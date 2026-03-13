@@ -13,6 +13,8 @@ function mostFrequentCharacter(str){
 
 console.log(mostFrequentCharacter("shgdtttgdfrrsecvvfgskkjhs"));
 
+/////////////////////////////////////
+
 function mostFrequentCharacter2(str){
     const freq = {};
     let maxChar = '';
