@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Trapping Rain Water</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Lexend+Exa:wght@300;400;700;900&family=Lexend:wght@300;400&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#04080f;
+  --s1:#080e1a;
+  --s2:#0c1422;
+  --bd:#152035;
+  --bd2:#1e3050;
+  --ink:#e8f4ff;
+  --muted:#3a5570;
+  --muted2:#253d55;
+  --water:#1d9bd4;
+  --water2:#0e6fa0;
+  --waterglow:rgba(29,155,212,.35);
+  --L:#f59e0b;      /* left pointer  – amber  */
+  --R:#a78bfa;      /* right pointer – violet */
+  --lmax:#fb923c;   /* leftMax  – orange  */
+  --rmax:#c084fc;   /* rightMax – purple  */
+  --bar:#2dd4bf;    /* bar height – teal  */
+  --fill:#22d3ee;   /* water fill – cyan  */
+  --mono:'JetBrains Mono',monospace;
+  --display:'Lexend Exa',sans-serif;
+  --sans:'Lexend',sans-serif;
+}
+
+body{
+  background:var(--bg);color:var(--ink);font-family:var(--sans);
+  min-height:100vh;padding:36px 16px 80px;
+  background-image:
+    radial-gradient(ellipse 80% 35% at 50% 0%,rgba(29,155,212,.07) 0%,transparent 60%),
+    radial-gradient(ellipse 40% 25% at 15% 80%,rgba(167,139,250,.04) 0%,transparent 55%),
+    radial-gradient(ellipse 40% 25% at 85% 80%,rgba(245,158,11,.04) 0%,transparent 55%);
+}
+.page{max-width:1020px;margin:0 auto}
+
+/* ── Header ── */
+.hdr{margin-bottom:28px;animation:up .5s ease forwards}
+.tag-row{display:flex;gap:7px;margin-bottom:14px;flex-wrap:wrap}
+.tag{font-family:var(--mono);font-size:10px;letter-spacing:1.5px;text-transform:uppercase;padding:3px 10px;border-radius:2px;border:1px solid}
+.th{color:#f43f5e;border-color:rgba(244,63,94,.3);background:rgba(244,63,94,.05)}
+.tp{color:var(--L);border-color:rgba(245,158,11,.3);background:rgba(245,158,11,.05)}
+.tt{color:var(--bar);border-color:rgba(45,212,191,.3);background:rgba(45,212,191,.05)}
+h1{font-family:var(--display);font-size:clamp(26px,5vw,54px);font-weight:900;line-height:.9;letter-spacing:-1px}
+h1 .t{color:var(--fill)}.h1 .r{color:var(--L)}.h1 .w{color:var(--R)}
+.sub{font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:9px}
+
+/* ── Controls ── */
+.top-bar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:20px;animation:up .5s ease .1s forwards;opacity:0}
+.in-box{display:flex;align-items:center;gap:8px;background:var(--s1);border:1.5px solid var(--bd2);border-radius:7px;padding:8px 13px;flex:1;min-width:260px}
+.in-box label{font-family:var(--mono);font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:2px;white-space:nowrap}
+.in-box input{flex:1;font-family:var(--mono);font-size:13px;background:transparent;border:none;color:var(--ink);outline:none}
+.btn{font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;border:none;border-radius:7px;padding:10px 18px;cursor:pointer;transition:all .15s;white-space:nowrap}
+.btn:hover{transform:translateY(-1px)}
+.btn-play{background:linear-gradient(135deg,var(--water),var(--fill));color:#000;font-weight:800}
+.btn-step{background:var(--s2);color:var(--fill);border:1.5px solid var(--fill)}
+.btn-rst{background:var(--s2);color:var(--muted);border:1.5px solid var(--bd2)}
+.spd-row{display:flex;align-items:center;gap:5px}
+.spd-lbl{font-family:var(--mono);font-size:9px;color:var(--muted)}
+.sb{font-family:var(--mono);font-size:10px;background:var(--s2);border:1px solid var(--bd2);color:var(--muted);border-radius:4px;padding:4px 9px;cursor:pointer;transition:all .15s}
+.sb.on{border-color:var(--fill);color:var(--fill)}
+
+/* ── Stats row ── */
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px;animation:up .5s ease .16s forwards;opacity:0}
+@media(max-width:580px){.stats-row{grid-template-columns:1fr 1fr}}
+.stat{background:var(--s1);border:1.5px solid var(--bd2);border-radius:12px;padding:14px 16px}
+.stat-lbl{font-family:var(--mono);font-size:9px;letter-spacing:2px;text-transform:uppercase;margin-bottom:7px}
+.stat-val{font-family:var(--display);font-size:28px;font-weight:700;line-height:1;transition:all .3s}
+.stat-sub{font-family:var(--mono);font-size:9px;margin-top:4px}
+.lL{color:var(--L)}.vL{color:var(--L)}
+.lR{color:var(--R)}.vR{color:var(--R)}
+.lLM{color:var(--lmax)}.vLM{color:var(--lmax)}
+.lRM{color:var(--rmax)}.vRM{color:var(--rmax)}
+.lW{color:var(--fill)}.vW{color:var(--fill)}
+
+/* ── Histogram canvas ── */
+.chart-wrap{background:var(--s1);border:1.5px solid var(--bd2);border-radius:16px;padding:24px 24px 16px;margin-bottom:14px;animation:up .5s ease .2s forwards;opacity:0;overflow-x:auto}
+.chart-inner{position:relative;min-width:fit-content}
+.histogram{display:flex;align-items:flex-end;gap:4px;height:220px;padding-bottom:0;position:relative}
+.col-wrap{display:flex;flex-direction:column;align-items:center;gap:0;position:relative}
+
+/* Bar column */
+.bar-col{
+  width:52px;position:relative;display:flex;flex-direction:column;justify-content:flex-end;
+  border-radius:5px 5px 0 0;overflow:visible;
+  transition:all .3s ease;
+}
+.bar-stone{
+  width:100%;border-radius:5px 5px 0 0;
+  background:linear-gradient(180deg,#2a4a5a,#1a3040);
+  border:1.5px solid #2d5a70;
+  position:relative;z-index:2;
+  transition:all .3s;
+}
+.bar-water{
+  width:100%;background:linear-gradient(180deg,rgba(34,211,238,.55),rgba(14,111,160,.7));
+  border-left:1.5px solid rgba(34,211,238,.3);
+  border-right:1.5px solid rgba(34,211,238,.3);
+  position:relative;z-index:1;
+  transition:height .4s ease, background .3s;
+}
+.bar-water::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:3px;
+  background:rgba(34,211,238,.7);border-radius:2px 2px 0 0;
+}
+/* active water ripple */
+.bar-water.ripple::before{
+  animation:rippleWave 1s ease infinite;
+}
+@keyframes rippleWave{
+  0%,100%{opacity:.7;height:3px}
+  50%{opacity:1;height:5px;box-shadow:0 0 8px rgba(34,211,238,.5)}
+}
+
+/* pointer flags */
+.ptr-flag{
+  position:absolute;top:-32px;left:50%;transform:translateX(-50%);
+  font-family:var(--mono);font-size:10px;font-weight:700;
+  padding:2px 6px;border-radius:4px;white-space:nowrap;z-index:10;
+  animation:flagIn .3s ease;
+}
+.pf-L{background:rgba(245,158,11,.2);color:var(--L);border:1px solid rgba(245,158,11,.4)}
+.pf-R{background:rgba(167,139,250,.2);color:var(--R);border:1px solid rgba(167,139,250,.4)}
+.pf-LR{background:rgba(244,63,94,.2);color:#f43f5e;border:1px solid rgba(244,63,94,.4)}
+@keyframes flagIn{from{transform:translateX(-50%) translateY(-6px);opacity:0}to{transform:translateX(-50%) translateY(0);opacity:1}}
+
+/* max level lines */
+.max-line{
+  position:absolute;left:0;right:0;height:2px;z-index:3;pointer-events:none;
+}
+.ml-L{background:rgba(245,158,11,.35)}
+.ml-R{background:rgba(167,139,250,.35)}
+
+/* col state highlights */
+.bar-stone.bs-L{border-color:var(--L);box-shadow:0 0 14px rgba(245,158,11,.25)}
+.bar-stone.bs-R{border-color:var(--R);box-shadow:0 0 14px rgba(167,139,250,.25)}
+.bar-stone.bs-lm{border-color:var(--lmax);background:linear-gradient(180deg,#4a3a10,#2a2208)}
+.bar-stone.bs-rm{border-color:var(--rmax);background:linear-gradient(180deg,#3a2a50,#1e1030)}
+.bar-stone.bs-done{border-color:rgba(34,211,238,.3)}
+
+.col-idx{font-family:var(--mono);font-size:8px;color:var(--muted);margin-top:5px;text-align:center}
+.col-val{font-family:var(--mono);font-size:9px;font-weight:700;margin-bottom:3px;text-align:center;transition:all .3s}
+.cv-L{color:var(--L)}.cv-R{color:var(--R)}.cv-norm{color:var(--muted)}.cv-done{color:var(--fill)}
+.cv-water{color:var(--fill);font-size:8px}
+
+/* water total badge */
+.water-badge{
+  font-family:var(--display);font-size:13px;font-weight:700;
+  padding:4px 10px;border-radius:6px;background:rgba(34,211,238,.12);
+  color:var(--fill);border:1px solid rgba(34,211,238,.3);
+  white-space:nowrap;margin-left:8px;transition:all .3s;
+}
+
+/* ── Pointer cards ── */
+.ptr-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;animation:up .5s ease .25s forwards;opacity:0}
+@media(max-width:480px){.ptr-row{grid-template-columns:1fr}}
+.ptr-card{background:var(--s1);border:1.5px solid var(--bd2);border-radius:12px;padding:16px 18px;transition:border-color .3s}
+.ptr-card.pc-L{border-color:rgba(245,158,11,.35)}
+.ptr-card.pc-R{border-color:rgba(167,139,250,.35)}
+.ptr-title{font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:2px;margin-bottom:10px}
+.pt-L{color:var(--L)}.pt-R{color:var(--R)}
+.ptr-detail{display:flex;gap:14px;flex-wrap:wrap}
+.pd-item{display:flex;flex-direction:column;gap:2px}
+.pd-lbl{font-family:var(--mono);font-size:8px;color:var(--muted);text-transform:uppercase;letter-spacing:1px}
+.pd-val{font-family:var(--mono);font-size:18px;font-weight:700;line-height:1;transition:all .3s}
+.pd-note{font-family:var(--mono);font-size:9px;padding:2px 6px;border-radius:3px;margin-top:3px;font-weight:600}
+.pd-note-update{background:rgba(245,158,11,.12);color:var(--L)}
+.pd-note-add{background:rgba(34,211,238,.1);color:var(--fill)}
+.pd-note-skip{background:rgba(58,85,112,.2);color:var(--muted)}
+.pd-note-R-update{background:rgba(167,139,250,.1);color:var(--R)}
+.pd-note-R-add{background:rgba(34,211,238,.1);color:var(--fill)}
+
+/* ── Status ── */
+.status-card{background:var(--s1);border:1.5px solid var(--bd2);border-radius:10px;padding:14px 20px;margin-bottom:14px;font-family:var(--mono);font-size:12px;line-height:1.8;min-height:52px;border-left:5px solid var(--bd2);transition:border-color .3s;animation:up .5s ease .3s forwards;opacity:0}
+.sc-L{border-left-color:var(--L)}.sc-R{border-left-color:var(--R)}.sc-done{border-left-color:var(--fill)}
+.hL{color:var(--L);font-weight:700}.hR{color:var(--R);font-weight:700}
+.hLM{color:var(--lmax);font-weight:700}.hRM{color:var(--rmax);font-weight:700}
+.hW{color:var(--fill);font-weight:700}.hB{color:var(--bar);font-weight:700}
+
+/* ── Code ── */
+.code-card{background:#030609;border:1.5px solid var(--bd2);border-radius:14px;overflow:hidden;animation:up .5s ease .35s forwards;opacity:0}
+.code-hdr{display:flex;justify-content:space-between;align-items:center;padding:10px 18px;border-bottom:1px solid var(--bd);background:#020407}
+.code-hdr span{font-family:var(--mono);font-size:11px;color:var(--muted2)}
+.dots{display:flex;gap:5px}.dot{width:9px;height:9px;border-radius:50%}
+pre{padding:20px 24px;font-family:var(--mono);font-size:12.5px;line-height:1.9;color:#253d55;overflow-x:auto}
+.kw{color:#c792ea}.fn{color:#82aaff}.vr{color:#ffcb6b}.nm{color:#f78c6c}.cm{color:#101e2a;font-style:italic}
+.cl{display:block;border-radius:3px;padding:0 6px;margin:0 -6px;transition:background .2s}
+.cl.lit-L{background:rgba(245,158,11,.08);border-left:2px solid var(--L);padding-left:10px;margin-left:-10px;color:#d0a860}
+.cl.lit-R{background:rgba(167,139,250,.07);border-left:2px solid var(--R);padding-left:10px;margin-left:-10px;color:#b090d8}
+.cl.lit-W{background:rgba(34,211,238,.07);border-left:2px solid var(--fill);padding-left:10px;margin-left:-10px;color:#60c8d8}
+.cl.lit-done{background:rgba(34,211,238,.06);border-left:2px solid var(--fill);padding-left:10px;margin-left:-10px;color:#70d0e0}
+
+.prog-row{display:flex;align-items:center;gap:10px;padding:0 24px 14px}
+.prog-lbl{font-family:var(--mono);font-size:10px;color:var(--muted);white-space:nowrap}
+.prog-track{flex:1;height:3px;background:var(--bd);border-radius:99px;overflow:hidden}
+.prog-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--L),var(--fill),var(--R));transition:width .3s}
+
+@keyframes up{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- Header -->
+  <div class="hdr">
+    <div class="tag-row">
+      <span class="tag th">Very High</span>
+      <span class="tag tp">Two Pointer</span>
+      <span class="tag tt">Array · T1</span>
+    </div>
+    <h1>
+      <span class="t">Trapping</span><br/>
+      <span style="color:var(--L)">Rain</span>
+      <span style="color:var(--R)">Water</span>
+    </h1>
+    <p class="sub">Two pointers inward · leftMax / rightMax walls · water = max - bar height · O(n) time · O(1) space</p>
+  </div>
+
+  <!-- Controls -->
+  <div class="top-bar">
+    <div class="in-box">
+      <label>bars</label>
+      <input id="inArr" value="0,1,0,2,1,0,1,3,2,1,2,1"/>
+    </div>
+    <button class="btn btn-play" onclick="window.startAuto()">▶ Play</button>
+    <button class="btn btn-step" onclick="window.stepFwd()">Step →</button>
+    <button class="btn btn-rst"  onclick="window.resetAll()">↺ Reset</button>
+    <div class="spd-row">
+      <span class="spd-lbl">Speed</span>
+      <button class="sb" onclick="window.setSpd(1200)" id="ss">Slow</button>
+      <button class="sb on" onclick="window.setSpd(700)" id="sm">Med</button>
+      <button class="sb" onclick="window.setSpd(180)" id="sf">Fast</button>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-row">
+    <div class="stat">
+      <div class="stat-lbl lL">Left</div>
+      <div class="stat-val vL" id="stL">0</div>
+      <div class="stat-sub" id="stLSub" style="color:var(--muted)">bars[left]</div>
+    </div>
+    <div class="stat">
+      <div class="stat-lbl lR">Right</div>
+      <div class="stat-val vR" id="stR">—</div>
+      <div class="stat-sub" id="stRSub" style="color:var(--muted)">bars[right]</div>
+    </div>
+    <div class="stat" style="grid-column:span 2">
+      <div style="display:flex;align-items:baseline;gap:8px;margin-bottom:7px">
+        <div class="stat-lbl lW" style="margin-bottom:0">Water Trapped</div>
+        <div class="water-badge" id="waterBadge">0 units</div>
+      </div>
+      <div style="display:flex;gap:20px;flex-wrap:wrap">
+        <div>
+          <div class="stat-lbl lLM" style="font-size:8px">leftMax</div>
+          <div class="stat-val vLM" id="stLM" style="font-size:20px">0</div>
+        </div>
+        <div>
+          <div class="stat-lbl lRM" style="font-size:8px">rightMax</div>
+          <div class="stat-val vRM" id="stRM" style="font-size:20px">0</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Histogram -->
+  <div class="chart-wrap">
+    <div class="sec-lbl" style="margin-bottom:18px;display:flex;align-items:center;gap:10px">
+      Elevation Map
+      <span style="font-family:var(--mono);font-size:9px;color:var(--muted)">
+        <span style="color:var(--L)">■ L</span> &nbsp;
+        <span style="color:var(--R)">■ R</span> &nbsp;
+        <span style="color:var(--fill)">■ water</span> &nbsp;
+        <span style="color:var(--lmax)">— leftMax</span> &nbsp;
+        <span style="color:var(--rmax)">— rightMax</span>
+      </span>
+    </div>
+    <div class="chart-inner">
+      <div class="histogram" id="histogram"></div>
+    </div>
+  </div>
+
+  <!-- Pointer cards -->
+  <div class="ptr-row">
+    <div class="ptr-card pc-L">
+      <div class="ptr-title pt-L">← Left Pointer</div>
+      <div class="ptr-detail" id="ptrLDetail"></div>
+    </div>
+    <div class="ptr-card pc-R">
+      <div class="ptr-title pt-R">Right Pointer →</div>
+      <div class="ptr-detail" id="ptrRDetail"></div>
+    </div>
+  </div>
+
+  <!-- Status -->
+  <div class="status-card sc-L" id="statusCard">Press ▶ Play or Step → to begin.</div>
+
+  <!-- Code -->
+  <div class="code-card">
+    <div class="code-hdr">
+      <div class="dots">
+        <div class="dot" style="background:#f06060"></div>
+        <div class="dot" style="background:#f0c040"></div>
+        <div class="dot" style="background:#4af0a0"></div>
+      </div>
+      <span>trap.js</span>
+    </div>
+    <pre>
+<span class="cl" id="ln0"><span class="kw">function</span> <span class="fn">trap</span>(bars) {</span>
+<span class="cl" id="ln1">  <span class="kw">let</span> <span class="vr">left</span>  = <span class="nm">0</span>;</span>
+<span class="cl" id="ln2">  <span class="kw">let</span> <span class="vr">right</span> = bars.length - <span class="nm">1</span>;</span>
+<span class="cl" id="ln3">  <span class="kw">let</span> <span class="vr">leftMax</span>  = <span class="nm">0</span>;</span>
+<span class="cl" id="ln4">  <span class="kw">let</span> <span class="vr">rightMax</span> = <span class="nm">0</span>;</span>
+<span class="cl" id="ln5">  <span class="kw">let</span> <span class="vr">water</span> = <span class="nm">0</span>;</span>
+<span class="cl" id="ln6"> </span>
+<span class="cl" id="ln7">  <span class="kw">while</span> (<span class="vr">left</span> &lt; <span class="vr">right</span>) {</span>
+<span class="cl" id="ln8"> </span>
+<span class="cl" id="ln9">    <span class="kw">if</span> (bars[<span class="vr">left</span>] &lt; bars[<span class="vr">right</span>]) {  <span class="cm">// left side shorter</span></span>
+<span class="cl" id="ln10">      <span class="kw">if</span> (bars[<span class="vr">left</span>] &gt;= <span class="vr">leftMax</span>) {</span>
+<span class="cl" id="ln11">        <span class="vr">leftMax</span> = bars[<span class="vr">left</span>];        <span class="cm">// new left wall</span></span>
+<span class="cl" id="ln12">      } <span class="kw">else</span> {</span>
+<span class="cl" id="ln13">        <span class="vr">water</span> += <span class="vr">leftMax</span> - bars[<span class="vr">left</span>]; <span class="cm">// trapped!</span></span>
+<span class="cl" id="ln14">      }</span>
+<span class="cl" id="ln15">      <span class="vr">left</span>++;                         <span class="cm">// advance left</span></span>
+<span class="cl" id="ln16">    } <span class="kw">else</span> {                           <span class="cm">// right side shorter or equal</span></span>
+<span class="cl" id="ln17">      <span class="kw">if</span> (bars[<span class="vr">right</span>] &gt;= <span class="vr">rightMax</span>) {</span>
+<span class="cl" id="ln18">        <span class="vr">rightMax</span> = bars[<span class="vr">right</span>];       <span class="cm">// new right wall</span></span>
+<span class="cl" id="ln19">      } <span class="kw">else</span> {</span>
+<span class="cl" id="ln20">        <span class="vr">water</span> += <span class="vr">rightMax</span> - bars[<span class="vr">right</span>]; <span class="cm">// trapped!</span></span>
+<span class="cl" id="ln21">      }</span>
+<span class="cl" id="ln22">      <span class="vr">right</span>--;                        <span class="cm">// advance right</span></span>
+<span class="cl" id="ln23">    }</span>
+<span class="cl" id="ln24">  }</span>
+<span class="cl" id="ln25">  <span class="kw">return</span> <span class="vr">water</span>;</span>
+<span class="cl" id="ln26">}</span></pre>
+    <div class="prog-row">
+      <span class="prog-lbl" id="stepLbl">0 / 0</span>
+      <div class="prog-track"><div class="prog-fill" id="progFill" style="width:0%"></div></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ── Step generator — exact user code ──────────────────────
+function genSteps(bars) {
+  const steps = [];
+  let left = 0, right = bars.length - 1;
+  let leftMax = 0, rightMax = 0, water = 0;
+  // track water per cell
+  const waterAt = new Array(bars.length).fill(0);
+
+  function snap(side, action, addedWater, line, litCls, msg) {
+    steps.push({
+      bars, left, right, leftMax, rightMax, water,
+      waterAt: [...waterAt],
+      side, action, addedWater, line, litCls, msg
+    });
+  }
+
+  snap('init', 'init', 0, 'ln3', 'lit-L',
+    `Initialize: left=<span class="hL">0</span>, right=<span class="hR">${bars.length-1}</span>, leftMax=<span class="hLM">0</span>, rightMax=<span class="hRM">0</span>, water=<span class="hW">0</span>. Two pointers move inward.`);
+
+  while (left < right) {
+    if (bars[left] < bars[right]) {
+      if (bars[left] >= leftMax) {
+        leftMax = bars[left];
+        snap('L', 'newMax', 0, 'ln11', 'lit-L',
+          `bars[<span class="hL">left=${left}</span>]=${bars[left]} &lt; bars[right=${right}]=${bars[right]}. bars[left] ≥ leftMax → <span class="hLM">leftMax = ${leftMax}</span>. New left wall! No water here.`);
+      } else {
+        const add = leftMax - bars[left];
+        waterAt[left] += add;
+        water += add;
+        snap('L', 'addWater', add, 'ln13', 'lit-W',
+          `bars[<span class="hL">left=${left}</span>]=${bars[left]} &lt; bars[right=${right}]=${bars[right]}. bars[left] &lt; leftMax(${leftMax}) → <span class="hW">+${add} water</span> (${leftMax}−${bars[left]}). Total: ${water}.`);
+      }
+      left++;
+    } else {
+      if (bars[right] >= rightMax) {
+        rightMax = bars[right];
+        snap('R', 'newMax', 0, 'ln18', 'lit-R',
+          `bars[left=${left}]=${bars[left]} ≥ bars[<span class="hR">right=${right}</span>]=${bars[right]}. bars[right] ≥ rightMax → <span class="hRM">rightMax = ${rightMax}</span>. New right wall! No water here.`);
+      } else {
+        const add = rightMax - bars[right];
+        waterAt[right] += add;
+        water += add;
+        snap('R', 'addWater', add, 'ln20', 'lit-W',
+          `bars[left=${left}]=${bars[left]} ≥ bars[<span class="hR">right=${right}</span>]=${bars[right]}. bars[right] &lt; rightMax(${rightMax}) → <span class="hW">+${add} water</span> (${rightMax}−${bars[right]}). Total: ${water}.`);
+      }
+      right--;
+    }
+  }
+
+  snap('done', 'done', 0, 'ln25', 'lit-done',
+    `<span class="hW">✓ Done!</span> left (${left}) = right (${right}). Pointers met. Total water trapped = <span class="hW">${water}</span> units.`);
+
+  return steps;
+}
+
+// ── Render ─────────────────────────────────────────────────
+let steps = [], curStep = -1, timer = null, speed = 700;
+
+function renderStep(idx) {
+  if (idx < 0 || idx >= steps.length) return;
+  const st = steps[idx]; curStep = idx;
+  const { bars, left, right, leftMax, rightMax, water, waterAt, side, action, addedWater, line, litCls, msg } = st;
+  const isDone = action === 'done';
+  const n = bars.length;
+  const maxBar = Math.max(...bars);
+  const CHART_H = 200; // px
+
+  function barPx(v) { return maxBar > 0 ? Math.round((v / maxBar) * CHART_H) : 0; }
+
+  // Stats
+  document.getElementById('stL').textContent = isDone ? '✓' : left;
+  document.getElementById('stLSub').textContent = isDone ? 'done' : `bars[${left}] = ${bars[left]}`;
+  document.getElementById('stR').textContent = isDone ? '✓' : right;
+  document.getElementById('stRSub').textContent = isDone ? 'done' : `bars[${right}] = ${bars[right]}`;
+  document.getElementById('stLM').textContent = leftMax;
+  document.getElementById('stRM').textContent = rightMax;
+  document.getElementById('waterBadge').textContent = `${water} units`;
+
+  // Histogram
+  const hist = document.getElementById('histogram');
+  hist.innerHTML = '';
+  hist.style.height = (CHART_H + 40) + 'px';
+
+  bars.forEach((h, i) => {
+    const stonePx = barPx(h);
+    const w = waterAt[i];
+    const waterPx = barPx(w);
+    const isL = i === left && !isDone;
+    const isR = i === right && !isDone;
+    const isLR = isL && isR;
+
+    const cw = document.createElement('div');
+    cw.className = 'col-wrap';
+    cw.style.position = 'relative';
+    cw.style.height = (CHART_H + 30) + 'px';
+    cw.style.display = 'flex';
+    cw.style.flexDirection = 'column';
+    cw.style.justifyContent = 'flex-end';
+    cw.style.alignItems = 'center';
+
+    // Pointer flag
+    if (isLR) {
+      const f = document.createElement('div'); f.className = 'ptr-flag pf-LR'; f.textContent = 'L=R'; cw.appendChild(f);
+    } else if (isL) {
+      const f = document.createElement('div'); f.className = 'ptr-flag pf-L'; f.textContent = 'L'; cw.appendChild(f);
+    } else if (isR) {
+      const f = document.createElement('div'); f.className = 'ptr-flag pf-R'; f.textContent = 'R'; cw.appendChild(f);
+    }
+
+    // Value label
+    const valLbl = document.createElement('div'); valLbl.className = 'col-val';
+    valLbl.textContent = h;
+    if (isDone) valLbl.classList.add('cv-done');
+    else if (isL || isLR) valLbl.classList.add('cv-L');
+    else if (isR) valLbl.classList.add('cv-R');
+    else valLbl.classList.add('cv-norm');
+    cw.appendChild(valLbl);
+
+    // Bar wrap (stone + water stacked)
+    const barWrap = document.createElement('div');
+    barWrap.style.cssText = `width:52px;display:flex;flex-direction:column;justify-content:flex-end;position:relative`;
+
+    // Water layer (on top of stone visually goes underneath — water sits ON stone)
+    if (waterPx > 0) {
+      const bw = document.createElement('div'); bw.className = 'bar-water' + (isL || isR ? ' ripple' : '');
+      bw.style.height = waterPx + 'px';
+      barWrap.appendChild(bw);
+    }
+    // Stone
+    const bs = document.createElement('div'); bs.className = 'bar-stone';
+    bs.style.height = Math.max(stonePx, 4) + 'px';
+    if (isLR) bs.classList.add('bs-L');
+    else if (isL) bs.classList.add('bs-L');
+    else if (isR) bs.classList.add('bs-R');
+    else if (isDone) bs.classList.add('bs-done');
+    barWrap.appendChild(bs);
+
+    cw.appendChild(barWrap);
+
+    // Water amount label
+    if (waterAt[i] > 0) {
+      const wl = document.createElement('div'); wl.className = 'col-val cv-water'; wl.textContent = `+${waterAt[i]}💧`; cw.appendChild(wl);
+    }
+
+    // Index label
+    const il = document.createElement('div'); il.className = 'col-idx'; il.textContent = i; cw.appendChild(il);
+
+    hist.appendChild(cw);
+  });
+
+  // Pointer detail cards
+  function renderPtrDetail(elId, ptr, maxVal, side) {
+    const el = document.getElementById(elId);
+    el.innerHTML = '';
+    const items = [
+      { lbl: 'index', val: ptr, color: side === 'L' ? 'var(--L)' : 'var(--R)' },
+      { lbl: 'bars[i]', val: isDone ? '✓' : bars[ptr], color: side === 'L' ? 'var(--bar)' : 'var(--bar)' },
+      { lbl: side === 'L' ? 'leftMax' : 'rightMax', val: maxVal, color: side === 'L' ? 'var(--lmax)' : 'var(--rmax)' },
+    ];
+    items.forEach(it => {
+      const d = document.createElement('div'); d.className = 'pd-item';
+      d.innerHTML = `<div class="pd-lbl">${it.lbl}</div><div class="pd-val" style="color:${it.color}">${it.val}</div>`;
+      el.appendChild(d);
+    });
+    // action note
+    if (!isDone && ((side === 'L' && (bars[left] < bars[right] || bars[left] >= bars[right])) ||
+                    (side === 'R' && bars[left] >= bars[right]))) {
+      const note = document.createElement('div'); note.className = 'pd-item';
+      let noteClass = '', noteText = '';
+      if (side === 'L' && action === 'newMax') { noteClass = 'pd-note pd-note-update'; noteText = '↑ update leftMax'; }
+      else if (side === 'L' && action === 'addWater') { noteClass = 'pd-note pd-note-add'; noteText = `+${addedWater} water`; }
+      else if (side === 'R' && action === 'newMax') { noteClass = 'pd-note pd-note-R-update'; noteText = '↑ update rightMax'; }
+      else if (side === 'R' && action === 'addWater') { noteClass = 'pd-note pd-note-R-add'; noteText = `+${addedWater} water`; }
+      if (noteClass) { note.innerHTML = `<div class="${noteClass}">${noteText}</div>`; el.appendChild(note); }
+    }
+  }
+  renderPtrDetail('ptrLDetail', Math.min(left, n-1), leftMax, 'L');
+  renderPtrDetail('ptrRDetail', Math.max(right, 0), rightMax, 'R');
+
+  // Status
+  const sc = document.getElementById('statusCard');
+  sc.innerHTML = msg;
+  sc.className = 'status-card ' + (isDone ? 'sc-done' : side === 'R' ? 'sc-R' : 'sc-L');
+
+  // Code
+  document.querySelectorAll('.cl').forEach(el => el.className = 'cl');
+  if (line) { const el = document.getElementById(line); if (el) el.classList.add(litCls); }
+
+  // Progress
+  document.getElementById('stepLbl').textContent = `${idx+1} / ${steps.length}`;
+  document.getElementById('progFill').style.width = `${((idx+1)/steps.length)*100}%`;
+}
+
+function parse() {
+  return document.getElementById('inArr').value.split(',').map(s => parseInt(s.trim())).filter(n => !isNaN(n));
+}
+function build() {
+  const arr = parse();
+  if (arr.length < 2) { alert('Enter at least 2 bars.'); return false; }
+  steps = genSteps(arr); curStep = -1; return true;
+}
+
+window.resetAll  = function () { clearTimeout(timer); timer = null; if (!build()) return; renderStep(0); };
+window.stepFwd   = function () { clearTimeout(timer); timer = null; if (!steps.length) { if (!build()) return; } if (curStep < steps.length - 1) renderStep(curStep + 1); };
+window.startAuto = function () {
+  if (!steps.length || curStep >= steps.length - 1) { if (!build()) return; renderStep(0); }
+  clearTimeout(timer);
+  function tick() { if (curStep < steps.length - 1) { renderStep(curStep + 1); timer = setTimeout(tick, speed); } }
+  timer = setTimeout(tick, speed);
+};
+window.setSpd = function (ms) {
+  speed = ms;
+  ['ss','sm','sf'].forEach(id => document.getElementById(id).classList.remove('on'));
+  if (ms === 1200) document.getElementById('ss').classList.add('on');
+  else if (ms === 700) document.getElementById('sm').classList.add('on');
+  else document.getElementById('sf').classList.add('on');
+};
+
+window.addEventListener('DOMContentLoaded', () => { build(); renderStep(0); });
+</script>
+</body>
+</html>
