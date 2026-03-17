@@ -1,48 +1,17 @@
-// function findMedian(arr1, arr2){
-//   let i = 0;
-//   let j = 0;
-//   const merged = [];
+function mySetTimeout(callback, delay){
+  let start = Date.now();
 
-//   while(i < arr1.length && j < arr2.length){
-//     if(arr1[i] < arr2[j]){
-//       merged.push(arr1[i]);
-//       i++;
-//     }
-//     else{
-//       merged.push(arr2[j]);
-//       j++;
-//     }
-//   }
-//   merged.concat(arr1.slice(i)).concat(arr2.slice(j))
-//   return merged;
-// }
-// console.log(findMedian([1,3],[2]));
+  let id = setInterval(() => {
+    let now = Date.now();
 
-
-function findMedian(arr1, arr2){
-  let i = 0;
-  let j = 0;
-  let merged = [];
-
-  while(i < arr1.length && j < arr2.length){
-    if(arr1[i] < arr2[j]){
-      merged.push(arr1[i]);
-      i++;
-    } else {
-      merged.push(arr2[j]);
-      j++;
+    if(now - start >= delay){
+      callback();
+      clearInterval(id)
     }
-  }
-
-  merged = merged.concat(arr1.slice(i)).concat(arr2.slice(j));
-
-  // let n = merged.length;
-
-  // if(n % 2 === 1){
-  //   return merged[Math.floor(n / 2)];
-  // } else {
-  //   return (merged[n/2 - 1] + merged[n/2]) / 2;
-  // }
+  }, 1)
 }
 
-console.log(findMedian([1,3],[2]));
+
+mySetTimeout(() => {
+  console.log("Hello world")
+}, 2000)
