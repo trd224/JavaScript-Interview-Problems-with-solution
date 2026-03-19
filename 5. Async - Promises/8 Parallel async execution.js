@@ -12,7 +12,7 @@ function getOrders() {
   return new Promise((resolve) => {
     setTimeout(() => {
       resolve("Orders Data");
-    }, 1000);
+    }, 2000);
   });
 }
 

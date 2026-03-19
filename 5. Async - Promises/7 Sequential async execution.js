@@ -4,7 +4,7 @@ function getUser() {
   return new Promise((resolve) => {
     setTimeout(() => {
       resolve("User Data");
-    }, 1000);
+    }, 3000);
   });
 }
 
@@ -12,7 +12,7 @@ function getOrders() {
   return new Promise((resolve) => {
     setTimeout(() => {
       resolve("Orders Data");
-    }, 1000);
+    }, 3000);
   });
 }
 
@@ -20,7 +20,7 @@ function getPayments() {
   return new Promise((resolve) => {
     setTimeout(() => {
       resolve("Payments Data");
-    }, 1000);
+    }, 3000);
   });
 }
 

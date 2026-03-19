@@ -1,9 +1,9 @@
-//🟢 2. Parallel (Fast ✅)
+
 function getUser() {
   return new Promise((resolve) => {
     setTimeout(() => {
       resolve("User Data");
-    }, 1000);
+    }, 3000);
   });
 }
 
@@ -11,7 +11,7 @@ function getOrders() {
   return new Promise((resolve) => {
     setTimeout(() => {
       resolve("Orders Data");
-    }, 1000);
+    }, 3000);
   });
 }
 
@@ -24,16 +24,17 @@ function getPayments() {
 }
 
 async function getDashboard() {
-  const userPromise = getUser();
-  const ordersPromise = getOrders();
-  const paymentsPromise = getPayments();
-
-  const user = await userPromise;
-  const orders = await ordersPromise;
-  const payments = await paymentsPromise;
+  const user = await getUser();        // waits 1s
+  console.log(user);
+  const orders = await getOrders();    // waits 1s
+   console.log(orders);
+  const payments = await getPayments(); // waits 1s
+   console.log(payments);
 
   return { user, orders, payments };
 }
 
-getDashboard().then(res => console.log(res))
-
+// call function
+getDashboard().then((data) => {
+  console.log(data);
+});
