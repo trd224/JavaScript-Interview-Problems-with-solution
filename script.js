@@ -1,16 +1,39 @@
-function task(name, delay) {
+//🟢 2. Parallel (Fast ✅)
+function getUser() {
   return new Promise((resolve) => {
     setTimeout(() => {
-      console.log(name);
-      resolve();
-    }, delay);
+      resolve("User Data");
+    }, 1000);
   });
 }
 
-async function runSequential() {
-  await task("Task 1", 1000);
-  await task("Task 2", 1000);
-  await task("Task 3", 1000);
+function getOrders() {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve("Orders Data");
+    }, 1000);
+  });
 }
 
-runSequential();
+function getPayments() {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve("Payments Data");
+    }, 3000);
+  });
+}
+
+async function getDashboard() {
+  const userPromise = getUser();
+  const ordersPromise = getOrders();
+  const paymentsPromise = getPayments();
+
+  const user = await userPromise;
+  const orders = await ordersPromise;
+  const payments = await paymentsPromise;
+
+  return { user, orders, payments };
+}
+
+getDashboard().then(res => console.log(res))
+

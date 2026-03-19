@@ -1,4 +1,28 @@
 //🟢 2. Parallel (Fast ✅)
+//🟢 2. Parallel (Fast ✅)
+function getUser() {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve("User Data");
+    }, 1000);
+  });
+}
+
+function getOrders() {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve("Orders Data");
+    }, 1000);
+  });
+}
+
+function getPayments() {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve("Payments Data");
+    }, 3000);
+  });
+}
 
 async function getDashboard() {
   const userPromise = getUser();
@@ -11,6 +35,8 @@ async function getDashboard() {
 
   return { user, orders, payments };
 }
+
+getDashboard().then(res => console.log(res))
 
 
 // ⏱️ What happens:
