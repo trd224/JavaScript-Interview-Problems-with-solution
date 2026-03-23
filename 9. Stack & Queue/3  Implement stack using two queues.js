@@ -44,6 +44,6 @@ const s = new Stack();
 s.push(1);
 s.push(2);
 s.push(3);
-console.log(s.q1)
+
 console.log(s.pop()); // 3
 console.log(s.pop()); // 2
