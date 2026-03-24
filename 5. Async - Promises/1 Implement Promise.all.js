@@ -35,6 +35,15 @@ Promise.all([prms1, prms2, prms3])
   .then(result => console.log(result)); // result will show after 5 second
 
 
+
+
+
+
+
+
+
+  
+
 ////////// Custome promise.all ////////////////
 
 function promiseAll(promises) {

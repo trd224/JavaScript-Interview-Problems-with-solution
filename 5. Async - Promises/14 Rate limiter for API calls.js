@@ -4,6 +4,26 @@
 // 👉 But server allows only 2 calls per second
 
 
+// function apiCall(id) {
+//    return  new Promise((resolve) => {
+//       setTimeout(() => {
+//         console.log("API done:", id);
+//         resolve();
+//       }, 500);
+//     });
+// }
+
+// const tasks = [
+//   () => apiCall(1),
+//   () => apiCall(2),
+//   () => apiCall(3),
+//   () => apiCall(4),
+//   () => apiCall(5),
+// ];
+
+
+// /////////or
+
 
 function apiCall(id) {
   return () =>

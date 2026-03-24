@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Next Greater Element — Right-to-Left Stack</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Syne:wght@400;700;800;900&family=Syne+Mono&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f7f5f0;
+  --s1:#efece4;
+  --s2:#e6e2d8;
+  --bd:#cdc8bb;
+  --bd2:#b8b2a3;
+  --ink:#181510;
+  --muted:#7a7468;
+  --muted2:#a09888;
+  --cur:#c2410c;    /* current    – burnt orange */
+  --stk:#1d4ed8;    /* on stack   – blue         */
+  --pop:#dc2626;    /* popped     – red          */
+  --nge:#15803d;    /* NGE found  – green        */
+  --none:#6b7280;   /* result -1  – gray         */
+  --push:#7c3aed;   /* push cur   – violet       */
+  --mono:'JetBrains Mono',monospace;
+  --sans:'Syne',sans-serif;
+}
+body{
+  background:var(--bg);color:var(--ink);font-family:var(--sans);
+  min-height:100vh;padding:38px 16px 80px;
+  background-image:
+    radial-gradient(ellipse 70% 30% at 50% 0%,rgba(194,65,12,.05) 0%,transparent 60%);
+}
+.page{max-width:980px;margin:0 auto}
+
+/* ── Header ── */
+.hdr{margin-bottom:28px;animation:up .45s ease forwards;border-bottom:3px double var(--ink);padding-bottom:18px}
+.tag-row{display:flex;gap:7px;margin-bottom:12px;flex-wrap:wrap}
+.tag{font-family:var(--mono);font-size:10px;letter-spacing:1.5px;text-transform:uppercase;padding:3px 10px;border-radius:2px;border:1.5px solid}
+.th{color:#c2410c;border-color:rgba(194,65,12,.4);background:rgba(194,65,12,.06)}
+.ts{color:var(--stk);border-color:rgba(29,78,216,.3);background:rgba(29,78,216,.05)}
+.tt{color:var(--push);border-color:rgba(124,58,237,.3);background:rgba(124,58,237,.05)}
+h1{font-size:clamp(26px,5.5vw,58px);font-weight:900;line-height:.9;letter-spacing:-2px}
+h1 .n{color:var(--cur)}.h1 .g{color:var(--stk)}.h1 .e{color:var(--push)}
+.sub{font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:9px}
+.key-insight{
+  margin-top:12px;font-family:var(--mono);font-size:11px;
+  background:rgba(29,78,216,.05);border:1px solid rgba(29,78,216,.2);
+  border-radius:6px;padding:8px 12px;color:var(--ink);line-height:1.7;
+  display:inline-block;
+}
+.ki-diff{color:var(--cur);font-weight:700}
+
+/* ── Controls ── */
+.top-bar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:20px;animation:up .45s ease .1s forwards;opacity:0}
+.in-box{display:flex;align-items:center;gap:8px;background:#fff;border:1.5px solid var(--bd2);border-radius:7px;padding:8px 13px;flex:1;min-width:240px}
+.in-box label{font-family:var(--mono);font-size:9px;color:var(--muted2);text-transform:uppercase;letter-spacing:2px;white-space:nowrap}
+.in-box input{flex:1;font-family:var(--mono);font-size:14px;background:transparent;border:none;color:var(--ink);outline:none}
+.btn{font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;border:none;border-radius:7px;padding:10px 18px;cursor:pointer;transition:all .15s;white-space:nowrap}
+.btn:hover{transform:translateY(-1px)}
+.btn-play{background:var(--ink);color:#fff}
+.btn-step{background:#fff;color:var(--stk);border:1.5px solid var(--stk)}
+.btn-rst{background:#fff;color:var(--muted);border:1.5px solid var(--bd2)}
+.spd-row{display:flex;align-items:center;gap:5px}
+.spd-lbl{font-family:var(--mono);font-size:9px;color:var(--muted2)}
+.sb{font-family:var(--mono);font-size:10px;background:#fff;border:1px solid var(--bd);color:var(--muted);border-radius:4px;padding:4px 9px;cursor:pointer;transition:all .15s}
+.sb.on{border-color:var(--stk);color:var(--stk)}
+
+/* ── i-direction banner ── */
+.dir-banner{
+  display:flex;align-items:center;gap:0;background:#fff;
+  border:1.5px solid var(--bd2);border-radius:10px;padding:12px 18px;
+  margin-bottom:14px;animation:up .45s ease .15s forwards;opacity:0;
+  overflow-x:auto;
+}
+.dir-track{display:flex;align-items:center;gap:0;flex:1;min-width:fit-content}
+.dir-arrow{font-family:var(--mono);font-size:11px;font-weight:700;color:var(--muted2);padding:0 6px}
+.dir-seg{
+  height:6px;flex:1;min-width:30px;border-radius:3px;background:var(--s2);
+  transition:background .3s;position:relative;
+}
+.dir-seg.ds-done{background:rgba(21,128,61,.25)}
+.dir-seg.ds-cur{background:rgba(194,65,12,.4)}
+.dir-seg.ds-future{background:var(--s2)}
+.dir-dot{
+  width:24px;height:24px;border-radius:50%;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--mono);font-size:9px;font-weight:700;
+  border:2px solid var(--bd2);background:var(--s1);color:var(--muted);
+  transition:all .25s;
+}
+.dir-dot.dd-done{background:rgba(21,128,61,.1);border-color:var(--nge);color:var(--nge)}
+.dir-dot.dd-cur{background:rgba(194,65,12,.12);border-color:var(--cur);color:var(--cur);box-shadow:0 0 10px rgba(194,65,12,.2)}
+.dir-lbl{font-family:var(--mono);font-size:10px;color:var(--muted);white-space:nowrap;margin-left:10px}
+
+/* ── Main layout ── */
+.main-grid{display:grid;grid-template-columns:1fr 200px;gap:14px;margin-bottom:14px;animation:up .45s ease .2s forwards;opacity:0}
+@media(max-width:680px){.main-grid{grid-template-columns:1fr}}
+
+/* ── Array card ── */
+.arr-card{background:#fff;border:1.5px solid var(--bd2);border-radius:14px;padding:22px 24px;overflow-x:auto}
+.sec-lbl{font-family:var(--mono);font-size:9px;color:var(--muted2);letter-spacing:2px;text-transform:uppercase;margin-bottom:14px}
+.arr-wrap{display:flex;flex-direction:column;gap:8px;min-width:fit-content}
+.arr-row{display:flex;gap:7px;align-items:flex-end}
+.cw{display:flex;flex-direction:column;align-items:center;gap:4px}
+.cell{
+  width:58px;height:58px;border-radius:10px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--mono);font-size:21px;font-weight:700;
+  border:2px solid var(--bd);background:var(--s1);color:var(--muted2);
+  transition:all .26s ease;position:relative;
+}
+.cell .cidx{position:absolute;top:3px;right:5px;font-size:7px;font-weight:400;color:var(--muted2)}
+/* cell states */
+.cell.c-cur{border-color:var(--cur);background:rgba(194,65,12,.08);color:var(--cur);box-shadow:0 0 16px rgba(194,65,12,.18);animation:cellin .35s ease}
+.cell.c-stk{border-color:var(--stk);background:rgba(29,78,216,.07);color:var(--stk)}
+.cell.c-pop{border-color:var(--pop);background:rgba(220,38,38,.08);color:var(--pop);animation:shake .3s ease}
+.cell.c-nge{border-color:var(--nge);background:rgba(21,128,61,.07);color:var(--nge)}
+.cell.c-none{border-color:var(--none);background:rgba(107,114,128,.06);color:var(--muted)}
+.cell.c-future{border-color:var(--bd);background:var(--s2);color:var(--muted2);opacity:.45}
+.cell.c-push{border-color:var(--push);background:rgba(124,58,237,.08);color:var(--push);animation:pushin .35s ease}
+@keyframes cellin{from{transform:scale(.8);opacity:.4}to{transform:scale(1);opacity:1}}
+@keyframes shake{0%,100%{transform:translateX(0)}30%{transform:translateX(-5px)}70%{transform:translateX(5px)}}
+@keyframes pushin{from{transform:scale(.75) translateY(-6px);opacity:.3}to{transform:scale(1) translateY(0);opacity:1}}
+
+.cptr{font-family:var(--mono);font-size:9px;font-weight:700;padding:2px 5px;border-radius:3px;white-space:nowrap}
+.cp-cur{background:rgba(194,65,12,.12);color:var(--cur)}
+.cp-future{visibility:hidden}
+.cidx-lbl{font-family:var(--mono);font-size:8px;color:var(--muted2)}
+
+/* Result row */
+.res-row{display:flex;gap:7px;align-items:flex-start}
+.r-box{
+  width:58px;height:44px;border-radius:7px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--mono);font-size:15px;font-weight:700;
+  border:1.5px solid var(--bd);background:var(--s1);color:var(--muted2);
+  transition:all .25s;
+}
+.r-box.rb-nge{border-color:var(--nge);background:rgba(21,128,61,.07);color:var(--nge);animation:reslide .3s ease}
+.r-box.rb-none{border-color:var(--none);background:rgba(107,114,128,.06);color:var(--muted)}
+.r-box.rb-cur{border-color:var(--cur);background:rgba(194,65,12,.07);color:var(--cur)}
+@keyframes reslide{from{transform:translateY(-6px);opacity:.3}to{transform:translateY(0);opacity:1}}
+.r-lbl{font-family:var(--mono);font-size:8px;color:var(--muted2)}
+
+/* Row labels */
+.row-label{font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:1.5px;width:54px;flex-shrink:0;padding-top:18px}
+.rl-arr{color:var(--ink)}.rl-res{color:var(--nge)}.rl-sep{border-top:1px solid var(--bd2);margin:6px 0}
+
+/* ── Stack card (vertical) ── */
+.stack-card{background:#fff;border:1.5px solid var(--bd2);border-radius:14px;padding:20px 18px;display:flex;flex-direction:column}
+.stk-well{flex:1;display:flex;flex-direction:column;gap:5px;min-height:200px;justify-content:flex-end}
+.si{
+  padding:9px 12px;border-radius:8px;text-align:center;
+  font-family:var(--mono);font-size:17px;font-weight:700;
+  border:1.5px solid var(--stk);background:rgba(29,78,216,.07);color:var(--stk);
+  transition:all .25s ease;
+}
+.si.si-top{border-color:var(--stk);background:rgba(29,78,216,.13);box-shadow:0 2px 12px rgba(29,78,216,.15)}
+.si.si-pop{border-color:var(--pop);background:rgba(220,38,38,.08);color:var(--pop);animation:shake .3s ease}
+.si.si-new{border-color:var(--push);background:rgba(124,58,237,.1);color:var(--push);animation:pushin .35s ease}
+.stk-empty{font-family:var(--mono);font-size:11px;color:var(--muted2);text-align:center;padding:16px 0;font-style:italic}
+.stk-top-lbl{font-family:var(--mono);font-size:9px;color:var(--muted2);letter-spacing:1px;text-align:right;margin-top:8px}
+.stk-bot-lbl{font-family:var(--mono);font-size:8px;color:var(--muted2);margin-top:5px;text-align:center}
+
+/* ── Compare row ── */
+.cmp-card{background:#fff;border:1.5px solid var(--bd2);border-radius:14px;padding:18px 22px;margin-bottom:14px;animation:up .45s ease .25s forwards;opacity:0}
+.cmp-inner{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:10px}
+.cmp-box{
+  padding:10px 16px;border-radius:10px;font-family:var(--mono);font-size:22px;font-weight:700;
+  border:2px solid var(--bd);background:var(--s1);color:var(--muted2);
+  transition:all .3s;min-width:58px;text-align:center;
+}
+.cmp-box.cb-cur{border-color:var(--cur);background:rgba(194,65,12,.08);color:var(--cur)}
+.cmp-box.cb-top{border-color:var(--stk);background:rgba(29,78,216,.07);color:var(--stk)}
+.cmp-box.cb-pop{border-color:var(--pop);background:rgba(220,38,38,.08);color:var(--pop)}
+.cmp-box.cb-win{border-color:var(--nge);background:rgba(21,128,61,.07);color:var(--nge)}
+.cmp-op{font-family:var(--mono);font-size:15px;font-weight:700;color:var(--muted)}
+.cmp-verdict{font-family:var(--mono);font-size:11px;font-weight:700;padding:5px 10px;border-radius:5px}
+.cv-pop{background:rgba(220,38,38,.1);color:var(--pop)}
+.cv-win{background:rgba(21,128,61,.1);color:var(--nge)}
+.cv-none{background:rgba(107,114,128,.1);color:var(--muted)}
+
+/* ── Status ── */
+.status-card{background:#fff;border:1.5px solid var(--bd2);border-radius:10px;padding:14px 20px;margin-bottom:14px;font-family:var(--mono);font-size:12px;line-height:1.8;min-height:52px;border-left:5px solid var(--bd2);transition:border-color .3s;animation:up .45s ease .3s forwards;opacity:0}
+.sc-cur{border-left-color:var(--cur)}.sc-pop{border-left-color:var(--pop)}.sc-nge{border-left-color:var(--nge)}.sc-push{border-left-color:var(--push)}.sc-done{border-left-color:var(--nge)}
+.hCur{color:var(--cur);font-weight:700}.hStk{color:var(--stk);font-weight:700}
+.hPop{color:var(--pop);font-weight:700}.hNge{color:var(--nge);font-weight:700}
+.hNone{color:var(--none);font-weight:700}.hPush{color:var(--push);font-weight:700}
+
+/* ── Code ── */
+.code-card{background:var(--ink);border-radius:14px;overflow:hidden;animation:up .45s ease .35s forwards;opacity:0}
+.code-hdr{display:flex;justify-content:space-between;align-items:center;padding:10px 18px;border-bottom:1px solid #2a2010;background:#0e0c08}
+.code-hdr span{font-family:var(--mono);font-size:11px;color:#5a4a30}
+.dots{display:flex;gap:5px}.dot{width:9px;height:9px;border-radius:50%}
+pre{padding:20px 24px;font-family:var(--mono);font-size:12.5px;line-height:1.9;color:#3a3a28;overflow-x:auto}
+.kw{color:#c792ea}.fn{color:#82aaff}.vr{color:#ffcb6b}.nm{color:#f78c6c}.cm{color:#202010;font-style:italic}
+.cl{display:block;border-radius:3px;padding:0 6px;margin:0 -6px;transition:background .2s}
+.cl.lit-cur{background:rgba(194,65,12,.1);border-left:2px solid var(--cur);padding-left:10px;margin-left:-10px;color:#c87050}
+.cl.lit-pop{background:rgba(220,38,38,.09);border-left:2px solid var(--pop);padding-left:10px;margin-left:-10px;color:#e09090}
+.cl.lit-nge{background:rgba(21,128,61,.08);border-left:2px solid var(--nge);padding-left:10px;margin-left:-10px;color:#80c898}
+.cl.lit-push{background:rgba(124,58,237,.09);border-left:2px solid var(--push);padding-left:10px;margin-left:-10px;color:#b090d8}
+
+.prog-row{display:flex;align-items:center;gap:10px;padding:0 24px 14px}
+.prog-lbl{font-family:var(--mono);font-size:10px;color:#5a4a30;white-space:nowrap}
+.prog-track{flex:1;height:3px;background:#2a2010;border-radius:99px;overflow:hidden}
+.prog-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--cur),var(--stk),var(--nge));transition:width .3s}
+
+@keyframes up{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- Header -->
+  <div class="hdr">
+    <div class="tag-row">
+      <span class="tag th">High</span>
+      <span class="tag ts">Monotonic Stack</span>
+      <span class="tag tt">Array · T1</span>
+    </div>
+    <h1>
+      <span class="n">Next</span>
+      <span class="g"> Greater</span>
+      <span class="e"> Element</span>
+    </h1>
+    <p class="sub">Right-to-left scan · stack holds candidates · pop smaller · peek top for NGE · O(n)</p>
+    <div class="key-insight">
+      <span class="ki-diff">⟵ This version scans RIGHT → LEFT</span> (vs left→right in previous visualizer).<br/>
+      Stack = "candidates still waiting to be someone's NGE". Pop anything ≤ arr[i] — they can never win.
+    </div>
+  </div>
+
+  <!-- Controls -->
+  <div class="top-bar">
+    <div class="in-box">
+      <label>Array</label>
+      <input id="inArr" value="4, 5, 2, 10, 8"/>
+    </div>
+    <button class="btn btn-play" onclick="window.startAuto()">▶ Play</button>
+    <button class="btn btn-step" onclick="window.stepFwd()">Step →</button>
+    <button class="btn btn-rst"  onclick="window.resetAll()">↺ Reset</button>
+    <div class="spd-row">
+      <span class="spd-lbl">Speed</span>
+      <button class="sb" onclick="window.setSpd(1200)" id="ss">Slow</button>
+      <button class="sb on" onclick="window.setSpd(700)" id="sm">Med</button>
+      <button class="sb" onclick="window.setSpd(200)" id="sf">Fast</button>
+    </div>
+  </div>
+
+  <!-- i direction track -->
+  <div class="dir-banner" id="dirBanner"></div>
+
+  <!-- Main: array + stack -->
+  <div class="main-grid">
+    <div class="arr-card">
+      <div class="sec-lbl">Array (scanning right → left)</div>
+      <div class="arr-wrap">
+        <div class="arr-row" id="arrRow"></div>
+        <div class="rl-sep"></div>
+        <div class="res-row" id="resRow"></div>
+      </div>
+    </div>
+    <div class="stack-card">
+      <div class="sec-lbl">Stack (values)</div>
+      <div class="stk-well" id="stkWell"></div>
+      <div class="stk-top-lbl" id="stkTopLbl">top ↑</div>
+      <div class="stk-bot-lbl">candidates for NGE</div>
+    </div>
+  </div>
+
+  <!-- Compare card -->
+  <div class="cmp-card">
+    <div class="sec-lbl">Current Comparison</div>
+    <div class="cmp-inner" id="cmpInner">
+      <div style="font-family:var(--mono);font-size:11px;color:var(--muted2)">Waiting to start…</div>
+    </div>
+  </div>
+
+  <!-- Status -->
+  <div class="status-card sc-cur" id="statusCard">Press ▶ Play or Step → to begin.</div>
+
+  <!-- Code -->
+  <div class="code-card">
+    <div class="code-hdr">
+      <div class="dots">
+        <div class="dot" style="background:#f06060"></div>
+        <div class="dot" style="background:#f0c040"></div>
+        <div class="dot" style="background:#4af0a0"></div>
+      </div>
+      <span>nextGreaterElement.js</span>
+    </div>
+    <pre>
+<span class="cl" id="ln0"><span class="kw">function</span> <span class="fn">nextGreaterElement</span>(arr) {</span>
+<span class="cl" id="ln1">  <span class="kw">let</span> <span class="vr">stack</span>  = [];</span>
+<span class="cl" id="ln2">  <span class="kw">let</span> <span class="vr">result</span> = <span class="kw">new</span> <span class="fn">Array</span>(arr.length);</span>
+<span class="cl" id="ln3"> </span>
+<span class="cl" id="ln4">  <span class="kw">for</span> (<span class="kw">let</span> <span class="vr">i</span> = arr.length - <span class="nm">1</span>; i >= <span class="nm">0</span>; i--) {</span>
+<span class="cl" id="ln5"> </span>
+<span class="cl" id="ln6">    <span class="cm">// Remove smaller elements (they can never be NGE)</span></span>
+<span class="cl" id="ln7">    <span class="kw">while</span> (stack.length && stack[stack.length-<span class="nm">1</span>] &lt;= arr[i]) {</span>
+<span class="cl" id="ln8">      stack.<span class="fn">pop</span>();</span>
+<span class="cl" id="ln9">    }</span>
+<span class="cl" id="ln10"> </span>
+<span class="cl" id="ln11">    <span class="cm">// Stack empty → no greater element exists to the right</span></span>
+<span class="cl" id="ln12">    result[i] = stack.length === <span class="nm">0</span> ? -<span class="nm">1</span> : stack[stack.length-<span class="nm">1</span>];</span>
+<span class="cl" id="ln13"> </span>
+<span class="cl" id="ln14">    <span class="cm">// Push current value as candidate for elements to its left</span></span>
+<span class="cl" id="ln15">    stack.<span class="fn">push</span>(arr[i]);</span>
+<span class="cl" id="ln16">  }</span>
+<span class="cl" id="ln17"> </span>
+<span class="cl" id="ln18">  <span class="kw">return</span> <span class="vr">result</span>;</span>
+<span class="cl" id="ln19">}</span></pre>
+    <div class="prog-row">
+      <span class="prog-lbl" id="stepLbl">0 / 0</span>
+      <div class="prog-track"><div class="prog-fill" id="progFill" style="width:0%"></div></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+function genSteps(arr) {
+  const n = arr.length;
+  const result = new Array(n);
+  const stack = [];
+  const steps = [];
+
+  function snap(type, i, popVal, msg, line, litCls) {
+    steps.push({
+      arr, n,
+      result: [...result],
+      stack: [...stack],
+      type, i, popVal, msg, line, litCls
+    });
+  }
+
+  snap('init', n - 1, null,
+    `Scan from <span class="hCur">right → left</span> (i = ${n-1} down to 0). Stack holds <span class="hStk">candidate values</span> that could be the NGE for elements to the left.`,
+    'ln1', 'lit-cur');
+
+  for (let i = n - 1; i >= 0; i--) {
+    const cur = arr[i];
+
+    snap('arrive', i, null,
+      `<span class="hCur">i=${i}, arr[i]=${cur}</span>. Check stack for NGE. Stack top = ${stack.length ? stack[stack.length-1] : 'none'}.`,
+      'ln7', 'lit-cur');
+
+    // Pop phase
+    while (stack.length && stack[stack.length - 1] <= cur) {
+      const topVal = stack[stack.length - 1];
+      snap('pop', i, topVal,
+        `Stack top <span class="hPop">${topVal}</span> ≤ arr[i]=${cur}. Pop it — it can <em>never</em> be NGE for any element further left (arr[i] is already bigger).`,
+        'ln8', 'lit-pop');
+      stack.pop();
+    }
+
+    // Assign result
+    if (stack.length === 0) {
+      result[i] = -1;
+      snap('assign-none', i, null,
+        `Stack empty → no greater element to the right of i=${i}. <span class="hNone">result[${i}] = -1</span>.`,
+        'ln12', 'lit-nge');
+    } else {
+      result[i] = stack[stack.length - 1];
+      snap('assign-nge', i, stack[stack.length - 1],
+        `Stack top = <span class="hNge">${stack[stack.length-1]}</span> > arr[i]=${cur}. <span class="hNge">result[${i}] = ${stack[stack.length-1]}</span>. ✓`,
+        'ln12', 'lit-nge');
+    }
+
+    // Push current
+    stack.push(cur);
+    snap('push', i, cur,
+      `Push <span class="hPush">${cur}</span> onto stack. It's a candidate NGE for elements to the left. Stack: [${[...stack].join(', ')}].`,
+      'ln15', 'lit-push');
+  }
+
+  snap('done', -1, null,
+    `<span class="hNge">✓ Done!</span> Result = [${result.join(', ')}]. Each element paired with its next greater to the right.`,
+    'ln18', 'lit-nge');
+
+  return steps;
+}
+
+let steps = [], curStep = -1, timer = null, speed = 700;
+
+function renderStep(idx) {
+  if (idx < 0 || idx >= steps.length) return;
+  const st = steps[idx]; curStep = idx;
+  const { arr, n, result, stack, type, i, popVal, msg, line, litCls } = st;
+  const isDone = type === 'done';
+
+  // Direction track
+  const db = document.getElementById('dirBanner');
+  db.innerHTML = '';
+  const rtlLbl = document.createElement('div');
+  rtlLbl.style.cssText = 'font-family:var(--mono);font-size:10px;color:var(--cur);font-weight:700;margin-right:8px;white-space:nowrap';
+  rtlLbl.textContent = 'i ←';
+  db.appendChild(rtlLbl);
+  const dt = document.createElement('div'); dt.className = 'dir-track';
+  arr.forEach((v, j) => {
+    const dot = document.createElement('div'); dot.className = 'dir-dot';
+    dot.textContent = j;
+    if (isDone || j > i) dot.classList.add('dd-done');
+    else if (j === i) dot.classList.add('dd-cur');
+    dt.appendChild(dot);
+    if (j < n - 1) {
+      const seg = document.createElement('div'); seg.className = 'dir-seg';
+      if (isDone || j >= i) seg.classList.add('ds-done');
+      else if (j === i - 1) seg.classList.add('ds-cur');
+      dt.appendChild(seg);
+    }
+  });
+  db.appendChild(dt);
+  const dirLbl2 = document.createElement('div'); dirLbl2.className = 'dir-lbl';
+  dirLbl2.textContent = isDone ? '✓ complete' : `processing i=${i}`;
+  db.appendChild(dirLbl2);
+
+  // Array + result rows
+  const arrRow = document.getElementById('arrRow');
+  const resRow = document.getElementById('resRow');
+  arrRow.innerHTML = ''; resRow.innerHTML = '';
+
+  // row labels
+  const al = document.createElement('div'); al.className = 'row-label rl-arr'; al.textContent = 'arr'; arrRow.appendChild(al);
+  const rl = document.createElement('div'); rl.className = 'row-label rl-res'; rl.textContent = 'result'; resRow.appendChild(rl);
+
+  arr.forEach((v, j) => {
+    const cw = document.createElement('div'); cw.className = 'cw';
+    // pointer label
+    const ptr = document.createElement('div');
+    if (j === i && !isDone) { ptr.className = 'cptr cp-cur'; ptr.textContent = 'i'; }
+    else { ptr.className = 'cptr cp-future'; ptr.textContent = '.'; }
+
+    const cell = document.createElement('div'); cell.className = 'cell';
+    cell.innerHTML = `<span class="cidx">${j}</span>${v}`;
+
+    if (isDone) {
+      cell.classList.add(result[j] === -1 ? 'c-none' : 'c-nge');
+    } else if (j === i) {
+      if (type === 'pop') cell.classList.add('c-pop');
+      else if (type === 'push') cell.classList.add('c-push');
+      else cell.classList.add('c-cur');
+    } else if (j > i) {
+      const onStk = stack.includes(v) && arr.lastIndexOf(v) === j;
+      cell.classList.add(result[j] !== undefined && result[j] !== -1 ? 'c-nge' : result[j] === -1 ? 'c-none' : 'c-stk');
+    } else {
+      cell.classList.add('c-future');
+    }
+
+    const il = document.createElement('div'); il.className = 'cidx-lbl'; il.textContent = j;
+    cw.appendChild(ptr); cw.appendChild(cell); cw.appendChild(il);
+    arrRow.appendChild(cw);
+
+    // result box
+    const rc = document.createElement('div'); rc.className = 'cw';
+    const rbox = document.createElement('div'); rbox.className = 'r-box';
+    const hasRes = result[j] !== undefined;
+    if (hasRes) {
+      rbox.textContent = result[j];
+      rbox.classList.add(result[j] === -1 ? 'rb-none' : j === i && (type === 'assign-nge' || type === 'assign-none') ? 'rb-cur' : 'rb-nge');
+    } else {
+      rbox.textContent = '?';
+    }
+    const rl2 = document.createElement('div'); rl2.className = 'r-lbl'; rl2.textContent = `[${j}]`;
+    rc.appendChild(rbox); rc.appendChild(rl2);
+    resRow.appendChild(rc);
+  });
+
+  // Stack
+  const sw = document.getElementById('stkWell');
+  sw.innerHTML = '';
+  if (stack.length === 0) {
+    sw.innerHTML = '<div class="stk-empty">empty</div>';
+  } else {
+    // bottom to top visually = first to last in array (top = last)
+    [...stack].forEach((v, si) => {
+      const el = document.createElement('div');
+      el.className = 'si' + (si === stack.length - 1 ? ' si-top' : '');
+      if (type === 'pop' && v === popVal && si === stack.length - 1) el.classList.add('si-pop');
+      if (type === 'push' && si === stack.length - 1) el.classList.add('si-new');
+      el.textContent = v;
+      sw.insertBefore(el, sw.firstChild);
+    });
+  }
+  document.getElementById('stkTopLbl').textContent = stack.length ? `top → ${stack[stack.length-1]}` : 'empty';
+
+  // Compare card
+  const ci = document.getElementById('cmpInner');
+  ci.innerHTML = '';
+  if (!isDone && i >= 0 && type !== 'init') {
+    const cur = arr[i];
+    const top = stack.length > 0 && type !== 'push' ? stack[stack.length-1] : null;
+
+    const curBox = document.createElement('div'); curBox.className = 'cmp-box cb-cur'; curBox.textContent = cur;
+    const label1 = document.createElement('div'); label1.style.cssText='font-family:var(--mono);font-size:9px;color:var(--muted)'; label1.textContent=`arr[${i}]`;
+    const curWrap = document.createElement('div'); curWrap.style.cssText='display:flex;flex-direction:column;align-items:center;gap:3px'; curWrap.appendChild(curBox); curWrap.appendChild(label1);
+    ci.appendChild(curWrap);
+
+    if (type === 'pop') {
+      const op = document.createElement('div'); op.className = 'cmp-op'; op.textContent = '≥'; ci.appendChild(op);
+      const topBox = document.createElement('div'); topBox.className = 'cmp-box cb-pop'; topBox.textContent = popVal;
+      const label2 = document.createElement('div'); label2.style.cssText='font-family:var(--mono);font-size:9px;color:var(--muted)'; label2.textContent='stack top';
+      const tWrap = document.createElement('div'); tWrap.style.cssText='display:flex;flex-direction:column;align-items:center;gap:3px'; tWrap.appendChild(topBox); tWrap.appendChild(label2);
+      ci.appendChild(tWrap);
+      const v = document.createElement('div'); v.className = 'cmp-verdict cv-pop'; v.textContent = '✗ pop — too small'; ci.appendChild(v);
+    } else if (type === 'assign-nge') {
+      const op = document.createElement('div'); op.className = 'cmp-op'; op.textContent = '<'; ci.appendChild(op);
+      const topBox = document.createElement('div'); topBox.className = 'cmp-box cb-win'; topBox.textContent = stack[stack.length-1];
+      const label2 = document.createElement('div'); label2.style.cssText='font-family:var(--mono);font-size:9px;color:var(--muted)'; label2.textContent='stack top = NGE';
+      const tWrap = document.createElement('div'); tWrap.style.cssText='display:flex;flex-direction:column;align-items:center;gap:3px'; tWrap.appendChild(topBox); tWrap.appendChild(label2);
+      ci.appendChild(tWrap);
+      const v = document.createElement('div'); v.className = 'cmp-verdict cv-win'; v.textContent = `✓ NGE = ${stack[stack.length-1]}`; ci.appendChild(v);
+    } else if (type === 'assign-none') {
+      const v = document.createElement('div'); v.className = 'cmp-verdict cv-none'; v.textContent = 'stack empty → result[i] = -1'; ci.appendChild(v);
+    } else if (type === 'push') {
+      const v = document.createElement('div'); v.style.cssText='font-family:var(--mono);font-size:11px;color:var(--push)'; v.textContent = `Push ${cur} as candidate for left elements`; ci.appendChild(v);
+    } else {
+      ci.innerHTML = '<div style="font-family:var(--mono);font-size:11px;color:var(--muted2)">Starting iteration…</div>';
+    }
+  } else if (isDone) {
+    ci.innerHTML = `<div style="font-family:var(--mono);font-size:13px;font-weight:700;color:var(--nge)">✓ result = [${result.join(', ')}]</div>`;
+  } else {
+    ci.innerHTML = '<div style="font-family:var(--mono);font-size:11px;color:var(--muted2)">Waiting to start…</div>';
+  }
+
+  // Status
+  const sc = document.getElementById('statusCard');
+  sc.innerHTML = msg;
+  sc.className = 'status-card ' + (
+    type === 'pop' ? 'sc-pop' :
+    type === 'assign-nge' || type === 'done' ? 'sc-nge' :
+    type === 'assign-none' ? 'sc-nge' :
+    type === 'push' ? 'sc-push' : 'sc-cur'
+  );
+
+  // Code
+  document.querySelectorAll('.cl').forEach(el => el.className = 'cl');
+  if (line) { const el = document.getElementById(line); if (el) el.classList.add(litCls); }
+
+  // Progress
+  document.getElementById('stepLbl').textContent = `${idx+1} / ${steps.length}`;
+  document.getElementById('progFill').style.width = `${((idx+1)/steps.length)*100}%`;
+}
+
+function parse() {
+  return document.getElementById('inArr').value.split(',').map(s => parseInt(s.trim())).filter(n => !isNaN(n));
+}
+function build() {
+  const arr = parse();
+  if (arr.length < 2) { alert('Enter at least 2 numbers.'); return false; }
+  steps = genSteps(arr); curStep = -1; return true;
+}
+
+window.resetAll  = function () { clearTimeout(timer); timer = null; if (!build()) return; renderStep(0); };
+window.stepFwd   = function () { clearTimeout(timer); timer = null; if (!steps.length) { if (!build()) return; } if (curStep < steps.length - 1) renderStep(curStep + 1); };
+window.startAuto = function () {
+  if (!steps.length || curStep >= steps.length - 1) { if (!build()) return; renderStep(0); }
+  clearTimeout(timer);
+  function tick() { if (curStep < steps.length - 1) { renderStep(curStep + 1); timer = setTimeout(tick, speed); } }
+  timer = setTimeout(tick, speed);
+};
+window.setSpd = function (ms) {
+  speed = ms;
+  ['ss','sm','sf'].forEach(id => document.getElementById(id).classList.remove('on'));
+  if (ms === 1200) document.getElementById('ss').classList.add('on');
+  else if (ms === 700) document.getElementById('sm').classList.add('on');
+  else document.getElementById('sf').classList.add('on');
+};
+
+window.addEventListener('DOMContentLoaded', () => { build(); renderStep(0); });
+</script>
+</body>
+</html>
