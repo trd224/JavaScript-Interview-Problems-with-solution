@@ -1,0 +1,2588 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JS Interview Mastery — 2000+ Problems</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600;700&family=Clash+Display:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #07080d;
+  --surface: #0d0e16;
+  --card: #111320;
+  --border: #1e2035;
+  --border2: #2a2d4a;
+  --accent: #6ee7b7;
+  --accent2: #818cf8;
+  --accent3: #fb7185;
+  --accent4: #fbbf24;
+  --text: #e2e8f0;
+  --muted: #64748b;
+  --easy: #6ee7b7;
+  --med: #fbbf24;
+  --hard: #fb7185;
+  --font-mono: 'IBM Plex Mono', monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  font-family: var(--font-mono);
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  line-height: 1.6;
+}
+body::before{
+  content:'';
+  position:fixed;
+  inset:0;
+  background:
+    radial-gradient(ellipse 80% 50% at 20% 10%, rgba(110,231,183,0.04) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 40% at 80% 80%, rgba(129,140,248,0.04) 0%, transparent 60%);
+  pointer-events:none;
+  z-index:0;
+}
+
+/* LAYOUT */
+.app { display: flex; min-height: 100vh; position: relative; z-index: 1; }
+
+/* SIDEBAR */
+.sidebar {
+  width: 280px;
+  flex-shrink: 0;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  position: fixed;
+  top: 0; left: 0; bottom: 0;
+  overflow-y: auto;
+  z-index: 50;
+  transition: transform 0.3s;
+}
+.sidebar::-webkit-scrollbar{width:3px;}
+.sidebar::-webkit-scrollbar-thumb{background:var(--border2);}
+
+.sidebar-header {
+  padding: 24px 20px 16px;
+  border-bottom: 1px solid var(--border);
+  position: sticky; top: 0;
+  background: var(--surface);
+  z-index: 1;
+}
+.logo {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+.logo span { color: var(--accent2); }
+
+.overall-progress {
+  margin-top: 12px;
+}
+.progress-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+.progress-track {
+  height: 3px;
+  background: var(--border);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), var(--accent2));
+  border-radius: 2px;
+  transition: width 0.4s ease;
+}
+
+.nav-section { padding: 8px 0; }
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 20px;
+  cursor: pointer;
+  transition: background 0.15s;
+  border-left: 2px solid transparent;
+  font-size: 11px;
+  color: var(--muted);
+}
+.nav-item:hover { background: rgba(110,231,183,0.05); color: var(--text); }
+.nav-item.active {
+  background: rgba(110,231,183,0.08);
+  border-left-color: var(--accent);
+  color: var(--accent);
+}
+.nav-icon { font-size: 14px; width: 20px; text-align: center; }
+.nav-label { flex: 1; }
+.nav-count {
+  font-size: 10px;
+  color: var(--muted);
+  background: var(--card);
+  padding: 1px 6px;
+  border-radius: 10px;
+}
+.nav-done-pct {
+  font-size: 10px;
+  color: var(--accent);
+}
+
+/* MAIN */
+.main {
+  margin-left: 280px;
+  flex: 1;
+  min-width: 0;
+}
+
+/* TOP BAR */
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  background: rgba(7,8,13,0.92);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  padding: 12px 32px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.search-wrap { flex: 1; position: relative; }
+.search-wrap::before {
+  content: '⌕';
+  position: absolute;
+  left: 12px; top: 50%;
+  transform: translateY(-50%);
+  color: var(--muted);
+  font-size: 16px;
+}
+.search {
+  width: 100%;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 9px 12px 9px 34px;
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.search:focus { border-color: var(--accent); }
+.search::placeholder { color: var(--muted); }
+
+.pill-group { display: flex; gap: 6px; }
+.pill {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 6px 14px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--muted);
+  cursor: pointer;
+  transition: all 0.15s;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.pill:hover { border-color: var(--accent); color: var(--accent); }
+.pill.active { background: var(--accent); border-color: var(--accent); color: var(--bg); }
+.pill.easy.active { background: var(--easy); border-color: var(--easy); }
+.pill.med.active { background: var(--med); border-color: var(--med); }
+.pill.hard.active { background: var(--hard); border-color: var(--hard); }
+
+/* HERO */
+.hero {
+  padding: 40px 32px 24px;
+  border-bottom: 1px solid var(--border);
+}
+.hero-tag {
+  font-size: 10px;
+  color: var(--accent);
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+.hero-title {
+  font-size: clamp(28px, 4vw, 52px);
+  font-weight: 700;
+  line-height: 1.05;
+  letter-spacing: -1px;
+  color: var(--text);
+}
+.hero-title .hl1 { color: var(--accent); }
+.hero-title .hl2 { color: var(--accent2); }
+.hero-sub {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 10px;
+}
+.hero-stats {
+  display: flex;
+  gap: 28px;
+  margin-top: 24px;
+  flex-wrap: wrap;
+}
+.hstat { display: flex; flex-direction: column; gap: 2px; }
+.hstat-num { font-size: 26px; font-weight: 700; color: var(--accent4); }
+.hstat-lab { font-size: 10px; color: var(--muted); letter-spacing: 2px; text-transform: uppercase; }
+
+/* CONTENT */
+.content { padding: 24px 32px 100px; }
+
+/* SECTION */
+.section {
+  margin-bottom: 32px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--card);
+}
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 20px;
+  cursor: pointer;
+  user-select: none;
+  border-bottom: 1px solid transparent;
+  transition: background 0.15s;
+}
+.section-header:hover { background: rgba(255,255,255,0.02); }
+.section-header.open { border-bottom-color: var(--border); }
+.sec-icon { font-size: 18px; }
+.sec-title { flex: 1; font-size: 13px; font-weight: 600; color: var(--text); }
+.sec-stats { display: flex; gap: 8px; align-items: center; }
+.sec-badge {
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--muted);
+}
+.sec-done { color: var(--accent); font-size: 11px; font-weight: 600; }
+.sec-toggle {
+  font-size: 18px;
+  color: var(--muted);
+  transition: transform 0.3s, color 0.2s;
+  line-height: 1;
+}
+.section-header.open .sec-toggle { transform: rotate(45deg); color: var(--accent); }
+
+.section-progress { height: 2px; background: var(--border); }
+.section-progress-fill { height: 100%; background: var(--accent); transition: width 0.3s; }
+
+.section-body { display: none; }
+.section-body.open { display: block; }
+
+/* SUBCATEGORY */
+.subcat {
+  border-bottom: 1px solid var(--border);
+}
+.subcat:last-child { border-bottom: none; }
+.subcat-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 20px;
+  background: rgba(255,255,255,0.01);
+  border-bottom: 1px solid var(--border);
+  font-size: 10px;
+  color: var(--accent2);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.subcat-header:hover { background: rgba(129,140,248,0.05); }
+.subcat-toggle { margin-left: auto; color: var(--muted); font-size: 12px; transition: transform 0.2s; }
+.subcat-header.open .subcat-toggle { transform: rotate(90deg); }
+.subcat-list { display: none; }
+.subcat-list.open { display: block; }
+
+/* PROBLEM ROW */
+.prob {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 9px 20px 9px 28px;
+  border-bottom: 1px solid rgba(30,32,53,0.6);
+  cursor: pointer;
+  transition: background 0.12s;
+}
+.prob:last-child { border-bottom: none; }
+.prob:hover { background: rgba(110,231,183,0.04); }
+.prob.solved { opacity: 0.45; }
+.prob.solved .prob-text { text-decoration: line-through; color: var(--muted); }
+
+.prob-check {
+  width: 15px; height: 15px;
+  border: 1px solid var(--border2);
+  border-radius: 3px;
+  flex-shrink: 0;
+  margin-top: 3px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 9px;
+  transition: all 0.2s;
+}
+.prob.solved .prob-check { background: var(--accent); border-color: var(--accent); color: var(--bg); }
+
+.prob-num {
+  font-size: 9px;
+  color: var(--muted);
+  min-width: 32px;
+  padding-top: 3px;
+  flex-shrink: 0;
+}
+.prob-text { font-size: 12px; flex: 1; line-height: 1.5; color: var(--text); }
+.prob-tags { display: flex; gap: 4px; flex-shrink: 0; margin-top: 2px; flex-wrap: wrap; justify-content: flex-end; }
+.diff-tag {
+  font-size: 9px;
+  padding: 1px 6px;
+  border-radius: 2px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+.diff-tag.easy { background: rgba(110,231,183,0.12); color: var(--easy); }
+.diff-tag.med  { background: rgba(251,191,36,0.12);  color: var(--med);  }
+.diff-tag.hard { background: rgba(251,113,133,0.12); color: var(--hard); }
+
+/* HIDDEN */
+.hidden { display: none !important; }
+
+/* FOOTER FIXED */
+.footer-fixed {
+  position: fixed;
+  bottom: 0; left: 280px; right: 0;
+  background: rgba(7,8,13,0.96);
+  backdrop-filter: blur(10px);
+  border-top: 1px solid var(--border);
+  padding: 10px 32px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  z-index: 40;
+}
+.foot-label { font-size: 10px; color: var(--muted); letter-spacing: 1px; white-space: nowrap; }
+.foot-bar { flex: 1; height: 3px; background: var(--border); border-radius: 2px; overflow: hidden; }
+.foot-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent2)); border-radius: 2px; transition: width 0.4s; }
+.foot-count { font-size: 12px; color: var(--accent); font-weight: 700; white-space: nowrap; }
+.foot-pct { font-size: 10px; color: var(--muted); white-space: nowrap; }
+
+/* MOBILE */
+.menu-btn {
+  display: none;
+  background: var(--card);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 8px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+}
+@media(max-width:768px){
+  .sidebar { transform: translateX(-100%); }
+  .sidebar.open { transform: translateX(0); }
+  .main { margin-left: 0; }
+  .footer-fixed { left: 0; }
+  .menu-btn { display: block; }
+  .topbar { padding: 10px 16px; }
+  .hero, .content { padding-left: 16px; padding-right: 16px; }
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <div class="logo">JS<span>Interview</span></div>
+    <div class="overall-progress">
+      <div class="progress-label">
+        <span>OVERALL PROGRESS</span>
+        <span id="sidebarPct">0%</span>
+      </div>
+      <div class="progress-track"><div class="progress-fill" id="sidebarFill" style="width:0%"></div></div>
+    </div>
+  </div>
+  <div class="nav-section" id="sidebarNav"></div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+  <div class="topbar">
+    <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+    <div class="search-wrap">
+      <input class="search" type="text" id="searchInput" placeholder="Search any problem..." />
+    </div>
+    <div class="pill-group">
+      <div class="pill active" data-f="all">All</div>
+      <div class="pill easy" data-f="easy">Easy</div>
+      <div class="pill med" data-f="med">Med</div>
+      <div class="pill hard" data-f="hard">Hard</div>
+    </div>
+  </div>
+
+  <div class="hero">
+    <div class="hero-tag">// complete reference guide</div>
+    <div class="hero-title">
+      <span class="hl1">JavaScript</span><br>
+      Interview <span class="hl2">Mastery</span>
+    </div>
+    <div class="hero-sub">// 2000+ problems • 20 categories • track every solution</div>
+    <div class="hero-stats">
+      <div class="hstat"><span class="hstat-num" id="totalProbs">0</span><span class="hstat-lab">Problems</span></div>
+      <div class="hstat"><span class="hstat-num">20</span><span class="hstat-lab">Categories</span></div>
+      <div class="hstat"><span class="hstat-num" id="solvedCount">0</span><span class="hstat-lab">Solved</span></div>
+      <div class="hstat"><span class="hstat-num" id="pctDone">0%</span><span class="hstat-lab">Complete</span></div>
+    </div>
+  </div>
+
+  <div class="content" id="content"></div>
+</main>
+
+<!-- FOOTER -->
+<div class="footer-fixed">
+  <span class="foot-label">PROGRESS</span>
+  <div class="foot-bar"><div class="foot-fill" id="footFill" style="width:0%"></div></div>
+  <span class="foot-count" id="footCount">0 / 0</span>
+  <span class="foot-pct" id="footPct">0%</span>
+</div>
+
+</div>
+
+<script>
+// ============================================================
+// DATA — 100+ problems per category
+// ============================================================
+const DATA = [
+  {
+    id:"strings", icon:"🔤", title:"1. String Problems",
+    subs:[
+      { name:"Basic Operations", problems:[
+        {t:"Reverse a string without built-in reverse()",d:"easy"},
+        {t:"Check if a string is a palindrome",d:"easy"},
+        {t:"Count vowels in a string",d:"easy"},
+        {t:"Count consonants in a string",d:"easy"},
+        {t:"Count total characters excluding spaces",d:"easy"},
+        {t:"Remove all whitespace from a string",d:"easy"},
+        {t:"Trim leading and trailing whitespace manually",d:"easy"},
+        {t:"Convert string to uppercase without toUpperCase()",d:"easy"},
+        {t:"Convert string to lowercase without toLowerCase()",d:"easy"},
+        {t:"Repeat a string n times without repeat()",d:"easy"},
+        {t:"Check if string contains only digits",d:"easy"},
+        {t:"Check if string contains only alphabets",d:"easy"},
+        {t:"Check if string is alphanumeric",d:"easy"},
+        {t:"Concatenate two strings without +",d:"easy"},
+        {t:"Find length of string without .length",d:"easy"},
+      ]},
+      { name:"Search & Replace", problems:[
+        {t:"Find index of first occurrence of substring",d:"easy"},
+        {t:"Find index of last occurrence of substring",d:"easy"},
+        {t:"Count occurrences of a character in string",d:"easy"},
+        {t:"Count occurrences of a substring",d:"easy"},
+        {t:"Replace first occurrence of a substring",d:"easy"},
+        {t:"Replace all occurrences without replaceAll()",d:"med"},
+        {t:"Remove a specific character from string",d:"easy"},
+        {t:"Remove all occurrences of a substring",d:"med"},
+        {t:"Find and replace using regex",d:"med"},
+        {t:"Extract numbers from a string",d:"med"},
+        {t:"Extract only alphabets from string",d:"easy"},
+        {t:"Check if string starts with a prefix",d:"easy"},
+        {t:"Check if string ends with a suffix",d:"easy"},
+        {t:"Find all indices of substring occurrence",d:"med"},
+        {t:"Check if string contains another string",d:"easy"},
+      ]},
+      { name:"Transformation", problems:[
+        {t:"Capitalize first letter of each word (Title Case)",d:"easy"},
+        {t:"Convert camelCase to snake_case",d:"med"},
+        {t:"Convert snake_case to camelCase",d:"med"},
+        {t:"Convert kebab-case to camelCase",d:"med"},
+        {t:"Convert string to title case",d:"easy"},
+        {t:"Reverse each word in a sentence",d:"med"},
+        {t:"Reverse words order in a sentence",d:"easy"},
+        {t:"Remove duplicate words from sentence",d:"med"},
+        {t:"Sort words in a sentence alphabetically",d:"med"},
+        {t:"Truncate string to n characters with ellipsis",d:"easy"},
+        {t:"Pad string to fixed length (left and right)",d:"easy"},
+        {t:"Encode string to Base64",d:"med"},
+        {t:"Decode Base64 string",d:"med"},
+        {t:"Slugify a string for URLs",d:"med"},
+        {t:"Wrap long lines at n characters",d:"med"},
+      ]},
+      { name:"Analysis & Patterns", problems:[
+        {t:"Find most frequent character",d:"easy"},
+        {t:"Find least frequent character",d:"easy"},
+        {t:"Check if string has all unique characters",d:"easy"},
+        {t:"Remove duplicate characters",d:"easy"},
+        {t:"Check two strings are anagrams",d:"easy"},
+        {t:"Find all anagrams of a word in string",d:"hard"},
+        {t:"Find longest common prefix",d:"med"},
+        {t:"Find longest common suffix",d:"med"},
+        {t:"Find longest common substring",d:"hard"},
+        {t:"Find longest palindromic substring",d:"hard"},
+        {t:"Find longest palindromic subsequence",d:"hard"},
+        {t:"String compression (aabccc → a2b1c3)",d:"med"},
+        {t:"String decompression (a2b1c3 → aabccc)",d:"med"},
+        {t:"Check if two strings are rotations of each other",d:"med"},
+        {t:"Find number of distinct substrings",d:"hard"},
+      ]},
+      { name:"Validation & Parsing", problems:[
+        {t:"Valid parentheses checker",d:"med"},
+        {t:"Check balanced brackets { } [ ] ( )",d:"med"},
+        {t:"Validate email format",d:"med"},
+        {t:"Validate phone number format",d:"med"},
+        {t:"Validate URL format",d:"med"},
+        {t:"Validate IP address (IPv4)",d:"med"},
+        {t:"Validate IPv6 address",d:"hard"},
+        {t:"Check if string is a valid JSON",d:"med"},
+        {t:"Parse CSV row into array",d:"med"},
+        {t:"Parse query string into object",d:"med"},
+        {t:"Check if number string is a valid integer",d:"easy"},
+        {t:"Check if number string is a valid float",d:"easy"},
+        {t:"Validate strong password (rules-based)",d:"med"},
+        {t:"Check if string is valid hex color",d:"med"},
+        {t:"Check if string is valid date format",d:"med"},
+      ]},
+      { name:"Advanced String Algorithms", problems:[
+        {t:"KMP (Knuth-Morris-Pratt) pattern search",d:"hard"},
+        {t:"Rabin-Karp rolling hash substring search",d:"hard"},
+        {t:"Z-algorithm for pattern matching",d:"hard"},
+        {t:"Trie insert and search",d:"hard"},
+        {t:"Longest repeating substring",d:"hard"},
+        {t:"Minimum window substring",d:"hard"},
+        {t:"Wildcard pattern matching (* and ?)",d:"hard"},
+        {t:"Regular expression matching (. and *)",d:"hard"},
+        {t:"Edit distance (Levenshtein distance)",d:"hard"},
+        {t:"Shortest superstring",d:"hard"},
+        {t:"Interleaving strings check",d:"hard"},
+        {t:"Count palindromic substrings",d:"med"},
+        {t:"Longest substring with at most k distinct chars",d:"hard"},
+        {t:"Minimum characters to add to make palindrome",d:"hard"},
+        {t:"Word break problem",d:"hard"},
+      ]},
+      { name:"Number/String Conversion", problems:[
+        {t:"Roman numeral to integer",d:"med"},
+        {t:"Integer to Roman numeral",d:"med"},
+        {t:"Number to words (1234 → 'one thousand...')",d:"hard"},
+        {t:"Words to number",d:"hard"},
+        {t:"Convert binary string to decimal",d:"easy"},
+        {t:"Convert decimal to binary string",d:"easy"},
+        {t:"Convert hex string to decimal",d:"med"},
+        {t:"Convert decimal to hex string",d:"med"},
+        {t:"Convert octal string to decimal",d:"med"},
+        {t:"Multiply two very large numbers as strings",d:"hard"},
+        {t:"Add two large numbers given as strings",d:"med"},
+        {t:"Divide two numbers without division operator",d:"hard"},
+        {t:"Implement atoi (string to integer)",d:"med"},
+        {t:"Implement itoa (integer to string)",d:"med"},
+        {t:"Check if string represents a valid number",d:"hard"},
+      ]},
+    ]
+  },
+  {
+    id:"numbers", icon:"🔢", title:"2. Number Problems",
+    subs:[
+      { name:"Basic Number Theory", problems:[
+        {t:"Check if number is prime",d:"easy"},
+        {t:"Find all prime factors",d:"med"},
+        {t:"Sieve of Eratosthenes",d:"med"},
+        {t:"Segmented Sieve",d:"hard"},
+        {t:"Find GCD of two numbers",d:"easy"},
+        {t:"Find LCM of two numbers",d:"easy"},
+        {t:"Find GCD of array of numbers",d:"easy"},
+        {t:"Extended Euclidean algorithm",d:"hard"},
+        {t:"Check if number is perfect",d:"easy"},
+        {t:"Find all perfect numbers up to n",d:"med"},
+        {t:"Check if number is Armstrong (narcissistic)",d:"easy"},
+        {t:"Find all Armstrong numbers up to n",d:"med"},
+        {t:"Check if number is abundant",d:"med"},
+        {t:"Check if number is deficient",d:"med"},
+        {t:"Check if number is automorphic",d:"med"},
+      ]},
+      { name:"Fibonacci & Sequences", problems:[
+        {t:"Fibonacci — recursive",d:"easy"},
+        {t:"Fibonacci — iterative",d:"easy"},
+        {t:"Fibonacci — memoized",d:"easy"},
+        {t:"Fibonacci — matrix exponentiation O(log n)",d:"hard"},
+        {t:"Find nth Fibonacci number",d:"easy"},
+        {t:"Check if number is a Fibonacci number",d:"med"},
+        {t:"Sum of Fibonacci series up to n",d:"easy"},
+        {t:"Tribonacci sequence",d:"med"},
+        {t:"Lucas numbers",d:"med"},
+        {t:"Catalan numbers",d:"hard"},
+        {t:"Bell numbers",d:"hard"},
+        {t:"Stirling numbers",d:"hard"},
+        {t:"Padovan sequence",d:"med"},
+        {t:"Pell numbers",d:"med"},
+        {t:"Jacobsthal numbers",d:"med"},
+      ]},
+      { name:"Factorial & Combinatorics", problems:[
+        {t:"Factorial — recursive",d:"easy"},
+        {t:"Factorial — iterative",d:"easy"},
+        {t:"Factorial of large number (BigInt)",d:"med"},
+        {t:"Count trailing zeros in factorial",d:"med"},
+        {t:"Find nCr (combinations)",d:"med"},
+        {t:"Find nPr (permutations)",d:"med"},
+        {t:"Pascal's triangle",d:"med"},
+        {t:"Pascal's triangle nth row",d:"med"},
+        {t:"Count ways to climb n stairs (1 or 2 steps)",d:"easy"},
+        {t:"Count ways to climb n stairs (1, 2, or 3 steps)",d:"med"},
+        {t:"Unique paths in m×n grid",d:"med"},
+        {t:"Unique paths with obstacles",d:"med"},
+        {t:"Number of derangements",d:"hard"},
+        {t:"Count permutations of a multiset",d:"hard"},
+        {t:"Josephus problem",d:"hard"},
+      ]},
+      { name:"Powers & Roots", problems:[
+        {t:"Power of a number (x^n) — recursive",d:"easy"},
+        {t:"Fast power (binary exponentiation)",d:"med"},
+        {t:"Power without Math.pow",d:"easy"},
+        {t:"Square root without Math.sqrt (Newton's method)",d:"med"},
+        {t:"Cube root without Math.cbrt",d:"med"},
+        {t:"Integer square root",d:"med"},
+        {t:"Check if number is a perfect square",d:"easy"},
+        {t:"Check if number is a perfect cube",d:"easy"},
+        {t:"Check if number is a power of 2",d:"easy"},
+        {t:"Check if number is a power of 3",d:"med"},
+        {t:"Check if number is a power of 4",d:"med"},
+        {t:"Find smallest power of 2 >= n",d:"easy"},
+        {t:"Modular exponentiation",d:"hard"},
+        {t:"nth root of a number",d:"med"},
+        {t:"Log base 2 without Math.log",d:"med"},
+      ]},
+      { name:"Digit Manipulation", problems:[
+        {t:"Sum of digits of a number",d:"easy"},
+        {t:"Product of digits of a number",d:"easy"},
+        {t:"Count digits in a number",d:"easy"},
+        {t:"Reverse a number",d:"easy"},
+        {t:"Check if number is palindrome",d:"easy"},
+        {t:"Find maximum digit in a number",d:"easy"},
+        {t:"Find minimum digit in a number",d:"easy"},
+        {t:"Rotate digits left by k",d:"med"},
+        {t:"Rotate digits right by k",d:"med"},
+        {t:"Count set bits (1s) in binary representation",d:"med"},
+        {t:"Count zeros in binary representation",d:"med"},
+        {t:"Check if binary representation is palindrome",d:"med"},
+        {t:"Digital root (repeated digit sum)",d:"easy"},
+        {t:"Happy number check",d:"med"},
+        {t:"Disarium number check",d:"med"},
+      ]},
+      { name:"FizzBuzz & Classics", problems:[
+        {t:"Classic FizzBuzz (1–100)",d:"easy"},
+        {t:"FizzBuzz for any range and rules",d:"easy"},
+        {t:"FizzBuzz without if/else",d:"med"},
+        {t:"Find all missing numbers in 1–n array",d:"easy"},
+        {t:"Find missing and duplicate number",d:"med"},
+        {t:"Find two missing numbers",d:"hard"},
+        {t:"Sum of first n natural numbers",d:"easy"},
+        {t:"Sum of squares of first n numbers",d:"easy"},
+        {t:"Sum of cubes of first n numbers",d:"easy"},
+        {t:"Sum of odd numbers up to n",d:"easy"},
+        {t:"Sum of even numbers up to n",d:"easy"},
+        {t:"Count odd and even in a range",d:"easy"},
+        {t:"Find all abundant numbers up to n",d:"med"},
+        {t:"Find all Kaprekar numbers up to n",d:"hard"},
+        {t:"Collatz conjecture sequence",d:"med"},
+      ]},
+      { name:"Bit Manipulation", problems:[
+        {t:"Check if nth bit is set",d:"easy"},
+        {t:"Set nth bit",d:"easy"},
+        {t:"Clear nth bit",d:"easy"},
+        {t:"Toggle nth bit",d:"easy"},
+        {t:"Count set bits (Brian Kernighan)",d:"med"},
+        {t:"Find single non-duplicate (XOR)",d:"med"},
+        {t:"Swap two numbers without temp variable",d:"easy"},
+        {t:"Check if number is odd/even using bitwise",d:"easy"},
+        {t:"Multiply by 2 and divide by 2 using shifts",d:"easy"},
+        {t:"Find highest set bit position",d:"med"},
+        {t:"Find lowest set bit position",d:"med"},
+        {t:"Reverse bits of a number",d:"med"},
+        {t:"Find XOR of all numbers from 1 to n",d:"med"},
+        {t:"Find two non-repeating elements",d:"hard"},
+        {t:"Hamming distance between two numbers",d:"easy"},
+      ]},
+    ]
+  },
+  {
+    id:"arrays", icon:"📦", title:"3. Array Problems",
+    subs:[
+      { name:"Basic Array Operations", problems:[
+        {t:"Find max element in array",d:"easy"},
+        {t:"Find min element in array",d:"easy"},
+        {t:"Find sum of array",d:"easy"},
+        {t:"Find average of array",d:"easy"},
+        {t:"Find second largest element",d:"easy"},
+        {t:"Find second smallest element",d:"easy"},
+        {t:"Find kth largest element",d:"med"},
+        {t:"Find kth smallest element",d:"med"},
+        {t:"Reverse an array in place",d:"easy"},
+        {t:"Rotate array left by k",d:"med"},
+        {t:"Rotate array right by k",d:"med"},
+        {t:"Move all zeros to end",d:"easy"},
+        {t:"Move all zeros to front",d:"easy"},
+        {t:"Move negatives to left, positives to right",d:"med"},
+        {t:"Remove duplicates from sorted array",d:"easy"},
+      ]},
+      { name:"Search & Sort", problems:[
+        {t:"Linear search",d:"easy"},
+        {t:"Binary search (iterative)",d:"easy"},
+        {t:"Binary search (recursive)",d:"easy"},
+        {t:"Binary search on rotated sorted array",d:"hard"},
+        {t:"Find first and last occurrence of element",d:"med"},
+        {t:"Count occurrences of element in sorted array",d:"med"},
+        {t:"Find floor and ceil of element",d:"med"},
+        {t:"Bubble sort",d:"easy"},
+        {t:"Selection sort",d:"easy"},
+        {t:"Insertion sort",d:"easy"},
+        {t:"Shell sort",d:"med"},
+        {t:"Merge sort",d:"med"},
+        {t:"Quick sort",d:"med"},
+        {t:"Heap sort",d:"hard"},
+        {t:"Counting sort",d:"med"},
+        {t:"Radix sort",d:"hard"},
+        {t:"Bucket sort",d:"med"},
+        {t:"Sort array of 0s, 1s, and 2s (Dutch Flag)",d:"med"},
+        {t:"Sort by absolute value",d:"easy"},
+        {t:"Sort by frequency",d:"med"},
+      ]},
+      { name:"Two Pointers & Sliding Window", problems:[
+        {t:"Two sum (sorted array — two pointers)",d:"easy"},
+        {t:"Three sum — find all triplets summing to 0",d:"med"},
+        {t:"Four sum",d:"hard"},
+        {t:"Container with most water",d:"med"},
+        {t:"Trapping rain water",d:"hard"},
+        {t:"Maximum sum subarray of size k (sliding window)",d:"med"},
+        {t:"Minimum size subarray sum >= target",d:"med"},
+        {t:"Longest substring without repeating chars",d:"med"},
+        {t:"Longest subarray with at most k distinct",d:"hard"},
+        {t:"Find all anagrams in a string",d:"hard"},
+        {t:"Minimum window substring",d:"hard"},
+        {t:"Count of subarrays with product < k",d:"hard"},
+        {t:"Maximum consecutive 1s with at most k flips",d:"hard"},
+        {t:"Longest subarray with equal 0s and 1s",d:"med"},
+        {t:"Subarray sum equals k",d:"med"},
+      ]},
+      { name:"Subarray Problems", problems:[
+        {t:"Maximum subarray sum (Kadane's algorithm)",d:"med"},
+        {t:"Maximum subarray product",d:"hard"},
+        {t:"Minimum subarray sum",d:"med"},
+        {t:"Find subarray with given sum",d:"med"},
+        {t:"Longest subarray with given sum",d:"med"},
+        {t:"Count subarrays with sum divisible by k",d:"hard"},
+        {t:"Print all subarrays",d:"easy"},
+        {t:"Count all subarrays",d:"easy"},
+        {t:"Subarray with maximum XOR",d:"hard"},
+        {t:"Maximum circular subarray sum",d:"hard"},
+        {t:"Minimum operations to reduce subarray",d:"hard"},
+        {t:"Stock buy & sell (single transaction)",d:"easy"},
+        {t:"Stock buy & sell (unlimited transactions)",d:"med"},
+        {t:"Stock buy & sell with cooldown",d:"hard"},
+        {t:"Stock buy & sell with k transactions",d:"hard"},
+      ]},
+      { name:"Matrix / 2D Arrays", problems:[
+        {t:"Matrix addition",d:"easy"},
+        {t:"Matrix multiplication",d:"med"},
+        {t:"Transpose a matrix",d:"easy"},
+        {t:"Rotate matrix 90° clockwise",d:"med"},
+        {t:"Rotate matrix 90° counter-clockwise",d:"med"},
+        {t:"Spiral matrix traversal",d:"med"},
+        {t:"Diagonal traversal",d:"med"},
+        {t:"Anti-diagonal traversal",d:"med"},
+        {t:"Search in row-wise & col-wise sorted matrix",d:"med"},
+        {t:"Set entire row/col to zero if cell is zero",d:"med"},
+        {t:"Pascal's triangle in 2D",d:"med"},
+        {t:"Spiral matrix generation",d:"med"},
+        {t:"Wave traversal of matrix",d:"med"},
+        {t:"Boundary traversal of matrix",d:"med"},
+        {t:"Find largest rectangle in binary matrix",d:"hard"},
+      ]},
+      { name:"Set & Combination Problems", problems:[
+        {t:"Find all pairs with given difference",d:"med"},
+        {t:"Find all pairs with given sum",d:"easy"},
+        {t:"Find pair with maximum product",d:"easy"},
+        {t:"Find majority element (>n/2) — Boyer-Moore",d:"med"},
+        {t:"Find majority element (>n/3)",d:"hard"},
+        {t:"Find duplicate using Floyd's cycle detection",d:"hard"},
+        {t:"Find duplicate without extra space",d:"med"},
+        {t:"Longest consecutive sequence",d:"med"},
+        {t:"Intersection of two arrays",d:"easy"},
+        {t:"Union of two arrays",d:"easy"},
+        {t:"Merge two sorted arrays in place",d:"hard"},
+        {t:"Merge k sorted arrays",d:"hard"},
+        {t:"Median of two sorted arrays",d:"hard"},
+        {t:"Find common elements of three sorted arrays",d:"med"},
+        {t:"Product of array except self (no division)",d:"med"},
+      ]},
+      { name:"Flatten, Chunk & Transform", problems:[
+        {t:"Flatten one level deep",d:"easy"},
+        {t:"Flatten infinitely nested array",d:"med"},
+        {t:"Flatten to given depth",d:"med"},
+        {t:"Chunk array into groups of n",d:"easy"},
+        {t:"Zip two arrays together",d:"easy"},
+        {t:"Unzip array of pairs",d:"easy"},
+        {t:"Compact array (remove falsy values)",d:"easy"},
+        {t:"Difference between two arrays",d:"easy"},
+        {t:"Symmetric difference of two arrays",d:"med"},
+        {t:"Cartesian product of two arrays",d:"med"},
+        {t:"Sliding window of size k over array",d:"med"},
+        {t:"Running average of array",d:"easy"},
+        {t:"Running max/min of array",d:"easy"},
+        {t:"Cumulative sum array (prefix sum)",d:"easy"},
+        {t:"Cumulative product array",d:"easy"},
+      ]},
+    ]
+  },
+  {
+    id:"functions", icon:"🔁", title:"4. Functions & Closures",
+    subs:[
+      { name:"Closure Fundamentals", problems:[
+        {t:"Counter with increment, decrement, reset",d:"easy"},
+        {t:"Private variable using closure",d:"easy"},
+        {t:"Function that remembers last call count",d:"easy"},
+        {t:"Multiplier factory: makeMultiplier(x)",d:"easy"},
+        {t:"Adder factory: makeAdder(x)",d:"easy"},
+        {t:"Once — function that runs only once",d:"easy"},
+        {t:"Before — function that runs at most n times",d:"med"},
+        {t:"After — function that runs after n calls",d:"med"},
+        {t:"Negate a predicate function",d:"easy"},
+        {t:"Complement of a boolean function",d:"easy"},
+        {t:"Timer that tracks elapsed time",d:"med"},
+        {t:"Stack-based undo/redo with closures",d:"med"},
+        {t:"Cache last n results using closure",d:"med"},
+        {t:"Closure-based toggle function",d:"easy"},
+        {t:"Generate unique IDs with closure",d:"easy"},
+      ]},
+      { name:"Currying & Partial Application", problems:[
+        {t:"Basic curry function (fixed arity)",d:"med"},
+        {t:"Curry function (variadic / auto-detect arity)",d:"hard"},
+        {t:"Infinite currying: add(1)(2)(3)...()",d:"hard"},
+        {t:"Uncurry a curried function",d:"med"},
+        {t:"Partial application (left)",d:"med"},
+        {t:"Partial application (right)",d:"med"},
+        {t:"Partial application (any positions)",d:"hard"},
+        {t:"Flip arguments of a function",d:"easy"},
+        {t:"Unary — restrict function to 1 argument",d:"easy"},
+        {t:"Binary — restrict function to 2 arguments",d:"easy"},
+        {t:"Spread operator workaround with apply",d:"easy"},
+        {t:"Curry a sum function: sum(1)(2)(...)(n)()",d:"hard"},
+        {t:"Curry lodash-style with placeholder",d:"hard"},
+        {t:"Point-free function composition",d:"hard"},
+        {t:"Fluent interface / method builder",d:"hard"},
+      ]},
+      { name:"Function Composition & Pipelines", problems:[
+        {t:"Compose two functions: compose(f,g)",d:"easy"},
+        {t:"Compose n functions right-to-left",d:"med"},
+        {t:"Pipe n functions left-to-right",d:"med"},
+        {t:"Async pipe with promises",d:"hard"},
+        {t:"Conditional pipe (skip if predicate fails)",d:"hard"},
+        {t:"Tap — side-effect step in pipe",d:"med"},
+        {t:"Transform object with pipe of transformers",d:"med"},
+        {t:"Function memoization (basic)",d:"med"},
+        {t:"Memoization with custom cache key",d:"hard"},
+        {t:"Memoization with LRU eviction",d:"hard"},
+        {t:"Memoize async function",d:"hard"},
+        {t:"Lazy evaluation / thunk",d:"med"},
+        {t:"Trampoline (tail-call optimization)",d:"hard"},
+        {t:"Recursive function → trampolined",d:"hard"},
+        {t:"Y-combinator (anonymous recursion)",d:"hard"},
+      ]},
+      { name:"Timing Functions", problems:[
+        {t:"Debounce (delay execution until idle)",d:"med"},
+        {t:"Debounce with leading edge option",d:"hard"},
+        {t:"Debounce with trailing edge option",d:"hard"},
+        {t:"Throttle (limit to once per n ms)",d:"med"},
+        {t:"Throttle with leading/trailing options",d:"hard"},
+        {t:"Rate limiter (max n calls per second)",d:"hard"},
+        {t:"Implement sleep(ms) using Promise",d:"easy"},
+        {t:"Implement delay(fn, ms)",d:"easy"},
+        {t:"Implement setTimeout using setInterval",d:"med"},
+        {t:"Implement setInterval using setTimeout",d:"med"},
+        {t:"Cancellable setTimeout wrapper",d:"med"},
+        {t:"Retry with exponential backoff",d:"hard"},
+        {t:"Execute function n times with interval",d:"med"},
+        {t:"Scheduler: queue timed tasks",d:"hard"},
+        {t:"RequestAnimationFrame polyfill",d:"hard"},
+      ]},
+      { name:"Higher-Order Functions", problems:[
+        {t:"Implement Array.map from scratch",d:"easy"},
+        {t:"Implement Array.filter from scratch",d:"easy"},
+        {t:"Implement Array.reduce from scratch",d:"med"},
+        {t:"Implement Array.forEach from scratch",d:"easy"},
+        {t:"Implement Array.find from scratch",d:"easy"},
+        {t:"Implement Array.findIndex from scratch",d:"easy"},
+        {t:"Implement Array.some from scratch",d:"easy"},
+        {t:"Implement Array.every from scratch",d:"easy"},
+        {t:"Implement Array.flat from scratch",d:"med"},
+        {t:"Implement Array.flatMap from scratch",d:"med"},
+        {t:"Map over object values",d:"easy"},
+        {t:"Filter object by key/value predicate",d:"med"},
+        {t:"Reduce object to new shape",d:"med"},
+        {t:"GroupBy array of objects by key",d:"med"},
+        {t:"Partition array into two groups",d:"easy"},
+      ]},
+      { name:"Generators & Iterators", problems:[
+        {t:"Implement range generator",d:"med"},
+        {t:"Infinite counter generator",d:"easy"},
+        {t:"Fibonacci generator",d:"med"},
+        {t:"Take n values from generator",d:"med"},
+        {t:"Zip two iterables together",d:"hard"},
+        {t:"Flatten nested iterables with generator",d:"hard"},
+        {t:"Implement custom iterable class",d:"hard"},
+        {t:"Implement linked list iterator",d:"hard"},
+        {t:"Async generator for paginated data",d:"hard"},
+        {t:"Implement async/await using generators",d:"hard"},
+        {t:"Coroutine with generator send()",d:"hard"},
+        {t:"Lazy map / filter with generators",d:"hard"},
+        {t:"Pipeline using generator composition",d:"hard"},
+        {t:"Cancelable generator",d:"hard"},
+        {t:"Implement Observable with generator",d:"hard"},
+      ]},
+      { name:"call / apply / bind & this", problems:[
+        {t:"Implement Function.prototype.call",d:"hard"},
+        {t:"Implement Function.prototype.apply",d:"hard"},
+        {t:"Implement Function.prototype.bind",d:"hard"},
+        {t:"Bind with partial application support",d:"hard"},
+        {t:"Soft bind (allows later override)",d:"hard"},
+        {t:"this in regular function vs arrow function",d:"med"},
+        {t:"Fix this in event handler with bind",d:"med"},
+        {t:"Fix this in setTimeout callback",d:"med"},
+        {t:"Method borrowing between objects",d:"med"},
+        {t:"Explicit vs implicit this binding",d:"med"},
+        {t:"new binding for constructor functions",d:"med"},
+        {t:"Implement new keyword from scratch",d:"hard"},
+        {t:"Super call simulation in plain JS",d:"hard"},
+        {t:"Hard bind vs soft bind difference",d:"hard"},
+        {t:"this in class methods vs regular objects",d:"med"},
+      ]},
+    ]
+  },
+  {
+    id:"async", icon:"🔄", title:"5. Async / Promises",
+    subs:[
+      { name:"Promise Fundamentals", problems:[
+        {t:"Create and resolve a basic Promise",d:"easy"},
+        {t:"Create and reject a Promise",d:"easy"},
+        {t:"Promise chaining with .then()",d:"easy"},
+        {t:"Promise error handling with .catch()",d:"easy"},
+        {t:"Promise finally block usage",d:"easy"},
+        {t:"Convert callback to Promise",d:"easy"},
+        {t:"Promisify a node-style function",d:"med"},
+        {t:"Sequential promise execution",d:"med"},
+        {t:"Parallel promise execution",d:"med"},
+        {t:"Promise timeout wrapper",d:"med"},
+        {t:"Promise with progress callback",d:"med"},
+        {t:"Deferred pattern (manual resolve/reject)",d:"med"},
+        {t:"Create a cancellable Promise",d:"hard"},
+        {t:"Pausable/resumable Promise",d:"hard"},
+        {t:"Promise queue (one at a time)",d:"hard"},
+      ]},
+      { name:"Promise Static Methods", problems:[
+        {t:"Implement Promise.resolve",d:"med"},
+        {t:"Implement Promise.reject",d:"med"},
+        {t:"Implement Promise.all",d:"hard"},
+        {t:"Implement Promise.race",d:"hard"},
+        {t:"Implement Promise.allSettled",d:"hard"},
+        {t:"Implement Promise.any",d:"hard"},
+        {t:"Promise.all with error handling",d:"med"},
+        {t:"Promise.race for timeout pattern",d:"med"},
+        {t:"Promise.allSettled vs Promise.all comparison",d:"med"},
+        {t:"Custom Promise.some (n of m must resolve)",d:"hard"},
+        {t:"Custom Promise.first (first resolved)",d:"hard"},
+        {t:"Custom Promise.last (last to resolve)",d:"hard"},
+        {t:"Custom Promise.none (all must reject)",d:"hard"},
+        {t:"Custom Promise.every (all must resolve)",d:"hard"},
+        {t:"Implement Promise.map with concurrency",d:"hard"},
+      ]},
+      { name:"Async/Await Patterns", problems:[
+        {t:"Convert .then() chain to async/await",d:"easy"},
+        {t:"Error handling in async/await (try/catch)",d:"easy"},
+        {t:"Run async functions sequentially",d:"med"},
+        {t:"Run async functions in parallel",d:"med"},
+        {t:"Async IIFE pattern",d:"easy"},
+        {t:"Await in loops (for...of vs forEach)",d:"med"},
+        {t:"Async reduce",d:"hard"},
+        {t:"Async filter",d:"hard"},
+        {t:"Async map with concurrency limit",d:"hard"},
+        {t:"Race condition prevention pattern",d:"hard"},
+        {t:"Async retry with exponential backoff",d:"hard"},
+        {t:"Async pipeline",d:"hard"},
+        {t:"Top-level await usage",d:"med"},
+        {t:"Async class methods and constructors",d:"med"},
+        {t:"Await multiple independent operations",d:"easy"},
+      ]},
+      { name:"Task Queues & Scheduling", problems:[
+        {t:"Async task queue (FIFO, one at a time)",d:"med"},
+        {t:"Async task queue with max concurrency",d:"hard"},
+        {t:"Priority queue for async tasks",d:"hard"},
+        {t:"Job scheduler with delay support",d:"hard"},
+        {t:"Batch processor (group tasks by time window)",d:"hard"},
+        {t:"Worker pool simulation",d:"hard"},
+        {t:"Rate limiter: max n requests per interval",d:"hard"},
+        {t:"Token bucket rate limiting",d:"hard"},
+        {t:"Leaky bucket rate limiting",d:"hard"},
+        {t:"Sliding window rate limiter",d:"hard"},
+        {t:"Cron-like job scheduler",d:"hard"},
+        {t:"Task with dependencies (DAG execution)",d:"hard"},
+        {t:"Cancellable task queue",d:"hard"},
+        {t:"Round-robin scheduler",d:"hard"},
+        {t:"Deadline-aware task scheduler",d:"hard"},
+      ]},
+      { name:"Error Handling & Resilience", problems:[
+        {t:"Retry failed Promise n times",d:"med"},
+        {t:"Retry with fixed delay",d:"med"},
+        {t:"Retry with exponential backoff",d:"hard"},
+        {t:"Retry with jitter (random backoff)",d:"hard"},
+        {t:"Circuit breaker pattern",d:"hard"},
+        {t:"Fallback: try A, then B, then C",d:"med"},
+        {t:"Timeout and fallback combined",d:"hard"},
+        {t:"Error boundary for async function",d:"med"},
+        {t:"Safe async wrapper (never throws, returns [err,val])",d:"med"},
+        {t:"Global unhandledRejection handler",d:"med"},
+        {t:"Async transaction: rollback on failure",d:"hard"},
+        {t:"Idempotent async operation",d:"hard"},
+        {t:"Dead letter queue for failed tasks",d:"hard"},
+        {t:"Async saga pattern",d:"hard"},
+        {t:"Outbox pattern for reliable messaging",d:"hard"},
+      ]},
+      { name:"Caching & Memoization (Async)", problems:[
+        {t:"Cache async function results",d:"med"},
+        {t:"TTL-based async cache",d:"hard"},
+        {t:"Deduplicate in-flight requests (request coalescing)",d:"hard"},
+        {t:"Stale-while-revalidate cache",d:"hard"},
+        {t:"Cache with LRU eviction",d:"hard"},
+        {t:"Persistent cache using localStorage",d:"med"},
+        {t:"Cache invalidation strategy",d:"hard"},
+        {t:"Optimistic update with rollback",d:"hard"},
+        {t:"Fetch with caching layer",d:"med"},
+        {t:"Prefetch and cache upcoming pages",d:"hard"},
+        {t:"Multi-level cache (memory + disk)",d:"hard"},
+        {t:"Cache stampede prevention",d:"hard"},
+        {t:"Write-through cache",d:"hard"},
+        {t:"Read-through cache",d:"hard"},
+        {t:"Cache warming strategy",d:"hard"},
+      ]},
+      { name:"Event Loop & Microtasks", problems:[
+        {t:"Predict output: setTimeout vs Promise order",d:"med"},
+        {t:"Predict output: nested microtasks",d:"hard"},
+        {t:"Predict output: queueMicrotask usage",d:"hard"},
+        {t:"Implement queueMicrotask polyfill",d:"hard"},
+        {t:"Microtask queue depth limit",d:"hard"},
+        {t:"setImmediate vs setTimeout(0) difference",d:"med"},
+        {t:"Long task detection and yield strategy",d:"hard"},
+        {t:"Async recursion without stack overflow",d:"hard"},
+        {t:"Process large dataset without blocking UI",d:"hard"},
+        {t:"scheduler.postTask polyfill",d:"hard"},
+        {t:"requestIdleCallback usage",d:"med"},
+        {t:"Cooperative multitasking pattern",d:"hard"},
+        {t:"Task splitting into time slices",d:"hard"},
+        {t:"MessageChannel for microtask scheduling",d:"hard"},
+        {t:"Async Iterator protocol implementation",d:"hard"},
+      ]},
+    ]
+  },
+  {
+    id:"objects", icon:"🧩", title:"6. Object & Prototype",
+    subs:[
+      { name:"Object Basics", problems:[
+        {t:"Create object with factory function",d:"easy"},
+        {t:"Create object with constructor function",d:"easy"},
+        {t:"Create object with Object.create()",d:"med"},
+        {t:"Create object with class syntax",d:"easy"},
+        {t:"Copy object (shallow)",d:"easy"},
+        {t:"Copy object with Object.assign",d:"easy"},
+        {t:"Copy object with spread operator",d:"easy"},
+        {t:"Deep clone without JSON.parse",d:"med"},
+        {t:"Deep clone using structuredClone",d:"easy"},
+        {t:"Merge two objects shallowly",d:"easy"},
+        {t:"Merge two objects deeply",d:"med"},
+        {t:"Freeze object recursively",d:"med"},
+        {t:"Seal an object",d:"med"},
+        {t:"Prevent object extension",d:"med"},
+        {t:"Check if object is frozen/sealed",d:"easy"},
+      ]},
+      { name:"Property Access & Manipulation", problems:[
+        {t:"Implement Object.keys from scratch",d:"med"},
+        {t:"Implement Object.values from scratch",d:"med"},
+        {t:"Implement Object.entries from scratch",d:"med"},
+        {t:"Implement Object.fromEntries",d:"med"},
+        {t:"Safe deep get: get(obj, 'a.b.c')",d:"med"},
+        {t:"Safe deep set: set(obj, 'a.b.c', val)",d:"hard"},
+        {t:"Safe deep delete: del(obj, 'a.b.c')",d:"hard"},
+        {t:"Flatten nested object to dot notation",d:"med"},
+        {t:"Unflatten dot-notation to nested object",d:"med"},
+        {t:"Pick specified keys from object",d:"easy"},
+        {t:"Omit specified keys from object",d:"easy"},
+        {t:"Rename keys in object",d:"med"},
+        {t:"Map over object values",d:"easy"},
+        {t:"Filter object by predicate",d:"med"},
+        {t:"Invert object keys and values",d:"easy"},
+      ]},
+      { name:"Prototype & Inheritance", problems:[
+        {t:"Prototype chain: explain with example",d:"med"},
+        {t:"Check own vs inherited property",d:"med"},
+        {t:"Implement instanceof from scratch",d:"hard"},
+        {t:"Implement new keyword from scratch",d:"hard"},
+        {t:"Implement Object.create from scratch",d:"hard"},
+        {t:"Implement Object.assign from scratch",d:"hard"},
+        {t:"Parasitic inheritance pattern",d:"hard"},
+        {t:"Mixin pattern for multiple inheritance",d:"hard"},
+        {t:"Stamp / trait composition",d:"hard"},
+        {t:"Prototype-based Animal–Dog inheritance",d:"med"},
+        {t:"Class-based inheritance with super",d:"med"},
+        {t:"Override toString and valueOf",d:"med"},
+        {t:"Symbol.toPrimitive for type coercion",d:"hard"},
+        {t:"Symbol.iterator for custom iteration",d:"hard"},
+        {t:"Symbol.hasInstance for custom instanceof",d:"hard"},
+      ]},
+      { name:"Descriptors & Meta-Programming", problems:[
+        {t:"Get property descriptor of object",d:"med"},
+        {t:"Define non-enumerable property",d:"med"},
+        {t:"Define non-writable property",d:"med"},
+        {t:"Define non-configurable property",d:"med"},
+        {t:"Define getter and setter",d:"med"},
+        {t:"Lazy computed property with getter",d:"med"},
+        {t:"Validation via setter",d:"med"},
+        {t:"Implement Proxy for property access logging",d:"hard"},
+        {t:"Implement Proxy for default values",d:"hard"},
+        {t:"Implement Proxy for validation",d:"hard"},
+        {t:"Implement Proxy for negative array indexing",d:"hard"},
+        {t:"Implement Proxy-based reactive object",d:"hard"},
+        {t:"Reflect API: forward all operations",d:"hard"},
+        {t:"WeakMap-based private field simulation",d:"hard"},
+        {t:"WeakRef for optional object reference",d:"hard"},
+      ]},
+      { name:"Equality & Comparison", problems:[
+        {t:"Shallow equality check",d:"easy"},
+        {t:"Deep equality check",d:"med"},
+        {t:"Deep equality with circular reference",d:"hard"},
+        {t:"Check if two arrays are equal",d:"easy"},
+        {t:"Structural diff between two objects",d:"hard"},
+        {t:"JSON-safe deep clone",d:"easy"},
+        {t:"Compare objects ignoring key order",d:"med"},
+        {t:"Compare sets for equality",d:"med"},
+        {t:"Compare maps for equality",d:"med"},
+        {t:"isNaN vs Number.isNaN difference",d:"easy"},
+        {t:"null == undefined vs null === undefined",d:"easy"},
+        {t:"SameValueZero algorithm",d:"hard"},
+        {t:"Object.is() edge cases",d:"med"},
+        {t:"-0 vs +0 distinction",d:"med"},
+        {t:"NaN !== NaN explanation and handling",d:"easy"},
+      ]},
+      { name:"Object Patterns & Utilities", problems:[
+        {t:"Builder pattern for objects",d:"med"},
+        {t:"Fluent API / method chaining",d:"med"},
+        {t:"Immutable update helpers",d:"med"},
+        {t:"Object pool pattern",d:"hard"},
+        {t:"Memoize object construction",d:"hard"},
+        {t:"Serialize / deserialize complex objects",d:"hard"},
+        {t:"JSON.stringify with replacer function",d:"med"},
+        {t:"JSON.parse with reviver function",d:"med"},
+        {t:"Implement JSON.stringify from scratch",d:"hard"},
+        {t:"Implement JSON.parse from scratch",d:"hard"},
+        {t:"Schema validation for objects",d:"hard"},
+        {t:"Type-safe property access with Proxy",d:"hard"},
+        {t:"Record & Tuple-like immutable structures",d:"hard"},
+        {t:"Implement Map.prototype methods",d:"hard"},
+        {t:"Implement Set.prototype methods",d:"hard"},
+      ]},
+    ]
+  },
+  {
+    id:"dom", icon:"🌐", title:"7. DOM & Browser APIs",
+    subs:[
+      { name:"DOM Selection & Traversal", problems:[
+        {t:"Implement querySelector from scratch",d:"hard"},
+        {t:"Implement querySelectorAll from scratch",d:"hard"},
+        {t:"Get all ancestors of an element",d:"med"},
+        {t:"Get all descendants of an element",d:"med"},
+        {t:"Get all siblings of an element",d:"easy"},
+        {t:"Find closest ancestor matching selector",d:"med"},
+        {t:"Count all child nodes",d:"easy"},
+        {t:"Find deepest nested element",d:"med"},
+        {t:"Walk entire DOM tree",d:"med"},
+        {t:"Find elements with specific attribute",d:"easy"},
+        {t:"Get computed style of element",d:"easy"},
+        {t:"Check if element is visible in viewport",d:"med"},
+        {t:"Get element offset from document top",d:"med"},
+        {t:"Get element dimensions including margins",d:"med"},
+        {t:"Find all text nodes in a subtree",d:"med"},
+      ]},
+      { name:"DOM Manipulation", problems:[
+        {t:"Create and append elements",d:"easy"},
+        {t:"Clone a DOM node (shallow and deep)",d:"easy"},
+        {t:"Insert element before/after another",d:"easy"},
+        {t:"Replace element with another",d:"easy"},
+        {t:"Remove element from DOM",d:"easy"},
+        {t:"Swap two elements in the DOM",d:"med"},
+        {t:"Move element to different parent",d:"easy"},
+        {t:"Set multiple attributes at once",d:"easy"},
+        {t:"Toggle CSS class on element",d:"easy"},
+        {t:"Add/remove multiple classes",d:"easy"},
+        {t:"Dynamic table builder from data array",d:"med"},
+        {t:"Create DOM tree from JSON descriptor",d:"hard"},
+        {t:"Serialize DOM subtree to HTML string",d:"med"},
+        {t:"Diff and patch DOM (virtual DOM concept)",d:"hard"},
+        {t:"Sanitize HTML to prevent XSS",d:"hard"},
+      ]},
+      { name:"Events", problems:[
+        {t:"Event delegation for dynamic list items",d:"med"},
+        {t:"Custom EventEmitter class",d:"med"},
+        {t:"One-time event listener",d:"easy"},
+        {t:"Remove all event listeners from element",d:"med"},
+        {t:"Prevent default and stop propagation",d:"easy"},
+        {t:"Capture vs bubble phase demonstration",d:"med"},
+        {t:"Custom drag and drop (mousedown/move/up)",d:"hard"},
+        {t:"Touch events: swipe detection",d:"hard"},
+        {t:"Keyboard shortcut manager",d:"med"},
+        {t:"Double-click vs single-click disambiguation",d:"med"},
+        {t:"Right-click context menu",d:"med"},
+        {t:"Long press detection",d:"med"},
+        {t:"Pointer lock API usage",d:"hard"},
+        {t:"Passive event listeners for performance",d:"med"},
+        {t:"Event bus (pub/sub) for DOM events",d:"med"},
+      ]},
+      { name:"UI Components", problems:[
+        {t:"Modal dialog from scratch",d:"easy"},
+        {t:"Accordion component",d:"easy"},
+        {t:"Tabs component",d:"easy"},
+        {t:"Dropdown menu",d:"med"},
+        {t:"Tooltip component",d:"med"},
+        {t:"Carousel / slider",d:"med"},
+        {t:"Infinite scroll",d:"med"},
+        {t:"Virtual scroll for large lists",d:"hard"},
+        {t:"Autocomplete / typeahead",d:"hard"},
+        {t:"Multi-select dropdown",d:"hard"},
+        {t:"Date picker from scratch",d:"hard"},
+        {t:"Color picker",d:"hard"},
+        {t:"Resizable split pane",d:"hard"},
+        {t:"Tree view / file explorer",d:"hard"},
+        {t:"Kanban board drag and drop",d:"hard"},
+      ]},
+      { name:"Forms & Validation", problems:[
+        {t:"Live form validation",d:"med"},
+        {t:"Custom form validation rules engine",d:"hard"},
+        {t:"Multi-step form wizard",d:"hard"},
+        {t:"Debounced search input",d:"med"},
+        {t:"Auto-resize textarea",d:"easy"},
+        {t:"Character counter for input",d:"easy"},
+        {t:"Input mask (phone, credit card)",d:"hard"},
+        {t:"Password strength meter",d:"med"},
+        {t:"File upload with preview",d:"med"},
+        {t:"Drag-and-drop file upload zone",d:"hard"},
+        {t:"Form serialize to object",d:"med"},
+        {t:"Form populate from object",d:"med"},
+        {t:"Cross-field validation",d:"hard"},
+        {t:"Async form validation (server check)",d:"hard"},
+        {t:"Form auto-save draft",d:"hard"},
+      ]},
+      { name:"Browser APIs", problems:[
+        {t:"IntersectionObserver for lazy loading",d:"med"},
+        {t:"IntersectionObserver for infinite scroll",d:"med"},
+        {t:"ResizeObserver for responsive component",d:"med"},
+        {t:"MutationObserver to watch DOM changes",d:"med"},
+        {t:"Clipboard read and write",d:"med"},
+        {t:"Geolocation API usage",d:"med"},
+        {t:"localStorage CRUD wrapper",d:"easy"},
+        {t:"sessionStorage with expiry",d:"med"},
+        {t:"IndexedDB basic CRUD",d:"hard"},
+        {t:"Web Worker for heavy computation",d:"hard"},
+        {t:"Shared Worker for cross-tab communication",d:"hard"},
+        {t:"BroadcastChannel API",d:"med"},
+        {t:"History API: pushState / replaceState",d:"med"},
+        {t:"Single Page App router from scratch",d:"hard"},
+        {t:"Service Worker offline cache",d:"hard"},
+      ]},
+    ]
+  },
+  {
+    id:"ds", icon:"🏗️", title:"8. Data Structures",
+    subs:[
+      { name:"Linked Lists", problems:[
+        {t:"Implement singly linked list",d:"med"},
+        {t:"Implement doubly linked list",d:"med"},
+        {t:"Implement circular linked list",d:"med"},
+        {t:"Reverse a linked list (iterative)",d:"med"},
+        {t:"Reverse a linked list (recursive)",d:"med"},
+        {t:"Reverse k nodes at a time",d:"hard"},
+        {t:"Find middle of linked list",d:"easy"},
+        {t:"Detect cycle (Floyd's algorithm)",d:"med"},
+        {t:"Find start of cycle",d:"hard"},
+        {t:"Remove nth node from end",d:"med"},
+        {t:"Merge two sorted linked lists",d:"med"},
+        {t:"Merge k sorted linked lists",d:"hard"},
+        {t:"Remove duplicates from sorted list",d:"easy"},
+        {t:"Remove duplicates from unsorted list",d:"med"},
+        {t:"Find intersection of two linked lists",d:"med"},
+        {t:"Flatten multilevel doubly linked list",d:"hard"},
+        {t:"Clone with random pointer",d:"hard"},
+        {t:"Add two numbers as linked lists",d:"med"},
+        {t:"Reorder list (L0→Ln→L1→Ln-1…)",d:"hard"},
+        {t:"Check if linked list is palindrome",d:"med"},
+      ]},
+      { name:"Stacks", problems:[
+        {t:"Stack using array",d:"easy"},
+        {t:"Stack using linked list",d:"med"},
+        {t:"Min stack with O(1) getMin",d:"med"},
+        {t:"Max stack with O(1) getMax",d:"med"},
+        {t:"Stack with O(1) middle element",d:"hard"},
+        {t:"Valid parentheses",d:"easy"},
+        {t:"Longest valid parentheses substring",d:"hard"},
+        {t:"Evaluate postfix expression",d:"med"},
+        {t:"Evaluate infix expression",d:"hard"},
+        {t:"Infix to postfix conversion",d:"hard"},
+        {t:"Next greater element (right)",d:"med"},
+        {t:"Next greater element (left)",d:"med"},
+        {t:"Next smaller element",d:"med"},
+        {t:"Stock span problem",d:"med"},
+        {t:"Largest rectangle in histogram",d:"hard"},
+        {t:"Maximal rectangle in binary matrix",d:"hard"},
+        {t:"Asteroid collision",d:"med"},
+        {t:"Decode string (3[a2[bc]])",d:"med"},
+        {t:"Remove k digits for smallest number",d:"hard"},
+        {t:"Daily temperatures next warmer day",d:"med"},
+      ]},
+      { name:"Queues", problems:[
+        {t:"Queue using array",d:"easy"},
+        {t:"Queue using linked list",d:"med"},
+        {t:"Circular queue",d:"med"},
+        {t:"Deque (double-ended queue)",d:"med"},
+        {t:"Queue using two stacks",d:"med"},
+        {t:"Stack using two queues",d:"med"},
+        {t:"Priority queue (min-heap based)",d:"hard"},
+        {t:"Priority queue (max-heap based)",d:"hard"},
+        {t:"Sliding window maximum (deque)",d:"hard"},
+        {t:"First non-repeating in stream",d:"med"},
+        {t:"Generate binary numbers 1 to n using queue",d:"med"},
+        {t:"BFS level order traversal using queue",d:"med"},
+        {t:"Reverse first k elements of queue",d:"med"},
+        {t:"Interleave first and second halves",d:"hard"},
+        {t:"LRU Cache using queue + hashmap",d:"hard"},
+      ]},
+      { name:"Trees", problems:[
+        {t:"BST insert, search, delete",d:"med"},
+        {t:"Inorder traversal (iterative)",d:"med"},
+        {t:"Preorder traversal (iterative)",d:"med"},
+        {t:"Postorder traversal (iterative)",d:"med"},
+        {t:"Level order traversal",d:"med"},
+        {t:"Zigzag level order traversal",d:"med"},
+        {t:"Find height of binary tree",d:"easy"},
+        {t:"Check balanced binary tree",d:"med"},
+        {t:"Diameter of binary tree",d:"med"},
+        {t:"Mirror/invert a binary tree",d:"easy"},
+        {t:"Symmetric tree check",d:"med"},
+        {t:"Lowest common ancestor (BST)",d:"med"},
+        {t:"Lowest common ancestor (Binary Tree)",d:"hard"},
+        {t:"Validate BST",d:"med"},
+        {t:"Kth smallest in BST",d:"med"},
+        {t:"Kth largest in BST",d:"med"},
+        {t:"Serialize and deserialize binary tree",d:"hard"},
+        {t:"Construct tree from inorder + preorder",d:"hard"},
+        {t:"Construct tree from inorder + postorder",d:"hard"},
+        {t:"Path sum: check if root-to-leaf sum exists",d:"med"},
+        {t:"All root-to-leaf paths",d:"med"},
+        {t:"Maximum path sum",d:"hard"},
+        {t:"Count nodes in complete binary tree",d:"hard"},
+        {t:"Flatten binary tree to linked list",d:"hard"},
+        {t:"Vertical order traversal",d:"hard"},
+      ]},
+      { name:"Heaps", problems:[
+        {t:"Implement min-heap from scratch",d:"hard"},
+        {t:"Implement max-heap from scratch",d:"hard"},
+        {t:"Heapify an array",d:"hard"},
+        {t:"Heap sort",d:"hard"},
+        {t:"Find kth largest element",d:"med"},
+        {t:"Find kth smallest element",d:"med"},
+        {t:"Top k frequent elements",d:"med"},
+        {t:"Merge k sorted arrays using heap",d:"hard"},
+        {t:"Sliding window median",d:"hard"},
+        {t:"Find median from data stream",d:"hard"},
+        {t:"Task scheduler with cooldown",d:"hard"},
+        {t:"Reorganize string (no adjacent same chars)",d:"hard"},
+        {t:"Minimum cost to connect ropes",d:"hard"},
+        {t:"K closest points to origin",d:"med"},
+        {t:"Sort k-sorted array",d:"med"},
+      ]},
+      { name:"Graphs", problems:[
+        {t:"Represent graph as adjacency list",d:"easy"},
+        {t:"Represent graph as adjacency matrix",d:"easy"},
+        {t:"BFS traversal",d:"med"},
+        {t:"DFS traversal (iterative)",d:"med"},
+        {t:"DFS traversal (recursive)",d:"med"},
+        {t:"Detect cycle in undirected graph",d:"med"},
+        {t:"Detect cycle in directed graph",d:"hard"},
+        {t:"Topological sort (DFS)",d:"hard"},
+        {t:"Topological sort (Kahn's BFS)",d:"hard"},
+        {t:"Number of islands",d:"med"},
+        {t:"Clone a graph",d:"med"},
+        {t:"Course schedule (can finish all?)",d:"hard"},
+        {t:"Word ladder (BFS shortest path)",d:"hard"},
+        {t:"Alien dictionary (topological sort)",d:"hard"},
+        {t:"Dijkstra's shortest path",d:"hard"},
+        {t:"Bellman-Ford shortest path",d:"hard"},
+        {t:"Floyd-Warshall all-pairs shortest path",d:"hard"},
+        {t:"Union-Find / Disjoint Set",d:"hard"},
+        {t:"Minimum spanning tree (Kruskal)",d:"hard"},
+        {t:"Minimum spanning tree (Prim)",d:"hard"},
+      ]},
+    ]
+  },
+  {
+    id:"patterns", icon:"🎨", title:"9. Design Patterns",
+    subs:[
+      { name:"Creational Patterns", problems:[
+        {t:"Singleton — basic implementation",d:"med"},
+        {t:"Singleton — module pattern version",d:"med"},
+        {t:"Singleton — class with static instance",d:"med"},
+        {t:"Factory function pattern",d:"med"},
+        {t:"Abstract factory pattern",d:"hard"},
+        {t:"Builder pattern with method chaining",d:"med"},
+        {t:"Builder with director class",d:"hard"},
+        {t:"Prototype pattern (clone objects)",d:"med"},
+        {t:"Object pool pattern",d:"hard"},
+        {t:"Dependency injection container",d:"hard"},
+        {t:"Service locator pattern",d:"hard"},
+        {t:"Lazy initialization pattern",d:"med"},
+        {t:"Multiton (keyed singleton)",d:"hard"},
+        {t:"Registry pattern",d:"med"},
+        {t:"Flyweight pattern",d:"hard"},
+      ]},
+      { name:"Structural Patterns", problems:[
+        {t:"Adapter pattern (convert interface)",d:"med"},
+        {t:"Bridge pattern (decouple abstraction)",d:"hard"},
+        {t:"Composite pattern (tree structures)",d:"hard"},
+        {t:"Decorator pattern (wrap functionality)",d:"med"},
+        {t:"Decorator using ES class syntax",d:"med"},
+        {t:"Facade pattern (simple interface)",d:"med"},
+        {t:"Flyweight pattern (shared state)",d:"hard"},
+        {t:"Proxy pattern (access control)",d:"med"},
+        {t:"Virtual proxy (lazy initialization)",d:"hard"},
+        {t:"Protection proxy (access guard)",d:"hard"},
+        {t:"Logging proxy",d:"med"},
+        {t:"Caching proxy (memoize via Proxy)",d:"hard"},
+        {t:"Module pattern (IIFE-based)",d:"easy"},
+        {t:"Revealing module pattern",d:"med"},
+        {t:"Mixin pattern for multiple behaviors",d:"med"},
+      ]},
+      { name:"Behavioral Patterns", problems:[
+        {t:"Observer / EventEmitter pattern",d:"med"},
+        {t:"Pub/Sub with topics",d:"med"},
+        {t:"Strategy pattern (interchangeable algos)",d:"med"},
+        {t:"Command pattern with undo/redo",d:"hard"},
+        {t:"Iterator pattern (custom iteration)",d:"med"},
+        {t:"Template method pattern",d:"med"},
+        {t:"Chain of responsibility",d:"hard"},
+        {t:"State machine pattern",d:"hard"},
+        {t:"Mediator pattern",d:"hard"},
+        {t:"Memento pattern (save/restore state)",d:"hard"},
+        {t:"Visitor pattern",d:"hard"},
+        {t:"Interpreter pattern",d:"hard"},
+        {t:"Null object pattern",d:"med"},
+        {t:"Specification pattern",d:"hard"},
+        {t:"Policy pattern",d:"hard"},
+      ]},
+      { name:"Reactive & Functional Patterns", problems:[
+        {t:"Simple Observable implementation",d:"hard"},
+        {t:"Observable with map/filter operators",d:"hard"},
+        {t:"Subject (Observable + Observer)",d:"hard"},
+        {t:"BehaviorSubject (replay last value)",d:"hard"},
+        {t:"ReplaySubject (replay n values)",d:"hard"},
+        {t:"Signal primitive (fine-grained reactivity)",d:"hard"},
+        {t:"Computed signals",d:"hard"},
+        {t:"Effect (side-effect on signal change)",d:"hard"},
+        {t:"Redux-like state management",d:"hard"},
+        {t:"Flux architecture implementation",d:"hard"},
+        {t:"Event sourcing pattern",d:"hard"},
+        {t:"CQRS (Command Query Responsibility)",d:"hard"},
+        {t:"Saga pattern for async workflows",d:"hard"},
+        {t:"Lens pattern for immutable updates",d:"hard"},
+        {t:"Transducer pattern",d:"hard"},
+      ]},
+      { name:"Architectural Patterns", problems:[
+        {t:"MVC from scratch (Model-View-Controller)",d:"hard"},
+        {t:"MVP (Model-View-Presenter)",d:"hard"},
+        {t:"MVVM (Model-View-ViewModel)",d:"hard"},
+        {t:"Repository pattern for data access",d:"hard"},
+        {t:"Unit of work pattern",d:"hard"},
+        {t:"Domain model pattern",d:"hard"},
+        {t:"Active record pattern",d:"hard"},
+        {t:"Data mapper pattern",d:"hard"},
+        {t:"Service layer pattern",d:"hard"},
+        {t:"Hexagonal architecture (ports & adapters)",d:"hard"},
+        {t:"Plugin system architecture",d:"hard"},
+        {t:"Middleware pipeline (Express-like)",d:"hard"},
+        {t:"Hook system (React-like useState)",d:"hard"},
+        {t:"Micro-frontend communication bridge",d:"hard"},
+        {t:"Feature flags system",d:"med"},
+      ]},
+    ]
+  },
+  {
+    id:"algorithms", icon:"⚡", title:"10. Algorithms & Complexity",
+    subs:[
+      { name:"Dynamic Programming", problems:[
+        {t:"Climbing stairs (1 or 2 steps)",d:"easy"},
+        {t:"House robber (no adjacent)",d:"med"},
+        {t:"House robber II (circular)",d:"med"},
+        {t:"Coin change (minimum coins)",d:"med"},
+        {t:"Coin change II (count ways)",d:"med"},
+        {t:"Knapsack 0/1",d:"hard"},
+        {t:"Unbounded knapsack",d:"hard"},
+        {t:"Longest common subsequence",d:"med"},
+        {t:"Longest common substring",d:"med"},
+        {t:"Longest increasing subsequence",d:"med"},
+        {t:"Edit distance (Levenshtein)",d:"hard"},
+        {t:"Matrix chain multiplication",d:"hard"},
+        {t:"Egg drop problem",d:"hard"},
+        {t:"Burst balloons",d:"hard"},
+        {t:"Wildcard pattern matching",d:"hard"},
+        {t:"Regular expression matching",d:"hard"},
+        {t:"Palindrome partitioning II (min cuts)",d:"hard"},
+        {t:"Interleaving string",d:"hard"},
+        {t:"Scramble string",d:"hard"},
+        {t:"Russian doll envelopes",d:"hard"},
+      ]},
+      { name:"Greedy Algorithms", problems:[
+        {t:"Activity selection problem",d:"med"},
+        {t:"Fractional knapsack",d:"med"},
+        {t:"Job scheduling with deadlines",d:"hard"},
+        {t:"Huffman encoding",d:"hard"},
+        {t:"Minimum platforms for trains",d:"med"},
+        {t:"Gas station circular tour",d:"hard"},
+        {t:"Jump game I (can reach end?)",d:"med"},
+        {t:"Jump game II (minimum jumps)",d:"hard"},
+        {t:"Minimum number of arrows to burst balloons",d:"med"},
+        {t:"Non-overlapping intervals (min removals)",d:"med"},
+        {t:"Meeting rooms (max concurrent meetings)",d:"med"},
+        {t:"Task scheduler with cooldown (greedy)",d:"hard"},
+        {t:"Candy distribution",d:"hard"},
+        {t:"Largest number from array",d:"med"},
+        {t:"Minimum cost to hire workers",d:"hard"},
+      ]},
+      { name:"Backtracking", problems:[
+        {t:"Generate all subsets (power set)",d:"med"},
+        {t:"Generate all permutations",d:"med"},
+        {t:"Generate all combinations of size k",d:"med"},
+        {t:"Combination sum (repeat allowed)",d:"med"},
+        {t:"Combination sum II (no repeat)",d:"med"},
+        {t:"N-Queens problem",d:"hard"},
+        {t:"Sudoku solver",d:"hard"},
+        {t:"Word search in grid",d:"hard"},
+        {t:"Palindrome partitioning",d:"hard"},
+        {t:"Letter combinations of phone number",d:"med"},
+        {t:"Generate valid parentheses",d:"med"},
+        {t:"Restore IP addresses",d:"med"},
+        {t:"Knight's tour on chessboard",d:"hard"},
+        {t:"Rat in a maze",d:"hard"},
+        {t:"M-coloring problem",d:"hard"},
+      ]},
+      { name:"Divide & Conquer", problems:[
+        {t:"Binary search (divide & conquer view)",d:"easy"},
+        {t:"Merge sort",d:"med"},
+        {t:"Quick sort with Lomuto partition",d:"med"},
+        {t:"Quick sort with Hoare partition",d:"hard"},
+        {t:"Quick select (kth element)",d:"med"},
+        {t:"Count inversions in array",d:"hard"},
+        {t:"Closest pair of points",d:"hard"},
+        {t:"Strassen matrix multiplication",d:"hard"},
+        {t:"Karatsuba multiplication",d:"hard"},
+        {t:"Majority element (divide & conquer)",d:"med"},
+        {t:"Maximum subarray (divide & conquer)",d:"med"},
+        {t:"Peak element in array",d:"med"},
+        {t:"Median of unsorted array",d:"hard"},
+        {t:"Skyline problem",d:"hard"},
+        {t:"Expression evaluation (recursive descent)",d:"hard"},
+      ]},
+      { name:"Graph Algorithms", problems:[
+        {t:"BFS shortest path in unweighted graph",d:"med"},
+        {t:"DFS connected components",d:"med"},
+        {t:"Dijkstra's algorithm",d:"hard"},
+        {t:"A* search algorithm",d:"hard"},
+        {t:"Bellman-Ford algorithm",d:"hard"},
+        {t:"Floyd-Warshall algorithm",d:"hard"},
+        {t:"Kruskal's MST",d:"hard"},
+        {t:"Prim's MST",d:"hard"},
+        {t:"Topological sort",d:"hard"},
+        {t:"Strongly connected components (Kosaraju)",d:"hard"},
+        {t:"Tarjan's SCC algorithm",d:"hard"},
+        {t:"Articulation points and bridges",d:"hard"},
+        {t:"Eulerian path and circuit",d:"hard"},
+        {t:"Hamiltonian path (backtracking)",d:"hard"},
+        {t:"Network flow (Ford-Fulkerson)",d:"hard"},
+      ]},
+    ]
+  },
+  {
+    id:"fp", icon:"♻️", title:"11. Functional Programming",
+    subs:[
+      { name:"Core FP Concepts", problems:[
+        {t:"Write a pure function (no side effects)",d:"easy"},
+        {t:"Demonstrate referential transparency",d:"easy"},
+        {t:"Immutable array update (no mutation)",d:"easy"},
+        {t:"Immutable object update (spread)",d:"easy"},
+        {t:"Immutable nested update",d:"med"},
+        {t:"Avoid shared mutable state between calls",d:"med"},
+        {t:"First-class function as argument",d:"easy"},
+        {t:"Return function from function",d:"easy"},
+        {t:"Function as value in object",d:"easy"},
+        {t:"Avoid imperative loop using recursion",d:"med"},
+        {t:"Tail-recursive sum",d:"med"},
+        {t:"Tail-recursive flatten",d:"hard"},
+        {t:"Mutual recursion example",d:"hard"},
+        {t:"Church encoding of booleans",d:"hard"},
+        {t:"Church encoding of numbers",d:"hard"},
+      ]},
+      { name:"Functor & Monad Basics", problems:[
+        {t:"Box/Identity functor (fmap)",d:"med"},
+        {t:"Maybe functor (handle null safely)",d:"med"},
+        {t:"Maybe.map and Maybe.chain",d:"med"},
+        {t:"Either functor (Left/Right)",d:"hard"},
+        {t:"Either for error handling",d:"hard"},
+        {t:"IO monad (wrap side effects)",d:"hard"},
+        {t:"Task/Future monad (async IO)",d:"hard"},
+        {t:"List monad (non-determinism)",d:"hard"},
+        {t:"Writer monad (log accumulation)",d:"hard"},
+        {t:"Reader monad (dependency injection)",d:"hard"},
+        {t:"State monad",d:"hard"},
+        {t:"Monad laws: left identity",d:"hard"},
+        {t:"Monad laws: right identity",d:"hard"},
+        {t:"Monad laws: associativity",d:"hard"},
+        {t:"Functor laws: identity and composition",d:"hard"},
+      ]},
+      { name:"Immutability & Persistent Data", problems:[
+        {t:"Implement immutable list prepend",d:"med"},
+        {t:"Persistent array using structural sharing",d:"hard"},
+        {t:"Persistent map (trie-based)",d:"hard"},
+        {t:"Lens get and set for nested object",d:"hard"},
+        {t:"Lens compose two lenses",d:"hard"},
+        {t:"Prism for optional nested value",d:"hard"},
+        {t:"Traversal for multiple values",d:"hard"},
+        {t:"Produce next state with Immer-like API",d:"hard"},
+        {t:"Undo/redo using immutable snapshots",d:"hard"},
+        {t:"Compare two immutable records",d:"med"},
+        {t:"Patch function for sparse updates",d:"med"},
+        {t:"Normalize nested data structure",d:"hard"},
+        {t:"Denormalize from normalized structure",d:"hard"},
+        {t:"Structural sharing in linked list",d:"hard"},
+        {t:"Copy-on-write semantics",d:"hard"},
+      ]},
+      { name:"Transducers & Advanced Composition", problems:[
+        {t:"Explain transducer concept with example",d:"hard"},
+        {t:"Map transducer",d:"hard"},
+        {t:"Filter transducer",d:"hard"},
+        {t:"Compose two transducers",d:"hard"},
+        {t:"Transduce over array",d:"hard"},
+        {t:"Transduce over string",d:"hard"},
+        {t:"Transduce lazily (stop early)",d:"hard"},
+        {t:"Build take(n) transducer",d:"hard"},
+        {t:"Build drop(n) transducer",d:"hard"},
+        {t:"Build dedupe transducer",d:"hard"},
+        {t:"Implement reduce-based pipeline",d:"hard"},
+        {t:"Fantasy Land spec: Semigroup",d:"hard"},
+        {t:"Fantasy Land spec: Monoid",d:"hard"},
+        {t:"Fantasy Land spec: Applicative",d:"hard"},
+        {t:"Fantasy Land spec: Chain (Monad)",d:"hard"},
+      ]},
+    ]
+  },
+  {
+    id:"testing", icon:"🧪", title:"12. Testing Patterns",
+    subs:[
+      { name:"Unit Testing Fundamentals", problems:[
+        {t:"Write tests for a pure add(a,b) function",d:"easy"},
+        {t:"Test edge cases: null, undefined, NaN inputs",d:"easy"},
+        {t:"Test string utility functions",d:"easy"},
+        {t:"Test array utility functions",d:"easy"},
+        {t:"Test a sorting algorithm",d:"med"},
+        {t:"Test recursive function",d:"med"},
+        {t:"Arrange-Act-Assert pattern",d:"easy"},
+        {t:"Test error throwing",d:"easy"},
+        {t:"Test optional return values",d:"med"},
+        {t:"Parameterized / table-driven tests",d:"med"},
+        {t:"Boundary value testing",d:"med"},
+        {t:"Equivalence partitioning tests",d:"med"},
+        {t:"Test a class with multiple methods",d:"med"},
+        {t:"Test inheritance chain behavior",d:"med"},
+        {t:"Snapshot-style value comparison",d:"med"},
+      ]},
+      { name:"Mocking & Stubbing", problems:[
+        {t:"Stub a function (replace with fixed return)",d:"med"},
+        {t:"Spy on function calls (track invocations)",d:"med"},
+        {t:"Mock a module dependency",d:"med"},
+        {t:"Mock Date.now() for deterministic tests",d:"med"},
+        {t:"Mock Math.random() for predictable tests",d:"med"},
+        {t:"Fake timers: control setTimeout/setInterval",d:"med"},
+        {t:"Mock fetch/HTTP requests",d:"med"},
+        {t:"Mock localStorage",d:"med"},
+        {t:"Mock Event and DOM APIs",d:"hard"},
+        {t:"Mock a Promise-returning function",d:"med"},
+        {t:"Spy with call count assertions",d:"med"},
+        {t:"Spy with argument capture",d:"med"},
+        {t:"Partial mock (some methods real)",d:"hard"},
+        {t:"Automatic mock injection",d:"hard"},
+        {t:"Restore mocks after each test",d:"med"},
+      ]},
+      { name:"Async Testing", problems:[
+        {t:"Test async function with await",d:"med"},
+        {t:"Test Promise rejection",d:"med"},
+        {t:"Test setTimeout callback",d:"med"},
+        {t:"Test setInterval and advance time",d:"med"},
+        {t:"Test EventEmitter callbacks",d:"med"},
+        {t:"Test API calls with mock fetch",d:"med"},
+        {t:"Test retry logic",d:"hard"},
+        {t:"Test race condition handling",d:"hard"},
+        {t:"Test observable sequences",d:"hard"},
+        {t:"Test async generator output",d:"hard"},
+        {t:"Test debounced function",d:"med"},
+        {t:"Test throttled function",d:"med"},
+        {t:"Test cancellable async operation",d:"hard"},
+        {t:"Test timeout error handling",d:"med"},
+        {t:"Test parallel execution order",d:"hard"},
+      ]},
+      { name:"Test Infrastructure", problems:[
+        {t:"Implement minimal test runner (describe/it)",d:"hard"},
+        {t:"Implement expect().toBe() assertion",d:"med"},
+        {t:"Implement expect().toEqual() deep assertion",d:"hard"},
+        {t:"Implement beforeEach / afterEach hooks",d:"med"},
+        {t:"Implement test isolation (fresh state each)",d:"med"},
+        {t:"Implement test timeouts",d:"hard"},
+        {t:"Implement skip and only modifiers",d:"med"},
+        {t:"Implement test coverage tracker",d:"hard"},
+        {t:"Generate test report (pass/fail/skip counts)",d:"med"},
+        {t:"Property-based testing: generate random inputs",d:"hard"},
+        {t:"Fuzz testing: random string inputs",d:"hard"},
+        {t:"Mutation testing concept demonstration",d:"hard"},
+        {t:"Test fixtures and factories",d:"med"},
+        {t:"Seeded random for reproducible tests",d:"hard"},
+        {t:"Contract testing between modules",d:"hard"},
+      ]},
+    ]
+  },
+  {
+    id:"security", icon:"🔐", title:"13. Security & Validation",
+    subs:[
+      { name:"Input Validation", problems:[
+        {t:"Sanitize HTML to prevent XSS",d:"med"},
+        {t:"Escape HTML entities",d:"easy"},
+        {t:"Unescape HTML entities",d:"easy"},
+        {t:"Validate and sanitize user input",d:"med"},
+        {t:"Whitelist vs blacklist input validation",d:"med"},
+        {t:"Validate email address (RFC compliant)",d:"med"},
+        {t:"Validate phone number (international)",d:"med"},
+        {t:"Validate credit card number (Luhn algorithm)",d:"hard"},
+        {t:"Validate IBAN bank account number",d:"hard"},
+        {t:"Validate URL (allow/deny protocols)",d:"med"},
+        {t:"Validate IPv4 and IPv6 address",d:"med"},
+        {t:"Validate password meets policy",d:"med"},
+        {t:"Validate JSON Web Token structure",d:"hard"},
+        {t:"Validate UUID format",d:"easy"},
+        {t:"Strip script tags from HTML",d:"med"},
+      ]},
+      { name:"Cryptography & Encoding", problems:[
+        {t:"Base64 encode and decode",d:"easy"},
+        {t:"URL encode and decode",d:"easy"},
+        {t:"Simple Caesar cipher encrypt/decrypt",d:"easy"},
+        {t:"ROT13 cipher",d:"easy"},
+        {t:"Vigenere cipher",d:"med"},
+        {t:"XOR-based simple encryption",d:"med"},
+        {t:"Hash a string (djb2 algorithm)",d:"med"},
+        {t:"SHA-256 using Web Crypto API",d:"med"},
+        {t:"HMAC signature generation",d:"hard"},
+        {t:"JWT encode and decode (manually)",d:"hard"},
+        {t:"Verify JWT signature",d:"hard"},
+        {t:"Generate random token (crypto.getRandomValues)",d:"med"},
+        {t:"Generate UUID v4",d:"easy"},
+        {t:"Password hashing with salt concept",d:"hard"},
+        {t:"Timing-safe string comparison",d:"hard"},
+      ]},
+      { name:"CSRF & XSS Protection", problems:[
+        {t:"Generate and validate CSRF token",d:"hard"},
+        {t:"Double-submit cookie pattern",d:"hard"},
+        {t:"Content Security Policy header builder",d:"hard"},
+        {t:"Sanitize Markdown to safe HTML",d:"hard"},
+        {t:"DOMPurify-like sanitizer",d:"hard"},
+        {t:"Trusted Types enforcement",d:"hard"},
+        {t:"Safe innerHTML alternative",d:"med"},
+        {t:"Prevent clickjacking via frame busting",d:"med"},
+        {t:"Subresource integrity checker",d:"hard"},
+        {t:"Validate redirect URLs (open redirect prevention)",d:"med"},
+        {t:"Safe URL construction (no injection)",d:"med"},
+        {t:"HTTP header injection prevention",d:"hard"},
+        {t:"Prototype pollution prevention",d:"hard"},
+        {t:"JSON injection prevention",d:"hard"},
+        {t:"Path traversal prevention",d:"hard"},
+      ]},
+      { name:"Auth & Authorization", problems:[
+        {t:"Basic token-based auth flow",d:"med"},
+        {t:"Refresh token rotation logic",d:"hard"},
+        {t:"OAuth 2.0 PKCE flow implementation",d:"hard"},
+        {t:"Session management (create/validate/expire)",d:"hard"},
+        {t:"Role-based access control (RBAC)",d:"hard"},
+        {t:"Permission check middleware",d:"med"},
+        {t:"Attribute-based access control (ABAC)",d:"hard"},
+        {t:"Account lockout after failed attempts",d:"med"},
+        {t:"2FA TOTP token generation (HOTP concept)",d:"hard"},
+        {t:"Password reset token with expiry",d:"hard"},
+        {t:"Secure password comparison",d:"med"},
+        {t:"API key generation and validation",d:"med"},
+        {t:"Request signing (HMAC-based)",d:"hard"},
+        {t:"IP allowlist/blocklist check",d:"easy"},
+        {t:"Brute-force protection with rate limiting",d:"hard"},
+      ]},
+    ]
+  },
+  {
+    id:"network", icon:"📡", title:"14. Network & APIs",
+    subs:[
+      { name:"Fetch & HTTP", problems:[
+        {t:"Basic fetch GET request",d:"easy"},
+        {t:"Fetch with POST and JSON body",d:"easy"},
+        {t:"Fetch with custom headers",d:"easy"},
+        {t:"Fetch with query parameters",d:"easy"},
+        {t:"Fetch with timeout using AbortController",d:"med"},
+        {t:"Fetch with retry on network error",d:"med"},
+        {t:"Fetch with retry and exponential backoff",d:"hard"},
+        {t:"Fetch with progress tracking (ReadableStream)",d:"hard"},
+        {t:"Cancel pending fetch on new request",d:"med"},
+        {t:"Deduplicate concurrent identical requests",d:"hard"},
+        {t:"Fetch all pages of paginated API",d:"med"},
+        {t:"Fetch with authentication header refresh",d:"hard"},
+        {t:"Implement axios-like HTTP client",d:"hard"},
+        {t:"Request/response interceptors",d:"hard"},
+        {t:"Multipart form data upload",d:"hard"},
+      ]},
+      { name:"WebSocket & Real-time", problems:[
+        {t:"WebSocket connection and message sending",d:"med"},
+        {t:"WebSocket reconnect on disconnect",d:"hard"},
+        {t:"WebSocket heartbeat (ping/pong)",d:"hard"},
+        {t:"WebSocket message queue (send when ready)",d:"hard"},
+        {t:"Broadcast message to all clients",d:"med"},
+        {t:"Room-based message routing",d:"hard"},
+        {t:"Server-Sent Events (SSE) listener",d:"med"},
+        {t:"SSE with reconnection",d:"hard"},
+        {t:"Long polling implementation",d:"med"},
+        {t:"Short polling with interval",d:"easy"},
+        {t:"WebSocket binary data handling",d:"hard"},
+        {t:"WebSocket backpressure handling",d:"hard"},
+        {t:"Real-time presence system",d:"hard"},
+        {t:"Collaborative editing conflict resolution",d:"hard"},
+        {t:"CRDT (Conflict-free Replicated Data Type) concept",d:"hard"},
+      ]},
+      { name:"URL & Routing", problems:[
+        {t:"Parse URL into components",d:"med"},
+        {t:"Build URL from components",d:"med"},
+        {t:"Parse query string to object",d:"med"},
+        {t:"Serialize object to query string",d:"med"},
+        {t:"Hash-based router (SPA)",d:"hard"},
+        {t:"History API router",d:"hard"},
+        {t:"Router with dynamic segments (:id)",d:"hard"},
+        {t:"Router with wildcard routes",d:"hard"},
+        {t:"Middleware pipeline for routes",d:"hard"},
+        {t:"Route guard (auth check)",d:"hard"},
+        {t:"Nested router",d:"hard"},
+        {t:"Link prefetching on hover",d:"med"},
+        {t:"Back/forward navigation state restoration",d:"hard"},
+        {t:"Deep link handling",d:"hard"},
+        {t:"URL canonicalization",d:"med"},
+      ]},
+      { name:"Caching & Offline", problems:[
+        {t:"HTTP cache headers explanation",d:"med"},
+        {t:"ETag-based cache validation",d:"hard"},
+        {t:"Service Worker install and activate",d:"hard"},
+        {t:"Cache-first strategy",d:"hard"},
+        {t:"Network-first strategy",d:"hard"},
+        {t:"Stale-while-revalidate strategy",d:"hard"},
+        {t:"Background sync for offline actions",d:"hard"},
+        {t:"IndexedDB as local cache",d:"hard"},
+        {t:"Cache busting with version hash",d:"med"},
+        {t:"Prefetch next page resources",d:"med"},
+        {t:"Offline fallback page",d:"hard"},
+        {t:"Sync queue for offline mutations",d:"hard"},
+        {t:"Conflict detection on sync",d:"hard"},
+        {t:"Cache storage size management",d:"hard"},
+        {t:"Progressive loading with cache",d:"hard"},
+      ]},
+    ]
+  },
+  {
+    id:"performance", icon:"⚡", title:"15. Performance & Optimization",
+    subs:[
+      { name:"JavaScript Performance", problems:[
+        {t:"Measure execution time with performance.now()",d:"easy"},
+        {t:"Benchmark two implementations",d:"med"},
+        {t:"Avoid repeated DOM queries (cache ref)",d:"easy"},
+        {t:"Use DocumentFragment for batch DOM inserts",d:"med"},
+        {t:"Virtual DOM reconciliation concept",d:"hard"},
+        {t:"Avoid layout thrashing",d:"med"},
+        {t:"RequestAnimationFrame for smooth animation",d:"med"},
+        {t:"Offload to Web Worker",d:"hard"},
+        {t:"Incremental rendering with scheduler",d:"hard"},
+        {t:"Memoize expensive computation",d:"med"},
+        {t:"Lazy load module (dynamic import)",d:"med"},
+        {t:"Code splitting strategy",d:"hard"},
+        {t:"Tree shaking unused exports",d:"med"},
+        {t:"Reduce memory allocations in hot path",d:"hard"},
+        {t:"Profile and fix memory leak",d:"hard"},
+      ]},
+      { name:"Memory Management", problems:[
+        {t:"Identify and fix memory leak",d:"hard"},
+        {t:"WeakMap for private data (GC friendly)",d:"med"},
+        {t:"WeakSet for object tracking",d:"med"},
+        {t:"FinalizationRegistry for cleanup",d:"hard"},
+        {t:"Object pooling to reduce GC pressure",d:"hard"},
+        {t:"Avoid closure-caused memory leaks",d:"hard"},
+        {t:"Remove event listeners on cleanup",d:"med"},
+        {t:"Clear intervals and timeouts on destroy",d:"easy"},
+        {t:"Limit cache size to prevent unbounded growth",d:"med"},
+        {t:"Circular reference detection",d:"hard"},
+        {t:"Efficient large array handling",d:"hard"},
+        {t:"Stream large file instead of loading all",d:"hard"},
+        {t:"Virtualize large list (render only visible)",d:"hard"},
+        {t:"Avoid string concatenation in loops (use join)",d:"easy"},
+        {t:"TypedArray for performance-critical buffers",d:"hard"},
+      ]},
+      { name:"Network Performance", problems:[
+        {t:"Debounce API calls on user input",d:"med"},
+        {t:"Throttle scroll/resize handlers",d:"med"},
+        {t:"Batch multiple API calls into one",d:"hard"},
+        {t:"Request deduplication (coalescing)",d:"hard"},
+        {t:"Implement prefetching strategy",d:"hard"},
+        {t:"Resource hints: preload, prefetch, preconnect",d:"med"},
+        {t:"Compress data before sending",d:"hard"},
+        {t:"Delta updates instead of full payload",d:"hard"},
+        {t:"HTTP/2 server push awareness",d:"hard"},
+        {t:"Optimize JSON payload size",d:"med"},
+        {t:"Use Blob for binary data transfer",d:"med"},
+        {t:"Connection pooling for WebSocket",d:"hard"},
+        {t:"Retry with circuit breaker",d:"hard"},
+        {t:"Graceful degradation on slow network",d:"hard"},
+        {t:"Optimistic UI update pattern",d:"hard"},
+      ]},
+      { name:"Rendering Performance", problems:[
+        {t:"Avoid forced synchronous layout",d:"hard"},
+        {t:"Batch style reads before writes",d:"med"},
+        {t:"Use CSS transforms instead of top/left",d:"easy"},
+        {t:"will-change hint for compositor layers",d:"med"},
+        {t:"Intersection Observer for lazy rendering",d:"med"},
+        {t:"Content-visibility: auto for off-screen",d:"med"},
+        {t:"Skeleton screens while loading",d:"med"},
+        {t:"Progressive image loading (blur-up)",d:"hard"},
+        {t:"Responsive images with srcset",d:"med"},
+        {t:"Canvas vs DOM for many moving elements",d:"hard"},
+        {t:"OffscreenCanvas for background rendering",d:"hard"},
+        {t:"WebGL basics for GPU-accelerated graphics",d:"hard"},
+        {t:"CSS containment for render isolation",d:"med"},
+        {t:"Font loading strategy (FOUT vs FOIT)",d:"med"},
+        {t:"Critical rendering path optimization",d:"hard"},
+      ]},
+    ]
+  },
+  {
+    id:"es6plus", icon:"🚀", title:"16. ES6+ Modern JavaScript",
+    subs:[
+      { name:"Destructuring & Spread", problems:[
+        {t:"Array destructuring with defaults",d:"easy"},
+        {t:"Object destructuring with rename",d:"easy"},
+        {t:"Nested destructuring",d:"med"},
+        {t:"Rest in array destructuring",d:"easy"},
+        {t:"Rest in object destructuring",d:"easy"},
+        {t:"Spread to clone array",d:"easy"},
+        {t:"Spread to merge arrays",d:"easy"},
+        {t:"Spread to clone object",d:"easy"},
+        {t:"Spread to merge objects (last wins)",d:"easy"},
+        {t:"Destructure function parameters",d:"easy"},
+        {t:"Default parameter values",d:"easy"},
+        {t:"Destructure in for...of loop",d:"easy"},
+        {t:"Swap variables with destructuring",d:"easy"},
+        {t:"Ignore values with commas in destructuring",d:"easy"},
+        {t:"Computed property names",d:"med"},
+      ]},
+      { name:"Classes & Modules", problems:[
+        {t:"ES6 class with constructor",d:"easy"},
+        {t:"Class inheritance with extends",d:"easy"},
+        {t:"Static methods and properties",d:"easy"},
+        {t:"Private fields with #",d:"med"},
+        {t:"Private methods with #",d:"med"},
+        {t:"Getter and setter in class",d:"easy"},
+        {t:"Abstract base class pattern",d:"med"},
+        {t:"Mixin with class expression",d:"hard"},
+        {t:"ES module import/export named",d:"easy"},
+        {t:"ES module import/export default",d:"easy"},
+        {t:"Re-export from module",d:"easy"},
+        {t:"Dynamic import() for code splitting",d:"med"},
+        {t:"Import.meta.url usage",d:"med"},
+        {t:"Circular module dependency handling",d:"hard"},
+        {t:"Module singleton pattern",d:"med"},
+      ]},
+      { name:"Iterators, Generators & Symbols", problems:[
+        {t:"Implement Symbol.iterator on object",d:"med"},
+        {t:"Make range object iterable",d:"med"},
+        {t:"Implement infinite generator",d:"med"},
+        {t:"Generator with return value",d:"med"},
+        {t:"Generator with throw()",d:"hard"},
+        {t:"Two-way communication via generator.next(val)",d:"hard"},
+        {t:"Delegating generators with yield*",d:"hard"},
+        {t:"Async generator with for await...of",d:"hard"},
+        {t:"Symbol.toPrimitive override",d:"hard"},
+        {t:"Symbol.toStringTag override",d:"med"},
+        {t:"Well-known symbols overview",d:"med"},
+        {t:"WeakRef and FinalizationRegistry",d:"hard"},
+        {t:"Nullish coalescing ?? operator",d:"easy"},
+        {t:"Optional chaining ?. operator",d:"easy"},
+        {t:"Logical assignment operators ||=, &&=, ??=",d:"easy"},
+      ]},
+      { name:"Collections: Map, Set, WeakMap, WeakSet", problems:[
+        {t:"Map vs Object: key flexibility",d:"easy"},
+        {t:"Map iteration with for...of",d:"easy"},
+        {t:"Map from array of pairs",d:"easy"},
+        {t:"Map to array of pairs",d:"easy"},
+        {t:"Frequency counter using Map",d:"easy"},
+        {t:"Cache using Map",d:"med"},
+        {t:"Set for unique values",d:"easy"},
+        {t:"Set operations: union",d:"easy"},
+        {t:"Set operations: intersection",d:"easy"},
+        {t:"Set operations: difference",d:"easy"},
+        {t:"WeakMap for private object data",d:"med"},
+        {t:"WeakSet for object membership test",d:"med"},
+        {t:"LRU Cache using Map (insertion order)",d:"hard"},
+        {t:"Graph using Map of Sets",d:"med"},
+        {t:"Bidirectional map (key ↔ value)",d:"hard"},
+      ]},
+      { name:"Proxy, Reflect & Meta-programming", problems:[
+        {t:"Proxy get trap for default values",d:"med"},
+        {t:"Proxy set trap for validation",d:"med"},
+        {t:"Proxy has trap for 'in' operator",d:"med"},
+        {t:"Proxy deleteProperty trap",d:"med"},
+        {t:"Proxy apply trap for function calls",d:"hard"},
+        {t:"Proxy construct trap",d:"hard"},
+        {t:"Revocable Proxy",d:"med"},
+        {t:"Deep reactive Proxy (like Vue 3)",d:"hard"},
+        {t:"Proxy for method chaining",d:"hard"},
+        {t:"Reflect.ownKeys iteration",d:"med"},
+        {t:"Reflect.defineProperty usage",d:"med"},
+        {t:"Reflect.getPrototypeOf usage",d:"med"},
+        {t:"Meta-programming: method missing",d:"hard"},
+        {t:"Proxy-based record type",d:"hard"},
+        {t:"Transparent logging proxy",d:"med"},
+      ]},
+    ]
+  },
+  {
+    id:"nodejs", icon:"🖥️", title:"17. Node.js & Runtime",
+    subs:[
+      { name:"Core Node.js Concepts", problems:[
+        {t:"CommonJS require vs ES module import",d:"easy"},
+        {t:"module.exports patterns",d:"easy"},
+        {t:"__dirname and __filename usage",d:"easy"},
+        {t:"process.argv argument parsing",d:"easy"},
+        {t:"process.env environment variables",d:"easy"},
+        {t:"process.exit() with exit codes",d:"easy"},
+        {t:"Global vs module scope",d:"med"},
+        {t:"Synchronous vs asynchronous I/O",d:"med"},
+        {t:"Event loop phases in Node.js",d:"hard"},
+        {t:"setImmediate vs process.nextTick",d:"hard"},
+        {t:"Cluster module for multi-core",d:"hard"},
+        {t:"Child process spawn and exec",d:"hard"},
+        {t:"Worker threads for CPU tasks",d:"hard"},
+        {t:"Shared memory with SharedArrayBuffer",d:"hard"},
+        {t:"Atomics for thread synchronization",d:"hard"},
+      ]},
+      { name:"Streams & Buffers", problems:[
+        {t:"Read file as stream",d:"med"},
+        {t:"Write file as stream",d:"med"},
+        {t:"Pipe readable to writable",d:"med"},
+        {t:"Transform stream for data modification",d:"hard"},
+        {t:"Duplex stream implementation",d:"hard"},
+        {t:"Handle backpressure in streams",d:"hard"},
+        {t:"Stream large CSV processing",d:"hard"},
+        {t:"Buffer to string and back",d:"easy"},
+        {t:"Binary data manipulation with Buffer",d:"med"},
+        {t:"Stream merging (multiple → one)",d:"hard"},
+        {t:"Stream splitting (one → multiple)",d:"hard"},
+        {t:"Object mode streams",d:"hard"},
+        {t:"readline for line-by-line file processing",d:"med"},
+        {t:"Gzip compress/decompress stream",d:"hard"},
+        {t:"Async iterator over stream",d:"hard"},
+      ]},
+      { name:"File System", problems:[
+        {t:"Read file (sync and async)",d:"easy"},
+        {t:"Write file (sync and async)",d:"easy"},
+        {t:"Append to file",d:"easy"},
+        {t:"Delete file",d:"easy"},
+        {t:"Copy file",d:"med"},
+        {t:"Move / rename file",d:"easy"},
+        {t:"List directory contents",d:"easy"},
+        {t:"Recursively list all files",d:"med"},
+        {t:"Watch file for changes",d:"med"},
+        {t:"Create directory recursively",d:"easy"},
+        {t:"Remove directory recursively",d:"med"},
+        {t:"Check if file exists",d:"easy"},
+        {t:"Get file metadata (size, modified)",d:"easy"},
+        {t:"Glob pattern matching for files",d:"med"},
+        {t:"File locking for concurrent access",d:"hard"},
+      ]},
+      { name:"HTTP Server", problems:[
+        {t:"Basic HTTP server with http module",d:"easy"},
+        {t:"Route handling without framework",d:"med"},
+        {t:"Parse request body (JSON, form)",d:"med"},
+        {t:"Set response headers and status",d:"easy"},
+        {t:"Serve static files",d:"med"},
+        {t:"Middleware pipeline (Express-like)",d:"hard"},
+        {t:"CORS headers implementation",d:"med"},
+        {t:"Rate limiting middleware",d:"hard"},
+        {t:"Request logging middleware",d:"med"},
+        {t:"Error handling middleware",d:"med"},
+        {t:"HTTPS server with TLS",d:"hard"},
+        {t:"HTTP/2 server setup",d:"hard"},
+        {t:"Chunked transfer encoding",d:"hard"},
+        {t:"File upload handling",d:"hard"},
+        {t:"WebSocket upgrade from HTTP",d:"hard"},
+      ]},
+    ]
+  },
+  {
+    id:"interview", icon:"🎯", title:"18. Interview Classics",
+    subs:[
+      { name:"Tricky Output Questions", problems:[
+        {t:"var in loop with setTimeout output",d:"med"},
+        {t:"let in loop with setTimeout output",d:"med"},
+        {t:"Hoisting: var declaration order",d:"med"},
+        {t:"Hoisting: function declaration vs expression",d:"med"},
+        {t:"this in regular function vs arrow",d:"med"},
+        {t:"Event loop: setTimeout vs Promise order",d:"hard"},
+        {t:"Closure counter increment sequence",d:"med"},
+        {t:"Prototype chain property lookup",d:"hard"},
+        {t:"typeof null === 'object' explanation",d:"easy"},
+        {t:"[] + [] and [] + {} outputs",d:"hard"},
+        {t:"{} + [] vs ({} + []) difference",d:"hard"},
+        {t:"0.1 + 0.2 !== 0.3 explanation",d:"med"},
+        {t:"NaN === NaN is false — why?",d:"easy"},
+        {t:"Implicit type coercion in ==",d:"med"},
+        {t:"'5' - 3 vs '5' + 3 difference",d:"easy"},
+        {t:"delete operator on variables",d:"med"},
+        {t:"arguments object vs rest params",d:"med"},
+        {t:"Function length property",d:"easy"},
+        {t:"Comma operator output",d:"hard"},
+        {t:"Labeled statement and break",d:"hard"},
+      ]},
+      { name:"System Design (JS)", problems:[
+        {t:"Design an event emitter",d:"med"},
+        {t:"Design a pub/sub system",d:"med"},
+        {t:"Design an LRU Cache",d:"hard"},
+        {t:"Design a rate limiter",d:"hard"},
+        {t:"Design a task scheduler",d:"hard"},
+        {t:"Design a virtual DOM",d:"hard"},
+        {t:"Design a state management library",d:"hard"},
+        {t:"Design an in-browser database",d:"hard"},
+        {t:"Design a client-side router",d:"hard"},
+        {t:"Design a plugin architecture",d:"hard"},
+        {t:"Design a dependency injection system",d:"hard"},
+        {t:"Design a form validation library",d:"hard"},
+        {t:"Design an animation library",d:"hard"},
+        {t:"Design a real-time collaboration layer",d:"hard"},
+        {t:"Design a micro-frontend framework",d:"hard"},
+      ]},
+      { name:"Coding Challenges (Common)", problems:[
+        {t:"Deep flatten array",d:"med"},
+        {t:"Deep clone object",d:"med"},
+        {t:"Implement lodash.get",d:"med"},
+        {t:"Implement lodash.set",d:"hard"},
+        {t:"Implement lodash.cloneDeep",d:"hard"},
+        {t:"Implement lodash.debounce",d:"med"},
+        {t:"Implement lodash.throttle",d:"med"},
+        {t:"Implement lodash.memoize",d:"med"},
+        {t:"Implement lodash.chunk",d:"easy"},
+        {t:"Implement lodash.groupBy",d:"med"},
+        {t:"Implement lodash.zip",d:"easy"},
+        {t:"Implement lodash.uniq",d:"easy"},
+        {t:"Implement lodash.flatten",d:"med"},
+        {t:"Implement lodash.intersection",d:"med"},
+        {t:"Implement lodash.difference",d:"med"},
+        {t:"Implement lodash.omit",d:"easy"},
+        {t:"Implement lodash.pick",d:"easy"},
+        {t:"Implement lodash.merge",d:"hard"},
+        {t:"Implement lodash.isEqual",d:"hard"},
+        {t:"Implement lodash.flow",d:"med"},
+      ]},
+      { name:"Real-world Scenarios", problems:[
+        {t:"Implement infinite scroll with API",d:"hard"},
+        {t:"Auto-save form with debounce",d:"med"},
+        {t:"Implement typeahead search",d:"hard"},
+        {t:"Handle optimistic UI updates",d:"hard"},
+        {t:"Retry failed uploads with progress",d:"hard"},
+        {t:"Sync state across browser tabs",d:"hard"},
+        {t:"Graceful degradation on JS error",d:"med"},
+        {t:"Feature detection for browser APIs",d:"med"},
+        {t:"Polyfill strategy for older browsers",d:"hard"},
+        {t:"Handle auth token expiry gracefully",d:"hard"},
+        {t:"Queue offline actions for sync",d:"hard"},
+        {t:"Paginated data with cursor",d:"med"},
+        {t:"Implement command palette (⌘K)",d:"hard"},
+        {t:"Drag-and-drop file uploader",d:"hard"},
+        {t:"Real-time search with cancel",d:"hard"},
+      ]},
+    ]
+  },
+  {
+    id:"regex", icon:"🔍", title:"19. Regular Expressions",
+    subs:[
+      { name:"Regex Fundamentals", problems:[
+        {t:"Match exact string",d:"easy"},
+        {t:"Case-insensitive match",d:"easy"},
+        {t:"Match any digit \\d",d:"easy"},
+        {t:"Match any word character \\w",d:"easy"},
+        {t:"Match whitespace \\s",d:"easy"},
+        {t:"Match beginning and end of string",d:"easy"},
+        {t:"Match one or more +",d:"easy"},
+        {t:"Match zero or more *",d:"easy"},
+        {t:"Match optional character ?",d:"easy"},
+        {t:"Match exact n repetitions {n}",d:"easy"},
+        {t:"Match character class [abc]",d:"easy"},
+        {t:"Match negated character class [^abc]",d:"easy"},
+        {t:"Match any character .",d:"easy"},
+        {t:"Escape special regex characters",d:"easy"},
+        {t:"Global flag: find all matches",d:"easy"},
+      ]},
+      { name:"Capturing & Groups", problems:[
+        {t:"Capturing group with ()",d:"easy"},
+        {t:"Non-capturing group (?:)",d:"med"},
+        {t:"Named capturing group (?<name>)",d:"med"},
+        {t:"Backreference to group \\1",d:"med"},
+        {t:"Named backreference \\k<name>",d:"med"},
+        {t:"Alternation with |",d:"easy"},
+        {t:"Lookahead (?=...)",d:"hard"},
+        {t:"Negative lookahead (?!...)",d:"hard"},
+        {t:"Lookbehind (?<=...)",d:"hard"},
+        {t:"Negative lookbehind (?<!...)",d:"hard"},
+        {t:"Atomic group concept",d:"hard"},
+        {t:"Non-greedy (lazy) quantifiers",d:"med"},
+        {t:"Greedy vs lazy: a.*b vs a.*?b",d:"med"},
+        {t:"Possessive quantifiers",d:"hard"},
+        {t:"Conditional group (?(...)|)",d:"hard"},
+      ]},
+      { name:"Practical Regex Problems", problems:[
+        {t:"Match email addresses",d:"med"},
+        {t:"Match phone numbers (multiple formats)",d:"med"},
+        {t:"Match URLs",d:"med"},
+        {t:"Match IPv4 addresses",d:"med"},
+        {t:"Match hex color codes",d:"med"},
+        {t:"Match dates (YYYY-MM-DD)",d:"med"},
+        {t:"Match times (HH:MM:SS)",d:"med"},
+        {t:"Match HTML tags (simple)",d:"med"},
+        {t:"Extract href from anchor tags",d:"med"},
+        {t:"Match words that start with capital",d:"easy"},
+        {t:"Match duplicate consecutive words",d:"med"},
+        {t:"Match lines containing keyword",d:"easy"},
+        {t:"Match lines NOT containing keyword",d:"med"},
+        {t:"Match password meeting criteria",d:"med"},
+        {t:"Match credit card numbers",d:"med"},
+      ]},
+      { name:"String Operations with Regex", problems:[
+        {t:"Replace all occurrences",d:"easy"},
+        {t:"Replace with function as replacer",d:"med"},
+        {t:"Split string on multiple delimiters",d:"med"},
+        {t:"Extract all matches into array",d:"med"},
+        {t:"Find match positions (index)",d:"med"},
+        {t:"Count regex matches",d:"easy"},
+        {t:"Trim whitespace using regex",d:"easy"},
+        {t:"Remove HTML tags",d:"med"},
+        {t:"Convert markdown bold to HTML",d:"med"},
+        {t:"Parse key=value pairs",d:"med"},
+        {t:"Tokenizer (split code into tokens)",d:"hard"},
+        {t:"Replace template placeholders {{var}}",d:"med"},
+        {t:"Normalize whitespace",d:"easy"},
+        {t:"Extract domain from URL",d:"med"},
+        {t:"Camel case words in sentence",d:"med"},
+      ]},
+    ]
+  },
+  {
+    id:"misc", icon:"🌟", title:"20. TypeScript & Tooling Concepts",
+    subs:[
+      { name:"TypeScript Fundamentals", problems:[
+        {t:"Basic type annotations: string, number, boolean",d:"easy"},
+        {t:"Array and tuple types",d:"easy"},
+        {t:"Object type and interface",d:"easy"},
+        {t:"Type vs Interface: when to use each",d:"med"},
+        {t:"Union types: string | number",d:"easy"},
+        {t:"Intersection types: A & B",d:"med"},
+        {t:"Literal types: 'left' | 'right'",d:"easy"},
+        {t:"Enum types",d:"easy"},
+        {t:"Generic functions <T>",d:"med"},
+        {t:"Generic constraints extends",d:"med"},
+        {t:"Optional and default parameters",d:"easy"},
+        {t:"Function overloads",d:"hard"},
+        {t:"Type narrowing with typeof",d:"med"},
+        {t:"Type narrowing with instanceof",d:"med"},
+        {t:"Discriminated union pattern",d:"hard"},
+      ]},
+      { name:"Advanced TypeScript", problems:[
+        {t:"Utility types: Partial, Required, Readonly",d:"med"},
+        {t:"Utility types: Pick, Omit, Exclude",d:"med"},
+        {t:"Utility types: Record, ReturnType, Parameters",d:"med"},
+        {t:"Mapped types",d:"hard"},
+        {t:"Conditional types",d:"hard"},
+        {t:"Template literal types",d:"hard"},
+        {t:"Infer keyword in conditional types",d:"hard"},
+        {t:"Recursive types",d:"hard"},
+        {t:"Covariance and contravariance",d:"hard"},
+        {t:"Declaration merging",d:"hard"},
+        {t:"Module augmentation",d:"hard"},
+        {t:"Decorators (stage 3)",d:"hard"},
+        {t:"Satisfies operator",d:"med"},
+        {t:"const assertion",d:"med"},
+        {t:"Type predicate (x is T)",d:"hard"},
+      ]},
+      { name:"Tooling Concepts", problems:[
+        {t:"npm scripts for build pipeline",d:"easy"},
+        {t:"package.json fields explained",d:"easy"},
+        {t:"Semantic versioning (^, ~, exact)",d:"easy"},
+        {t:"Lock files and reproducible installs",d:"med"},
+        {t:"Workspace monorepo setup",d:"hard"},
+        {t:"ESLint custom rule configuration",d:"hard"},
+        {t:"Prettier configuration",d:"easy"},
+        {t:"Webpack entry, output, loaders, plugins",d:"hard"},
+        {t:"Vite vs webpack build differences",d:"med"},
+        {t:"Tree shaking with ES modules",d:"med"},
+        {t:"Code splitting with dynamic import",d:"med"},
+        {t:"Source maps for debugging",d:"med"},
+        {t:"Environment variables in build",d:"med"},
+        {t:"CI pipeline for JS project",d:"hard"},
+        {t:"Bundle analysis and optimization",d:"hard"},
+      ]},
+      { name:"Debugging & Error Handling", problems:[
+        {t:"Error types: TypeError, RangeError, etc.",d:"easy"},
+        {t:"Custom Error class",d:"easy"},
+        {t:"Error cause (ES2022)",d:"med"},
+        {t:"Stack trace reading and interpretation",d:"med"},
+        {t:"try/catch/finally execution order",d:"easy"},
+        {t:"Rethrowing errors",d:"med"},
+        {t:"Global error boundary (window.onerror)",d:"med"},
+        {t:"Unhandled promise rejection handling",d:"med"},
+        {t:"Source map debugging in browser",d:"med"},
+        {t:"console methods: log, warn, error, table",d:"easy"},
+        {t:"console.time and timeEnd profiling",d:"easy"},
+        {t:"Breakpoints and step-through debugging",d:"med"},
+        {t:"Memory heap snapshot analysis",d:"hard"},
+        {t:"Performance profiler flame chart",d:"hard"},
+        {t:"Network request debugging",d:"med"},
+      ]},
+    ]
+  }
+];
+
+// ============================================================
+// STATE
+// ============================================================
+let solved = {};
+try { solved = JSON.parse(localStorage.getItem('jsMastery') || '{}'); } catch(e){}
+
+let activeFilter = 'all';
+let searchTerm = '';
+
+function totalProbs() {
+  return DATA.reduce((s,cat) => s + cat.subs.reduce((ss,sub) => ss + sub.problems.length, 0), 0);
+}
+function totalSolved() {
+  return Object.values(solved).filter(Boolean).length;
+}
+function saveSolved() {
+  localStorage.setItem('jsMastery', JSON.stringify(solved));
+}
+function probKey(catId, subIdx, probIdx) { return `${catId}::${subIdx}::${probIdx}`; }
+
+// ============================================================
+// SIDEBAR
+// ============================================================
+function buildSidebar() {
+  const nav = document.getElementById('sidebarNav');
+  nav.innerHTML = '';
+  DATA.forEach(cat => {
+    const catTotal = cat.subs.reduce((s,sub) => s + sub.problems.length, 0);
+    const catDone = cat.subs.reduce((s,sub,si) =>
+      s + sub.problems.filter((_,pi) => solved[probKey(cat.id,si,pi)]).length, 0);
+    const pct = catTotal ? Math.round(catDone/catTotal*100) : 0;
+
+    const item = document.createElement('div');
+    item.className = 'nav-item';
+    item.dataset.cat = cat.id;
+    item.innerHTML = `
+      <span class="nav-icon">${cat.icon}</span>
+      <span class="nav-label">${cat.title.replace(/^\d+\.\s*/,'')}</span>
+      <span class="nav-count">${catTotal}</span>
+      ${catDone > 0 ? `<span class="nav-done-pct">${pct}%</span>` : ''}
+    `;
+    item.addEventListener('click', () => {
+      const el = document.getElementById('sec-'+cat.id);
+      if(el) { el.scrollIntoView({behavior:'smooth', block:'start'}); }
+      if(window.innerWidth <= 768) document.getElementById('sidebar').classList.remove('open');
+    });
+    nav.appendChild(item);
+  });
+}
+
+// ============================================================
+// MAIN CONTENT
+// ============================================================
+function buildContent() {
+  const content = document.getElementById('content');
+  content.innerHTML = '';
+
+  DATA.forEach((cat, ci) => {
+    const section = document.createElement('div');
+    section.className = 'section';
+    section.id = 'sec-' + cat.id;
+
+    const catTotal = cat.subs.reduce((s,sub) => s + sub.problems.length, 0);
+    const catDone = cat.subs.reduce((s,sub,si) =>
+      s + sub.problems.filter((_,pi) => solved[probKey(cat.id,si,pi)]).length, 0);
+    const pct = catTotal ? Math.round(catDone/catTotal*100) : 0;
+
+    const header = document.createElement('div');
+    header.className = 'section-header';
+    header.innerHTML = `
+      <span class="sec-icon">${cat.icon}</span>
+      <span class="sec-title">${cat.title}</span>
+      <div class="sec-stats">
+        <span class="sec-badge">${catTotal} problems</span>
+        <span class="sec-done">${catDone}/${catTotal}</span>
+      </div>
+      <span class="sec-toggle">+</span>
+    `;
+
+    const progressBar = document.createElement('div');
+    progressBar.className = 'section-progress';
+    progressBar.innerHTML = `<div class="section-progress-fill" style="width:${pct}%"></div>`;
+
+    const body = document.createElement('div');
+    body.className = 'section-body';
+
+    cat.subs.forEach((sub, si) => {
+      const subDiv = document.createElement('div');
+      subDiv.className = 'subcat';
+
+      const subHeader = document.createElement('div');
+      subHeader.className = 'subcat-header open';
+      subHeader.innerHTML = `<span>${sub.name}</span><span class="subcat-toggle">▶</span>`;
+
+      const subList = document.createElement('div');
+      subList.className = 'subcat-list open';
+
+      let globalProbNum = 1;
+      // count offset
+      let offset = 0;
+      for(let i=0; i<ci; i++) offset += DATA[i].subs.reduce((s,s2) => s+s2.problems.length, 0);
+      for(let i=0; i<si; i++) offset += cat.subs[i].problems.length;
+
+      sub.problems.forEach((prob, pi) => {
+        const key = probKey(cat.id, si, pi);
+        const isSolved = !!solved[key];
+
+        const matchFilter = activeFilter === 'all' || prob.d === activeFilter;
+        const matchSearch = !searchTerm || prob.t.toLowerCase().includes(searchTerm.toLowerCase());
+        if(!matchFilter || !matchSearch) return;
+
+        const row = document.createElement('div');
+        row.className = `prob${isSolved ? ' solved' : ''}`;
+        row.dataset.key = key;
+        row.innerHTML = `
+          <div class="prob-check">${isSolved ? '✓' : ''}</div>
+          <span class="prob-num">#${String(offset+pi+1).padStart(4,'0')}</span>
+          <span class="prob-text">${prob.t}</span>
+          <div class="prob-tags"><span class="diff-tag ${prob.d}">${prob.d==='med'?'Med':prob.d.charAt(0).toUpperCase()+prob.d.slice(1)}</span></div>
+        `;
+        row.addEventListener('click', () => {
+          solved[key] = !solved[key];
+          saveSolved();
+          row.classList.toggle('solved');
+          row.querySelector('.prob-check').textContent = solved[key] ? '✓' : '';
+          updateProgress();
+          buildSidebar();
+        });
+        subList.appendChild(row);
+      });
+
+      if(subList.children.length === 0) return;
+
+      subHeader.addEventListener('click', () => {
+        subHeader.classList.toggle('open');
+        subList.classList.toggle('open');
+      });
+
+      subDiv.appendChild(subHeader);
+      subDiv.appendChild(subList);
+      body.appendChild(subDiv);
+    });
+
+    header.addEventListener('click', () => {
+      header.classList.toggle('open');
+      body.classList.toggle('open');
+    });
+
+    section.appendChild(header);
+    section.appendChild(progressBar);
+    section.appendChild(body);
+    content.appendChild(section);
+  });
+}
+
+// ============================================================
+// PROGRESS
+// ============================================================
+function updateProgress() {
+  const total = totalProbs();
+  const done = totalSolved();
+  const pct = total ? Math.round(done/total*100) : 0;
+
+  document.getElementById('solvedCount').textContent = done;
+  document.getElementById('totalProbs').textContent = total;
+  document.getElementById('pctDone').textContent = pct + '%';
+  document.getElementById('footCount').textContent = `${done} / ${total}`;
+  document.getElementById('footPct').textContent = pct + '%';
+  document.getElementById('footFill').style.width = pct + '%';
+  document.getElementById('sidebarFill').style.width = pct + '%';
+  document.getElementById('sidebarPct').textContent = pct + '%';
+}
+
+// ============================================================
+// FILTERS & SEARCH
+// ============================================================
+document.querySelectorAll('.pill').forEach(p => {
+  p.addEventListener('click', () => {
+    document.querySelectorAll('.pill').forEach(x => x.classList.remove('active'));
+    p.classList.add('active');
+    activeFilter = p.dataset.f;
+    buildContent();
+  });
+});
+
+let searchTimer;
+document.getElementById('searchInput').addEventListener('input', e => {
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(() => {
+    searchTerm = e.target.value.trim();
+    buildContent();
+  }, 200);
+});
+
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+}
+
+// ============================================================
+// INIT
+// ============================================================
+buildSidebar();
+buildContent();
+updateProgress();
+</script>
+</body>
+</html>

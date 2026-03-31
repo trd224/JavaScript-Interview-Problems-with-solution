@@ -1,26 +1,11 @@
-function createFetcher() {
-  const cache = {}; // ✅ inside but remembered
-
-  return async function fetchWithCache(url) {
-    if (cache[url]) {
-      console.log("From cache");
-      return cache[url];
+function isOnlyDigitsFnn(str){
+    for(let ch of str){
+        if(!(ch >= '0' && ch <= '9')){
+            return false;
+        }
     }
-
-    console.log("Fetching from API");
-    const res = await fetch(url);
-    const data = await res.json();
-
-    cache[url] = data;
-    return data;
-  };
+    return true;
 }
 
-const fetchWithCache = createFetcher();
-
-async function run(){
-  await fetchWithCache("https://jsonplaceholder.typicode.com/posts"); // API
-  await fetchWithCache("https://jsonplaceholder.typicode.com/posts"); // cache ✅
-}
-
-run();
+console.log(isOnlyDigitsFnn("12345")); // true
+console.log(isOnlyDigitsFnn("123a5")); // false
