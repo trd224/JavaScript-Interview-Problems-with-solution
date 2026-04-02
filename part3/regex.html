@@ -1,0 +1,1165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JavaScript RegEx — Complete Notes</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500;700&family=Lora:ital,wght@0,400;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0d0f;
+    --surface: #141418;
+    --surface2: #1c1c23;
+    --border: #2a2a35;
+    --accent: #ff6b35;
+    --accent2: #ffd166;
+    --accent3: #06d6a0;
+    --accent4: #118ab2;
+    --text: #e8e8f0;
+    --muted: #888898;
+    --code-bg: #0a0a0e;
+    --heading: #ffffff;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Lora', Georgia, serif;
+    font-size: 16px;
+    line-height: 1.8;
+    min-height: 100vh;
+  }
+
+  /* HERO */
+  .hero {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 60px 40px 50px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -80px; right: -80px;
+    width: 400px; height: 400px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,107,53,.12) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .hero-inner {
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  .hero-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 16px;
+    display: block;
+  }
+
+  .hero h1 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: clamp(2.4rem, 5vw, 4rem);
+    color: var(--heading);
+    line-height: 1.1;
+    margin-bottom: 16px;
+  }
+
+  .hero h1 span {
+    color: var(--accent);
+  }
+
+  .hero-sub {
+    font-family: 'Lora', serif;
+    font-style: italic;
+    color: var(--muted);
+    font-size: 1.05rem;
+    max-width: 520px;
+  }
+
+  .level-badges {
+    display: flex;
+    gap: 10px;
+    margin-top: 28px;
+    flex-wrap: wrap;
+  }
+
+  .badge {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 1px;
+    padding: 5px 14px;
+    border-radius: 100px;
+    border: 1px solid;
+  }
+  .badge.beg { color: var(--accent3); border-color: var(--accent3); background: rgba(6,214,160,.08); }
+  .badge.int { color: var(--accent2); border-color: var(--accent2); background: rgba(255,209,102,.08); }
+  .badge.adv { color: var(--accent); border-color: var(--accent); background: rgba(255,107,53,.08); }
+
+  /* LAYOUT */
+  .wrapper {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 24px 80px;
+  }
+
+  /* TOC */
+  .toc {
+    margin: 40px 0 0;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 28px 32px;
+  }
+
+  .toc-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 0.85rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 16px;
+  }
+
+  .toc-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 6px 24px;
+  }
+
+  .toc a {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    color: var(--text);
+    text-decoration: none;
+    padding: 4px 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    opacity: 0.75;
+    transition: opacity .2s, color .2s;
+  }
+
+  .toc a:hover { opacity: 1; color: var(--accent); }
+
+  .toc a::before {
+    content: '→';
+    color: var(--accent);
+    font-size: 11px;
+  }
+
+  /* SECTIONS */
+  .section {
+    margin-top: 56px;
+  }
+
+  .section-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 28px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .section-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--accent);
+    background: rgba(255,107,53,.1);
+    border: 1px solid rgba(255,107,53,.25);
+    padding: 4px 10px;
+    border-radius: 6px;
+    white-space: nowrap;
+    margin-top: 6px;
+  }
+
+  .section-header h2 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 1.65rem;
+    color: var(--heading);
+    line-height: 1.2;
+  }
+
+  .section-header h2 small {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: 400;
+    color: var(--muted);
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: 1px;
+    margin-top: 4px;
+  }
+
+  /* CARDS */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 24px 28px;
+    margin-bottom: 20px;
+    position: relative;
+  }
+
+  .card-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 1.05rem;
+    color: var(--heading);
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .card-title .tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    background: var(--surface2);
+    color: var(--muted);
+    padding: 2px 8px;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+    font-weight: 400;
+  }
+
+  p { margin-bottom: 12px; color: var(--text); }
+  p:last-child { margin-bottom: 0; }
+
+  /* CODE BLOCKS */
+  .code-block {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin: 16px 0;
+    overflow: hidden;
+  }
+
+  .code-header {
+    background: var(--surface2);
+    padding: 8px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .code-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 1px;
+  }
+
+  .code-dots { display: flex; gap: 6px; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; }
+  .dot:nth-child(1) { background: #ff5f57; }
+  .dot:nth-child(2) { background: #ffbd2e; }
+  .dot:nth-child(3) { background: #28ca42; }
+
+  pre {
+    padding: 20px;
+    overflow-x: auto;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13.5px;
+    line-height: 1.7;
+    color: #c9d1d9;
+  }
+
+  .kw  { color: #ff79c6; }   /* keyword */
+  .fn  { color: #8be9fd; }   /* function */
+  .str { color: #f1fa8c; }   /* string */
+  .rx  { color: #ff6b35; }   /* regex */
+  .cm  { color: #6272a4; font-style: italic; } /* comment */
+  .num { color: #bd93f9; }   /* number */
+  .bool{ color: #ffb86c; }
+
+  /* TABLES */
+  .ref-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    margin: 16px 0;
+  }
+
+  .ref-table th {
+    background: var(--surface2);
+    color: var(--muted);
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 10px 14px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .ref-table td {
+    padding: 10px 14px;
+    border-bottom: 1px solid rgba(42,42,53,.7);
+    vertical-align: top;
+  }
+
+  .ref-table tr:hover td { background: var(--surface2); }
+
+  .ref-table .sym {
+    color: var(--accent);
+    font-weight: 700;
+  }
+
+  .ref-table .desc {
+    color: var(--text);
+    font-family: 'Lora', serif;
+    font-size: 14px;
+  }
+
+  .ref-table .ex {
+    color: var(--accent3);
+  }
+
+  /* OUTPUT */
+  .output {
+    background: rgba(6,214,160,.06);
+    border: 1px solid rgba(6,214,160,.2);
+    border-radius: 6px;
+    padding: 12px 16px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    color: var(--accent3);
+    margin-top: -4px;
+    margin-bottom: 16px;
+  }
+
+  .output::before {
+    content: '▶  OUTPUT: ';
+    opacity: .55;
+    font-size: 11px;
+    letter-spacing: 1px;
+  }
+
+  /* CALLOUTS */
+  .callout {
+    border-left: 3px solid;
+    padding: 14px 18px;
+    border-radius: 0 8px 8px 0;
+    margin: 16px 0;
+    font-size: 14.5px;
+  }
+
+  .callout.tip { border-color: var(--accent3); background: rgba(6,214,160,.06); }
+  .callout.warn { border-color: var(--accent2); background: rgba(255,209,102,.06); }
+  .callout.info { border-color: var(--accent4); background: rgba(17,138,178,.06); }
+
+  .callout-head {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 12px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+
+  .callout.tip .callout-head { color: var(--accent3); }
+  .callout.warn .callout-head { color: var(--accent2); }
+  .callout.info .callout-head { color: var(--accent4); }
+
+  /* GRID */
+  .grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin: 16px 0;
+  }
+
+  @media (max-width: 600px) {
+    .grid-2 { grid-template-columns: 1fr; }
+    .hero { padding: 40px 20px; }
+    pre { font-size: 12px; }
+  }
+
+  /* LEVEL INDICATOR */
+  .level {
+    position: absolute;
+    top: 16px; right: 16px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 1px;
+    padding: 3px 10px;
+    border-radius: 100px;
+    border: 1px solid;
+  }
+  .level.beg { color: var(--accent3); border-color: rgba(6,214,160,.3); }
+  .level.int { color: var(--accent2); border-color: rgba(255,209,102,.3); }
+  .level.adv { color: var(--accent); border-color: rgba(255,107,53,.3); }
+
+  /* DIVIDER */
+  .divider {
+    height: 1px;
+    background: linear-gradient(to right, var(--accent), transparent);
+    margin: 40px 0;
+    opacity: .3;
+  }
+
+  /* INLINE CODE */
+  code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.875em;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    padding: 1px 6px;
+    border-radius: 4px;
+    color: var(--accent2);
+  }
+
+  /* SCROLL */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-inner">
+    <span class="hero-tag">Complete Reference Guide</span>
+    <h1>JavaScript <span>/RegEx/</span> Notes</h1>
+    <p class="hero-sub">From literal characters to lookaheads — everything you need to master regular expressions in JS.</p>
+    <div class="level-badges">
+      <span class="badge beg">● Beginner</span>
+      <span class="badge int">● Intermediate</span>
+      <span class="badge adv">● Advanced</span>
+    </div>
+  </div>
+</div>
+
+<div class="wrapper">
+
+  <!-- TOC -->
+  <div class="toc">
+    <div class="toc-title">Table of Contents</div>
+    <div class="toc-grid">
+      <a href="#s1">1. What is RegEx?</a>
+      <a href="#s2">2. Creating Patterns</a>
+      <a href="#s3">3. Character Classes</a>
+      <a href="#s4">4. Anchors</a>
+      <a href="#s5">5. Quantifiers</a>
+      <a href="#s6">6. Flags / Modifiers</a>
+      <a href="#s7">7. Groups & Capturing</a>
+      <a href="#s8">8. Alternation</a>
+      <a href="#s9">9. JS RegEx Methods</a>
+      <a href="#s10">10. Lookahead & Lookbehind</a>
+      <a href="#s11">11. Backreferences</a>
+      <a href="#s12">12. Named Groups</a>
+      <a href="#s13">13. Real-World Examples</a>
+      <a href="#s14">14. Performance Tips</a>
+    </div>
+  </div>
+
+
+  <!-- SECTION 1 -->
+  <div class="section" id="s1">
+    <div class="section-header">
+      <span class="section-num">01</span>
+      <h2>What is RegEx? <small>BEGINNER · FOUNDATION</small></h2>
+    </div>
+
+    <div class="card">
+      <span class="level beg">BEGINNER</span>
+      <p>A <strong>Regular Expression</strong> (RegEx or RegExp) is a sequence of characters that defines a <em>search pattern</em>. In JavaScript, regex is used to match, search, and replace text inside strings.</p>
+      <p>Think of it as a powerful "Find & Replace" with a special pattern language.</p>
+
+      <div class="code-block">
+        <div class="code-header"><div class="code-dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div><span class="code-label">BASIC CONCEPT</span></div>
+        <pre><span class="cm">// RegEx lives between forward slashes: /pattern/</span>
+<span class="kw">const</span> pattern = <span class="rx">/hello/</span>;
+<span class="kw">const</span> str = <span class="str">"Say hello to the world"</span>;
+
+<span class="fn">console</span>.<span class="fn">log</span>(pattern.<span class="fn">test</span>(str)); <span class="cm">// true — pattern found in string</span></pre>
+      </div>
+      <div class="output">true</div>
+
+      <div class="callout info">
+        <div class="callout-head">ℹ How it works</div>
+        The engine scans left-to-right through the string, trying to match the pattern at each position. The first full match wins unless you use global flag <code>g</code>.
+      </div>
+    </div>
+  </div>
+
+
+  <!-- SECTION 2 -->
+  <div class="section" id="s2">
+    <div class="section-header">
+      <span class="section-num">02</span>
+      <h2>Creating Patterns <small>BEGINNER · SYNTAX</small></h2>
+    </div>
+
+    <div class="card">
+      <span class="level beg">BEGINNER</span>
+      <p>There are two ways to write a regex in JavaScript:</p>
+
+      <div class="grid-2">
+        <div>
+          <div class="card-title">Literal Notation <span class="tag">preferred</span></div>
+          <div class="code-block">
+            <div class="code-header"><div class="code-dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div></div>
+            <pre><span class="kw">const</span> re = <span class="rx">/abc/</span>;
+<span class="cm">// Pattern is compiled at load time</span>
+<span class="cm">// Slightly faster for static patterns</span></pre>
+          </div>
+        </div>
+        <div>
+          <div class="card-title">Constructor Notation <span class="tag">dynamic</span></div>
+          <div class="code-block">
+            <div class="code-header"><div class="code-dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div></div>
+            <pre><span class="kw">const</span> re = <span class="kw">new</span> <span class="fn">RegExp</span>(<span class="str">'abc'</span>);
+<span class="cm">// Useful when pattern comes</span>
+<span class="cm">// from a variable or user input</span></pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="code-block">
+        <div class="code-header"><div class="code-dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div><span class="code-label">DYNAMIC PATTERN EXAMPLE</span></div>
+        <pre><span class="kw">const</span> word = <span class="str">"cat"</span>;
+<span class="kw">const</span> pattern = <span class="kw">new</span> <span class="fn">RegExp</span>(word, <span class="str">'gi'</span>); <span class="cm">// flags as 2nd arg</span>
+<span class="fn">console</span>.<span class="fn">log</span>(<span class="str">"I love my Cat and my CAT"</span>.<span class="fn">match</span>(pattern));
+<span class="cm">// → ["Cat", "CAT"]</span></pre>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- SECTION 3 -->
+  <div class="section" id="s3">
+    <div class="section-header">
+      <span class="section-num">03</span>
+      <h2>Character Classes <small>BEGINNER · PATTERNS</small></h2>
+    </div>
+
+    <div class="card">
+      <span class="level beg">BEGINNER</span>
+      <table class="ref-table">
+        <tr><th>Pattern</th><th>Meaning</th><th>Example Match</th></tr>
+        <tr><td class="sym">.</td><td class="desc">Any character except newline</td><td class="ex">/h.t/ → "hat", "hit", "hot"</td></tr>
+        <tr><td class="sym">\d</td><td class="desc">Digit [0-9]</td><td class="ex">/\d/ → "5" in "abc5"</td></tr>
+        <tr><td class="sym">\D</td><td class="desc">Non-digit</td><td class="ex">/\D/ → "a" in "a5"</td></tr>
+        <tr><td class="sym">\w</td><td class="desc">Word char [a-zA-Z0-9_]</td><td class="ex">/\w/ → "h" in "hello"</td></tr>
+        <tr><td class="sym">\W</td><td class="desc">Non-word character</td><td class="ex">/\W/ → "!" in "hi!"</td></tr>
+        <tr><td class="sym">\s</td><td class="desc">Whitespace (space, tab, newline)</td><td class="ex">/\s/ → " " in "a b"</td></tr>
+        <tr><td class="sym">\S</td><td class="desc">Non-whitespace</td><td class="ex">/\S/ → "a" in "a b"</td></tr>
+        <tr><td class="sym">[abc]</td><td class="desc">Character set — a, b, or c</td><td class="ex">/[aeiou]/ → vowels</td></tr>
+        <tr><td class="sym">[^abc]</td><td class="desc">Negated set — NOT a, b, or c</td><td class="ex">/[^aeiou]/ → consonants</td></tr>
+        <tr><td class="sym">[a-z]</td><td class="desc">Range — lowercase letters</td><td class="ex">/[a-z]/ → "h" in "Hello"</td></tr>
+        <tr><td class="sym">[A-Z]</td><td class="desc">Range — uppercase letters</td><td class="ex">/[A-Z]/ → "H" in "Hello"</td></tr>
+        <tr><td class="sym">[0-9]</td><td class="desc">Range — digits (same as \d)</td><td class="ex">/[0-9]/ → "3"</td></tr>
+      </table>
+
+      <div class="code-block">
+        <div class="code-header"><div class="code-dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div><span class="code-label">CHARACTER CLASS EXAMPLES</span></div>
+        <pre><span class="cm">// Match any vowel</span>
+<span class="str">"hello"</span>.<span class="fn">match</span>(<span class="rx">/[aeiou]/g</span>);   <span class="cm">// ["e", "o"]</span>
+
+<span class="cm">// Match digits</span>
+<span class="str">"age: 25"</span>.<span class="fn">match</span>(<span class="rx">/\d+/g</span>);      <span class="cm">// ["25"]</span>
+
+<span class="cm">// Match word characters only</span>
+<span class="str">"hi! 99"</span>.<span class="fn">match</span>(<span class="rx">/\w+/g</span>);       <span class="cm">// ["hi", "99"]</span>
+
+<span class="cm">// Negated set: no digits</span>
+<span class="str">"abc123"</span>.<span class="fn">match</span>(<span class="rx">/[^0-9]+/g</span>);  <span class="cm">// ["abc"]</span></pre>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- SECTION 4 -->
+  <div class="section" id="s4">
+    <div class="section-header">
+      <span class="section-num">04</span>
+      <h2>Anchors <small>BEGINNER · POSITION</small></h2>
+    </div>
+
+    <div class="card">
+      <span class="level beg">BEGINNER</span>
+      <p>Anchors don't match characters — they match <strong>positions</strong> in the string.</p>
+
+      <table class="ref-table">
+        <tr><th>Anchor</th><th>Meaning</th></tr>
+        <tr><td class="sym">^</td><td class="desc">Start of string (or line with <code>m</code> flag)</td></tr>
+        <tr><td class="sym">$</td><td class="desc">End of string (or line with <code>m</code> flag)</td></tr>
+        <tr><td class="sym">\b</td><td class="desc">Word boundary (between \w and \W)</td></tr>
+        <tr><td class="sym">\B</td><td class="desc">Non-word boundary</td></tr>
+      </table>
+
+      <div class="code-block">
+        <div class="code-header"><div class="code-dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div><span class="code-label">ANCHOR EXAMPLES</span></div>
+        <pre><span class="cm">// ^ — must start with "Hello"</span>
+<span class="rx">/^Hello/</span>.<span class="fn">test</span>(<span class="str">"Hello World"</span>); <span class="cm">// true</span>
+<span class="rx">/^Hello/</span>.<span class="fn">test</span>(<span class="str">"Say Hello"</span>);   <span class="cm">// false</span>
+
+<span class="cm">// $ — must end with "end"</span>
+<span class="rx">/end$/</span>.<span class="fn">test</span>(<span class="str">"The end"</span>);       <span class="cm">// true</span>
+<span class="rx">/end$/</span>.<span class="fn">test</span>(<span class="str">"endless"</span>);       <span class="cm">// false</span>
+
+<span class="cm">// \b — whole word "cat" only</span>
+<span class="str">"cat"</span>.<span class="fn">match</span>(<span class="rx">/\bcat\b/</span>);       <span class="cm">// ["cat"]</span>
+<span class="str">"catfish"</span>.<span class="fn">match</span>(<span class="rx">/\bcat\b/</span>);   <span class="cm">// null</span>
+
+<span class="cm">// Exact match (^ and $ together)</span>
+<span class="rx">/^\d{5}$/</span>.<span class="fn">test</span>(<span class="str">"12345"</span>);       <span class="cm">// true (5 digits only)</span>
+<span class="rx">/^\d{5}$/</span>.<span class="fn">test</span>(<span class="str">"123456"</span>);      <span class="cm">// false (6 digits)</span></pre>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- SECTION 5 -->
+  <div class="section" id="s5">
+    <div class="section-header">
+      <span class="section-num">05</span>
+      <h2>Quantifiers <small>BEGINNER · REPETITION</small></h2>
+    </div>
+
+    <div class="card">
+      <span class="level beg">BEGINNER</span>
+      <p>Quantifiers control <strong>how many times</strong> a character or group must appear.</p>
+
+      <table class="ref-table">
+        <tr><th>Quantifier</th><th>Meaning</th><th>Example</th></tr>
+        <tr><td class="sym">*</td><td class="desc">0 or more</td><td class="ex">/go*/ → "g", "go", "goo"</td></tr>
+        <tr><td class="sym">+</td><td class="desc">1 or more</td><td class="ex">/go+/ → "go", "goo" (not "g")</td></tr>
+        <tr><td class="sym">?</td><td class="desc">0 or 1 (optional)</td><td class="ex">/colou?r/ → "color", "colour"</td></tr>
+        <tr><td class="sym">{n}</td><td class="desc">Exactly n times</td><td class="ex">/\d{4}/ → "2024"</td></tr>
+        <tr><td class="sym">{n,}</td><td class="desc">n or more times</td><td class="ex">/\d{2,}/ → "25", "100"</td></tr>
+        <tr><td class="sym">{n,m}</td><td class="desc">Between n and m times</td><td class="ex">/\d{2,4}/ → "25", "123"</td></tr>
+      </table>
+
+      <div class="code-block">
+        <div class="code-header"><div class="code-dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div><span class="code-label">GREEDY vs LAZY</span></div>
+        <pre><span class="cm">// GREEDY (default) — matches as MUCH as possible</span>
+<span class="str">"&lt;b&gt;bold&lt;/b&gt;"</span>.<span class="fn">match</span>(<span class="rx">/&lt;.+&gt;/</span>)[<span class="num">0</span>];
+<span class="cm">// → "&lt;b&gt;bold&lt;/b&gt;"  (entire string!)</span>
+
+<span class="cm">// LAZY (add ?) — matches as LITTLE as possible</span>
+<span class="str">"&lt;b&gt;bold&lt;/b&gt;"</span>.<span class="fn">match</span>(<span class="rx">/&lt;.+?&gt;/</span>)[<span class="num">0</span>];
+<span class="cm">// → "&lt;b&gt;"  (stops at first &gt;)</span>
+
+<span class="cm">// Optional character: both spellings match</span>
+<span class="rx">/colou?r/</span>.<span class="fn">test</span>(<span class="str">"color"</span>);   <span class="cm">// true</span>
+<span class="rx">/colou?r/</span>.<span class="fn">test</span>(<span class="str">"colour"</span>);  <span class="cm">// true</span></pre>
+      </div>
+
+      <div class="callout warn">
+        <div class="callout-head">⚠ Greedy Pitfall</div>
+        Greedy quantifiers can cause unexpected over-matching. When parsing HTML-like content, always prefer lazy (<code>+?</code> or <code>*?</code>) over greedy.
+      </div>
+    </div>
+  </div>
+
+
+  <!-- SECTION 6 -->
+  <div class="section" id="s6">
+    <div class="section-header">
+      <span class="section-num">06</span>
+      <h2>Flags / Modifiers <small>BEGINNER · OPTIONS</small></h2>
+    </div>
+
+    <div class="card">
+      <span class="level beg">BEGINNER</span>
+      <p>Flags modify how the regex engine searches. They go after the closing <code>/</code>.</p>
+
+      <table class="ref-table">
+        <tr><th>Flag</th><th>Name</th><th>Effect</th></tr>
+        <tr><td class="sym">g</td><td class="desc">Global</td><td class="desc">Find ALL matches, not just first</td></tr>
+        <tr><td class="sym">i</td><td class="desc">Case-insensitive</td><td class="desc">Ignore upper/lowercase</td></tr>
+        <tr><td class="sym">m</td><td class="desc">Multiline</td><td class="desc"><code>^</code> and <code>$</code> match line start/end</td></tr>
+        <tr><td class="sym">s</td><td class="desc">Dotall</td><td class="desc"><code>.</code> also matches newline <code>\n</code></td></tr>
+        <tr><td class="sym">u</td><td class="desc">Unicode</td><td class="desc">Full Unicode support (emoji, etc.)</td></tr>
+        <tr><td class="sym">d</td><td class="desc">Indices</td><td class="desc">Include match start/end indices</td></tr>
+      </table>
+
+      <div class="code-block">
+        <div class="code-header"><div class="code-dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div><span class="code-label">FLAG EXAMPLES</span></div>
+        <pre><span class="cm">// g — find all matches</span>
+<span class="str">"cat Cat CAT"</span>.<span class="fn">match</span>(<span class="rx">/cat/g</span>);    <span class="cm">// ["cat"]</span>
+<span class="str">"cat Cat CAT"</span>.<span class="fn">match</span>(<span class="rx">/cat/gi</span>);   <span class="cm">// ["cat", "Cat", "CAT"]</span>
+
+<span class="cm">// m — multiline anchors</span>
+<span class="kw">const</span> lines = <span class="str">"line1\nline2\nline3"</span>;
+lines.<span class="fn">match</span>(<span class="rx">/^\w+/gm</span>); <span class="cm">// ["line1", "line2", "line3"]</span>
+
+<span class="cm">// s — dot matches newline</span>
+<span class="str">"hello\nworld"</span>.<span class="fn">match</span>(<span class="rx">/hello.world/s</span>); <span class="cm">// match!</span>
+
+<span class="cm">// Combine multiple flags</span>
+<span class="rx">/pattern/gim</span>; <span class="cm">// global + case-insensitive + multiline</span></pre>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- SECTION 7 -->
+  <div class="section" id="s7">
+    <div class="section-header">
+      <span class="section-num">07</span>
+      <h2>Groups & Capturing <small>INTERMEDIATE · GROUPS</small></h2>
+    </div>
+
+    <div class="card">
+      <span class="level int">INTERMEDIATE</span>
+      <p>Parentheses <code>()</code> serve two purposes: <strong>grouping</strong> (apply quantifiers to a pattern) and <strong>capturing</strong> (save matched text for later use).</p>
+
+      <table class="ref-table">
+        <tr><th>Syntax</th><th>Type</th><th>Description</th></tr>
+        <tr><td class="sym">(abc)</td><td class="desc">Capturing group</td><td class="desc">Captures "abc" into group 1</td></tr>
+        <tr><td class="sym">(?:abc)</td><td class="desc">Non-capturing group</td><td class="desc">Groups without capturing</td></tr>
+      </table>
+
+      <div class="code-block">
+        <div class="code-header"><div class="code-dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div><span class="code-label">GROUPS EXAMPLE</span></div>
+        <pre><span class="cm">// Grouping with quantifier</span>
+<span class="rx">/(\d{1,3}\.){3}\d{1,3}/</span>.<span class="fn">test</span>(<span class="str">"192.168.1.1"</span>); <span class="cm">// true (IPv4)</span>
+
+<span class="cm">// Capturing groups</span>
+<span class="kw">const</span> match = <span class="str">"2024-07-15"</span>.<span class="fn">match</span>(<span class="rx">/(\d{4})-(\d{2})-(\d{2})/</span>);
+<span class="fn">console</span>.<span class="fn">log</span>(match[<span class="num">0</span>]); <span class="cm">// "2024-07-15" — full match</span>
+<span class="fn">console</span>.<span class="fn">log</span>(match[<span class="num">1</span>]); <span class="cm">// "2024"       — group 1</span>
+<span class="fn">console</span>.<span class="fn">log</span>(match[<span class="num">2</span>]); <span class="cm">// "07"         — group 2</span>
+<span class="fn">console</span>.<span class="fn">log</span>(match[<span class="num">3</span>]); <span class="cm">// "15"         — group 3</span>
+
+<span class="cm">// Non-capturing group (no overhead)</span>
+<span class="kw">const</span> m2 = <span class="str">"2024-07-15"</span>.<span class="fn">match</span>(<span class="rx">/(?:\d{4})-(\d{2})-(\d{2})/</span>);
+<span class="fn">console</span>.<span class="fn">log</span>(m2[<span class="num">1</span>]); <span class="cm">// "07" — year not captured, shifted</span></pre>
+      </div>
+
+      <div class="code-block">
+        <div class="code-header"><div class="code-dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div><span class="code-label">USE IN REPLACE</span></div>
+        <pre><span class="cm">// Swap first and last name using capture groups</span>
+<span class="kw">const</span> name = <span class="str">"John Smith"</span>;
+<span class="kw">const</span> result = name.<span class="fn">replace</span>(<span class="rx">/(\w+)\s(\w+)/</span>, <span class="str">"$2, $1"</span>);
+<span class="fn">console</span>.<span class="fn">log</span>(result); <span class="cm">// "Smith, John"</span>
+
+<span class="cm">// $1 = first group ("John"), $2 = second group ("Smith")</span></pre>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- SECTION 8 -->
+  <div class="section" id="s8">
+    <div class="section-header">
+      <span class="section-num">08</span>
+      <h2>Alternation <small>INTERMEDIATE · OR LOGIC</small></h2>
+    </div>
+
+    <div class="card">
+      <span class="level int">INTERMEDIATE</span>
+      <p>The pipe <code>|</code> works like a logical OR — match this <em>or</em> that.</p>
+
+      <div class="code-block">
+        <div class="code-header"><div class="code-dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div><span class="code-label">ALTERNATION EXAMPLES</span></div>
+        <pre><span class="cm">// Match "cat" or "dog"</span>
+<span class="rx">/cat|dog/</span>.<span class="fn">test</span>(<span class="str">"I have a dog"</span>);   <span class="cm">// true</span>
+<span class="rx">/cat|dog/</span>.<span class="fn">test</span>(<span class="str">"I have a fish"</span>);  <span class="cm">// false</span>
+
+<span class="cm">// Scoped alternation with group</span>
+<span class="rx">/gr(a|e)y/</span>.<span class="fn">test</span>(<span class="str">"grey"</span>);    <span class="cm">// true</span>
+<span class="rx">/gr(a|e)y/</span>.<span class="fn">test</span>(<span class="str">"gray"</span>);    <span class="cm">// true</span>
+
+<span class="cm">// Without grouping — broad alternation</span>
+<span class="rx">/^cat|dog$/</span>  <span class="cm">// means: start with "cat" OR end with "dog"</span>
+<span class="rx">/^(cat|dog)$/</span> <span class="cm">// means: ONLY "cat" or "dog" (anchored)</span>
+
+<span class="cm">// Multiple options</span>
+<span class="rx">/Mon|Tue|Wed|Thu|Fri/</span>.<span class="fn">test</span>(<span class="str">"Today is Wed"</span>); <span class="cm">// true</span></pre>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- SECTION 9 -->
+  <div class="section" id="s9">
+    <div class="section-header">
+      <span class="section-num">09</span>
+      <h2>JS RegEx Methods <small>INTERMEDIATE · API</small></h2>
+    </div>
+
+    <div class="card">
+      <span class="level int">INTERMEDIATE</span>
+      <p>JavaScript offers regex methods on both <strong>RegExp objects</strong> and <strong>String objects</strong>.</p>
+
+      <div class="card-title">RegExp Methods</div>
+      <div class="code-block">
+        <div class="code-header"><div class="code-dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div><span class="code-label">test() and exec()</span></div>
+        <pre><span class="cm">// .test() — returns boolean</span>
+<span class="rx">/\d+/</span>.<span class="fn">test</span>(<span class="str">"hello 42"</span>); <span class="cm">// true</span>
+
+<span class="cm">// .exec() — returns match array or null</span>
+<span class="kw">const</span> re = <span class="rx">/(\d+)/g</span>;
+<span class="kw">let</span> m;
+<span class="kw">while</span> ((m = re.<span class="fn">exec</span>(<span class="str">"a1 b22 c333"</span>)) !== <span class="bool">null</span>) {
+  <span class="fn">console</span>.<span class="fn">log</span>(<span class="str">`Found: ${m[0]} at index ${m.index}`</span>);
+}
+<span class="cm">// Found: 1 at index 1</span>
+<span class="cm">// Found: 22 at index 4</span>
+<span class="cm">// Found: 333 at index 8</span></pre>
+      </div>
+
+      <div class="card-title" style="margin-top:20px">String Methods</div>
+      <div class="code-block">
+        <div class="code-header"><div class="code-dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div><span class="code-label">match, matchAll, search, replace, replaceAll, split</span></div>
+        <pre><span class="kw">const</span> str = <span class="str">"Phone: 123-456, Alt: 789-000"</span>;
+
+<span class="cm">// .match() — returns array of matches</span>
+str.<span class="fn">match</span>(<span class="rx">/\d{3}/g</span>);       <span class="cm">// ["123", "456", "789", "000"]</span>
+
+<span class="cm">// .matchAll() — iterator with full detail (needs /g)</span>
+<span class="kw">const</span> all = [...str.<span class="fn">matchAll</span>(<span class="rx">/(\d{3})-(\d{3})/g</span>)];
+all[<span class="num">0</span>][<span class="num">1</span>]; <span class="cm">// "123" (group 1 of first match)</span>
+
+<span class="cm">// .search() — returns index of first match, or -1</span>
+str.<span class="fn">search</span>(<span class="rx">/\d{3}/</span>);       <span class="cm">// 7</span>
+
+<span class="cm">// .replace() — replace first (or all with /g)</span>
+str.<span class="fn">replace</span>(<span class="rx">/\d+/g</span>, <span class="str">"#"</span>); <span class="cm">// "Phone: #-#, Alt: #-#"</span>
+
+<span class="cm">// .replace() with function</span>
+str.<span class="fn">replace</span>(<span class="rx">/\d+/g</span>, (m) => <span class="str">`[${m}]`</span>);
+<span class="cm">// "Phone: [123]-[456], Alt: [789]-[000]"</span>
+
+<span class="cm">// .split() — split by pattern</span>
+<span class="str">"one1two2three"</span>.<span class="fn">split</span>(<span class="rx">/\d/</span>); <span class="cm">// ["one", "two", "three"]</span></pre>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- SECTION 10 -->
+  <div class="section" id="s10">
+    <div class="section-header">
+      <span class="section-num">10</span>
+      <h2>Lookahead & Lookbehind <small>ADVANCED · ZERO-WIDTH</small></h2>
+    </div>
+
+    <div class="card">
+      <span class="level adv">ADVANCED</span>
+      <p><strong>Lookarounds</strong> are zero-width assertions — they check what is around a match without <em>consuming</em> those characters. The surrounding text is not included in the match result.</p>
+
+      <table class="ref-table">
+        <tr><th>Syntax</th><th>Name</th><th>Description</th></tr>
+        <tr><td class="sym">(?=...)</td><td class="desc">Positive lookahead</td><td class="desc">Matches if followed by ...</td></tr>
+        <tr><td class="sym">(?!...)</td><td class="desc">Negative lookahead</td><td class="desc">Matches if NOT followed by ...</td></tr>
+        <tr><td class="sym">(?&lt;=...)</td><td class="desc">Positive lookbehind</td><td class="desc">Matches if preceded by ...</td></tr>
+        <tr><td class="sym">(?&lt;!...)</td><td class="desc">Negative lookbehind</td><td class="desc">Matches if NOT preceded by ...</td></tr>
+      </table>
+
+      <div class="code-block">
+        <div class="code-header"><div class="code-dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div><span class="code-label">LOOKAHEAD EXAMPLES</span></div>
+        <pre><span class="cm">// Positive lookahead: numbers followed by "px"</span>
+<span class="str">"font-size: 14px; margin: 20px"</span>.<span class="fn">match</span>(<span class="rx">/\d+(?=px)/g</span>);
+<span class="cm">// ["14", "20"]  — numbers matched, "px" not included</span>
+
+<span class="cm">// Negative lookahead: numbers NOT followed by "px"</span>
+<span class="str">"14px 20em 30px"</span>.<span class="fn">match</span>(<span class="rx">/\d+(?!px)\b/g</span>);
+<span class="cm">// ["20"]</span>
+
+<span class="cm">// Positive lookbehind: amount after "$"</span>
+<span class="str">"Price: $99.99 and €45"</span>.<span class="fn">match</span>(<span class="rx">/(?&lt;=\$)\d+\.?\d*/g</span>);
+<span class="cm">// ["99.99"]</span>
+
+<span class="cm">// Negative lookbehind: word not after "un"</span>
+<span class="str">"happy unhappy lucky"</span>.<span class="fn">match</span>(<span class="rx">/(?&lt;!un)\bhappy\b/g</span>);
+<span class="cm">// ["happy"]  — "unhappy" excluded</span></pre>
+      </div>
+
+      <div class="callout tip">
+        <div class="callout-head">✓ Memory Trick</div>
+        <strong>Lookahead</strong> = looking forward (<code>?=</code> ahead). <strong>Lookbehind</strong> = looking back (<code>&lt;=</code> has an arrow pointing left). The <code>!</code> makes it negative.
+      </div>
+    </div>
+  </div>
+
+
+  <!-- SECTION 11 -->
+  <div class="section" id="s11">
+    <div class="section-header">
+      <span class="section-num">11</span>
+      <h2>Backreferences <small>ADVANCED · REUSE</small></h2>
+    </div>
+
+    <div class="card">
+      <span class="level adv">ADVANCED</span>
+      <p>A backreference refers back to a previously captured group within the <em>same pattern</em>. Use <code>\1</code>, <code>\2</code>, etc. (or <code>\k&lt;name&gt;</code> for named groups).</p>
+
+      <div class="code-block">
+        <div class="code-header"><div class="code-dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div><span class="code-label">BACKREFERENCE EXAMPLES</span></div>
+        <pre><span class="cm">// Match doubled words</span>
+<span class="rx">/\b(\w+)\s\1\b/</span>.<span class="fn">test</span>(<span class="str">"the the end"</span>);   <span class="cm">// true</span>
+<span class="rx">/\b(\w+)\s\1\b/</span>.<span class="fn">test</span>(<span class="str">"the quick end"</span>); <span class="cm">// false</span>
+
+<span class="cm">// Match opening and closing HTML-like tag</span>
+<span class="kw">const</span> tagRe = <span class="rx">/&lt;(\w+)&gt;.*?&lt;\/\1&gt;/s</span>;
+tagRe.<span class="fn">test</span>(<span class="str">"&lt;div&gt;hello&lt;/div&gt;"</span>);  <span class="cm">// true</span>
+tagRe.<span class="fn">test</span>(<span class="str">"&lt;div&gt;hello&lt;/span&gt;"</span>); <span class="cm">// false — tags don't match</span>
+
+<span class="cm">// Match quoted string (single or double)</span>
+<span class="rx">/(['"]).*?\1/</span>.<span class="fn">test</span>(<span class="str">`"hello"`</span>);   <span class="cm">// true  (both double)</span>
+<span class="rx">/(['"]).*?\1/</span>.<span class="fn">test</span>(<span class="str">`"hello'`</span>);   <span class="cm">// false (mismatched)</span></pre>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- SECTION 12 -->
+  <div class="section" id="s12">
+    <div class="section-header">
+      <span class="section-num">12</span>
+      <h2>Named Capture Groups <small>ADVANCED · CLARITY</small></h2>
+    </div>
+
+    <div class="card">
+      <span class="level adv">ADVANCED</span>
+      <p>Instead of <code>match[1]</code>, <code>match[2]</code>... use <code>(?&lt;name&gt;...)</code> to give groups meaningful names. Access via <code>match.groups.name</code>.</p>
+
+      <div class="code-block">
+        <div class="code-header"><div class="code-dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div><span class="code-label">NAMED GROUPS EXAMPLE</span></div>
+        <pre><span class="cm">// Parse a date string</span>
+<span class="kw">const</span> dateRe = <span class="rx">/(?&lt;year&gt;\d{4})-(?&lt;month&gt;\d{2})-(?&lt;day&gt;\d{2})/</span>;
+<span class="kw">const</span> m = <span class="str">"2024-11-30"</span>.<span class="fn">match</span>(dateRe);
+
+m.<span class="fn">groups</span>.year;  <span class="cm">// "2024"</span>
+m.<span class="fn">groups</span>.month; <span class="cm">// "11"</span>
+m.<span class="fn">groups</span>.day;   <span class="cm">// "30"</span>
+
+<span class="cm">// Named group in replace</span>
+<span class="str">"2024-11-30"</span>.<span class="fn">replace</span>(
+  <span class="rx">/(?&lt;y&gt;\d{4})-(?&lt;m&gt;\d{2})-(?&lt;d&gt;\d{2})/</span>,
+  <span class="str">"$&lt;d&gt;/$&lt;m&gt;/$&lt;y&gt;"</span>
+); <span class="cm">// "30/11/2024"</span>
+
+<span class="cm">// Named backreference</span>
+<span class="rx">/(?&lt;tag&gt;\w+):(?&lt;val&gt;\w+) \k&lt;tag&gt;:\w+/</span>.<span class="fn">test</span>(<span class="str">"a:1 a:2"</span>); <span class="cm">// true</span></pre>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- SECTION 13 -->
+  <div class="section" id="s13">
+    <div class="section-header">
+      <span class="section-num">13</span>
+      <h2>Real-World Patterns <small>ALL LEVELS · PRACTICAL</small></h2>
+    </div>
+
+    <div class="card">
+      <span class="level int">INTERMEDIATE</span>
+      <div class="card-title">Email Validation</div>
+      <div class="code-block">
+        <div class="code-header"><div class="code-dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div></div>
+        <pre><span class="kw">const</span> emailRe = <span class="rx">/^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/</span>;
+emailRe.<span class="fn">test</span>(<span class="str">"user@example.com"</span>);   <span class="cm">// true</span>
+emailRe.<span class="fn">test</span>(<span class="str">"bad@"</span>);               <span class="cm">// false</span>
+emailRe.<span class="fn">test</span>(<span class="str">"no-at-sign.com"</span>);     <span class="cm">// false</span></pre>
+      </div>
+    </div>
+
+    <div class="card">
+      <span class="level int">INTERMEDIATE</span>
+      <div class="card-title">URL Parsing</div>
+      <div class="code-block">
+        <div class="code-header"><div class="code-dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div></div>
+        <pre><span class="kw">const</span> urlRe = <span class="rx">/(?&lt;protocol&gt;https?):\/\/(?&lt;host&gt;[^\/]+)(?&lt;path&gt;\/[^?#]*)?/</span>;
+<span class="kw">const</span> m = <span class="str">"https://example.com/page?q=1"</span>.<span class="fn">match</span>(urlRe);
+m.<span class="fn">groups</span>.protocol;  <span class="cm">// "https"</span>
+m.<span class="fn">groups</span>.host;      <span class="cm">// "example.com"</span>
+m.<span class="fn">groups</span>.path;      <span class="cm">// "/page"</span></pre>
+      </div>
+    </div>
+
+    <div class="card">
+      <span class="level beg">BEGINNER</span>
+      <div class="card-title">Phone Number</div>
+      <div class="code-block">
+        <div class="code-header"><div class="code-dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div></div>
+        <pre><span class="cm">// Indian mobile: 10 digits starting with 6-9</span>
+<span class="kw">const</span> phoneRe = <span class="rx">/^[6-9]\d{9}$/</span>;
+phoneRe.<span class="fn">test</span>(<span class="str">"9876543210"</span>); <span class="cm">// true</span>
+phoneRe.<span class="fn">test</span>(<span class="str">"1234567890"</span>); <span class="cm">// false</span></pre>
+      </div>
+    </div>
+
+    <div class="card">
+      <span class="level int">INTERMEDIATE</span>
+      <div class="card-title">Password Strength</div>
+      <div class="code-block">
+        <div class="code-header"><div class="code-dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div></div>
+        <pre><span class="cm">// At least 8 chars, 1 uppercase, 1 digit, 1 special char</span>
+<span class="kw">const</span> strongPwd = <span class="rx">/^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&amp;])[A-Za-z\d@$!%*?&amp;]{8,}$/</span>;
+strongPwd.<span class="fn">test</span>(<span class="str">"Password1!"</span>); <span class="cm">// true</span>
+strongPwd.<span class="fn">test</span>(<span class="str">"password"</span>);   <span class="cm">// false (no upper, digit, special)</span>
+
+<span class="cm">// Breakdown using lookaheads:</span>
+<span class="cm">// (?=.*[A-Z])  — must have uppercase</span>
+<span class="cm">// (?=.*\d)     — must have digit</span>
+<span class="cm">// (?=.*[@$!%]) — must have special char</span>
+<span class="cm">// {8,}         — minimum 8 characters</span></pre>
+      </div>
+    </div>
+
+    <div class="card">
+      <span class="level int">INTERMEDIATE</span>
+      <div class="card-title">Slug / URL-safe String</div>
+      <div class="code-block">
+        <div class="code-header"><div class="code-dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div></div>
+        <pre><span class="kw">function</span> <span class="fn">slugify</span>(str) {
+  <span class="kw">return</span> str
+    .<span class="fn">toLowerCase</span>()
+    .<span class="fn">replace</span>(<span class="rx">/[^a-z0-9\s-]/g</span>, <span class="str">""</span>)   <span class="cm">// remove special chars</span>
+    .<span class="fn">replace</span>(<span class="rx">/\s+/g</span>, <span class="str">"-"</span>)           <span class="cm">// spaces → dashes</span>
+    .<span class="fn">replace</span>(<span class="rx">/^-+|-+$/g</span>, <span class="str">""</span>);      <span class="cm">// trim dashes</span>
+}
+<span class="fn">slugify</span>(<span class="str">"Hello World! #1"</span>);  <span class="cm">// "hello-world-1"</span></pre>
+      </div>
+    </div>
+
+    <div class="card">
+      <span class="level adv">ADVANCED</span>
+      <div class="card-title">CSV Row Parser</div>
+      <div class="code-block">
+        <div class="code-header"><div class="code-dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div></div>
+        <pre><span class="cm">// Handles quoted fields with commas inside</span>
+<span class="kw">function</span> <span class="fn">parseCSVRow</span>(row) {
+  <span class="kw">const</span> re = <span class="rx">/("(?:[^"]|"")*"|[^,]*),?/g</span>;
+  <span class="kw">return</span> [...row.<span class="fn">matchAll</span>(re)]
+    .<span class="fn">map</span>(m => m[<span class="num">1</span>].<span class="fn">replace</span>(<span class="rx">/^"|"$/g</span>, <span class="str">""</span>).<span class="fn">replace</span>(<span class="rx">/""/g</span>, <span class="str">'"'</span>))
+    .<span class="fn">filter</span>(Boolean);
+}
+<span class="fn">parseCSVRow</span>(<span class="str">'John,"Smith, Jr.",42'</span>);
+<span class="cm">// ["John", "Smith, Jr.", "42"]</span></pre>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- SECTION 14 -->
+  <div class="section" id="s14">
+    <div class="section-header">
+      <span class="section-num">14</span>
+      <h2>Performance & Best Practices <small>ADVANCED · OPTIMIZATION</small></h2>
+    </div>
+
+    <div class="card">
+      <span class="level adv">ADVANCED</span>
+
+      <div class="callout warn">
+        <div class="callout-head">⚠ Catastrophic Backtracking</div>
+        Patterns like <code>/(a+)+b/</code> on a string like "aaaaaaaaac" can cause <strong>exponential time</strong> — the engine tries every combination. This is called ReDoS (Regex Denial of Service). Always test with edge-case inputs.
+      </div>
+
+      <div class="code-block">
+        <div class="code-header"><div class="code-dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div><span class="code-label">PERFORMANCE TIPS</span></div>
+        <pre><span class="cm">// ✗ BAD: recompiles on every call in a loop</span>
+items.<span class="fn">forEach</span>(item => {
+  <span class="kw">if</span> (<span class="rx">/pattern/gi</span>.<span class="fn">test</span>(item)) { ... }
+});
+
+<span class="cm">// ✓ GOOD: compile once outside the loop</span>
+<span class="kw">const</span> re = <span class="rx">/pattern/gi</span>;
+items.<span class="fn">forEach</span>(item => {
+  <span class="kw">if</span> (re.<span class="fn">test</span>(item)) { ... }
+});
+
+<span class="cm">// ✗ BAD: greedy on large strings</span>
+bigStr.<span class="fn">match</span>(<span class="rx">/&lt;.+&gt;/</span>);
+
+<span class="cm">// ✓ GOOD: use lazy + anchors</span>
+bigStr.<span class="fn">match</span>(<span class="rx">/&lt;[^&gt;]+&gt;/</span>);     <span class="cm">// character class, no backtrack</span>
+bigStr.<span class="fn">match</span>(<span class="rx">/&lt;.+?&gt;/</span>);      <span class="cm">// lazy alternative</span>
+
+<span class="cm">// ✗ BAD: /g flag on stateful .test() / .exec()</span>
+<span class="kw">const</span> re2 = <span class="rx">/\d+/g</span>;
+re2.<span class="fn">test</span>(<span class="str">"123"</span>);  <span class="cm">// true  (lastIndex now = 3)</span>
+re2.<span class="fn">test</span>(<span class="str">"123"</span>);  <span class="cm">// false (starts at index 3!)</span>
+
+<span class="cm">// ✓ FIX: reset lastIndex or use new instance</span>
+re2.lastIndex = <span class="num">0</span>;
+re2.<span class="fn">test</span>(<span class="str">"123"</span>);  <span class="cm">// true again</span></pre>
+      </div>
+
+      <div class="callout tip">
+        <div class="callout-head">✓ Best Practices Summary</div>
+        <p>1. Compile regex <strong>outside loops</strong>. 2. Use <strong>non-capturing groups</strong> <code>(?:)</code> when you don't need the capture. 3. Prefer <strong>character classes</strong> over alternation for single chars. 4. Always <strong>reset</strong> <code>lastIndex</code> when reusing stateful <code>/g</code> patterns. 5. Validate regex with <a href="https://regex101.com" target="_blank" style="color:var(--accent)">regex101.com</a>.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- QUICK REF -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-num">REF</span>
+      <h2>Quick Reference Card <small>ALL LEVELS · CHEATSHEET</small></h2>
+    </div>
+    <div class="card">
+      <div class="grid-2">
+        <div>
+          <div class="card-title">Anchors & Boundaries</div>
+          <table class="ref-table">
+            <tr><td class="sym">^</td><td class="desc">String start</td></tr>
+            <tr><td class="sym">$</td><td class="desc">String end</td></tr>
+            <tr><td class="sym">\b</td><td class="desc">Word boundary</td></tr>
+            <tr><td class="sym">\B</td><td class="desc">Non-word boundary</td></tr>
+          </table>
+        </div>
+        <div>
+          <div class="card-title">Quantifiers</div>
+          <table class="ref-table">
+            <tr><td class="sym">*</td><td class="desc">0 or more (greedy)</td></tr>
+            <tr><td class="sym">+</td><td class="desc">1 or more (greedy)</td></tr>
+            <tr><td class="sym">?</td><td class="desc">0 or 1 (optional)</td></tr>
+            <tr><td class="sym">*? +? ??</td><td class="desc">Lazy versions</td></tr>
+            <tr><td class="sym">{n,m}</td><td class="desc">Between n and m</td></tr>
+          </table>
+        </div>
+        <div>
+          <div class="card-title">Character Shorthands</div>
+          <table class="ref-table">
+            <tr><td class="sym">.</td><td class="desc">Any except newline</td></tr>
+            <tr><td class="sym">\d / \D</td><td class="desc">Digit / Non-digit</td></tr>
+            <tr><td class="sym">\w / \W</td><td class="desc">Word / Non-word</td></tr>
+            <tr><td class="sym">\s / \S</td><td class="desc">Space / Non-space</td></tr>
+          </table>
+        </div>
+        <div>
+          <div class="card-title">Groups</div>
+          <table class="ref-table">
+            <tr><td class="sym">(abc)</td><td class="desc">Capture group</td></tr>
+            <tr><td class="sym">(?:abc)</td><td class="desc">Non-capture group</td></tr>
+            <tr><td class="sym">(?&lt;n&gt;abc)</td><td class="desc">Named group</td></tr>
+            <tr><td class="sym">(?=abc)</td><td class="desc">Lookahead</td></tr>
+            <tr><td class="sym">(?!abc)</td><td class="desc">Neg. lookahead</td></tr>
+            <tr><td class="sym">(?&lt;=abc)</td><td class="desc">Lookbehind</td></tr>
+            <tr><td class="sym">(?&lt;!abc)</td><td class="desc">Neg. lookbehind</td></tr>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /wrapper -->
+</body>
+</html>
