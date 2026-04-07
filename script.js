@@ -1,16 +1,16 @@
-function longestCommonSuffix(arr){
-    if(arr.length == 0) return ""
+function tribonacciSequence(num){
+    let a = 0;
+    let b = 1;
+    let c = 1;
 
-    let reversed = arr.map(item => item.split("").reverse().join(""));
-
-    let prefix = reversed[0];
-
-    for(let i = 1; i < reversed.length; i++){
-        while(reversed[i].indexOf(prefix) !== 0){
-            prefix = prefix.slice(0, -1);
-            if(prefix === "") return ""
-        }
+    for(let i = 3; i <=num; i++){
+        let d = a + b + c;
+        a = b;
+        b = c;
+        c = d
     }
-    return prefix.split(""). reverse().join("");
+
+    return c;
 }
-console.log(longestCommonSuffix(["running","jogging","walking"]));
+
+console.log(tribonacciSequence(10))
