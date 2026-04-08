@@ -1,5 +1,5 @@
 function fSum(num){
-    //serease = 0,1,1,2,3
+    //series = 0,1,1,2,3
     let a = 0;
     let b = 1;
     let sum = 1;
