@@ -3,7 +3,7 @@ let result = str.replace("hello", "hi");
 
 console.log(result); // "hi world hello"
 
-/////////////////////
+////////////Replace All/////////
 
 
 let str2 = "hello world hello";
