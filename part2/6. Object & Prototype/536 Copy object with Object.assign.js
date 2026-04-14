@@ -1,0 +1,10 @@
+// 🔹 Basic syntax
+// Object.assign(target, source)
+
+//used for shallow copy
+
+const obj = {a: 1, b: 2};
+
+const copy = Object.assign({}, obj);
+
+console.log(copy) //{a: 1, b: 2}

@@ -1,0 +1,29 @@
+function isValid(str) {
+    const pairs = {
+        ")": "(",
+        "}": "{",
+        "]": "["
+    };
+
+    let stack = [];
+
+    for (let i = 0; i < str.length; i++) {
+
+        if (str[i] === "(" || str[i] === "{" || str[i] === "[") {
+            stack.push(str[i]);
+        } 
+        else {
+            let top = stack.pop();
+            console.log(top)
+            if (top !== pairs[str[i]]) {
+                return false;
+            }
+        }
+    }
+
+    return stack.length === 0;
+}
+
+console.log(isValid("[{()}]"))
+console.log(isValid("[]{}()"))
+console.log(isValid("[}"))
