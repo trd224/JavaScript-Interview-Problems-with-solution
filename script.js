@@ -1,22 +1,21 @@
-class Queue{
-    constructor(){
-        this.items = [];
-    }
+function binarySearch(arr, target){
+    let left = 0;
+    let right = arr.length - 1;
 
-    push(element){
-        this.items.push(element);
-    }
+    while(left <= right){
+        let mid = Math.floor((left + right)/2);
 
-    pop(){
-        
+        if(target === arr[mid]){
+            return mid;
+        }
+        else if(arr[mid] < target){
+            left = left + 1
+        }
+        else{
+            right = right - 1
+        }
     }
+    return -1;
 
-    isEmpty(){
-        this.items.length === 0;
-    }
-
-    print(){
-        console.log(this.items);
-    }
 }
-const queue = new Queue();
+console.log(binarySearch([1,3,5,7,9,11], 9)); // index 4
