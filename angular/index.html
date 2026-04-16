@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Angular Questions</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Sora:wght@300;400;600;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0e1a;
+    --surface: #111827;
+    --card: #161d2e;
+    --border: #1e2d45;
+    --accent: #e84d4d;
+    --accent2: #f97316;
+    --accent3: #3b82f6;
+    --text: #e2e8f0;
+    --muted: #64748b;
+    --beginner: #22c55e;
+    --intermediate: #f59e0b;
+    --advanced: #e84d4d;
+    --latest: #a855f7;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Sora', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Animated background grid */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(59,130,246,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(59,130,246,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* Header */
+  header {
+    position: relative;
+    padding: 60px 40px 40px;
+    text-align: center;
+    border-bottom: 1px solid var(--border);
+    background: linear-gradient(180deg, rgba(232,77,77,0.07) 0%, transparent 100%);
+    overflow: hidden;
+    z-index: 1;
+  }
+
+  header::after {
+    content: '';
+    position: absolute;
+    bottom: -1px; left: 50%; transform: translateX(-50%);
+    width: 200px; height: 2px;
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  }
+
+  .logo-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(232,77,77,0.12);
+    border: 1px solid rgba(232,77,77,0.3);
+    border-radius: 100px;
+    padding: 6px 18px;
+    font-size: 12px;
+    font-family: 'Space Mono', monospace;
+    color: var(--accent);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+  }
+
+  .logo-badge::before {
+    content: '▲';
+    font-size: 14px;
+  }
+
+  h1 {
+    font-size: clamp(36px, 6vw, 72px);
+    font-weight: 800;
+    line-height: 1.1;
+    background: linear-gradient(135deg, #fff 30%, #e84d4d 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 12px;
+    letter-spacing: -2px;
+  }
+
+  .subtitle {
+    color: var(--muted);
+    font-size: 16px;
+    font-weight: 300;
+    max-width: 500px;
+    margin: 0 auto 30px;
+    line-height: 1.6;
+  }
+
+  /* Stats bar */
+  .stats-bar {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    flex-wrap: wrap;
+    margin-top: 10px;
+  }
+
+  .stat {
+    text-align: center;
+  }
+
+  .stat-num {
+    font-family: 'Space Mono', monospace;
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--accent);
+  }
+
+  .stat-label {
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  /* Controls */
+  .controls {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(10,14,26,0.95);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+    padding: 16px 40px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .search-box {
+    flex: 1;
+    min-width: 200px;
+    position: relative;
+  }
+
+  .search-box input {
+    width: 100%;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 16px 10px 40px;
+    color: var(--text);
+    font-family: 'Sora', sans-serif;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .search-box input:focus { border-color: var(--accent3); }
+  .search-box input::placeholder { color: var(--muted); }
+
+  .search-icon {
+    position: absolute;
+    left: 12px; top: 50%;
+    transform: translateY(-50%);
+    color: var(--muted);
+    font-size: 14px;
+  }
+
+  .filter-btns {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .filter-btn {
+    padding: 8px 16px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--muted);
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  .filter-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .filter-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .filter-btn.beginner.active { background: var(--beginner); border-color: var(--beginner); }
+  .filter-btn.intermediate.active { background: var(--intermediate); border-color: var(--intermediate); }
+  .filter-btn.advanced.active { background: var(--advanced); border-color: var(--advanced); }
+  .filter-btn.latest.active { background: var(--latest); border-color: var(--latest); }
+
+  /* Main layout */
+  .main {
+    position: relative;
+    z-index: 1;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 40px 40px 80px;
+  }
+
+  /* Section headers */
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin: 48px 0 24px;
+    position: relative;
+  }
+
+  .section-header::before {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .section-title-wrap {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    white-space: nowrap;
+  }
+
+  .section-icon {
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px;
+  }
+
+  .section-title {
+    font-family: 'Space Mono', monospace;
+    font-size: 13px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  .section-count {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 100px;
+    font-weight: 700;
+  }
+
+  .section-header::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* Level colors */
+  .level-beginner .section-icon { background: rgba(34,197,94,0.15); color: var(--beginner); }
+  .level-beginner .section-title { color: var(--beginner); }
+  .level-beginner .section-count { background: rgba(34,197,94,0.15); color: var(--beginner); }
+
+  .level-intermediate .section-icon { background: rgba(245,158,11,0.15); color: var(--intermediate); }
+  .level-intermediate .section-title { color: var(--intermediate); }
+  .level-intermediate .section-count { background: rgba(245,158,11,0.15); color: var(--intermediate); }
+
+  .level-advanced .section-icon { background: rgba(232,77,77,0.15); color: var(--advanced); }
+  .level-advanced .section-title { color: var(--advanced); }
+  .level-advanced .section-count { background: rgba(232,77,77,0.15); color: var(--advanced); }
+
+  .level-latest .section-icon { background: rgba(168,85,247,0.15); color: var(--latest); }
+  .level-latest .section-title { color: var(--latest); }
+  .level-latest .section-count { background: rgba(168,85,247,0.15); color: var(--latest); }
+
+  /* Question cards */
+  .questions-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .q-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    transition: all 0.2s ease;
+    cursor: pointer;
+  }
+
+  .q-card:hover {
+    border-color: rgba(232,77,77,0.4);
+    transform: translateX(4px);
+    box-shadow: -4px 0 0 var(--accent), 0 4px 24px rgba(0,0,0,0.3);
+  }
+
+  .q-card.hidden { display: none; }
+
+  .q-header {
+    padding: 18px 22px;
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+  }
+
+  .q-num {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    min-width: 32px;
+    padding-top: 2px;
+  }
+
+  .q-text {
+    flex: 1;
+    font-size: 15px;
+    font-weight: 600;
+    line-height: 1.5;
+    color: var(--text);
+  }
+
+  .q-tag {
+    font-size: 10px;
+    font-family: 'Space Mono', monospace;
+    padding: 3px 8px;
+    border-radius: 4px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    white-space: nowrap;
+    margin-top: 2px;
+  }
+
+  .tag-beginner { background: rgba(34,197,94,0.12); color: var(--beginner); border: 1px solid rgba(34,197,94,0.25); }
+  .tag-intermediate { background: rgba(245,158,11,0.12); color: var(--intermediate); border: 1px solid rgba(245,158,11,0.25); }
+  .tag-advanced { background: rgba(232,77,77,0.12); color: var(--advanced); border: 1px solid rgba(232,77,77,0.25); }
+  .tag-latest { background: rgba(168,85,247,0.12); color: var(--latest); border: 1px solid rgba(168,85,247,0.25); }
+
+  .q-expand-btn {
+    color: var(--muted);
+    font-size: 18px;
+    transition: transform 0.3s, color 0.2s;
+    padding-top: 2px;
+  }
+
+  .q-card.open .q-expand-btn {
+    transform: rotate(180deg);
+    color: var(--accent);
+  }
+
+  .q-answer {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.4s ease, padding 0.3s;
+    border-top: 0px solid var(--border);
+  }
+
+  .q-card.open .q-answer {
+    max-height: 600px;
+    border-top-width: 1px;
+    padding: 18px 22px 18px 68px;
+  }
+
+  .q-answer p {
+    font-size: 14px;
+    line-height: 1.8;
+    color: #94a3b8;
+    font-weight: 300;
+  }
+
+  .q-answer code {
+    font-family: 'Space Mono', monospace;
+    background: rgba(59,130,246,0.1);
+    border: 1px solid rgba(59,130,246,0.2);
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-size: 12px;
+    color: #93c5fd;
+  }
+
+  /* No results */
+  .no-results {
+    text-align: center;
+    padding: 80px 20px;
+    color: var(--muted);
+    display: none;
+  }
+
+  .no-results.show { display: block; }
+  .no-results .icon { font-size: 48px; margin-bottom: 16px; }
+
+  /* Scroll to top */
+  .scroll-top {
+    position: fixed;
+    bottom: 30px; right: 30px;
+    width: 44px; height: 44px;
+    background: var(--accent);
+    border: none;
+    border-radius: 50%;
+    color: #fff;
+    font-size: 18px;
+    cursor: pointer;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.3s;
+    z-index: 999;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  .scroll-top.visible { opacity: 1; transform: translateY(0); }
+
+  /* Progress bar */
+  .progress-bar {
+    position: fixed;
+    top: 0; left: 0;
+    height: 2px;
+    background: var(--accent);
+    z-index: 1000;
+    transition: width 0.1s;
+  }
+
+  /* Responsive */
+  @media (max-width: 600px) {
+    header { padding: 40px 20px 30px; }
+    .controls { padding: 12px 20px; }
+    .main { padding: 30px 20px 60px; }
+    .q-card.open .q-answer { padding-left: 22px; }
+    h1 { letter-spacing: -1px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="progress-bar" id="progressBar"></div>
+
+<header>
+  <div class="logo-badge">Angular Prep</div>
+  <h1>Angular <br>Questions</h1>
+  <p class="subtitle">From beginner to advanced — 200+ questions covering Angular latest versions</p>
+  <div class="stats-bar">
+    <div class="stat"><div class="stat-num" id="totalCount">210</div><div class="stat-label">Questions</div></div>
+    <div class="stat"><div class="stat-num" style="color:var(--beginner)">60</div><div class="stat-label">Beginner</div></div>
+    <div class="stat"><div class="stat-num" style="color:var(--intermediate)">80</div><div class="stat-label">Intermediate</div></div>
+    <div class="stat"><div class="stat-num" style="color:var(--advanced)">45</div><div class="stat-label">Advanced</div></div>
+    <div class="stat"><div class="stat-num" style="color:var(--latest)">25</div><div class="stat-label">Angular 17–19</div></div>
+  </div>
+</header>
+
+<div class="controls">
+  <div class="search-box">
+    <span class="search-icon">🔍</span>
+    <input type="text" id="searchInput" placeholder="Search questions...">
+  </div>
+  <div class="filter-btns">
+    <button class="filter-btn active" data-filter="all">All</button>
+    <button class="filter-btn beginner" data-filter="beginner">🟢 Beginner</button>
+    <button class="filter-btn intermediate" data-filter="intermediate">🟡 Intermediate</button>
+    <button class="filter-btn advanced" data-filter="advanced">🔴 Advanced</button>
+    <button class="filter-btn latest" data-filter="latest">🟣 Angular 17–19</button>
+  </div>
+</div>
+
+<div class="main">
+  <div id="noResults" class="no-results">
+    <div class="icon">🔍</div>
+    <p>No questions match your search.</p>
+  </div>
+
+  <!-- BEGINNER -->
+  <div class="section-header level-beginner" data-section="beginner">
+    <div class="section-title-wrap">
+      <div class="section-icon">🟢</div>
+      <span class="section-title">Beginner</span>
+      <span class="section-count">60 Questions</span>
+    </div>
+  </div>
+  <div class="questions-grid" id="beginner-grid"></div>
+
+  <!-- INTERMEDIATE -->
+  <div class="section-header level-intermediate" data-section="intermediate">
+    <div class="section-title-wrap">
+      <div class="section-icon">🟡</div>
+      <span class="section-title">Intermediate</span>
+      <span class="section-count">80 Questions</span>
+    </div>
+  </div>
+  <div class="questions-grid" id="intermediate-grid"></div>
+
+  <!-- ADVANCED -->
+  <div class="section-header level-advanced" data-section="advanced">
+    <div class="section-title-wrap">
+      <div class="section-icon">🔴</div>
+      <span class="section-title">Advanced</span>
+      <span class="section-count">45 Questions</span>
+    </div>
+  </div>
+  <div class="questions-grid" id="advanced-grid"></div>
+
+  <!-- LATEST -->
+  <div class="section-header level-latest" data-section="latest">
+    <div class="section-title-wrap">
+      <div class="section-icon">🟣</div>
+      <span class="section-title">Angular 17 / 18 / 19 (Latest)</span>
+      <span class="section-count">25 Questions</span>
+    </div>
+  </div>
+  <div class="questions-grid" id="latest-grid"></div>
+</div>
+
+<button class="scroll-top" id="scrollTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+
+<script>
+const data = {
+  beginner: [
+    { q: "What is Angular?", a: "Angular is a TypeScript-based open-source front-end web application framework developed by Google. It is used for building single-page applications (SPAs) using HTML, CSS, and TypeScript. Angular follows the MVC/MVVM architecture pattern." },
+    { q: "What is the difference between AngularJS and Angular?", a: "AngularJS (Angular 1.x) uses JavaScript and is based on MVC pattern. Angular (2+) is a complete rewrite using TypeScript, component-based architecture, better performance, mobile support, and modular design. They are entirely different frameworks." },
+    { q: "What is a Component in Angular?", a: "A component is the fundamental building block of Angular applications. It controls a portion of the screen (view) and is defined using the @Component decorator with a selector, template, and style. Every Angular app has at least one root component." },
+    { q: "What is a Module in Angular?", a: "A module is a container for components, directives, pipes, and services. It is defined using @NgModule. The root module is AppModule. Modules help organize an application into cohesive blocks of functionality." },
+    { q: "What is Data Binding in Angular?", a: "Data binding is the mechanism to sync data between the component class and its template. Angular supports: Interpolation ({{ }}), Property Binding ([property]), Event Binding ((event)), and Two-Way Binding ([(ngModel)])." },
+    { q: "What is Interpolation in Angular?", a: "Interpolation is a one-way data binding technique using double curly braces {{ expression }}. It evaluates the expression and renders the result as a string in the template. Example: <h1>{{ title }}</h1>." },
+    { q: "What is Property Binding in Angular?", a: "Property binding binds a component property to a DOM element property. It uses square brackets: [property]='expression'. Example: <img [src]='imageUrl'>. It flows data from component to view." },
+    { q: "What is Event Binding in Angular?", a: "Event binding listens to DOM events and calls a component method when triggered. It uses parentheses: (event)='handler()'. Example: <button (click)='onClick()'>Click</button>. It flows data from view to component." },
+    { q: "What is Two-Way Data Binding?", a: "Two-way binding combines property and event binding using [(ngModel)], which requires FormsModule. It keeps the model and view in sync automatically. Changes in input update the model, and model changes update the view." },
+    { q: "What is a Directive in Angular?", a: "Directives are instructions in the DOM. Angular has three types: Component directives (have a template), Structural directives (change DOM layout like *ngIf, *ngFor), and Attribute directives (change appearance/behavior like ngClass, ngStyle)." },
+    { q: "What is *ngIf directive?", a: "*ngIf is a structural directive that conditionally includes or removes a DOM element based on a boolean expression. When false, the element and its children are completely removed from the DOM, not just hidden." },
+    { q: "What is *ngFor directive?", a: "*ngFor is a structural directive used to iterate over a list and render a template for each item. Example: <li *ngFor='let item of items'>{{ item }}</li>. It also exposes index, first, last, even, and odd variables." },
+    { q: "What is ngClass directive?", a: "ngClass is an attribute directive that adds or removes CSS classes dynamically. It accepts a string, array, or object. Example: [ngClass]=\"{'active': isActive, 'disabled': isDisabled}\"." },
+    { q: "What is ngStyle directive?", a: "ngStyle is an attribute directive that sets inline CSS styles dynamically. Example: [ngStyle]=\"{'color': textColor, 'font-size': fontSize + 'px'}\"." },
+    { q: "What is a Service in Angular?", a: "A service is a class with a specific purpose, typically to share data or logic across components. Services are decorated with @Injectable and usually provided in root or a specific module. Angular uses dependency injection to supply services." },
+    { q: "What is Dependency Injection in Angular?", a: "Dependency Injection (DI) is a design pattern where a class receives its dependencies from external sources rather than creating them. Angular has a built-in DI framework that manages the creation and delivery of dependencies via providers and injectors." },
+    { q: "What is a Pipe in Angular?", a: "Pipes transform data in templates. They take an input, apply a transformation, and return the result. Built-in pipes include DatePipe, CurrencyPipe, UpperCasePipe, LowerCasePipe, DecimalPipe, and AsyncPipe. Used with the | syntax." },
+    { q: "What is the Angular CLI?", a: "Angular CLI (Command Line Interface) is a tool for initializing, developing, scaffolding, and maintaining Angular applications. Common commands: ng new, ng generate, ng serve, ng build, ng test, ng lint, ng add." },
+    { q: "What is the difference between constructor and ngOnInit?", a: "The constructor is called when the class is instantiated by JavaScript and is used for DI setup. ngOnInit is an Angular lifecycle hook called after Angular initializes component inputs. Business logic and data fetching should go in ngOnInit, not the constructor." },
+    { q: "What are Angular Lifecycle Hooks?", a: "Lifecycle hooks are methods Angular calls at specific stages of a component/directive lifecycle: ngOnChanges, ngOnInit, ngDoCheck, ngAfterContentInit, ngAfterContentChecked, ngAfterViewInit, ngAfterViewChecked, and ngOnDestroy." },
+    { q: "What is ngOnDestroy?", a: "ngOnDestroy is a lifecycle hook called just before Angular destroys a component. It's used to clean up resources like unsubscribing from observables, clearing timers, or detaching event handlers to prevent memory leaks." },
+    { q: "What is ngOnChanges?", a: "ngOnChanges is called when an input property changes. It receives a SimpleChanges object containing current and previous values. It is the first lifecycle hook to fire, and fires every time an @Input property changes." },
+    { q: "What is @Input decorator?", a: "@Input is used to pass data from a parent component to a child component. The child decorates a property with @Input() and the parent binds to it using property binding: <child [name]='parentName'></child>." },
+    { q: "What is @Output decorator?", a: "@Output allows a child component to emit events to the parent. It's used with EventEmitter. The child emits events and the parent listens with event binding: <child (clicked)='onChildClick($event)'></child>." },
+    { q: "What is EventEmitter?", a: "EventEmitter is a class used with @Output to emit custom events from child to parent components. It's imported from @angular/core. The emit() method triggers the event with an optional payload." },
+    { q: "What is the Angular Router?", a: "Angular Router is a module that enables navigation between views/components. It maps URLs to components. Key concepts include Routes, RouterModule, RouterOutlet, RouterLink, and Router service for programmatic navigation." },
+    { q: "What is RouterOutlet?", a: "<router-outlet> is a directive that acts as a placeholder where the Angular router inserts the component that matches the current route. It is placed in the main app template." },
+    { q: "What is RouterLink?", a: "RouterLink is a directive used in templates to navigate to a route without page reload. Example: <a [routerLink]=\"['/home']\">Home</a>. It supports both static strings and dynamic arrays." },
+    { q: "What is HttpClient in Angular?", a: "HttpClient is Angular's built-in HTTP client (from @angular/common/http) for making HTTP requests. It returns Observables and supports GET, POST, PUT, DELETE, PATCH methods, interceptors, typed responses, and error handling." },
+    { q: "What is an Observable in Angular?", a: "An Observable (from RxJS) represents a stream of asynchronous data. In Angular, it's used with HttpClient, EventEmitter, and Router events. You subscribe to an observable to receive values, errors, and completion notifications." },
+    { q: "What is the difference between Observable and Promise?", a: "A Promise handles a single async value and is eager (starts immediately). An Observable handles multiple values over time, is lazy (starts on subscribe), and is cancellable. Observables support operators like map, filter, and switchMap." },
+    { q: "What is FormsModule?", a: "FormsModule is the Angular module enabling template-driven forms. It provides ngModel for two-way binding, NgForm for form tracking, and template reference variables. Import it in AppModule from @angular/forms." },
+    { q: "What is ReactiveFormsModule?", a: "ReactiveFormsModule enables reactive/model-driven forms. It uses FormControl, FormGroup, FormArray, and FormBuilder to manage form state programmatically. It offers more control, testability, and scalability than template-driven forms." },
+    { q: "What is FormGroup?", a: "FormGroup is a collection of FormControls that track the validity and value of a group of controls. It represents a form as a whole, or a section of a form. You can nest FormGroups." },
+    { q: "What is FormControl?", a: "FormControl tracks the value and validation state of an individual form field. It can be initialized with a default value and validators. It has properties like value, valid, invalid, dirty, pristine, and touched." },
+    { q: "What is template reference variable?", a: "A template reference variable (using #varName) gives access to a DOM element or directive within a template. Example: <input #myInput type='text'> and you can use myInput.value in the template or access it via @ViewChild." },
+    { q: "What is ViewChild?", a: "@ViewChild is a decorator that gives a component access to a child component, directive, or DOM element from the template. It queries after the view is initialized (ngAfterViewInit). Example: @ViewChild('myInput') myInput: ElementRef." },
+    { q: "What is ElementRef?", a: "ElementRef is a wrapper around a native DOM element. It provides a nativeElement property to access the actual DOM element. However, direct DOM manipulation via ElementRef is discouraged; use Renderer2 instead for security and testability." },
+    { q: "What is the async pipe?", a: "The async pipe subscribes to an Observable or Promise and returns the latest value. It automatically unsubscribes when the component is destroyed, preventing memory leaks. Example: {{ data$ | async }}." },
+    { q: "What is change detection in Angular?", a: "Change detection is the mechanism Angular uses to track changes in component data and update the DOM accordingly. Angular runs change detection from root to leaf after every async event (click, HTTP response, timer)." },
+    { q: "What is the difference between declarations, imports, and providers in NgModule?", a: "declarations: lists components, directives, and pipes belonging to this module. imports: lists other modules whose exports are needed. providers: registers services available to the module's injector. exports: makes declarations available to importing modules." },
+    { q: "What is app.module.ts?", a: "app.module.ts is the root module of an Angular application. It bootstraps the AppComponent and declares/imports all necessary modules. It's decorated with @NgModule and is the entry point of the application." },
+    { q: "What is the difference between ngIf and hidden?", a: "*ngIf removes/adds the element from DOM entirely. [hidden] applies CSS display:none but keeps the element in the DOM. Use *ngIf for heavy components to save memory; use [hidden] when toggling frequently." },
+    { q: "What is the use of trackBy in *ngFor?", a: "trackBy is a performance optimization for *ngFor. It provides a function returning a unique identifier for each item so Angular can track which items changed, and only re-render those items instead of recreating the entire list." },
+    { q: "What is a custom pipe?", a: "A custom pipe is a user-defined pipe created with @Pipe decorator. It implements PipeTransform interface and its transform() method. Custom pipes can be pure (stateless) or impure (stateful, recalculated every change detection cycle)." },
+    { q: "What is string interpolation vs property binding?", a: "String interpolation {{ expr }} converts expression to a string and inserts it between HTML text. Property binding [attr]=expr binds directly to a DOM property (not just text). Use property binding for non-string values like booleans and objects." },
+    { q: "What is Angular's default change detection strategy?", a: "Angular's default strategy is ChangeDetectionStrategy.Default (CheckAlways). Angular checks every component in the tree after any async event. This is simple but can be slow for large apps. The alternative is OnPush." },
+    { q: "What is ViewEncapsulation in Angular?", a: "ViewEncapsulation controls how component styles are scoped. Options: Emulated (default – scopes styles using attributes), None (global styles), and ShadowDom (uses native Shadow DOM). Emulated prevents style leakage without Shadow DOM." },
+    { q: "What is a structural directive vs attribute directive?", a: "Structural directives change the DOM structure by adding/removing elements (*ngIf, *ngFor, *ngSwitch). Attribute directives change the appearance or behavior of an existing element without adding/removing it (ngClass, ngStyle, custom directives)." },
+    { q: "What is lazy loading in Angular?", a: "Lazy loading is loading Angular modules only when the user navigates to their routes, instead of loading everything at startup. This reduces initial bundle size and improves app performance. Configured with loadChildren in route definitions." },
+    { q: "What is the difference between BehaviorSubject and Subject?", a: "Subject emits values only to active subscribers (no initial value). BehaviorSubject requires an initial value and emits the current value to new subscribers immediately on subscription. BehaviorSubject is useful for state management." },
+    { q: "What is the purpose of ngModel?", a: "ngModel implements two-way data binding in template-driven forms. It binds a form input to a component property, keeping both in sync. Requires FormsModule. Example: <input [(ngModel)]='username'>." },
+    { q: "What is the Angular environment file?", a: "environment.ts and environment.prod.ts store environment-specific configuration like API URLs. The Angular CLI replaces environment.ts with environment.prod.ts during production builds using fileReplacements in angular.json." },
+    { q: "What is app-routing.module.ts?", a: "app-routing.module.ts is a dedicated module for defining application routes. It imports RouterModule and exports it. Routes map URL paths to components. It's generated by Angular CLI when you select routing during project creation." },
+    { q: "What is the purpose of main.ts in Angular?", a: "main.ts is the entry point of an Angular application. It bootstraps the root module (AppModule) using platformBrowserDynamic().bootstrapModule(AppModule). It also handles production mode enablement." },
+    { q: "What is CORS and how is it handled in Angular?", a: "CORS (Cross-Origin Resource Sharing) is a browser security feature. Angular handles it by configuring a proxy in proxy.conf.json for development. In production, the backend server must set appropriate CORS headers." },
+    { q: "What is the selector in @Component?", a: "The selector is a CSS selector that identifies the component in the HTML template. When Angular finds a matching HTML tag, it renders the component. Types: element selector (app-comp), attribute ([app-comp]), and class (.app-comp)." },
+    { q: "What is the difference between template and templateUrl?", a: "template is an inline HTML string for the component's view. templateUrl points to an external .html file. For small templates, use template; for larger ones, use templateUrl for better maintainability." },
+    { q: "What is Angular Universal?", a: "Angular Universal is server-side rendering (SSR) for Angular applications. It renders Angular apps on the server before sending HTML to the browser, improving initial load performance, SEO, and perceived speed." },
+    { q: "What are decorators in Angular?", a: "Decorators are TypeScript functions that add metadata to classes, methods, properties, or parameters. Angular uses them extensively: @Component, @NgModule, @Injectable, @Input, @Output, @Pipe, @Directive, @ViewChild, etc." },
+    { q: "What is the difference between presentational and smart components?", a: "Smart (container) components contain business logic and manage state; they interact with services. Presentational (dumb) components focus on UI and receive data via @Input and emit events via @Output, with no direct service dependency." },
+  ],
+
+  intermediate: [
+    { q: "What is ChangeDetectionStrategy.OnPush?", a: "OnPush tells Angular to only run change detection when: an @Input reference changes, an event originates from the component, an Observable used with async pipe emits, or change detection is triggered manually via ChangeDetectorRef.markForCheck()." },
+    { q: "What is ChangeDetectorRef?", a: "ChangeDetectorRef gives programmatic control over change detection. Methods: markForCheck() (marks component for checking), detectChanges() (runs detection immediately), detach() (removes from detection tree), and reattach() (re-adds it)." },
+    { q: "What are RxJS operators? Name common ones.", a: "RxJS operators transform, filter, or combine observables. Common ones: map (transform), filter (filter), switchMap (cancel previous, switch to new), mergeMap (flatten concurrently), concatMap (queue), debounceTime (wait), takeUntil (unsubscribe on signal), combineLatest, forkJoin." },
+    { q: "What is switchMap and when would you use it?", a: "switchMap cancels the previous inner observable when a new value arrives. Perfect for search autocomplete (cancel previous HTTP request when user types again), route params, or any scenario where only the latest result matters." },
+    { q: "What is the difference between mergeMap, switchMap, concatMap, and exhaustMap?", a: "mergeMap: subscribes to all concurrently. switchMap: cancels previous, subscribes to new. concatMap: queues, processes in order. exhaustMap: ignores new values while current is active. Use based on whether ordering, cancellation, or concurrency matters." },
+    { q: "What is a Route Guard in Angular?", a: "Route Guards are interfaces that control navigation. Types: CanActivate (can user access route?), CanDeactivate (can user leave route?), CanActivateChild, CanLoad (can lazy module load?), and Resolve (pre-fetch data before activation)." },
+    { q: "What is CanActivate guard?", a: "CanActivate is a guard interface that determines if a route can be activated. Returns boolean, Observable<boolean>, or Promise<boolean>. Used for authentication checks. Returning false cancels navigation." },
+    { q: "What is the Resolve guard?", a: "Resolve is a route guard that pre-fetches data before a route is activated. The component receives the resolved data via ActivatedRoute.data. This ensures data is available when the component initializes, avoiding loading states in the component." },
+    { q: "What are HTTP Interceptors?", a: "HTTP Interceptors intercept and modify outgoing HTTP requests and incoming responses. Use cases: adding auth tokens to headers, logging, error handling, loading indicators, response transformation. Implement the HttpInterceptor interface with intercept() method." },
+    { q: "How do you handle HTTP errors in Angular?", a: "Use catchError operator in RxJS pipe: httpClient.get(url).pipe(catchError(error => { return throwError(() => error); })). Also use HTTP interceptors for global error handling. Handle 401 (unauthorized) globally to redirect to login." },
+    { q: "What is the difference between template-driven and reactive forms?", a: "Template-driven: logic in template, uses ngModel, async, less boilerplate, harder to test. Reactive: logic in component class, uses FormGroup/FormControl, synchronous, more explicit, better testability, and recommended for complex forms." },
+    { q: "What is FormBuilder?", a: "FormBuilder is a service that simplifies creating reactive form controls. Instead of new FormControl(), use fb.control(). It has group(), control(), and array() methods, making reactive form creation more concise and readable." },
+    { q: "What is FormArray?", a: "FormArray manages an array of form controls whose length can change dynamically. Use it when you have a variable number of form fields (like adding multiple phone numbers). Methods: push(), removeAt(), at(), controls." },
+    { q: "What is custom form validation?", a: "Custom validators are functions returning null (valid) or an error object (invalid). For sync validators: (control: AbstractControl) => ValidationErrors | null. For async validators they return Observable or Promise. Apply via Validators.compose() or FormControl." },
+    { q: "What is cross-field validation?", a: "Cross-field validation validates multiple fields together in a FormGroup. Create a validator applied to the group: check if password and confirmPassword match, return error object if not. The error appears on the group, not individual controls." },
+    { q: "What is Content Projection (ng-content)?", a: "Content projection allows a parent to inject HTML content into a child component's template. The child uses <ng-content> as a slot. Multi-slot projection uses select attribute: <ng-content select='[header]'></ng-content>." },
+    { q: "What is ng-template?", a: "ng-template defines a reusable template fragment that is not rendered by default. Used with structural directives (*ngIf else, *ngFor), TemplateRef, and ViewContainerRef. Angular renders it when explicitly instructed." },
+    { q: "What is ng-container?", a: "ng-container is a grouping element that doesn't add extra DOM nodes. Useful for applying structural directives to multiple elements without a wrapper div, or for grouping without affecting layout." },
+    { q: "What is ViewContainerRef?", a: "ViewContainerRef represents a container where views can be dynamically inserted. Used with ComponentFactory or TemplateRef to create components/views dynamically at runtime. Used in dynamic component loading." },
+    { q: "What is dynamic component loading?", a: "Dynamic component loading creates and inserts components at runtime without using them in templates. Use ViewContainerRef.createComponent() (Angular 13+) or ComponentFactoryResolver (older). Useful for modals, tabs, and plugin architectures." },
+    { q: "What is the difference between @ViewChild and @ContentChild?", a: "@ViewChild queries elements inside the component's own template. @ContentChild queries projected content (from ng-content). ViewChild available after ngAfterViewInit; ContentChild after ngAfterContentInit." },
+    { q: "What is a shared module?", a: "A shared module contains commonly used components, directives, and pipes that are shared across feature modules. It exports these so feature modules only need to import SharedModule. Avoids duplicate declarations." },
+    { q: "What is the difference between forRoot() and forChild() in RouterModule?", a: "RouterModule.forRoot() is called once in the root AppRoutingModule and creates the router singleton with all root routes and services. RouterModule.forChild() is used in feature modules and only registers routes without re-creating the router singleton." },
+    { q: "What is a feature module?", a: "A feature module encapsulates a distinct application feature (e.g., UserModule, ProductModule). It contains related components, services, and routes. Feature modules improve code organization, lazy loading support, and team collaboration." },
+    { q: "What is providedIn: 'root'?", a: "providedIn: 'root' in @Injectable registers a service at the root injector level, making it a singleton available throughout the app without explicitly adding it to any module's providers array. This is tree-shakeable." },
+    { q: "What is the difference between zone.js and zoneless Angular?", a: "Zone.js patches browser async APIs to trigger Angular's change detection automatically. Zoneless Angular (experimental from v16+) skips zone.js, requiring manual change detection signals, improving performance for applications using Signals." },
+    { q: "What is RxJS Subject?", a: "A Subject is both an Observable and an Observer. It can multicast to multiple subscribers. Types: Subject (no initial value), BehaviorSubject (stores current value), ReplaySubject (replays N values), and AsyncSubject (emits last value on complete)." },
+    { q: "What is the takeUntil pattern?", a: "takeUntil is used to unsubscribe from observables when a component is destroyed. Create a destroy$ = new Subject(); in the component, pipe observable.pipe(takeUntil(this.destroy$)), and in ngOnDestroy call this.destroy$.next() and this.destroy$.complete()." },
+    { q: "What are Angular animations?", a: "Angular Animations use the Web Animations API and are defined using trigger(), state(), style(), animate(), and transition() functions from @angular/animations. They provide declarative, component-level animations with Angular's change detection integration." },
+    { q: "What is the Angular CDK?", a: "The Component Dev Kit (CDK) is a set of behavior primitives for building UI components. It provides accessibility tools, drag-and-drop, virtual scrolling, overlays, portals, layout, clipboard, and more without Material Design styling." },
+    { q: "What is Angular Material?", a: "Angular Material is a UI component library implementing Google's Material Design for Angular. It provides ready-to-use components like buttons, inputs, dialogs, tables, navigation, and more. It's built on top of the CDK." },
+    { q: "What is virtual scrolling?", a: "Virtual scrolling renders only the visible items in a large list, instead of all items. Angular CDK provides CdkVirtualScrollViewport and *cdkVirtualFor. This drastically improves performance for lists with thousands of items." },
+    { q: "What is the difference between pure and impure pipes?", a: "Pure pipes (default) only recalculate when input reference changes—highly performant. Impure pipes recalculate on every change detection cycle (every mouse move, keypress). Use impure sparingly. Set pure: false in @Pipe to make it impure." },
+    { q: "What is AOT compilation?", a: "Ahead-of-Time (AOT) compilation compiles Angular templates and components during the build phase (not in browser). Benefits: faster rendering, earlier error detection, smaller bundles (no compiler needed at runtime), better security." },
+    { q: "What is JIT compilation?", a: "Just-in-Time (JIT) compilation compiles Angular code in the browser at runtime. Used in development mode by default (older versions). Slower initial load but faster build times. Not recommended for production." },
+    { q: "What is Ivy in Angular?", a: "Ivy is Angular's next-generation compilation and rendering engine, introduced in Angular 9. It produces smaller bundles, faster compilation, improved debugging, better tree-shaking, and enables lazy loading of individual components." },
+    { q: "What is tree shaking?", a: "Tree shaking is a build optimization that removes unused code from the final bundle. Angular with Ivy and TypeScript/webpack supports tree shaking. Services using providedIn: 'root' are tree-shakeable if not injected anywhere." },
+    { q: "How do you optimize Angular application performance?", a: "Strategies: OnPush change detection, lazy loading, trackBy in ngFor, async pipe, virtual scrolling, pure pipes, AOT compilation, bundle analysis with webpack-bundle-analyzer, preloading strategies, HTTP caching, service workers (PWA)." },
+    { q: "What is APP_INITIALIZER?", a: "APP_INITIALIZER is a token that allows you to run functions before the application bootstraps. Useful for loading configuration from a server, setting up feature flags, or initializing third-party libraries before the app starts." },
+    { q: "What is the Router's navigate() vs navigateByUrl()?", a: "navigate() uses a commands array (relative or absolute): router.navigate(['/path', id]). navigateByUrl() takes a URL string and always treats it as absolute: router.navigateByUrl('/path/' + id). navigate() is more flexible for relative navigation." },
+    { q: "What are route parameters vs query parameters?", a: "Route parameters are part of the URL path (/user/:id) and accessed via ActivatedRoute.params. Query parameters are appended after ? (/user?sort=asc) and accessed via ActivatedRoute.queryParams. Route params identify resources; query params filter/sort." },
+    { q: "What is ActivatedRoute?", a: "ActivatedRoute is a service providing information about the active route: params, queryParams, data, url, fragment, and snapshot. It's injected into components to read route information. Use snapshot for one-time reads or observables for reactive updates." },
+    { q: "What is RouterState?", a: "RouterState represents the current state of the router including the tree of activated routes. Router.routerState gives the current state. RouterStateSnapshot is an immutable snapshot used in guards and resolvers." },
+    { q: "What is the difference between snapshot and observable in ActivatedRoute?", a: "ActivatedRoute.snapshot provides immediate one-time values (not reactive). ActivatedRoute.params, .queryParams, .data return Observables that emit when values change. Use observables if you need to react to parameter changes without component re-creation." },
+    { q: "What is auxiliary/secondary routes in Angular?", a: "Auxiliary routes allow multiple router outlets simultaneously. Named outlets (<router-outlet name='sidebar'>) enable secondary navigation. Useful for side panels, modals, or multi-panel layouts. URLs use parentheses: /home(sidebar:chat)." },
+    { q: "What is the Renderer2?", a: "Renderer2 is an abstraction over DOM manipulation. It's platform-independent (works in browser, server, web worker). Use it instead of direct DOM manipulation (ElementRef.nativeElement) for security (XSS prevention) and cross-platform compatibility." },
+    { q: "What is host binding and host listener?", a: "@HostBinding binds a directive property to a host element's property/attribute. @HostListener listens to host element events. Used in directives and components to interact with the host DOM element without requiring ElementRef." },
+    { q: "What is the difference between ngDoCheck and ngOnChanges?", a: "ngOnChanges fires only when @Input references change. ngDoCheck fires on every change detection cycle (every async event). ngDoCheck can detect changes that ngOnChanges misses (like mutation of an object property) but is performance-sensitive." },
+    { q: "What is providedIn: 'any'?", a: "providedIn: 'any' creates a new service instance for each lazy-loaded module while sharing one instance for all eagerly-loaded modules. This is between 'root' (one instance) and providing in module's providers (instance per module)." },
+    { q: "What are Angular compilation errors and how to debug them?", a: "Common errors: 'Can't bind to X' (missing module import), 'No provider for X' (missing service provider), template type errors (enable strictTemplates). Debug with ng serve errors, Angular DevTools browser extension, and source maps." },
+    { q: "What is the Angular DevTools?", a: "Angular DevTools is a browser extension for Chrome/Firefox that provides component tree inspection, profiler for change detection, injection tree explorer, and time-travel debugging. Essential for performance analysis and debugging Angular apps." },
+    { q: "What is forwardRef in Angular?", a: "forwardRef resolves circular references in dependency injection and allows referencing a class before it's declared. Often used with NG_VALUE_ACCESSOR when implementing ControlValueAccessor: provide: NG_VALUE_ACCESSOR, useExisting: forwardRef(() => MyComponent)." },
+    { q: "What is ControlValueAccessor?", a: "ControlValueAccessor is an interface that bridges Angular forms (reactive and template-driven) with custom form controls. Implement it to make a custom component work seamlessly with ngModel and reactive forms. Methods: writeValue, registerOnChange, registerOnTouched." },
+    { q: "What is the difference between subscribe() and async pipe?", a: "async pipe automatically subscribes/unsubscribes and triggers change detection with OnPush. Manual subscribe() requires manual unsubscription in ngOnDestroy. async pipe is preferred as it prevents memory leaks automatically and works well with OnPush." },
+    { q: "What is Angular's hierarchical injection system?", a: "Angular has a hierarchical injector tree: root injector (singleton services) → module injectors → component injectors → element injectors. A component can have its own providers creating scoped instances. Child injectors can override parent providers." },
+    { q: "What is multi-provider in Angular?", a: "Multi-providers allow multiple values for a single injection token using multi: true. Multiple classes can be provided for the same token (like HTTP_INTERCEPTORS), and they're all injected as an array. Used for extensible plugin patterns." },
+    { q: "What is InjectionToken?", a: "InjectionToken creates a token for injecting non-class values (strings, objects, functions). It avoids name collisions when injecting primitives. Example: const API_URL = new InjectionToken<string>('apiUrl'); then provide: { provide: API_URL, useValue: 'https://api.example.com' }." },
+    { q: "What is a monorepo and how does Angular support it?", a: "A monorepo contains multiple projects in one repository. Angular CLI supports monorepos via workspaces: one angular.json with multiple projects. Nx is a popular tool extending Angular CLI for large-scale monorepos with better caching and code sharing." },
+    { q: "What are environment-specific builds in Angular?", a: "Angular CLI supports different build configurations (development, production, staging) defined in angular.json. Each configuration can replace files, set optimization flags, define budgets, and configure source maps. Built with ng build --configuration=production." },
+    { q: "What is the purpose of angular.json?", a: "angular.json is the workspace configuration file. It defines project structure, build configurations, test configurations, serve options, file replacements, budgets, assets, styles, scripts, and more for each project in the workspace." },
+    { q: "What are Content Security Policy (CSP) considerations in Angular?", a: "Angular's DomSanitizer protects against XSS by sanitizing HTML, styles, URLs, and scripts. Avoid using bypassSecurityTrust methods unless absolutely necessary. Angular templates auto-escape interpolated values. Use HttpParams instead of string concatenation for URLs." },
+    { q: "What is the NgZone service?", a: "NgZone is Angular's zone service. runOutsideAngular() runs code without triggering change detection (useful for heavy timers/animations). run() re-enters Angular zone. Use it to optimize performance-sensitive operations like requestAnimationFrame or third-party library integrations." },
+    { q: "What is debounceTime and when would you use it?", a: "debounceTime is an RxJS operator that delays emitting a value until after a specified time has passed since the last emission. Perfect for search autocomplete: subscribe to valueChanges of an input, pipe debounceTime(300), then call the API." },
+    { q: "What is the shareReplay operator?", a: "shareReplay multicasts an observable and replays N last emissions to new subscribers. Used to cache HTTP responses: this.data$ = this.http.get(url).pipe(shareReplay(1)). New subscribers get the cached value immediately without new HTTP requests." },
+    { q: "What is forkJoin?", a: "forkJoin combines multiple observables and emits a single array of results when all source observables complete. Like Promise.all(). Used to make parallel HTTP requests and wait for all to finish: forkJoin([this.http.get('/a'), this.http.get('/b')])." },
+    { q: "What is combineLatest?", a: "combineLatest emits the latest values from all source observables whenever any of them emits. Unlike forkJoin it doesn't wait for completion. Used to react to multiple state streams simultaneously. All sources must emit at least once." },
+    { q: "What is withLatestFrom?", a: "withLatestFrom is an RxJS operator that combines the source observable with the latest value from another observable without subscribing to it independently. Example: on button click, get the current form value using: clicks$.pipe(withLatestFrom(this.form.valueChanges))." },
+    { q: "What is a component library?", a: "A component library is a collection of reusable UI components. In Angular, it can be created as an Angular Library project (ng generate library). Libraries are built and published to npm. They use secondary entry points for tree-shaking." },
+    { q: "What is ng-add?", a: "ng add is an Angular CLI command that uses Angular schematics to add and configure a package in one step. Example: ng add @angular/material installs the package AND runs setup schematics (configures themes, imports modules, updates angular.json)." },
+    { q: "What are Angular Schematics?", a: "Schematics are code generators that transform an existing file system. Angular CLI uses schematics for ng generate, ng add, ng update. You can create custom schematics to automate boilerplate code generation following your team's conventions." },
+    { q: "What is the Router preloading strategy?", a: "Preloading strategies load lazy modules in the background after initial load. PreloadAllModules preloads all lazy modules. Custom strategies can preload only certain modules. Configured in RouterModule.forRoot: preloadingStrategy: PreloadAllModules." },
+    { q: "What is route data property?", a: "The data property in route configuration passes static data to a component via ActivatedRoute.data. Example: { path: 'admin', component: AdminComponent, data: { role: 'admin', title: 'Admin Panel' } }. Useful for metadata, breadcrumbs, and permissions." },
+    { q: "What is the difference between ngAfterViewInit and ngAfterContentInit?", a: "ngAfterContentInit fires after content projected via ng-content is initialized. ngAfterViewInit fires after the component's own view and child views are initialized. ngAfterViewInit fires after ngAfterContentInit." },
+    { q: "What is the APP_BASE_HREF token?", a: "APP_BASE_HREF provides the application's base URL path for the Angular Router. Used when the app is deployed in a subdirectory (e.g., /myapp/). Alternative to setting the <base href> tag in index.html: provide: APP_BASE_HREF, useValue: '/myapp/'." },
+    { q: "What is a resolver vs APP_INITIALIZER?", a: "Resolver fetches data before a specific route activates (per-navigation). APP_INITIALIZER runs functions before the entire app bootstraps (once at startup). Use resolvers for route-specific data and APP_INITIALIZER for app-wide initialization." },
+  ],
+
+  advanced: [
+    { q: "Explain Angular's Zone-less change detection with Signals.", a: "Signals (Angular 16+) are reactive primitives that notify Angular specifically when they change, enabling fine-grained change detection without Zone.js. Using signal(), computed(), and effect(), Angular can update only affected DOM nodes without full tree traversal." },
+    { q: "What is the Signals API in Angular?", a: "Signals API (Angular 16+): signal(value) creates a writable signal, computed(() => expr) creates a derived computed signal, effect(() => sideEffect()) runs when signals change. Signals are synchronous, reactive, and enable zoneless Angular." },
+    { q: "What are computed signals and effects?", a: "computed() creates a lazily evaluated, memoized derived value from other signals. effect() creates a side effect that reruns automatically when its signal dependencies change. Effects run in injection context and are cleaned up when the component is destroyed." },
+    { q: "What is the difference between signal() and BehaviorSubject?", a: "Signals are synchronous, read as values (signal() returns getter function), don't require subscription management, and integrate with Angular's change detection natively. BehaviorSubject is async, push-based, requires subscribe/unsubscribe, and is RxJS-based." },
+    { q: "What is toSignal() and toObservable()?", a: "toSignal() converts an Observable to a Signal (from @angular/core/rxjs-interop). toObservable() converts a Signal to an Observable. They bridge the RxJS and Signals worlds, enabling incremental adoption of Signals in existing RxJS-heavy codebases." },
+    { q: "What are standalone components?", a: "Standalone components (stable in Angular 15) don't belong to any NgModule. They use the standalone: true flag in @Component and declare their own imports array. They simplify module management and are the recommended approach in modern Angular." },
+    { q: "How do you bootstrap a standalone Angular application?", a: "Use bootstrapApplication() from @angular/platform-browser. In main.ts: bootstrapApplication(AppComponent, { providers: [importProvidersFrom(RouterModule.forRoot(routes)), provideHttpClient()] }). No AppModule needed." },
+    { q: "What is the provideRouter() function?", a: "provideRouter() (Angular 14+) provides the Router for standalone applications without RouterModule. Usage: bootstrapApplication(AppComponent, { providers: [provideRouter(routes)] }). Supports functional guards, resolvers, and tree-shakeable route features." },
+    { q: "What are functional route guards?", a: "Functional guards (Angular 14.2+) are simple functions returning boolean/UrlTree instead of class-based guard interfaces. Example: canActivate: [() => inject(AuthService).isLoggedIn()]. More concise and tree-shakeable than class guards." },
+    { q: "What is the inject() function?", a: "inject() (Angular 14+) can be called in an injection context (constructor, field initializer, factory functions) to inject dependencies without constructor parameter injection. Enables dependency injection in functional guards, pipes, and factory functions." },
+    { q: "What is deferrable views (@defer)?", a: "@defer (Angular 17) allows lazy loading template sections with declarative control. Blocks: @defer (when condition) (lazy content), @placeholder (shown before load), @loading (during load), @error (on failure). Reduces initial bundle size dramatically." },
+    { q: "What are the @defer triggers?", a: "@defer supports triggers: on idle (when browser is idle), on viewport (when element enters viewport), on interaction (on click/focus), on hover, on immediate (no delay), on timer(duration), and when (custom condition expression)." },
+    { q: "What is the new Angular control flow syntax (@if, @for, @switch)?", a: "Angular 17 introduced built-in control flow: @if/@else if/@else replaces *ngIf, @for replaces *ngFor (requires track expression), @switch/@case replaces ngSwitch. It's more ergonomic, type-safe, and performs better than directive-based alternatives." },
+    { q: "What is the track expression in @for?", a: "The track expression in @for is required (unlike trackBy in *ngFor which was optional). It identifies items uniquely for efficient DOM diffing. Example: @for (item of items; track item.id). Can also track by $index for simple arrays." },
+    { q: "What are Angular Signals inputs (input())?", a: "Angular 18+ introduces signal-based inputs using input() instead of @Input. input() returns a signal, input.required() for required inputs, and input(defaultValue) for defaults. They integrate with computed signals and provide type-safe, reactive component inputs." },
+    { q: "What is the output() function in Angular?", a: "Angular 18+ introduces output() as an alternative to @Output/EventEmitter. output<Type>() creates a typed output. Emit with .emit(). It provides a cleaner API: const clicked = output<string>(); clicked.emit('hello')." },
+    { q: "What is model() in Angular Signals?", a: "model() (Angular 17.2+) creates a two-way bindable signal. It's like combining input() and output() for two-way binding. The parent binds with [(property)] and the child reads/writes via the signal. Ideal for form-like components." },
+    { q: "What is Angular's new view transition API integration?", a: "Angular 17 integrates the View Transitions API (Chrome) via withViewTransitions() in provideRouter(). It enables smooth animated page transitions using native browser APIs. Customize with onViewTransitionCreated callback to control transition animations." },
+    { q: "What is the ApplicationConfig in standalone Angular?", a: "ApplicationConfig is an interface defining application-level providers for bootstrapApplication(). It replaces NgModule for root-level configuration. appConfig.ts exports an ApplicationConfig object with providers array containing provideRouter, provideHttpClient, etc." },
+    { q: "What is HttpClient's new provideHttpClient() setup?", a: "provideHttpClient() (Angular 15+) provides HttpClient for standalone apps. Options: withInterceptors([functionalInterceptor]) for functional interceptors, withFetch() to use Fetch API instead of XHR, withInterceptorsFromDi() for class-based interceptors." },
+    { q: "What are functional HTTP interceptors?", a: "Functional interceptors (Angular 15+) are functions instead of classes: (req: HttpRequest<unknown>, next: HttpHandlerFn) => next(req). Registered with withInterceptors([myInterceptor]) in provideHttpClient(). More concise and tree-shakeable than class interceptors." },
+    { q: "What is the Angular SSR (Server-Side Rendering) setup in Angular 17+?", a: "Angular 17+ simplifies SSR with ng add @angular/ssr. It uses the new ApplicationRef.isStable approach, supports hydration, and generates separate server/client bundles. @angular/ssr wraps Angular Universal functionality into the core Angular ecosystem." },
+    { q: "What is hydration in Angular?", a: "Hydration (Angular 16+, stable in 17) reuses server-rendered DOM instead of re-rendering from scratch on the client. Enable with provideClientHydration() in app.config.ts. Dramatically improves LCP (Largest Contentful Paint) and reduces CLS (Cumulative Layout Shift)." },
+    { q: "What is partial hydration in Angular?", a: "Partial hydration (Angular 18+, experimental) hydrates only components that are interactive instead of the entire page. Combined with @defer, components can be progressively hydrated on interaction or viewport entry, reducing JS execution time." },
+    { q: "What is incremental hydration?", a: "Incremental hydration (Angular 19, developer preview) triggers hydration of @defer blocks on the same triggers (@defer on viewport, on interaction, etc.). This means server-rendered content is hydrated only when needed, improving Core Web Vitals significantly." },
+    { q: "What is the resource() API in Angular?", a: "resource() (Angular 19) is an experimental API for managing async resources tied to signals. It automatically re-fetches when signal dependencies change: resource({ request: () => this.userId(), loader: ({ request }) => fetchUser(request) }). Replaces common fetch+subscribe patterns." },
+    { q: "What is rxResource()?", a: "rxResource() (Angular 19) is like resource() but uses Observable as the loader. It bridges Signals and RxJS for data fetching: rxResource({ request: () => userId(), loader: ({ request }) => this.http.get('/user/' + request) })." },
+    { q: "What is the linkedSignal()?", a: "linkedSignal() (Angular 19) creates a writable signal that resets to a computed value when its source signal changes. Useful for components that have local state (writable) but reset when input changes. Bridges controlled and uncontrolled patterns." },
+    { q: "What is Angular's effect scheduling?", a: "Effects run asynchronously in a microtask after signals change. They run in injection context and are registered with DestroyRef for automatic cleanup. allowSignalWrites: true option is needed to write to signals inside effects (otherwise throws error)." },
+    { q: "What is the DestroyRef in Angular?", a: "DestroyRef (Angular 16+) provides a way to register cleanup logic when a context (component, directive, service) is destroyed. Use inject(DestroyRef).onDestroy(() => cleanup()). Enables functional-style cleanup without implementing ngOnDestroy." },
+    { q: "What is takeUntilDestroyed()?", a: "takeUntilDestroyed() (Angular 16+, from @angular/core/rxjs-interop) automatically completes observables when the injection context is destroyed. Use: observable.pipe(takeUntilDestroyed()). Replaces the manual destroy$ Subject pattern." },
+    { q: "What is the difference between CSR, SSR, SSG, and ISR?", a: "CSR (Client-Side Rendering): renders in browser. SSR (Server-Side Rendering): renders on server per request. SSG (Static Site Generation): pre-renders at build time. ISR (Incremental Static Regeneration): SSG with periodic revalidation. Angular supports all via @angular/ssr and prerender." },
+    { q: "What is the Angular prerendering strategy?", a: "Angular 17+ supports prerendering (SSG) via ng build with the prerender option. Routes can be prerendered statically at build time. PrerenderFallback.Server falls back to SSR for non-prerendered routes. Improves performance for content-heavy pages." },
+    { q: "What is Micro Frontend architecture with Angular?", a: "Micro frontends split a large frontend into independently deployable pieces. Angular supports this via Module Federation (webpack 5), Native Federation, or iframes. Each team owns a separate Angular app (remote), composed into a shell (host) at runtime." },
+    { q: "What is Module Federation?", a: "Module Federation (webpack 5 plugin) allows Angular apps to share and consume modules at runtime from separate deployments. @angular-architects/module-federation wraps it for Angular. Enables independent deployments, separate teams, and runtime composition." },
+    { q: "What is the Angular compiler's strictTemplates option?", a: "strictTemplates in tsconfig.json enables strict type checking in Angular templates. It catches type errors in template expressions, event bindings, and @Input/@Output types at compile time. Highly recommended for large-scale applications." },
+    { q: "What is the EnvironmentInjector?", a: "EnvironmentInjector is a platform-level injector outside the component tree. Services provided to it are available without being tied to a component lifecycle. Used in router guards, HTTP interceptors, and programmatic injection. createEnvironmentInjector() creates child instances." },
+    { q: "What are Angular's injection flags?", a: "Injection flags modify DI behavior: @Optional() (return null if not found), @Self() (look only in current injector), @SkipSelf() (skip current injector, look in parent), @Host() (stop at host element injector). They fine-tune hierarchical DI behavior." },
+    { q: "What is the platform injector hierarchy?", a: "Angular has Platform → Root → Environment → Element injector hierarchy. Platform injector is shared across multiple Angular apps on a page. Root is per-app. Environment injectors come from router lazy routes. Element injectors are per component/directive." },
+    { q: "What is NgOptimizedImage?", a: "NgOptimizedImage (Angular 15+, from @angular/common) optimizes image loading with automatic LCP optimization, lazy loading by default, priority attribute for LCP images, srcset generation, and missing width/height warnings. Replace <img src> with [ngSrc]." },
+    { q: "What is build-time prerendering vs runtime SSR?", a: "Build-time prerendering renders routes during ng build and saves static HTML files. Runtime SSR renders on each request in a Node.js server. Prerendering is faster (static serving) but not suitable for dynamic, user-specific content." },
+    { q: "What is the Angular transfer state?", a: "TransferState transfers data from server (SSR) to browser to prevent duplicate HTTP requests. Data fetched on server is serialized to the HTML. The browser Angular reads it via TransferState, avoiding a second network request. withHttpTransferCache() in provideHttpClient() automates this." },
+    { q: "What is NgRx and when would you use it?", a: "NgRx is a state management library for Angular based on Redux pattern. Use when: multiple components share complex state, state changes need to be tracked (devtools, time-travel), or team needs predictable, testable state management. For simple apps, services + signals/subjects suffice." },
+    { q: "What are NgRx Signals?", a: "@ngrx/signals (NgRx 18+) is a signals-based state management library. signalStore() creates a store with state, computed values, and methods. It's lighter than the full NgRx store, integrates with Angular Signals natively, and doesn't require actions/reducers/effects boilerplate." },
+    { q: "What is the Angular Language Service?", a: "Angular Language Service is a VS Code extension providing IDE features for Angular templates: autocomplete, type checking, goto definition, error highlighting, and refactoring. It uses the TypeScript language service extended with Angular template understanding." },
+  ],
+
+  latest: [
+    { q: "What are the major features introduced in Angular 17?", a: "Angular 17 introduced: new control flow (@if, @for, @switch), deferrable views (@defer), Signals improvements (stable), new project template with Vite/esbuild by default, SSR improvements, View Transitions API integration, and angular.dev as new documentation site." },
+    { q: "What is the new Angular build system (esbuild + Vite)?", a: "Angular 17+ uses esbuild and Vite as the default build system, replacing Webpack. It delivers dramatically faster build and rebuild times (10x faster in some cases), faster dev server with HMR (Hot Module Replacement), and smaller output bundles." },
+    { q: "What changed in Angular 18?", a: "Angular 18 introduced: Signals inputs (input()), Signals-based queries (viewChild(), contentChild()), output() function, stable zoneless change detection experiment, improved SSR with partial hydration developer preview, and route-level render modes." },
+    { q: "What is route-level render mode in Angular 18+?", a: "Angular 18+ allows configuring render mode per route: ServerRoute with RenderMode.Server (SSR), RenderMode.Client (CSR), or RenderMode.Prerender (SSG). Defined in app.routes.server.ts. Enables hybrid rendering strategies within one application." },
+    { q: "What are signal-based queries (viewChild, contentChild)?", a: "Angular 18 introduces signal-based queries: viewChild() and contentChild() return signals instead of using @ViewChild/@ContentChild decorators. viewChildren() and contentChildren() return Signal<readonly T[]>. They're reactive and work with the Signals system natively." },
+    { q: "What is the afterRender and afterNextRender API?", a: "afterRender() registers a callback that runs after every render. afterNextRender() runs once after the next render. Both are injection-context functions replacing ngAfterViewChecked for DOM measurements. afterRender supports phase parameter: EarlyRead, Write, MixedReadWrite, Read." },
+    { q: "What were the major Angular 19 features?", a: "Angular 19 introduced: incremental hydration, resource() and rxResource() APIs, linkedSignal(), stable standalone components without explicit standalone: true (all components standalone by default), hot module replacement for components, and improved zoneless support." },
+    { q: "What is the hot module replacement (HMR) for components in Angular 19?", a: "Angular 19 enables HMR for component styles and templates in development mode. When you save a component, only the changed component updates in the browser without full page reload, preserving application state. Enabled by default with ng serve." },
+    { q: "What does 'standalone: true by default' mean in Angular 19?", a: "In Angular 19, the standalone property defaults to true for components, directives, and pipes. You no longer need to explicitly write standalone: true. NgModule-based components still work but require standalone: false. This simplifies standalone development." },
+    { q: "What is the experimental zoneless mode and how to enable it?", a: "Zoneless mode removes Zone.js dependency. Enable with: provideZonelessChangeDetection() in app.config.ts providers. Update tsconfig to remove zone.js from types. Requires Signals or manual markForCheck() for change detection. Currently experimental but production-ready in some apps." },
+    { q: "What is the new inject() in constructor-less components?", a: "Modern Angular encourages inject() function over constructor injection, especially in standalone components. inject() can be called in field initializers and provides DI in functional contexts (guards, resolvers). It simplifies component code and avoids lengthy constructor parameters." },
+    { q: "What is the Angular DevTools profiler for Signals?", a: "Angular DevTools now includes a Signals dependency graph viewer that shows which signals are connected to which effects and computeds. It helps debug reactivity issues by visualizing the signal dependency tree and tracking which signals triggered updates." },
+    { q: "What is the @let template variable syntax?", a: "@let (Angular 18+) allows declaring local variables in templates: @let name = user.fullName; <p>{{ name }}</p>. Variables are scoped to the current block and can reference signal values, async values, or computed template expressions." },
+    { q: "What is provideExperimentalZonelessChangeDetection()?", a: "provideExperimentalZonelessChangeDetection() (Angular 18, renamed to provideZonelessChangeDetection() in 18.1) enables zoneless change detection. Components must be OnPush or use Signals. It removes zone.js from the bundle, saving ~14kb and improving performance." },
+    { q: "What is the @placeholder, @loading, and @error block in @defer?", a: "@placeholder shows content before the defer block loads (can specify minimum display time). @loading shows while the defer block is loading (can specify after and minimum time). @error shows if loading fails. All three are optional and improve user experience." },
+    { q: "How does @for differ from *ngFor in terms of performance?", a: "@for requires the track expression (mandatory), uses a more efficient diffing algorithm, and is implemented as a native compiler feature rather than a directive. It's consistently faster than *ngFor and produces less change detection overhead for large lists." },
+    { q: "What is the new application builder in Angular 18+?", a: "The application builder (@angular-devkit/build-angular:application) is the new stable builder using esbuild. It replaces the browser builder, supports SSR natively, enables build-time prerendering configuration, and is faster. ng update migrates automatically." },
+    { q: "What are ng-template outlet improvements in recent Angular?", a: "NgTemplateOutlet now works well with standalone components and the new control flow. It supports context binding for type-safe template variables. Combined with @defer, templates can be lazily loaded and conditionally rendered with full type safety." },
+    { q: "What is signal-based component testing approach?", a: "For signal-based components, tests use TestBed.flushEffects() to flush pending effects synchronously, TestBed.tick() for scheduler ticks, and direct signal manipulation (signal.set()). Angular Testing Library provides render() that works with signals and standalone components." },
+    { q: "What is the migration path from NgModule to standalone?", a: "Angular CLI provides ng generate @angular/core:standalone migration schematic. Run in three steps: convert components, remove unnecessary NgModules, and switch to standalone bootstrap. The migration is incremental, allowing gradual adoption in existing codebases." },
+    { q: "What is Angular's new documentation site (angular.dev)?", a: "angular.dev is Angular's new documentation site launched with Angular 17. It features interactive tutorials running in WebContainers (browser-based Node.js), improved search, modern design, playground, and the official home replacing angular.io for Angular 2+." },
+    { q: "What is the @ngrx/signals signalStore()?", a: "signalStore() creates a type-safe, signals-based store. Features: withState(), withComputed(), withMethods(), withHooks(), and withEntities(). It's lighter than classic NgRx, doesn't need actions/reducers/effects, and integrates naturally with Angular Signals." },
+    { q: "How does Angular 17+ handle image optimization with NgOptimizedImage?", a: "NgOptimizedImage now supports built-in loaders for Cloudinary, ImageKit, Imgix, and Netlify. Automatic placeholders (placeholder='blur'), automatic srcset generation, priority hints, and preconnect generation. Use [ngSrc] instead of [src] to enable all optimizations." },
+    { q: "What is the new Angular SSR transfer cache?", a: "Angular 17+ automatically caches HTTP requests made during SSR and transfers them to the client using TransferState. Enabled by withHttpTransferCache() in provideHttpClient(). The browser reads the cached response instead of making duplicate requests after hydration." },
+    { q: "What is the experimental authoring format for Angular components?", a: "Angular is exploring (as of 2024-2025) a new single-file component format with better TypeScript integration and template type inference. This aligns with industry trends (similar to Vue SFC). No official release yet, but prototypes show inline templates with full TS type checking." },
+  ]
+};
+
+let currentFilter = 'all';
+let globalCount = 1;
+
+function buildCards(level, containerId) {
+  const container = document.getElementById(containerId);
+  const items = data[level];
+  items.forEach(item => {
+    const card = document.createElement('div');
+    card.className = 'q-card';
+    card.dataset.level = level;
+    card.dataset.question = item.q.toLowerCase();
+    card.innerHTML = `
+      <div class="q-header" onclick="toggleCard(this.parentElement)">
+        <span class="q-num">#${String(globalCount++).padStart(3,'0')}</span>
+        <span class="q-text">${item.q}</span>
+        <span class="q-tag tag-${level}">${level === 'latest' ? 'v17–19' : level}</span>
+        <span class="q-expand-btn">▾</span>
+      </div>
+      <div class="q-answer"><p>${item.a}</p></div>
+    `;
+    container.appendChild(card);
+  });
+}
+
+buildCards('beginner', 'beginner-grid');
+buildCards('intermediate', 'intermediate-grid');
+buildCards('advanced', 'advanced-grid');
+buildCards('latest', 'latest-grid');
+
+function toggleCard(card) {
+  const isOpen = card.classList.contains('open');
+  document.querySelectorAll('.q-card.open').forEach(c => c.classList.remove('open'));
+  if (!isOpen) card.classList.add('open');
+}
+
+// Filter
+document.querySelectorAll('.filter-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentFilter = btn.dataset.filter;
+    applyFilters();
+  });
+});
+
+// Search
+document.getElementById('searchInput').addEventListener('input', applyFilters);
+
+function applyFilters() {
+  const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+  const cards = document.querySelectorAll('.q-card');
+  let visibleCount = 0;
+
+  cards.forEach(card => {
+    const levelMatch = currentFilter === 'all' || card.dataset.level === currentFilter;
+    const searchMatch = !searchTerm || card.dataset.question.includes(searchTerm) || card.querySelector('.q-text').textContent.toLowerCase().includes(searchTerm);
+    if (levelMatch && searchMatch) {
+      card.classList.remove('hidden');
+      visibleCount++;
+    } else {
+      card.classList.add('hidden');
+      card.classList.remove('open');
+    }
+  });
+
+  // Show/hide section headers
+  ['beginner','intermediate','advanced','latest'].forEach(level => {
+    const sectionHeader = document.querySelector(`[data-section="${level}"]`);
+    const grid = document.getElementById(`${level}-grid`);
+    const hasVisible = grid.querySelector('.q-card:not(.hidden)');
+    if (sectionHeader) sectionHeader.style.display = hasVisible ? '' : 'none';
+  });
+
+  document.getElementById('noResults').classList.toggle('show', visibleCount === 0);
+  document.getElementById('totalCount').textContent = visibleCount;
+}
+
+// Scroll top
+const scrollTopBtn = document.getElementById('scrollTop');
+const progressBar = document.getElementById('progressBar');
+window.addEventListener('scroll', () => {
+  const scrollPct = (window.scrollY / (document.body.scrollHeight - window.innerHeight)) * 100;
+  progressBar.style.width = scrollPct + '%';
+  scrollTopBtn.classList.toggle('visible', window.scrollY > 400);
+});
+</script>
+</body>
+</html>
