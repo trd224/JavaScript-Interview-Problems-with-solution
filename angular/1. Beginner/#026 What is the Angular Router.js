@@ -1,6 +1,6 @@
 // 🔹 What is the Angular Router?
 
-// Angular Router is a feature/module that allows you to navigate between different views (pages) in a Single Page Application (SPA) without reloading the browser.
+// Angular Router is a feature/module that allows us to navigate between different views (pages) in a Single Page Application (SPA) without reloading the browser.
 
 
 
