@@ -10,8 +10,8 @@
 
 // 🔹 Common Built-in Pipes
 
-// | Pipe      | Example   | Output                |             |
-// | --------- | --------- | --------------------- | ----------- |
+// | Pipe      | Example                           |   Output    |
+// | --------- | --------------------------------- | ----------- |
 // | uppercase | `{{ name  | uppercase }}`         | RIZWAN      |
 // | lowercase | `{{ name  | lowercase }}`         | rizwan      |
 // | date      | `{{ today | date:'dd/MM/yyyy' }}` | 16/04/2026  |

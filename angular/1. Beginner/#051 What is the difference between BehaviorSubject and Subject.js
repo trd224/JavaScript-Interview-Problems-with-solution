@@ -8,10 +8,14 @@
 
 
 // Simple difference:
+
 // Subject
+
 // No initial value
 // New subscribers get only future values
+
 // BehaviorSubject
+
 // Requires an initial value
 // New subscribers get latest (last) value instantly
 

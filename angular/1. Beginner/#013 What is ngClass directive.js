@@ -33,7 +33,7 @@
 
 // 🔹 Multiple Classes (Object Syntax)
 
-// <p [ngClass]="{active: isActive,highlight: isHighlighted}">
+// <p [ngClass]="{'active': isActive,'highlight': isHighlighted}">
 //   Text
 // </p>
 

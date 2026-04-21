@@ -1,8 +1,5 @@
 // 🔹 What is ViewChild in Angular?
 
-// ViewChild is a decorator used to access and interact with a child element, component, or directive from the parent component class (TypeScript).
-
-
 
 // 🔹 One-Line Interview Answer
 

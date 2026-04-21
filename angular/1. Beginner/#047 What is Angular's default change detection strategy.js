@@ -44,3 +44,24 @@
 
 // 🔹 Alternative 🔥
 // OnPush → Checks only when input changes (better performance)
+
+
+
+
+//✅ Full Example of OnPush
+
+// 🔹 1. Child Component (OnPush)
+
+// import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
+
+// @Component({
+//   selector: 'app-child',
+//   template: `
+//     <h3>Child Component</h3>
+//     <p>{{ user.name }}</p>
+//   `,
+//   changeDetection: ChangeDetectionStrategy.OnPush
+// })
+// export class ChildComponent {
+//   @Input() user: any;
+// }
