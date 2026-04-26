@@ -1,0 +1,1185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JavaScript Interview Questions — Beginner to Advanced</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #12121a;
+    --card: #1a1a26;
+    --border: #2a2a3e;
+    --accent: #f0e040;
+    --accent2: #40e0f0;
+    --accent3: #f040a0;
+    --text: #e8e8f0;
+    --muted: #7878a0;
+    --beginner: #40f090;
+    --mid: #f0a040;
+    --advanced: #f04060;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Syne', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Animated grid background */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(240,224,64,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(240,224,64,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container { max-width: 1100px; margin: 0 auto; padding: 0 24px; position: relative; z-index: 1; }
+
+  /* HEADER */
+  header {
+    padding: 60px 0 40px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 48px;
+    position: relative;
+  }
+
+  .header-tag {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+    opacity: 0.8;
+  }
+
+  h1 {
+    font-size: clamp(36px, 6vw, 72px);
+    font-weight: 800;
+    line-height: 1.0;
+    letter-spacing: -2px;
+    background: linear-gradient(135deg, #f0e040 0%, #40e0f0 50%, #f040a0 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 20px;
+  }
+
+  .subtitle {
+    font-family: 'Space Mono', monospace;
+    font-size: 13px;
+    color: var(--muted);
+    max-width: 600px;
+    line-height: 1.8;
+  }
+
+  /* STATS BAR */
+  .stats-bar {
+    display: flex;
+    gap: 32px;
+    flex-wrap: wrap;
+    margin: 32px 0;
+    padding: 20px 24px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+  }
+
+  .stat {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .stat-num {
+    font-size: 28px;
+    font-weight: 800;
+    letter-spacing: -1px;
+    color: var(--accent);
+  }
+
+  .stat-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+  }
+
+  /* CONTROLS */
+  .controls {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 36px;
+    align-items: center;
+  }
+
+  .filter-btn {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 8px 18px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.2s;
+    border-radius: 2px;
+  }
+
+  .filter-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .filter-btn.active { background: var(--accent); color: var(--bg); border-color: var(--accent); }
+  .filter-btn.beginner.active { background: var(--beginner); border-color: var(--beginner); }
+  .filter-btn.mid.active { background: var(--mid); border-color: var(--mid); }
+  .filter-btn.advanced.active { background: var(--advanced); border-color: var(--advanced); }
+
+  .search-box {
+    flex: 1;
+    min-width: 200px;
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    padding: 8px 16px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 2px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .search-box:focus { border-color: var(--accent2); }
+  .search-box::placeholder { color: var(--muted); }
+
+  /* SECTION */
+  .section {
+    margin-bottom: 56px;
+  }
+
+  .section-header {
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .section-title {
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+  }
+
+  .section-count {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+  }
+
+  /* QUESTION CARDS */
+  .questions-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .q-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 14px 18px;
+    background: var(--surface);
+    border-left: 3px solid transparent;
+    transition: all 0.15s;
+    cursor: default;
+    position: relative;
+  }
+
+  .q-item:hover {
+    background: var(--card);
+    border-left-color: var(--accent);
+  }
+
+  .q-item.beginner { --lvl-color: var(--beginner); }
+  .q-item.mid { --lvl-color: var(--mid); }
+  .q-item.advanced { --lvl-color: var(--advanced); }
+  .q-item:hover { border-left-color: var(--lvl-color); }
+
+  .q-num {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    min-width: 40px;
+    padding-top: 2px;
+    flex-shrink: 0;
+  }
+
+  .q-text {
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--text);
+    flex: 1;
+  }
+
+  .q-badge {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border-radius: 2px;
+    flex-shrink: 0;
+    color: var(--bg);
+    background: var(--lvl-color);
+    align-self: flex-start;
+    margin-top: 2px;
+  }
+
+  .hidden { display: none !important; }
+
+  /* SCROLL TO TOP */
+  .scroll-top {
+    position: fixed;
+    bottom: 32px;
+    right: 32px;
+    width: 44px;
+    height: 44px;
+    background: var(--accent);
+    color: var(--bg);
+    border: none;
+    border-radius: 2px;
+    font-size: 20px;
+    cursor: pointer;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    font-weight: 700;
+  }
+
+  .scroll-top.visible { display: flex; }
+
+  /* PROGRESS */
+  .progress-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    z-index: 200;
+    transition: width 0.1s;
+  }
+
+  /* NO RESULTS */
+  .no-results {
+    display: none;
+    padding: 60px 0;
+    text-align: center;
+    color: var(--muted);
+    font-family: 'Space Mono', monospace;
+    font-size: 13px;
+  }
+
+  .no-results.visible { display: block; }
+
+  @media (max-width: 600px) {
+    .stats-bar { gap: 20px; }
+    .q-badge { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="progress-bar" id="progressBar"></div>
+
+<div class="container">
+  <header>
+    <div class="header-tag">// interview prep</div>
+    <h1>JavaScript<br>Interview Qs</h1>
+    <p class="subtitle">Complete question bank from beginner to advanced — covering every core JavaScript topic for interview preparation.</p>
+
+    <div class="stats-bar">
+      <div class="stat"><span class="stat-num" id="totalCount">0</span><span class="stat-label">Total Questions</span></div>
+      <div class="stat"><span class="stat-num" style="color:var(--beginner)" id="beginnerCount">0</span><span class="stat-label">Beginner</span></div>
+      <div class="stat"><span class="stat-num" style="color:var(--mid)" id="midCount">0</span><span class="stat-label">Mid Level</span></div>
+      <div class="stat"><span class="stat-num" style="color:var(--advanced)" id="advancedCount">0</span><span class="stat-label">Advanced</span></div>
+    </div>
+  </header>
+
+  <div class="controls">
+    <button class="filter-btn active" data-filter="all" onclick="setFilter('all',this)">All</button>
+    <button class="filter-btn beginner" data-filter="beginner" onclick="setFilter('beginner',this)">Beginner</button>
+    <button class="filter-btn mid" data-filter="mid" onclick="setFilter('mid',this)">Mid Level</button>
+    <button class="filter-btn advanced" data-filter="advanced" onclick="setFilter('advanced',this)">Advanced</button>
+    <input class="search-box" type="text" id="searchInput" placeholder="Search questions..." oninput="searchQuestions()">
+  </div>
+
+  <div id="questionsContainer"></div>
+  <div class="no-results" id="noResults">No questions match your search.</div>
+</div>
+
+<button class="scroll-top" id="scrollTopBtn" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+
+<script>
+const data = [
+  {
+    section: "Variables & Data Types",
+    questions: [
+      { q: "What is JavaScript and how is it different from Java?", level: "beginner" },
+      { q: "What are the differences between var, let, and const?", level: "beginner" },
+      { q: "What is variable hoisting in JavaScript?", level: "mid" },
+      { q: "Why is var considered problematic in modern JavaScript?", level: "beginner" },
+      { q: "What is the Temporal Dead Zone (TDZ)?", level: "advanced" },
+      { q: "Can you reassign a const variable? Can you mutate it?", level: "beginner" },
+      { q: "What are the rules for naming variables in JavaScript?", level: "beginner" },
+      { q: "What are primitive data types in JavaScript? Name all of them.", level: "beginner" },
+      { q: "What is the difference between null and undefined?", level: "beginner" },
+      { q: "What is BigInt and when would you use it?", level: "mid" },
+      { q: "What is the Symbol data type used for?", level: "mid" },
+      { q: "What does typeof return for null? Why is this a bug?", level: "mid" },
+      { q: "What is the difference between typeof undefined and typeof null?", level: "mid" },
+      { q: "What is NaN and how do you check for it?", level: "beginner" },
+      { q: "Why does typeof NaN return 'number'?", level: "mid" },
+      { q: "How do you convert a string to a number in JavaScript?", level: "beginner" },
+      { q: "What is the difference between parseInt, parseFloat, and Number()?", level: "mid" },
+      { q: "How do you convert a number to a string?", level: "beginner" },
+      { q: "What is implicit type coercion? Give examples.", level: "mid" },
+      { q: "What is the result of 1 + '2' and why?", level: "beginner" },
+      { q: "What is the result of +'3' and why?", level: "mid" },
+      { q: "What is the difference between == and ===?", level: "beginner" },
+      { q: "What are truthy and falsy values in JavaScript? List all falsy values.", level: "beginner" },
+      { q: "Is '0' truthy or falsy? What about [] and {}?", level: "beginner" },
+      { q: "What happens when you compare objects with == or ===?", level: "mid" },
+    ]
+  },
+  {
+    section: "Strings",
+    questions: [
+      { q: "How do you access individual characters in a string?", level: "beginner" },
+      { q: "What is the difference between charAt() and bracket notation for strings?", level: "beginner" },
+      { q: "What does the slice() method do on strings?", level: "beginner" },
+      { q: "What is the difference between slice(), substring(), and substr()?", level: "mid" },
+      { q: "How do you convert a string to uppercase and lowercase?", level: "beginner" },
+      { q: "How does trim(), trimStart(), and trimEnd() work?", level: "beginner" },
+      { q: "What does split() do and what does it return?", level: "beginner" },
+      { q: "How do you check if a string includes a substring?", level: "beginner" },
+      { q: "What is the difference between indexOf() and includes()?", level: "beginner" },
+      { q: "How do template literals work? What are tagged template literals?", level: "mid" },
+      { q: "What is string concatenation and what is the preferred modern approach?", level: "beginner" },
+      { q: "How does padStart() and padEnd() work?", level: "mid" },
+      { q: "What does repeat() do on strings?", level: "beginner" },
+      { q: "How do you replace a part of a string using replace() and replaceAll()?", level: "beginner" },
+      { q: "What does startsWith() and endsWith() do?", level: "beginner" },
+      { q: "Are strings mutable in JavaScript?", level: "beginner" },
+      { q: "How do you iterate over characters of a string?", level: "beginner" },
+      { q: "What is the difference between a string primitive and a String object?", level: "advanced" },
+    ]
+  },
+  {
+    section: "Operators & Control Flow",
+    questions: [
+      { q: "What are the comparison operators in JavaScript?", level: "beginner" },
+      { q: "What is the difference between > and >= operators?", level: "beginner" },
+      { q: "Explain the && (AND) and || (OR) operators with examples.", level: "beginner" },
+      { q: "What is short-circuit evaluation?", level: "mid" },
+      { q: "What does the || operator return — true/false or one of the operands?", level: "mid" },
+      { q: "What is the nullish coalescing operator (??) and how does it differ from ||?", level: "mid" },
+      { q: "What is the optional chaining operator (?.) and when do you use it?", level: "mid" },
+      { q: "What is the ternary operator? Provide a syntax example.", level: "beginner" },
+      { q: "What is the unary ! (NOT) operator?", level: "beginner" },
+      { q: "What does !! (double negation) do?", level: "mid" },
+      { q: "What are bitwise operators in JavaScript?", level: "advanced" },
+      { q: "What is the exponentiation operator (**)?", level: "beginner" },
+      { q: "What is the difference between prefix and postfix increment (++i vs i++)?", level: "mid" },
+      { q: "How does the if-else if-else ladder work?", level: "beginner" },
+      { q: "What are the advantages of switch over nested if-else?", level: "beginner" },
+      { q: "What happens if you forget break in a switch case?", level: "beginner" },
+      { q: "What is a default case in switch and when is it executed?", level: "beginner" },
+      { q: "Can switch cases use expressions or only literals?", level: "mid" },
+      { q: "What is the comma operator in JavaScript?", level: "advanced" },
+      { q: "What is operator precedence? Give an example where it matters.", level: "mid" },
+    ]
+  },
+  {
+    section: "Loops",
+    questions: [
+      { q: "What are the different types of loops in JavaScript?", level: "beginner" },
+      { q: "What is the difference between a while loop and a do-while loop?", level: "beginner" },
+      { q: "When is a do-while loop preferred over a while loop?", level: "beginner" },
+      { q: "What is the syntax of a for loop?", level: "beginner" },
+      { q: "How does the for...of loop work and what can you iterate with it?", level: "beginner" },
+      { q: "What is the difference between for...in and for...of?", level: "mid" },
+      { q: "Why should you avoid using for...in on arrays?", level: "mid" },
+      { q: "What does the break keyword do inside a loop?", level: "beginner" },
+      { q: "What does the continue keyword do?", level: "beginner" },
+      { q: "What are labeled statements and how are they used with break/continue?", level: "advanced" },
+      { q: "How do you loop over the keys and values of an object?", level: "beginner" },
+      { q: "How can an infinite loop be created and when is it intentional?", level: "mid" },
+      { q: "What is the performance difference between various loop types?", level: "advanced" },
+      { q: "How would you loop backwards through an array?", level: "beginner" },
+    ]
+  },
+  {
+    section: "Arrays",
+    questions: [
+      { q: "What is an array in JavaScript? How do you create one?", level: "beginner" },
+      { q: "What do push() and pop() do?", level: "beginner" },
+      { q: "What do shift() and unshift() do?", level: "beginner" },
+      { q: "What is the difference between push/pop and shift/unshift?", level: "beginner" },
+      { q: "How do you find the length of an array?", level: "beginner" },
+      { q: "How do you access elements in an array?", level: "beginner" },
+      { q: "What does splice() do? How is it different from slice()?", level: "mid" },
+      { q: "How do you clone an array in JavaScript? List at least 3 ways.", level: "mid" },
+      { q: "What is the spread operator and how does it work with arrays?", level: "mid" },
+      { q: "What does concat() do?", level: "beginner" },
+      { q: "How do you flatten a nested array? What does flat() and flatMap() do?", level: "mid" },
+      { q: "What does indexOf() return if the element is not found?", level: "beginner" },
+      { q: "What is the difference between indexOf() and findIndex()?", level: "mid" },
+      { q: "What does includes() do on arrays?", level: "beginner" },
+      { q: "How does array destructuring work?", level: "mid" },
+      { q: "How do you swap two variables using destructuring?", level: "mid" },
+      { q: "What are default values in destructuring?", level: "mid" },
+      { q: "What is rest in destructuring?", level: "mid" },
+      { q: "How do you remove duplicates from an array?", level: "mid" },
+      { q: "How do you check if something is an array?", level: "beginner" },
+      { q: "What does Array.from() do?", level: "mid" },
+      { q: "What does Array.of() do?", level: "mid" },
+      { q: "What is a sparse array?", level: "advanced" },
+      { q: "What does fill() do and how do you use it?", level: "mid" },
+      { q: "What does join() do?", level: "beginner" },
+      { q: "How do you reverse an array in-place vs. without mutating?", level: "mid" },
+      { q: "What does the at() method do?", level: "mid" },
+      { q: "What is array-like object? Give examples.", level: "mid" },
+      { q: "How does Object.entries() work with arrays vs objects?", level: "mid" },
+    ]
+  },
+  {
+    section: "Array Methods (Higher-Order)",
+    questions: [
+      { q: "What does forEach() do? Does it return anything?", level: "beginner" },
+      { q: "What is the difference between forEach() and map()?", level: "beginner" },
+      { q: "What does map() return? Does it mutate the original array?", level: "beginner" },
+      { q: "What does filter() do? What does it return?", level: "beginner" },
+      { q: "How does reduce() work? Explain its callback and initial value.", level: "mid" },
+      { q: "What happens if you don't pass an initial value to reduce()?", level: "mid" },
+      { q: "How would you use reduce() to flatten a nested array?", level: "advanced" },
+      { q: "What does sort() do by default? What is its gotcha with numbers?", level: "mid" },
+      { q: "How do you sort an array of objects by a property?", level: "mid" },
+      { q: "What does find() return? What if nothing matches?", level: "beginner" },
+      { q: "What is the difference between find() and filter()?", level: "beginner" },
+      { q: "What does findIndex() return?", level: "beginner" },
+      { q: "What does every() do?", level: "beginner" },
+      { q: "What does some() do?", level: "beginner" },
+      { q: "What is the difference between some() and every()?", level: "beginner" },
+      { q: "Can you chain map() and filter() together? Give an example.", level: "mid" },
+      { q: "How do you implement your own map() function from scratch?", level: "advanced" },
+      { q: "How do you implement your own filter() from scratch?", level: "advanced" },
+      { q: "How do you implement your own reduce() from scratch?", level: "advanced" },
+      { q: "What does flatMap() do that map() + flat() also does?", level: "mid" },
+    ]
+  },
+  {
+    section: "Objects",
+    questions: [
+      { q: "What is an object in JavaScript? How do you create one?", level: "beginner" },
+      { q: "What is the difference between dot notation and bracket notation?", level: "beginner" },
+      { q: "When must you use bracket notation instead of dot notation?", level: "mid" },
+      { q: "How do you add, update, and delete properties from an object?", level: "beginner" },
+      { q: "How do you check if a property exists in an object?", level: "beginner" },
+      { q: "What is the difference between in operator and hasOwnProperty()?", level: "mid" },
+      { q: "What does Object.keys() return?", level: "beginner" },
+      { q: "What does Object.values() return?", level: "beginner" },
+      { q: "What does Object.entries() return?", level: "beginner" },
+      { q: "How do you iterate over an object's properties?", level: "beginner" },
+      { q: "What are computed property names in objects?", level: "mid" },
+      { q: "What is object shorthand notation?", level: "mid" },
+      { q: "How does the spread operator work with objects?", level: "mid" },
+      { q: "What is object destructuring?", level: "mid" },
+      { q: "How do you rename variables during destructuring?", level: "mid" },
+      { q: "What is nested destructuring?", level: "mid" },
+      { q: "How do you clone an object? What is the difference between shallow and deep clone?", level: "mid" },
+      { q: "What does Object.assign() do?", level: "mid" },
+      { q: "What does Object.freeze() do?", level: "mid" },
+      { q: "What does Object.seal() do?", level: "mid" },
+      { q: "What is the difference between freeze() and seal()?", level: "advanced" },
+      { q: "What does Object.create() do?", level: "advanced" },
+      { q: "What is the difference between Object.create(null) and {}?", level: "advanced" },
+      { q: "How do you deep clone an object?", level: "mid" },
+      { q: "What is JSON.stringify() and JSON.parse() used for?", level: "beginner" },
+      { q: "What are the limitations of using JSON.stringify for deep cloning?", level: "mid" },
+      { q: "What does structuredClone() do?", level: "advanced" },
+      { q: "What are getters and setters in objects?", level: "mid" },
+      { q: "What is property descriptor? What are configurable, enumerable, writable?", level: "advanced" },
+      { q: "How does Object.defineProperty() work?", level: "advanced" },
+    ]
+  },
+  {
+    section: "Functions",
+    questions: [
+      { q: "What is a function declaration?", level: "beginner" },
+      { q: "What is a function expression?", level: "beginner" },
+      { q: "What is the difference between function declaration and function expression?", level: "mid" },
+      { q: "What are arrow functions? What is the syntax?", level: "beginner" },
+      { q: "What are the differences between arrow functions and regular functions?", level: "mid" },
+      { q: "What is a named function expression?", level: "mid" },
+      { q: "What are first-class functions?", level: "mid" },
+      { q: "What is a higher-order function?", level: "mid" },
+      { q: "What is a callback function?", level: "beginner" },
+      { q: "What are default parameters in functions?", level: "beginner" },
+      { q: "What are rest parameters? How do they differ from arguments object?", level: "mid" },
+      { q: "What is the arguments object? Can you use it in arrow functions?", level: "mid" },
+      { q: "What is parameter destructuring in function arguments?", level: "mid" },
+      { q: "What is a pure function?", level: "mid" },
+      { q: "What is a side effect in a function?", level: "mid" },
+      { q: "What is function hoisting?", level: "mid" },
+      { q: "Are function expressions hoisted?", level: "mid" },
+      { q: "What is an IIFE (Immediately Invoked Function Expression)?", level: "mid" },
+      { q: "What is the purpose of IIFE?", level: "mid" },
+      { q: "What is a recursive function? Give an example.", level: "mid" },
+      { q: "What is tail call optimization?", level: "advanced" },
+      { q: "What is memoization?", level: "advanced" },
+      { q: "What is function composition?", level: "advanced" },
+      { q: "What is currying?", level: "advanced" },
+      { q: "What is partial application?", level: "advanced" },
+      { q: "What is a generator function? What does yield do?", level: "advanced" },
+      { q: "What is an async generator?", level: "advanced" },
+      { q: "What is a function that returns another function? Give an example.", level: "mid" },
+    ]
+  },
+  {
+    section: "Scope & Closures",
+    questions: [
+      { q: "What is scope in JavaScript?", level: "beginner" },
+      { q: "What is global scope?", level: "beginner" },
+      { q: "What is function scope?", level: "beginner" },
+      { q: "What is block scope?", level: "beginner" },
+      { q: "What is the difference between function scope and block scope?", level: "mid" },
+      { q: "What is lexical scope?", level: "mid" },
+      { q: "What is the scope chain?", level: "mid" },
+      { q: "What is a closure?", level: "mid" },
+      { q: "Give a practical example of a closure.", level: "mid" },
+      { q: "What is a closure over a loop variable? What is the classic bug?", level: "advanced" },
+      { q: "How do you fix the closure-in-loop bug?", level: "advanced" },
+      { q: "What is a module pattern using closures?", level: "advanced" },
+      { q: "What is variable shadowing?", level: "mid" },
+      { q: "Can inner functions access outer function variables?", level: "beginner" },
+      { q: "What is the difference between local and global variables?", level: "beginner" },
+      { q: "What is a memory leak caused by closures?", level: "advanced" },
+      { q: "What does it mean that closures capture variables by reference?", level: "advanced" },
+    ]
+  },
+  {
+    section: "this Keyword",
+    questions: [
+      { q: "What does the this keyword refer to in JavaScript?", level: "mid" },
+      { q: "What is the value of this in the global context?", level: "mid" },
+      { q: "What is the value of this inside a regular function in strict mode?", level: "mid" },
+      { q: "What is the value of this inside an object method?", level: "mid" },
+      { q: "What is the value of this inside an arrow function?", level: "mid" },
+      { q: "What is the difference between this in arrow functions vs. regular functions?", level: "mid" },
+      { q: "What does call() do?", level: "mid" },
+      { q: "What does apply() do? How does it differ from call()?", level: "mid" },
+      { q: "What does bind() do and what does it return?", level: "mid" },
+      { q: "How do you explicitly set the value of this?", level: "mid" },
+      { q: "What is method borrowing using call/apply?", level: "advanced" },
+      { q: "What does this refer to inside a class?", level: "mid" },
+      { q: "What is the problem with passing methods as callbacks (losing this context)?", level: "advanced" },
+      { q: "How do you prevent losing this context in callbacks?", level: "advanced" },
+      { q: "What is window vs globalThis?", level: "mid" },
+    ]
+  },
+  {
+    section: "Prototypes & Inheritance",
+    questions: [
+      { q: "What is prototypal inheritance in JavaScript?", level: "mid" },
+      { q: "What is the prototype chain?", level: "mid" },
+      { q: "What is __proto__ vs prototype property?", level: "advanced" },
+      { q: "What does Object.getPrototypeOf() do?", level: "advanced" },
+      { q: "What is a constructor function?", level: "mid" },
+      { q: "How does the new keyword work step by step?", level: "advanced" },
+      { q: "What happens if you forget the new keyword with a constructor?", level: "mid" },
+      { q: "How do you add a method to a constructor function's prototype?", level: "mid" },
+      { q: "What does hasOwnProperty() check?", level: "mid" },
+      { q: "What is the difference between own properties and inherited properties?", level: "mid" },
+      { q: "What is Object.create() and how is it used for inheritance?", level: "advanced" },
+      { q: "What is the class keyword? Is it just syntactic sugar?", level: "mid" },
+      { q: "What is the constructor() method inside a class?", level: "mid" },
+      { q: "What is inheritance with extends?", level: "mid" },
+      { q: "What does super() do and when must you call it?", level: "mid" },
+      { q: "What is method overriding in classes?", level: "mid" },
+      { q: "What are static methods and properties?", level: "mid" },
+      { q: "What is the difference between static and instance methods?", level: "mid" },
+      { q: "What are getters and setters in a class?", level: "mid" },
+      { q: "What is the instanceof operator?", level: "mid" },
+      { q: "What is mixins in JavaScript?", level: "advanced" },
+      { q: "What is the difference between classical inheritance and prototypal inheritance?", level: "advanced" },
+      { q: "What are private class fields (# syntax)?", level: "advanced" },
+    ]
+  },
+  {
+    section: "JavaScript Engine & Execution",
+    questions: [
+      { q: "What is the JavaScript engine?", level: "mid" },
+      { q: "What is the call stack?", level: "mid" },
+      { q: "What is a stack frame?", level: "advanced" },
+      { q: "What is a stack overflow?", level: "mid" },
+      { q: "What is the Global Execution Context?", level: "mid" },
+      { q: "What phases does the JavaScript engine go through when running code?", level: "advanced" },
+      { q: "What is the creation phase vs. execution phase of an execution context?", level: "advanced" },
+      { q: "What is hoisting exactly? What gets hoisted and what doesn't?", level: "mid" },
+      { q: "Are let and const hoisted? What is the TDZ?", level: "advanced" },
+      { q: "What is the lexical environment?", level: "advanced" },
+      { q: "What is the variable environment?", level: "advanced" },
+      { q: "What is the outer reference in the scope chain?", level: "advanced" },
+      { q: "What is JIT compilation?", level: "advanced" },
+      { q: "What are memory heap and call stack in JS engines?", level: "advanced" },
+      { q: "What is garbage collection in JavaScript?", level: "advanced" },
+      { q: "What is the mark-and-sweep algorithm?", level: "advanced" },
+    ]
+  },
+  {
+    section: "Asynchronous JavaScript",
+    questions: [
+      { q: "Is JavaScript synchronous or asynchronous?", level: "beginner" },
+      { q: "What is the event loop?", level: "mid" },
+      { q: "What is the callback queue (task queue)?", level: "mid" },
+      { q: "What is the microtask queue?", level: "advanced" },
+      { q: "What is the difference between the microtask queue and the callback queue?", level: "advanced" },
+      { q: "Which has higher priority: promises or setTimeout callbacks?", level: "advanced" },
+      { q: "How does setTimeout work? What is the minimum delay?", level: "mid" },
+      { q: "What happens with setTimeout with 0 milliseconds?", level: "mid" },
+      { q: "What is setInterval and how do you stop it?", level: "beginner" },
+      { q: "What is the difference between setTimeout and setInterval?", level: "beginner" },
+      { q: "What is callback hell? How do you avoid it?", level: "mid" },
+      { q: "What is a Promise?", level: "mid" },
+      { q: "What are the states of a Promise?", level: "mid" },
+      { q: "What does Promise.resolve() do?", level: "mid" },
+      { q: "What does Promise.reject() do?", level: "mid" },
+      { q: "What does .then() return?", level: "mid" },
+      { q: "What does .catch() do?", level: "mid" },
+      { q: "What does .finally() do?", level: "mid" },
+      { q: "What is Promise chaining?", level: "mid" },
+      { q: "What does Promise.all() do? What if one promise fails?", level: "mid" },
+      { q: "What does Promise.allSettled() do?", level: "mid" },
+      { q: "What does Promise.race() do?", level: "mid" },
+      { q: "What does Promise.any() do?", level: "mid" },
+      { q: "What is async/await?", level: "mid" },
+      { q: "How do you handle errors with async/await?", level: "mid" },
+      { q: "What does await do to execution?", level: "mid" },
+      { q: "Can you use await outside an async function?", level: "mid" },
+      { q: "How do you run multiple async operations in parallel with async/await?", level: "advanced" },
+      { q: "What is the difference between sequential and parallel async execution?", level: "advanced" },
+      { q: "What is Promise.all vs sequential await?", level: "advanced" },
+      { q: "What is a microtask? Give examples.", level: "advanced" },
+      { q: "What is queueMicrotask()?", level: "advanced" },
+      { q: "What is the difference between synchronous and asynchronous error handling?", level: "advanced" },
+    ]
+  },
+  {
+    section: "Network Requests & APIs",
+    questions: [
+      { q: "What is AJAX?", level: "mid" },
+      { q: "What is an HTTP request?", level: "beginner" },
+      { q: "What are HTTP methods (GET, POST, PUT, DELETE, PATCH)?", level: "beginner" },
+      { q: "What is XMLHttpRequest (XHR)?", level: "mid" },
+      { q: "What is the Fetch API?", level: "mid" },
+      { q: "How do you make a GET request using fetch?", level: "mid" },
+      { q: "How do you make a POST request with fetch and send JSON?", level: "mid" },
+      { q: "What does fetch return?", level: "mid" },
+      { q: "How do you handle errors with the Fetch API?", level: "mid" },
+      { q: "Why doesn't fetch throw on HTTP errors like 404?", level: "advanced" },
+      { q: "What is CORS and why does it exist?", level: "mid" },
+      { q: "What is a REST API?", level: "beginner" },
+      { q: "What are HTTP status codes? Give examples for 2xx, 4xx, 5xx.", level: "beginner" },
+      { q: "What is JSON and how do you parse it in JavaScript?", level: "beginner" },
+      { q: "What is the difference between response.json() and JSON.parse()?", level: "mid" },
+      { q: "How do you set headers in a fetch request?", level: "mid" },
+      { q: "What is the AbortController API?", level: "advanced" },
+      { q: "How do you cancel a fetch request?", level: "advanced" },
+      { q: "What is a WebSocket?", level: "advanced" },
+      { q: "What is Server-Sent Events (SSE)?", level: "advanced" },
+    ]
+  },
+  {
+    section: "ES6+ Features",
+    questions: [
+      { q: "What are the major features introduced in ES6 (ES2015)?", level: "mid" },
+      { q: "What is destructuring assignment?", level: "beginner" },
+      { q: "What is the spread operator?", level: "beginner" },
+      { q: "What is the rest operator?", level: "beginner" },
+      { q: "What is the difference between spread and rest?", level: "mid" },
+      { q: "What are template literals?", level: "beginner" },
+      { q: "What are tagged template literals?", level: "advanced" },
+      { q: "What is the for...of loop?", level: "beginner" },
+      { q: "What is a Symbol in JavaScript?", level: "mid" },
+      { q: "What is an iterable?", level: "mid" },
+      { q: "What is the iterator protocol?", level: "advanced" },
+      { q: "What is a Set?", level: "mid" },
+      { q: "What is a Map data structure?", level: "mid" },
+      { q: "What is the difference between Map and a plain object?", level: "mid" },
+      { q: "What is a WeakMap and WeakSet?", level: "advanced" },
+      { q: "When would you use a WeakMap over a Map?", level: "advanced" },
+      { q: "What is optional chaining (?.) ?", level: "mid" },
+      { q: "What is nullish coalescing (??)?", level: "mid" },
+      { q: "What is logical assignment (&&=, ||=, ??=)?", level: "advanced" },
+      { q: "What are ES2022 features like at(), Object.hasOwn(), etc.?", level: "advanced" },
+      { q: "What is Array.prototype.at()?", level: "mid" },
+      { q: "What is Object.fromEntries()?", level: "mid" },
+      { q: "What is Promise.allSettled()?", level: "mid" },
+      { q: "What are private class fields and methods?", level: "advanced" },
+      { q: "What is the globalThis object?", level: "mid" },
+    ]
+  },
+  {
+    section: "ES6 Modules",
+    questions: [
+      { q: "What are ES6 modules?", level: "mid" },
+      { q: "What is the difference between ES modules and CommonJS modules?", level: "mid" },
+      { q: "How do you export something from a module?", level: "mid" },
+      { q: "What is the difference between named exports and default exports?", level: "mid" },
+      { q: "How do you import a default export?", level: "mid" },
+      { q: "How do you import multiple named exports at once?", level: "mid" },
+      { q: "How do you rename imports using 'as'?", level: "mid" },
+      { q: "What does import * as name from 'module' do?", level: "mid" },
+      { q: "What is dynamic import() and when is it useful?", level: "advanced" },
+      { q: "What is tree shaking?", level: "advanced" },
+      { q: "What is the module scope?", level: "mid" },
+      { q: "Are ES modules strictly mode by default?", level: "advanced" },
+      { q: "What is the difference between type='module' and a regular script tag?", level: "mid" },
+    ]
+  },
+  {
+    section: "Sets & Maps",
+    questions: [
+      { q: "How do you create a Set?", level: "beginner" },
+      { q: "How do you add, delete, and check values in a Set?", level: "beginner" },
+      { q: "Can a Set contain duplicate values?", level: "beginner" },
+      { q: "How do you convert a Set to an array?", level: "beginner" },
+      { q: "How do you iterate over a Set?", level: "beginner" },
+      { q: "What is the size property of a Set?", level: "beginner" },
+      { q: "How do you use a Set to remove duplicates from an array?", level: "mid" },
+      { q: "How do you create a Map?", level: "beginner" },
+      { q: "How do you set and get values in a Map?", level: "beginner" },
+      { q: "What types can be used as Map keys?", level: "mid" },
+      { q: "How do you iterate over a Map?", level: "beginner" },
+      { q: "What is the difference between Map.size and Object.keys().length?", level: "mid" },
+      { q: "When would you choose Map over an object?", level: "mid" },
+      { q: "What is a WeakMap and how does it differ from Map?", level: "advanced" },
+      { q: "What is a WeakRef and FinalizationRegistry?", level: "advanced" },
+    ]
+  },
+  {
+    section: "DOM Manipulation",
+    questions: [
+      { q: "What is the DOM?", level: "beginner" },
+      { q: "What is the difference between the DOM and HTML?", level: "beginner" },
+      { q: "How do you select an element by its ID?", level: "beginner" },
+      { q: "What does querySelector() do vs querySelectorAll()?", level: "beginner" },
+      { q: "What is the difference between getElementById and querySelector?", level: "beginner" },
+      { q: "What does textContent vs innerText vs innerHTML do?", level: "mid" },
+      { q: "What is the security risk of using innerHTML?", level: "mid" },
+      { q: "How do you change CSS styles via JavaScript?", level: "beginner" },
+      { q: "What is classList and what methods does it have?", level: "beginner" },
+      { q: "How do you get and set HTML attributes using JavaScript?", level: "beginner" },
+      { q: "How do you create a new DOM element?", level: "beginner" },
+      { q: "How do you append an element to the DOM?", level: "beginner" },
+      { q: "What is the difference between append(), appendChild(), prepend(), and insertBefore()?", level: "mid" },
+      { q: "What is insertAdjacentHTML() and its positions?", level: "mid" },
+      { q: "How do you remove an element from the DOM?", level: "beginner" },
+      { q: "How do you clone a DOM node?", level: "mid" },
+      { q: "What is the difference between cloneNode(true) and cloneNode(false)?", level: "mid" },
+      { q: "What is the difference between parent, child, and sibling nodes?", level: "beginner" },
+      { q: "What does parentElement vs parentNode return?", level: "mid" },
+      { q: "What are element nodes vs text nodes vs comment nodes?", level: "mid" },
+      { q: "How do you get the dimensions of an element?", level: "mid" },
+      { q: "What is getBoundingClientRect()?", level: "mid" },
+      { q: "What is the difference between clientWidth, offsetWidth, and scrollWidth?", level: "advanced" },
+      { q: "What is the difference between offsetTop and scrollTop?", level: "advanced" },
+      { q: "What is the virtual DOM? How is it different from the real DOM?", level: "advanced" },
+      { q: "How do you detect when an element enters the viewport?", level: "advanced" },
+      { q: "What is the Intersection Observer API?", level: "advanced" },
+      { q: "What is the MutationObserver API?", level: "advanced" },
+    ]
+  },
+  {
+    section: "Events",
+    questions: [
+      { q: "What is an event in JavaScript?", level: "beginner" },
+      { q: "How do you add an event listener?", level: "beginner" },
+      { q: "How do you remove an event listener?", level: "beginner" },
+      { q: "What are different ways to handle events in JavaScript?", level: "beginner" },
+      { q: "What is the event object?", level: "beginner" },
+      { q: "What is event.target vs event.currentTarget?", level: "mid" },
+      { q: "What is event bubbling?", level: "mid" },
+      { q: "What is event capturing?", level: "mid" },
+      { q: "What is the difference between bubbling and capturing?", level: "mid" },
+      { q: "How do you stop event propagation?", level: "mid" },
+      { q: "What is the difference between stopPropagation() and stopImmediatePropagation()?", level: "advanced" },
+      { q: "What does preventDefault() do?", level: "mid" },
+      { q: "What is event delegation?", level: "mid" },
+      { q: "Why is event delegation useful?", level: "mid" },
+      { q: "How do you implement event delegation?", level: "mid" },
+      { q: "What is the this keyword inside an event listener callback?", level: "mid" },
+      { q: "What are custom events? How do you create and dispatch them?", level: "advanced" },
+      { q: "What is the DOMContentLoaded event vs the load event?", level: "mid" },
+      { q: "What is debouncing and throttling?", level: "advanced" },
+      { q: "How do you implement a debounce function?", level: "advanced" },
+      { q: "How do you implement a throttle function?", level: "advanced" },
+      { q: "What are keyboard events? What is the difference between keydown, keyup, keypress?", level: "mid" },
+      { q: "What are mouse events?", level: "beginner" },
+      { q: "What are pointer events?", level: "advanced" },
+      { q: "What is the passive event listener option?", level: "advanced" },
+      { q: "What is once option in addEventListener?", level: "mid" },
+    ]
+  },
+  {
+    section: "Error Handling",
+    questions: [
+      { q: "What are common JavaScript errors? Name at least 5 error types.", level: "beginner" },
+      { q: "What is a TypeError? Give an example.", level: "beginner" },
+      { q: "What is a ReferenceError? Give an example.", level: "beginner" },
+      { q: "What is a SyntaxError?", level: "beginner" },
+      { q: "What is a RangeError?", level: "mid" },
+      { q: "How do you use try-catch-finally?", level: "beginner" },
+      { q: "What does the finally block always do?", level: "beginner" },
+      { q: "How do you throw a custom error?", level: "mid" },
+      { q: "How do you create a custom error class?", level: "advanced" },
+      { q: "What is the Error object and what properties does it have?", level: "mid" },
+      { q: "How do you handle errors in promises using .catch()?", level: "mid" },
+      { q: "How do you handle errors with async/await?", level: "mid" },
+      { q: "What happens to unhandled promise rejections?", level: "advanced" },
+      { q: "What is the unhandledrejection global event?", level: "advanced" },
+      { q: "What is error propagation in async functions?", level: "advanced" },
+      { q: "How do you rethrow an error?", level: "mid" },
+    ]
+  },
+  {
+    section: "Strict Mode",
+    questions: [
+      { q: "What is strict mode in JavaScript?", level: "mid" },
+      { q: "How do you enable strict mode?", level: "mid" },
+      { q: "What does strict mode prevent? Give 3 examples.", level: "mid" },
+      { q: "Are ES6 modules automatically in strict mode?", level: "mid" },
+      { q: "What happens to this in a regular function in strict mode?", level: "mid" },
+      { q: "Does strict mode affect classes?", level: "mid" },
+    ]
+  },
+  {
+    section: "JSON & Data Serialization",
+    questions: [
+      { q: "What is JSON?", level: "beginner" },
+      { q: "What are the rules of valid JSON?", level: "beginner" },
+      { q: "What does JSON.stringify() do?", level: "beginner" },
+      { q: "What does JSON.parse() do?", level: "beginner" },
+      { q: "What values does JSON.stringify() ignore or convert?", level: "mid" },
+      { q: "What is the replacer argument in JSON.stringify()?", level: "advanced" },
+      { q: "What is the reviver argument in JSON.parse()?", level: "advanced" },
+      { q: "How do you pretty-print JSON?", level: "mid" },
+      { q: "What is the difference between JSON and JavaScript object literals?", level: "mid" },
+      { q: "What happens when you JSON.stringify() a circular reference?", level: "advanced" },
+    ]
+  },
+  {
+    section: "Regular Expressions",
+    questions: [
+      { q: "What is a regular expression?", level: "mid" },
+      { q: "How do you create a regex in JavaScript?", level: "mid" },
+      { q: "What does test() do on a regex?", level: "mid" },
+      { q: "What does match() do on a string with regex?", level: "mid" },
+      { q: "What does replace() do with regex?", level: "mid" },
+      { q: "What are common regex flags (g, i, m, s)?", level: "mid" },
+      { q: "What are anchors (^ and $) in regex?", level: "mid" },
+      { q: "What are character classes in regex?", level: "mid" },
+      { q: "What is the difference between greedy and lazy matching?", level: "advanced" },
+      { q: "What are capturing groups in regex?", level: "advanced" },
+      { q: "What is a named capture group?", level: "advanced" },
+      { q: "What does matchAll() return?", level: "advanced" },
+      { q: "What are lookahead and lookbehind assertions?", level: "advanced" },
+    ]
+  },
+  {
+    section: "Numbers & Math",
+    questions: [
+      { q: "How does JavaScript represent numbers internally? (IEEE 754)", level: "advanced" },
+      { q: "What is the maximum safe integer in JavaScript?", level: "mid" },
+      { q: "What is Number.MAX_SAFE_INTEGER and why does it exist?", level: "mid" },
+      { q: "What is Number.isInteger()?", level: "beginner" },
+      { q: "What is Number.isFinite()?", level: "beginner" },
+      { q: "What is Number.isNaN() vs global isNaN()?", level: "mid" },
+      { q: "What is toFixed() and what does it return?", level: "beginner" },
+      { q: "Why does 0.1 + 0.2 not equal 0.3?", level: "advanced" },
+      { q: "What is Infinity in JavaScript?", level: "beginner" },
+      { q: "What are common Math methods (round, floor, ceil, abs, max, min, random, pow, sqrt)?", level: "beginner" },
+      { q: "How do you generate a random integer between min and max?", level: "mid" },
+    ]
+  },
+  {
+    section: "Dates & Timers",
+    questions: [
+      { q: "How do you create a Date object in JavaScript?", level: "beginner" },
+      { q: "How do you get the current timestamp?", level: "beginner" },
+      { q: "What does Date.now() return?", level: "beginner" },
+      { q: "How do you format a date in JavaScript?", level: "mid" },
+      { q: "What is Intl.DateTimeFormat?", level: "mid" },
+      { q: "How do you add days to a Date?", level: "mid" },
+      { q: "What is the Unix epoch?", level: "mid" },
+      { q: "How do you compare two dates?", level: "mid" },
+      { q: "What are the problems with JavaScript's built-in Date?", level: "advanced" },
+      { q: "What is the Temporal API?", level: "advanced" },
+    ]
+  },
+  {
+    section: "Storage & Browser APIs",
+    questions: [
+      { q: "What is localStorage and sessionStorage?", level: "beginner" },
+      { q: "What is the difference between localStorage and sessionStorage?", level: "beginner" },
+      { q: "How do you set, get, and remove items from localStorage?", level: "beginner" },
+      { q: "What data types can be stored in localStorage?", level: "beginner" },
+      { q: "What are cookies? How do they differ from localStorage?", level: "mid" },
+      { q: "What is IndexedDB?", level: "advanced" },
+      { q: "What is the Web Storage API?", level: "mid" },
+      { q: "What is the Cache API?", level: "advanced" },
+      { q: "What are Web Workers?", level: "advanced" },
+      { q: "What is a Service Worker?", level: "advanced" },
+      { q: "What is the History API (pushState, replaceState)?", level: "mid" },
+      { q: "What is the URL API and URLSearchParams?", level: "mid" },
+      { q: "What is the Clipboard API?", level: "mid" },
+      { q: "What is the Notification API?", level: "mid" },
+      { q: "What is the Geolocation API?", level: "mid" },
+    ]
+  },
+  {
+    section: "Performance & Optimization",
+    questions: [
+      { q: "What is the difference between async and defer in script tags?", level: "mid" },
+      { q: "What is lazy loading?", level: "mid" },
+      { q: "What is memoization and how does it improve performance?", level: "advanced" },
+      { q: "What is debouncing and why is it important for performance?", level: "advanced" },
+      { q: "What is throttling?", level: "advanced" },
+      { q: "What is requestAnimationFrame and when should you use it?", level: "advanced" },
+      { q: "What is the performance API?", level: "advanced" },
+      { q: "What is layout thrashing and how do you avoid it?", level: "advanced" },
+      { q: "What is document fragment and why is it useful for DOM operations?", level: "advanced" },
+      { q: "What is code splitting?", level: "advanced" },
+      { q: "What is tree shaking?", level: "advanced" },
+    ]
+  },
+  {
+    section: "Security",
+    questions: [
+      { q: "What is XSS (Cross-Site Scripting) and how do you prevent it?", level: "mid" },
+      { q: "Why is innerHTML dangerous?", level: "mid" },
+      { q: "What is CSRF and how is it prevented?", level: "advanced" },
+      { q: "What is Content Security Policy (CSP)?", level: "advanced" },
+      { q: "What is HTTPS and why is it important for web apps?", level: "mid" },
+      { q: "What is same-origin policy?", level: "mid" },
+      { q: "What is CORS and how does it work?", level: "mid" },
+      { q: "How do you sanitize user input in JavaScript?", level: "mid" },
+      { q: "What are security risks of using eval()?", level: "advanced" },
+    ]
+  },
+  {
+    section: "Functional Programming",
+    questions: [
+      { q: "What is functional programming?", level: "mid" },
+      { q: "What is immutability?", level: "mid" },
+      { q: "What is a pure function?", level: "mid" },
+      { q: "What is function composition?", level: "advanced" },
+      { q: "What is currying?", level: "advanced" },
+      { q: "What is partial application?", level: "advanced" },
+      { q: "What is a monad (high-level concept)?", level: "advanced" },
+      { q: "What is point-free style?", level: "advanced" },
+      { q: "What is referential transparency?", level: "advanced" },
+      { q: "What is the difference between map/filter/reduce and imperative loops?", level: "mid" },
+      { q: "What is a functor in JavaScript terms?", level: "advanced" },
+    ]
+  },
+  {
+    section: "Design Patterns",
+    questions: [
+      { q: "What is the Module pattern?", level: "advanced" },
+      { q: "What is the Singleton pattern?", level: "advanced" },
+      { q: "What is the Observer pattern?", level: "advanced" },
+      { q: "What is the Factory pattern?", level: "advanced" },
+      { q: "What is the Proxy pattern?", level: "advanced" },
+      { q: "What is the JavaScript Proxy object?", level: "advanced" },
+      { q: "What is the Reflect object?", level: "advanced" },
+      { q: "What is the Strategy pattern?", level: "advanced" },
+      { q: "What is the Decorator pattern?", level: "advanced" },
+      { q: "What is the MVC pattern?", level: "mid" },
+      { q: "What is publish-subscribe (pub/sub) pattern?", level: "advanced" },
+    ]
+  },
+  {
+    section: "Testing",
+    questions: [
+      { q: "Why is testing important in JavaScript?", level: "mid" },
+      { q: "What is unit testing?", level: "mid" },
+      { q: "What is integration testing?", level: "mid" },
+      { q: "What is end-to-end testing?", level: "mid" },
+      { q: "What is TDD (Test-Driven Development)?", level: "advanced" },
+      { q: "What is a mock in testing?", level: "advanced" },
+      { q: "What is a stub?", level: "advanced" },
+      { q: "What is code coverage?", level: "mid" },
+      { q: "Name popular JavaScript testing frameworks.", level: "mid" },
+    ]
+  },
+  {
+    section: "Miscellaneous / Tricky Questions",
+    questions: [
+      { q: "What is the difference between == and === with objects?", level: "beginner" },
+      { q: "What does 'use strict' do and why should you use it?", level: "mid" },
+      { q: "What is the difference between null == undefined and null === undefined?", level: "mid" },
+      { q: "What is the result of typeof null?", level: "mid" },
+      { q: "What is the result of [] + []?", level: "advanced" },
+      { q: "What is the result of [] + {}?", level: "advanced" },
+      { q: "What is the result of {} + []?", level: "advanced" },
+      { q: "What is the result of NaN === NaN?", level: "mid" },
+      { q: "How do you check for NaN correctly?", level: "mid" },
+      { q: "What is the result of typeof function(){}?", level: "beginner" },
+      { q: "What is the result of 0.1 + 0.2 === 0.3?", level: "mid" },
+      { q: "What does delete operator do on object properties?", level: "mid" },
+      { q: "What is the void operator?", level: "advanced" },
+      { q: "What is the comma operator?", level: "advanced" },
+      { q: "What happens when you access a property that doesn't exist?", level: "beginner" },
+      { q: "What is event.preventDefault() used for?", level: "mid" },
+      { q: "What is the difference between mutable and immutable values?", level: "mid" },
+      { q: "What is shallow copy vs deep copy?", level: "mid" },
+      { q: "Why can't you use const with a loop variable in a regular for loop?", level: "mid" },
+      { q: "What is the difference between for...in and Object.keys()?", level: "mid" },
+      { q: "What are accessor properties vs data properties?", level: "advanced" },
+      { q: "What is the difference between isNaN() and Number.isNaN()?", level: "mid" },
+      { q: "What is coercion in the context of comparisons?", level: "mid" },
+      { q: "What does Object.is() do? How is it different from ===?", level: "advanced" },
+      { q: "What is a polyfill?", level: "mid" },
+      { q: "What is a transpiler like Babel?", level: "mid" },
+      { q: "What is the difference between a library and a framework?", level: "beginner" },
+      { q: "What is the Node.js event loop vs browser event loop?", level: "advanced" },
+      { q: "What is eval() and why is it dangerous?", level: "mid" },
+      { q: "What is the with statement and why is it deprecated?", level: "advanced" },
+    ]
+  }
+];
+
+let currentFilter = 'all';
+let allQuestions = [];
+let globalIndex = 1;
+
+function buildUI() {
+  const container = document.getElementById('questionsContainer');
+  container.innerHTML = '';
+  globalIndex = 1;
+
+  let totalB = 0, totalM = 0, totalA = 0;
+
+  data.forEach(section => {
+    const secDiv = document.createElement('div');
+    secDiv.className = 'section';
+    secDiv.setAttribute('data-section', section.section);
+
+    const header = document.createElement('div');
+    header.className = 'section-header';
+    header.innerHTML = `<span class="section-title">${section.section}</span><span class="section-count">${section.questions.length} questions</span>`;
+    secDiv.appendChild(header);
+
+    const grid = document.createElement('div');
+    grid.className = 'questions-grid';
+
+    section.questions.forEach(q => {
+      const item = document.createElement('div');
+      item.className = `q-item ${q.level}`;
+      item.setAttribute('data-level', q.level);
+      item.setAttribute('data-text', q.q.toLowerCase());
+
+      item.innerHTML = `
+        <span class="q-num">#${String(globalIndex).padStart(3,'0')}</span>
+        <span class="q-text">${q.q}</span>
+        <span class="q-badge">${q.level === 'mid' ? 'Mid' : q.level.charAt(0).toUpperCase() + q.level.slice(1)}</span>
+      `;
+
+      grid.appendChild(item);
+      allQuestions.push(item);
+      globalIndex++;
+
+      if (q.level === 'beginner') totalB++;
+      else if (q.level === 'mid') totalM++;
+      else totalA++;
+    });
+
+    secDiv.appendChild(grid);
+    container.appendChild(secDiv);
+  });
+
+  const total = totalB + totalM + totalA;
+  document.getElementById('totalCount').textContent = total;
+  document.getElementById('beginnerCount').textContent = totalB;
+  document.getElementById('midCount').textContent = totalM;
+  document.getElementById('advancedCount').textContent = totalA;
+}
+
+function setFilter(level, btn) {
+  currentFilter = level;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  applyFilters();
+}
+
+function searchQuestions() {
+  applyFilters();
+}
+
+function applyFilters() {
+  const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+  let visibleCount = 0;
+
+  allQuestions.forEach(item => {
+    const lvl = item.getAttribute('data-level');
+    const txt = item.getAttribute('data-text');
+    const matchLevel = currentFilter === 'all' || lvl === currentFilter;
+    const matchSearch = !searchTerm || txt.includes(searchTerm);
+
+    if (matchLevel && matchSearch) {
+      item.classList.remove('hidden');
+      visibleCount++;
+    } else {
+      item.classList.add('hidden');
+    }
+  });
+
+  // Hide/show sections with no visible items
+  document.querySelectorAll('.section').forEach(sec => {
+    const visible = sec.querySelectorAll('.q-item:not(.hidden)').length;
+    sec.style.display = visible === 0 ? 'none' : '';
+  });
+
+  document.getElementById('noResults').classList.toggle('visible', visibleCount === 0);
+}
+
+// Scroll progress
+window.addEventListener('scroll', () => {
+  const scrollTop = window.scrollY;
+  const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+  const progress = (scrollTop / docHeight) * 100;
+  document.getElementById('progressBar').style.width = progress + '%';
+  document.getElementById('scrollTopBtn').classList.toggle('visible', scrollTop > 400);
+});
+
+buildUI();
+</script>
+</body>
+</html>

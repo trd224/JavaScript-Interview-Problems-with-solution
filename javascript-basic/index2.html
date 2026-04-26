@@ -1,0 +1,1261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JavaScript Interview Questions — 500+</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #111118;
+    --surface2: #18181f;
+    --border: #2a2a38;
+    --accent: #f7c948;
+    --accent2: #4af7a8;
+    --accent3: #f74a6a;
+    --text: #e8e8f0;
+    --muted: #7070a0;
+    --beginner: #4af7a8;
+    --mid: #f7c948;
+    --advanced: #f74a6a;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'JetBrains Mono', monospace;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Noise overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.5;
+  }
+
+  header {
+    position: relative;
+    padding: 60px 40px 40px;
+    border-bottom: 1px solid var(--border);
+    background: linear-gradient(135deg, #0a0a0f 0%, #12121e 100%);
+    overflow: hidden;
+  }
+
+  header::after {
+    content: 'JS';
+    position: absolute;
+    right: -20px;
+    top: -30px;
+    font-family: 'Syne', sans-serif;
+    font-size: 220px;
+    font-weight: 800;
+    color: rgba(247,201,72,0.04);
+    pointer-events: none;
+    user-select: none;
+    line-height: 1;
+  }
+
+  .header-tag {
+    font-size: 11px;
+    letter-spacing: 0.3em;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .header-tag::before {
+    content: '';
+    width: 30px;
+    height: 1px;
+    background: var(--accent);
+  }
+
+  h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(32px, 5vw, 64px);
+    font-weight: 800;
+    line-height: 1.05;
+    color: #fff;
+    max-width: 700px;
+  }
+
+  h1 span { color: var(--accent); }
+
+  .header-meta {
+    margin-top: 20px;
+    display: flex;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    border-radius: 2px;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .badge.beg { background: rgba(74,247,168,0.12); color: var(--beginner); border: 1px solid rgba(74,247,168,0.25); }
+  .badge.mid { background: rgba(247,201,72,0.12); color: var(--mid); border: 1px solid rgba(247,201,72,0.25); }
+  .badge.adv { background: rgba(247,74,106,0.12); color: var(--advanced); border: 1px solid rgba(247,74,106,0.25); }
+  .badge.total { background: rgba(255,255,255,0.06); color: var(--text); border: 1px solid var(--border); }
+
+  /* Controls */
+  .controls {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(10,10,15,0.95);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 40px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  .search-wrap {
+    flex: 1;
+    min-width: 200px;
+    position: relative;
+  }
+
+  .search-wrap::before {
+    content: '⌕';
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--muted);
+    font-size: 16px;
+  }
+
+  #search {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    color: var(--text);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    padding: 9px 12px 9px 34px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  #search:focus { border-color: var(--accent); }
+  #search::placeholder { color: var(--muted); }
+
+  .filter-btns {
+    display: flex;
+    gap: 6px;
+  }
+
+  .filter-btn {
+    padding: 8px 16px;
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    background: transparent;
+    color: var(--muted);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .filter-btn:hover, .filter-btn.active {
+    background: var(--surface2);
+    color: var(--text);
+    border-color: var(--accent);
+  }
+
+  .filter-btn.beg.active { border-color: var(--beginner); color: var(--beginner); }
+  .filter-btn.mid.active { border-color: var(--mid); color: var(--mid); }
+  .filter-btn.adv.active { border-color: var(--advanced); color: var(--advanced); }
+
+  #count-display {
+    font-size: 12px;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+
+  /* Main layout */
+  main {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 40px 80px;
+  }
+
+  .section {
+    margin-top: 56px;
+  }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 20px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .section-num {
+    font-family: 'Syne', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+
+  .section-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    color: #fff;
+  }
+
+  .section-title .accent { color: var(--accent); }
+
+  .q-grid {
+    display: grid;
+    gap: 8px;
+  }
+
+  .q-item {
+    display: grid;
+    grid-template-columns: 32px 1fr auto;
+    align-items: start;
+    gap: 12px;
+    padding: 14px 16px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    transition: all 0.15s;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .q-item::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: transparent;
+    transition: background 0.15s;
+  }
+
+  .q-item:hover { background: var(--surface2); border-color: #3a3a50; }
+  .q-item:hover::before { background: var(--accent); }
+  .q-item.beginner:hover::before { background: var(--beginner); }
+  .q-item.mid-level:hover::before { background: var(--mid); }
+  .q-item.advanced:hover::before { background: var(--advanced); }
+
+  .q-num {
+    font-size: 11px;
+    color: var(--muted);
+    padding-top: 2px;
+    font-weight: 500;
+  }
+
+  .q-text {
+    font-size: 13.5px;
+    line-height: 1.55;
+    color: var(--text);
+    font-weight: 400;
+  }
+
+  .q-level {
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    font-weight: 600;
+    padding: 3px 8px;
+    border-radius: 2px;
+    white-space: nowrap;
+    margin-top: 2px;
+  }
+
+  .q-item.beginner .q-level { background: rgba(74,247,168,0.1); color: var(--beginner); }
+  .q-item.mid-level .q-level { background: rgba(247,201,72,0.1); color: var(--mid); }
+  .q-item.advanced .q-level { background: rgba(247,74,106,0.1); color: var(--advanced); }
+
+  .no-results {
+    text-align: center;
+    padding: 80px 20px;
+    color: var(--muted);
+    font-size: 14px;
+    display: none;
+  }
+
+  /* Scroll to top */
+  #scroll-top {
+    position: fixed;
+    bottom: 32px;
+    right: 32px;
+    width: 44px;
+    height: 44px;
+    background: var(--accent);
+    border: none;
+    border-radius: 2px;
+    color: #000;
+    font-size: 18px;
+    cursor: pointer;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 200;
+    transition: transform 0.15s;
+  }
+
+  #scroll-top:hover { transform: translateY(-2px); }
+  #scroll-top.show { display: flex; }
+
+  /* Hidden items */
+  .q-item.hidden { display: none; }
+  .section.all-hidden { display: none; }
+
+  @media (max-width: 640px) {
+    header, .controls, main { padding-left: 20px; padding-right: 20px; }
+    h1 { font-size: 28px; }
+    .controls { gap: 10px; }
+    .filter-btns { flex-wrap: wrap; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-tag">Interview Preparation Kit</div>
+  <h1>JavaScript<br><span>Interview Questions</span></h1>
+  <div class="header-meta">
+    <span class="badge total">500+ Questions</span>
+    <span class="badge beg">● Beginner</span>
+    <span class="badge mid">● Intermediate</span>
+    <span class="badge adv">● Advanced</span>
+  </div>
+</header>
+
+<div class="controls">
+  <div class="search-wrap">
+    <input type="text" id="search" placeholder="Search questions..." autocomplete="off">
+  </div>
+  <div class="filter-btns">
+    <button class="filter-btn active" data-filter="all">All</button>
+    <button class="filter-btn beg" data-filter="beginner">Beginner</button>
+    <button class="filter-btn mid" data-filter="mid-level">Mid</button>
+    <button class="filter-btn adv" data-filter="advanced">Advanced</button>
+  </div>
+  <div id="count-display">Showing <span id="visible-count">500</span> questions</div>
+</div>
+
+<main id="main-content">
+  <div class="no-results" id="no-results">No questions match your search.</div>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- 1. JS FUNDAMENTALS & VARIABLES -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="section" data-section="1">
+  <div class="section-header">
+    <span class="section-num">01</span>
+    <span class="section-title">JS Fundamentals <span class="accent">&amp; Variables</span></span>
+  </div>
+  <div class="q-grid">
+    <div class="q-item beginner"><span class="q-num">1</span><span class="q-text">What is JavaScript and what is it primarily used for?</span><span class="q-level">Beginner</span></div>
+    <div class="q-item beginner"><span class="q-num">2</span><span class="q-text">What is the difference between JavaScript and ECMAScript?</span><span class="q-level">Beginner</span></div>
+    <div class="q-item beginner"><span class="q-num">3</span><span class="q-text">What are the different ways to declare a variable in JavaScript?</span><span class="q-level">Beginner</span></div>
+    <div class="q-item beginner"><span class="q-num">4</span><span class="q-text">What is the difference between <code>var</code>, <code>let</code>, and <code>const</code>?</span><span class="q-level">Beginner</span></div>
+    <div class="q-item beginner"><span class="q-num">5</span><span class="q-text">Can you reassign a <code>const</code> variable? Can you mutate an object declared with <code>const</code>?</span><span class="q-level">Beginner</span></div>
+    <div class="q-item beginner"><span class="q-num">6</span><span class="q-text">What is variable hoisting in JavaScript?</span><span class="q-level">Beginner</span></div>
+    <div class="q-item mid-level"><span class="q-num">7</span><span class="q-text">Are <code>let</code> and <code>const</code> hoisted? Explain the Temporal Dead Zone (TDZ).</span><span class="q-level">Mid</span></div>
+    <div class="q-item beginner"><span class="q-num">8</span><span class="q-text">What is the difference between <code>undefined</code> and <code>null</code> in JavaScript?</span><span class="q-level">Beginner</span></div>
+    <div class="q-item beginner"><span class="q-num">9</span><span class="q-text">What does the <code>typeof</code> operator return for different types?</span><span class="q-level">Beginner</span></div>
+    <div class="q-item mid-level"><span class="q-num">10</span><span class="q-text">Why does <code>typeof null</code> return <code>"object"</code>? Is it a bug?</span><span class="q-level">Mid</span></div>
+    <div class="q-item beginner"><span class="q-num">11</span><span class="q-text">What is BigInt and when would you use it?</span><span class="q-level">Beginner</span></div>
+    <div class="q-item beginner"><span class="q-num">12</span><span class="q-text">What are truthy and falsy values in JavaScript? List all falsy values.</span><span class="q-level">Beginner</span></div>
+    <div class="q-item mid-level"><span class="q-num">13</span><span class="q-text">What is the difference between block scope and function scope?</span><span class="q-level">Mid</span></div>
+    <div class="q-item beginner"><span class="q-num">14</span><span class="q-text">What is the difference between <code>==</code> and <code>===</code>?</span><span class="q-level">Beginner</span></div>
+    <div class="q-item mid-level"><span class="q-num">15</span><span class="q-text">What are the rules of type coercion in JavaScript?</span><span class="q-level">Mid</span></div>
+    <div class="q-item advanced"><span class="q-num">16</span><span class="q-text">What is the output of <code>[] == false</code>, <code>[] == ![]</code>? Explain the coercion steps.</span><span class="q-level">Advanced</span></div>
+    <div class="q-item beginner"><span class="q-num">17</span><span class="q-text">What are the primitive data types in JavaScript?</span><span class="q-level">Beginner</span></div>
+    <div class="q-item mid-level"><span class="q-num">18</span><span class="q-text">What is the difference between primitive and reference data types?</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">19</span><span class="q-text">How does JavaScript store objects in memory versus primitives?</span><span class="q-level">Mid</span></div>
+    <div class="q-item beginner"><span class="q-num">20</span><span class="q-text">What is the Symbol data type and when is it useful?</span><span class="q-level">Beginner</span></div>
+  </div>
+</div>
+
+<!-- 2. STRINGS -->
+<div class="section" data-section="2">
+  <div class="section-header">
+    <span class="section-num">02</span>
+    <span class="section-title">Strings <span class="accent">&amp; Template Literals</span></span>
+  </div>
+  <div class="q-grid">
+    <div class="q-item beginner"><span class="q-num">21</span><span class="q-text">How do you access a character at a specific index in a string?</span><span class="q-level">Beginner</span></div>
+    <div class="q-item beginner"><span class="q-num">22</span><span class="q-text">What is the difference between <code>slice()</code>, <code>substring()</code>, and <code>substr()</code>?</span><span class="q-level">Beginner</span></div>
+    <div class="q-item beginner"><span class="q-num">23</span><span class="q-text">How do template literals (template strings) differ from regular strings?</span><span class="q-level">Beginner</span></div>
+    <div class="q-item beginner"><span class="q-num">24</span><span class="q-text">What does <code>String.prototype.trim()</code> do?</span><span class="q-level">Beginner</span></div>
+    <div class="q-item beginner"><span class="q-num">25</span><span class="q-text">How do you check if a string contains a specific substring?</span><span class="q-level">Beginner</span></div>
+    <div class="q-item beginner"><span class="q-num">26</span><span class="q-text">What is the difference between <code>indexOf()</code> and <code>includes()</code>?</span><span class="q-level">Beginner</span></div>
+    <div class="q-item beginner"><span class="q-num">27</span><span class="q-text">How do you convert a string to uppercase and lowercase?</span><span class="q-level">Beginner</span></div>
+    <div class="q-item beginner"><span class="q-num">28</span><span class="q-text">What does <code>split()</code> return and how does it work?</span><span class="q-level">Beginner</span></div>
+    <div class="q-item mid-level"><span class="q-num">29</span><span class="q-text">What are tagged template literals and give a use case?</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">30</span><span class="q-text">How does <code>String.prototype.replace()</code> differ from <code>replaceAll()</code>?</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">31</span><span class="q-text">How do you reverse a string in JavaScript?</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">32</span><span class="q-text">What is <code>padStart()</code> and <code>padEnd()</code> used for?</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">33</span><span class="q-text">Are strings mutable in JavaScript? Explain with an example.</span><span class="q-level">Mid</span></div>
+    <div class="q-item advanced"><span class="q-num">34</span><span class="q-text">How does string interning work in JavaScript engines?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item mid-level"><span class="q-num">35</span><span class="q-text">How do you convert a number to a string and vice versa?</span><span class="q-level">Mid</span></div>
+  </div>
+</div>
+
+<!-- 3. CONTROL FLOW -->
+<div class="section" data-section="3">
+  <div class="section-header">
+    <span class="section-num">03</span>
+    <span class="section-title">Control Flow <span class="accent">&amp; Operators</span></span>
+  </div>
+  <div class="q-grid">
+    <div class="q-item beginner"><span class="q-num">36</span><span class="q-text">What is a ternary operator and how does it work?</span><span class="q-level">Beginner</span></div>
+    <div class="q-item beginner"><span class="q-num">37</span><span class="q-text">What is short-circuit evaluation with <code>&&</code> and <code>||</code>?</span><span class="q-level">Beginner</span></div>
+    <div class="q-item beginner"><span class="q-num">38</span><span class="q-text">What is the nullish coalescing operator <code>??</code>?</span><span class="q-level">Beginner</span></div>
+    <div class="q-item mid-level"><span class="q-num">39</span><span class="q-text">What is optional chaining (<code>?.</code>) and why is it useful?</span><span class="q-level">Mid</span></div>
+    <div class="q-item beginner"><span class="q-num">40</span><span class="q-text">When should you use a <code>switch</code> statement over an <code>if-else</code> chain?</span><span class="q-level">Beginner</span></div>
+    <div class="q-item beginner"><span class="q-num">41</span><span class="q-text">What happens if you omit <code>break</code> in a switch statement?</span><span class="q-level">Beginner</span></div>
+    <div class="q-item beginner"><span class="q-num">42</span><span class="q-text">What is the difference between <code>while</code> and <code>do...while</code> loops?</span><span class="q-level">Beginner</span></div>
+    <div class="q-item beginner"><span class="q-num">43</span><span class="q-text">What do <code>break</code> and <code>continue</code> do inside loops?</span><span class="q-level">Beginner</span></div>
+    <div class="q-item mid-level"><span class="q-num">44</span><span class="q-text">Can you use <code>break</code> with a label in JavaScript? Give an example.</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">45</span><span class="q-text">What is the difference between <code>for...in</code> and <code>for...of</code>?</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">46</span><span class="q-text">What does the logical assignment operator (<code>&&=</code>, <code>||=</code>, <code>??=</code>) do?</span><span class="q-level">Mid</span></div>
+    <div class="q-item advanced"><span class="q-num">47</span><span class="q-text">What is the difference between <code>+</code> and <code>-</code> unary operators?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">48</span><span class="q-text">Explain the comma operator in JavaScript. When is it evaluated?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item mid-level"><span class="q-num">49</span><span class="q-text">What is operator precedence and how does it affect expressions?</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">50</span><span class="q-text">What is the difference between bitwise operators (<code>&</code>, <code>|</code>, <code>^</code>, <code>~</code>) and logical operators?</span><span class="q-level">Mid</span></div>
+  </div>
+</div>
+
+<!-- 4. ARRAYS -->
+<div class="section" data-section="4">
+  <div class="section-header">
+    <span class="section-num">04</span>
+    <span class="section-title">Arrays <span class="accent">&amp; Array Methods</span></span>
+  </div>
+  <div class="q-grid">
+    <div class="q-item beginner"><span class="q-num">51</span><span class="q-text">What is an array in JavaScript and how is it different from arrays in other languages?</span><span class="q-level">Beginner</span></div>
+    <div class="q-item beginner"><span class="q-num">52</span><span class="q-text">What is the difference between <code>push()</code>, <code>pop()</code>, <code>shift()</code>, and <code>unshift()</code>?</span><span class="q-level">Beginner</span></div>
+    <div class="q-item beginner"><span class="q-num">53</span><span class="q-text">How do you clone an array in JavaScript?</span><span class="q-level">Beginner</span></div>
+    <div class="q-item beginner"><span class="q-num">54</span><span class="q-text">What does the spread operator (<code>...</code>) do with arrays?</span><span class="q-level">Beginner</span></div>
+    <div class="q-item beginner"><span class="q-num">55</span><span class="q-text">What is array destructuring and give an example?</span><span class="q-level">Beginner</span></div>
+    <div class="q-item beginner"><span class="q-num">56</span><span class="q-text">How does <code>Array.prototype.forEach()</code> differ from a regular for loop?</span><span class="q-level">Beginner</span></div>
+    <div class="q-item beginner"><span class="q-num">57</span><span class="q-text">What does <code>map()</code> return? Does it mutate the original array?</span><span class="q-level">Beginner</span></div>
+    <div class="q-item beginner"><span class="q-num">58</span><span class="q-text">How does <code>filter()</code> work? What does it return?</span><span class="q-level">Beginner</span></div>
+    <div class="q-item mid-level"><span class="q-num">59</span><span class="q-text">Explain <code>reduce()</code> with an example of summing an array.</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">60</span><span class="q-text">What does <code>Array.prototype.find()</code> return versus <code>filter()</code>?</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">61</span><span class="q-text">What is the difference between <code>some()</code> and <code>every()</code>?</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">62</span><span class="q-text">What does <code>splice()</code> do and how does it differ from <code>slice()</code>?</span><span class="q-level">Mid</span></div>
+    <div class="q-item beginner"><span class="q-num">63</span><span class="q-text">How does <code>Array.prototype.sort()</code> work by default? What is its gotcha?</span><span class="q-level">Beginner</span></div>
+    <div class="q-item mid-level"><span class="q-num">64</span><span class="q-text">How do you sort an array of objects by a property value?</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">65</span><span class="q-text">What does <code>flat()</code> and <code>flatMap()</code> do?</span><span class="q-level">Mid</span></div>
+    <div class="q-item beginner"><span class="q-num">66</span><span class="q-text">What does <code>Array.isArray()</code> do and why is it needed?</span><span class="q-level">Beginner</span></div>
+    <div class="q-item mid-level"><span class="q-num">67</span><span class="q-text">How do you remove duplicates from an array?</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">68</span><span class="q-text">What is the <code>fill()</code> method used for?</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">69</span><span class="q-text">What does <code>Array.from()</code> do? Give an example.</span><span class="q-level">Mid</span></div>
+    <div class="q-item advanced"><span class="q-num">70</span><span class="q-text">What is <code>reduceRight()</code> and when would you prefer it over <code>reduce()</code>?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">71</span><span class="q-text">How does JavaScript's <code>sort()</code> algorithm handle stability? Is it guaranteed to be stable?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item mid-level"><span class="q-num">72</span><span class="q-text">What is the difference between a shallow copy and a deep copy of an array?</span><span class="q-level">Mid</span></div>
+    <div class="q-item advanced"><span class="q-num">73</span><span class="q-text">How would you flatten a deeply nested array without using <code>flat(Infinity)</code>?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item mid-level"><span class="q-num">74</span><span class="q-text">What does <code>findIndex()</code> return and how is it different from <code>indexOf()</code>?</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">75</span><span class="q-text">How do you merge two arrays in JavaScript?</span><span class="q-level">Mid</span></div>
+  </div>
+</div>
+
+<!-- 5. OBJECTS -->
+<div class="section" data-section="5">
+  <div class="section-header">
+    <span class="section-num">05</span>
+    <span class="section-title">Objects <span class="accent">&amp; Destructuring</span></span>
+  </div>
+  <div class="q-grid">
+    <div class="q-item beginner"><span class="q-num">76</span><span class="q-text">What is the difference between dot notation and bracket notation to access object properties?</span><span class="q-level">Beginner</span></div>
+    <div class="q-item beginner"><span class="q-num">77</span><span class="q-text">What are computed property names in objects?</span><span class="q-level">Beginner</span></div>
+    <div class="q-item beginner"><span class="q-num">78</span><span class="q-text">How do you iterate over the keys and values of an object?</span><span class="q-level">Beginner</span></div>
+    <div class="q-item beginner"><span class="q-num">79</span><span class="q-text">What is object destructuring? Give an example with default values.</span><span class="q-level">Beginner</span></div>
+    <div class="q-item mid-level"><span class="q-num">80</span><span class="q-text">What is nested destructuring and when is it useful?</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">81</span><span class="q-text">How does the spread operator work with objects?</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">82</span><span class="q-text">What is <code>Object.assign()</code> and what are its limitations?</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">83</span><span class="q-text">What is the difference between <code>Object.keys()</code>, <code>Object.values()</code>, and <code>Object.entries()</code>?</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">84</span><span class="q-text">What is <code>Object.freeze()</code>? Does it deeply freeze an object?</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">85</span><span class="q-text">What is the difference between <code>Object.freeze()</code> and <code>Object.seal()</code>?</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">86</span><span class="q-text">How do you check if a property exists in an object?</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">87</span><span class="q-text">What is the <code>in</code> operator and how does it differ from <code>hasOwnProperty()</code>?</span><span class="q-level">Mid</span></div>
+    <div class="q-item advanced"><span class="q-num">88</span><span class="q-text">What are property descriptors? Explain <code>writable</code>, <code>enumerable</code>, and <code>configurable</code>.</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">89</span><span class="q-text">What does <code>Object.defineProperty()</code> do?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">90</span><span class="q-text">How do you create a deep clone of a nested object?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item mid-level"><span class="q-num">91</span><span class="q-text">What is <code>Object.create()</code> and how is it different from object literal syntax?</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">92</span><span class="q-text">What is property shorthand in ES6 object literals?</span><span class="q-level">Mid</span></div>
+    <div class="q-item advanced"><span class="q-num">93</span><span class="q-text">What is <code>structuredClone()</code> and how does it differ from JSON.parse/stringify cloning?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item mid-level"><span class="q-num">94</span><span class="q-text">How do you rename a variable during object destructuring?</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">95</span><span class="q-text">What is the difference between shallow and deep equality for objects?</span><span class="q-level">Mid</span></div>
+  </div>
+</div>
+
+<!-- 6. FUNCTIONS -->
+<div class="section" data-section="6">
+  <div class="section-header">
+    <span class="section-num">06</span>
+    <span class="section-title">Functions <span class="accent">&amp; Scope</span></span>
+  </div>
+  <div class="q-grid">
+    <div class="q-item beginner"><span class="q-num">96</span><span class="q-text">What is the difference between a function declaration and a function expression?</span><span class="q-level">Beginner</span></div>
+    <div class="q-item beginner"><span class="q-num">97</span><span class="q-text">What is an arrow function and how does it differ from a regular function?</span><span class="q-level">Beginner</span></div>
+    <div class="q-item beginner"><span class="q-num">98</span><span class="q-text">What are default parameters in functions?</span><span class="q-level">Beginner</span></div>
+    <div class="q-item beginner"><span class="q-num">99</span><span class="q-text">What are rest parameters and how are they different from the <code>arguments</code> object?</span><span class="q-level">Beginner</span></div>
+    <div class="q-item beginner"><span class="q-num">100</span><span class="q-text">What is parameter destructuring in functions?</span><span class="q-level">Beginner</span></div>
+    <div class="q-item mid-level"><span class="q-num">101</span><span class="q-text">Are function declarations hoisted? What about function expressions?</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">102</span><span class="q-text">What is lexical scope in JavaScript?</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">103</span><span class="q-text">What is a closure? Give a practical example.</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">104</span><span class="q-text">What is a higher-order function?</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">105</span><span class="q-text">What is a callback function and give a real-world example?</span><span class="q-level">Mid</span></div>
+    <div class="q-item advanced"><span class="q-num">106</span><span class="q-text">What is a function that returns another function called? Give an example.</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">107</span><span class="q-text">What is currying and how do you implement it?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">108</span><span class="q-text">What is function composition and how does it work?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">109</span><span class="q-text">What is memoization and how do you implement it in JavaScript?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">110</span><span class="q-text">What is the difference between pure and impure functions?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item mid-level"><span class="q-num">111</span><span class="q-text">What is an IIFE (Immediately Invoked Function Expression) and why use it?</span><span class="q-level">Mid</span></div>
+    <div class="q-item advanced"><span class="q-num">112</span><span class="q-text">What is tail call optimization? Does JavaScript support it?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item mid-level"><span class="q-num">113</span><span class="q-text">Can arrow functions be used as constructors? Why or why not?</span><span class="q-level">Mid</span></div>
+    <div class="q-item advanced"><span class="q-num">114</span><span class="q-text">What is the <code>arguments</code> object? Why doesn't it exist in arrow functions?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">115</span><span class="q-text">What is a generator function? How does it differ from a regular function?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">116</span><span class="q-text">What is the <code>yield</code> keyword in a generator?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">117</span><span class="q-text">How can generators be used to implement lazy evaluation?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item mid-level"><span class="q-num">118</span><span class="q-text">What is a recursive function? What is the risk of deep recursion?</span><span class="q-level">Mid</span></div>
+    <div class="q-item advanced"><span class="q-num">119</span><span class="q-text">What is trampolining and how does it solve stack overflow in recursion?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item mid-level"><span class="q-num">120</span><span class="q-text">How does JavaScript handle multiple return values from a function?</span><span class="q-level">Mid</span></div>
+  </div>
+</div>
+
+<!-- 7. THIS & OOP -->
+<div class="section" data-section="7">
+  <div class="section-header">
+    <span class="section-num">07</span>
+    <span class="section-title">OOP, <code>this</code> <span class="accent">&amp; Prototypes</span></span>
+  </div>
+  <div class="q-grid">
+    <div class="q-item mid-level"><span class="q-num">121</span><span class="q-text">What does the <code>this</code> keyword refer to in different contexts?</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">122</span><span class="q-text">What is the <code>Window</code> object and how does it relate to <code>this</code> in the global scope?</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">123</span><span class="q-text">What is <code>this</code> inside an arrow function?</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">124</span><span class="q-text">What is the difference between <code>call()</code>, <code>apply()</code>, and <code>bind()</code>?</span><span class="q-level">Mid</span></div>
+    <div class="q-item advanced"><span class="q-num">125</span><span class="q-text">What happens to <code>this</code> when a method is extracted from an object and called standalone?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item mid-level"><span class="q-num">126</span><span class="q-text">What is <code>__proto__</code> and how does it relate to <code>[[Prototype]]</code>?</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">127</span><span class="q-text">What is <code>prototype</code> property on a constructor function?</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">128</span><span class="q-text">What does the <code>new</code> keyword do step by step?</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">129</span><span class="q-text">What is a factory function and what problem does it solve?</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">130</span><span class="q-text">What is the prototype chain and how does property lookup work?</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">131</span><span class="q-text">What is the difference between prototypal inheritance and classical inheritance?</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">132</span><span class="q-text">How do ES6 classes work under the hood?</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">133</span><span class="q-text">What is the <code>super</code> keyword used for in classes?</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">134</span><span class="q-text">What is method overriding in JavaScript?</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">135</span><span class="q-text">What are getters and setters in JavaScript classes?</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">136</span><span class="q-text">What are static methods and properties? When would you use them?</span><span class="q-level">Mid</span></div>
+    <div class="q-item advanced"><span class="q-num">137</span><span class="q-text">What is the difference between <code>instanceof</code> and <code>typeof</code>?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">138</span><span class="q-text">How do you implement private class fields using the <code>#</code> syntax?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">139</span><span class="q-text">What is mixins pattern in JavaScript and when is it useful?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">140</span><span class="q-text">How do you implement multiple inheritance in JavaScript?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">141</span><span class="q-text">What is the difference between <code>Object.getPrototypeOf()</code> and <code>__proto__</code>?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">142</span><span class="q-text">What is <code>Symbol.iterator</code> and how do you make an object iterable?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">143</span><span class="q-text">What is a Proxy object in JavaScript and what is it used for?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">144</span><span class="q-text">What is <code>Reflect</code> API and how does it relate to <code>Proxy</code>?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">145</span><span class="q-text">How can you use a Proxy to create an observable object?</span><span class="q-level">Advanced</span></div>
+  </div>
+</div>
+
+<!-- 8. HOW JS WORKS -->
+<div class="section" data-section="8">
+  <div class="section-header">
+    <span class="section-num">08</span>
+    <span class="section-title">How JavaScript <span class="accent">Works Internally</span></span>
+  </div>
+  <div class="q-grid">
+    <div class="q-item mid-level"><span class="q-num">146</span><span class="q-text">What is the JavaScript execution context?</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">147</span><span class="q-text">What is the call stack in JavaScript?</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">148</span><span class="q-text">What is the difference between the global execution context and function execution context?</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">149</span><span class="q-text">What is the scope chain?</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">150</span><span class="q-text">What is lexical environment in JavaScript?</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">151</span><span class="q-text">What is a closure and how does it leverage the scope chain?</span><span class="q-level">Mid</span></div>
+    <div class="q-item advanced"><span class="q-num">152</span><span class="q-text">What is a common closure pitfall inside loops and how do you fix it?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">153</span><span class="q-text">How does the JavaScript engine (V8) compile and optimize code at runtime?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">154</span><span class="q-text">What is JIT (Just-In-Time) compilation?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">155</span><span class="q-text">What is deoptimization in V8 and what causes it?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item mid-level"><span class="q-num">156</span><span class="q-text">What is garbage collection in JavaScript? What algorithm does V8 use?</span><span class="q-level">Mid</span></div>
+    <div class="q-item advanced"><span class="q-num">157</span><span class="q-text">What is a memory leak? Give three examples of common memory leaks in JavaScript.</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">158</span><span class="q-text">How can closures cause memory leaks?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item mid-level"><span class="q-num">159</span><span class="q-text">What is the WeakMap and WeakSet and why don't they prevent garbage collection?</span><span class="q-level">Mid</span></div>
+    <div class="q-item advanced"><span class="q-num">160</span><span class="q-text">What is <code>WeakRef</code> in JavaScript and when would you use it?</span><span class="q-level">Advanced</span></div>
+  </div>
+</div>
+
+<!-- 9. CLOSURES (Detailed) -->
+<div class="section" data-section="9">
+  <div class="section-header">
+    <span class="section-num">09</span>
+    <span class="section-title">Closures <span class="accent">In Depth</span></span>
+  </div>
+  <div class="q-grid">
+    <div class="q-item mid-level"><span class="q-num">161</span><span class="q-text">How would you use a closure to create a counter function?</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">162</span><span class="q-text">How do closures enable data encapsulation / private variables?</span><span class="q-level">Mid</span></div>
+    <div class="q-item advanced"><span class="q-num">163</span><span class="q-text">What is the classic <code>var</code> loop closure problem? Show the output and fix it.</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">164</span><span class="q-text">How do you implement a module pattern using closures?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">165</span><span class="q-text">How does a closure capture variables — by reference or by value?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">166</span><span class="q-text">What is a partial application and how is it related to closures?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">167</span><span class="q-text">Build a function <code>once(fn)</code> that only executes <code>fn</code> once using closures.</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">168</span><span class="q-text">Implement a debounce function using closures.</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">169</span><span class="q-text">Implement a throttle function using closures.</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">170</span><span class="q-text">How does React's <code>useState</code> hook leverage closures internally?</span><span class="q-level">Advanced</span></div>
+  </div>
+</div>
+
+<!-- 10. DOM -->
+<div class="section" data-section="10">
+  <div class="section-header">
+    <span class="section-num">10</span>
+    <span class="section-title">DOM <span class="accent">Manipulation</span></span>
+  </div>
+  <div class="q-grid">
+    <div class="q-item beginner"><span class="q-num">171</span><span class="q-text">What is the DOM and how is it related to HTML?</span><span class="q-level">Beginner</span></div>
+    <div class="q-item beginner"><span class="q-num">172</span><span class="q-text">What is the difference between <code>getElementById()</code> and <code>querySelector()</code>?</span><span class="q-level">Beginner</span></div>
+    <div class="q-item beginner"><span class="q-num">173</span><span class="q-text">What is the difference between <code>textContent</code> and <code>innerText</code>?</span><span class="q-level">Beginner</span></div>
+    <div class="q-item beginner"><span class="q-num">174</span><span class="q-text">What is the difference between <code>innerHTML</code> and <code>textContent</code>?</span><span class="q-level">Beginner</span></div>
+    <div class="q-item beginner"><span class="q-num">175</span><span class="q-text">How do you change an element's CSS style using JavaScript?</span><span class="q-level">Beginner</span></div>
+    <div class="q-item beginner"><span class="q-num">176</span><span class="q-text">How do you get and set HTML attributes using JavaScript?</span><span class="q-level">Beginner</span></div>
+    <div class="q-item beginner"><span class="q-num">177</span><span class="q-text">What is <code>classList</code> and what methods does it provide?</span><span class="q-level">Beginner</span></div>
+    <div class="q-item beginner"><span class="q-num">178</span><span class="q-text">How do you create and append a new element to the DOM?</span><span class="q-level">Beginner</span></div>
+    <div class="q-item mid-level"><span class="q-num">179</span><span class="q-text">What is the difference between <code>appendChild()</code> and <code>insertAdjacentElement()</code>?</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">180</span><span class="q-text">How do you remove an element from the DOM?</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">181</span><span class="q-text">What does <code>cloneNode()</code> do and what does the <code>deep</code> parameter mean?</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">182</span><span class="q-text">What is the DOM tree? Explain root node, element nodes, and text nodes.</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">183</span><span class="q-text">What is <code>getBoundingClientRect()</code> used for?</span><span class="q-level">Mid</span></div>
+    <div class="q-item advanced"><span class="q-num">184</span><span class="q-text">What is a DocumentFragment and why is it more performant for batch DOM updates?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">185</span><span class="q-text">What is virtual DOM? Why do frameworks like React use it?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item mid-level"><span class="q-num">186</span><span class="q-text">What is the difference between <code>async</code> and <code>defer</code> attributes on a script tag?</span><span class="q-level">Mid</span></div>
+    <div class="q-item advanced"><span class="q-num">187</span><span class="q-text">What is reflow and repaint? How do you minimize them?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">188</span><span class="q-text">What is layout thrashing and how do you avoid it?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item mid-level"><span class="q-num">189</span><span class="q-text">How do you traverse up and down the DOM tree?</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">190</span><span class="q-text">What is the difference between <code>querySelectorAll()</code> and <code>getElementsByClassName()</code>? Which is live?</span><span class="q-level">Mid</span></div>
+  </div>
+</div>
+
+<!-- 11. EVENTS -->
+<div class="section" data-section="11">
+  <div class="section-header">
+    <span class="section-num">11</span>
+    <span class="section-title">Events <span class="accent">&amp; Event Handling</span></span>
+  </div>
+  <div class="q-grid">
+    <div class="q-item beginner"><span class="q-num">191</span><span class="q-text">What is an event listener and how do you add one?</span><span class="q-level">Beginner</span></div>
+    <div class="q-item beginner"><span class="q-num">192</span><span class="q-text">What is the event object? What properties does it have?</span><span class="q-level">Beginner</span></div>
+    <div class="q-item mid-level"><span class="q-num">193</span><span class="q-text">What is event bubbling and how does it work?</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">194</span><span class="q-text">What is event capturing (trickling)? How does it differ from bubbling?</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">195</span><span class="q-text">What does <code>event.stopPropagation()</code> do?</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">196</span><span class="q-text">What is the difference between <code>stopPropagation()</code> and <code>stopImmediatePropagation()</code>?</span><span class="q-level">Mid</span></div>
+    <div class="q-item beginner"><span class="q-num">197</span><span class="q-text">What does <code>event.preventDefault()</code> do?</span><span class="q-level">Beginner</span></div>
+    <div class="q-item mid-level"><span class="q-num">198</span><span class="q-text">What is event delegation and why is it efficient?</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">199</span><span class="q-text">What is the difference between <code>event.target</code> and <code>event.currentTarget</code>?</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">200</span><span class="q-text">What does <code>this</code> refer to inside an event listener callback?</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">201</span><span class="q-text">What is a custom event and how do you create and dispatch one?</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">202</span><span class="q-text">What is the difference between <code>mouseenter</code> and <code>mouseover</code> events?</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">203</span><span class="q-text">What are the different keyboard events and what do they fire on?</span><span class="q-level">Mid</span></div>
+    <div class="q-item advanced"><span class="q-num">204</span><span class="q-text">How would you implement a publish/subscribe (PubSub) pattern for events?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item mid-level"><span class="q-num">205</span><span class="q-text">How do you remove an event listener and why might it fail?</span><span class="q-level">Mid</span></div>
+    <div class="q-item advanced"><span class="q-num">206</span><span class="q-text">What is the <code>passive</code> event listener option and why does it improve scroll performance?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">207</span><span class="q-text">What is pointer events API? How is it different from mouse and touch events?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item mid-level"><span class="q-num">208</span><span class="q-text">What is the <code>once</code> option in <code>addEventListener</code>?</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">209</span><span class="q-text">What events fire when a page loads (<code>DOMContentLoaded</code> vs <code>load</code>)?</span><span class="q-level">Mid</span></div>
+    <div class="q-item advanced"><span class="q-num">210</span><span class="q-text">How do you implement infinite scroll using scroll events and IntersectionObserver?</span><span class="q-level">Advanced</span></div>
+  </div>
+</div>
+
+<!-- 12. ASYNC JS -->
+<div class="section" data-section="12">
+  <div class="section-header">
+    <span class="section-num">12</span>
+    <span class="section-title">Asynchronous <span class="accent">JavaScript</span></span>
+  </div>
+  <div class="q-grid">
+    <div class="q-item mid-level"><span class="q-num">211</span><span class="q-text">Is JavaScript synchronous or asynchronous? Explain the event loop.</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">212</span><span class="q-text">What is the call stack, Web APIs, callback queue, and microtask queue?</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">213</span><span class="q-text">What is the difference between the microtask queue and the callback (task) queue?</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">214</span><span class="q-text">What does <code>setTimeout(fn, 0)</code> do? When does it execute?</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">215</span><span class="q-text">What is <code>setInterval</code> and how do you clear it?</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">216</span><span class="q-text">What is callback hell (Pyramid of Doom) and what problems does it cause?</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">217</span><span class="q-text">What is a Promise and what are its three states?</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">218</span><span class="q-text">What do <code>.then()</code>, <code>.catch()</code>, and <code>.finally()</code> do on a promise?</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">219</span><span class="q-text">How do you chain promises? What does each <code>.then()</code> return?</span><span class="q-level">Mid</span></div>
+    <div class="q-item advanced"><span class="q-num">220</span><span class="q-text">What is the difference between <code>Promise.all()</code>, <code>Promise.race()</code>, <code>Promise.allSettled()</code>, and <code>Promise.any()</code>?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item mid-level"><span class="q-num">221</span><span class="q-text">What is <code>async/await</code> and how does it relate to promises?</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">222</span><span class="q-text">How do you handle errors with <code>async/await</code>?</span><span class="q-level">Mid</span></div>
+    <div class="q-item advanced"><span class="q-num">223</span><span class="q-text">Can you use <code>await</code> at the top level? What is top-level await?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">224</span><span class="q-text">What happens if you forget to <code>await</code> an async function call?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">225</span><span class="q-text">How do you run multiple async operations in parallel using <code>async/await</code>?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">226</span><span class="q-text">What is a microtask? Give examples of things that run as microtasks.</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">227</span><span class="q-text">What is the order of output: <code>setTimeout</code>, <code>Promise.resolve().then()</code>, synchronous code?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">228</span><span class="q-text">How do you convert a callback-based API (like Node.js <code>fs</code>) to return a promise?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">229</span><span class="q-text">What is <code>queueMicrotask()</code> and when would you use it?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">230</span><span class="q-text">What is an async iterator and how do you use <code>for await...of</code>?</span><span class="q-level">Advanced</span></div>
+  </div>
+</div>
+
+<!-- 13. FETCH & AJAX -->
+<div class="section" data-section="13">
+  <div class="section-header">
+    <span class="section-num">13</span>
+    <span class="section-title">AJAX, Fetch <span class="accent">&amp; HTTP</span></span>
+  </div>
+  <div class="q-grid">
+    <div class="q-item mid-level"><span class="q-num">231</span><span class="q-text">What is AJAX and what problem did it solve?</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">232</span><span class="q-text">What is XMLHttpRequest (XHR) and how does it work?</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">233</span><span class="q-text">What is the Fetch API and how does it differ from XHR?</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">234</span><span class="q-text">Why doesn't <code>fetch()</code> reject on HTTP errors (like 404)? How do you handle this?</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">235</span><span class="q-text">How do you send a POST request with JSON body using <code>fetch()</code>?</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">236</span><span class="q-text">What is CORS and why does it exist?</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">237</span><span class="q-text">What is a preflight request in CORS?</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">238</span><span class="q-text">What HTTP methods are commonly used in REST APIs?</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">239</span><span class="q-text">What is the difference between <code>response.json()</code> and <code>response.text()</code>?</span><span class="q-level">Mid</span></div>
+    <div class="q-item advanced"><span class="q-num">240</span><span class="q-text">How do you abort a fetch request using <code>AbortController</code>?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">241</span><span class="q-text">What is the difference between <code>credentials: 'include'</code> and <code>credentials: 'same-origin'</code> in fetch?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">242</span><span class="q-text">What is server-sent events (SSE) and how does it compare to WebSockets?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">243</span><span class="q-text">What is a WebSocket and how do you create one in JavaScript?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">244</span><span class="q-text">What is streaming response in Fetch API and how do you use <code>ReadableStream</code>?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item mid-level"><span class="q-num">245</span><span class="q-text">What does JSON.stringify() and JSON.parse() do? What types can't JSON serialize?</span><span class="q-level">Mid</span></div>
+  </div>
+</div>
+
+<!-- 14. ES6+ -->
+<div class="section" data-section="14">
+  <div class="section-header">
+    <span class="section-num">14</span>
+    <span class="section-title">ES6+ <span class="accent">Modern Features</span></span>
+  </div>
+  <div class="q-grid">
+    <div class="q-item mid-level"><span class="q-num">246</span><span class="q-text">What is destructuring assignment and how does it work for arrays and objects?</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">247</span><span class="q-text">What is the spread operator vs the rest operator? How do you tell them apart?</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">248</span><span class="q-text">What are Symbols and what makes each Symbol unique?</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">249</span><span class="q-text">What are iterables in JavaScript? What protocol must an object implement?</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">250</span><span class="q-text">What is a <code>Set</code> in JavaScript and how does it differ from an array?</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">251</span><span class="q-text">What is a <code>Map</code> and how does it differ from a plain object?</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">252</span><span class="q-text">What is the difference between a <code>Map</code> and <code>WeakMap</code>?</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">253</span><span class="q-text">What is the <code>for...of</code> loop and what can it iterate over?</span><span class="q-level">Mid</span></div>
+    <div class="q-item advanced"><span class="q-num">254</span><span class="q-text">How do you make a custom class iterable using <code>Symbol.iterator</code>?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">255</span><span class="q-text">What are well-known Symbols (e.g., <code>Symbol.toPrimitive</code>, <code>Symbol.hasInstance</code>)?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item mid-level"><span class="q-num">256</span><span class="q-text">What is <code>Object.fromEntries()</code> and when is it useful?</span><span class="q-level">Mid</span></div>
+    <div class="q-item advanced"><span class="q-num">257</span><span class="q-text">What are private class fields and methods (the <code>#</code> syntax)?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">258</span><span class="q-text">What is the <code>at()</code> method on arrays and strings?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">259</span><span class="q-text">What is array and object groupBy (new in ES2024)?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">260</span><span class="q-text">What is <code>Promise.withResolvers()</code> introduced in ES2024?</span><span class="q-level">Advanced</span></div>
+  </div>
+</div>
+
+<!-- 15. MODULES -->
+<div class="section" data-section="15">
+  <div class="section-header">
+    <span class="section-num">15</span>
+    <span class="section-title">ES6 <span class="accent">Modules</span></span>
+  </div>
+  <div class="q-grid">
+    <div class="q-item mid-level"><span class="q-num">261</span><span class="q-text">What is the difference between CommonJS modules (<code>require</code>) and ES6 modules (<code>import/export</code>)?</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">262</span><span class="q-text">What is the difference between named exports and default exports?</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">263</span><span class="q-text">How do you re-export something from a module?</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">264</span><span class="q-text">What is a barrel file (index.js) in a module system?</span><span class="q-level">Mid</span></div>
+    <div class="q-item advanced"><span class="q-num">265</span><span class="q-text">What is dynamic import (<code>import()</code>) and when would you use it?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">266</span><span class="q-text">What is tree shaking and how do ES6 modules enable it?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item mid-level"><span class="q-num">267</span><span class="q-text">What happens if you have circular imports in ES modules?</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">268</span><span class="q-text">Are ES modules loaded synchronously or asynchronously?</span><span class="q-level">Mid</span></div>
+    <div class="q-item advanced"><span class="q-num">269</span><span class="q-text">What is import.meta and what does <code>import.meta.url</code> provide?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">270</span><span class="q-text">What is the difference between a bundler (Webpack, Vite) and a module system?</span><span class="q-level">Advanced</span></div>
+  </div>
+</div>
+
+<!-- 16. ERROR HANDLING -->
+<div class="section" data-section="16">
+  <div class="section-header">
+    <span class="section-num">16</span>
+    <span class="section-title">Error Handling <span class="accent">&amp; Debugging</span></span>
+  </div>
+  <div class="q-grid">
+    <div class="q-item beginner"><span class="q-num">271</span><span class="q-text">What is a <code>try...catch...finally</code> block?</span><span class="q-level">Beginner</span></div>
+    <div class="q-item beginner"><span class="q-num">272</span><span class="q-text">What does the <code>finally</code> block always do?</span><span class="q-level">Beginner</span></div>
+    <div class="q-item beginner"><span class="q-num">273</span><span class="q-text">What types of built-in errors does JavaScript have? (TypeError, ReferenceError, etc.)</span><span class="q-level">Beginner</span></div>
+    <div class="q-item mid-level"><span class="q-num">274</span><span class="q-text">How do you throw a custom error in JavaScript?</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">275</span><span class="q-text">How do you create a custom Error class extending <code>Error</code>?</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">276</span><span class="q-text">What is the difference between a SyntaxError, TypeError, and ReferenceError?</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">277</span><span class="q-text">How do you handle errors in async/await code?</span><span class="q-level">Mid</span></div>
+    <div class="q-item advanced"><span class="q-num">278</span><span class="q-text">What is an unhandled promise rejection and how do you catch it globally?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">279</span><span class="q-text">What is a <code>window.onerror</code> handler and when does it fire?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">280</span><span class="q-text">How do you implement a global error boundary in a JavaScript application?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item mid-level"><span class="q-num">281</span><span class="q-text">What is the <code>error.stack</code> property?</span><span class="q-level">Mid</span></div>
+    <div class="q-item advanced"><span class="q-num">282</span><span class="q-text">What is the AggregateError and when is it thrown?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item mid-level"><span class="q-num">283</span><span class="q-text">How do you use the browser DevTools to debug JavaScript?</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">284</span><span class="q-text">What is a breakpoint and how do you set one in DevTools?</span><span class="q-level">Mid</span></div>
+    <div class="q-item advanced"><span class="q-num">285</span><span class="q-text">What is a source map and why is it important for debugging minified code?</span><span class="q-level">Advanced</span></div>
+  </div>
+</div>
+
+<!-- 17. REGEX -->
+<div class="section" data-section="17">
+  <div class="section-header">
+    <span class="section-num">17</span>
+    <span class="section-title">Regular <span class="accent">Expressions</span></span>
+  </div>
+  <div class="q-grid">
+    <div class="q-item mid-level"><span class="q-num">286</span><span class="q-text">What is a regular expression (regex) in JavaScript?</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">287</span><span class="q-text">What is the difference between <code>test()</code> and <code>match()</code>?</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">288</span><span class="q-text">What are regex flags: <code>g</code>, <code>i</code>, <code>m</code>, <code>s</code>, <code>u</code>?</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">289</span><span class="q-text">How do you extract capture groups from a regex match?</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">290</span><span class="q-text">What is <code>matchAll()</code> and how does it differ from <code>match()</code> with the <code>g</code> flag?</span><span class="q-level">Mid</span></div>
+    <div class="q-item advanced"><span class="q-num">291</span><span class="q-text">What are named capture groups in regex?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">292</span><span class="q-text">What is a lookahead and lookbehind assertion in regex?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">293</span><span class="q-text">What is catastrophic backtracking in regex and how do you avoid it?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item mid-level"><span class="q-num">294</span><span class="q-text">Write a regex to validate an email address.</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">295</span><span class="q-text">How do you replace all occurrences of a pattern in a string using regex?</span><span class="q-level">Mid</span></div>
+  </div>
+</div>
+
+<!-- 18. WEB APIs -->
+<div class="section" data-section="18">
+  <div class="section-header">
+    <span class="section-num">18</span>
+    <span class="section-title">Browser APIs <span class="accent">&amp; Storage</span></span>
+  </div>
+  <div class="q-grid">
+    <div class="q-item mid-level"><span class="q-num">296</span><span class="q-text">What is <code>localStorage</code> and how does it differ from <code>sessionStorage</code>?</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">297</span><span class="q-text">What are cookies and how do they differ from localStorage?</span><span class="q-level">Mid</span></div>
+    <div class="q-item advanced"><span class="q-num">298</span><span class="q-text">What is IndexedDB and when would you use it over localStorage?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item mid-level"><span class="q-num">299</span><span class="q-text">What is the <code>History</code> API? What do <code>pushState()</code> and <code>replaceState()</code> do?</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">300</span><span class="q-text">What is the <code>Location</code> object and its useful properties?</span><span class="q-level">Mid</span></div>
+    <div class="q-item advanced"><span class="q-num">301</span><span class="q-text">What is the Intersection Observer API and what problem does it solve?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">302</span><span class="q-text">What is the MutationObserver API and what can it observe?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">303</span><span class="q-text">What is the ResizeObserver API?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">304</span><span class="q-text">What is <code>requestAnimationFrame()</code> and why is it preferred over <code>setInterval</code> for animations?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">305</span><span class="q-text">What is the Web Worker API and how does it enable true parallelism?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">306</span><span class="q-text">What is a Service Worker and what enables it to work offline?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">307</span><span class="q-text">What is the Cache API and how is it used with Service Workers?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item mid-level"><span class="q-num">308</span><span class="q-text">What is the Geolocation API?</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">309</span><span class="q-text">What is the Clipboard API and how do you copy text programmatically?</span><span class="q-level">Mid</span></div>
+    <div class="q-item advanced"><span class="q-num">310</span><span class="q-text">What is the Broadcast Channel API and when is it useful?</span><span class="q-level">Advanced</span></div>
+  </div>
+</div>
+
+<!-- 19. PERFORMANCE -->
+<div class="section" data-section="19">
+  <div class="section-header">
+    <span class="section-num">19</span>
+    <span class="section-title">Performance <span class="accent">&amp; Optimization</span></span>
+  </div>
+  <div class="q-grid">
+    <div class="q-item mid-level"><span class="q-num">311</span><span class="q-text">What is debouncing and when would you use it?</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">312</span><span class="q-text">What is throttling and how does it differ from debouncing?</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">313</span><span class="q-text">What is lazy loading and how does it improve performance?</span><span class="q-level">Mid</span></div>
+    <div class="q-item advanced"><span class="q-num">314</span><span class="q-text">What is code splitting and how does dynamic <code>import()</code> enable it?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">315</span><span class="q-text">What is memoization and how does it improve performance?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">316</span><span class="q-text">What is the performance.now() API and how is it more precise than Date.now()?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">317</span><span class="q-text">What is a long task in the browser and how does it affect the main thread?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">318</span><span class="q-text">What is the concept of time slicing and how does <code>scheduler.postTask()</code> help?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">319</span><span class="q-text">How does using <code>const</code> vs <code>let</code> affect performance?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">320</span><span class="q-text">What are the Core Web Vitals and how does JavaScript affect them?</span><span class="q-level">Advanced</span></div>
+  </div>
+</div>
+
+<!-- 20. DESIGN PATTERNS -->
+<div class="section" data-section="20">
+  <div class="section-header">
+    <span class="section-num">20</span>
+    <span class="section-title">Design Patterns <span class="accent">in JavaScript</span></span>
+  </div>
+  <div class="q-grid">
+    <div class="q-item advanced"><span class="q-num">321</span><span class="q-text">What is the Singleton pattern in JavaScript? Implement one.</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">322</span><span class="q-text">What is the Observer pattern? How does it relate to event listeners?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">323</span><span class="q-text">What is the Module pattern and how does it use closures?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">324</span><span class="q-text">What is the Factory pattern and when would you use it?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">325</span><span class="q-text">What is the Decorator pattern in JavaScript?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">326</span><span class="q-text">What is the Strategy pattern and give a real-world use case?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">327</span><span class="q-text">What is the Command pattern and how can it be used to implement undo/redo?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">328</span><span class="q-text">What is the Proxy pattern and how does JavaScript's built-in <code>Proxy</code> relate to it?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">329</span><span class="q-text">What is the Mediator pattern and how does it reduce coupling?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">330</span><span class="q-text">What is the Facade pattern and give an example in JavaScript?</span><span class="q-level">Advanced</span></div>
+  </div>
+</div>
+
+<!-- 21. SECURITY -->
+<div class="section" data-section="21">
+  <div class="section-header">
+    <span class="section-num">21</span>
+    <span class="section-title">Security <span class="accent">Best Practices</span></span>
+  </div>
+  <div class="q-grid">
+    <div class="q-item mid-level"><span class="q-num">331</span><span class="q-text">What is Cross-Site Scripting (XSS) and how do you prevent it?</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">332</span><span class="q-text">Why is using <code>innerHTML</code> dangerous? What is the safer alternative?</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">333</span><span class="q-text">What is CSRF (Cross-Site Request Forgery) and how is it prevented?</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">334</span><span class="q-text">What is Content Security Policy (CSP) and how does it work?</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">335</span><span class="q-text">Why should you never store sensitive tokens in localStorage?</span><span class="q-level">Mid</span></div>
+    <div class="q-item advanced"><span class="q-num">336</span><span class="q-text">What is prototype pollution and how can it be exploited?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">337</span><span class="q-text">What is a timing attack and how can it affect JavaScript applications?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item mid-level"><span class="q-num">338</span><span class="q-text">What does <code>eval()</code> do and why is it considered dangerous?</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">339</span><span class="q-text">What is the <code>same-origin policy</code> in browsers?</span><span class="q-level">Mid</span></div>
+    <div class="q-item advanced"><span class="q-num">340</span><span class="q-text">How can you sanitize user input to prevent injection attacks in the DOM?</span><span class="q-level">Advanced</span></div>
+  </div>
+</div>
+
+<!-- 22. FUNCTIONAL PROGRAMMING -->
+<div class="section" data-section="22">
+  <div class="section-header">
+    <span class="section-num">22</span>
+    <span class="section-title">Functional <span class="accent">Programming</span></span>
+  </div>
+  <div class="q-grid">
+    <div class="q-item mid-level"><span class="q-num">341</span><span class="q-text">What are the core principles of functional programming?</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">342</span><span class="q-text">What is immutability and why is it important in FP?</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">343</span><span class="q-text">What is a pure function and why are pure functions easier to test?</span><span class="q-level">Mid</span></div>
+    <div class="q-item advanced"><span class="q-num">344</span><span class="q-text">What is function composition and how do you implement <code>compose</code> and <code>pipe</code>?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">345</span><span class="q-text">What is currying vs partial application? Implement a curry function.</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">346</span><span class="q-text">What are functors in functional programming?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">347</span><span class="q-text">What is a monad? How does JavaScript's Promise resemble one?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item mid-level"><span class="q-num">348</span><span class="q-text">What is referential transparency?</span><span class="q-level">Mid</span></div>
+    <div class="q-item advanced"><span class="q-num">349</span><span class="q-text">What is the difference between eager and lazy evaluation?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">350</span><span class="q-text">How do you implement a transducer in JavaScript?</span><span class="q-level">Advanced</span></div>
+  </div>
+</div>
+
+<!-- 23. NUMBERS & MATH -->
+<div class="section" data-section="23">
+  <div class="section-header">
+    <span class="section-num">23</span>
+    <span class="section-title">Numbers <span class="accent">&amp; Math</span></span>
+  </div>
+  <div class="q-grid">
+    <div class="q-item beginner"><span class="q-num">351</span><span class="q-text">What is <code>NaN</code>? Why is <code>NaN === NaN</code> false?</span><span class="q-level">Beginner</span></div>
+    <div class="q-item beginner"><span class="q-num">352</span><span class="q-text">How do you check if a value is <code>NaN</code>? Why is <code>isNaN()</code> unreliable?</span><span class="q-level">Beginner</span></div>
+    <div class="q-item beginner"><span class="q-num">353</span><span class="q-text">What is floating-point arithmetic? Why is <code>0.1 + 0.2 !== 0.3</code>?</span><span class="q-level">Beginner</span></div>
+    <div class="q-item mid-level"><span class="q-num">354</span><span class="q-text">What is <code>Number.EPSILON</code> and how do you use it for float comparison?</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">355</span><span class="q-text">What is <code>Number.MAX_SAFE_INTEGER</code> and why does it matter?</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">356</span><span class="q-text">What is <code>Infinity</code> and <code>-Infinity</code> in JavaScript?</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">357</span><span class="q-text">How does <code>parseInt()</code> differ from <code>parseFloat()</code> and the unary <code>+</code> operator?</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">358</span><span class="q-text">What is the <code>toFixed()</code> method and what does it return?</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">359</span><span class="q-text">What is <code>Math.floor()</code>, <code>Math.ceil()</code>, and <code>Math.round()</code>? When does each produce different results?</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">360</span><span class="q-text">How do you generate a random integer between two numbers in JavaScript?</span><span class="q-level">Mid</span></div>
+  </div>
+</div>
+
+<!-- 24. DATES & TIME -->
+<div class="section" data-section="24">
+  <div class="section-header">
+    <span class="section-num">24</span>
+    <span class="section-title">Dates <span class="accent">&amp; Time</span></span>
+  </div>
+  <div class="q-grid">
+    <div class="q-item mid-level"><span class="q-num">361</span><span class="q-text">How do you create a Date object in JavaScript?</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">362</span><span class="q-text">What is the epoch in JavaScript's Date system?</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">363</span><span class="q-text">What is the difference between <code>Date.now()</code> and <code>new Date()</code>?</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">364</span><span class="q-text">How do you compare two date objects?</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">365</span><span class="q-text">How do you format a date as a string? What is <code>toLocaleDateString()</code>?</span><span class="q-level">Mid</span></div>
+    <div class="q-item advanced"><span class="q-num">366</span><span class="q-text">What is the new <code>Temporal</code> proposal in JavaScript? Why is it better than <code>Date</code>?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item mid-level"><span class="q-num">367</span><span class="q-text">How do you add days to a date in JavaScript without a library?</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">368</span><span class="q-text">What does <code>Date.prototype.getTime()</code> return?</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">369</span><span class="q-text">What are common pitfalls when working with JavaScript dates (timezones, parsing)?</span><span class="q-level">Mid</span></div>
+    <div class="q-item advanced"><span class="q-num">370</span><span class="q-text">How does <code>Intl.DateTimeFormat</code> help with internationalized date formatting?</span><span class="q-level">Advanced</span></div>
+  </div>
+</div>
+
+<!-- 25. TESTING -->
+<div class="section" data-section="25">
+  <div class="section-header">
+    <span class="section-num">25</span>
+    <span class="section-title">Testing <span class="accent">JavaScript</span></span>
+  </div>
+  <div class="q-grid">
+    <div class="q-item mid-level"><span class="q-num">371</span><span class="q-text">What is unit testing and why is it important?</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">372</span><span class="q-text">What is the difference between unit, integration, and end-to-end testing?</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">373</span><span class="q-text">What is Jest? What is Vitest?</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">374</span><span class="q-text">What is Test-Driven Development (TDD)?</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">375</span><span class="q-text">What is a mock function? What is spying?</span><span class="q-level">Mid</span></div>
+    <div class="q-item advanced"><span class="q-num">376</span><span class="q-text">How do you test asynchronous code in Jest?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">377</span><span class="q-text">What is code coverage and what does 100% coverage mean?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">378</span><span class="q-text">What is the difference between <code>toBe()</code> and <code>toEqual()</code> in Jest?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">379</span><span class="q-text">What is snapshot testing and when would you use it?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">380</span><span class="q-text">What is property-based testing? Name a library for it in JS.</span><span class="q-level">Advanced</span></div>
+  </div>
+</div>
+
+<!-- 26. TRICKY QUESTIONS -->
+<div class="section" data-section="26">
+  <div class="section-header">
+    <span class="section-num">26</span>
+    <span class="section-title">Tricky Output <span class="accent">Questions</span></span>
+  </div>
+  <div class="q-grid">
+    <div class="q-item advanced"><span class="q-num">381</span><span class="q-text">What is the output of <code>console.log(typeof typeof 42)</code>?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">382</span><span class="q-text">What does <code>console.log(1 + "2" + "2")</code> output and why?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">383</span><span class="q-text">What is the output of <code>console.log([] + [])</code> and <code>console.log([] + {})</code>?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">384</span><span class="q-text">What does <code>console.log(0.1 + 0.2 == 0.3)</code> output?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">385</span><span class="q-text">What is the output of <code>console.log(typeof null)</code>?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">386</span><span class="q-text">What is the output of <code>console.log(2 ** 53 === 2 ** 53 + 1)</code>?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">387</span><span class="q-text">What does <code>var a = b = 5</code> do and what is the scope of <code>b</code>?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">388</span><span class="q-text">What is the output of <code>console.log(!!"false" == !!"0")</code>?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">389</span><span class="q-text">In strict mode, what is <code>this</code> inside a regular function?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">390</span><span class="q-text">What is the output: <code>let x = 1; console.log(x++); console.log(++x);</code>?</span><span class="q-level">Advanced</span></div>
+  </div>
+</div>
+
+<!-- 27. REAL WORLD / CODING -->
+<div class="section" data-section="27">
+  <div class="section-header">
+    <span class="section-num">27</span>
+    <span class="section-title">Coding Challenges <span class="accent">&amp; Implementation</span></span>
+  </div>
+  <div class="q-grid">
+    <div class="q-item beginner"><span class="q-num">391</span><span class="q-text">Write a function that checks if a string is a palindrome.</span><span class="q-level">Beginner</span></div>
+    <div class="q-item beginner"><span class="q-num">392</span><span class="q-text">Write a function to count occurrences of each character in a string.</span><span class="q-level">Beginner</span></div>
+    <div class="q-item beginner"><span class="q-num">393</span><span class="q-text">Write a function to find the largest number in an array without using <code>Math.max</code>.</span><span class="q-level">Beginner</span></div>
+    <div class="q-item mid-level"><span class="q-num">394</span><span class="q-text">Implement a function to group an array of objects by a key.</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">395</span><span class="q-text">Write a function that flattens a deeply nested array.</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">396</span><span class="q-text">Implement a function to deep clone an object.</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">397</span><span class="q-text">Implement <code>Array.prototype.map</code> from scratch.</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">398</span><span class="q-text">Implement <code>Array.prototype.reduce</code> from scratch.</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">399</span><span class="q-text">Implement a debounce function.</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">400</span><span class="q-text">Implement a throttle function.</span><span class="q-level">Mid</span></div>
+    <div class="q-item advanced"><span class="q-num">401</span><span class="q-text">Implement a Promise from scratch.</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">402</span><span class="q-text">Implement <code>Promise.all()</code> from scratch.</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">403</span><span class="q-text">Implement a deep equal function without using JSON.</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">404</span><span class="q-text">Implement an event emitter class with <code>on</code>, <code>off</code>, and <code>emit</code> methods.</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">405</span><span class="q-text">Implement LRU cache using a Map and a doubly linked list.</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">406</span><span class="q-text">Implement a function that retries a failing async function N times.</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">407</span><span class="q-text">Implement a pipe function that composes async functions.</span><span class="q-level">Advanced</span></div>
+    <div class="q-item mid-level"><span class="q-num">408</span><span class="q-text">Write a function that implements <code>Function.prototype.bind</code> from scratch.</span><span class="q-level">Mid</span></div>
+    <div class="q-item advanced"><span class="q-num">409</span><span class="q-text">Implement a lazy evaluation system using generators.</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">410</span><span class="q-text">Implement an observable from scratch (minimal RxJS-like).</span><span class="q-level">Advanced</span></div>
+  </div>
+</div>
+
+<!-- 28. NODE.JS -->
+<div class="section" data-section="28">
+  <div class="section-header">
+    <span class="section-num">28</span>
+    <span class="section-title">Node.js <span class="accent">Fundamentals</span></span>
+  </div>
+  <div class="q-grid">
+    <div class="q-item mid-level"><span class="q-num">411</span><span class="q-text">What is Node.js and how does it execute JavaScript outside the browser?</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">412</span><span class="q-text">What is the Node.js event loop and how does it differ from the browser's?</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">413</span><span class="q-text">What are streams in Node.js and what are their types?</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">414</span><span class="q-text">What is the difference between <code>process.nextTick()</code> and <code>setImmediate()</code>?</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">415</span><span class="q-text">What is the <code>__dirname</code> and <code>__filename</code> variable in Node.js?</span><span class="q-level">Mid</span></div>
+    <div class="q-item advanced"><span class="q-num">416</span><span class="q-text">What is clustering in Node.js and why is it used?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">417</span><span class="q-text">What is libuv and what role does it play in Node.js?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item mid-level"><span class="q-num">418</span><span class="q-text">What is the difference between synchronous and asynchronous file reading in Node.js?</span><span class="q-level">Mid</span></div>
+    <div class="q-item advanced"><span class="q-num">419</span><span class="q-text">What is backpressure in Node.js streams and how do you handle it?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item mid-level"><span class="q-num">420</span><span class="q-text">What is the difference between CommonJS and ES Modules in Node.js?</span><span class="q-level">Mid</span></div>
+  </div>
+</div>
+
+<!-- 29. MIXED ADVANCED -->
+<div class="section" data-section="29">
+  <div class="section-header">
+    <span class="section-num">29</span>
+    <span class="section-title">Advanced <span class="accent">Concepts Mix</span></span>
+  </div>
+  <div class="q-grid">
+    <div class="q-item advanced"><span class="q-num">421</span><span class="q-text">What is <code>use strict</code> and how does it change JavaScript behavior?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">422</span><span class="q-text">What is the difference between <code>Object.is()</code> and <code>===</code>?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">423</span><span class="q-text">What is <code>globalThis</code> and why was it introduced?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">424</span><span class="q-text">What is the Abstract Syntax Tree (AST) in JavaScript?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">425</span><span class="q-text">What is a Babel plugin and how does transpilation work?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">426</span><span class="q-text">What is the difference between compilation and interpretation? Is JS compiled?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">427</span><span class="q-text">What is realm in JavaScript?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">428</span><span class="q-text">What is <code>FinalizationRegistry</code> in JavaScript?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">429</span><span class="q-text">What is the difference between <code>Array.prototype.toString()</code> and <code>Array.prototype.join()</code>?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">430</span><span class="q-text">How do you detect if your code is running in Node.js or the browser?</span><span class="q-level">Advanced</span></div>
+  </div>
+</div>
+
+<!-- 30. FINAL 70 QUESTIONS -->
+<div class="section" data-section="30">
+  <div class="section-header">
+    <span class="section-num">30</span>
+    <span class="section-title">Mixed Review <span class="accent">— All Levels</span></span>
+  </div>
+  <div class="q-grid">
+    <div class="q-item beginner"><span class="q-num">431</span><span class="q-text">How do you check the length of an array and a string?</span><span class="q-level">Beginner</span></div>
+    <div class="q-item beginner"><span class="q-num">432</span><span class="q-text">What is the difference between <code>Array.prototype.concat()</code> and the spread operator for merging arrays?</span><span class="q-level">Beginner</span></div>
+    <div class="q-item beginner"><span class="q-num">433</span><span class="q-text">What is the difference between <code>null</code> and <code>undefined</code> in terms of assignment?</span><span class="q-level">Beginner</span></div>
+    <div class="q-item beginner"><span class="q-num">434</span><span class="q-text">How do you convert a string to an integer using <code>parseInt</code>? What does the radix parameter do?</span><span class="q-level">Beginner</span></div>
+    <div class="q-item beginner"><span class="q-num">435</span><span class="q-text">What is a ternary operator chain and why should it be used carefully?</span><span class="q-level">Beginner</span></div>
+    <div class="q-item mid-level"><span class="q-num">436</span><span class="q-text">What is the difference between <code>Object.keys()</code> on an array vs an object?</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">437</span><span class="q-text">How do you swap two variables without a temporary variable?</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">438</span><span class="q-text">What is the difference between a shallow comparison and deep comparison?</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">439</span><span class="q-text">What are tagged template literals and how can they be used for i18n?</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">440</span><span class="q-text">How do you convert a NodeList to an array?</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">441</span><span class="q-text">What does the <code>void</code> operator do in JavaScript?</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">442</span><span class="q-text">How do you check if an object is empty (has no own properties)?</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">443</span><span class="q-text">What is the difference between a for loop and a forEach when iterating arrays?</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">444</span><span class="q-text">What is the difference between <code>Map.get()</code> and object property access?</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">445</span><span class="q-text">How do you create an array of a specific length filled with a default value?</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">446</span><span class="q-text">What is method chaining and how do you enable it in a custom class?</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">447</span><span class="q-text">What is the difference between <code>hasOwnProperty()</code> and <code>Object.hasOwn()</code>?</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">448</span><span class="q-text">What is an abstract class pattern in JavaScript?</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">449</span><span class="q-text">What is the purpose of <code>Symbol.toPrimitive</code>?</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">450</span><span class="q-text">How does destructuring work with default values when the property is <code>undefined</code> vs <code>null</code>?</span><span class="q-level">Mid</span></div>
+    <div class="q-item advanced"><span class="q-num">451</span><span class="q-text">What is the difference between duck typing and structural typing?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">452</span><span class="q-text">What is the problem with using <code>new Array(3)</code> vs <code>[undefined, undefined, undefined]</code>?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">453</span><span class="q-text">How does JavaScript handle integer overflow differently than other languages?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">454</span><span class="q-text">What is a sparse array and what happens when you iterate over one?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">455</span><span class="q-text">What happens when you delete a property from an object vs setting it to <code>undefined</code>?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">456</span><span class="q-text">What is the <code>with</code> statement and why is it deprecated?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">457</span><span class="q-text">What is <code>Object.getOwnPropertyDescriptor()</code> and how is it different from <code>Object.keys()</code>?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">458</span><span class="q-text">What is a tagged union or discriminated union pattern in JavaScript?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">459</span><span class="q-text">What is the difference between <code>encodeURI()</code> and <code>encodeURIComponent()</code>?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">460</span><span class="q-text">What is the <code>Atomics</code> object in JavaScript and when would you use it?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">461</span><span class="q-text">What is <code>SharedArrayBuffer</code> and what are its security implications?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">462</span><span class="q-text">How does JavaScript handle Unicode and what issues can arise with emoji in strings?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">463</span><span class="q-text">What is <code>Intl</code> namespace and what internationalization features does it provide?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">464</span><span class="q-text">What is a typed array (<code>Int8Array</code>, <code>Uint8Array</code>, etc.) and when would you use it?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">465</span><span class="q-text">What is <code>ArrayBuffer</code> and how is it different from a typed array?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">466</span><span class="q-text">What is <code>DataView</code> and when would you prefer it over typed arrays?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">467</span><span class="q-text">What is the difference between microtask queue vs animation frame callbacks?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">468</span><span class="q-text">How does <code>console.log()</code> behave differently with objects in some browsers?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">469</span><span class="q-text">What is the <code>label</code> statement in JavaScript and when is it useful?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">470</span><span class="q-text">What is the difference between a class field defined in the constructor vs outside?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">471</span><span class="q-text">What is the temporal dead zone for class fields?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">472</span><span class="q-text">How does JavaScript coerce objects to primitives? What methods are called?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">473</span><span class="q-text">What is <code>Symbol.for()</code> and <code>Symbol.keyFor()</code>?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">474</span><span class="q-text">What happens when you spread a string into an array? Why does it handle emoji correctly?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">475</span><span class="q-text">What is a branded type pattern in JavaScript?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">476</span><span class="q-text">What is the specification difference between <code>abstract operations</code> like <code>ToPrimitive</code> and <code>ToNumber</code>?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">477</span><span class="q-text">What is CPS (Continuation Passing Style) in functional programming?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">478</span><span class="q-text">What is the difference between a thunk and a promise?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">479</span><span class="q-text">What is algebraic effects and is it related to JavaScript generators?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">480</span><span class="q-text">What is the Iterator protocol vs the Iterable protocol?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">481</span><span class="q-text">What are TC39 proposals and how do new features get added to JavaScript?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">482</span><span class="q-text">What is the Pipe operator (<code>|></code>) proposal and what problem does it solve?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">483</span><span class="q-text">What is the Records and Tuples proposal in JavaScript?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">484</span><span class="q-text">What is pattern matching proposal in JavaScript?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item mid-level"><span class="q-num">485</span><span class="q-text">What does the <code>in</code> operator do with arrays? Can it cause bugs?</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">486</span><span class="q-text">How do you implement pagination logic in JavaScript?</span><span class="q-level">Mid</span></div>
+    <div class="q-item mid-level"><span class="q-num">487</span><span class="q-text">What is the Builder pattern and how do you implement it in JavaScript?</span><span class="q-level">Mid</span></div>
+    <div class="q-item advanced"><span class="q-num">488</span><span class="q-text">What is structural sharing in immutable data structures?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">489</span><span class="q-text">What is the difference between push-based and pull-based reactive programming?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">490</span><span class="q-text">How does React's reconciliation algorithm (fiber architecture) relate to JavaScript scheduling?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">491</span><span class="q-text">What is speculative parsing in browsers and how does it affect script loading?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">492</span><span class="q-text">What is the concept of hidden classes (shapes) in V8 and why do they matter for performance?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">493</span><span class="q-text">What is inline caching in JavaScript engines?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">494</span><span class="q-text">What is the difference between monomorphic, polymorphic, and megamorphic call sites?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">495</span><span class="q-text">What are the performance implications of using <code>try/catch</code> inside hot loops?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">496</span><span class="q-text">What is compile-time vs runtime error detection in JavaScript?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">497</span><span class="q-text">What is the zone.js library and what problem does it solve for async tracking?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">498</span><span class="q-text">What is <code>AsyncLocalStorage</code> in Node.js and how does it help with request-scoped context?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">499</span><span class="q-text">What is WASM (WebAssembly) and how can it be called from JavaScript?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">500</span><span class="q-text">What is the JavaScript specification (ECMA-262) and how do engines implement it? Why can behavior differ between engines?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">501</span><span class="q-text">What is observable state management and how does MobX use Proxies to implement it?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">502</span><span class="q-text">What is the difference between value semantics and reference semantics in JavaScript?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">503</span><span class="q-text">How do you detect and fix a circular reference in a JavaScript object?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">504</span><span class="q-text">What is tree shaking and dead code elimination? How does a bundler determine what to remove?</span><span class="q-level">Advanced</span></div>
+    <div class="q-item advanced"><span class="q-num">505</span><span class="q-text">What is the difference between <code>isFinite()</code> (global) and <code>Number.isFinite()</code>?</span><span class="q-level">Advanced</span></div>
+  </div>
+</div>
+
+</main>
+
+<button id="scroll-top" title="Back to top">↑</button>
+
+<script>
+  const items = document.querySelectorAll('.q-item');
+  const sections = document.querySelectorAll('.section');
+  const searchInput = document.getElementById('search');
+  const filterBtns = document.querySelectorAll('.filter-btn');
+  const visibleCount = document.getElementById('visible-count');
+  const noResults = document.getElementById('no-results');
+  const scrollTop = document.getElementById('scroll-top');
+
+  let currentFilter = 'all';
+  let currentSearch = '';
+
+  function updateVisible() {
+    let count = 0;
+    items.forEach(item => {
+      const levelMatch = currentFilter === 'all' || item.classList.contains(currentFilter);
+      const text = item.querySelector('.q-text').textContent.toLowerCase();
+      const searchMatch = !currentSearch || text.includes(currentSearch.toLowerCase());
+      if (levelMatch && searchMatch) {
+        item.classList.remove('hidden');
+        count++;
+      } else {
+        item.classList.add('hidden');
+      }
+    });
+
+    sections.forEach(section => {
+      const visible = section.querySelectorAll('.q-item:not(.hidden)').length;
+      section.classList.toggle('all-hidden', visible === 0);
+    });
+
+    visibleCount.textContent = count;
+    noResults.style.display = count === 0 ? 'block' : 'none';
+  }
+
+  filterBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      filterBtns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentFilter = btn.dataset.filter;
+      updateVisible();
+    });
+  });
+
+  searchInput.addEventListener('input', (e) => {
+    currentSearch = e.target.value;
+    updateVisible();
+  });
+
+  window.addEventListener('scroll', () => {
+    scrollTop.classList.toggle('show', window.scrollY > 400);
+  });
+
+  scrollTop.addEventListener('click', () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+
+  // Animate on load
+  items.forEach((item, i) => {
+    item.style.opacity = '0';
+    item.style.transform = 'translateY(8px)';
+    item.style.transition = `opacity 0.3s ease ${Math.min(i * 2, 300)}ms, transform 0.3s ease ${Math.min(i * 2, 300)}ms`;
+    requestAnimationFrame(() => {
+      item.style.opacity = '1';
+      item.style.transform = 'translateY(0)';
+    });
+  });
+
+  updateVisible();
+</script>
+</body>
+</html>

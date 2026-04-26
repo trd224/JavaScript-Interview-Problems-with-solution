@@ -1,6 +1,6 @@
 // 🔹 What is Content Projection (ng-content) in Angular?
 
-// 👉 Content Projection is a technique in Angular that allows you to pass and display external content inside a component using <ng-content>.
+// 👉 Content Projection is a technique in Angular that allows us to pass and display external content inside a component using <ng-content>.
 
 // 👉 Content Projection allows a parent component to pass HTML content into a child component using <ng-content>.
 
