@@ -1,0 +1,913 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Angular Forms — Interview Questions</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,300;0,400;0,700;1,400&family=Outfit:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f5f3ee;
+    --surface: #ffffff;
+    --card-hover: #faf9f5;
+    --border: #e2ddd5;
+    --accent: #dd3333;
+    --accent2: #2244cc;
+    --accent3: #227744;
+    --text: #1a1714;
+    --muted: #8a8070;
+    --tag-bg: #1a1714;
+    --beginner: #227744;
+    --mid: #cc7700;
+    --advanced: #cc2244;
+    --beginner-bg: #e8f5ee;
+    --mid-bg: #fff4e0;
+    --advanced-bg: #fde8ec;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Outfit', sans-serif;
+    min-height: 100vh;
+  }
+
+  /* Subtle dot pattern */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: radial-gradient(circle, #c8c0b0 1px, transparent 1px);
+    background-size: 28px 28px;
+    opacity: 0.35;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .progress-bar {
+    position: fixed;
+    top: 0; left: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    z-index: 999;
+    transition: width 0.1s;
+  }
+
+  .container {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 0 28px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* HEADER */
+  header {
+    padding: 64px 0 48px;
+    border-bottom: 2px solid var(--text);
+    margin-bottom: 44px;
+  }
+
+  .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--tag-bg);
+    color: #fff;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    padding: 5px 14px;
+    margin-bottom: 20px;
+  }
+
+  .eyebrow::before { content: '◆'; color: var(--accent); font-size: 8px; }
+
+  h1 {
+    font-size: clamp(42px, 7vw, 88px);
+    font-weight: 900;
+    line-height: 0.92;
+    letter-spacing: -3px;
+    color: var(--text);
+    margin-bottom: 18px;
+  }
+
+  h1 span { color: var(--accent); }
+
+  .subtitle {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.9;
+    max-width: 560px;
+    border-left: 3px solid var(--accent);
+    padding-left: 16px;
+  }
+
+  /* STATS */
+  .stats-row {
+    display: flex;
+    gap: 0;
+    margin: 32px 0 0;
+    border: 2px solid var(--text);
+    width: fit-content;
+  }
+
+  .stat {
+    padding: 16px 28px;
+    border-right: 2px solid var(--text);
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .stat:last-child { border-right: none; }
+
+  .stat-num {
+    font-size: 32px;
+    font-weight: 900;
+    letter-spacing: -1px;
+    line-height: 1;
+  }
+
+  .stat-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+  }
+
+  /* CONTROLS */
+  .controls {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: center;
+    margin-bottom: 40px;
+  }
+
+  .filter-btn {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 9px 20px;
+    border: 2px solid var(--border);
+    background: var(--surface);
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .filter-btn:hover { border-color: var(--text); color: var(--text); }
+  .filter-btn.active { background: var(--text); color: #fff; border-color: var(--text); }
+  .filter-btn.b.active { background: var(--beginner); border-color: var(--beginner); }
+  .filter-btn.m.active { background: var(--mid); border-color: var(--mid); }
+  .filter-btn.a.active { background: var(--advanced); border-color: var(--advanced); }
+
+  .search-wrap {
+    flex: 1;
+    min-width: 200px;
+    position: relative;
+  }
+
+  .search-wrap::before {
+    content: '⌕';
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--muted);
+    font-size: 16px;
+    pointer-events: none;
+  }
+
+  .search-box {
+    width: 100%;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    padding: 9px 16px 9px 34px;
+    background: var(--surface);
+    border: 2px solid var(--border);
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.15s;
+  }
+
+  .search-box:focus { border-color: var(--accent2); }
+  .search-box::placeholder { color: var(--muted); }
+
+  /* SECTION */
+  .section { margin-bottom: 52px; }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 4px;
+  }
+
+  .section-icon {
+    width: 36px;
+    height: 36px;
+    background: var(--text);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+
+  .section-title {
+    font-size: 18px;
+    font-weight: 800;
+    letter-spacing: -0.3px;
+  }
+
+  .section-meta {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    margin-left: auto;
+  }
+
+  .section-line {
+    height: 2px;
+    background: var(--text);
+    margin-bottom: 3px;
+  }
+
+  /* QUESTION ITEMS */
+  .q-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 0;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-top: none;
+    transition: background 0.12s;
+    cursor: default;
+  }
+
+  .q-item:first-child { border-top: 1px solid var(--border); }
+  .q-item:hover { background: var(--card-hover); }
+
+  .q-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    min-width: 52px;
+    padding: 14px 0 14px 16px;
+    flex-shrink: 0;
+    border-right: 1px solid var(--border);
+    margin-right: 16px;
+    align-self: stretch;
+    display: flex;
+    align-items: center;
+  }
+
+  .q-text {
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 1.65;
+    color: var(--text);
+    flex: 1;
+    padding: 13px 0;
+  }
+
+  .q-badge {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 8px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 3px 9px;
+    margin: 13px 14px 0 12px;
+    flex-shrink: 0;
+    align-self: flex-start;
+  }
+
+  .q-item.beginner .q-badge { background: var(--beginner-bg); color: var(--beginner); }
+  .q-item.mid      .q-badge { background: var(--mid-bg);      color: var(--mid); }
+  .q-item.advanced .q-badge { background: var(--advanced-bg); color: var(--advanced); }
+
+  .q-item.beginner:hover { border-left: 3px solid var(--beginner); }
+  .q-item.mid:hover      { border-left: 3px solid var(--mid); }
+  .q-item.advanced:hover { border-left: 3px solid var(--advanced); }
+
+  .hidden { display: none !important; }
+
+  .no-results {
+    display: none;
+    padding: 80px 0;
+    text-align: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    color: var(--muted);
+  }
+  .no-results.show { display: block; }
+
+  .scroll-top {
+    position: fixed;
+    bottom: 28px; right: 28px;
+    width: 46px; height: 46px;
+    background: var(--text);
+    color: #fff;
+    border: none;
+    font-size: 18px;
+    font-weight: 700;
+    cursor: pointer;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    transition: background 0.15s;
+  }
+
+  .scroll-top:hover { background: var(--accent); }
+  .scroll-top.show { display: flex; }
+
+  footer {
+    border-top: 2px solid var(--text);
+    padding: 32px 0;
+    margin-top: 60px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .footer-text {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 1px;
+  }
+
+  @media (max-width: 600px) {
+    h1 { letter-spacing: -2px; }
+    .stats-row { flex-wrap: wrap; }
+    .stat { flex: 1 0 45%; border-bottom: 2px solid var(--text); }
+    .q-badge { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="progress-bar" id="progressBar"></div>
+
+<div class="container">
+  <header>
+    <div class="eyebrow">Angular Interview Prep</div>
+    <h1>Angular<br><span>Forms</span></h1>
+    <p class="subtitle">
+      Complete interview question bank for Angular Forms.<br>
+      Template-driven · Reactive · Validators · Controls · UI Elements
+    </p>
+    <div class="stats-row">
+      <div class="stat"><span class="stat-num" id="totalCount">0</span><span class="stat-label">Total Questions</span></div>
+      <div class="stat"><span class="stat-num" style="color:var(--beginner)" id="bCount">0</span><span class="stat-label">Beginner</span></div>
+      <div class="stat"><span class="stat-num" style="color:var(--mid)" id="mCount">0</span><span class="stat-label">Mid Level</span></div>
+      <div class="stat"><span class="stat-num" style="color:var(--advanced)" id="aCount">0</span><span class="stat-label">Advanced</span></div>
+    </div>
+  </header>
+
+  <div class="controls">
+    <button class="filter-btn active" onclick="setFilter('all',this)">All</button>
+    <button class="filter-btn b" onclick="setFilter('beginner',this)">Beginner</button>
+    <button class="filter-btn m" onclick="setFilter('mid',this)">Mid Level</button>
+    <button class="filter-btn a" onclick="setFilter('advanced',this)">Advanced</button>
+    <div class="search-wrap">
+      <input class="search-box" type="text" id="searchInput" placeholder="Search questions..." oninput="applyFilters()">
+    </div>
+  </div>
+
+  <div id="questionsContainer"></div>
+  <div class="no-results" id="noResults">No questions found. Try a different search term.</div>
+
+  <footer>
+    <span class="footer-text">Angular Forms · Interview Question Bank</span>
+    <span class="footer-text" id="visibleLabel">Showing all questions</span>
+  </footer>
+</div>
+
+<button class="scroll-top" id="scrollTopBtn" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+
+<script>
+const sections = [
+  {
+    icon: "📋",
+    title: "Angular Forms — Fundamentals",
+    questions: [
+      { q: "What are the two types of forms in Angular?", level: "beginner" },
+      { q: "What is the difference between Template-Driven Forms and Reactive Forms?", level: "beginner" },
+      { q: "When should you use Template-Driven Forms vs Reactive Forms?", level: "mid" },
+      { q: "Which Angular module is required for Template-Driven Forms?", level: "beginner" },
+      { q: "Which Angular module is required for Reactive Forms?", level: "beginner" },
+      { q: "What is FormsModule and what does it provide?", level: "beginner" },
+      { q: "What is ReactiveFormsModule and what does it provide?", level: "beginner" },
+      { q: "Can you use both FormsModule and ReactiveFormsModule in the same application?", level: "beginner" },
+      { q: "What is two-way data binding and how does it relate to forms?", level: "beginner" },
+      { q: "What is the NgForm directive?", level: "beginner" },
+      { q: "What is the purpose of the name attribute on form inputs in template-driven forms?", level: "beginner" },
+      { q: "What is a form model in Angular?", level: "mid" },
+      { q: "What is the difference between a form's value and rawValue?", level: "advanced" },
+      { q: "What are form controls in Angular?", level: "beginner" },
+      { q: "How does Angular track the state of a form and its controls?", level: "mid" },
+    ]
+  },
+  {
+    icon: "🔗",
+    title: "Template-Driven Forms",
+    questions: [
+      { q: "How do you create a template-driven form in Angular?", level: "beginner" },
+      { q: "What is the ngModel directive used for?", level: "beginner" },
+      { q: "What is the difference between [(ngModel)] and [ngModel]?", level: "beginner" },
+      { q: "What does (ngModelChange) do?", level: "beginner" },
+      { q: "How do you get the form reference in template-driven forms?", level: "beginner" },
+      { q: "What is #myForm='ngForm' template reference variable?", level: "mid" },
+      { q: "How do you submit a template-driven form?", level: "beginner" },
+      { q: "How do you reset a template-driven form?", level: "mid" },
+      { q: "What is ngModelGroup used for?", level: "mid" },
+      { q: "How do you add validation to a template-driven form?", level: "beginner" },
+      { q: "What is ngModel's standalone option?", level: "advanced" },
+      { q: "How does Angular automatically create NgModel instances in template-driven forms?", level: "mid" },
+      { q: "What are the limitations of template-driven forms?", level: "mid" },
+      { q: "How do you access the NgForm instance inside the component class?", level: "mid" },
+      { q: "What is the difference between #f='ngForm' and #f on a form element?", level: "mid" },
+      { q: "How do you set default values in template-driven forms?", level: "beginner" },
+      { q: "How do you do conditional validation in template-driven forms?", level: "advanced" },
+    ]
+  },
+  {
+    icon: "⚛️",
+    title: "Reactive Forms",
+    questions: [
+      { q: "How do you create a reactive form in Angular?", level: "beginner" },
+      { q: "What is FormControl?", level: "beginner" },
+      { q: "What is FormGroup?", level: "beginner" },
+      { q: "What is FormArray?", level: "mid" },
+      { q: "What is FormBuilder and why is it used?", level: "mid" },
+      { q: "What is the difference between new FormControl() and fb.control()?", level: "mid" },
+      { q: "How do you bind a reactive form to a template using formGroup directive?", level: "beginner" },
+      { q: "How do you bind individual controls using formControlName?", level: "beginner" },
+      { q: "What is formGroupName directive used for?", level: "mid" },
+      { q: "What is formArrayName directive used for?", level: "mid" },
+      { q: "How do you get the value of a specific control in a reactive form?", level: "beginner" },
+      { q: "How do you set the value of a control using setValue()?", level: "beginner" },
+      { q: "What is the difference between setValue() and patchValue()?", level: "mid" },
+      { q: "How do you reset a reactive form?", level: "mid" },
+      { q: "What does reset() do to control state?", level: "mid" },
+      { q: "How do you disable a form control programmatically?", level: "mid" },
+      { q: "How do you enable a disabled control?", level: "mid" },
+      { q: "What happens to disabled controls in form.value vs form.getRawValue()?", level: "advanced" },
+      { q: "How do you add and remove controls dynamically in a FormGroup?", level: "advanced" },
+      { q: "How do you subscribe to value changes in a reactive form?", level: "mid" },
+      { q: "What is valueChanges observable?", level: "mid" },
+      { q: "What is statusChanges observable?", level: "mid" },
+      { q: "How do you listen to changes on a single control vs the entire form?", level: "mid" },
+      { q: "What are the advantages of reactive forms over template-driven forms?", level: "mid" },
+      { q: "What is NonNullableFormBuilder introduced in Angular 14?", level: "advanced" },
+      { q: "What are typed forms in Angular 14+?", level: "advanced" },
+      { q: "What is FormControl<string | null> in typed reactive forms?", level: "advanced" },
+      { q: "What is the difference between untyped and typed form controls?", level: "advanced" },
+    ]
+  },
+  {
+    icon: "📝",
+    title: "Input Fields",
+    questions: [
+      { q: "How do you bind an input field in a reactive form?", level: "beginner" },
+      { q: "How do you bind an input field in a template-driven form?", level: "beginner" },
+      { q: "How do you get the current value of a text input in Angular?", level: "beginner" },
+      { q: "What is the difference between (input) and (change) event on an input?", level: "mid" },
+      { q: "How do you handle number type inputs in Angular forms?", level: "mid" },
+      { q: "How do you handle email type inputs and add email validation?", level: "beginner" },
+      { q: "How do you bind a password input field and show/hide password?", level: "mid" },
+      { q: "How do you handle date input fields in Angular?", level: "mid" },
+      { q: "What is the difference between type='text' and type='number' in Angular binding?", level: "mid" },
+      { q: "How do you handle file input in Angular forms?", level: "mid" },
+      { q: "How do you read the file selected by a file input?", level: "mid" },
+      { q: "Can you use ngModel on a file input? Why or why not?", level: "advanced" },
+      { q: "How do you implement an autocomplete input in Angular?", level: "advanced" },
+      { q: "How do you debounce input changes in reactive forms?", level: "advanced" },
+      { q: "How do you use the min and max attributes with number inputs in reactive forms?", level: "mid" },
+    ]
+  },
+  {
+    icon: "☑️",
+    title: "Checkboxes",
+    questions: [
+      { q: "How do you bind a single checkbox using ngModel?", level: "beginner" },
+      { q: "How do you bind a single checkbox in a reactive form?", level: "beginner" },
+      { q: "What value does a checkbox FormControl hold — true/false or checked/unchecked string?", level: "beginner" },
+      { q: "How do you handle a group of checkboxes in Angular?", level: "mid" },
+      { q: "How do you store multiple checkbox selections in a FormArray?", level: "mid" },
+      { q: "How do you initialize a checkbox as checked by default?", level: "beginner" },
+      { q: "How do you make a checkbox required in Angular forms?", level: "beginner" },
+      { q: "How do you show a validation error if a required checkbox is not checked?", level: "mid" },
+      { q: "How do you dynamically add checkboxes from an array of options using FormArray?", level: "advanced" },
+      { q: "How do you get the selected values from a group of checkboxes?", level: "mid" },
+      { q: "How do you implement a 'select all' checkbox that controls child checkboxes?", level: "advanced" },
+      { q: "How do you disable a specific checkbox in a FormArray?", level: "mid" },
+      { q: "What is the indeterminate state of a checkbox and how do you handle it in Angular?", level: "advanced" },
+      { q: "How do you use checkbox with ngModelGroup in template-driven forms?", level: "advanced" },
+      { q: "How do you validate that at least one checkbox must be selected?", level: "advanced" },
+    ]
+  },
+  {
+    icon: "🔘",
+    title: "Radio Buttons",
+    questions: [
+      { q: "How do you bind radio buttons using ngModel in a template-driven form?", level: "beginner" },
+      { q: "How do you bind radio buttons in a reactive form?", level: "beginner" },
+      { q: "What is the role of the name attribute on radio buttons in template-driven forms?", level: "beginner" },
+      { q: "How do you group radio buttons in Angular?", level: "beginner" },
+      { q: "What value does a radio button FormControl hold?", level: "beginner" },
+      { q: "How do you set a default selected radio button?", level: "beginner" },
+      { q: "How do you make a radio button group required?", level: "mid" },
+      { q: "How do you display validation error if no radio option is selected?", level: "mid" },
+      { q: "How do you dynamically render radio buttons from an array?", level: "mid" },
+      { q: "How do you disable a specific radio button?", level: "mid" },
+      { q: "How do you disable the entire radio button group?", level: "mid" },
+      { q: "What is the difference between radio buttons and a select dropdown in terms of UX and form binding?", level: "mid" },
+      { q: "How do you react to radio button value changes in reactive forms?", level: "mid" },
+      { q: "How do you reset radio button selection to null?", level: "mid" },
+      { q: "How do you implement conditional form sections based on radio button selection?", level: "advanced" },
+    ]
+  },
+  {
+    icon: "▼",
+    title: "Select / Dropdown",
+    questions: [
+      { q: "How do you bind a select dropdown using ngModel?", level: "beginner" },
+      { q: "How do you bind a select dropdown in a reactive form?", level: "beginner" },
+      { q: "What is the ngValue directive and how does it differ from value?", level: "mid" },
+      { q: "How do you bind an object (not just string) as the value of a select option?", level: "mid" },
+      { q: "How do you set a default selected option in a select dropdown?", level: "beginner" },
+      { q: "How do you add a placeholder option like '-- Select --' to a dropdown?", level: "beginner" },
+      { q: "How do you populate dropdown options dynamically from an API?", level: "mid" },
+      { q: "How do you use *ngFor to render select options?", level: "beginner" },
+      { q: "How do you implement a multi-select dropdown in Angular?", level: "mid" },
+      { q: "How do you get all selected values from a multi-select?", level: "mid" },
+      { q: "How do you disable a specific option in a dropdown?", level: "mid" },
+      { q: "How do you implement dependent/chained dropdowns (e.g. Country → State)?", level: "advanced" },
+      { q: "How do you reset a dropdown to its default value?", level: "mid" },
+      { q: "How do you add required validation to a select dropdown?", level: "beginner" },
+      { q: "What is compareWith input on select and when do you need it?", level: "advanced" },
+    ]
+  },
+  {
+    icon: "📄",
+    title: "Textarea",
+    questions: [
+      { q: "How do you bind a textarea in a template-driven form?", level: "beginner" },
+      { q: "How do you bind a textarea in a reactive form?", level: "beginner" },
+      { q: "What is the correct way to bind content in a textarea — between tags or via [value]?", level: "beginner" },
+      { q: "How do you add minlength and maxlength validators to a textarea?", level: "beginner" },
+      { q: "How do you show a character count for a textarea in Angular?", level: "mid" },
+      { q: "How do you prevent a user from exceeding a character limit in a textarea?", level: "mid" },
+      { q: "How do you auto-resize a textarea as the user types?", level: "mid" },
+      { q: "How do you display an error if textarea is empty on form submit?", level: "beginner" },
+      { q: "How do you trim whitespace from textarea input before validation?", level: "mid" },
+      { q: "How do you preserve newlines from a textarea when displaying the value?", level: "mid" },
+    ]
+  },
+  {
+    icon: "🔲",
+    title: "Buttons in Forms",
+    questions: [
+      { q: "What is the default type of a button element inside a form?", level: "beginner" },
+      { q: "What is the difference between type='submit', type='button', and type='reset'?", level: "beginner" },
+      { q: "How do you prevent a button from submitting the form accidentally?", level: "beginner" },
+      { q: "How do you disable a submit button until the form is valid?", level: "beginner" },
+      { q: "How do you show a loading spinner on a submit button while an API call is in progress?", level: "mid" },
+      { q: "How do you disable the submit button after one click to prevent double submission?", level: "mid" },
+      { q: "How do you use (click) vs (submit) for form submission?", level: "beginner" },
+      { q: "How do you reset a form using a reset button?", level: "beginner" },
+      { q: "How do you programmatically trigger form submission from a button outside the form element?", level: "advanced" },
+      { q: "How do you conditionally show/hide buttons based on form state?", level: "mid" },
+      { q: "How do you bind button label text dynamically?", level: "beginner" },
+    ]
+  },
+  {
+    icon: "✅",
+    title: "Built-in Validators",
+    questions: [
+      { q: "What built-in validators does Angular provide?", level: "beginner" },
+      { q: "How do you apply required validator in a reactive form?", level: "beginner" },
+      { q: "How do you apply required validator in a template-driven form?", level: "beginner" },
+      { q: "What is Validators.minLength() and how do you use it?", level: "beginner" },
+      { q: "What is Validators.maxLength() and how do you use it?", level: "beginner" },
+      { q: "What is Validators.pattern() and how do you use it with regex?", level: "mid" },
+      { q: "What is Validators.email() and how is it different from the email HTML attribute?", level: "mid" },
+      { q: "What is Validators.min() and Validators.max() for numeric inputs?", level: "beginner" },
+      { q: "How do you apply multiple validators to a single control?", level: "beginner" },
+      { q: "How do you compose validators using Validators.compose()?", level: "mid" },
+      { q: "What is Validators.nullValidator?", level: "mid" },
+      { q: "What is Validators.requiredTrue and when would you use it?", level: "mid" },
+      { q: "How do you add validators to a control in template-driven forms using directives?", level: "mid" },
+      { q: "How do you add validators dynamically to a control after form creation?", level: "advanced" },
+      { q: "How do you clear all validators from a control programmatically?", level: "advanced" },
+    ]
+  },
+  {
+    icon: "🛠️",
+    title: "Custom Validators",
+    questions: [
+      { q: "What is a custom validator in Angular?", level: "mid" },
+      { q: "How do you create a custom sync validator function for reactive forms?", level: "mid" },
+      { q: "What should a validator function return when validation passes?", level: "mid" },
+      { q: "What should a validator function return when validation fails?", level: "mid" },
+      { q: "How do you create a custom validator directive for template-driven forms?", level: "advanced" },
+      { q: "What interface does a custom validator directive implement?", level: "advanced" },
+      { q: "How do you create an async validator (e.g., check username availability via API)?", level: "advanced" },
+      { q: "What is AsyncValidatorFn?", level: "advanced" },
+      { q: "How do you handle debouncing in async validators?", level: "advanced" },
+      { q: "How do you create a cross-field validator (e.g., password match)?", level: "advanced" },
+      { q: "How do you apply a cross-field validator to a FormGroup?", level: "advanced" },
+      { q: "How do you create a reusable validator factory function that accepts parameters?", level: "advanced" },
+      { q: "How do you combine custom validators with built-in validators?", level: "mid" },
+      { q: "What is the ValidationErrors type?", level: "mid" },
+      { q: "How do you show error messages from a custom validator in the template?", level: "mid" },
+      { q: "How do you implement a 'no whitespace only' validator?", level: "mid" },
+      { q: "How do you implement a 'strong password' validator?", level: "advanced" },
+    ]
+  },
+  {
+    icon: "⚠️",
+    title: "Validation & Error Display",
+    questions: [
+      { q: "What are the validation states of a form control (valid, invalid, pending)?", level: "beginner" },
+      { q: "What is the difference between errors, valid, invalid, and status?", level: "mid" },
+      { q: "How do you display an error message when a field is invalid?", level: "beginner" },
+      { q: "What are touched, untouched, dirty, and pristine states?", level: "beginner" },
+      { q: "What is the difference between dirty and touched?", level: "beginner" },
+      { q: "Why should you check touched before displaying a validation error?", level: "mid" },
+      { q: "How do you show errors only after the form is submitted?", level: "mid" },
+      { q: "How do you mark all controls as touched programmatically?", level: "mid" },
+      { q: "What is markAllAsTouched() and when do you use it?", level: "mid" },
+      { q: "How do you access specific validation errors like required, minlength, etc.?", level: "mid" },
+      { q: "What is the structure of the errors object on a control?", level: "mid" },
+      { q: "How do you display minlength error and show the actual vs required length?", level: "mid" },
+      { q: "What is hasError() method on a form control?", level: "mid" },
+      { q: "What is the difference between form.errors and control.errors?", level: "mid" },
+      { q: "How do you implement a reusable error message component?", level: "advanced" },
+      { q: "How do you validate a form on submit only (not on every keystroke)?", level: "advanced" },
+      { q: "What is updateOn option in FormControl? What values can it take?", level: "advanced" },
+      { q: "What is the difference between updateOn: 'change', 'blur', and 'submit'?", level: "advanced" },
+      { q: "How do you apply updateOn: 'blur' to an entire FormGroup?", level: "advanced" },
+    ]
+  },
+  {
+    icon: "📦",
+    title: "FormArray",
+    questions: [
+      { q: "What is FormArray and when do you use it?", level: "mid" },
+      { q: "How do you create a FormArray?", level: "mid" },
+      { q: "How do you add a new control to a FormArray?", level: "mid" },
+      { q: "How do you remove a control at a specific index from a FormArray?", level: "mid" },
+      { q: "How do you access a control inside a FormArray?", level: "mid" },
+      { q: "How do you iterate over FormArray controls in a template?", level: "mid" },
+      { q: "What does FormArray.at(index) do?", level: "mid" },
+      { q: "How do you validate a FormArray (e.g., at least one item must be added)?", level: "advanced" },
+      { q: "How do you use FormArray with FormGroup inside (array of objects)?", level: "advanced" },
+      { q: "How do you implement a dynamic form with add/remove rows using FormArray?", level: "advanced" },
+      { q: "What is the length property of FormArray?", level: "mid" },
+      { q: "How do you clear all items in a FormArray?", level: "mid" },
+      { q: "How do you patch values into a FormArray?", level: "advanced" },
+      { q: "What is the difference between FormArray and a regular array in a form?", level: "mid" },
+      { q: "How do you use FormArray with checkboxes to represent a list of selections?", level: "advanced" },
+    ]
+  },
+  {
+    icon: "🔄",
+    title: "Form Submission & Data Handling",
+    questions: [
+      { q: "How do you handle form submission in Angular?", level: "beginner" },
+      { q: "What is the (ngSubmit) event?", level: "beginner" },
+      { q: "How do you prevent the default HTML form submission behavior in Angular?", level: "beginner" },
+      { q: "How do you get all form values on submit?", level: "beginner" },
+      { q: "How do you send form data to an API on submit?", level: "mid" },
+      { q: "How do you disable the submit button while an API request is pending?", level: "mid" },
+      { q: "How do you handle API error after form submission and show server-side errors?", level: "advanced" },
+      { q: "How do you set a server-side validation error on a specific control?", level: "advanced" },
+      { q: "What is form.getRawValue() and when should you use it instead of form.value?", level: "advanced" },
+      { q: "How do you reset a form to its initial values after submission?", level: "mid" },
+      { q: "How do you pre-populate a form with data from an API (edit/update flow)?", level: "mid" },
+      { q: "What is the best approach to map an API response to a reactive form?", level: "advanced" },
+      { q: "How do you handle file upload as part of form submission using FormData?", level: "advanced" },
+    ]
+  },
+  {
+    icon: "🔁",
+    title: "Value & Status Observables",
+    questions: [
+      { q: "What does form.valueChanges return?", level: "mid" },
+      { q: "What does form.statusChanges return?", level: "mid" },
+      { q: "How do you unsubscribe from valueChanges to prevent memory leaks?", level: "mid" },
+      { q: "How do you use takeUntil or async pipe with valueChanges?", level: "advanced" },
+      { q: "How do you debounce valueChanges to delay processing?", level: "advanced" },
+      { q: "How do you use distinctUntilChanged with valueChanges?", level: "advanced" },
+      { q: "How do you use valueChanges on a single control vs the whole FormGroup?", level: "mid" },
+      { q: "What emits in statusChanges — 'VALID', 'INVALID', 'PENDING', 'DISABLED'?", level: "mid" },
+      { q: "How do you react to status change from PENDING to VALID (async validator)?", level: "advanced" },
+      { q: "How do you filter valueChanges to react only when a specific field changes?", level: "advanced" },
+    ]
+  },
+  {
+    icon: "♿",
+    title: "Accessibility in Forms",
+    questions: [
+      { q: "What is the role of the label element in forms and how do you associate it with an input?", level: "beginner" },
+      { q: "What is aria-label and aria-labelledby in form inputs?", level: "mid" },
+      { q: "How do you announce validation errors to screen readers?", level: "advanced" },
+      { q: "What is role='alert' and when should you use it for form errors?", level: "advanced" },
+      { q: "How do you associate error messages with inputs using aria-describedby?", level: "advanced" },
+      { q: "What is aria-invalid and when should it be set to true?", level: "mid" },
+      { q: "How do you ensure tab order is logical in complex forms?", level: "mid" },
+      { q: "What is aria-required and how does it relate to the required attribute?", level: "mid" },
+    ]
+  },
+  {
+    icon: "🎨",
+    title: "Styling & CSS Classes",
+    questions: [
+      { q: "What CSS classes does Angular automatically add to form controls?", level: "beginner" },
+      { q: "What does the ng-valid CSS class mean?", level: "beginner" },
+      { q: "What does the ng-invalid CSS class mean?", level: "beginner" },
+      { q: "What does ng-touched and ng-untouched mean?", level: "beginner" },
+      { q: "What does ng-dirty and ng-pristine mean?", level: "beginner" },
+      { q: "What does ng-pending mean?", level: "mid" },
+      { q: "How do you use these Angular CSS classes to style error states?", level: "mid" },
+      { q: "How do you conditionally apply a CSS class based on control validity?", level: "mid" },
+      { q: "How do you use [ngClass] to highlight invalid inputs?", level: "mid" },
+      { q: "How do you add a red border to inputs when they are invalid and touched?", level: "mid" },
+      { q: "How do you animate form validation error messages using Angular animations?", level: "advanced" },
+    ]
+  },
+  {
+    icon: "🧩",
+    title: "ControlValueAccessor (CVA)",
+    questions: [
+      { q: "What is ControlValueAccessor?", level: "advanced" },
+      { q: "Why would you implement ControlValueAccessor?", level: "advanced" },
+      { q: "What methods must ControlValueAccessor implement?", level: "advanced" },
+      { q: "What is writeValue() and when is it called?", level: "advanced" },
+      { q: "What is registerOnChange() and what is the callback used for?", level: "advanced" },
+      { q: "What is registerOnTouched() and what does it track?", level: "advanced" },
+      { q: "What is setDisabledState() in ControlValueAccessor?", level: "advanced" },
+      { q: "How do you register a custom component as a ControlValueAccessor using NG_VALUE_ACCESSOR?", level: "advanced" },
+      { q: "How do you use forwardRef() when providing NG_VALUE_ACCESSOR?", level: "advanced" },
+      { q: "How do you use a custom CVA component with both reactive and template-driven forms?", level: "advanced" },
+      { q: "What is the difference between NG_VALUE_ACCESSOR and NG_VALIDATORS injection tokens?", level: "advanced" },
+      { q: "How do you add validation to a custom CVA component?", level: "advanced" },
+    ]
+  },
+  {
+    icon: "🏗️",
+    title: "Complex & Real-World Form Scenarios",
+    questions: [
+      { q: "How do you build a multi-step (wizard) form in Angular?", level: "advanced" },
+      { q: "How do you persist form state across navigation steps?", level: "advanced" },
+      { q: "How do you implement a form with conditional fields that appear/disappear?", level: "advanced" },
+      { q: "How do you implement a form that adds/removes validators based on user input?", level: "advanced" },
+      { q: "How do you implement a 'password' and 'confirm password' match validation?", level: "advanced" },
+      { q: "How do you implement an inline editable table using FormArray?", level: "advanced" },
+      { q: "How do you implement a form with nested FormGroups for address details?", level: "advanced" },
+      { q: "How do you handle large forms with many fields efficiently?", level: "advanced" },
+      { q: "How do you lazy load a form module only when a route is visited?", level: "advanced" },
+      { q: "How do you use Angular CDK FormField or Angular Material forms?", level: "advanced" },
+      { q: "How do you prevent unsaved form changes from navigating away (using CanDeactivate guard)?", level: "advanced" },
+      { q: "How do you implement auto-save draft functionality using valueChanges?", level: "advanced" },
+      { q: "How do you implement a form that loads data on edit and submits updates?", level: "mid" },
+      { q: "How do you handle a form inside a dialog/modal in Angular?", level: "advanced" },
+      { q: "How do you use signals with Angular forms (Angular 17+)?", level: "advanced" },
+      { q: "How do you share form state between parent and child components?", level: "advanced" },
+    ]
+  },
+  {
+    icon: "⚡",
+    title: "Performance & Best Practices",
+    questions: [
+      { q: "How do you use OnPush change detection with reactive forms?", level: "advanced" },
+      { q: "What is the impact of using valueChanges without unsubscribing?", level: "mid" },
+      { q: "How do you use the async pipe to handle form observables in templates?", level: "mid" },
+      { q: "Why should you avoid heavy logic directly in the template for form error messages?", level: "mid" },
+      { q: "How do you avoid redundant validation by caching async validator results?", level: "advanced" },
+      { q: "What are best practices for naming FormControls in large applications?", level: "mid" },
+      { q: "How do you structure a large form into smaller sub-components?", level: "advanced" },
+      { q: "How do you avoid re-rendering the entire form on every value change?", level: "advanced" },
+      { q: "When should you use template-driven vs reactive forms for performance?", level: "mid" },
+      { q: "How do you unit test a reactive form and its validators?", level: "advanced" },
+      { q: "How do you test custom validators in Angular unit tests?", level: "advanced" },
+      { q: "How do you test async validators?", level: "advanced" },
+    ]
+  }
+];
+
+let allItems = [];
+let currentFilter = 'all';
+let idx = 1;
+
+function buildUI() {
+  const container = document.getElementById('questionsContainer');
+  container.innerHTML = '';
+  allItems = [];
+  idx = 1;
+  let totB = 0, totM = 0, totA = 0;
+
+  sections.forEach(sec => {
+    const secEl = document.createElement('div');
+    secEl.className = 'section';
+
+    secEl.innerHTML = `
+      <div class="section-header">
+        <div class="section-icon">${sec.icon}</div>
+        <span class="section-title">${sec.title}</span>
+        <span class="section-meta">${sec.questions.length} questions</span>
+      </div>
+      <div class="section-line"></div>
+    `;
+
+    sec.questions.forEach(q => {
+      const item = document.createElement('div');
+      item.className = `q-item ${q.level}`;
+      item.dataset.level = q.level;
+      item.dataset.text = q.q.toLowerCase();
+
+      item.innerHTML = `
+        <span class="q-num">${String(idx).padStart(3,'0')}</span>
+        <span class="q-text">${q.q}</span>
+        <span class="q-badge">${q.level === 'mid' ? 'Mid' : q.level.charAt(0).toUpperCase() + q.level.slice(1)}</span>
+      `;
+
+      secEl.appendChild(item);
+      allItems.push({ el: item, secEl });
+      idx++;
+
+      if (q.level === 'beginner') totB++;
+      else if (q.level === 'mid') totM++;
+      else totA++;
+    });
+
+    container.appendChild(secEl);
+  });
+
+  const total = totB + totM + totA;
+  document.getElementById('totalCount').textContent = total;
+  document.getElementById('bCount').textContent = totB;
+  document.getElementById('mCount').textContent = totM;
+  document.getElementById('aCount').textContent = totA;
+}
+
+function setFilter(level, btn) {
+  currentFilter = level;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  applyFilters();
+}
+
+function applyFilters() {
+  const term = document.getElementById('searchInput').value.toLowerCase().trim();
+  let visible = 0;
+
+  allItems.forEach(({ el }) => {
+    const lvl = el.dataset.level;
+    const txt = el.dataset.text;
+    const matchLevel = currentFilter === 'all' || lvl === currentFilter;
+    const matchSearch = !term || txt.includes(term);
+    const show = matchLevel && matchSearch;
+    el.classList.toggle('hidden', !show);
+    if (show) visible++;
+  });
+
+  document.querySelectorAll('.section').forEach(sec => {
+    const vis = sec.querySelectorAll('.q-item:not(.hidden)').length;
+    sec.style.display = vis === 0 ? 'none' : '';
+  });
+
+  const nr = document.getElementById('noResults');
+  nr.classList.toggle('show', visible === 0);
+
+  document.getElementById('visibleLabel').textContent =
+    visible === allItems.length ? 'Showing all questions' : `Showing ${visible} questions`;
+}
+
+window.addEventListener('scroll', () => {
+  const pct = (window.scrollY / (document.documentElement.scrollHeight - window.innerHeight)) * 100;
+  document.getElementById('progressBar').style.width = pct + '%';
+  document.getElementById('scrollTopBtn').classList.toggle('show', window.scrollY > 400);
+});
+
+buildUI();
+</script>
+</body>
+</html>
