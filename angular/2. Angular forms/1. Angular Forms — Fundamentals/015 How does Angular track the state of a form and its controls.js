@@ -4,15 +4,11 @@
 
 // Form (NgForm / FormGroup)
 // Controls (ngModel / FormControl)
+
 // Example (Template-Driven Form)
 // <form #myForm="ngForm">
 
-//   <input 
-//     name="username" 
-//     ngModel 
-//     required 
-//     #u="ngModel"
-//   >
+//   <input name="username" ngModel required #u="ngModel">
 
 //   <p>Form Valid: {{ myForm.valid }}</p>
 //   <p>Control Valid: {{ u.valid }}</p>
@@ -26,6 +22,7 @@
 // valid/invalid → based on validation
 // touched → when user focuses & leaves field
 // dirty → when value changes
+
 // Example (Reactive Form)
 // import { FormGroup, FormControl, Validators } from '@angular/forms';
 
