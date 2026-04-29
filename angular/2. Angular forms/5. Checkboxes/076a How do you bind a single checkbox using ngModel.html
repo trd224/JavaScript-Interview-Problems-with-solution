@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Angular ngModel & Checkbox Cheatsheet</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #0f0f1a;
+      color: #cdd6f4;
+      padding: 2rem;
+      line-height: 1.7;
+    }
+
+    h1 {
+      font-size: 2rem;
+      color: #cba6f7;
+      margin-bottom: 0.3rem;
+    }
+
+    h2 {
+      font-size: 1.2rem;
+      color: #89b4fa;
+      margin: 2rem 0 0.75rem;
+      border-left: 4px solid #89b4fa;
+      padding-left: 0.6rem;
+    }
+
+    h3 {
+      font-size: 1rem;
+      color: #a6e3a1;
+      margin: 1.2rem 0 0.4rem;
+    }
+
+    p {
+      font-size: 0.95rem;
+      color: #cdd6f4;
+      margin-bottom: 0.75rem;
+    }
+
+    ul {
+      list-style: none;
+      padding-left: 0;
+      margin-bottom: 1rem;
+    }
+
+    ul li {
+      padding: 0.3rem 0 0.3rem 1.4rem;
+      position: relative;
+      font-size: 0.93rem;
+      color: #cdd6f4;
+    }
+
+    ul li::before {
+      content: "›";
+      position: absolute;
+      left: 0;
+      color: #f38ba8;
+      font-weight: bold;
+    }
+
+    .tag { color: #f2cdcd; }
+    .label { display: inline-block; font-size: 0.75rem; font-weight: 600; padding: 2px 8px; border-radius: 4px; margin-bottom: 6px; }
+    .label-html { background: #2e1f00; color: #fab387; }
+    .label-ts   { background: #0d1f3c; color: #89b4fa; }
+
+    pre {
+      background: #1e1e2e;
+      border: 1px solid #313145;
+      border-radius: 10px;
+      padding: 1rem 1.2rem;
+      overflow-x: auto;
+      font-size: 0.88rem;
+      line-height: 1.8;
+      margin-bottom: 1rem;
+      font-family: 'Cascadia Code', 'Fira Code', 'Courier New', monospace;
+    }
+
+    .kw      { color: #ff79c6; }
+    .attr    { color: #50fa7b; }
+    .val     { color: #f1fa8c; }
+    .bracket { color: #bd93f9; }
+    .comment { color: #6272a4; }
+    .fn      { color: #50fa7b; }
+    .prop    { color: #ffb86c; }
+    .type    { color: #8be9fd; }
+    .str     { color: #f1fa8c; }
+    .plain   { color: #f8f8f2; }
+    .num     { color: #bd93f9; }
+
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 0.5rem 0 1.2rem;
+    }
+
+    .chip {
+      font-size: 0.8rem;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-family: monospace;
+    }
+
+    .chip-blue  { background: #1a2c4e; color: #89b4fa; }
+    .chip-green { background: #0f2e1a; color: #a6e3a1; }
+    .chip-red   { background: #2e0f0f; color: #f38ba8; }
+
+    .note {
+      background: #1a1a2e;
+      border-left: 3px solid #f9e2af;
+      padding: 0.6rem 1rem;
+      border-radius: 0 8px 8px 0;
+      font-size: 0.88rem;
+      color: #f9e2af;
+      margin-bottom: 1rem;
+    }
+
+    .divider {
+      border: none;
+      border-top: 1px solid #313145;
+      margin: 2rem 0;
+    }
+
+    .subtitle {
+      color: #6c7086;
+      font-size: 0.9rem;
+      margin-bottom: 2rem;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Angular ngModel &amp; Checkbox</h1>
+  <p class="subtitle">Cheatsheet — two-way binding, forms, custom values, and submit</p>
+
+  <!-- ===================== SECTION 1 ===================== -->
+  <h2>1. Single Checkbox — Boolean Binding</h2>
+  <p>A single checkbox with <code>ngModel</code> binds to a <strong>boolean</strong> value representing its checked state.</p>
+
+  <span class="label label-html">HTML</span>
+  <pre><span class="plain">&lt;</span><span class="kw">input</span> <span class="attr">type</span>=<span class="val">"checkbox"</span> <span class="bracket">[(</span><span class="attr">ngModel</span><span class="bracket">)]</span>=<span class="val">"isChecked"</span><span class="plain">&gt;</span></pre>
+
+  <span class="label label-ts">TS</span>
+  <pre><span class="prop">isChecked</span> <span class="plain">=</span> <span class="kw">false</span><span class="plain">;</span></pre>
+
+  <ul>
+    <li>Checked → <code>isChecked = true</code></li>
+    <li>Unchecked → <code>isChecked = false</code></li>
+  </ul>
+
+  <hr class="divider"/>
+
+  <!-- ===================== SECTION 2 ===================== -->
+  <h2>2. Inside a Form</h2>
+  <p>When placed inside a <code>&lt;form&gt;</code>, the <code>name</code> attribute is <strong>required</strong>.</p>
+
+  <span class="label label-html">HTML</span>
+  <pre><span class="plain">&lt;</span><span class="kw">form</span> <span class="attr">#f</span>=<span class="val">"ngForm"</span><span class="plain">&gt;</span>
+  <span class="plain">&lt;</span><span class="kw">input</span> <span class="attr">type</span>=<span class="val">"checkbox"</span> <span class="attr">name</span>=<span class="val">"agree"</span> <span class="bracket">[(</span><span class="attr">ngModel</span><span class="bracket">)]</span>=<span class="val">"isChecked"</span><span class="plain">&gt;</span>
+<span class="plain">&lt;/</span><span class="kw">form</span><span class="plain">&gt;</span></pre>
+
+  <div class="note">⚠ The <code>name</code> attribute is required on all inputs inside <code>&lt;form&gt;</code> when using ngModel.</div>
+
+  <hr class="divider"/>
+
+  <!-- ===================== SECTION 3 ===================== -->
+  <h2>3. Custom True / False Values</h2>
+  <p>Use <code>[trueValue]</code> and <code>[falseValue]</code> to bind custom strings instead of booleans.</p>
+
+  <span class="label label-html">HTML</span>
+  <pre><span class="plain">&lt;</span><span class="kw">input</span>
+  <span class="attr">type</span>=<span class="val">"checkbox"</span>
+  <span class="bracket">[(</span><span class="attr">ngModel</span><span class="bracket">)]</span>=<span class="val">"status"</span>
+  <span class="bracket">[</span><span class="attr">trueValue</span><span class="bracket">]</span>=<span class="val">"'YES'"</span>
+  <span class="bracket">[</span><span class="attr">falseValue</span><span class="bracket">]</span>=<span class="val">"'NO'"</span>
+<span class="plain">&gt;</span></pre>
+
+  <span class="label label-ts">TS</span>
+  <pre><span class="prop">status</span> <span class="plain">=</span> <span class="str">'NO'</span><span class="plain">;</span></pre>
+
+  <div class="chips">
+    <span class="chip chip-blue">Checked → 'YES'</span>
+    <span class="chip chip-green">Unchecked → 'NO'</span>
+  </div>
+
+  <hr class="divider"/>
+
+  <!-- ===================== SECTION 4 ===================== -->
+  <h2>4. Full Example — Text Input + Checkbox + Submit</h2>
+  <p>Combining a text input and checkbox inside a form with an <code>ngSubmit</code> handler.</p>
+
+  <span class="label label-html">HTML</span>
+  <pre><span class="plain">&lt;</span><span class="kw">form</span> <span class="attr">#myForm</span>=<span class="val">"ngForm"</span> <span class="bracket">(</span><span class="attr">ngSubmit</span><span class="bracket">)</span>=<span class="val">"onSubmit(myForm)"</span><span class="plain">&gt;</span>
+
+  <span class="comment">&lt;!-- Text Input --&gt;</span>
+  <span class="plain">&lt;</span><span class="kw">label</span><span class="plain">&gt;</span>Name:<span class="plain">&lt;/</span><span class="kw">label</span><span class="plain">&gt;</span>
+  <span class="plain">&lt;</span><span class="kw">input</span>
+    <span class="attr">type</span>=<span class="val">"text"</span>
+    <span class="attr">name</span>=<span class="val">"username"</span>
+    <span class="bracket">[(</span><span class="attr">ngModel</span><span class="bracket">)]</span>=<span class="val">"user.name"</span>
+    <span class="attr">required</span>
+  <span class="plain">&gt;</span>
+
+  <span class="comment">&lt;!-- Checkbox --&gt;</span>
+  <span class="plain">&lt;</span><span class="kw">label</span><span class="plain">&gt;</span>
+    <span class="plain">&lt;</span><span class="kw">input</span>
+      <span class="attr">type</span>=<span class="val">"checkbox"</span>
+      <span class="attr">name</span>=<span class="val">"agree"</span>
+      <span class="bracket">[(</span><span class="attr">ngModel</span><span class="bracket">)]</span>=<span class="val">"user.agree"</span>
+    <span class="plain">&gt;</span>
+    Accept Terms
+  <span class="plain">&lt;/</span><span class="kw">label</span><span class="plain">&gt;</span>
+
+  <span class="plain">&lt;</span><span class="kw">button</span> <span class="attr">type</span>=<span class="val">"submit"</span><span class="plain">&gt;</span>Submit<span class="plain">&lt;/</span><span class="kw">button</span><span class="plain">&gt;</span>
+
+<span class="plain">&lt;/</span><span class="kw">form</span><span class="plain">&gt;</span></pre>
+
+  <span class="label label-ts">TS</span>
+  <pre><span class="prop">user</span> <span class="plain">= {</span>
+  <span class="prop">name</span><span class="plain">:</span> <span class="str">''</span><span class="plain">,</span>
+  <span class="prop">agree</span><span class="plain">:</span> <span class="kw">false</span>
+<span class="plain">};</span>
+
+<span class="fn">onSubmit</span><span class="plain">(</span><span class="prop">form</span><span class="plain">:</span> <span class="type">any</span><span class="plain">) {</span>
+  <span class="plain">console.</span><span class="fn">log</span><span class="plain">(</span><span class="str">'Form Value:'</span><span class="plain">, form.value);</span>
+  <span class="plain">console.</span><span class="fn">log</span><span class="plain">(</span><span class="str">'User Model:'</span><span class="plain">, this.user);</span>
+<span class="plain">}</span></pre>
+
+  <hr class="divider"/>
+
+  <!-- ===================== SECTION 5 ===================== -->
+  <h2>5. ngModel Without a Variable (Submit-Only)</h2>
+  <p>Use <code>ngModel</code> alone (without <code>[()]</code>) when you only need the value at submit time and don't need a TypeScript variable.</p>
+
+  <h3>When to use this</h3>
+  <ul>
+    <li>You only need the value at submit time</li>
+    <li>You don't need a TS variable like <code>this.username</code></li>
+    <li>Value is accessed via <code>form.value</code></li>
+  </ul>
+
+  <span class="label label-html">HTML</span>
+  <pre><span class="plain">&lt;</span><span class="kw">form</span> <span class="attr">#f</span>=<span class="val">"ngForm"</span><span class="plain">&gt;</span>
+  <span class="plain">&lt;</span><span class="kw">input</span> <span class="attr">type</span>=<span class="val">"text"</span> <span class="attr">name</span>=<span class="val">"username"</span> <span class="attr">ngModel</span><span class="plain">&gt;</span>
+<span class="plain">&lt;/</span><span class="kw">form</span><span class="plain">&gt;</span></pre>
+
+  <span class="label label-ts">TS</span>
+  <pre><span class="fn">onSubmit</span><span class="plain">(</span><span class="prop">form</span><span class="plain">:</span> <span class="type">any</span><span class="plain">) {</span>
+  <span class="plain">console.</span><span class="fn">log</span><span class="plain">(form.value.username);</span>
+<span class="plain">}</span></pre>
+
+  <h3>Key difference</h3>
+  <ul>
+    <li>✔ Value comes from <code>form.value</code></li>
+    <li>✘ No direct TS variable like <code>this.username</code></li>
+  </ul>
+
+  <div class="chips">
+    <span class="chip chip-green">ngModel alone → form.value only</span>
+    <span class="chip chip-blue">[(ngModel)] → two-way bound TS variable</span>
+    <span class="chip chip-red">Missing name → form won't register it</span>
+  </div>
+
+</body>
+</html>
