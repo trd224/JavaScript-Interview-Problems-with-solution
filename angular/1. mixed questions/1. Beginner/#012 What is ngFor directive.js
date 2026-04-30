@@ -18,9 +18,9 @@
 //</li>
 
 // example
-export class AppComponent {
-  items = ["Apple", "Banana", "Mango", "Orange"];
-}
+// export class AppComponent {
+//   items = ["Apple", "Banana", "Mango", "Orange"];
+// }
 
 // <ul>
 //   <li *ngFor="let item of items; 
@@ -52,9 +52,9 @@ export class AppComponent {
 
 
 // 🔹 Styling Example (Real Use 🔥)
-{/* <li *ngFor="let item of items; let isEven = even" [style.background]="isEven ? 'lightgray' : 'white'">
-  {{ item }}
-</li> */}
+// <li *ngFor="let item of items; let isEven = even" [style.background]="isEven ? 'lightgray' : 'white'">
+ // {{ item }}
+//</li> 
 
 
 // 🔹 Simple Interview Line
