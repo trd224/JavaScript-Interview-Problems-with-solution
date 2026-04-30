@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NgModel Instances in Angular</title>
+
+<style>
+body{
+  font-family:'Segoe UI',sans-serif;
+  background:#0f0f1a;
+  color:#cdd6f4;
+  padding:2rem;
+  line-height:1.7;
+}
+
+h2{color:#89b4fa;margin-top:25px}
+h3{color:#a6e3a1;margin-top:15px}
+
+ul{
+  margin-top:10px;
+  padding-left:20px;
+}
+
+li{
+  margin:6px 0;
+}
+
+pre{
+  background:#1e1e2e;
+  padding:1rem;
+  border-radius:10px;
+  overflow:auto;
+  font-family:'Fira Code',monospace;
+  line-height:1.8;
+}
+
+.tag{color:#ff79c6;}
+.attr{color:#50fa7b;}
+.val{color:#f1fa8c;}
+.prop{color:#ffb86c;}
+.fn{color:#50fa7b;}
+.type{color:#8be9fd;}
+</style>
+</head>
+
+<body>
+
+<h2>In a template-driven form in Angular, NgModel instances are created automatically by Angular when it detects the ngModel directive on an input inside a form.</h2>
+
+<h3>How it works internally</h3>
+
+<p>When we write:</p>
+
+<pre>
+&lt;<span class="tag">form</span> <span class="attr">#f</span>=<span class="val">"ngForm"</span>&gt;
+  &lt;<span class="tag">input</span> <span class="attr">name</span>=<span class="val">"username"</span> <span class="attr">ngModel</span>&gt;
+&lt;/<span class="tag">form</span>&gt;
+</pre>
+
+<p>Angular does these steps automatically:</p>
+
+<h3>1. Detects ngModel</h3>
+<p>Angular sees the ngModel directive on the input</p>
+
+<h3>2. Creates NgModel instance</h3>
+<p>It internally creates a FormControl wrapper (NgModel)</p>
+
+<h3>3. Registers with parent form (NgForm)</h3>
+<p>Since the input is inside &lt;form&gt; with ngForm</p>
+<p>Angular automatically adds it to:</p>
+
+<ul>
+  <li>NgForm.controls</li>
+  <li>NgForm.value</li>
+</ul>
+
+<h3>4. Connects everything</h3>
+
+<p>So now:</p>
+
+<ul>
+  <li>View (input field)</li>
+  <li>Model (NgModel)</li>
+  <li>Form (NgForm)</li>
+</ul>
+
+<p>are all connected automatically.</p>
+
+<h3>Example</h3>
+
+<pre>
+&lt;<span class="tag">form</span> <span class="attr">#f</span>=<span class="val">"ngForm"</span>&gt;
+
+  &lt;<span class="tag">input</span> <span class="attr">name</span>=<span class="val">"email"</span> <span class="attr">ngModel</span> <span class="attr">required</span>&gt;
+
+&lt;/<span class="tag">form</span>&gt;
+</pre>
+
+<p>Angular internally creates something like:</p>
+
+<pre>
+new <span class="type">NgModel</span>()
+new <span class="type">FormControl</span>()
+f.<span class="fn">addControl</span>(emailControl)
+</pre>
+
+<h3>Key Idea</h3>
+
+<p>We do NOT manually create form controls in template-driven forms — Angular auto-registers them based on ngModel + name attribute.</p>
+
+</body>
+</html>

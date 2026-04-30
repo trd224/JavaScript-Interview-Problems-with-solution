@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Conditional Validation in Template-Driven Forms</title>
+
+<style>
+body{
+  font-family:'Segoe UI',sans-serif;
+  background:#0f0f1a;
+  color:#cdd6f4;
+  padding:2rem;
+  line-height:1.7;
+}
+
+h2{color:#89b4fa;margin-top:25px}
+h3{color:#a6e3a1;margin-top:15px}
+
+ul{
+  margin-top:10px;
+  padding-left:20px;
+}
+
+li{
+  margin:6px 0;
+}
+
+pre{
+  background:#1e1e2e;
+  padding:1rem;
+  border-radius:10px;
+  overflow:auto;
+  font-family:'Fira Code',monospace;
+  line-height:1.8;
+}
+
+/* syntax colors */
+.tag{color:#ff79c6;}
+.attr{color:#50fa7b;}
+.val{color:#f1fa8c;}
+.bind{color:#bd93f9;font-weight:bold;}
+</style>
+</head>
+
+<body>
+
+<h2>We do conditional validation in template-driven forms in Angular by dynamically applying validators or checking conditions in the template using bindings and control state.</h2>
+
+<h3>Method 1: Conditional required using binding</h3>
+
+<pre>
+&lt;<span class="tag">form</span> <span class="attr">#f</span>=<span class="val">"ngForm"</span>&gt;
+
+  &lt;<span class="tag">input</span> <span class="attr">type</span>=<span class="val">"checkbox"</span> <span class="bind">[(ngModel)]</span>=<span class="val">"isRequired"</span> <span class="attr">name</span>=<span class="val">"check"</span>&gt;
+
+  &lt;<span class="tag">input</span> 
+    <span class="attr">name</span>=<span class="val">"phone"</span> 
+    <span class="attr">ngModel</span> 
+    <span class="bind">[required]</span>=<span class="val">"isRequired"</span>
+    <span class="attr">#p</span>=<span class="val">"ngModel"</span>
+  &gt;
+
+  &lt;<span class="tag">p</span> *ngIf="p.invalid && p.touched"&gt;
+    Phone is required
+  &lt;/<span class="tag">p</span>&gt;
+
+&lt;/<span class="tag">form</span>&gt;
+</pre>
+
+<p>When isRequired = true → field becomes required</p>
+<p>When false → validation removed</p>
+
+<h3>Method 2: Using *ngIf (add/remove control)</h3>
+
+<pre>
+&lt;<span class="tag">input</span> *ngIf="showField" <span class="attr">name</span>=<span class="val">"email"</span> <span class="attr">ngModel</span> <span class="attr">required</span>&gt;
+</pre>
+
+<p>Control exists only when condition is true</p>
+
+<h3>Method 3: Custom condition in template</h3>
+
+<pre>
+&lt;<span class="tag">input</span> <span class="attr">name</span>=<span class="val">"password"</span> <span class="attr">ngModel</span> <span class="attr">#p</span>=<span class="val">"ngModel"</span>&gt;
+&lt;<span class="tag">input</span> <span class="attr">name</span>=<span class="val">"confirmPassword"</span> <span class="attr">ngModel</span> <span class="attr">#c</span>=<span class="val">"ngModel"</span>&gt;
+
+&lt;<span class="tag">p</span> *ngIf="p.value !== c.value && c.touched"&gt;
+  Passwords must match
+&lt;/<span class="tag">p</span>&gt;
+</pre>
+
+</body>
+</html>

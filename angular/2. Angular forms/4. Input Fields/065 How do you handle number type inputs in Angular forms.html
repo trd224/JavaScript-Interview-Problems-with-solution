@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Number Input in Angular</title>
+
+<style>
+body{
+  font-family:'Segoe UI',sans-serif;
+  background:#0f0f1a;
+  color:#cdd6f4;
+  padding:2rem;
+  line-height:1.7;
+}
+
+h2{color:#89b4fa;margin-top:25px}
+h3{color:#a6e3a1;margin-top:15px}
+
+pre{
+  background:#1e1e2e;
+  padding:1rem;
+  border-radius:10px;
+  overflow:auto;
+  font-family:'Fira Code',monospace;
+  line-height:1.8;
+}
+
+ul{
+  margin-top:10px;
+  padding-left:20px;
+}
+
+li{
+  margin:6px 0;
+}
+
+/* syntax colors */
+.tag{color:#ff79c6;}
+.attr{color:#50fa7b;}
+.val{color:#f1fa8c;}
+.bind{color:#bd93f9;font-weight:bold;}
+.prop{color:#ffb86c;}
+.type{color:#8be9fd;}
+.str{color:#f1fa8c;}
+</style>
+</head>
+
+<body>
+
+<h2>We handle number type inputs in Angular by ensuring the value is treated as a number (not string) using type="number" and proper form bindings.</h2>
+
+<h3>1. Template-driven form</h3>
+
+<pre>
+&lt;<span class="tag">input</span> <span class="attr">type</span>=<span class="val">"number"</span> <span class="attr">name</span>=<span class="val">"age"</span> <span class="bind">[(ngModel)]</span>=<span class="val">"age"</span>&gt;
+
+<span class="prop">age</span>: number = 0;
+</pre>
+
+<p>Angular automatically converts input to number</p>
+
+<h3>2. Reactive form</h3>
+
+<pre>
+<span class="prop">age</span> = new <span class="type">FormControl</span>(0);
+
+&lt;<span class="tag">input</span> <span class="attr">type</span>=<span class="val">"number"</span> <span class="bind">[formControl]</span>=<span class="val">"age"</span>&gt;
+</pre>
+
+<p>Value is stored as number</p>
+
+<h3>Important Issue (common bug)</h3>
+
+<pre>
+console.log(typeof this.age.value);
+</pre>
+
+<p>Sometimes it may be "string" (especially with empty input)</p>
+
+<h3>Safe Handling</h3>
+
+<pre>
+const value = Number(this.age.value);
+</pre>
+
+<h3>With validation</h3>
+
+<pre>
+<span class="prop">age</span> = new <span class="type">FormControl</span>(0, [
+  Validators.required,
+  Validators.min(18)
+]);
+</pre>
+
+<h3>Best Practice</h3>
+
+<ul>
+  <li>Initialize with number (0, not '')</li>
+  <li>Use validators (min, max)</li>
+  <li>Convert explicitly if needed</li>
+</ul>
+
+</body>
+</html>

@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dynamic Controls in FormGroup</title>
+
+<style>
+body{
+  font-family:'Segoe UI',sans-serif;
+  background:#0f0f1a;
+  color:#cdd6f4;
+  padding:2rem;
+  line-height:1.7;
+}
+
+h2{color:#89b4fa;margin-top:25px}
+h3{color:#a6e3a1;margin-top:15px}
+
+pre{
+  background:#1e1e2e;
+  padding:1rem;
+  border-radius:10px;
+  overflow:auto;
+  font-family:'Fira Code',monospace;
+  line-height:1.8;
+}
+
+ul{
+  margin-top:10px;
+  padding-left:20px;
+}
+
+li{
+  margin:6px 0;
+}
+
+/* syntax colors */
+.tag{color:#ff79c6;}
+.attr{color:#50fa7b;}
+.val{color:#f1fa8c;}
+.bind{color:#bd93f9;font-weight:bold;}
+.prop{color:#ffb86c;}
+.type{color:#8be9fd;}
+.str{color:#f1fa8c;}
+.fn{color:#50fa7b;}
+</style>
+</head>
+
+<body>
+
+<h2>We add and remove controls dynamically in a FormGroup in Angular using addControl() and removeControl() methods.</h2>
+
+<h3>Component (TS)</h3>
+
+<pre>
+import { <span class="type">FormGroup</span>, <span class="type">FormControl</span> } from <span class="str">'@angular/forms'</span>;
+
+<span class="prop">myForm</span> = new <span class="type">FormGroup</span>({
+  <span class="prop">username</span>: new <span class="type">FormControl</span>(<span class="str">''</span>)
+});
+
+<span class="prop">showEmail</span> = false;
+
+<span class="fn">addEmail</span>() {
+  this.myForm.addControl(<span class="str">'email'</span>, new <span class="type">FormControl</span>(<span class="str">''</span>));
+  this.showEmail = true;
+}
+
+<span class="fn">removeEmail</span>() {
+  this.myForm.removeControl(<span class="str">'email'</span>);
+  this.showEmail = false;
+}
+</pre>
+
+<h3>Template (HTML)</h3>
+
+<pre>
+&lt;<span class="tag">form</span> <span class="bind">[formGroup]</span>=<span class="val">"myForm"</span>&gt;
+
+  &lt;<span class="tag">input</span> <span class="attr">formControlName</span>=<span class="val">"username"</span>&gt;
+
+  &lt;<span class="tag">input</span> *ngIf="showEmail" <span class="attr">formControlName</span>=<span class="val">"email"</span>&gt;
+
+  &lt;<span class="tag">button</span> <span class="attr">type</span>=<span class="val">"button"</span> (<span class="attr">click</span>)=<span class="val">"addEmail()"</span>&gt;Add Email&lt;/<span class="tag">button</span>&gt;
+  &lt;<span class="tag">button</span> <span class="attr">type</span>=<span class="val">"button"</span> (<span class="attr">click</span>)=<span class="val">"removeEmail()"</span>&gt;Remove Email&lt;/<span class="tag">button</span>&gt;
+
+&lt;/<span class="tag">form</span>&gt;
+</pre>
+
+<h3>Important</h3>
+
+<p>Angular will throw error if:</p>
+
+<ul>
+  <li>formControlName="email" exists in HTML</li>
+  <li>but control is NOT present in FormGroup</li>
+</ul>
+
+<p>That’s why we use *ngIf</p>
+
+<h3>Alternative (safer check)</h3>
+
+<pre>
+&lt;<span class="tag">input</span> *ngIf="myForm.get(<span class="str">'email'</span>)" <span class="attr">formControlName</span>=<span class="val">"email"</span>&gt;
+</pre>
+
+</body>
+</html>

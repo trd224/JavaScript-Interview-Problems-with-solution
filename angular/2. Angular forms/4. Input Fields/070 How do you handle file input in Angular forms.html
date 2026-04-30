@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>File Input in Angular</title>
+
+<style>
+body{
+  font-family:'Segoe UI',sans-serif;
+  background:#0f0f1a;
+  color:#cdd6f4;
+  padding:2rem;
+  line-height:1.7;
+}
+
+h2{color:#89b4fa;margin-top:25px}
+h3{color:#a6e3a1;margin-top:15px}
+
+pre{
+  background:#1e1e2e;
+  padding:1rem;
+  border-radius:10px;
+  overflow:auto;
+  font-family:'Fira Code',monospace;
+  line-height:1.8;
+}
+
+ul{
+  margin-top:10px;
+  padding-left:20px;
+}
+
+li{
+  margin:6px 0;
+}
+
+/* syntax colors */
+.tag{color:#ff79c6;}
+.attr{color:#50fa7b;}
+.val{color:#f1fa8c;}
+.bind{color:#bd93f9;font-weight:bold;}
+.prop{color:#ffb86c;}
+.type{color:#8be9fd;}
+.str{color:#f1fa8c;}
+.fn{color:#50fa7b;}
+</style>
+</head>
+
+<body>
+
+<h2>We handle file input in Angular by listening to the (change) event and manually reading the selected file from event.target.files, because file inputs cannot be automatically bound like normal form fields.</h2>
+
+<h3>Key Idea</h3>
+
+<ul>
+  <li>File inputs are not two-way bindable</li>
+  <li>We must handle them manually</li>
+</ul>
+
+<h3>Template-driven approach</h3>
+
+<pre>
+&lt;<span class="tag">input</span> <span class="attr">type</span>=<span class="val">"file"</span> (<span class="attr">change</span>)=<span class="val">"onFileChange($event)"</span>&gt;
+
+<span class="prop">selectedFile</span>!: File;
+
+<span class="fn">onFileChange</span>(event: any) {
+  this.selectedFile = event.target.files[0];
+  console.log(this.selectedFile);
+}
+</pre>
+
+<h3>Reactive form approach</h3>
+
+<pre>
+&lt;<span class="tag">form</span> <span class="bind">[formGroup]</span>=<span class="val">"myForm"</span>&gt;
+  &lt;<span class="tag">input</span> <span class="attr">type</span>=<span class="val">"file"</span> <span class="attr">formControlName</span>=<span class="val">"file"</span> (<span class="attr">change</span>)=<span class="val">"onFileChange($event)"</span>&gt;
+&lt;/<span class="tag">form</span>&gt;
+
+<span class="prop">myForm</span> = new <span class="type">FormGroup</span>({
+  <span class="prop">file</span>: new <span class="type">FormControl</span>(null)
+});
+
+<span class="fn">onFileChange</span>(event: any) {
+  const file = event.target.files[0];
+  this.myForm.patchValue({ file });
+}
+</pre>
+
+<h3>Upload example (FormData)</h3>
+
+<pre>
+const formData = new FormData();
+formData.append(<span class="str">'file'</span>, this.selectedFile);
+</pre>
+
+<h3>Full Example: File Upload in Reactive Form</h3>
+
+<h3>Component (TS)</h3>
+
+<pre>
+import { Component } from <span class="str">'@angular/core'</span>;
+import { FormGroup, FormControl } from <span class="str">'@angular/forms'</span>;
+
+@Component({
+  selector: <span class="str">'app-file-upload'</span>,
+  templateUrl: <span class="str">'./file-upload.component.html'</span>
+})
+export class FileUploadComponent {
+
+  <span class="prop">selectedFile</span>!: File;
+
+  <span class="prop">myForm</span> = new <span class="type">FormGroup</span>({
+    <span class="prop">file</span>: new <span class="type">FormControl</span>(null)
+  });
+
+  <span class="fn">onFileChange</span>(event: any) {
+    const file = event.target.files[0];
+
+    if (file) {
+      this.selectedFile = file;
+
+      this.myForm.patchValue({
+        file: file
+      });
+    }
+  }
+
+  <span class="fn">onSubmit</span>() {
+    const formData = new FormData();
+    formData.append(<span class="str">'file'</span>, this.selectedFile);
+
+    console.log(<span class="str">'Uploading file:'</span>, this.selectedFile);
+  }
+}
+</pre>
+
+<h3>Template (HTML)</h3>
+
+<pre>
+&lt;<span class="tag">form</span> <span class="bind">[formGroup]</span>=<span class="val">"myForm"</span> (<span class="attr">ngSubmit</span>)=<span class="val">"onSubmit()"</span>&gt;
+
+  &lt;<span class="tag">input</span> 
+    <span class="attr">type</span>=<span class="val">"file"</span> 
+    <span class="attr">formControlName</span>=<span class="val">"file"</span> 
+    (<span class="attr">change</span>)=<span class="val">"onFileChange($event)"</span>
+  &gt;
+
+  &lt;<span class="tag">button</span> <span class="attr">type</span>=<span class="val">"submit"</span>&gt;Upload&lt;/<span class="tag">button</span>&gt;
+
+&lt;/<span class="tag">form</span>&gt;
+
+&lt;<span class="tag">p</span> *ngIf="selectedFile"&gt;
+  Selected File: {{ selectedFile.name }}
+&lt;/<span class="tag">p</span>&gt;
+</pre>
+
+<h3>FormData</h3>
+
+<p>FormData is a built-in Web API used in Angular (and JavaScript) to construct key–value pairs for sending form data—especially files—to a server.</p>
+
+<h3>Simple Meaning</h3>
+
+<p>We use FormData when we want to send:</p>
+
+<ul>
+  <li>Files</li>
+  <li>Text fields</li>
+  <li>Mixed form data</li>
+</ul>
+
+<p>to backend via HTTP</p>
+
+<h3>Basic Example</h3>
+
+<pre>
+const formData = new FormData();
+
+formData.append(<span class="str">'username'</span>, <span class="str">'John'</span>);
+formData.append(<span class="str">'email'</span>, <span class="str">'john@gmail.com'</span>);
+</pre>
+
+<h3>File Upload Example</h3>
+
+<pre>
+const formData = new FormData();
+formData.append(<span class="str">'file'</span>, this.selectedFile);
+</pre>
+
+<h3>Angular HTTP Example</h3>
+
+<pre>
+this.http.post(<span class="str">'api/upload'</span>, formData).subscribe(res => {
+  console.log(res);
+});
+</pre>
+
+</body>
+</html>

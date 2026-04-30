@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>formArrayName in Angular</title>
+
+<style>
+body{
+  font-family:'Segoe UI',sans-serif;
+  background:#0f0f1a;
+  color:#cdd6f4;
+  padding:2rem;
+  line-height:1.7;
+}
+
+h2{color:#89b4fa;margin-top:25px}
+h3{color:#a6e3a1;margin-top:15px}
+
+ul{
+  margin-top:10px;
+  padding-left:20px;
+}
+
+li{
+  margin:6px 0;
+}
+
+pre{
+  background:#1e1e2e;
+  padding:1rem;
+  border-radius:10px;
+  overflow:auto;
+  font-family:'Fira Code',monospace;
+  line-height:1.8;
+}
+
+/* syntax colors */
+.tag{color:#ff79c6;}
+.attr{color:#50fa7b;}
+.val{color:#f1fa8c;}
+.bind{color:#bd93f9;font-weight:bold;}
+.prop{color:#ffb86c;}
+.type{color:#8be9fd;}
+.str{color:#f1fa8c;}
+</style>
+</head>
+
+<body>
+
+<h2>formArrayName in Angular is a directive used to bind a FormArray from the component to a section of the template.</h2>
+
+<h3>Simple Meaning</h3>
+
+<p>We use formArrayName when we have a list of controls (dynamic fields) inside a form.</p>
+
+<h3>Example</h3>
+
+<h3>Component</h3>
+
+<pre>
+import { <span class="type">FormGroup</span>, <span class="type">FormArray</span>, <span class="type">FormControl</span> } from <span class="str">'@angular/forms'</span>;
+
+<span class="prop">myForm</span> = new <span class="type">FormGroup</span>({
+  <span class="prop">skills</span>: new <span class="type">FormArray</span>([
+    new <span class="type">FormControl</span>(<span class="str">'Angular'</span>),
+    new <span class="type">FormControl</span>(<span class="str">'React'</span>)
+  ])
+});
+</pre>
+
+<h3>Template</h3>
+
+<pre>
+&lt;<span class="tag">form</span> <span class="bind">[formGroup]</span>=<span class="val">"myForm"</span>&gt;
+
+  &lt;<span class="tag">div</span> <span class="attr">formArrayName</span>=<span class="val">"skills"</span>&gt;
+    &lt;<span class="tag">div</span> *ngFor="let skill of myForm.get('skills').controls; let i = index"&gt;
+      &lt;<span class="tag">input</span> <span class="bind">[formControlName]</span>=<span class="val">"i"</span>&gt;
+    &lt;/<span class="tag">div</span>&gt;
+  &lt;/<span class="tag">div</span>&gt;
+
+&lt;/<span class="tag">form</span>&gt;
+</pre>
+
+<h3>How it works</h3>
+
+<ul>
+  <li>formArrayName="skills" → connects to myForm.controls.skills</li>
+  <li>[formControlName]="i" → binds each control using index</li>
+</ul>
+
+<h3>Add control dynamically</h3>
+
+<pre>
+(this.myForm.get(<span class="str">'skills'</span>) as any).push(new <span class="type">FormControl</span>(<span class="str">'Vue'</span>));
+</pre>
+
+<h3>Output</h3>
+
+<pre>
+["Angular", "React", "Vue"]
+</pre>
+
+</body>
+</html>

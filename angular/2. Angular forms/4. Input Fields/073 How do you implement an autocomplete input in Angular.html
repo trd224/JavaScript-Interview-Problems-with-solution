@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Autocomplete in Angular</title>
+
+<style>
+body{
+  font-family:'Segoe UI',sans-serif;
+  background:#0f0f1a;
+  color:#cdd6f4;
+  padding:2rem;
+  line-height:1.7;
+}
+
+h2{color:#89b4fa;margin-top:25px}
+h3{color:#a6e3a1;margin-top:15px}
+
+pre{
+  background:#1e1e2e;
+  padding:1rem;
+  border-radius:10px;
+  overflow:auto;
+  font-family:'Fira Code',monospace;
+  line-height:1.8;
+}
+
+ul{
+  margin-top:10px;
+  padding-left:20px;
+}
+
+li{
+  margin:6px 0;
+}
+
+/* syntax colors */
+.tag{color:#ff79c6;}
+.attr{color:#50fa7b;}
+.val{color:#f1fa8c;}
+.bind{color:#bd93f9;font-weight:bold;}
+.prop{color:#ffb86c;}
+.type{color:#8be9fd;}
+.str{color:#f1fa8c;}
+.fn{color:#50fa7b;}
+</style>
+</head>
+
+<body>
+
+<h2>Autocomplete in Angular is an input field that shows filtered suggestions dynamically based on user input using events or Reactive Forms.</h2>
+
+<h3>1. Simple Autocomplete (without library)</h3>
+
+<h3>HTML</h3>
+
+<pre>
+&lt;<span class="tag">input</span> <span class="attr">type</span>=<span class="val">"text"</span> <span class="bind">[(ngModel)]</span>=<span class="val">"searchText"</span> (<span class="attr">input</span>)=<span class="val">"onSearch()"</span> <span class="attr">placeholder</span>=<span class="val">"Search..."</span>&gt;
+
+&lt;<span class="tag">ul</span> *ngIf="filteredList.length"&gt;
+  &lt;<span class="tag">li</span> *ngFor="let item of filteredList" (<span class="attr">click</span>)=<span class="val">"selectItem(item)"</span>&gt;
+    {{ item }}
+  &lt;/<span class="tag">li</span>&gt;
+&lt;/<span class="tag">ul</span>&gt;
+</pre>
+
+<h3>TS</h3>
+
+<pre>
+<span class="prop">searchText</span> = <span class="str">''</span>;
+<span class="prop">list</span> = [<span class="str">'Apple'</span>, <span class="str">'Banana'</span>, <span class="str">'Mango'</span>, <span class="str">'Orange'</span>, <span class="str">'Grapes'</span>];
+<span class="prop">filteredList</span>: string[] = [];
+
+<span class="fn">onSearch</span>() {
+  this.filteredList = this.list.filter(item =>
+    item.toLowerCase().includes(this.searchText.toLowerCase())
+  );
+}
+
+<span class="fn">selectItem</span>(item: string) {
+  this.searchText = item;
+  this.filteredList = [];
+}
+</pre>
+
+<h3>2. Reactive Form Autocomplete (Better approach)</h3>
+
+<h3>HTML</h3>
+
+<pre>
+&lt;<span class="tag">input</span> <span class="attr">type</span>=<span class="val">"text"</span> <span class="bind">[formControl]</span>=<span class="val">"searchControl"</span> <span class="attr">placeholder</span>=<span class="val">"Search..."</span>&gt;
+
+&lt;<span class="tag">ul</span> *ngIf="filteredList.length"&gt;
+  &lt;<span class="tag">li</span> *ngFor="let item of filteredList" (<span class="attr">click</span>)=<span class="val">"selectItem(item)"</span>&gt;
+    {{ item }}
+  &lt;/<span class="tag">li</span>&gt;
+&lt;/<span class="tag">ul</span>&gt;
+</pre>
+
+<h3>TS</h3>
+
+<pre>
+import { <span class="type">FormControl</span> } from <span class="str">'@angular/forms'</span>;
+
+<span class="prop">searchControl</span> = new <span class="type">FormControl</span>(<span class="str">''</span>);
+<span class="prop">list</span> = [<span class="str">'Apple'</span>, <span class="str">'Banana'</span>, <span class="str">'Mango'</span>, <span class="str">'Orange'</span>, <span class="str">'Grapes'</span>];
+<span class="prop">filteredList</span>: string[] = [];
+
+<span class="fn">ngOnInit</span>() {
+  this.searchControl.valueChanges.subscribe(value => {
+    this.filteredList = this.list.filter(item =>
+      item.toLowerCase().includes(value.toLowerCase())
+    );
+  });
+}
+
+<span class="fn">selectItem</span>(item: string) {
+  this.searchControl.setValue(item);
+  this.filteredList = [];
+}
+</pre>
+
+<h3>Key Concepts</h3>
+
+<ul>
+  <li>input / valueChanges → detect typing</li>
+  <li>filter() → match data</li>
+  <li>*ngFor → show suggestions</li>
+  <li>click → select value</li>
+</ul>
+
+<h3>Bonus (Best Practice)</h3>
+
+<pre>
+import { debounceTime } from <span class="str">'rxjs/operators'</span>;
+
+this.searchControl.valueChanges
+  .pipe(debounceTime(300))
+  .subscribe(value => {
+    this.filteredList = this.list.filter(item =>
+      item.toLowerCase().includes(value.toLowerCase())
+    );
+  });
+</pre>
+
+</body>
+</html>

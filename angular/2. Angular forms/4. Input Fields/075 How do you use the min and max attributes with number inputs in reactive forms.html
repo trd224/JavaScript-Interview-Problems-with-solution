@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Min Max Validation in Reactive Forms</title>
+
+<style>
+body{
+  font-family:'Segoe UI',sans-serif;
+  background:#0f0f1a;
+  color:#cdd6f4;
+  padding:2rem;
+  line-height:1.7;
+}
+
+h2{color:#89b4fa;margin-top:25px}
+h3{color:#a6e3a1;margin-top:15px}
+
+pre{
+  background:#1e1e2e;
+  padding:1rem;
+  border-radius:10px;
+  overflow:auto;
+  font-family:'Fira Code',monospace;
+  line-height:1.8;
+}
+
+ul{
+  margin-top:10px;
+  padding-left:20px;
+}
+
+li{
+  margin:6px 0;
+}
+
+/* syntax colors */
+.tag{color:#ff79c6;}
+.attr{color:#50fa7b;}
+.val{color:#f1fa8c;}
+.bind{color:#bd93f9;font-weight:bold;}
+.prop{color:#ffb86c;}
+.type{color:#8be9fd;}
+.str{color:#f1fa8c;}
+</style>
+</head>
+
+<body>
+
+<h2>In Reactive Forms, min and max are applied using Angular validators (Validators.min() / Validators.max()) and optionally HTML attributes for UI restriction.</h2>
+
+<h3>Full Example</h3>
+
+<h3>TS</h3>
+
+<pre>
+import { <span class="type">FormGroup</span>, <span class="type">FormControl</span>, <span class="type">Validators</span> } from <span class="str">'@angular/forms'</span>;
+
+<span class="prop">myForm</span> = new <span class="type">FormGroup</span>({
+  <span class="prop">age</span>: new <span class="type">FormControl</span>(<span class="str">''</span>, [
+    Validators.required,
+    Validators.min(18),
+    Validators.max(60)
+  ])
+});
+</pre>
+
+<h3>HTML</h3>
+
+<pre>
+&lt;<span class="tag">form</span> <span class="bind">[formGroup]</span>=<span class="val">"myForm"</span>&gt;
+
+  &lt;<span class="tag">input</span> 
+    <span class="attr">type</span>=<span class="val">"number"</span> 
+    <span class="attr">formControlName</span>=<span class="val">"age"</span>
+    <span class="attr">min</span>=<span class="val">"18"</span>
+    <span class="attr">max</span>=<span class="val">"60"</span>
+    <span class="attr">placeholder</span>=<span class="val">"Enter age"</span>
+  &gt;
+
+  &lt;<span class="tag">div</span> *ngIf="myForm.get('age')?.errors?.['min']"&gt;
+    Minimum age is 18
+  &lt;/<span class="tag">div</span>&gt;
+
+  &lt;<span class="tag">div</span> *ngIf="myForm.get('age')?.errors?.['max']"&gt;
+    Maximum age is 60
+  &lt;/<span class="tag">div</span>&gt;
+
+&lt;/<span class="tag">form</span>&gt;
+</pre>
+
+<h3>Best practice</h3>
+
+<ul>
+  <li>Always use Validators in TS</li>
+  <li>Use min/max in HTML for better UX</li>
+</ul>
+
+</body>
+</html>

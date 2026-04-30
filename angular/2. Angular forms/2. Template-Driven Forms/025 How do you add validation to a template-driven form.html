@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Template-Driven Form Validation</title>
+
+<style>
+body{
+  font-family:'Segoe UI',sans-serif;
+  background:#0f0f1a;
+  color:#cdd6f4;
+  padding:2rem;
+  line-height:1.7;
+}
+
+h2{color:#89b4fa;margin-top:25px}
+h3{color:#a6e3a1;margin-top:15px}
+
+ul{
+  margin-top:10px;
+  padding-left:20px;
+}
+
+li{
+  margin:6px 0;
+}
+
+pre{
+  background:#1e1e2e;
+  padding:1rem;
+  border-radius:10px;
+  overflow:auto;
+  font-family:'Fira Code',monospace;
+  line-height:1.8;
+}
+
+/* syntax colors */
+.tag{color:#ff79c6;}
+.attr{color:#50fa7b;}
+.val{color:#f1fa8c;}
+.bind{color:#bd93f9;font-weight:bold;}
+</style>
+</head>
+
+<body>
+
+<h2>We add validation to a template-driven form in Angular using HTML validation attributes and Angular directives like required, minlength, pattern, etc.</h2>
+
+<h3>Basic Example</h3>
+
+<pre>
+&lt;<span class="tag">form</span> <span class="attr">#myForm</span>=<span class="val">"ngForm"</span>&gt;
+
+  &lt;<span class="tag">input</span> 
+    <span class="attr">name</span>=<span class="val">"username"</span> 
+    <span class="attr">ngModel</span> 
+    <span class="attr">required</span> 
+    <span class="attr">minlength</span>=<span class="val">"3"</span>
+    <span class="attr">#u</span>=<span class="val">"ngModel"</span>
+  &gt;
+
+  &lt;<span class="tag">p</span> *ngIf="u.invalid && u.touched"&gt;
+    Username is required (min 3 chars)
+  &lt;/<span class="tag">p</span>&gt;
+
+  &lt;<span class="tag">button</span> [<span class="attr">disabled</span>]=<span class="val">"myForm.invalid"</span>&gt;Submit&lt;/<span class="tag">button</span>&gt;
+
+&lt;/<span class="tag">form</span>&gt;
+</pre>
+
+<h3>How it works</h3>
+
+<p>We add validation using attributes like:</p>
+
+<ul>
+  <li>required</li>
+  <li>minlength</li>
+  <li>maxlength</li>
+  <li>pattern</li>
+</ul>
+
+<p>Angular automatically updates control state:</p>
+
+<ul>
+  <li>valid / invalid</li>
+  <li>touched / untouched</li>
+  <li>dirty / pristine</li>
+</ul>
+
+<h3>Common Validators</h3>
+
+<pre>
+&lt;<span class="tag">input</span> <span class="attr">name</span>=<span class="val">"email"</span> <span class="attr">ngModel</span> <span class="attr">required</span> <span class="attr">email</span>&gt;
+
+&lt;<span class="tag">input</span> <span class="attr">name</span>=<span class="val">"password"</span> <span class="attr">ngModel</span> <span class="attr">required</span> <span class="attr">minlength</span>=<span class="val">"6"</span>&gt;
+
+&lt;<span class="tag">input</span> <span class="attr">name</span>=<span class="val">"phone"</span> <span class="attr">ngModel</span> <span class="attr">pattern</span>=<span class="val">"[0-9]{10}"</span>&gt;
+</pre>
+
+<h3>Access validation state</h3>
+
+<pre>
+&lt;<span class="tag">input</span> <span class="attr">name</span>=<span class="val">"email"</span> <span class="attr">ngModel</span> <span class="attr">#e</span>=<span class="val">"ngModel"</span>&gt;
+
+&lt;<span class="tag">p</span> *ngIf="e.errors?.required"&gt;Email is required&lt;/<span class="tag">p</span>&gt;
+&lt;<span class="tag">p</span> *ngIf="e.errors?.email"&gt;Invalid email&lt;/<span class="tag">p</span>&gt;
+</pre>
+
+</body>
+</html>

@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Form State Tracking in Angular</title>
+
+<style>
+body{
+  font-family:'Segoe UI',sans-serif;
+  background:#0f0f1a;
+  color:#cdd6f4;
+  padding:2rem;
+  line-height:1.7;
+}
+
+h2{color:#89b4fa;margin-top:25px}
+h3{color:#a6e3a1;margin-top:15px}
+
+ul{
+  margin-top:10px;
+  padding-left:20px;
+}
+
+li{
+  margin:6px 0;
+}
+
+pre{
+  background:#1e1e2e;
+  padding:1rem;
+  border-radius:10px;
+  overflow:auto;
+  font-family:'Fira Code',monospace;
+  line-height:1.8;
+}
+
+/* syntax colors */
+.tag{color:#ff79c6;}
+.attr{color:#50fa7b;}
+.val{color:#f1fa8c;}
+.bind{color:#bd93f9;font-weight:bold;}
+.prop{color:#ffb86c;}
+.type{color:#8be9fd;}
+.str{color:#f1fa8c;}
+.fn{color:#50fa7b;}
+</style>
+</head>
+
+<body>
+
+<h2>Angular tracks the state of a form and its controls using properties like valid, invalid, touched, untouched, dirty, and pristine.</h2>
+
+<h3>These properties are available on:</h3>
+
+<ul>
+  <li>Form (NgForm / FormGroup)</li>
+  <li>Controls (ngModel / FormControl)</li>
+</ul>
+
+<h3>Example (Template-Driven Form)</h3>
+
+<pre>
+&lt;<span class="tag">form</span> <span class="attr">#myForm</span>=<span class="val">"ngForm"</span>&gt;
+
+  &lt;<span class="tag">input</span> <span class="attr">name</span>=<span class="val">"username"</span> <span class="attr">ngModel</span> <span class="attr">required</span> <span class="attr">#u</span>=<span class="val">"ngModel"</span>&gt;
+
+  &lt;<span class="tag">p</span>&gt;Form Valid: {{ myForm.valid }}&lt;/<span class="tag">p</span>&gt;
+  &lt;<span class="tag">p</span>&gt;Control Valid: {{ u.valid }}&lt;/<span class="tag">p</span>&gt;
+  &lt;<span class="tag">p</span>&gt;Touched: {{ u.touched }}&lt;/<span class="tag">p</span>&gt;
+  &lt;<span class="tag">p</span>&gt;Dirty: {{ u.dirty }}&lt;/<span class="tag">p</span>&gt;
+
+&lt;/<span class="tag">form</span>&gt;
+</pre>
+
+<h3>Angular automatically updates:</h3>
+
+<ul>
+  <li>valid/invalid → based on validation</li>
+  <li>touched → when user focuses & leaves field</li>
+  <li>dirty → when value changes</li>
+</ul>
+
+<h3>Example (Reactive Form)</h3>
+
+<pre>
+import { <span class="type">FormGroup</span>, <span class="type">FormControl</span>, <span class="type">Validators</span> } from <span class="str">'@angular/forms'</span>;
+
+<span class="prop">form</span> = new <span class="type">FormGroup</span>({
+  <span class="prop">username</span>: new <span class="type">FormControl</span>(<span class="str">''</span>, Validators.required)
+});
+
+<span class="fn">ngOnInit</span>() {
+  console.log(this.form.get('username')?.touched);
+  console.log(this.form.get('username')?.dirty);
+  console.log(this.form.valid);
+}
+</pre>
+
+<pre>
+&lt;<span class="tag">form</span> <span class="bind">[formGroup]</span>=<span class="val">"form"</span>&gt;
+  &lt;<span class="tag">input</span> <span class="attr">formControlName</span>=<span class="val">"username"</span>&gt;
+&lt;/<span class="tag">form</span>&gt;
+</pre>
+
+<h3>In short:</h3>
+
+<p>
+Angular tracks form state using built-in properties on form and form control objects.
+</p>
+
+</body>
+</html>

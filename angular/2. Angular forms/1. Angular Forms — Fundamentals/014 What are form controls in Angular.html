@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Form Control in Angular</title>
+
+<style>
+body{
+  font-family:'Segoe UI',sans-serif;
+  background:#0f0f1a;
+  color:#cdd6f4;
+  padding:2rem;
+  line-height:1.7;
+}
+
+h2{color:#89b4fa;margin-top:25px}
+h3{color:#a6e3a1;margin-top:15px}
+
+ul{
+  margin-top:10px;
+  padding-left:20px;
+}
+
+li{
+  margin:6px 0;
+}
+
+pre{
+  background:#1e1e2e;
+  padding:1rem;
+  border-radius:10px;
+  overflow:auto;
+  font-family:'Fira Code',monospace;
+  line-height:1.8;
+}
+
+/* syntax colors */
+.tag{color:#ff79c6;}
+.attr{color:#50fa7b;}
+.val{color:#f1fa8c;}
+.bind{color:#bd93f9;font-weight:bold;}
+.prop{color:#ffb86c;}
+.type{color:#8be9fd;}
+.str{color:#f1fa8c;}
+.fn{color:#50fa7b;}
+</style>
+</head>
+
+<body>
+
+<h2>Form controls in Angular are objects (instances of the FormControl class) that track the value, validation, and state of a single input field.</h2>
+
+<h3>Example (Reactive Form)</h3>
+
+<h3>TypeScript</h3>
+
+<pre>
+import { <span class="type">FormControl</span> } from <span class="str">'@angular/forms'</span>;
+
+<span class="prop">username</span> = new <span class="type">FormControl</span>(<span class="str">'John'</span>);
+
+<span class="fn">ngOnInit</span>() {
+  console.log(this.username.value);
+  console.log(this.username.valid);
+}
+</pre>
+
+<h3>HTML</h3>
+
+<pre>
+&lt;<span class="tag">input</span> <span class="bind">[formControl]</span>=<span class="val">"username"</span>&gt;
+</pre>
+
+<h3>Here, username is a form control object that tracks:</h3>
+
+<ul>
+  <li>value → 'John'</li>
+  <li>state → touched, dirty</li>
+  <li>validation → valid/invalid</li>
+</ul>
+
+<h2>Full Example (Template-Driven Form)</h2>
+
+<h3>HTML</h3>
+
+<pre>
+&lt;<span class="tag">form</span> <span class="attr">#myForm</span>=<span class="val">"ngForm"</span> (<span class="attr">ngSubmit</span>)=<span class="val">"onSubmit(myForm)"</span>&gt;
+
+  &lt;<span class="tag">label</span>&gt;Username:&lt;/<span class="tag">label</span>&gt;
+  &lt;<span class="tag">input</span> 
+    <span class="attr">type</span>=<span class="val">"text"</span> 
+    <span class="attr">name</span>=<span class="val">"username"</span> 
+    <span class="attr">ngModel</span> 
+    <span class="attr">required</span> 
+    <span class="attr">#u</span>=<span class="val">"ngModel"</span>
+  &gt;
+
+  &lt;<span class="tag">p</span>&gt;Value: {{ u.value }}&lt;/<span class="tag">p</span>&gt;
+  &lt;<span class="tag">p</span>&gt;Valid: {{ u.valid }}&lt;/<span class="tag">p</span>&gt;
+  &lt;<span class="tag">p</span>&gt;Touched: {{ u.touched }}&lt;/<span class="tag">p</span>&gt;
+
+  &lt;<span class="tag">button</span> <span class="attr">type</span>=<span class="val">"submit"</span>&gt;Submit&lt;/<span class="tag">button</span>&gt;
+
+&lt;/<span class="tag">form</span>&gt;
+</pre>
+
+<h3>TypeScript</h3>
+
+<pre>
+import { <span class="type">Component</span> } from <span class="str">'@angular/core'</span>;
+import { <span class="type">NgForm</span> } from <span class="str">'@angular/forms'</span>;
+
+@<span class="type">Component</span>({
+  <span class="prop">selector</span>: <span class="str">'app-root'</span>,
+  <span class="prop">templateUrl</span>: <span class="str">'./app.component.html'</span>
+})
+export class <span class="type">AppComponent</span> {
+
+  <span class="fn">onSubmit</span>(form: <span class="type">NgForm</span>) {
+    console.log(form.value);
+    console.log(form.valid);
+  }
+
+}
+</pre>
+
+<h3>What’s happening here:</h3>
+
+<ul>
+  <li>ngModel → creates form control</li>
+  <li>name="username" → registers control</li>
+  <li>#u="ngModel" → gives access to control object</li>
+  <li>myForm → represents full form (NgForm)</li>
+</ul>
+
+</body>
+</html>

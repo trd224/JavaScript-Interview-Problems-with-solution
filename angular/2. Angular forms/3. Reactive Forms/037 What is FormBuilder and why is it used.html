@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FormBuilder in Angular</title>
+
+<style>
+body{
+  font-family:'Segoe UI',sans-serif;
+  background:#0f0f1a;
+  color:#cdd6f4;
+  padding:2rem;
+  line-height:1.7;
+}
+
+h2{color:#89b4fa;margin-top:25px}
+h3{color:#a6e3a1;margin-top:15px}
+
+ul{
+  margin-top:10px;
+  padding-left:20px;
+}
+
+li{
+  margin:6px 0;
+}
+
+pre{
+  background:#1e1e2e;
+  padding:1rem;
+  border-radius:10px;
+  overflow:auto;
+  font-family:'Fira Code',monospace;
+  line-height:1.8;
+}
+
+/* syntax colors */
+.tag{color:#ff79c6;}
+.attr{color:#50fa7b;}
+.val{color:#f1fa8c;}
+.bind{color:#bd93f9;font-weight:bold;}
+.prop{color:#ffb86c;}
+.type{color:#8be9fd;}
+.str{color:#f1fa8c;}
+.fn{color:#50fa7b;}
+</style>
+</head>
+
+<body>
+
+<h2>FormBuilder in Angular is a service that provides a shorter and cleaner way to create FormGroup, FormControl, and FormArray in reactive forms.</h2>
+
+<h3>Why we use it</h3>
+
+<p>Without FormBuilder, form creation becomes verbose and repetitive.</p>
+<p>FormBuilder helps us write less code and cleaner structure.</p>
+
+<h3>Without FormBuilder</h3>
+
+<pre>
+<span class="prop">myForm</span> = new <span class="type">FormGroup</span>({
+  <span class="prop">username</span>: new <span class="type">FormControl</span>(<span class="str">''</span>),
+  <span class="prop">email</span>: new <span class="type">FormControl</span>(<span class="str">''</span>)
+});
+</pre>
+
+<h3>With FormBuilder</h3>
+
+<pre>
+import { <span class="type">FormBuilder</span> } from <span class="str">'@angular/forms'</span>;
+
+constructor(private <span class="prop">fb</span>: <span class="type">FormBuilder</span>) {}
+
+<span class="prop">myForm</span> = this.fb.group({
+  <span class="prop">username</span>: [<span class="str">''</span>],
+  <span class="prop">email</span>: [<span class="str">''</span>]
+});
+</pre>
+
+<h3>With Validation</h3>
+
+<pre>
+import { <span class="type">Validators</span> } from <span class="str">'@angular/forms'</span>;
+
+<span class="prop">myForm</span> = this.fb.group({
+  <span class="prop">username</span>: [<span class="str">''</span>, Validators.required],
+  <span class="prop">email</span>: [<span class="str">''</span>, [Validators.required, Validators.email]]
+});
+</pre>
+
+<h3>What it provides</h3>
+
+<ul>
+  <li>fb.group() → creates FormGroup</li>
+  <li>fb.control() → creates FormControl</li>
+  <li>fb.array() → creates FormArray</li>
+</ul>
+
+<h3>fb.control() and fb.array()</h3>
+
+<p>fb.control() and fb.array() in Angular are used to create FormControl and FormArray in a shorter way using FormBuilder.</p>
+
+<h3>Example: fb.control()</h3>
+
+<pre>
+import { <span class="type">FormBuilder</span>, <span class="type">Validators</span> } from <span class="str">'@angular/forms'</span>;
+
+constructor(private <span class="prop">fb</span>: <span class="type">FormBuilder</span>) {}
+
+<span class="prop">username</span> = this.fb.control(<span class="str">'John'</span>, Validators.required);
+</pre>
+
+<p>Same as:</p>
+
+<pre>
+<span class="prop">username</span> = new <span class="type">FormControl</span>(<span class="str">'John'</span>, Validators.required);
+</pre>
+
+<h3>Example: fb.array()</h3>
+
+<pre>
+<span class="prop">skills</span> = this.fb.array([
+  this.fb.control(<span class="str">'Angular'</span>),
+  this.fb.control(<span class="str">'React'</span>)
+]);
+</pre>
+
+<h3>Using inside FormGroup (real use)</h3>
+
+<pre>
+<span class="prop">myForm</span> = this.fb.group({
+  <span class="prop">username</span>: this.fb.control(<span class="str">''</span>),
+  <span class="prop">skills</span>: this.fb.array([
+    this.fb.control(<span class="str">'Angular'</span>),
+    this.fb.control(<span class="str">'React'</span>)
+  ])
+});
+</pre>
+
+<h3>Add item dynamically</h3>
+
+<pre>
+(this.myForm.get(<span class="str">'skills'</span>) as any).push(this.fb.control(<span class="str">'Vue'</span>));
+</pre>
+
+</body>
+</html>

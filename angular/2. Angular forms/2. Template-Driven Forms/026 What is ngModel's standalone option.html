@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ngModel Standalone Option</title>
+
+<style>
+body{
+  font-family:'Segoe UI',sans-serif;
+  background:#0f0f1a;
+  color:#cdd6f4;
+  padding:2rem;
+  line-height:1.7;
+}
+
+h2{color:#89b4fa;margin-top:25px}
+h3{color:#a6e3a1;margin-top:15px}
+
+ul{
+  margin-top:10px;
+  padding-left:20px;
+}
+
+li{
+  margin:6px 0;
+}
+
+pre{
+  background:#1e1e2e;
+  padding:1rem;
+  border-radius:10px;
+  overflow:auto;
+  font-family:'Fira Code',monospace;
+  line-height:1.8;
+}
+
+/* syntax colors */
+.tag{color:#ff79c6;}
+.attr{color:#50fa7b;}
+.val{color:#f1fa8c;}
+.bind{color:#bd93f9;font-weight:bold;}
+</style>
+</head>
+
+<body>
+
+<h2>ngModel’s standalone option in Angular is used to prevent a form control from registering with its parent form (NgForm).</h2>
+
+<h3>Simple Meaning</h3>
+
+<p>We use standalone: true when we want a control not to be part of the form.</p>
+
+<h3>Syntax</h3>
+
+<pre>
+&lt;<span class="tag">input</span> 
+  <span class="attr">name</span>=<span class="val">"username"</span> 
+  <span class="attr">ngModel</span> 
+  <span class="bind">[ngModelOptions]</span>=<span class="val">"{ standalone: true }"</span>
+&gt;
+</pre>
+
+<h3>What happens</h3>
+
+<ul>
+  <li>This input will NOT be added to myForm.controls</li>
+  <li>It will NOT affect:</li>
+  <li>myForm.value</li>
+  <li>myForm.valid</li>
+</ul>
+
+<h3>Example</h3>
+
+<pre>
+&lt;<span class="tag">form</span> <span class="attr">#myForm</span>=<span class="val">"ngForm"</span>&gt;
+
+  &lt;<span class="tag">input</span> <span class="attr">name</span>=<span class="val">"username"</span> <span class="attr">ngModel</span>&gt;
+
+  &lt;<span class="tag">input</span> 
+    <span class="attr">name</span>=<span class="val">"preview"</span> 
+    <span class="attr">ngModel</span> 
+    <span class="bind">[ngModelOptions]</span>=<span class="val">"{ standalone: true }"</span>
+  &gt;
+
+&lt;/<span class="tag">form</span>&gt;
+
+&lt;<span class="tag">p</span>&gt;{{ myForm.value | json }}&lt;/<span class="tag">p</span>&gt;
+</pre>
+
+<h3>Output</h3>
+
+<pre>
+{
+  "username": "John"
+}
+</pre>
+
+<p>preview is excluded</p>
+
+<h3>When we use it</h3>
+
+<ul>
+  <li>Extra UI fields (like search, filters, preview)</li>
+  <li>Fields not needed in final form submission</li>
+</ul>
+
+<p>We should NOT use standalone for confirm password, because we need it inside the form for validation.</p>
+
+</body>
+</html>

@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Debouncing in Reactive Forms</title>
+
+<style>
+body{
+  font-family:'Segoe UI',sans-serif;
+  background:#0f0f1a;
+  color:#cdd6f4;
+  padding:2rem;
+  line-height:1.7;
+}
+
+h2{color:#89b4fa;margin-top:25px}
+h3{color:#a6e3a1;margin-top:15px}
+
+pre{
+  background:#1e1e2e;
+  padding:1rem;
+  border-radius:10px;
+  overflow:auto;
+  font-family:'Fira Code',monospace;
+  line-height:1.8;
+}
+
+ul{
+  margin-top:10px;
+  padding-left:20px;
+}
+
+li{
+  margin:6px 0;
+}
+
+/* syntax colors */
+.tag{color:#ff79c6;}
+.attr{color:#50fa7b;}
+.val{color:#f1fa8c;}
+.bind{color:#bd93f9;font-weight:bold;}
+.prop{color:#ffb86c;}
+.type{color:#8be9fd;}
+.str{color:#f1fa8c;}
+.fn{color:#50fa7b;}
+</style>
+</head>
+
+<body>
+
+<h2>Debouncing in Reactive Forms is delaying input value changes using RxJS debounceTime() so actions (like API calls) trigger only after the user stops typing.</h2>
+
+<h3>Example (Reactive Form with debounce)</h3>
+
+<h3>TS</h3>
+
+<pre>
+import { <span class="type">FormControl</span> } from <span class="str">'@angular/forms'</span>;
+import { debounceTime } from <span class="str">'rxjs/operators'</span>;
+
+<span class="prop">searchControl</span> = new <span class="type">FormControl</span>(<span class="str">''</span>);
+
+<span class="fn">ngOnInit</span>() {
+  this.searchControl.valueChanges
+    .pipe(debounceTime(300))
+    .subscribe(value => {
+      console.log(<span class="str">'Search:'</span>, value);
+    });
+}
+</pre>
+
+<h3>HTML</h3>
+
+<pre>
+&lt;<span class="tag">input</span> <span class="attr">type</span>=<span class="val">"text"</span> <span class="bind">[formControl]</span>=<span class="val">"searchControl"</span> <span class="attr">placeholder</span>=<span class="val">"Search..."</span>&gt;
+</pre>
+
+<h3>How it works</h3>
+
+<pre>
+User types: a → ap → app
+</pre>
+
+<ul>
+  <li>Without debounce → 3 API calls</li>
+  <li>With debounce (300ms) → 1 API call (after user stops typing)</li>
+</ul>
+
+<h3>Best Practice (with distinct values)</h3>
+
+<pre>
+import { debounceTime, distinctUntilChanged } from <span class="str">'rxjs/operators'</span>;
+
+this.searchControl.valueChanges
+  .pipe(
+    debounceTime(300),
+    distinctUntilChanged()
+  )
+  .subscribe(value => {
+    console.log(value);
+  });
+</pre>
+
+<ul>
+  <li>debounceTime → delay</li>
+  <li>distinctUntilChanged → ignore same value</li>
+</ul>
+
+</body>
+</html>

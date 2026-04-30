@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Email Input in Angular</title>
+
+<style>
+body{
+  font-family:'Segoe UI',sans-serif;
+  background:#0f0f1a;
+  color:#cdd6f4;
+  padding:2rem;
+  line-height:1.7;
+}
+
+h2{color:#89b4fa;margin-top:25px}
+h3{color:#a6e3a1;margin-top:15px}
+
+pre{
+  background:#1e1e2e;
+  padding:1rem;
+  border-radius:10px;
+  overflow:auto;
+  font-family:'Fira Code',monospace;
+  line-height:1.8;
+}
+
+ul{
+  margin-top:10px;
+  padding-left:20px;
+}
+
+li{
+  margin:6px 0;
+}
+
+/* syntax colors */
+.tag{color:#ff79c6;}
+.attr{color:#50fa7b;}
+.val{color:#f1fa8c;}
+.bind{color:#bd93f9;font-weight:bold;}
+.prop{color:#ffb86c;}
+.type{color:#8be9fd;}
+.str{color:#f1fa8c;}
+</style>
+</head>
+
+<body>
+
+<h2>We handle email inputs in Angular by using type="email" and adding Angular’s email validation (email or Validators.email).</h2>
+
+<h3>1. Template-driven form</h3>
+
+<pre>
+&lt;<span class="tag">form</span> #f="ngForm"&gt;
+
+  &lt;<span class="tag">input</span> 
+    <span class="attr">type</span>=<span class="val">"email"</span> 
+    <span class="attr">name</span>=<span class="val">"email"</span> 
+    <span class="attr">ngModel</span> 
+    <span class="attr">required</span> 
+    <span class="attr">email</span>
+    #e="ngModel"
+  &gt;
+
+  &lt;<span class="tag">p</span> *ngIf="e.errors?.required && e.touched"&gt;
+    Email is required
+  &lt;/<span class="tag">p</span>&gt;
+
+  &lt;<span class="tag">p</span> *ngIf="e.errors?.email && e.touched"&gt;
+    Invalid email format
+  &lt;/<span class="tag">p</span>&gt;
+
+&lt;/<span class="tag">form</span>&gt;
+</pre>
+
+<p>Uses:</p>
+
+<ul>
+  <li>type="email" → browser-level validation</li>
+  <li>email directive → Angular validation</li>
+</ul>
+
+<h3>2. Reactive form</h3>
+
+<pre>
+import { <span class="type">FormControl</span>, <span class="type">Validators</span> } from <span class="str">'@angular/forms'</span>;
+
+<span class="prop">email</span> = new <span class="type">FormControl</span>(<span class="str">''</span>, [
+  Validators.required,
+  Validators.email
+]);
+</pre>
+
+<pre>
+&lt;<span class="tag">input</span> <span class="attr">type</span>=<span class="val">"email"</span> <span class="bind">[formControl]</span>=<span class="val">"email"</span>&gt;
+
+&lt;<span class="tag">p</span> *ngIf="email.errors?.required && email.touched"&gt;
+  Email is required
+&lt;/<span class="tag">p</span>&gt;
+
+&lt;<span class="tag">p</span> *ngIf="email.errors?.email && email.touched"&gt;
+  Invalid email format
+&lt;/<span class="tag">p</span>&gt;
+</pre>
+
+<h3>Key Points</h3>
+
+<ul>
+  <li>type="email" → basic browser validation</li>
+  <li>Angular email / Validators.email → proper validation in form</li>
+  <li>Works with both template-driven and reactive forms</li>
+</ul>
+
+</body>
+</html>

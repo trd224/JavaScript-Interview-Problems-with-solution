@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Typed Forms in Angular</title>
+
+<style>
+body{
+  font-family:'Segoe UI',sans-serif;
+  background:#0f0f1a;
+  color:#cdd6f4;
+  padding:2rem;
+  line-height:1.7;
+}
+
+h2{color:#89b4fa;margin-top:25px}
+h3{color:#a6e3a1;margin-top:15px}
+
+pre{
+  background:#1e1e2e;
+  padding:1rem;
+  border-radius:10px;
+  overflow:auto;
+  font-family:'Fira Code',monospace;
+  line-height:1.8;
+}
+
+ul{
+  margin-top:10px;
+  padding-left:20px;
+}
+
+li{
+  margin:6px 0;
+}
+
+.type{color:#8be9fd;}
+.prop{color:#ffb86c;}
+.str{color:#f1fa8c;}
+</style>
+</head>
+
+<body>
+
+<h2>Typed forms in Angular (Angular 14+) are reactive forms with strong TypeScript typing, where form values and controls have explicit types instead of any.</h2>
+
+<h3>Simple Meaning</h3>
+
+<p>We define forms with strict types, so TypeScript knows exactly what data each control holds.</p>
+
+<h3>Before Angular 14 (untyped)</h3>
+
+<pre>
+<span class="prop">myForm</span> = new <span class="type">FormGroup</span>({
+  <span class="prop">username</span>: new <span class="type">FormControl</span>(<span class="str">''</span>),
+});
+</pre>
+
+<p>Type:</p>
+
+<pre>
+FormGroup&lt;any&gt;
+</pre>
+
+<p>No type safety</p>
+
+<h3>After Angular 14 (typed forms)</h3>
+
+<pre>
+<span class="prop">myForm</span> = new <span class="type">FormGroup</span>({
+  <span class="prop">username</span>: new <span class="type">FormControl</span>&lt;string&gt;(<span class="str">''</span>),
+});
+</pre>
+
+<p>Type:</p>
+
+<pre>
+FormGroup&lt;{
+  username: FormControl&lt;string&gt;;
+}&gt;
+</pre>
+
+<p>Fully typed</p>
+
+<h3>Example</h3>
+
+<pre>
+<span class="prop">myForm</span> = new <span class="type">FormGroup</span>({
+  <span class="prop">username</span>: new <span class="type">FormControl</span>&lt;string&gt;(<span class="str">'John'</span>),
+  <span class="prop">age</span>: new <span class="type">FormControl</span>&lt;number&gt;(25)
+});
+
+const name = this.myForm.value.username; // string
+</pre>
+
+<h3>With FormBuilder (typed)</h3>
+
+<pre>
+<span class="prop">myForm</span> = this.fb.group({
+  <span class="prop">username</span>: [<span class="str">''</span>],   // inferred as string
+  <span class="prop">age</span>: [0]          // inferred as number
+});
+</pre>
+
+<h3>Benefits</h3>
+
+<ul>
+  <li>Type safety</li>
+  <li>Better IntelliSense</li>
+  <li>Compile-time error detection</li>
+  <li>No unexpected any</li>
+</ul>
+
+<h3>Note</h3>
+
+<p>Default FormControl still allows null</p>
+
+<pre>
+FormControl&lt;string | null&gt;
+</pre>
+
+<p>Use NonNullableFormBuilder to remove null</p>
+
+</body>
+</html>

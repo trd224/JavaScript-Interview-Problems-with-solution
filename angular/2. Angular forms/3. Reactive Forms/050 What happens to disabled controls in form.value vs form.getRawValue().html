@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>form.value vs getRawValue()</title>
+
+<style>
+body{
+  font-family:'Segoe UI',sans-serif;
+  background:#0f0f1a;
+  color:#cdd6f4;
+  padding:2rem;
+  line-height:1.7;
+}
+
+h2{color:#89b4fa;margin-top:25px}
+h3{color:#a6e3a1;margin-top:15px}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:15px;
+}
+
+th, td{
+  border:1px solid #444;
+  padding:10px;
+  text-align:left;
+}
+
+th{
+  background:#1e1e2e;
+  color:#89b4fa;
+}
+
+pre{
+  background:#1e1e2e;
+  padding:1rem;
+  border-radius:10px;
+  overflow:auto;
+  font-family:'Fira Code',monospace;
+  line-height:1.8;
+}
+
+/* syntax colors */
+.prop{color:#ffb86c;}
+.str{color:#f1fa8c;}
+.type{color:#8be9fd;}
+</style>
+</head>
+
+<body>
+
+<h2>In Angular reactive forms, disabled controls are treated differently in form.value vs form.getRawValue().</h2>
+
+<h3>Core Difference</h3>
+
+<table>
+<tr>
+  <th>Method</th>
+  <th>Includes Disabled Controls?</th>
+</tr>
+<tr>
+  <td>form.value</td>
+  <td>No (excluded)</td>
+</tr>
+<tr>
+  <td>form.getRawValue()</td>
+  <td>Yes (included)</td>
+</tr>
+</table>
+
+<h3>Example</h3>
+
+<pre>
+<span class="prop">myForm</span> = new <span class="type">FormGroup</span>({
+  <span class="prop">username</span>: new <span class="type">FormControl</span>(<span class="str">'John'</span>),
+  <span class="prop">email</span>: new <span class="type">FormControl</span>({ value: <span class="str">'test@gmail.com'</span>, disabled: true })
+});
+</pre>
+
+<h3>form.value</h3>
+
+<pre>
+console.log(this.myForm.value);
+</pre>
+
+<p>Output:</p>
+
+<pre>
+{
+  "username": "John"
+}
+</pre>
+
+<p>email is missing</p>
+
+<h3>form.getRawValue()</h3>
+
+<pre>
+console.log(this.myForm.getRawValue());
+</pre>
+
+<p>Output:</p>
+
+<pre>
+{
+  "username": "John",
+  "email": "test@gmail.com"
+}
+</pre>
+
+<p>Includes disabled control</p>
+
+</body>
+</html>

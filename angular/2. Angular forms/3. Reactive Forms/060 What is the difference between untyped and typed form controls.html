@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Typed vs Untyped FormControl</title>
+
+<style>
+body{
+  font-family:'Segoe UI',sans-serif;
+  background:#0f0f1a;
+  color:#cdd6f4;
+  padding:2rem;
+  line-height:1.7;
+}
+
+h2{color:#89b4fa;margin-top:25px}
+h3{color:#a6e3a1;margin-top:15px}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:15px;
+}
+
+th, td{
+  border:1px solid #444;
+  padding:10px;
+  text-align:left;
+}
+
+th{
+  background:#1e1e2e;
+  color:#89b4fa;
+}
+
+pre{
+  background:#1e1e2e;
+  padding:1rem;
+  border-radius:10px;
+  overflow:auto;
+  font-family:'Fira Code',monospace;
+  line-height:1.8;
+}
+
+ul{
+  margin-top:10px;
+  padding-left:20px;
+}
+
+li{
+  margin:6px 0;
+}
+
+.type{color:#8be9fd;}
+.prop{color:#ffb86c;}
+.str{color:#f1fa8c;}
+</style>
+</head>
+
+<body>
+
+<h2>The difference between untyped and typed form controls in Angular is that typed controls use TypeScript generics for strong type safety, while untyped controls use any and provide no compile-time checking.</h2>
+
+<h3>Core Difference</h3>
+
+<table>
+<tr>
+  <th>Feature</th>
+  <th>Untyped FormControl</th>
+  <th>Typed FormControl</th>
+</tr>
+<tr>
+  <td>Type</td>
+  <td>any</td>
+  <td>FormControl&lt;T&gt;</td>
+</tr>
+<tr>
+  <td>Type safety</td>
+  <td>No</td>
+  <td>Yes</td>
+</tr>
+<tr>
+  <td>IntelliSense</td>
+  <td>Poor</td>
+  <td>Strong</td>
+</tr>
+<tr>
+  <td>Error detection</td>
+  <td>Runtime</td>
+  <td>Compile-time</td>
+</tr>
+</table>
+
+<h3>Untyped Example</h3>
+
+<pre>
+<span class="prop">username</span> = new <span class="type">FormControl</span>(<span class="str">''</span>);
+</pre>
+
+<p>Type:</p>
+
+<pre>
+FormControl&lt;any&gt;
+</pre>
+
+<pre>
+this.username.value.toUpperCase();
+</pre>
+
+<p>no error even if value is not string</p>
+
+<h3>Typed Example</h3>
+
+<pre>
+<span class="prop">username</span> = new <span class="type">FormControl</span>&lt;string&gt;(<span class="str">'John'</span>);
+</pre>
+
+<p>Type:</p>
+
+<pre>
+FormControl&lt;string | null&gt;
+</pre>
+
+<pre>
+this.username.value.toUpperCase();
+</pre>
+
+<p>safe</p>
+
+<h3>Error Example (typed)</h3>
+
+<pre>
+<span class="prop">username</span> = new <span class="type">FormControl</span>&lt;string&gt;(<span class="str">'John'</span>);
+
+this.username.setValue(123);
+</pre>
+
+<p>TypeScript error</p>
+
+<h3>Key Idea</h3>
+
+<ul>
+  <li>Untyped → flexible but unsafe</li>
+  <li>Typed → strict but safe</li>
+</ul>
+
+</body>
+</html>
