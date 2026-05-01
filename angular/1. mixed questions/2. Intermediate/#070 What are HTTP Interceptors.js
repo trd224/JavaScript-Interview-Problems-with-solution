@@ -41,3 +41,10 @@
 // Works globally for all HTTP calls
 // Can modify request and response
 // Useful for authentication & error handling
+
+
+
+// intercept() is automatically used by Angular’s HTTP pipeline — you never call it manually.
+
+// 👉 One-line definition (your style):
+// intercept() is a method of HttpInterceptor that Angular automatically executes whenever an HTTP request is sent using HttpClient.

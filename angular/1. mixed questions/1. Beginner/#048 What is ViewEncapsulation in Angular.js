@@ -1,6 +1,6 @@
 // 🔹 What is ViewEncapsulation in Angular?
 
-// 👉 ViewEncapsulation in Angular is a feature that controls how component styles are scoped and applied to the DOM.
+// 👉 ViewEncapsulation in Angular is a feature that controls how component styles are "scoped" and applied to the DOM.
 
 
 // 🔹 Why It Is Used

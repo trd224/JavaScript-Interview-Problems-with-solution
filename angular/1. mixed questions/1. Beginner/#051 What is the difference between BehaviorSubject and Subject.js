@@ -1,4 +1,4 @@
-// Subject is an RxJS observable that allows us to multicast values to multiple subscribers and manually emit values using next().
+// Subject is a special type of RxJS Observable that acts as both an Observer and an Observable at the same time.
 
 // BehaviorSubject is a special type of Subject that stores the latest value and immediately emits that value to new subscribers.
 
