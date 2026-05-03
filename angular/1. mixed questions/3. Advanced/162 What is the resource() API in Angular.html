@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>#162 What is the resource() API in Angular</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+<style>
+:root{--bg:#0f0f1a;--card:#161622;--code:#1e1e2e;--text:#cdd6f4;--muted:#bac2de;--h2:#89b4fa;--h3:#a6e3a1;--accent:#f9e2af;--border:#313244;}
+*{box-sizing:border-box} body{margin:0;font-family:'Segoe UI',Arial,sans-serif;background:radial-gradient(circle at top,#1b1b33 0,#0f0f1a 45%);color:var(--text);line-height:1.7;padding:32px} .page{max-width:1050px;margin:0 auto;background:rgba(22,22,34,.72);border:1px solid var(--border);border-radius:18px;padding:28px;box-shadow:0 20px 60px rgba(0,0,0,.35)}
+h1{color:#f5c2e7;margin:0 0 22px;font-size:28px} h2{color:var(--h2);font-size:24px;margin:24px 0 14px} h3{color:var(--h3);font-size:20px;margin:22px 0 12px} p{margin:10px 0;color:var(--text)} ul{margin:10px 0 18px 0;padding-left:26px} li{margin:6px 0;padding-left:4px} li::marker{color:#f38ba8} .codebox{background:var(--code)!important;border:1px solid var(--border);border-radius:14px;padding:18px;overflow:auto;margin:14px 0 20px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.02)} code[class*=language-],pre[class*=language-]{font-family:'Fira Code','Consolas','Courier New',monospace!important;font-size:15px;line-height:1.75;white-space:pre!important;tab-size:2;text-shadow:none!important}.table-wrap{overflow:auto;margin:16px 0 22px;border:1px solid var(--border);border-radius:14px;background:#11111b} table{width:100%;border-collapse:collapse;min-width:680px} th{background:#313244;color:#f9e2af;text-align:left;padding:12px;border-bottom:1px solid var(--border)} td{padding:11px 12px;border-bottom:1px solid #262637;color:#cdd6f4;vertical-align:top} tr:nth-child(even) td{background:#181825} tr:last-child td{border-bottom:0}
+</style>
+</head>
+<body>
+<div class="page">
+<h1>#162 What is the resource() API in Angular</h1>
+
+<h2>👉 One-Line Interview Answer:</h2>
+
+<p>resource() is an Angular Signals API used to handle async data (like API calls) with built-in loading, error, and value states.</p>
+
+<h2>🔥 What is resource()?</h2>
+
+<p>👉 In simple words:</p>
+
+<p>It is a Signal-based way to fetch and manage async data</p>
+
+<p>👉 Replacement for:</p>
+
+<p>manual subscribe()</p>
+
+<p>loading flags</p>
+
+<p>error handling</p>
+
+<h3>Basic Example</h3>
+
+<pre class="codebox"><code class="language-typescript">import { resource } from &#x27;@angular/core&#x27;;
+
+userResource = resource({
+  loader: () =&gt; fetch(&#x27;/api/user&#x27;).then(res =&gt; res.json())    //loader is a function inside resource() that defines how to fetch or load the async data.
+});</code></pre>
+
+<h3>🔹 Use in Template</h3>
+
+<pre class="codebox"><code class="language-markup">@if (userResource.loading()) {
+  &lt;p&gt;Loading...&lt;/p&gt;
+} @else if (userResource.error()) {
+  &lt;p&gt;Error occurred&lt;/p&gt;
+} @else {
+  &lt;p&gt;{{ userResource.value().name }}&lt;/p&gt;
+}</code></pre>
+
+<h2>🔥 What it provides?</h2>
+
+<p>loading() → loading state</p>
+
+<p>error() → error state</p>
+
+<p>value() → data</p>
+
+<h3>🔹 How it works</h3>
+
+<p>Call API → loading → success/error → UI updates automatically</p>
+
+<ul><li>No manual subscribe</li><li>No extra variables</li></ul>
+
+<h3>🔹 Example</h3>
+
+<pre class="codebox"><code class="language-typescript">userResource = resource({
+  loader: () =&gt; fetch(&#x27;/api/user&#x27;).then(res =&gt; res.json())
+});</code></pre>
+
+<h2>🔥 What happens here?</h2>
+
+<p>👉 Flow:</p>
+
+<p>loader runs → API call → data comes → resource updates</p>
+
+<ul><li>loader executes automatically</li><li>Updates loading, error, value</li></ul>
+
+<h3>🔹 Async Example</h3>
+
+<pre class="codebox"><code class="language-typescript">dataResource = resource({
+  loader: async () =&gt; {
+    const res = await fetch(&#x27;/api/data&#x27;);
+    return res.json();
+  }
+});</code></pre>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js"></script>
+</body>
+</html>

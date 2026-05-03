@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>#062 What is ChangeDetectionStrategy.OnPush</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+<style>
+:root{--bg:#0f0f1a;--card:#161622;--code:#1e1e2e;--text:#cdd6f4;--muted:#bac2de;--h2:#89b4fa;--h3:#a6e3a1;--accent:#f9e2af;--border:#313244;}
+*{box-sizing:border-box} body{margin:0;font-family:'Segoe UI',Arial,sans-serif;background:radial-gradient(circle at top,#1b1b33 0,#0f0f1a 45%);color:var(--text);line-height:1.7;padding:32px} .page{max-width:1050px;margin:0 auto;background:rgba(22,22,34,.72);border:1px solid var(--border);border-radius:18px;padding:28px;box-shadow:0 20px 60px rgba(0,0,0,.35)}
+h1{color:#f5c2e7;margin:0 0 22px;font-size:28px} h2{color:var(--h2);font-size:24px;margin:24px 0 14px} h3{color:var(--h3);font-size:20px;margin:22px 0 12px} p{margin:10px 0;color:var(--text)} ul{margin:10px 0 18px 0;padding-left:26px} li{margin:6px 0;padding-left:4px} li::marker{color:#f38ba8} .codebox{background:var(--code)!important;border:1px solid var(--border);border-radius:14px;padding:18px;overflow:auto;margin:14px 0 20px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.02)} code[class*=language-],pre[class*=language-]{font-family:'Fira Code','Consolas','Courier New',monospace!important;font-size:15px;line-height:1.75;white-space:pre!important;tab-size:2;text-shadow:none!important}.table-wrap{overflow:auto;margin:16px 0 22px;border:1px solid var(--border);border-radius:14px;background:#11111b} table{width:100%;border-collapse:collapse;min-width:680px} th{background:#313244;color:#f9e2af;text-align:left;padding:12px;border-bottom:1px solid var(--border)} td{padding:11px 12px;border-bottom:1px solid #262637;color:#cdd6f4;vertical-align:top} tr:nth-child(even) td{background:#181825} tr:last-child td{border-bottom:0}
+</style>
+</head>
+<body>
+<div class="page">
+<h1>#062 What is ChangeDetectionStrategy.OnPush</h1>
+
+<h2>🔹 What is ChangeDetectionStrategy.OnPush?</h2>
+
+<p>👉 ChangeDetectionStrategy.OnPush is an Angular change detection strategy that updates the component only when its input properties change or when triggered manually.</p>
+
+<h3>🔹 Why Use OnPush?</h3>
+
+<ul><li>Improves performance</li><li>Reduces unnecessary checks</li><li>Optimizes large applications</li></ul>
+
+<h3>🔹 How It Works</h3>
+
+<h3>Angular checks component only when:</h3>
+
+<pre class="codebox"><code class="language-typescript">@Input() value changes</code></pre>
+
+<ul><li>Event occurs inside component</li><li>Observable emits new value</li><li>Manually triggered (markForCheck())</li></ul>
+
+<h3>🔹 Key Points</h3>
+
+<ul><li>Does not check entire component tree</li><li>Runs only on specific triggers</li><li>Better performance than Default</li></ul>
+
+<p>👉 OnPush updates the UI only when the object reference changes, not when internal values change.</p>
+
+<h3>🔹 Example Setup</h3>
+
+<ul><li>Child Component (OnPush)</li></ul>
+
+<pre class="codebox"><code class="language-typescript">import { Component, Input, ChangeDetectionStrategy } from &#x27;@angular/core&#x27;;
+
+@Component({
+  selector: &#x27;app-child&#x27;,
+  template: `&lt;p&gt;{{ user.name }}&lt;/p&gt;`,
+  changeDetection: ChangeDetectionStrategy.OnPush
+})
+export class ChildComponent {
+  @Input() user!: any;
+}</code></pre>
+
+<h3>Parent Component</h3>
+
+<pre class="codebox"><code class="language-typescript">@Component({
+  selector: &#x27;app-parent&#x27;,
+  template: `
+    &lt;app-child [user]=&quot;user&quot;&gt;&lt;/app-child&gt;
+    &lt;button (click)=&quot;changeName()&quot;&gt;Change Name&lt;/button&gt;
+  `
+})
+export class ParentComponent {
+  user = { name: &quot;Rizwan&quot; };
+
+  changeName() {
+    this.user.name = &quot;Ali&quot;; // ❌ will NOT update UI
+  }
+}</code></pre>
+
+<h3>🔹 What Happens ❌</h3>
+
+<ul><li>Button clicked</li><li>user.name changes</li><li>BUT UI does NOT update</li></ul>
+
+<p>👉 Because object reference is same</p>
+
+<h3>🔹 Fix (Correct Way ✅)</h3>
+
+<pre class="codebox"><code class="language-typescript">changeName() {
+  this.user = { ...this.user, name: &quot;Ali&quot; }; // ✅ new reference
+}</code></pre>
+
+<h3>🔹 What Happens Now ✅</h3>
+
+<ul><li>New object created</li><li>Angular detects reference change</li><li>UI updates ✔️</li></ul>
+
+<h3>🔹 Another Example (Array)</h3>
+
+<h3>❌ Wrong</h3>
+
+<pre class="codebox"><code class="language-typescript">this.items.push(&quot;New Item&quot;);</code></pre>
+
+<p>👉 UI may NOT update</p>
+
+<h3>✅ Correct</h3>
+
+<pre class="codebox"><code class="language-typescript">this.items = [...this.items, &quot;New Item&quot;];</code></pre>
+
+<p>👉 UI updates</p>
+
+<h3>🔹 Key Rule 🔥</h3>
+
+<p>👉 OnPush works only with reference change, not mutation</p>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js"></script>
+</body>
+</html>
