@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>123 What is the correct way to bind content in a textarea — between tags or via [value]</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css">
+<style>
+body{font-family:'Segoe UI',sans-serif;background:#0f0f1a;color:#cdd6f4;padding:2rem;line-height:1.7;}
+h2{color:#89b4fa;margin-top:25px;font-size:1.7rem;}
+h3{color:#a6e3a1;margin-top:24px;font-size:1.25rem;}
+h4{color:#f9e2af;margin:18px 0 8px;font-size:1rem;}
+p{margin:9px 0;} ul{margin-top:10px;padding-left:24px;} li{margin:6px 0;}
+pre{background:#1e1e2e!important;padding:1rem;border-radius:10px;overflow:auto;font-family:'Fira Code',Consolas,monospace;line-height:1.8;white-space:pre-wrap;}
+code{font-family:'Fira Code',Consolas,monospace;font-size:.95rem;}
+table{width:100%;border-collapse:collapse;margin:14px 0;background:#181825;border-radius:10px;overflow:hidden;}
+td,th{border:1px solid #45475a;padding:10px 12px;text-align:left;vertical-align:top;} th{color:#f9e2af;background:#1e1e2e;} td:first-child{color:#89b4fa;font-weight:600;}
+</style>
+</head>
+<body>
+<h2>123 What is the correct way to bind content in a textarea — between tags or via [value]</h2>
+<p>In Angular (and HTML in general), the correct way to bind a &lt;textarea&gt; is by putting the value between the tags or using Angular forms — NOT [value].</p>
+<ul><li>Wrong way: [value] on textarea</li></ul>
+<pre><code class="language-html">&lt;textarea [value]=&quot;message&quot;&gt;&lt;/textarea&gt;</code></pre>
+<ul><li>This is NOT recommended in Angular because:</li></ul>
+<p>It does not properly support two-way binding</p>
+<p>It can break updates when value changes dynamically</p>
+<p>Angular forms ignore it in most cases</p>
+<h3>✅ Correct way 1: Interpolation between tags (basic HTML style)</h3>
+<pre><code class="language-html">&lt;textarea&gt;{{ message }}&lt;/textarea&gt;</code></pre>
+<ul><li>Works, but:</li></ul>
+<p>read-only behavior in many cases</p>
+<p>not good for user input binding</p>
+<h3>✅ Correct way 2 (BEST): Angular binding</h3>
+<h3>🔹 Template-driven</h3>
+<pre><code class="language-html">&lt;textarea [(ngModel)]=&quot;message&quot; name=&quot;message&quot;&gt;&lt;/textarea&gt;</code></pre>
+<h3>🔹 Reactive form</h3>
+<pre><code class="language-html">&lt;textarea formControlName=&quot;message&quot;&gt;&lt;/textarea&gt;</code></pre>
+<ul><li>This is the correct Angular way</li></ul>
+<h3>🧠 Why [value] is wrong for textarea?</h3>
+<p>Because &lt;textarea&gt; is a special form control:</p>
+<p>It does NOT behave like &lt;input&gt;</p>
+<p>Its value is stored in inner text, not attribute</p>
+<p>So Angular handles it through:</p>
+<p>ngModel</p>
+<pre><code class="language-typescript">FormControl</code></pre>
+<p>or inner content binding</p>
+<h3>💡 Simple explanation</h3>
+<table><thead><tr><th>Method</th><th>Correct?</th><th>Why</th></tr></thead><tbody><tr><td>[value]</td><td>❌ No</td><td>Not supported properly</td></tr><tr><td>{{ message }}</td><td>⚠️ Partial</td><td>display only</td></tr><tr><td>[(ngModel)]</td><td>✅ Yes</td><td>proper 2-way binding</td></tr><tr><td>formControlName</td><td>✅ Yes</td><td>reactive form standard</td></tr></tbody></table>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-core.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+</body>
+</html>

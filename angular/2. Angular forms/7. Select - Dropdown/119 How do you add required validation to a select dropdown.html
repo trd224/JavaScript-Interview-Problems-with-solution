@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>119 How do you add required validation to a select dropdown</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css">
+<style>
+body{font-family:'Segoe UI',sans-serif;background:#0f0f1a;color:#cdd6f4;padding:2rem;line-height:1.7;}
+h2{color:#89b4fa;margin-top:25px;font-size:1.7rem;}
+h3{color:#a6e3a1;margin-top:24px;font-size:1.25rem;}
+h4{color:#f9e2af;margin:18px 0 8px;font-size:1rem;}
+p{margin:9px 0;} ul{margin-top:10px;padding-left:24px;} li{margin:6px 0;}
+pre{background:#1e1e2e!important;padding:1rem;border-radius:10px;overflow:auto;font-family:'Fira Code',Consolas,monospace;line-height:1.8;white-space:pre-wrap;}
+code{font-family:'Fira Code',Consolas,monospace;font-size:.95rem;}
+table{width:100%;border-collapse:collapse;margin:14px 0;background:#181825;border-radius:10px;overflow:hidden;}
+td,th{border:1px solid #45475a;padding:10px 12px;text-align:left;vertical-align:top;} th{color:#f9e2af;background:#1e1e2e;} td:first-child{color:#89b4fa;font-weight:600;}
+</style>
+</head>
+<body>
+<h2>119 How do you add required validation to a select dropdown</h2>
+<p>You add required validation to a select dropdown in Angular using either template-driven forms or reactive forms.</p>
+<h3>✅ 1. Template-driven Form (ngModel)</h3>
+<h3>🔹 HTML</h3>
+<pre><code class="language-html">&lt;form #f=&quot;ngForm&quot; (ngSubmit)=&quot;submit(f)&quot;&gt;
+  
+  &lt;select name=&quot;country&quot; [(ngModel)]=&quot;selectedCountry&quot; required #country=&quot;ngModel&quot;&gt;
+    &lt;option value=&quot;&quot;&gt;-- Select Country --&lt;/option&gt;
+    &lt;option *ngFor=&quot;let c of countries&quot; [value]=&quot;c&quot;&gt;
+      {{ c }}
+    &lt;/option&gt;
+  &lt;/select&gt;
+
+  &lt;!-- Error message --&gt;
+  &lt;div *ngIf=&quot;country.invalid &amp;&amp; country.touched&quot;&gt;
+    Country is required
+  &lt;/div&gt;
+
+  &lt;button type=&quot;submit&quot;&gt;Submit&lt;/button&gt;
+&lt;/form&gt;</code></pre>
+<h3>🔹 TS</h3>
+<pre><code class="language-typescript">countries = [&#x27;India&#x27;, &#x27;USA&#x27;, &#x27;UK&#x27;];
+selectedCountry = &#x27;&#x27;;</code></pre>
+<h3>✅ 2. Reactive Form (Recommended)</h3>
+<h3>🔹 HTML</h3>
+<pre><code class="language-html">&lt;form [formGroup]=&quot;form&quot; (ngSubmit)=&quot;submit()&quot;&gt;
+
+  &lt;select formControlName=&quot;country&quot;&gt;
+    &lt;option value=&quot;&quot;&gt;-- Select Country --&lt;/option&gt;
+    &lt;option *ngFor=&quot;let c of countries&quot; [value]=&quot;c&quot;&gt;
+      {{ c }}
+    &lt;/option&gt;
+  &lt;/select&gt;
+
+  &lt;!-- Error message --&gt;
+  &lt;div *ngIf=&quot;form.get(&#x27;country&#x27;)?.invalid &amp;&amp; form.get(&#x27;country&#x27;)?.touched&quot;&gt;
+    Country is required
+  &lt;/div&gt;
+
+  &lt;button type=&quot;submit&quot;&gt;Submit&lt;/button&gt;
+&lt;/form&gt;</code></pre>
+<h3>🔹 TS</h3>
+<pre><code class="language-typescript">form = this.fb.group({
+  country: [&#x27;&#x27;, Validators.required]
+});
+
+countries = [&#x27;India&#x27;, &#x27;USA&#x27;, &#x27;UK&#x27;];
+
+submit() {
+  if (this.form.invalid) {
+    this.form.markAllAsTouched();
+    return;
+  }
+
+  console.log(this.form.value);
+}</code></pre>
+<h3>🚀 3. What is happening?</h3>
+<ul><li>Validators.required ensures:</li></ul>
+<p>user must select a value</p>
+<p>empty (&#x27;&#x27;) is considered invalid</p>
+<h3>💡 4. Important Trick (VERY USED)</h3>
+<p>Make sure your default option is empty:</p>
+<pre><code class="language-html">&lt;option value=&quot;&quot;&gt;-- Select --&lt;/option&gt;</code></pre>
+<p>If you use &quot;Select&quot; or any text, Angular will treat it as valid.</p>
+<h3>🧠 Summary</h3>
+<table><thead><tr><th>Approach</th><th>Validation</th></tr></thead><tbody><tr><td>Template-driven</td><td>required` attribute</td></tr></tbody></table>
+<pre><code class="language-typescript">| Reactive form   | `Validators.required`    |</code></pre>
+<table><thead><tr><th>Default option</th><th>value=&quot;&quot;` must be empty</th></tr></thead><tbody></tbody></table>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-core.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>118 How do you reset a dropdown to its default value</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css">
+<style>
+body{font-family:'Segoe UI',sans-serif;background:#0f0f1a;color:#cdd6f4;padding:2rem;line-height:1.7;}
+h2{color:#89b4fa;margin-top:25px;font-size:1.7rem;}
+h3{color:#a6e3a1;margin-top:24px;font-size:1.25rem;}
+h4{color:#f9e2af;margin:18px 0 8px;font-size:1rem;}
+p{margin:9px 0;} ul{margin-top:10px;padding-left:24px;} li{margin:6px 0;}
+pre{background:#1e1e2e!important;padding:1rem;border-radius:10px;overflow:auto;font-family:'Fira Code',Consolas,monospace;line-height:1.8;white-space:pre-wrap;}
+code{font-family:'Fira Code',Consolas,monospace;font-size:.95rem;}
+table{width:100%;border-collapse:collapse;margin:14px 0;background:#181825;border-radius:10px;overflow:hidden;}
+td,th{border:1px solid #45475a;padding:10px 12px;text-align:left;vertical-align:top;} th{color:#f9e2af;background:#1e1e2e;} td:first-child{color:#89b4fa;font-weight:600;}
+</style>
+</head>
+<body>
+<h2>118 How do you reset a dropdown to its default value</h2>
+<p>In Angular, resetting a dropdown to its default value means setting the form control (or model) back to a predefined value like &quot;Select Country&quot; or null.</p>
+<h3>✅ 1. Template-driven (ngModel)</h3>
+<h3>🔹 HTML</h3>
+<pre><code class="language-html">&lt;select [(ngModel)]=&quot;selectedCountry&quot;&gt;
+  &lt;option value=&quot;&quot;&gt;-- Select Country --&lt;/option&gt;
+  &lt;option *ngFor=&quot;let c of countries&quot; [value]=&quot;c&quot;&gt;
+    {{ c }}
+  &lt;/option&gt;
+&lt;/select&gt;
+
+&lt;button (click)=&quot;resetDropdown()&quot;&gt;Reset&lt;/button&gt;</code></pre>
+<h3>🔹 TS</h3>
+<pre><code class="language-typescript">countries = [&#x27;India&#x27;, &#x27;USA&#x27;, &#x27;UK&#x27;];
+selectedCountry = &#x27;&#x27;;
+
+resetDropdown() {
+  this.selectedCountry = &#x27;&#x27;;
+}</code></pre>
+<ul><li>Setting &#x27;&#x27; brings it back to default placeholder.</li></ul>
+<h3>✅ 2. Reactive Forms (Recommended)</h3>
+<h3>🔹 HTML</h3>
+<pre><code class="language-html">&lt;form [formGroup]=&quot;form&quot;&gt;
+  &lt;select formControlName=&quot;country&quot;&gt;
+    &lt;option value=&quot;&quot;&gt;-- Select Country --&lt;/option&gt;
+    &lt;option *ngFor=&quot;let c of countries&quot; [value]=&quot;c&quot;&gt;
+      {{ c }}
+    &lt;/option&gt;
+  &lt;/select&gt;
+
+  &lt;button type=&quot;button&quot; (click)=&quot;reset()&quot;&gt;Reset&lt;/button&gt;
+&lt;/form&gt;</code></pre>
+<h3>🔹 TS</h3>
+<pre><code class="language-typescript">form = this.fb.group({
+  country: [&#x27;&#x27;]
+});
+
+countries = [&#x27;India&#x27;, &#x27;USA&#x27;, &#x27;UK&#x27;];
+
+reset() {
+  this.form.patchValue({
+    country: &#x27;&#x27;
+  });
+}</code></pre>
+<h3>🚀 3. Full Form Reset</h3>
+<p>If you want to reset everything:</p>
+<pre><code class="language-typescript">this.form.reset();</code></pre>
+<p>Or with default values:</p>
+<pre><code class="language-typescript">this.form.reset({
+  country: &#x27;&#x27;
+});</code></pre>
+<h3>💡 4. Reset with Default Selected Value</h3>
+<p>If you want a specific default value:</p>
+<pre><code class="language-typescript">this.form.patchValue({
+  country: &#x27;India&#x27;
+});</code></pre>
+<h3>🎯 Simple Rule</h3>
+<table><thead><tr><th>Goal</th><th>Code</th></tr></thead><tbody><tr><td>Clear dropdown</td><td>setValue(&#x27;&#x27;)</td></tr><tr><td>Reset form</td><td>reset()</td></tr><tr><td>Set default option</td><td>patchValue({ country: &#x27;India&#x27; })</td></tr></tbody></table>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-core.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+</body>
+</html>

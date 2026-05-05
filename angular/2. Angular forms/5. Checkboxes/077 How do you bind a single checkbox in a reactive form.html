@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>077 How do you bind a single checkbox in a reactive form</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css">
+<style>
+body{font-family:'Segoe UI',sans-serif;background:#0f0f1a;color:#cdd6f4;padding:2rem;line-height:1.7;}
+h2{color:#89b4fa;margin-top:25px;font-size:1.7rem;}
+h3{color:#a6e3a1;margin-top:24px;font-size:1.25rem;}
+h4{color:#f9e2af;margin:18px 0 8px;font-size:1rem;}
+p{margin:9px 0;} ul{margin-top:10px;padding-left:24px;} li{margin:6px 0;}
+pre{background:#1e1e2e!important;padding:1rem;border-radius:10px;overflow:auto;font-family:'Fira Code',Consolas,monospace;line-height:1.8;white-space:pre-wrap;}
+code{font-family:'Fira Code',Consolas,monospace;font-size:.95rem;}
+table{width:100%;border-collapse:collapse;margin:14px 0;background:#181825;border-radius:10px;overflow:hidden;}
+td,th{border:1px solid #45475a;padding:10px 12px;text-align:left;vertical-align:top;} th{color:#f9e2af;background:#1e1e2e;} td:first-child{color:#89b4fa;font-weight:600;}
+</style>
+</head>
+<body>
+<h2>077 How do you bind a single checkbox in a reactive form</h2>
+<h3>✅ One-line definition</h3>
+<p>In a Reactive Form, a single checkbox is bound using formControlName and stores a boolean value (true/false).</p>
+<h3>✅ Full Example</h3>
+<h4>TS</h4>
+<pre><code class="language-typescript">import { FormGroup, FormControl } from &#x27;@angular/forms&#x27;;
+
+myForm = new FormGroup({
+  agree: new FormControl(false)
+});
+
+onSubmit() {
+  console.log(this.myForm.value); 
+  // { agree: true/false }
+}</code></pre>
+<h4>HTML</h4>
+<pre><code class="language-html">&lt;form [formGroup]=&quot;myForm&quot; (ngSubmit)=&quot;onSubmit()&quot;&gt;
+
+  &lt;label&gt;
+    &lt;input type=&quot;checkbox&quot; formControlName=&quot;agree&quot;&gt;
+    Accept Terms
+  &lt;/label&gt;
+
+  &lt;br&gt;&lt;br&gt;
+
+  &lt;button type=&quot;submit&quot;&gt;Submit&lt;/button&gt;
+
+&lt;/form&gt;</code></pre>
+<p>🔍 How it works</p>
+<table><tbody><tr><td>formControlName=&quot;agree&quot;</td><td>binds checkbox to FormControl</td></tr><tr><td>Default value false</td><td>unchecked</td></tr><tr><td>Checked</td><td>true, Unchecked → false</td></tr></tbody></table>
+<p>Value available via this.myForm.value.agree</p>
+<h3>✅ With validation (required checkbox)</h3>
+<h4>TS</h4>
+<pre><code class="language-typescript">import { Validators } from &#x27;@angular/forms&#x27;;
+
+myForm = new FormGroup({
+  agree: new FormControl(false, Validators.requiredTrue)
+});</code></pre>
+<h4>HTML</h4>
+<pre><code class="language-html">&lt;div *ngIf=&quot;myForm.get(&#x27;agree&#x27;)?.errors?.[&#x27;required&#x27;]&quot;&gt;
+  You must accept terms
+&lt;/div&gt;</code></pre>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-core.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+</body>
+</html>

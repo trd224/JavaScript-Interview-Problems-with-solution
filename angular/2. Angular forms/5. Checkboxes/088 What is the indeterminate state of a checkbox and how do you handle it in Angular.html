@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>088 What is the indeterminate state of a checkbox and how do you handle it in Angular</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css">
+<style>
+body{font-family:'Segoe UI',sans-serif;background:#0f0f1a;color:#cdd6f4;padding:2rem;line-height:1.7;}
+h2{color:#89b4fa;margin-top:25px;font-size:1.7rem;}
+h3{color:#a6e3a1;margin-top:24px;font-size:1.25rem;}
+h4{color:#f9e2af;margin:18px 0 8px;font-size:1rem;}
+p{margin:9px 0;} ul{margin-top:10px;padding-left:24px;} li{margin:6px 0;}
+pre{background:#1e1e2e!important;padding:1rem;border-radius:10px;overflow:auto;font-family:'Fira Code',Consolas,monospace;line-height:1.8;white-space:pre-wrap;}
+code{font-family:'Fira Code',Consolas,monospace;font-size:.95rem;}
+table{width:100%;border-collapse:collapse;margin:14px 0;background:#181825;border-radius:10px;overflow:hidden;}
+td,th{border:1px solid #45475a;padding:10px 12px;text-align:left;vertical-align:top;} th{color:#f9e2af;background:#1e1e2e;} td:first-child{color:#89b4fa;font-weight:600;}
+</style>
+</head>
+<body>
+<h2>088 What is the indeterminate state of a checkbox and how do you handle it in Angular</h2>
+<p>An indeterminate checkbox is a state where the checkbox is neither fully checked nor unchecked (used when some, but not all, child checkboxes are selected).</p>
+<h3>✅ Key Idea</h3>
+<table><tbody><tr><td>checked = true</td><td>all selected</td></tr><tr><td>checked = false</td><td>none selected</td></tr><tr><td>indeterminate = true</td><td>partially selected</td></tr></tbody></table>
+<h3>✅ Example (Select All with Indeterminate)</h3>
+<h4>TS</h4>
+<pre><code class="language-typescript">import { FormBuilder, FormGroup, FormArray } from &#x27;@angular/forms&#x27;;
+
+export class AppComponent {
+  form: FormGroup;
+  options = [&#x27;HTML&#x27;, &#x27;CSS&#x27;, &#x27;JS&#x27;];
+  indeterminate = false;
+
+  constructor(private fb: FormBuilder) {
+    this.form = this.fb.group({
+      selectAll: [false],
+      skills: this.fb.array(this.options.map(() =&gt; this.fb.control(false)))
+    });
+  }
+
+  get skillsArray(): FormArray {
+    return this.form.get(&#x27;skills&#x27;) as FormArray;
+  }
+
+  onChildChange() {
+    const values = this.skillsArray.value;
+
+    const allChecked = values.every(v =&gt; v === true);
+    const noneChecked = values.every(v =&gt; v === false);
+
+    this.form.get(&#x27;selectAll&#x27;)?.setValue(allChecked, { emitEvent: false });
+
+    // ✅ handle indeterminate state
+    this.indeterminate = !allChecked &amp;&amp; !noneChecked;
+  }
+
+  onSelectAllChange(event: any) {
+    const checked = event.target.checked;
+
+    this.skillsArray.controls.forEach(control =&gt; {
+      control.setValue(checked);
+    });
+
+    this.indeterminate = false; // reset
+  }
+}</code></pre>
+<h4>HTML</h4>
+<pre><code class="language-html">&lt;!-- Select All --&gt;
+&lt;input 
+  type=&quot;checkbox&quot;
+  formControlName=&quot;selectAll&quot;
+  [indeterminate]=&quot;indeterminate&quot;
+  (change)=&quot;onSelectAllChange($event)&quot;
+&gt;</code></pre>
+<p>Select All</p>
+<pre><code class="language-html">&lt;!-- Child Checkboxes --&gt;
+&lt;div formArrayName=&quot;skills&quot;&gt;
+  &lt;div *ngFor=&quot;let control of skillsArray.controls; let i = index&quot;&gt;
+    &lt;input 
+      type=&quot;checkbox&quot;
+      [formControlName]=&quot;i&quot;
+      (change)=&quot;onChildChange()&quot;
+    &gt;
+    {{ options[i] }}
+  &lt;/div&gt;
+&lt;/div&gt;</code></pre>
+<h3>⚡ One-line (your style)</h3>
+<p>Indeterminate state is a partial selection state handled by [indeterminate] property based on child checkbox values.</p>
+<h3>💡 Important</h3>
+<pre><code class="language-typescript">It’s UI-only state (not stored in FormControl value)</code></pre>
+<h4>You must manage it manually in TS</h4>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-core.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+</body>
+</html>

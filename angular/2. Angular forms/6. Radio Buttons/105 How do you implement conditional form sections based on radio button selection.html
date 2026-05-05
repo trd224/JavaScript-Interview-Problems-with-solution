@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>105 How do you implement conditional form sections based on radio button selection</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css">
+<style>
+body{font-family:'Segoe UI',sans-serif;background:#0f0f1a;color:#cdd6f4;padding:2rem;line-height:1.7;}
+h2{color:#89b4fa;margin-top:25px;font-size:1.7rem;}
+h3{color:#a6e3a1;margin-top:24px;font-size:1.25rem;}
+h4{color:#f9e2af;margin:18px 0 8px;font-size:1rem;}
+p{margin:9px 0;} ul{margin-top:10px;padding-left:24px;} li{margin:6px 0;}
+pre{background:#1e1e2e!important;padding:1rem;border-radius:10px;overflow:auto;font-family:'Fira Code',Consolas,monospace;line-height:1.8;white-space:pre-wrap;}
+code{font-family:'Fira Code',Consolas,monospace;font-size:.95rem;}
+table{width:100%;border-collapse:collapse;margin:14px 0;background:#181825;border-radius:10px;overflow:hidden;}
+td,th{border:1px solid #45475a;padding:10px 12px;text-align:left;vertical-align:top;} th{color:#f9e2af;background:#1e1e2e;} td:first-child{color:#89b4fa;font-weight:600;}
+</style>
+</head>
+<body>
+<h2>105 How do you implement conditional form sections based on radio button selection</h2>
+<p>Conditional form sections are implemented by listening to the radio value and showing/hiding parts of the form using *ngIf (and optionally enabling/disabling controls).</p>
+<h3>✅ Reactive Form Example</h3>
+<h4>TS</h4>
+<pre><code class="language-typescript">this.form = this.fb.group({
+  userType: [&#x27;individual&#x27;],   // radio
+  companyName: [&#x27;&#x27;]           // shown only for company
+});</code></pre>
+<p>// optional: react to changes</p>
+<pre><code class="language-typescript">this.form.get(&#x27;userType&#x27;)?.valueChanges.subscribe(value =&gt; {
+  if (value === &#x27;company&#x27;) {
+    this.form.get(&#x27;companyName&#x27;)?.enable();
+  } else {
+    this.form.get(&#x27;companyName&#x27;)?.reset();
+    this.form.get(&#x27;companyName&#x27;)?.disable();
+  }
+});</code></pre>
+<h4>HTML</h4>
+<pre><code class="language-html">&lt;form [formGroup]=&quot;form&quot;&gt;
+
+  &lt;!-- Radio --&gt;
+  &lt;label&gt;&lt;input type=&quot;radio&quot; formControlName=&quot;userType&quot; value=&quot;individual&quot;&gt; Individual&lt;/label&gt;
+  &lt;label&gt;&lt;input type=&quot;radio&quot; formControlName=&quot;userType&quot; value=&quot;company&quot;&gt; Company&lt;/label&gt;
+
+  &lt;!-- Conditional Section --&gt;
+  &lt;div *ngIf=&quot;form.get(&#x27;userType&#x27;)?.value === &#x27;company&#x27;&quot;&gt;
+    &lt;input type=&quot;text&quot; formControlName=&quot;companyName&quot; placeholder=&quot;Company Name&quot;&gt;
+  &lt;/div&gt;
+
+&lt;/form&gt;</code></pre>
+<h3>✅ Template-driven Example</h3>
+<pre><code class="language-html">&lt;label&gt;&lt;input type=&quot;radio&quot; name=&quot;type&quot; value=&quot;individual&quot; [(ngModel)]=&quot;type&quot;&gt; Individual&lt;/label&gt;
+&lt;label&gt;&lt;input type=&quot;radio&quot; name=&quot;type&quot; value=&quot;company&quot; [(ngModel)]=&quot;type&quot;&gt; Company&lt;/label&gt;</code></pre>
+<pre><code class="language-html">&lt;div *ngIf=&quot;type === &#x27;company&#x27;&quot;&gt;
+  &lt;input type=&quot;text&quot; [(ngModel)]=&quot;companyName&quot; name=&quot;companyName&quot;&gt;
+&lt;/div&gt;</code></pre>
+<h3>⚡ One-line (your style)</h3>
+<p>Conditional form sections are shown/hidden using *ngIf based on radio button value, with optional control enable/disable in TS.</p>
+<h3>💡 Best Practice</h3>
+<table><tbody><tr><td>Hide UI</td><td>*ngIf</td></tr><tr><td>Control form state</td><td>enable() / disable()</td></tr><tr><td>Reset unused fields</td><td>reset()</td></tr></tbody></table>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-core.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+</body>
+</html>

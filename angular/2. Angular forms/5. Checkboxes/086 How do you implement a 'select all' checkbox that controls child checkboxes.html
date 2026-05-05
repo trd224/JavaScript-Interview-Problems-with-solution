@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>086 How do you implement a &#x27;select all&#x27; checkbox that controls child checkboxes</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css">
+<style>
+body{font-family:'Segoe UI',sans-serif;background:#0f0f1a;color:#cdd6f4;padding:2rem;line-height:1.7;}
+h2{color:#89b4fa;margin-top:25px;font-size:1.7rem;}
+h3{color:#a6e3a1;margin-top:24px;font-size:1.25rem;}
+h4{color:#f9e2af;margin:18px 0 8px;font-size:1rem;}
+p{margin:9px 0;} ul{margin-top:10px;padding-left:24px;} li{margin:6px 0;}
+pre{background:#1e1e2e!important;padding:1rem;border-radius:10px;overflow:auto;font-family:'Fira Code',Consolas,monospace;line-height:1.8;white-space:pre-wrap;}
+code{font-family:'Fira Code',Consolas,monospace;font-size:.95rem;}
+table{width:100%;border-collapse:collapse;margin:14px 0;background:#181825;border-radius:10px;overflow:hidden;}
+td,th{border:1px solid #45475a;padding:10px 12px;text-align:left;vertical-align:top;} th{color:#f9e2af;background:#1e1e2e;} td:first-child{color:#89b4fa;font-weight:600;}
+</style>
+</head>
+<body>
+<h2>086 How do you implement a &#x27;select all&#x27; checkbox that controls child checkboxes</h2>
+<p>A ‘Select All’ checkbox is implemented by updating all FormArray controls when the parent checkbox changes, and syncing the parent based on child selections.</p>
+<h3>✅ Example (Reactive Form)</h3>
+<h4>TS</h4>
+<pre><code class="language-typescript">import { FormBuilder, FormGroup, FormArray } from &#x27;@angular/forms&#x27;;
+
+export class AppComponent {
+  form: FormGroup;
+  options = [&#x27;HTML&#x27;, &#x27;CSS&#x27;, &#x27;JS&#x27;];
+
+  constructor(private fb: FormBuilder) {
+    this.form = this.fb.group({
+      selectAll: [false],
+      skills: this.fb.array(this.options.map(() =&gt; this.fb.control(false)))
+    });
+  }
+
+  get skillsArray(): FormArray {
+    return this.form.get(&#x27;skills&#x27;) as FormArray;
+  }
+
+  // ✅ When &quot;Select All&quot; changes
+  onSelectAllChange(event: any) {
+    const checked = event.target.checked;
+    this.skillsArray.controls.forEach(control =&gt; {
+      control.setValue(checked);
+    });
+  }
+
+  // ✅ When any child checkbox changes
+  onChildChange() {
+    const allChecked = this.skillsArray.controls.every(c =&gt; c.value);
+    this.form.get(&#x27;selectAll&#x27;)?.setValue(allChecked, { emitEvent: false });
+  }
+}</code></pre>
+<h4>HTML</h4>
+<pre><code class="language-html">&lt;form [formGroup]=&quot;form&quot;&gt;
+
+  &lt;!-- Select All --&gt;
+  &lt;input 
+    type=&quot;checkbox&quot; 
+    formControlName=&quot;selectAll&quot;
+    (change)=&quot;onSelectAllChange($event)&quot;
+  &gt;
+  Select All
+
+  &lt;!-- Child Checkboxes --&gt;
+  &lt;div formArrayName=&quot;skills&quot;&gt;
+    &lt;div *ngFor=&quot;let control of skillsArray.controls; let i = index&quot;&gt;
+      &lt;input 
+        type=&quot;checkbox&quot; 
+        [formControlName]=&quot;i&quot;
+        (change)=&quot;onChildChange()&quot;
+      &gt;
+      {{ options[i] }}
+    &lt;/div&gt;
+  &lt;/div&gt;
+
+&lt;/form&gt;</code></pre>
+<h3>⚡ One-line (your style)</h3>
+<pre><code class="language-typescript">‘Select All’ checkbox works by setting all FormArray controls to true/false and updating itself based on child checkbox states.</code></pre>
+<h3>💡 Pro Tip (cleaner way)</h3>
+<p>Instead of (change), you can use valueChanges in TS for a fully reactive solution (no DOM events).</p>
+<p>{ emitEvent: false } is an option used with Angular form methods to prevent triggering valueChanges and statusChanges events.</p>
+<h3>✅ Example</h3>
+<pre><code class="language-typescript">this.form.get(&#x27;selectAll&#x27;)?.setValue(true, { emitEvent: false });</code></pre>
+<ul><li>This updates the value without firing valueChanges.</li></ul>
+<h3>⚡ Why use it?</h3>
+<p>To avoid infinite loops or unnecessary triggers, especially in cases like:</p>
+<p>Select All ↔ Child checkboxes syncing</p>
+<p>Auto-updating values inside valueChanges subscription</p>
+<h3>⚡ One-line (your style)</h3>
+<p>{ emitEvent: false } updates a form control value without emitting valueChanges events.</p>
+<h3>💡 Without it (problem)</h3>
+<pre><code class="language-typescript">this.form.get(&#x27;selectAll&#x27;)?.setValue(true);</code></pre>
+<table><tbody><tr><td>➡️ Triggers valueChanges</td><td>may cause loop ⚠️</td></tr></tbody></table>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-core.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+</body>
+</html>

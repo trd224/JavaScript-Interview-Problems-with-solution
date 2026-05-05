@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>110 How do you set a default selected option in a select dropdown</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css">
+<style>
+body{font-family:'Segoe UI',sans-serif;background:#0f0f1a;color:#cdd6f4;padding:2rem;line-height:1.7;}
+h2{color:#89b4fa;margin-top:25px;font-size:1.7rem;}
+h3{color:#a6e3a1;margin-top:24px;font-size:1.25rem;}
+h4{color:#f9e2af;margin:18px 0 8px;font-size:1rem;}
+p{margin:9px 0;} ul{margin-top:10px;padding-left:24px;} li{margin:6px 0;}
+pre{background:#1e1e2e!important;padding:1rem;border-radius:10px;overflow:auto;font-family:'Fira Code',Consolas,monospace;line-height:1.8;white-space:pre-wrap;}
+code{font-family:'Fira Code',Consolas,monospace;font-size:.95rem;}
+table{width:100%;border-collapse:collapse;margin:14px 0;background:#181825;border-radius:10px;overflow:hidden;}
+td,th{border:1px solid #45475a;padding:10px 12px;text-align:left;vertical-align:top;} th{color:#f9e2af;background:#1e1e2e;} td:first-child{color:#89b4fa;font-weight:600;}
+</style>
+</head>
+<body>
+<h2>110 How do you set a default selected option in a select dropdown</h2>
+<pre><code class="language-typescript">You set a default selected option by initializing the model/FormControl with the desired value.</code></pre>
+<h3>✅ Full Example 1 — Reactive Form (Primitive)</h3>
+<h4>TS</h4>
+<pre><code class="language-typescript">import { Component } from &#x27;@angular/core&#x27;;
+import { FormBuilder, FormGroup } from &#x27;@angular/forms&#x27;;
+
+@Component({
+  selector: &#x27;app-root&#x27;,
+  templateUrl: &#x27;./app.component.html&#x27;
+})
+export class AppComponent {
+
+  form: FormGroup;
+  countries = [&#x27;India&#x27;, &#x27;USA&#x27;, &#x27;UK&#x27;];
+
+  constructor(private fb: FormBuilder) {
+    this.form = this.fb.group({
+      country: [&#x27;USA&#x27;] // ✅ default selected
+    });
+  }
+}</code></pre>
+<h4>HTML</h4>
+<pre><code class="language-html">&lt;form [formGroup]=&quot;form&quot;&gt;
+
+  &lt;select formControlName=&quot;country&quot;&gt;
+    &lt;option *ngFor=&quot;let country of countries&quot; [value]=&quot;country&quot;&gt;
+      {{ country }}
+    &lt;/option&gt;
+  &lt;/select&gt;
+
+&lt;/form&gt;</code></pre>
+<h3>✅ Full Example 2 — Reactive Form (Object)</h3>
+<h4>TS</h4>
+<pre><code class="language-typescript">users = [
+  { id: 1, name: &#x27;John&#x27; },
+  { id: 2, name: &#x27;Jane&#x27; }
+];
+
+this.form = this.fb.group({
+  user: [this.users[1]] // ✅ default object (Jane)
+});</code></pre>
+<h4>HTML</h4>
+<pre><code class="language-html">&lt;select formControlName=&quot;user&quot;&gt;
+  &lt;option *ngFor=&quot;let user of users&quot; [ngValue]=&quot;user&quot;&gt;
+    {{ user.name }}
+  &lt;/option&gt;
+&lt;/select&gt;</code></pre>
+<h3>✅ Full Example 3 — Template-driven Form</h3>
+<h4>TS</h4>
+<pre><code class="language-typescript">selectedCountry = &#x27;India&#x27;; // ✅ default
+countries = [&#x27;India&#x27;, &#x27;USA&#x27;, &#x27;UK&#x27;];</code></pre>
+<h4>HTML</h4>
+<pre><code class="language-html">&lt;select name=&quot;country&quot; [(ngModel)]=&quot;selectedCountry&quot;&gt;
+  &lt;option *ngFor=&quot;let country of countries&quot; [value]=&quot;country&quot;&gt;
+    {{ country }}
+  &lt;/option&gt;
+&lt;/select&gt;</code></pre>
+<h3>⚡ One-line (your style)</h3>
+<p>Default select option is set by initializing the model/FormControl with the desired value.</p>
+<h3>💡 Important</h3>
+<p>Value must match exactly</p>
+<table><tbody><tr><td>For objects</td><td>use [ngValue]</td></tr></tbody></table>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-core.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+</body>
+</html>

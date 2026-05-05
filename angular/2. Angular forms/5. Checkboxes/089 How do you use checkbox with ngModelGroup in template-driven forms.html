@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ngModelGroup Checkbox Example</title>
+
+<link href="https://cdn.jsdelivr.net/npm/prismjs/themes/prism-tomorrow.css" rel="stylesheet" />
+
+<style>
+body{
+  font-family:'Segoe UI',sans-serif;
+  background:#0f0f1a;
+  color:#cdd6f4;
+  padding:2rem;
+  line-height:1.7;
+}
+
+h2{color:#89b4fa;margin-top:25px}
+h3{color:#a6e3a1;margin-top:15px}
+
+pre{
+  background:#1e1e2e;
+  padding:1rem;
+  border-radius:10px;
+  overflow:auto;
+  font-family:'Fira Code',monospace;
+}
+</style>
+</head>
+
+<body>
+
+<h2>A checkbox with ngModelGroup in template-driven forms is used to group multiple checkboxes under one object in the form.</h2>
+
+<h3>HTML (Complete)</h3>
+
+<pre><code class="language-html">
+&lt;form #form="ngForm" (ngSubmit)="onSubmit(form)"&gt;
+
+  &lt;!-- Group --&gt;
+  &lt;div ngModelGroup="skills" #skillsGroup="ngModelGroup"&gt;
+
+    &lt;label&gt;
+      &lt;input 
+        type="checkbox" 
+        name="html" 
+        ngModel 
+        (change)="onCheckboxChange(skillsGroup)"
+      &gt;
+      HTML
+    &lt;/label&gt;
+
+    &lt;label&gt;
+      &lt;input 
+        type="checkbox" 
+        name="css" 
+        ngModel 
+        (change)="onCheckboxChange(skillsGroup)"
+      &gt;
+      CSS
+    &lt;/label&gt;
+
+    &lt;label&gt;
+      &lt;input 
+        type="checkbox" 
+        name="js" 
+        ngModel 
+        (change)="onCheckboxChange(skillsGroup)"
+      &gt;
+      JS
+    &lt;/label&gt;
+
+  &lt;/div&gt;
+
+  &lt;!-- Validation Error --&gt;
+  &lt;div *ngIf="skillsError" style="color:red;"&gt;
+    At least one skill must be selected
+  &lt;/div&gt;
+
+  &lt;button type="submit"&gt;Submit&lt;/button&gt;
+
+&lt;/form&gt;
+</code></pre>
+
+<h3>TS (Component)</h3>
+
+<pre><code class="language-ts">
+export class AppComponent {
+  skillsError = false;
+
+  onCheckboxChange(group: any) {
+    const values = group.value;
+
+    this.skillsError = !Object.values(values).some(v => v === true);
+  }
+
+  onSubmit(form: any) {
+    const skills = form.value.skills;
+
+    this.skillsError = !Object.values(skills).some(v => v === true);
+
+    if (!this.skillsError) {
+      console.log(form.value);
+    }
+  }
+}
+</code></pre>
+
+<h3>Output</h3>
+
+<pre><code class="language-json">
+{
+  skills: {
+    html: true,
+    css: false,
+    js: true
+  }
+}
+</code></pre>
+
+<h3>One-line (your style)</h3>
+<p>In template-driven forms, ngModelGroup groups checkboxes into an object and validation is handled manually by checking if at least one value is true.</p>
+
+<h3>Key Points</h3>
+<ul>
+  <li>ngModelGroup → creates object (skills)</li>
+  <li>Each checkbox → name + ngModel</li>
+  <li>Validation → manual (no built-in validator for group)</li>
+</ul>
+
+<script src="https://cdn.jsdelivr.net/npm/prismjs/prism.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs/components/prism-typescript.min.js"></script>
+
+</body>
+</html>

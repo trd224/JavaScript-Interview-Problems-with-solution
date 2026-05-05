@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>079 How do you handle a group of checkboxes in Angular</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css">
+<style>
+body{font-family:'Segoe UI',sans-serif;background:#0f0f1a;color:#cdd6f4;padding:2rem;line-height:1.7;}
+h2{color:#89b4fa;margin-top:25px;font-size:1.7rem;}
+h3{color:#a6e3a1;margin-top:24px;font-size:1.25rem;}
+h4{color:#f9e2af;margin:18px 0 8px;font-size:1rem;}
+p{margin:9px 0;} ul{margin-top:10px;padding-left:24px;} li{margin:6px 0;}
+pre{background:#1e1e2e!important;padding:1rem;border-radius:10px;overflow:auto;font-family:'Fira Code',Consolas,monospace;line-height:1.8;white-space:pre-wrap;}
+code{font-family:'Fira Code',Consolas,monospace;font-size:.95rem;}
+table{width:100%;border-collapse:collapse;margin:14px 0;background:#181825;border-radius:10px;overflow:hidden;}
+td,th{border:1px solid #45475a;padding:10px 12px;text-align:left;vertical-align:top;} th{color:#f9e2af;background:#1e1e2e;} td:first-child{color:#89b4fa;font-weight:600;}
+</style>
+</head>
+<body>
+<h2>079 How do you handle a group of checkboxes in Angular</h2>
+<h3>✅ One-line definition</h3>
+<p>A group of checkboxes in Angular is handled using an array (for selected values) or a FormArray (in Reactive Forms) to track multiple selections.</p>
+<h3>✅ 1. Template-Driven Form (Array approach)</h3>
+<h4>HTML</h4>
+<pre><code class="language-html">&lt;form #f=&quot;ngForm&quot; (ngSubmit)=&quot;onSubmit(f)&quot;&gt;
+
+  &lt;label *ngFor=&quot;let skill of skills&quot;&gt;
+    &lt;input 
+      type=&quot;checkbox&quot;
+      name=&quot;skills&quot;
+      [value]=&quot;skill&quot;
+      (change)=&quot;onCheckboxChange($event)&quot;
+    &gt;
+    {{ skill }}
+  &lt;/label&gt;
+
+  &lt;br&gt;&lt;br&gt;
+  &lt;button type=&quot;submit&quot;&gt;Submit&lt;/button&gt;
+
+&lt;/form&gt;</code></pre>
+<h4>TS</h4>
+<pre><code class="language-typescript">skills = [&#x27;HTML&#x27;, &#x27;CSS&#x27;, &#x27;JS&#x27;];
+selectedSkills: string[] = [];
+
+onCheckboxChange(event: any) {
+  const value = event.target.value;
+
+  if (event.target.checked) {
+    this.selectedSkills.push(value);
+  } else {
+    this.selectedSkills = this.selectedSkills.filter(v =&gt; v !== value);
+  }
+}
+
+onSubmit(form: any) {
+  console.log(&#x27;Selected Skills:&#x27;, this.selectedSkills);
+}</code></pre>
+<p>🔍 Result</p>
+<p>[&#x27;HTML&#x27;, &#x27;JS&#x27;]</p>
+<h3>✅ 2. Reactive Form (FormArray approach)</h3>
+<h4>TS</h4>
+<pre><code class="language-typescript">import { FormBuilder, FormGroup, FormArray } from &#x27;@angular/forms&#x27;;
+
+export class AppComponent {
+  form: FormGroup;
+  skills = [&#x27;Angular&#x27;, &#x27;React&#x27;, &#x27;Vue&#x27;];
+
+  constructor(private fb: FormBuilder) {
+    this.form = this.fb.group({
+      skills: this.fb.array([]) // FormArray for checkboxes
+    });
+  }
+
+  get skillsArray() {
+    return this.form.get(&#x27;skills&#x27;) as FormArray;
+  }
+
+  onCheckboxChange(event: any) {
+    if (event.target.checked) {
+      this.skillsArray.push(this.fb.control(event.target.value));
+    } else {
+      const index = this.skillsArray.controls
+        .findIndex(x =&gt; x.value === event.target.value);
+      this.skillsArray.removeAt(index);
+    }
+  }
+}</code></pre>
+<h4>HTML</h4>
+<pre><code class="language-html">&lt;form [formGroup]=&quot;form&quot;&gt;
+  &lt;div *ngFor=&quot;let skill of skills&quot;&gt;
+    &lt;input 
+      type=&quot;checkbox&quot;
+      [value]=&quot;skill&quot;
+      (change)=&quot;onCheckboxChange($event)&quot;
+    &gt;
+    {{ skill }}
+  &lt;/div&gt;
+&lt;/form&gt;
+
+&lt;p&gt;Selected: {{ form.value | json }}&lt;/p&gt;</code></pre>
+<p>🔍 Result</p>
+<p>{</p>
+<p>&quot;skills&quot;: [&quot;Angular&quot;, &quot;Vue&quot;]</p>
+<pre><code class="language-typescript">}</code></pre>
+<p>or</p>
+<h4>TS</h4>
+<pre><code class="language-typescript">import { FormGroup, FormArray, FormControl } from &#x27;@angular/forms&#x27;;
+
+skills = [&#x27;HTML&#x27;, &#x27;CSS&#x27;, &#x27;JS&#x27;];
+
+myForm = new FormGroup({
+  skills: new FormArray([])
+});
+
+onCheckboxChange(event: any) {
+  const formArray = this.myForm.get(&#x27;skills&#x27;) as FormArray;
+
+  if (event.target.checked) {
+    formArray.push(new FormControl(event.target.value));
+  } else {
+    const index = formArray.controls.findIndex(
+      x =&gt; x.value === event.target.value
+    );
+    formArray.removeAt(index);
+  }
+}
+
+onSubmit() {
+  console.log(this.myForm.value);
+}</code></pre>
+<h4>HTML</h4>
+<pre><code class="language-html">&lt;form [formGroup]=&quot;myForm&quot; (ngSubmit)=&quot;onSubmit()&quot;&gt;
+
+  &lt;label *ngFor=&quot;let skill of skills&quot;&gt;
+    &lt;input 
+      type=&quot;checkbox&quot;
+      [value]=&quot;skill&quot;
+      (change)=&quot;onCheckboxChange($event)&quot;
+    &gt;
+    {{ skill }}
+  &lt;/label&gt;
+
+  &lt;br&gt;&lt;br&gt;
+  &lt;button type=&quot;submit&quot;&gt;Submit&lt;/button&gt;
+
+&lt;/form&gt;</code></pre>
+<p>🔍 Result</p>
+<p>// Reactive form</p>
+<p>{ skills: [&#x27;HTML&#x27;, &#x27;JS&#x27;] }</p>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-core.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+</body>
+</html>

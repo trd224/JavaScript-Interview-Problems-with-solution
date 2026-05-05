@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>115 How do you get all selected values from a multi-select</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css">
+<style>
+body{font-family:'Segoe UI',sans-serif;background:#0f0f1a;color:#cdd6f4;padding:2rem;line-height:1.7;}
+h2{color:#89b4fa;margin-top:25px;font-size:1.7rem;}
+h3{color:#a6e3a1;margin-top:24px;font-size:1.25rem;}
+h4{color:#f9e2af;margin:18px 0 8px;font-size:1rem;}
+p{margin:9px 0;} ul{margin-top:10px;padding-left:24px;} li{margin:6px 0;}
+pre{background:#1e1e2e!important;padding:1rem;border-radius:10px;overflow:auto;font-family:'Fira Code',Consolas,monospace;line-height:1.8;white-space:pre-wrap;}
+code{font-family:'Fira Code',Consolas,monospace;font-size:.95rem;}
+table{width:100%;border-collapse:collapse;margin:14px 0;background:#181825;border-radius:10px;overflow:hidden;}
+td,th{border:1px solid #45475a;padding:10px 12px;text-align:left;vertical-align:top;} th{color:#f9e2af;background:#1e1e2e;} td:first-child{color:#89b4fa;font-weight:600;}
+</style>
+</head>
+<body>
+<h2>115 How do you get all selected values from a multi-select</h2>
+<p>A multi-select in Angular returns an array of selected values, and how you access it depends on whether you are using template-driven forms, reactive forms, or native HTML binding.</p>
+<h3>✅ 1. Native &lt;select multiple&gt; (Template-driven / ngModel)</h3>
+<h3>🔹 HTML</h3>
+<pre><code class="language-html">&lt;select multiple [(ngModel)]=&quot;selectedCities&quot;&gt;
+  &lt;option *ngFor=&quot;let city of cities&quot; [value]=&quot;city&quot;&gt;
+    {{ city }}
+  &lt;/option&gt;
+&lt;/select&gt;</code></pre>
+<h3>🔹 TS</h3>
+<pre><code class="language-typescript">cities = [&#x27;Delhi&#x27;, &#x27;Mumbai&#x27;, &#x27;Jaipur&#x27;];
+selectedCities: string[] = [];</code></pre>
+<h3>✅ Get selected values</h3>
+<ul><li>Directly available in:</li></ul>
+<pre><code class="language-typescript">console.log(this.selectedCities);</code></pre>
+<ul><li>Angular automatically stores all selected options in an array.</li></ul>
+<h3>✅ 2. Reactive Form Multi-Select</h3>
+<h3>🔹 HTML</h3>
+<pre><code class="language-html">&lt;form [formGroup]=&quot;form&quot;&gt;
+  &lt;select formControlName=&quot;cities&quot; multiple&gt;
+    &lt;option *ngFor=&quot;let city of cities&quot; [value]=&quot;city&quot;&gt;
+      {{ city }}
+    &lt;/option&gt;
+  &lt;/select&gt;
+&lt;/form&gt;</code></pre>
+<h3>🔹 TS</h3>
+<pre><code class="language-typescript">form = this.fb.group({
+  cities: [[]]
+});
+
+cities = [&#x27;Delhi&#x27;, &#x27;Mumbai&#x27;, &#x27;Jaipur&#x27;];</code></pre>
+<h3>✅ Get selected values</h3>
+<pre><code class="language-typescript">console.log(this.form.value.cities);</code></pre>
+<ul><li>This returns an array of selected values</li></ul>
+<h3>✅ 3. Checkbox Multi-Select (Custom Implementation)</h3>
+<h3>🔹 HTML</h3>
+<pre><code class="language-html">&lt;div *ngFor=&quot;let skill of skills&quot;&gt;
+  &lt;input
+    type=&quot;checkbox&quot;
+    [value]=&quot;skill&quot;
+    (change)=&quot;onChange($event)&quot;
+  /&gt;
+  {{ skill }}
+&lt;/div&gt;</code></pre>
+<h3>🔹 TS</h3>
+<pre><code class="language-typescript">skills = [&#x27;Angular&#x27;, &#x27;React&#x27;, &#x27;Node&#x27;];
+selectedSkills: string[] = [];
+
+onChange(event: any) {
+  const value = event.target.value;
+
+  if (event.target.checked) {
+    this.selectedSkills.push(value);
+  } else {
+    this.selectedSkills = this.selectedSkills.filter(v =&gt; v !== value);
+  }
+
+  console.log(this.selectedSkills);
+}</code></pre>
+<h3>🚀 4. Angular Material Multi-Select</h3>
+<h3>🔹 HTML</h3>
+<pre><code class="language-html">&lt;mat-select multiple [(value)]=&quot;selectedSkills&quot;&gt;
+  &lt;mat-option *ngFor=&quot;let skill of skills&quot; [value]=&quot;skill&quot;&gt;
+    {{ skill }}
+  &lt;/mat-option&gt;
+&lt;/mat-select&gt;</code></pre>
+<h3>🔹 TS</h3>
+<pre><code class="language-typescript">selectedSkills: string[] = [];</code></pre>
+<h3>✅ Get values</h3>
+<pre><code class="language-typescript">console.log(this.selectedSkills);</code></pre>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-core.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+</body>
+</html>

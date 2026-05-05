@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>111 How do you add a placeholder option like &#x27;-- Select --&#x27; to a dropdown</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css">
+<style>
+body{font-family:'Segoe UI',sans-serif;background:#0f0f1a;color:#cdd6f4;padding:2rem;line-height:1.7;}
+h2{color:#89b4fa;margin-top:25px;font-size:1.7rem;}
+h3{color:#a6e3a1;margin-top:24px;font-size:1.25rem;}
+h4{color:#f9e2af;margin:18px 0 8px;font-size:1rem;}
+p{margin:9px 0;} ul{margin-top:10px;padding-left:24px;} li{margin:6px 0;}
+pre{background:#1e1e2e!important;padding:1rem;border-radius:10px;overflow:auto;font-family:'Fira Code',Consolas,monospace;line-height:1.8;white-space:pre-wrap;}
+code{font-family:'Fira Code',Consolas,monospace;font-size:.95rem;}
+table{width:100%;border-collapse:collapse;margin:14px 0;background:#181825;border-radius:10px;overflow:hidden;}
+td,th{border:1px solid #45475a;padding:10px 12px;text-align:left;vertical-align:top;} th{color:#f9e2af;background:#1e1e2e;} td:first-child{color:#89b4fa;font-weight:600;}
+</style>
+</head>
+<body>
+<h2>111 How do you add a placeholder option like &#x27;-- Select --&#x27; to a dropdown</h2>
+<p>You add a placeholder option by creating a default &lt;option&gt; with empty value (&quot;&quot; or null) at the top of the dropdown.</p>
+<h3>✅ Full Example 1 — Reactive Form</h3>
+<h4>TS</h4>
+<pre><code class="language-typescript">import { Component } from &#x27;@angular/core&#x27;;
+import { FormBuilder, FormGroup, Validators } from &#x27;@angular/forms&#x27;;
+
+@Component({
+  selector: &#x27;app-root&#x27;,
+  templateUrl: &#x27;./app.component.html&#x27;
+})
+export class AppComponent {
+
+  form: FormGroup;
+  countries = [&#x27;India&#x27;, &#x27;USA&#x27;, &#x27;UK&#x27;];
+
+  constructor(private fb: FormBuilder) {
+    this.form = this.fb.group({
+      country: [&#x27;&#x27;, Validators.required] // ✅ start empty
+    });
+  }
+
+  onSubmit() {
+    console.log(this.form.value);
+  }
+}</code></pre>
+<h4>HTML</h4>
+<pre><code class="language-html">&lt;form [formGroup]=&quot;form&quot; (ngSubmit)=&quot;onSubmit()&quot;&gt;
+
+  &lt;select formControlName=&quot;country&quot;&gt;
+    &lt;option value=&quot;&quot; disabled selected&gt;-- Select --&lt;/option&gt;
+
+    &lt;option *ngFor=&quot;let country of countries&quot; [value]=&quot;country&quot;&gt;
+      {{ country }}
+    &lt;/option&gt;
+  &lt;/select&gt;
+
+  &lt;div *ngIf=&quot;form.get(&#x27;country&#x27;)?.invalid &amp;&amp; form.get(&#x27;country&#x27;)?.touched&quot;&gt;
+    Please select a country
+  &lt;/div&gt;
+
+  &lt;button type=&quot;submit&quot;&gt;Submit&lt;/button&gt;
+
+&lt;/form&gt;</code></pre>
+<h3>✅ Full Example 2 — Template-driven Form</h3>
+<h4>TS</h4>
+<pre><code class="language-typescript">countries = [&#x27;India&#x27;, &#x27;USA&#x27;, &#x27;UK&#x27;];
+selectedCountry = &#x27;&#x27;; // ✅ no selection initially</code></pre>
+<h4>HTML</h4>
+<pre><code class="language-html">&lt;form #form=&quot;ngForm&quot;&gt;
+
+  &lt;select name=&quot;country&quot; [(ngModel)]=&quot;selectedCountry&quot; required&gt;
+    &lt;option value=&quot;&quot; disabled&gt;-- Select --&lt;/option&gt;
+
+    &lt;option *ngFor=&quot;let country of countries&quot; [value]=&quot;country&quot;&gt;
+      {{ country }}
+    &lt;/option&gt;
+  &lt;/select&gt;
+
+  &lt;div *ngIf=&quot;form.controls[&#x27;country&#x27;]?.invalid &amp;&amp; form.controls[&#x27;country&#x27;]?.touched&quot;&gt;
+    Please select a country
+  &lt;/div&gt;
+
+&lt;/form&gt;</code></pre>
+<h3>⚡ One-line (your style)</h3>
+<p>Add a placeholder by using a default &lt;option value=&quot;&quot;&gt;-- Select --&lt;/option&gt; and initializing the model with empty value.</p>
+<h3>💡 Important</h3>
+<table><tbody><tr><td>Use value=&quot;&quot;</td><td>represents no selection</td></tr><tr><td>Use disabled</td><td>prevents selecting placeholder again</td></tr><tr><td>Use Validators.required</td><td>enforce selection</td></tr></tbody></table>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-core.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+</body>
+</html>

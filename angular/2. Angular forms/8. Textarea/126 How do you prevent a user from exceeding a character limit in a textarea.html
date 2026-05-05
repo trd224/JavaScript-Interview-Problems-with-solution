@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>126 How do you prevent a user from exceeding a character limit in a textarea</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css">
+<style>
+body{font-family:'Segoe UI',sans-serif;background:#0f0f1a;color:#cdd6f4;padding:2rem;line-height:1.7;}
+h2{color:#89b4fa;margin-top:25px;font-size:1.7rem;}
+h3{color:#a6e3a1;margin-top:24px;font-size:1.25rem;}
+h4{color:#f9e2af;margin:18px 0 8px;font-size:1rem;}
+p{margin:9px 0;} ul{margin-top:10px;padding-left:24px;} li{margin:6px 0;}
+pre{background:#1e1e2e!important;padding:1rem;border-radius:10px;overflow:auto;font-family:'Fira Code',Consolas,monospace;line-height:1.8;white-space:pre-wrap;}
+code{font-family:'Fira Code',Consolas,monospace;font-size:.95rem;}
+table{width:100%;border-collapse:collapse;margin:14px 0;background:#181825;border-radius:10px;overflow:hidden;}
+td,th{border:1px solid #45475a;padding:10px 12px;text-align:left;vertical-align:top;} th{color:#f9e2af;background:#1e1e2e;} td:first-child{color:#89b4fa;font-weight:600;}
+</style>
+</head>
+<body>
+<h2>126 How do you prevent a user from exceeding a character limit in a textarea</h2>
+<p>Preventing a user from exceeding a character limit in a textarea in Angular means restricting input using HTML attributes or Angular validators so the user cannot type beyond the allowed length.</p>
+<h3>✅ 1. Using maxlength (simplest way)</h3>
+<pre><code class="language-html">&lt;textarea [(ngModel)]=&quot;message&quot; maxlength=&quot;100&quot;&gt;&lt;/textarea&gt;</code></pre>
+<pre><code class="language-html">&lt;p&gt;{{ message?.length || 0 }}/100&lt;/p&gt;</code></pre>
+<ul><li>Example:</li><li>User cannot type more than 100 characters — browser blocks extra input automatically.</li></ul>
+<h3>✅ 2. Reactive Form with Validators</h3>
+<pre><code class="language-html">&lt;form [formGroup]=&quot;form&quot;&gt;
+  &lt;textarea formControlName=&quot;message&quot;&gt;&lt;/textarea&gt;
+
+  &lt;p&gt;{{ form.get(&#x27;message&#x27;)?.value?.length || 0 }}/100&lt;/p&gt;
+
+  &lt;p *ngIf=&quot;form.get(&#x27;message&#x27;)?.errors?.[&#x27;maxlength&#x27;]&quot;&gt;
+    Max 100 characters allowed
+  &lt;/p&gt;
+&lt;/form&gt;</code></pre>
+<pre><code class="language-typescript">import { FormGroup, FormControl, Validators } from &#x27;@angular/forms&#x27;;</code></pre>
+<pre><code class="language-typescript">export class AppComponent {
+  form = new FormGroup({
+    message: new FormControl(&#x27;&#x27;, [Validators.maxLength(100)])
+  });
+}</code></pre>
+<ul><li>Example:</li></ul>
+<p>Validation triggers if user exceeds 100 chars</p>
+<p>You can show error message</p>
+<h3>✅ 3. Hard restriction from TypeScript (extra safety)</h3>
+<pre><code class="language-html">&lt;textarea [(ngModel)]=&quot;message&quot; (input)=&quot;limitText()&quot;&gt;&lt;/textarea&gt;
+&lt;p&gt;{{ message.length }}/100&lt;/p&gt;</code></pre>
+<pre><code class="language-typescript">export class AppComponent {
+  message = &#x27;&#x27;;
+
+  limitText() {
+    if (this.message.length &gt; 100) {
+      this.message = this.message.substring(0, 100);
+    }
+  }
+}</code></pre>
+<ul><li>Example:</li><li>Even if user pastes long text, it gets trimmed to 100 characters.</li></ul>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-core.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+</body>
+</html>

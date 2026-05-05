@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>097 How do you make a radio button group required</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css">
+<style>
+body{font-family:'Segoe UI',sans-serif;background:#0f0f1a;color:#cdd6f4;padding:2rem;line-height:1.7;}
+h2{color:#89b4fa;margin-top:25px;font-size:1.7rem;}
+h3{color:#a6e3a1;margin-top:24px;font-size:1.25rem;}
+h4{color:#f9e2af;margin:18px 0 8px;font-size:1rem;}
+p{margin:9px 0;} ul{margin-top:10px;padding-left:24px;} li{margin:6px 0;}
+pre{background:#1e1e2e!important;padding:1rem;border-radius:10px;overflow:auto;font-family:'Fira Code',Consolas,monospace;line-height:1.8;white-space:pre-wrap;}
+code{font-family:'Fira Code',Consolas,monospace;font-size:.95rem;}
+table{width:100%;border-collapse:collapse;margin:14px 0;background:#181825;border-radius:10px;overflow:hidden;}
+td,th{border:1px solid #45475a;padding:10px 12px;text-align:left;vertical-align:top;} th{color:#f9e2af;background:#1e1e2e;} td:first-child{color:#89b4fa;font-weight:600;}
+</style>
+</head>
+<body>
+
+<h2>097 How do you make a radio button group required</h2>
+
+<p>A radio button group is made required by applying the required validator to the control (reactive) or adding the required attribute (template-driven).</p>
+
+<h3>✅ Reactive Form</h3>
+
+<h4>TS</h4>
+<pre><code class="language-typescript">import { Validators } from &#x27;@angular/forms&#x27;;
+
+this.form = this.fb.group({
+  gender: [null, Validators.required] // ❌ no selection initially
+});</code></pre>
+
+<h4>HTML</h4>
+<pre><code class="language-html">&lt;label&gt;&lt;input type=&quot;radio&quot; formControlName=&quot;gender&quot; value=&quot;male&quot;&gt; Male&lt;/label&gt;
+&lt;label&gt;&lt;input type=&quot;radio&quot; formControlName=&quot;gender&quot; value=&quot;female&quot;&gt; Female&lt;/label&gt;
+
+&lt;div *ngIf=&quot;form.get(&#x27;gender&#x27;)?.invalid &amp;&amp; form.get(&#x27;gender&#x27;)?.touched&quot;&gt;
+  Please select a gender
+&lt;/div&gt;</code></pre>
+
+<h3>✅ Template-driven Form</h3>
+
+<h4>TS</h4>
+<pre><code class="language-typescript">import { Component } from &#x27;@angular/core&#x27;;
+
+@Component({
+  selector: &#x27;app-root&#x27;,
+  templateUrl: &#x27;./app.component.html&#x27;
+})
+export class AppComponent {
+  gender: string = &#x27;&#x27;; // ❌ no selection initially
+
+  onSubmit(form: any) {
+    console.log(form.value);
+  }
+}</code></pre>
+
+<h4>HTML</h4>
+<pre><code class="language-html">&lt;form #form=&quot;ngForm&quot; (ngSubmit)=&quot;onSubmit(form)&quot;&gt;
+
+&lt;label&gt;&lt;input type=&quot;radio&quot; name=&quot;gender&quot; value=&quot;male&quot; ngModel required #gender=&quot;ngModel&quot;&gt; Male&lt;/label&gt;
+&lt;label&gt;&lt;input type=&quot;radio&quot; name=&quot;gender&quot; value=&quot;female&quot; ngModel required&gt; Female&lt;/label&gt;
+
+&lt;div *ngIf=&quot;gender.invalid &amp;&amp; gender.touched&quot;&gt;
+  Please select a gender
+&lt;/div&gt;
+
+&lt;button type=&quot;submit&quot;&gt;Submit&lt;/button&gt;
+
+&lt;/form&gt;</code></pre>
+
+<h3>⚡ One-line (your style)</h3>
+<p>Radio group is required using Validators.required (reactive) or required attribute (template-driven).</p>
+
+<h3>💡 Important</h3>
+<pre><code class="language-typescript">Validation applies to the group (single FormControl), not individual radios</code></pre>
+
+<p>Value must not be null or empty</p>
+
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-core.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+
+</body>
+</html>
