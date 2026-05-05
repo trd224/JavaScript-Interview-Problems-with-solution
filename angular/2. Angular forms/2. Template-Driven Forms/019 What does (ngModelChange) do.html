@@ -67,6 +67,8 @@ pre{
 
 <span class="prop">username</span> = <span class="val">'John'</span>;
 
+//here $event = value
+
 <span class="fn">onChange</span>(value: string) {
    this.username = value; 
 }
@@ -102,6 +104,44 @@ pre{
   <li>(ngModelChange) = event (output binding)</li>
   <li>[ngModel] = input binding</li>
   <li>Together → two-way binding</li>
+</ul>
+
+<!-- ✅ Added Section -->
+
+<h3>Correct Understanding</h3>
+
+<h3>1. ngModelChange → gives VALUE</h3>
+
+<pre>
+&lt;<span class="tag">input</span> 
+  <span class="bind">[ngModel]</span>=<span class="val">"username"</span> 
+  (<span class="attr">ngModelChange</span>)=<span class="val">"onChange($event)"</span>
+&gt;
+
+<span class="fn">onChange</span>(value: string) {
+  console.log(value); <span class="val">// "Rizwan"</span>
+}
+</pre>
+
+<ul>
+  <li>$event = value</li>
+  <li>NOT an event object</li>
+  <li>event.target.value ❌ invalid here</li>
+</ul>
+
+<h3>2. input event → gives EVENT OBJECT</h3>
+
+<pre>
+&lt;<span class="tag">input</span> (<span class="attr">input</span>)=<span class="val">"onChange($event)"</span>&gt;
+
+<span class="fn">onChange</span>(event: any) {
+  console.log(event.target.value); <span class="val">// "Rizwan"</span>
+}
+</pre>
+
+<ul>
+  <li>$event = DOM event</li>
+  <li>event.target.value ✅ correct here</li>
 </ul>
 
 </body>
