@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Conditionally Show Hide Buttons Based on Form State</title>
+
+  <link rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css">
+
+  <style>
+
+    body{
+      font-family:'Segoe UI',sans-serif;
+      background:#0f0f1a;
+      color:#cdd6f4;
+      padding:2rem;
+      line-height:1.8;
+    }
+
+    h1{
+      color:#89b4fa;
+      text-align:center;
+      margin-bottom:40px;
+    }
+
+    h2{
+      color:#a6e3a1;
+      margin-top:40px;
+      margin-bottom:15px;
+    }
+
+    p{
+      margin:12px 0;
+    }
+
+    ul{
+      margin-left:20px;
+    }
+
+    li{
+      margin:8px 0;
+    }
+
+    .code-title{
+      color:#f9e2af;
+      font-size:1rem;
+      margin:15px 0 8px;
+    }
+
+    pre{
+      border-radius:12px;
+      overflow:auto;
+      padding:1rem;
+      background:#1e1e2e !important;
+      border:1px solid #313244;
+    }
+
+    code{
+      font-size:0.95rem;
+    }
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      margin-top:20px;
+    }
+
+    th,td{
+      border:1px solid #45475a;
+      padding:12px;
+      text-align:left;
+    }
+
+    th{
+      background:#181825;
+      color:#89b4fa;
+    }
+
+    td{
+      background:#1e1e2e;
+    }
+
+    .highlight{
+      color:#f38ba8;
+      font-weight:bold;
+    }
+
+  </style>
+
+</head>
+
+<body>
+
+  <h1>
+    Conditionally Show/Hide Buttons Based on Form State in Angular
+  </h1>
+
+  <p>
+    In Angular, you can conditionally show or hide buttons using:
+  </p>
+
+  <ul>
+    <li>form.valid</li>
+    <li>form.invalid</li>
+    <li>form.dirty</li>
+    <li>form.pristine</li>
+    <li>form.touched</li>
+    <li>form.untouched</li>
+    <li>form.submitted</li>
+  </ul>
+
+  <p>
+    with:
+  </p>
+
+  <pre><code class="language-html">*ngIf
+</code></pre>
+
+  <p>
+    or
+  </p>
+
+  <pre><code class="language-html">[hidden]
+</code></pre>
+
+  <h2>
+    ✅ Real Example (Template-Driven Form)
+  </h2>
+
+  <div class="code-title">
+    🔹 HTML
+  </div>
+
+  <pre><code class="language-html">&lt;form #userForm="ngForm"&gt;
+
+  &lt;input
+    type="text"
+    name="username"
+    ngModel
+    required
+    placeholder="Enter username"
+  &gt;
+
+  &lt;br&gt;&lt;br&gt;
+
+  &lt;!-- Show only when form is valid --&gt;
+  &lt;button
+    *ngIf="userForm.valid"
+    type="submit"
+  &gt;
+    Submit
+  &lt;/button&gt;
+
+  &lt;!-- Show only when form is invalid --&gt;
+  &lt;button
+    *ngIf="userForm.invalid"
+    type="button"
+  &gt;
+    Fill Required Fields
+  &lt;/button&gt;
+
+&lt;/form&gt;
+</code></pre>
+
+  <h2>
+    ✅ How It Works
+  </h2>
+
+  <h3>
+    🔹 Initially
+  </h3>
+
+  <p>
+    Input is empty → form becomes invalid
+  </p>
+
+  <p>
+    So Angular shows:
+  </p>
+
+  <pre><code class="language-html">Fill Required Fields
+</code></pre>
+
+  <h3>
+    🔹 After Entering Value
+  </h3>
+
+  <p>
+    If user types:
+  </p>
+
+  <pre><code class="language-text">Rizwan
+</code></pre>
+
+  <p>
+    Form becomes valid.
+  </p>
+
+  <p>
+    Angular hides:
+  </p>
+
+  <pre><code class="language-html">Fill Required Fields
+</code></pre>
+
+  <p>
+    and shows:
+  </p>
+
+  <pre><code class="language-html">Submit
+</code></pre>
+
+  <h2>
+    ✅ Common Form States
+  </h2>
+
+  <table>
+
+    <tr>
+      <th>Form State</th>
+      <th>Meaning</th>
+    </tr>
+
+    <tr>
+      <td>form.valid</td>
+      <td>All validations passed</td>
+    </tr>
+
+    <tr>
+      <td>form.invalid</td>
+      <td>Form has validation errors</td>
+    </tr>
+
+    <tr>
+      <td>form.dirty</td>
+      <td>User changed value</td>
+    </tr>
+
+    <tr>
+      <td>form.pristine</td>
+      <td>User did not change anything</td>
+    </tr>
+
+    <tr>
+      <td>form.touched</td>
+      <td>Input was focused &amp; left</td>
+    </tr>
+
+    <tr>
+      <td>form.untouched</td>
+      <td>Input never touched</td>
+    </tr>
+
+    <tr>
+      <td>form.submitted</td>
+      <td>Form submitted</td>
+    </tr>
+
+  </table>
+
+  <h2>
+    ✅ Example Using dirty
+  </h2>
+
+  <pre><code class="language-html">&lt;button *ngIf="userForm.dirty"&gt;
+  Save Changes
+&lt;/button&gt;
+</code></pre>
+
+  <p>
+    Button appears only after user changes something.
+  </p>
+
+  <h2>
+    ✅ Example Using touched
+  </h2>
+
+  <pre><code class="language-html">&lt;button *ngIf="userForm.touched"&gt;
+  Continue
+&lt;/button&gt;
+</code></pre>
+
+  <p>
+    Button appears after user interacts with form.
+  </p>
+
+  <h2>
+    ✅ *ngIf vs [hidden]
+  </h2>
+
+  <table>
+
+    <tr>
+      <th>Method</th>
+      <th>Removes From DOM</th>
+      <th>Recommended</th>
+    </tr>
+
+    <tr>
+      <td>*ngIf</td>
+      <td>✅ Yes</td>
+      <td>✅ Best</td>
+    </tr>
+
+    <tr>
+      <td>[hidden]</td>
+      <td>❌ No</td>
+      <td>Sometimes</td>
+    </tr>
+
+  </table>
+
+  <h2>
+    ✅ Using [hidden]
+  </h2>
+
+  <pre><code class="language-html">&lt;button [hidden]="userForm.invalid"&gt;
+  Submit
+&lt;/button&gt;
+</code></pre>
+
+  <p>
+    Button stays in DOM but becomes hidden.
+  </p>
+
+  <h2>
+    ✅ Best Practice
+  </h2>
+
+  <p>
+    Usually Angular developers use:
+  </p>
+
+  <pre><code class="language-html">*ngIf="form.valid"
+</code></pre>
+
+  <p>
+    for conditional button rendering.
+  </p>
+
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-typescript.min.js"></script>
+
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-markup.min.js"></script>
+
+</body>
+
+</html>

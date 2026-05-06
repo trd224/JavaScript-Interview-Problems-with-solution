@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Trigger Form Submission From Outside Form in Angular</title>
+
+  <link rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css">
+
+  <style>
+
+    body{
+      font-family:'Segoe UI',sans-serif;
+      background:#0f0f1a;
+      color:#cdd6f4;
+      padding:2rem;
+      line-height:1.8;
+    }
+
+    h1{
+      color:#89b4fa;
+      text-align:center;
+      margin-bottom:40px;
+    }
+
+    h2{
+      color:#a6e3a1;
+      margin-top:40px;
+      margin-bottom:15px;
+    }
+
+    p{
+      margin:12px 0;
+    }
+
+    ul{
+      padding-left:25px;
+    }
+
+    li{
+      margin:8px 0;
+    }
+
+    .code-title{
+      color:#f9e2af;
+      font-size:1rem;
+      margin:15px 0 8px;
+    }
+
+    pre{
+      border-radius:12px;
+      overflow:auto;
+      padding:1rem;
+      background:#1e1e2e !important;
+      border:1px solid #313244;
+    }
+
+    code{
+      font-size:0.95rem;
+    }
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      margin-top:20px;
+    }
+
+    th,td{
+      border:1px solid #45475a;
+      padding:12px;
+      text-align:left;
+    }
+
+    th{
+      background:#181825;
+      color:#89b4fa;
+    }
+
+    td{
+      background:#1e1e2e;
+    }
+
+    .highlight{
+      color:#f38ba8;
+      font-weight:bold;
+    }
+
+  </style>
+
+</head>
+
+<body>
+
+  <h1>
+    Programmatically Trigger Form Submission From Outside Form in Angular
+  </h1>
+
+  <p>
+    In Angular, you can programmatically trigger form submission from a button outside the
+    <span class="highlight">&lt;form&gt;</span>
+    using:
+  </p>
+
+  <ul>
+
+    <li>
+      <strong>@ViewChild()</strong>
+      to access the form
+    </li>
+
+    <li>
+      Call
+      <strong>ngSubmit.emit()</strong>
+      manually
+    </li>
+
+  </ul>
+
+  <h2>
+    ✅ Real Example (Template-Driven Form)
+  </h2>
+
+  <div class="code-title">
+    🔹 HTML
+  </div>
+
+  <pre><code class="language-html">&lt;form #userForm="ngForm" (ngSubmit)="onSubmit(userForm)"&gt;
+
+  &lt;input
+    type="text"
+    name="username"
+    ngModel
+    placeholder="Enter username"
+    required
+  &gt;
+
+  &lt;!-- Normal Submit Button --&gt;
+  &lt;button type="submit"&gt;
+    Inside Submit
+  &lt;/button&gt;
+
+&lt;/form&gt;
+
+&lt;!-- Outside Form --&gt;
+&lt;button (click)="submitForm()"&gt;
+  Outside Submit Button
+&lt;/button&gt;
+</code></pre>
+
+  <div class="code-title">
+    🔹 TypeScript
+  </div>
+
+  <pre><code class="language-typescript">import { Component, ViewChild } from '@angular/core';
+import { NgForm } from '@angular/forms';
+
+@Component({
+  selector: 'app-root',
+  templateUrl: './app.component.html'
+})
+export class AppComponent {
+
+  @ViewChild('userForm')
+  userForm!: NgForm;
+
+  submitForm() {
+
+    // Trigger form submission programmatically
+    this.userForm.ngSubmit.emit();
+
+    //or
+     //this.onSubmit();
+
+  }
+
+  onSubmit(form: NgForm) {
+
+    console.log('Form Submitted');
+    console.log(form.value);
+
+  }
+
+}
+</code></pre>
+
+  <h2>
+    ✅ How It Works
+  </h2>
+
+  <p>
+    When you click the outside button:
+  </p>
+
+  <pre><code class="language-typescript">this.userForm.ngSubmit.emit();
+</code></pre>
+
+  <p>
+    Angular manually fires:
+  </p>
+
+  <pre><code class="language-html">(ngSubmit)="onSubmit(userForm)"
+</code></pre>
+
+  <p>
+    So the form submits exactly like a normal submit button.
+  </p>
+
+  <h2>
+    ✅ Real Output
+  </h2>
+
+  <p>
+    If user enters:
+  </p>
+
+  <pre><code class="language-text">Rizwan
+</code></pre>
+
+  <p>
+    Console:
+  </p>
+
+  <pre><code class="language-text">Form Submitted
+{username: 'Rizwan'}
+</code></pre>
+
+  <h2>
+    ✅ Real Example (Reactive Form)
+  </h2>
+
+  <div class="code-title">
+    🔹 HTML
+  </div>
+
+  <pre><code class="language-html">&lt;form [formGroup]="userForm" (ngSubmit)="onSubmit()"&gt;
+
+  &lt;input
+    type="text"
+    formControlName="username"
+    placeholder="Enter username"
+  &gt;
+
+  &lt;button type="submit"&gt;
+    Inside Submit
+  &lt;/button&gt;
+
+&lt;/form&gt;
+
+&lt;!-- Outside Form --&gt;
+&lt;button (click)="submitForm()"&gt;
+  Outside Submit Button
+&lt;/button&gt;
+</code></pre>
+
+  <div class="code-title">
+    🔹 TypeScript
+  </div>
+
+  <pre><code class="language-typescript">import { Component, ViewChild } from '@angular/core';
+import {
+  FormGroup,
+  FormControl,
+  FormGroupDirective
+} from '@angular/forms';
+
+@Component({
+  selector: 'app-root',
+  templateUrl: './app.component.html'
+})
+export class AppComponent {
+
+  userForm = new FormGroup({
+    username: new FormControl('')
+  });
+
+  @ViewChild(FormGroupDirective)
+  formDirective!: FormGroupDirective;
+
+  submitForm() {
+
+    // Trigger Reactive Form submit
+    this.formDirective.ngSubmit.emit();
+
+  }
+
+  onSubmit() {
+
+    console.log('Reactive Form Submitted');
+    console.log(this.userForm.value);
+
+  }
+
+}
+</code></pre>
+
+  <h2>
+    ✅ Reactive Form Output
+  </h2>
+
+  <p>
+    If user enters:
+  </p>
+
+  <pre><code class="language-text">Rizwan
+</code></pre>
+
+  <p>
+    Console:
+  </p>
+
+  <pre><code class="language-text">Reactive Form Submitted
+{username: 'Rizwan'}
+</code></pre>
+
+  <h2>
+    ✅ Reactive Form Explanation
+  </h2>
+
+  <table>
+
+    <tr>
+      <th>Concept</th>
+      <th>Purpose</th>
+    </tr>
+
+    <tr>
+      <td>FormGroup</td>
+      <td>Creates Reactive Form</td>
+    </tr>
+
+    <tr>
+      <td>FormControl</td>
+      <td>Controls input field value</td>
+    </tr>
+
+    <tr>
+      <td>FormGroupDirective</td>
+      <td>Access Angular form directive</td>
+    </tr>
+
+    <tr>
+      <td>ngSubmit.emit()</td>
+      <td>Triggers Angular form submit manually</td>
+    </tr>
+
+  </table>
+
+  <h2>
+    ✅ Another Method (Native HTML submit)
+  </h2>
+
+  <div class="code-title">
+    🔹 HTML
+  </div>
+
+  <pre><code class="language-html">&lt;form #myForm&gt;
+
+&lt;/form&gt;
+</code></pre>
+
+  <div class="code-title">
+    🔹 TypeScript
+  </div>
+
+  <pre><code class="language-typescript">import { ElementRef, ViewChild } from '@angular/core';
+
+@ViewChild('myForm')
+formElement!: ElementRef;
+
+submitForm() {
+
+  this.formElement.nativeElement.submit();
+
+}
+</code></pre>
+
+  <p>
+    But this bypasses Angular validation and
+    <strong>ngSubmit</strong>.
+  </p>
+
+  <p>
+    So in Angular, preferred way is:
+  </p>
+
+  <pre><code class="language-typescript">this.userForm.ngSubmit.emit();
+</code></pre>
+
+  <h2>
+    ✅ Best Practice
+  </h2>
+
+  <table>
+
+    <tr>
+      <th>Method</th>
+      <th>Recommended</th>
+      <th>Reason</th>
+    </tr>
+
+    <tr>
+      <td>ngSubmit.emit()</td>
+      <td>✅ Yes</td>
+      <td>Uses Angular validation + lifecycle</td>
+    </tr>
+
+    <tr>
+      <td>native submit()</td>
+      <td>❌ Usually No</td>
+      <td>Bypasses Angular form handling</td>
+    </tr>
+
+  </table>
+
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-typescript.min.js"></script>
+
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-markup.min.js"></script>
+
+</body>
+
+</html>
+
+ 

@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Built-in Validators in Angular</title>
+
+  <link rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css">
+
+  <style>
+
+    body{
+      font-family:'Segoe UI',sans-serif;
+      background:#0f0f1a;
+      color:#cdd6f4;
+      padding:2rem;
+      line-height:1.8;
+    }
+
+    h1{
+      color:#89b4fa;
+      text-align:center;
+      margin-bottom:40px;
+    }
+
+    h2{
+      color:#a6e3a1;
+      margin-top:40px;
+      margin-bottom:15px;
+    }
+
+    h3{
+      color:#f9e2af;
+      margin-top:30px;
+      margin-bottom:10px;
+    }
+
+    p{
+      margin:12px 0;
+    }
+
+    ul{
+      margin-left:20px;
+    }
+
+    li{
+      margin:8px 0;
+    }
+
+    .code-title{
+      color:#f9e2af;
+      font-size:1rem;
+      margin:15px 0 8px;
+    }
+
+    pre{
+      border-radius:12px;
+      overflow:auto;
+      padding:1rem;
+      background:#1e1e2e !important;
+      border:1px solid #313244;
+    }
+
+    code{
+      font-size:0.95rem;
+    }
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      margin-top:20px;
+    }
+
+    th,td{
+      border:1px solid #45475a;
+      padding:12px;
+      text-align:left;
+    }
+
+    th{
+      background:#181825;
+      color:#89b4fa;
+    }
+
+    td{
+      background:#1e1e2e;
+    }
+
+    .highlight{
+      color:#f38ba8;
+      font-weight:bold;
+    }
+
+  </style>
+
+</head>
+
+<body>
+
+  <h1>
+    Built-in Validators in Angular
+  </h1>
+
+  <p>
+    Angular provides built-in validators through the
+    <span class="highlight">Validators</span>
+    class for reactive forms and HTML validation attributes for template-driven forms.
+  </p>
+
+  <h2>
+    ✅ Common Built-in Validators in Angular
+  </h2>
+
+  <table>
+
+    <tr>
+      <th>Validator</th>
+      <th>Purpose</th>
+    </tr>
+
+    <tr>
+      <td>required</td>
+      <td>Field cannot be empty</td>
+    </tr>
+
+    <tr>
+      <td>requiredTrue</td>
+      <td>Checkbox must be checked</td>
+    </tr>
+
+    <tr>
+      <td>min</td>
+      <td>Minimum numeric value</td>
+    </tr>
+
+    <tr>
+      <td>max</td>
+      <td>Maximum numeric value</td>
+    </tr>
+
+    <tr>
+      <td>minLength</td>
+      <td>Minimum text length</td>
+    </tr>
+
+    <tr>
+      <td>maxLength</td>
+      <td>Maximum text length</td>
+    </tr>
+
+    <tr>
+      <td>email</td>
+      <td>Valid email format</td>
+    </tr>
+
+    <tr>
+      <td>pattern</td>
+      <td>Custom regex validation</td>
+    </tr>
+
+    <tr>
+      <td>nullValidator</td>
+      <td>No validation</td>
+    </tr>
+
+    <tr>
+      <td>compose()</td>
+      <td>Combine multiple validators</td>
+    </tr>
+
+  </table>
+
+  <h2>
+    ✅ Real Example (Reactive Form)
+  </h2>
+
+  <div class="code-title">
+    🔹 TypeScript
+  </div>
+
+  <pre><code class="language-typescript">import { FormGroup, FormControl, Validators } from '@angular/forms';
+
+export class AppComponent {
+
+  userForm = new FormGroup({
+
+    username: new FormControl('', [
+      Validators.required,
+      Validators.minLength(3),
+      Validators.maxLength(10)
+    ]),
+
+    age: new FormControl('', [
+      Validators.required,
+      Validators.min(18),
+      Validators.max(60)
+    ]),
+
+    email: new FormControl('', [
+      Validators.required,
+      Validators.email
+    ]),
+
+    password: new FormControl('', [
+      Validators.required,
+      Validators.pattern(
+        '^(?=.*[A-Z])(?=.*[0-9]).{8,}$'
+      )
+    ]),
+
+    terms: new FormControl(false, [
+      Validators.requiredTrue
+    ])
+
+  });
+
+}
+</code></pre>
+
+  <div class="code-title">
+    🔹 HTML
+  </div>
+
+  <pre><code class="language-html">&lt;form [formGroup]="userForm"&gt;
+
+  &lt;input type="text" formControlName="username"&gt;
+
+  &lt;input type="number" formControlName="age"&gt;
+
+  &lt;input type="email" formControlName="email"&gt;
+
+  &lt;input type="password" formControlName="password"&gt;
+
+  &lt;input type="checkbox" formControlName="terms"&gt;
+
+&lt;/form&gt;
+</code></pre>
+
+  <h2>
+    ✅ Validator Examples
+  </h2>
+
+  <h3>
+    🔹 required
+  </h3>
+
+  <pre><code class="language-typescript">Validators.required
+</code></pre>
+
+  <p>
+    Field must not be empty.
+  </p>
+
+  <h3>
+    🔹 requiredTrue
+  </h3>
+
+  <pre><code class="language-typescript">Validators.requiredTrue
+</code></pre>
+
+  <p>
+    Mostly used for checkboxes.
+  </p>
+
+  <h3>
+    🔹 min / max
+  </h3>
+
+  <pre><code class="language-typescript">Validators.min(18)
+Validators.max(60)
+</code></pre>
+
+  <p>
+    Checks numeric range.
+  </p>
+
+  <h3>
+    🔹 minLength / maxLength
+  </h3>
+
+  <pre><code class="language-typescript">Validators.minLength(3)
+Validators.maxLength(10)
+</code></pre>
+
+  <p>
+    Checks text length.
+  </p>
+
+  <h3>
+    🔹 email
+  </h3>
+
+  <pre><code class="language-typescript">Validators.email
+</code></pre>
+
+  <p>
+    Validates email format.
+  </p>
+
+  <h3>
+    🔹 pattern
+  </h3>
+
+  <pre><code class="language-typescript">Validators.pattern('^[A-Z]+$')
+</code></pre>
+
+  <p>
+    Custom regex validation.
+  </p>
+
+  <p>
+    Example:
+  </p>
+
+  <pre><code class="language-text">Only uppercase letters allowed
+</code></pre>
+
+  <h2>
+    ✅ Template-Driven Form Validators
+  </h2>
+
+  <p>
+    Angular also supports HTML validators directly.
+  </p>
+
+  <div class="code-title">
+    🔹 HTML
+  </div>
+
+  <pre><code class="language-html">&lt;input
+  type="email"
+  name="email"
+  ngModel
+  required
+  minlength="3"
+  maxlength="20"
+&gt;
+</code></pre>
+
+  <h2>
+    ✅ Multiple Validators Together
+  </h2>
+
+  <pre><code class="language-typescript">Validators.compose([
+  Validators.required,
+  Validators.email
+])
+</code></pre>
+
+  <h2>
+    ✅ compose() Example
+  </h2>
+
+  <p>
+    <span class="highlight">Validators.compose()</span>
+    is used to combine multiple validators into a single validator function.
+  </p>
+
+  <div class="code-title">
+    🔹 TypeScript
+  </div>
+
+  <pre><code class="language-typescript">import { FormGroup, FormControl, Validators } from '@angular/forms';
+
+export class AppComponent {
+
+  userForm = new FormGroup({
+
+    username: new FormControl(
+      '',
+      Validators.compose([
+
+        Validators.required,
+        Validators.minLength(3),
+        Validators.maxLength(10)
+
+      ])
+    )
+
+  });
+
+}
+</code></pre>
+
+  <div class="code-title">
+    🔹 HTML
+  </div>
+
+  <pre><code class="language-html">&lt;form [formGroup]="userForm"&gt;
+
+  &lt;input
+    type="text"
+    formControlName="username"
+    placeholder="Enter username"
+  &gt;
+
+&lt;/form&gt;
+</code></pre>
+
+  <h2>
+    ✅ Validation Rules
+  </h2>
+
+  <table>
+
+    <tr>
+      <th>Rule</th>
+      <th>Meaning</th>
+    </tr>
+
+    <tr>
+      <td>required</td>
+      <td>Cannot be empty</td>
+    </tr>
+
+    <tr>
+      <td>minLength(3)</td>
+      <td>Minimum 3 characters</td>
+    </tr>
+
+    <tr>
+      <td>maxLength(10)</td>
+      <td>Maximum 10 characters</td>
+    </tr>
+
+  </table>
+
+  <h2>
+    ✅ Example Results
+  </h2>
+
+  <table>
+
+    <tr>
+      <th>Input</th>
+      <th>Result</th>
+    </tr>
+
+    <tr>
+      <td>""</td>
+      <td>❌ Invalid</td>
+    </tr>
+
+    <tr>
+      <td>"Ri"</td>
+      <td>❌ Too short</td>
+    </tr>
+
+    <tr>
+      <td>"Rizwan"</td>
+      <td>✅ Valid</td>
+    </tr>
+
+    <tr>
+      <td>"VeryLongUsername"</td>
+      <td>❌ Too long</td>
+    </tr>
+
+  </table>
+
+  <h2>
+    ✅ Without compose()
+  </h2>
+
+  <pre><code class="language-typescript">username: new FormControl('', [
+  Validators.required,
+  Validators.minLength(3),
+  Validators.maxLength(10)
+])
+</code></pre>
+
+  <h2>
+    ✅ Best Practice
+  </h2>
+
+  <p>
+    Nowadays Angular developers mostly use:
+  </p>
+
+  <pre><code class="language-typescript">[
+  Validators.required,
+  Validators.email
+]
+</code></pre>
+
+  <p>
+    instead of:
+  </p>
+
+  <pre><code class="language-typescript">Validators.compose()
+</code></pre>
+
+  <p>
+    because array syntax is shorter and cleaner.
+  </p>
+
+  <p>
+    Most commonly used validators:
+  </p>
+
+  <pre><code class="language-typescript">Validators.required
+Validators.email
+Validators.minLength()
+Validators.pattern()
+</code></pre>
+
+  <p>
+    These cover most real-world form validation needs.
+  </p>
+
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-typescript.min.js"></script>
+
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-markup.min.js"></script>
+
+</body>
+
+</html>
