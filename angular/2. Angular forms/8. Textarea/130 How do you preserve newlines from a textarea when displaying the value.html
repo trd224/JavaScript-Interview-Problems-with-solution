@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Preserve Textarea Newlines in Angular</title>
+
+  <link rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css">
+
+  <style>
+
+    body{
+      font-family:'Segoe UI',sans-serif;
+      background:#0f0f1a;
+      color:#cdd6f4;
+      padding:2rem;
+      line-height:1.8;
+    }
+
+    h1{
+      color:#89b4fa;
+      text-align:center;
+      margin-bottom:40px;
+    }
+
+    h2{
+      color:#a6e3a1;
+      margin-top:40px;
+      margin-bottom:15px;
+    }
+
+    p{
+      margin:12px 0;
+    }
+
+    .code-title{
+      color:#f9e2af;
+      font-size:1rem;
+      font-weight:bold;
+      margin:18px 0 10px;
+    }
+
+    pre{
+      background:#1e1e2e !important;
+      border-radius:14px;
+      padding:1rem;
+      overflow:auto;
+      box-shadow:0 0 10px rgba(0,0,0,0.3);
+    }
+
+    code{
+      font-size:14px;
+    }
+
+    .note{
+      background:#1a1b26;
+      border-left:4px solid #89b4fa;
+      border-radius:10px;
+      padding:16px;
+      margin-top:20px;
+    }
+
+    ul{
+      padding-left:25px;
+    }
+
+    li{
+      margin:10px 0;
+    }
+
+    .output-box{
+      background:#1e1e2e;
+      padding:15px;
+      border-radius:10px;
+      margin-top:15px;
+      white-space:pre-line;
+    }
+
+  </style>
+
+</head>
+
+<body>
+
+  <h1>
+    Preserve Newlines from a Textarea in Angular
+  </h1>
+
+  <p>
+    Newlines from a textarea are preserved in Angular by using
+    <b>white-space: pre-line</b> or <b>pre-wrap</b> in CSS.
+  </p>
+
+  <!-- ========================================= -->
+  <!-- Problem Explanation -->
+  <!-- ========================================= -->
+
+  <h2>✅ Problem</h2>
+
+  <div class="note">
+
+    <p>
+      When text from a <b>&lt;textarea&gt;</b> is displayed in normal HTML,
+      line breaks (Enter) are removed because HTML ignores newline
+      characters <b>(\n)</b>.
+    </p>
+
+    <p>
+      So this:
+    </p>
+
+    <div class="output-box">
+Hello
+World
+    </div>
+
+    <p>
+      becomes:
+    </p>
+
+    <div class="output-box" style="white-space:normal;">
+Hello World
+    </div>
+
+    <p>
+      To preserve line breaks, use:
+    </p>
+
+    <pre><code class="language-css">
+
+white-space: pre-line;
+
+    </code></pre>
+
+    <p>
+      This tells HTML to display newline characters as actual new lines.
+    </p>
+
+  </div>
+
+  <!-- ========================================= -->
+  <!-- Template-driven Form -->
+  <!-- ========================================= -->
+
+  <h2>✅ Template-driven Form Example</h2>
+
+  <div class="code-title">HTML</div>
+
+  <pre><code class="language-html">
+
+&lt;textarea
+  [(ngModel)]="message"
+  rows="5"
+&gt;&lt;/textarea&gt;
+
+&lt;div class="output"&gt;
+  {{ message }}
+&lt;/div&gt;
+
+  </code></pre>
+
+  <div class="code-title">CSS</div>
+
+  <pre><code class="language-css">
+
+.output{
+  white-space: pre-line;
+}
+
+  </code></pre>
+
+  <div class="code-title">TS</div>
+
+  <pre><code class="language-ts">
+
+message = '';
+
+  </code></pre>
+
+  <!-- ========================================= -->
+  <!-- How it works -->
+  <!-- ========================================= -->
+
+  <h2>✅ How it works</h2>
+
+  <div class="note">
+
+    <ul>
+      <li>
+        Textarea stores line breaks using <b>\n</b>
+      </li>
+
+      <li>
+        Normal HTML ignores line breaks
+      </li>
+
+      <li>
+        <b>white-space: pre-line</b> preserves newlines
+      </li>
+
+      <li>
+        Each Enter key appears on a new line
+      </li>
+    </ul>
+
+  </div>
+
+  <!-- ========================================= -->
+  <!-- Output -->
+  <!-- ========================================= -->
+
+  <h2>✅ Output Example</h2>
+
+  <div class="output-box">
+Line 1
+Line 2
+Line 3
+  </div>
+
+  <!-- ========================================= -->
+  <!-- Reactive Form -->
+  <!-- ========================================= -->
+
+  <h2>✅ Reactive Form Example</h2>
+
+  <div class="code-title">HTML</div>
+
+  <pre><code class="language-html">
+
+&lt;form [formGroup]="form"&gt;
+
+  &lt;textarea
+    formControlName="message"
+    rows="5"
+  &gt;&lt;/textarea&gt;
+
+&lt;/form&gt;
+
+&lt;div class="output"&gt;
+  {{ form.value.message }}
+&lt;/div&gt;
+
+  </code></pre>
+
+  <div class="code-title">CSS</div>
+
+  <pre><code class="language-css">
+
+.output{
+  white-space: pre-line;
+}
+
+  </code></pre>
+
+  <div class="code-title">TS</div>
+
+  <pre><code class="language-ts">
+
+import {
+  FormGroup,
+  FormControl
+} from '@angular/forms';
+
+form = new FormGroup({
+  message: new FormControl('')
+});
+
+  </code></pre>
+
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-typescript.min.js"></script>
+
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-markup.min.js"></script>
+
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-css.min.js"></script>
+
+</body>
+</html>

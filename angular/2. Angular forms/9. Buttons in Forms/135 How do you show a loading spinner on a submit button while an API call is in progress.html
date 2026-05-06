@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Loading Spinner on Submit Button</title>
+
+<link rel="stylesheet"
+href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css">
+
+<style>
+
+body{
+  font-family:'Segoe UI',sans-serif;
+  background:#0f0f1a;
+  color:#cdd6f4;
+  padding:2rem;
+  line-height:1.8;
+}
+
+h1{
+  color:#89b4fa;
+  text-align:center;
+  margin-bottom:40px;
+}
+
+h2{
+  color:#a6e3a1;
+  margin-top:35px;
+}
+
+p{
+  margin:12px 0;
+}
+
+pre{
+  border-radius:12px;
+  overflow:auto;
+}
+
+code{
+  color:#f9e2af;
+}
+
+.note{
+  background:#1e1e2e;
+  border-left:5px solid #f38ba8;
+  padding:16px;
+  border-radius:10px;
+  margin-top:25px;
+}
+
+.correct{
+  color:#a6e3a1;
+  font-weight:bold;
+}
+
+ul{
+  padding-left:25px;
+}
+
+li{
+  margin:8px 0;
+}
+
+.spinner{
+  width:16px;
+  height:16px;
+  border:3px solid #cdd6f4;
+  border-top:3px solid #89b4fa;
+  border-radius:50%;
+  animation:spin 1s linear infinite;
+  display:inline-block;
+  vertical-align:middle;
+  margin-right:8px;
+}
+
+@keyframes spin{
+  100%{
+    transform:rotate(360deg);
+  }
+}
+
+.demo-btn{
+  background:#89b4fa;
+  color:#11111b;
+  border:none;
+  padding:12px 20px;
+  border-radius:8px;
+  font-size:1rem;
+  cursor:pointer;
+}
+
+.demo-btn:disabled{
+  opacity:0.6;
+  cursor:not-allowed;
+}
+
+</style>
+</head>
+
+<body>
+
+<h1>
+How Do You Show a Loading Spinner on a Submit Button While an API Call Is in Progress?
+</h1>
+
+<p>
+In Angular, a loading spinner is usually shown using a boolean variable like:
+</p>
+
+<pre><code class="language-ts">isLoading = false;</code></pre>
+
+<p>
+When the API starts:
+</p>
+
+<pre><code class="language-ts">this.isLoading = true;</code></pre>
+
+<p>
+When the API completes:
+</p>
+
+<pre><code class="language-ts">this.isLoading = false;</code></pre>
+
+<h2>✅ TypeScript Example</h2>
+
+<pre><code class="language-ts">isLoading = false;
+
+onSubmit() {
+
+  this.isLoading = true;
+
+  this.http.post('api/login', data)
+    .subscribe({
+      next: (res) => {
+
+        console.log(res);
+
+        this.isLoading = false;
+      },
+
+      error: (err) => {
+
+        console.log(err);
+
+        this.isLoading = false;
+      }
+    });
+}</code></pre>
+
+<h2>✅ HTML Example</h2>
+
+<pre><code class="language-html">&lt;button
+  type="submit"
+  [disabled]="isLoading"
+&gt;
+
+  &lt;span *ngIf="isLoading" class="spinner"&gt;&lt;/span&gt;
+
+  {{ isLoading ? 'Loading...' : 'Submit' }}
+
+&lt;/button&gt;</code></pre>
+
+<h2>✅ How It Works</h2>
+
+<ul>
+  <li>Button becomes disabled during API call</li>
+  <li>Spinner appears</li>
+  <li>Button text changes to Loading...</li>
+  <li>Button enabled again after API completes</li>
+</ul>
+
+<h2>✅ Live UI Example</h2>
+
+<button class="demo-btn" disabled>
+  <span class="spinner"></span>
+  Loading...
+</button>
+
+<div class="note">
+<strong>Important:</strong>
+Always stop loading in both:
+<ul>
+  <li>success response</li>
+  <li>error response</li>
+</ul>
+
+Otherwise spinner may continue forever.
+</div>
+
+<h2>✅ Better Approach Using finalize()</h2>
+
+<p>
+Instead of writing:
+<code>this.isLoading = false</code>
+multiple times,
+you can use RxJS
+<code>finalize()</code>.
+</p>
+
+<pre><code class="language-ts">import { finalize } from 'rxjs/operators';
+
+onSubmit() {
+
+  this.isLoading = true;
+
+  this.http.post('api/login', data)
+    .pipe(
+
+      finalize(() => {
+        this.isLoading = false;
+      })
+
+    )
+    .subscribe({
+      next: (res) => {
+        console.log(res);
+      },
+
+      error: (err) => {
+        console.log(err);
+      }
+    });
+}</code></pre>
+
+<p class="correct">
+Result:
+</p>
+
+<ul>
+  <li>Cleaner code</li>
+  <li>Loading automatically stops</li>
+  <li>No duplicate loading code</li>
+</ul>
+
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-markup.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-typescript.min.js"></script>
+
+</body>
+</html>

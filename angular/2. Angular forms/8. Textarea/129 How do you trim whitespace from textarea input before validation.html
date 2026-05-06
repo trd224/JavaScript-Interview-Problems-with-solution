@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Trim Whitespace from Textarea in Angular</title>
+
+  <link rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css">
+
+  <style>
+
+    body{
+      font-family:'Segoe UI',sans-serif;
+      background:#0f0f1a;
+      color:#cdd6f4;
+      padding:2rem;
+      line-height:1.8;
+    }
+
+    h1{
+      color:#89b4fa;
+      text-align:center;
+      margin-bottom:40px;
+    }
+
+    h2{
+      color:#a6e3a1;
+      margin-top:40px;
+      margin-bottom:15px;
+    }
+
+    p{
+      margin:12px 0;
+    }
+
+    .code-title{
+      color:#f9e2af;
+      font-size:1rem;
+      font-weight:bold;
+      margin:18px 0 10px;
+    }
+
+    pre{
+      background:#1e1e2e !important;
+      border-radius:14px;
+      padding:1rem;
+      overflow:auto;
+      box-shadow:0 0 10px rgba(0,0,0,0.3);
+    }
+
+    code{
+      font-size:14px;
+    }
+
+    .note{
+      background:#1a1b26;
+      border-left:4px solid #89b4fa;
+      border-radius:10px;
+      padding:16px;
+      margin-top:20px;
+    }
+
+    ul{
+      padding-left:25px;
+    }
+
+    li{
+      margin:10px 0;
+    }
+
+    .error{
+      color:#f38ba8;
+      font-weight:bold;
+    }
+
+    .success{
+      color:#a6e3a1;
+      font-weight:bold;
+    }
+
+  </style>
+
+</head>
+
+<body>
+
+  <h1>
+    Trim Whitespace from Textarea Input Before Validation
+  </h1>
+
+  <p>
+    Whitespace is trimmed from a textarea in Angular by using the JavaScript
+    <b>trim()</b> method before validation or form submission.
+  </p>
+
+  <!-- ========================================= -->
+  <!-- Template-driven Form -->
+  <!-- ========================================= -->
+
+  <h2>✅ Template-driven Form Example</h2>
+
+  <div class="code-title">HTML</div>
+
+  <pre><code class="language-html">
+
+&lt;form
+  #form="ngForm"
+  (ngSubmit)="onSubmit(form)"
+&gt;
+
+  &lt;textarea
+    name="message"
+    [(ngModel)]="message"
+    required
+    #msg="ngModel"
+  &gt;&lt;/textarea&gt;
+
+  &lt;div
+    *ngIf="form.submitted &amp;&amp; msg.invalid"
+  &gt;
+    Message is required
+  &lt;/div&gt;
+
+  &lt;button type="submit"&gt;
+    Submit
+  &lt;/button&gt;
+
+&lt;/form&gt;
+
+  </code></pre>
+
+  <div class="code-title">TS</div>
+
+  <pre><code class="language-ts">
+
+message = '';
+
+onSubmit(form: any) {
+
+  // Trim whitespace
+  this.message = this.message.trim();
+
+  // Check after trimming
+  if (!this.message) {
+    return;
+  }
+
+  console.log(this.message);
+
+}
+
+  </code></pre>
+
+  <!-- ========================================= -->
+  <!-- Explanation -->
+  <!-- ========================================= -->
+
+  <h2>✅ How it works</h2>
+
+  <div class="note">
+
+    <ul>
+      <li>
+        <b>trim()</b> removes spaces from start and end
+      </li>
+
+      <li>
+        <b>"     "</b> becomes empty string <b>""</b>
+      </li>
+
+      <li>
+        Prevents users from submitting only spaces
+      </li>
+    </ul>
+
+  </div>
+
+  <!-- ========================================= -->
+  <!-- Output -->
+  <!-- ========================================= -->
+
+  <h2>✅ Output</h2>
+
+  <div class="note">
+
+    <p class="error">
+      • Only spaces → validation fails
+    </p>
+
+    <p class="success">
+      • Proper text → form submits successfully
+    </p>
+
+  </div>
+
+  <!-- ========================================= -->
+  <!-- Reactive Form -->
+  <!-- ========================================= -->
+
+  <h2>✅ Reactive Form Example</h2>
+
+  <div class="code-title">HTML</div>
+
+  <pre><code class="language-html">
+
+&lt;form
+  [formGroup]="form"
+  (ngSubmit)="onSubmit()"
+&gt;
+
+  &lt;textarea
+    formControlName="message"
+  &gt;&lt;/textarea&gt;
+
+  &lt;div
+    *ngIf="
+      submitted &amp;&amp;
+      form.controls['message'].invalid
+    "
+  &gt;
+    Message is required
+  &lt;/div&gt;
+
+  &lt;button type="submit"&gt;
+    Submit
+  &lt;/button&gt;
+
+&lt;/form&gt;
+
+  </code></pre>
+
+  <div class="code-title">TS</div>
+
+  <pre><code class="language-ts">
+
+import {
+  FormGroup,
+  FormControl,
+  Validators
+} from '@angular/forms';
+
+submitted = false;
+
+form = new FormGroup({
+  message: new FormControl('', Validators.required)
+});
+
+onSubmit() {
+
+  this.submitted = true;
+
+  // Trim value
+  const trimmedValue =
+    this.form.value.message?.trim();
+
+  // Validation after trim
+  if (!trimmedValue) {
+    return;
+  }
+
+  console.log(trimmedValue);
+
+}
+
+  </code></pre>
+
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-typescript.min.js"></script>
+
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-markup.min.js"></script>
+
+</body>
+</html>

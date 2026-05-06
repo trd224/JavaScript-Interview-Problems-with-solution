@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Auto Resize Textarea in Angular</title>
+<title>Textarea Validation in Angular</title>
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css">
 
@@ -62,16 +62,20 @@ li{
   margin:8px 0;
 }
 
+.error{
+  color:#f38ba8;
+  font-weight:bold;
+}
+
 </style>
 </head>
 
 <body>
 
-<h1>Auto Resize Textarea in Angular</h1>
+<h1>Display Error if Textarea is Empty on Form Submit</h1>
 
 <p>
-A textarea is auto-resized in Angular by updating its height dynamically
-based on its scrollHeight whenever the user types.
+A validation error for a textarea is displayed on form submit by checking whether the textarea is invalid and the form is submitted.
 </p>
 
 <h2>✅ Template-driven Form Example</h2>
@@ -79,12 +83,25 @@ based on its scrollHeight whenever the user types.
 <div class="code-title">HTML</div>
 
 <pre><code class="language-html">
-&lt;textarea
-  rows="1"
-  [(ngModel)]="message"
-  (input)="autoResize($event)"
-  style="overflow:hidden; resize:none;"
-&gt;&lt;/textarea&gt;
+&lt;form #form="ngForm" (ngSubmit)="onSubmit(form)"&gt;
+
+  &lt;textarea
+    name="message"
+    [(ngModel)]="message"
+    required
+    #msg="ngModel"
+  &gt;&lt;/textarea&gt;
+
+  &lt;!-- Error Message --&gt;
+  &lt;div *ngIf="form.submitted && msg.invalid"&gt;
+    Message is required
+  &lt;/div&gt;
+
+  &lt;button type="submit"&gt;
+    Submit
+  &lt;/button&gt;
+
+&lt;/form&gt;
 </code></pre>
 
 <div class="code-title">TS</div>
@@ -92,13 +109,12 @@ based on its scrollHeight whenever the user types.
 <pre><code class="language-ts">
 message = '';
 
-autoResize(event: Event) {
+onSubmit(form: any) {
 
-  const textarea = event.target as HTMLTextAreaElement;
+  if (form.valid) {
+    console.log(form.value);
+  }
 
-  textarea.style.height = 'auto';
-
-  textarea.style.height = textarea.scrollHeight + 'px';
 }
 </code></pre>
 
@@ -107,12 +123,20 @@ autoResize(event: Event) {
 <div class="note">
 
 <ul>
-  <li><b>scrollHeight</b> → gives actual content height</li>
-  <li>First set height to <b>auto</b></li>
-  <li>Then set height to <b>scrollHeight + 'px'</b></li>
-  <li>Textarea grows automatically as the user types</li>
-  <li>No scrollbar appears</li>
+  <li><b>required</b> → makes textarea mandatory</li>
+  <li><b>#msg="ngModel"</b> → gives textarea validation state</li>
+  <li><b>form.submitted</b> → becomes true after submit</li>
+  <li><b>msg.invalid</b> → checks textarea validation</li>
 </ul>
+
+</div>
+
+<h2>✅ Output</h2>
+
+<div class="note">
+
+<p class="error">• Empty textarea → shows error message</p>
+<p>• Filled textarea → form submits successfully</p>
 
 </div>
 
@@ -121,14 +145,20 @@ autoResize(event: Event) {
 <div class="code-title">HTML</div>
 
 <pre><code class="language-html">
-&lt;form [formGroup]="form"&gt;
+&lt;form [formGroup]="form" (ngSubmit)="onSubmit()"&gt;
 
   &lt;textarea
     formControlName="message"
-    rows="1"
-    (input)="autoResize($event)"
-    style="overflow:hidden; resize:none;"
   &gt;&lt;/textarea&gt;
+
+  &lt;!-- Error --&gt;
+  &lt;div *ngIf="submitted && form.controls['message'].invalid"&gt;
+    Message is required
+  &lt;/div&gt;
+
+  &lt;button type="submit"&gt;
+    Submit
+  &lt;/button&gt;
 
 &lt;/form&gt;
 </code></pre>
@@ -136,19 +166,29 @@ autoResize(event: Event) {
 <div class="code-title">TS</div>
 
 <pre><code class="language-ts">
-import { FormGroup, FormControl } from '@angular/forms';
+import {
+  FormGroup,
+  FormControl,
+  Validators
+} from '@angular/forms';
+
+submitted = false;
 
 form = new FormGroup({
-  message: new FormControl('')
+  message: new FormControl(
+    '',
+    Validators.required
+  )
 });
 
-autoResize(event: Event) {
+onSubmit() {
 
-  const textarea = event.target as HTMLTextAreaElement;
+  this.submitted = true;
 
-  textarea.style.height = 'auto';
+  if (this.form.valid) {
+    console.log(this.form.value);
+  }
 
-  textarea.style.height = textarea.scrollHeight + 'px';
 }
 </code></pre>
 

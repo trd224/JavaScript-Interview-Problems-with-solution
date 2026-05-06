@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Difference Between submit, button and reset</title>
+
+<link rel="stylesheet"
+href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css">
+
+<style>
+
+body{
+  font-family:'Segoe UI',sans-serif;
+  background:#0f0f1a;
+  color:#cdd6f4;
+  padding:2rem;
+  line-height:1.8;
+}
+
+h1{
+  color:#89b4fa;
+  text-align:center;
+  margin-bottom:40px;
+}
+
+h2{
+  color:#a6e3a1;
+  margin-top:35px;
+}
+
+h3{
+  color:#f9e2af;
+  margin-top:25px;
+}
+
+p{
+  margin:12px 0;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:20px;
+  background:#1e1e2e;
+  border-radius:10px;
+  overflow:hidden;
+}
+
+th,td{
+  border:1px solid #313244;
+  padding:14px;
+  text-align:left;
+}
+
+th{
+  background:#181825;
+  color:#f9e2af;
+}
+
+tr:nth-child(even){
+  background:#24273a;
+}
+
+.note{
+  background:#1e1e2e;
+  border-left:5px solid #f38ba8;
+  padding:16px;
+  border-radius:10px;
+  margin-top:25px;
+}
+
+code{
+  color:#f9e2af;
+}
+
+pre{
+  border-radius:12px;
+  overflow:auto;
+}
+
+.highlight{
+  color:#f38ba8;
+  font-weight:bold;
+}
+
+ul{
+  padding-left:25px;
+}
+
+li{
+  margin:8px 0;
+}
+
+</style>
+</head>
+
+<body>
+
+<h1>
+Difference Between
+type="submit",
+type="button"
+and
+type="reset"
+</h1>
+
+<p>
+Buttons inside a form can perform different actions depending on their
+<code>type</code>.
+</p>
+
+<table>
+
+<tr>
+  <th>Type</th>
+  <th>Purpose</th>
+  <th>Behavior</th>
+</tr>
+
+<tr>
+  <td><code>submit</code></td>
+  <td>Submit the form</td>
+  <td>Triggers form submission and ngSubmit</td>
+</tr>
+
+<tr>
+  <td><code>button</code></td>
+  <td>Normal button</td>
+  <td>Does nothing automatically</td>
+</tr>
+
+<tr>
+  <td><code>reset</code></td>
+  <td>Reset form fields</td>
+  <td>Restores initial form values</td>
+</tr>
+
+</table>
+
+<h2>✅ 1. type="submit"</h2>
+
+<p>
+Used to submit the form.
+</p>
+
+<pre><code class="language-html">&lt;form (ngSubmit)="onSubmit()"&gt;
+
+  &lt;input type="text"&gt;
+
+  &lt;button type="submit"&gt;
+    Submit
+  &lt;/button&gt;
+
+&lt;/form&gt;</code></pre>
+
+<p>
+When clicked:
+</p>
+
+<ul>
+  <li>Form submits</li>
+  <li><code>ngSubmit</code> executes</li>
+  <li>Validation runs</li>
+</ul>
+
+<div class="note">
+<strong>Important:</strong>
+<code>&lt;button&gt;</code> without type is automatically
+<code>type="submit"</code>.
+</div>
+
+<h2>✅ 2. type="button"</h2>
+
+<p>
+Used for normal actions.
+</p>
+
+<pre><code class="language-html">&lt;button type="button" (click)="openPopup()"&gt;
+  Open Popup
+&lt;/button&gt;</code></pre>
+
+<p>
+When clicked:
+</p>
+
+<ul>
+  <li>Only click event runs</li>
+  <li>Form does NOT submit</li>
+</ul>
+
+<p>
+Commonly used for:
+</p>
+
+<ul>
+  <li>Popup</li>
+  <li>Add row</li>
+  <li>Remove item</li>
+  <li>Custom logic</li>
+</ul>
+
+<h2>✅ 3. type="reset"</h2>
+
+<p>
+Used to reset form fields.
+</p>
+
+<p>
+If you use:
+</p>
+
+<pre><code class="language-html">&lt;button type="reset"&gt;
+  Reset
+&lt;/button&gt;</code></pre>
+
+<p>
+then you do <span class="highlight">NOT</span> need any function.
+</p>
+
+<p>
+The browser automatically resets the form fields.
+</p>
+
+<h3>✅ Example</h3>
+
+<pre><code class="language-html">&lt;form&gt;
+
+  &lt;input type="text" value="Rizwan"&gt;
+
+  &lt;button type="reset"&gt;
+    Reset
+  &lt;/button&gt;
+
+&lt;/form&gt;</code></pre>
+
+<p>
+When clicked:
+</p>
+
+<ul>
+  <li>Form fields return to initial values</li>
+  <li>No TypeScript function needed</li>
+  <li>No <code>(click)</code> event needed</li>
+</ul>
+
+<div class="note">
+<strong>Angular Note:</strong>
+In Angular Reactive Forms, developers usually prefer using
+<code>form.reset()</code>
+because it can also reset validation state, touched/dirty state,
+and custom form values.
+</div>
+
+<h3>✅ Reactive Form Example</h3>
+
+<pre><code class="language-ts">resetForm() {
+  this.myForm.reset();
+}</code></pre>
+
+<pre><code class="language-html">&lt;button type="button" (click)="resetForm()"&gt;
+  Reset
+&lt;/button&gt;</code></pre>
+
+<h2>✅ Complete Example</h2>
+
+<pre><code class="language-html">&lt;form (ngSubmit)="onSubmit()"&gt;
+
+  &lt;input type="text"&gt;
+
+  &lt;button type="submit"&gt;
+    Submit
+  &lt;/button&gt;
+
+  &lt;button type="button" (click)="showMessage()"&gt;
+    Show Message
+  &lt;/button&gt;
+
+  &lt;button type="reset"&gt;
+    Reset
+  &lt;/button&gt;
+
+&lt;/form&gt;</code></pre>
+
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-markup.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-typescript.min.js"></script>
+
+</body>
+</html>
