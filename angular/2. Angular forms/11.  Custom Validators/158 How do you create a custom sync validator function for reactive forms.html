@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Custom Sync Validator in Angular Reactive Forms</title>
+
+  <link rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css">
+
+  <style>
+
+    body{
+      font-family:'Segoe UI',sans-serif;
+      background:#0f0f1a;
+      color:#cdd6f4;
+      padding:2rem;
+      line-height:1.8;
+    }
+
+    h1{
+      color:#89b4fa;
+      text-align:center;
+      margin-bottom:40px;
+    }
+
+    h2{
+      color:#a6e3a1;
+      margin-top:35px;
+      margin-bottom:15px;
+    }
+
+    p{
+      margin:12px 0;
+    }
+
+    ul{
+      padding-left:24px;
+    }
+
+    li{
+      margin:8px 0;
+    }
+
+    pre{
+      background:#1e1e2e !important;
+      border-radius:12px;
+      padding:1rem;
+      overflow:auto;
+      border:1px solid #313244;
+    }
+
+    code{
+      font-family:Consolas,monospace;
+      font-size:0.95rem;
+    }
+
+    .note{
+      background:#181825;
+      padding:14px;
+      border-left:5px solid #89b4fa;
+      border-radius:8px;
+      margin:18px 0;
+    }
+
+  </style>
+
+</head>
+
+<body>
+
+  <h1>How do you create a custom sync validator function for reactive forms?</h1>
+
+  <p>
+    A <strong>custom sync validator</strong> in Angular Reactive Forms is a normal function
+    that validates a form control immediately and returns:
+  </p>
+
+  <ul>
+    <li><strong>null</strong> → when the value is valid</li>
+    <li><strong>ValidationErrors object</strong> → when validation fails</li>
+  </ul>
+
+  <div class="note">
+    Sync validators run instantly whenever the form value changes.
+  </div>
+
+  <h2>🔹 Step 1: Create Custom Sync Validator Function</h2>
+
+  <pre><code class="language-ts">
+import { AbstractControl, ValidationErrors } from '@angular/forms';
+
+export function noAdminValidator(
+  control: AbstractControl
+): ValidationErrors | null {
+
+  if (control.value === 'admin') {
+    return { noAdmin: true };
+  }
+
+  return null;
+}
+  </code></pre>
+
+  <h2>🔹 Step 2: Use Validator in Reactive Form</h2>
+
+  <pre><code class="language-ts">
+import { FormGroup, FormControl } from '@angular/forms';
+
+this.userForm = new FormGroup({
+
+  username: new FormControl(
+    '',
+    [noAdminValidator]
+  )
+
+});
+  </code></pre>
+
+  <h2>🔹 Step 3: HTML Template</h2>
+
+  <pre><code class="language-html">
+&lt;form [formGroup]="userForm"&gt;
+
+  &lt;input
+    type="text"
+    formControlName="username"
+    placeholder="Enter username"
+  &gt;
+
+  &lt;div *ngIf="userForm.get('username')?.hasError('noAdmin')"&gt;
+    Username cannot be admin
+  &lt;/div&gt;
+
+&lt;/form&gt;
+  </code></pre>
+
+  <h2>🔹 How it Works</h2>
+
+  <ul>
+    <li>If user enters <strong>admin</strong>, validation fails.</li>
+    <li>Validator returns:</li>
+  </ul>
+
+  <pre><code class="language-ts">
+{ noAdmin: true }
+  </code></pre>
+
+  <ul>
+    <li>If value is valid, validator returns:</li>
+  </ul>
+
+  <pre><code class="language-ts">
+null
+  </code></pre>
+
+  <h2>🔹 Summary</h2>
+
+  <ul>
+    <li>Custom sync validators are normal TypeScript functions.</li>
+    <li>They validate values immediately.</li>
+    <li>Return <strong>null</strong> when valid.</li>
+    <li>Return <strong>ValidationErrors</strong> object when invalid.</li>
+    <li>Used inside Reactive Forms validators array.</li>
+  </ul>
+
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-typescript.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-markup.min.js"></script>
+
+</body>
+
+</html>

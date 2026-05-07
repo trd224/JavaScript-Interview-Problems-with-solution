@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>errors vs valid vs invalid vs status in Angular</title>
+
+<link rel="stylesheet"
+href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css">
+
+<style>
+
+body{
+  font-family:'Segoe UI',sans-serif;
+  background:#0f172a;
+  color:#e2e8f0;
+  padding:2rem;
+  line-height:1.8;
+}
+
+h1{
+  color:#38bdf8;
+  text-align:center;
+  margin-bottom:40px;
+}
+
+h2{
+  color:#a78bfa;
+  margin-top:35px;
+}
+
+h3{
+  margin-top:25px;
+}
+
+p{
+  margin:12px 0;
+}
+
+ul{
+  padding-left:24px;
+}
+
+li{
+  margin:8px 0;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:20px;
+}
+
+th,td{
+  border:1px solid #334155;
+  padding:12px;
+  text-align:left;
+}
+
+th{
+  background:#1e293b;
+  color:#38bdf8;
+}
+
+td{
+  background:#0f172a;
+}
+
+pre{
+  background:#020617 !important;
+  border:1px solid #334155;
+  border-radius:12px;
+  padding:1rem;
+  overflow:auto;
+}
+
+code{
+  font-size:15px;
+  font-family:Consolas,monospace;
+}
+
+.demo{
+  background:#1e293b;
+  padding:20px;
+  border-radius:12px;
+  margin-top:20px;
+  border:1px solid #334155;
+}
+
+.valid{
+  color:#4ade80;
+  margin-top:10px;
+}
+
+.invalid{
+  color:#f87171;
+  margin-top:10px;
+}
+
+.pending{
+  color:#facc15;
+  margin-top:10px;
+}
+
+.highlight{
+  color:#facc15;
+  font-weight:bold;
+}
+
+.note{
+  background:#1e293b;
+  padding:15px;
+  border-left:4px solid #38bdf8;
+  border-radius:8px;
+  margin-top:20px;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<h1>What is the difference between errors, valid, invalid, and status?</h1>
+
+<p>
+These properties are used to check the validation state of an Angular form control.
+</p>
+
+<h2>Reactive Form Example</h2>
+
+<pre><code class="language-ts">
+form = this.fb.group({
+
+  username: [
+
+    '',
+
+    [
+
+      Validators.required,
+
+      Validators.minLength(5)
+
+    ]
+
+  ]
+
+});
+</code></pre>
+
+<h2>Main Difference</h2>
+
+<table>
+
+<tr>
+  <th>Property</th>
+  <th>Purpose</th>
+</tr>
+
+<tr>
+  <td>errors</td>
+  <td>Contains validation error object</td>
+</tr>
+
+<tr>
+  <td>valid</td>
+  <td>Returns true if control is valid</td>
+</tr>
+
+<tr>
+  <td>invalid</td>
+  <td>Returns true if control is invalid</td>
+</tr>
+
+<tr>
+  <td>status</td>
+  <td>Returns overall status string</td>
+</tr>
+
+</table>
+
+<h2>1. errors</h2>
+
+<p>
+Returns an object containing validation errors.
+</p>
+
+<pre><code class="language-ts">
+control.errors
+</code></pre>
+
+<p>
+Example:
+</p>
+
+<pre><code class="language-ts">
+{
+  required: true,
+  minlength: {
+    requiredLength: 5,
+    actualLength: 2
+  }
+}
+</code></pre>
+
+<p>
+If no errors exist:
+</p>
+
+<pre><code class="language-ts">
+null
+</code></pre>
+
+<h2>2. valid</h2>
+
+<p>
+Returns:
+</p>
+
+<pre><code class="language-ts">
+true
+</code></pre>
+
+<p>
+when all validations pass.
+</p>
+
+<pre><code class="language-ts">
+control.valid
+</code></pre>
+
+<h2>3. invalid</h2>
+
+<p>
+Returns:
+</p>
+
+<pre><code class="language-ts">
+true
+</code></pre>
+
+<p>
+when validation fails.
+</p>
+
+<pre><code class="language-ts">
+control.invalid
+</code></pre>
+
+<h2>4. status</h2>
+
+<p>
+Returns overall validation state as a string.
+</p>
+
+<pre><code class="language-ts">
+control.status
+</code></pre>
+
+<p>
+Possible values:
+</p>
+
+<ul>
+  <li><span class="highlight">VALID</span></li>
+  <li><span class="highlight">INVALID</span></li>
+  <li><span class="highlight">PENDING</span></li>
+  <li><span class="highlight">DISABLED</span></li>
+</ul>
+
+<h2>HTML View</h2>
+
+<pre><code class="language-html">
+&lt;div&gt;
+  Errors:
+  {{ form.get('username')?.errors | json }}
+&lt;/div&gt;
+
+&lt;div&gt;
+  Valid:
+  {{ form.get('username')?.valid }}
+&lt;/div&gt;
+
+&lt;div&gt;
+  Invalid:
+  {{ form.get('username')?.invalid }}
+&lt;/div&gt;
+
+&lt;div&gt;
+  Status:
+  {{ form.get('username')?.status }}
+&lt;/div&gt;
+</code></pre>
+
+<h2>Output Example</h2>
+
+<div class="demo">
+
+<div class="invalid">
+Errors:
+{ required: true }
+</div>
+
+<div>
+Valid: false
+</div>
+
+<div>
+Invalid: true
+</div>
+
+<div class="pending">
+Status: INVALID
+</div>
+
+</div>
+
+<h2>Main Point</h2>
+
+<ul>
+  <li><span class="highlight">errors</span> → gives error details object</li>
+  <li><span class="highlight">valid</span> → boolean valid state</li>
+  <li><span class="highlight">invalid</span> → boolean invalid state</li>
+  <li><span class="highlight">status</span> → complete status string</li>
+</ul>
+
+<div class="note">
+
+<span class="highlight">Example:</span>
+
+A control can have:
+
+<pre><code class="language-ts">
+valid = false
+invalid = true
+status = "INVALID"
+errors = { required: true }
+</code></pre>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-typescript.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-markup.min.js"></script>
+
+</body>
+
+</html>

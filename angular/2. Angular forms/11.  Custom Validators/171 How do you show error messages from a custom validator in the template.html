@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Show Error Messages From Custom Validator</title>
+
+  <link rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css">
+
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-typescript.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-markup.min.js"></script>
+
+  <style>
+
+    body{
+      font-family:'Segoe UI',sans-serif;
+      background:#0f0f1a;
+      color:#cdd6f4;
+      padding:2rem;
+      line-height:1.8;
+    }
+
+    h1{
+      color:#89b4fa;
+      text-align:center;
+      margin-bottom:40px;
+    }
+
+    h2{
+      color:#a6e3a1;
+      margin-top:35px;
+      margin-bottom:15px;
+    }
+
+    p{
+      margin:12px 0;
+    }
+
+    ul{
+      padding-left:24px;
+    }
+
+    li{
+      margin:8px 0;
+    }
+
+    .box{
+      background:#181825;
+      border-left:5px solid #89b4fa;
+      padding:18px;
+      border-radius:10px;
+      margin:20px 0;
+    }
+
+    .code-title{
+      color:#f9e2af;
+      margin:14px 0 8px;
+      font-weight:bold;
+    }
+
+    pre{
+      background:#1e1e2e !important;
+      border-radius:12px;
+      padding:1rem;
+      overflow:auto;
+    }
+
+    code{
+      font-size:0.95rem;
+    }
+
+    .error{
+      color:#f38ba8;
+      font-weight:bold;
+    }
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      margin-top:20px;
+    }
+
+    th,td{
+      border:1px solid #45475a;
+      padding:12px;
+      text-align:left;
+    }
+
+    th{
+      background:#313244;
+      color:#89b4fa;
+    }
+
+    td{
+      background:#1e1e2e;
+    }
+
+  </style>
+
+</head>
+
+<body>
+
+  <h1>How do you show error messages from a custom validator in the template?</h1>
+
+  <div class="box">
+
+    <p>
+      In Angular, custom validator errors are shown using:
+    </p>
+
+    <ul>
+      <li><code>control.errors</code></li>
+      <li><code>control.hasError()</code></li>
+      <li><code>*ngIf</code></li>
+    </ul>
+
+  </div>
+
+  <h2>Reactive Form Example</h2>
+
+  <p>
+    This example checks whether the password is strong.
+  </p>
+
+  <div class="code-title">HTML Template</div>
+
+  <pre><code class="language-html">
+
+&lt;form [formGroup]="form"&gt;
+
+  &lt;!-- Password Input --&gt;
+  &lt;input
+    type="password"
+    formControlName="password"
+    placeholder="Enter Password"
+  &gt;
+
+  &lt;!-- Error Message --&gt;
+  &lt;div
+    *ngIf="
+      form.get('password')?.hasError('weakPassword')
+      &amp;&amp;
+      form.get('password')?.touched
+    "
+    class="error"
+  &gt;
+
+    Password must contain:
+    uppercase, lowercase, and number
+
+  &lt;/div&gt;
+
+&lt;/form&gt;
+
+  </code></pre>
+
+  <div class="code-title">TypeScript</div>
+
+  <pre><code class="language-typescript">
+
+import {
+  FormGroup,
+  FormControl,
+  ValidatorFn,
+  AbstractControl,
+  ValidationErrors
+} from '@angular/forms';
+
+export class AppComponent {
+
+  form = new FormGroup({
+
+    password: new FormControl(
+      '',
+      [this.weakPasswordValidator()]
+    )
+
+  });
+
+  weakPasswordValidator(): ValidatorFn {
+
+    return (
+      control: AbstractControl
+    ): ValidationErrors | null =&gt; {
+
+      const value = control.value;
+
+      if (!value) {
+        return null;
+      }
+
+      const valid =
+
+        /[A-Z]/.test(value) &amp;&amp;
+        /[a-z]/.test(value) &amp;&amp;
+        /[0-9]/.test(value);
+
+      return valid
+        ? null
+        : { weakPassword: true };
+
+    };
+
+  }
+
+}
+
+  </code></pre>
+
+  <h2>How It Works</h2>
+
+  <table>
+
+    <tr>
+      <th>Part</th>
+      <th>Purpose</th>
+    </tr>
+
+    <tr>
+      <td>
+        <code>{ weakPassword: true }</code>
+      </td>
+      <td>
+        Custom validator error object
+      </td>
+    </tr>
+
+    <tr>
+      <td>
+        <code>hasError('weakPassword')</code>
+      </td>
+      <td>
+        Checks whether error exists
+      </td>
+    </tr>
+
+    <tr>
+      <td>
+        <code>*ngIf</code>
+      </td>
+      <td>
+        Shows error conditionally
+      </td>
+    </tr>
+
+    <tr>
+      <td>
+        <code>touched</code>
+      </td>
+      <td>
+        Prevents showing error before user interaction
+      </td>
+    </tr>
+
+  </table>
+
+  <h2>Custom Error Message Example</h2>
+
+  <p>
+    You can also return dynamic error messages.
+  </p>
+
+  <div class="code-title">Validator</div>
+
+  <pre><code class="language-typescript">
+
+return {
+  weakPassword: {
+    message: 'Password is too weak'
+  }
+};
+
+  </code></pre>
+
+  <div class="code-title">Template</div>
+
+  <pre><code class="language-html">
+
+&lt;div
+  *ngIf="
+    form.get('password')?.errors?.['weakPassword']
+  "
+  class="error"
+&gt;
+
+  {{
+    form.get('password')
+    ?.errors?.['weakPassword']
+    ?.message
+  }}
+
+&lt;/div&gt;
+
+  </code></pre>
+
+</body>
+
+</html>

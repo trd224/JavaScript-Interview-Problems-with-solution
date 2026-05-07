@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Validation States of Form Control in Angular</title>
+
+<link rel="stylesheet"
+href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css">
+
+<style>
+
+body{
+  font-family:'Segoe UI',sans-serif;
+  background:#0f172a;
+  color:#e2e8f0;
+  padding:2rem;
+  line-height:1.8;
+}
+
+h1{
+  color:#38bdf8;
+  text-align:center;
+  margin-bottom:40px;
+}
+
+h2{
+  color:#a78bfa;
+  margin-top:35px;
+}
+
+h3{
+  margin-top:25px;
+}
+
+p{
+  margin:12px 0;
+}
+
+ul{
+  padding-left:24px;
+}
+
+li{
+  margin:8px 0;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:20px;
+}
+
+th,td{
+  border:1px solid #334155;
+  padding:12px;
+  text-align:left;
+}
+
+th{
+  background:#1e293b;
+  color:#38bdf8;
+}
+
+td{
+  background:#0f172a;
+}
+
+pre{
+  background:#020617 !important;
+  border:1px solid #334155;
+  border-radius:12px;
+  padding:1rem;
+  overflow:auto;
+}
+
+code{
+  font-size:15px;
+  font-family:Consolas,monospace;
+}
+
+.demo{
+  background:#1e293b;
+  padding:20px;
+  border-radius:12px;
+  margin-top:20px;
+  border:1px solid #334155;
+}
+
+input{
+  width:100%;
+  padding:12px;
+  margin-top:10px;
+  border-radius:8px;
+  border:1px solid #475569;
+  background:#0f172a;
+  color:white;
+  box-sizing:border-box;
+}
+
+.valid{
+  color:#4ade80;
+  margin-top:10px;
+}
+
+.invalid{
+  color:#f87171;
+  margin-top:10px;
+}
+
+.pending{
+  color:#facc15;
+  margin-top:10px;
+}
+
+.correct{
+  color:#4ade80;
+  font-weight:bold;
+}
+
+.wrong{
+  color:#f87171;
+  font-weight:bold;
+}
+
+.highlight{
+  color:#facc15;
+  font-weight:bold;
+}
+
+.note{
+  background:#1e293b;
+  padding:15px;
+  border-left:4px solid #38bdf8;
+  border-radius:8px;
+  margin-top:20px;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<h1>What are the validation states of a form control?</h1>
+
+<p>
+Angular form controls have validation states that show the current validation status of the control.
+</p>
+
+<h2>Main Validation States</h2>
+
+<ul>
+  <li><span class="highlight">valid</span></li>
+  <li><span class="highlight">invalid</span></li>
+  <li><span class="highlight">pending</span></li>
+</ul>
+
+<h2>Reactive Form Example</h2>
+
+<pre><code class="language-ts">
+form = this.fb.group({
+
+  username: [
+
+    '',
+
+    [Validators.required],
+
+    [this.usernameValidator()]
+
+  ]
+
+});
+</code></pre>
+
+<h2>Why Validators Come in Separate Blocks?</h2>
+
+<p>
+Angular FormControl structure is:
+</p>
+
+<pre><code class="language-ts">
+[value, syncValidators, asyncValidators]
+</code></pre>
+
+<h3 class="correct">✔ Correct</h3>
+
+<pre><code class="language-ts">
+username: [
+
+  '',
+
+  [Validators.required],
+
+  [this.usernameValidator()]
+
+]
+</code></pre>
+
+<p class="correct">
+Validators.required → sync validator
+</p>
+
+<p class="correct">
+this.usernameValidator() → async validator
+</p>
+
+<h3 class="wrong">✘ Wrong</h3>
+
+<pre><code class="language-ts">
+username: [
+
+  '',
+
+  [
+
+    Validators.required,
+
+    this.usernameValidator()
+
+  ]
+
+]
+</code></pre>
+
+<p class="wrong">
+Angular will treat both as synchronous validators.
+</p>
+
+<h2>Why?</h2>
+
+<p>
+Async validators usually call APIs or servers.
+</p>
+
+<pre><code class="language-ts">
+this.usernameValidator()
+</code></pre>
+
+<p>
+That operation takes time, so Angular handles async validators separately.
+</p>
+
+<h2>FormControl Parameter Meaning</h2>
+
+<table>
+
+<tr>
+  <th>Position</th>
+  <th>Meaning</th>
+</tr>
+
+<tr>
+  <td>1st</td>
+  <td>Initial Value</td>
+</tr>
+
+<tr>
+  <td>2nd</td>
+  <td>Sync Validators</td>
+</tr>
+
+<tr>
+  <td>3rd</td>
+  <td>Async Validators</td>
+</tr>
+
+</table>
+
+<h2>HTML View</h2>
+
+<pre><code class="language-html">
+&lt;input
+  type="text"
+  formControlName="username"
+&gt;
+
+&lt;div
+  class="valid"
+  *ngIf="form.get('username')?.valid"
+&gt;
+  Valid
+&lt;/div&gt;
+
+&lt;div
+  class="invalid"
+  *ngIf="form.get('username')?.invalid"
+&gt;
+  Invalid
+&lt;/div&gt;
+
+&lt;div
+  class="pending"
+  *ngIf="form.get('username')?.pending"
+&gt;
+  Checking...
+&lt;/div&gt;
+</code></pre>
+
+<h2>Output Example</h2>
+
+<div class="demo">
+
+<label>Username</label>
+
+<input type="text" placeholder="john">
+
+<div class="pending">
+Checking...
+</div>
+
+<div class="valid">
+Valid
+</div>
+
+<div class="invalid">
+Invalid
+</div>
+
+</div>
+
+<h2>Meaning of Each State</h2>
+
+<h3 style="color:#4ade80;">1. valid</h3>
+
+<p>
+The control passed all validators.
+</p>
+
+<pre><code class="language-ts">
+control.valid
+</code></pre>
+
+<h3 style="color:#f87171;">2. invalid</h3>
+
+<p>
+The control failed one or more validators.
+</p>
+
+<pre><code class="language-ts">
+control.invalid
+</code></pre>
+
+<h3 style="color:#facc15;">3. pending</h3>
+
+<p>
+Async validation is currently running.
+</p>
+
+<pre><code class="language-ts">
+control.pending
+</code></pre>
+
+<h2>Example Flow</h2>
+
+<ul>
+  <li>User types username</li>
+  <li>Angular starts async validator</li>
+  <li>Control becomes <span class="highlight">pending</span></li>
+  <li>If validation passes → <span class="highlight">valid</span></li>
+  <li>If validation fails → <span class="highlight">invalid</span></li>
+</ul>
+
+<div class="note">
+
+<span class="highlight">Main Point:</span>
+
+pending state is mostly used with async validators.
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-typescript.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-markup.min.js"></script>
+
+</body>
+
+</html>

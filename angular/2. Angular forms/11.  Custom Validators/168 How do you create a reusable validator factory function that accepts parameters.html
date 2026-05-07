@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Easy Validator Factory Function Example</title>
+
+<link rel="stylesheet"
+href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css">
+
+<style>
+
+body{
+  font-family:Arial,sans-serif;
+  background:#0f172a;
+  color:#e2e8f0;
+  padding:30px;
+  line-height:1.8;
+}
+
+h1{
+  color:#38bdf8;
+}
+
+h2{
+  color:#a78bfa;
+  margin-top:30px;
+}
+
+pre{
+  background:#020617 !important;
+  padding:15px;
+  border-radius:10px;
+  overflow:auto;
+  border:1px solid #334155;
+}
+
+.demo{
+  background:#1e293b;
+  padding:20px;
+  border-radius:10px;
+  margin-top:20px;
+}
+
+input{
+  width:100%;
+  padding:12px;
+  border-radius:8px;
+  border:1px solid #475569;
+  background:#0f172a;
+  color:white;
+  margin-top:10px;
+  box-sizing:border-box;
+}
+
+.error{
+  color:#f87171;
+  margin-top:10px;
+}
+
+button{
+  margin-top:15px;
+  padding:10px 18px;
+  border:none;
+  border-radius:8px;
+  background:#38bdf8;
+  font-weight:bold;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<h1>Reusable Validator Factory Function</h1>
+
+<p>
+A validator factory function accepts a parameter and returns a validator.
+</p>
+
+<h2>TypeScript</h2>
+
+<pre><code class="language-ts">
+minLengthValidator(min: number): ValidatorFn {
+
+  return (control: AbstractControl) => {
+
+    if (control.value.length &lt; min) {
+
+      return { minLength: true };
+
+    }
+
+    return null;
+
+  };
+
+}
+</code></pre>
+
+<h2>Reactive Form</h2>
+
+<pre><code class="language-ts">
+form = this.fb.group({
+
+  username: [
+
+    '',
+
+    [
+
+      this.minLengthValidator(5)
+
+    ]
+
+  ]
+
+});
+</code></pre>
+
+<h2>HTML View</h2>
+
+<pre><code class="language-html">
+&lt;form [formGroup]="form"&gt;
+
+  &lt;input 
+    type="text"
+    formControlName="username"
+    placeholder="Enter username"
+  &gt;
+
+  &lt;div 
+    class="error"
+    *ngIf="form.get('username')?.errors?.['minLength']"
+  &gt;
+
+    Minimum 5 characters required
+
+  &lt;/div&gt;
+
+&lt;/form&gt;
+</code></pre>
+
+<h2>Output Example</h2>
+
+<div class="demo">
+
+<label>Username</label>
+
+<input type="text" placeholder="abc">
+
+<div class="error">
+Minimum 5 characters required
+</div>
+
+<button disabled>
+Submit
+</button>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-typescript.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-markup.min.js"></script>
+
+</body>
+
+</html>

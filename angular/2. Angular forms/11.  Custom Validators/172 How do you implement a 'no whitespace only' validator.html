@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>No Whitespace Only Validator in Angular</title>
+
+  <link rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css">
+
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-typescript.min.js"></script>
+
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-markup.min.js"></script>
+
+  <style>
+
+    body{
+      font-family:'Segoe UI',sans-serif;
+      background:#0f0f1a;
+      color:#cdd6f4;
+      padding:2rem;
+      line-height:1.8;
+    }
+
+    h1{
+      color:#89b4fa;
+      text-align:center;
+      margin-bottom:40px;
+    }
+
+    h2{
+      color:#a6e3a1;
+      margin-top:35px;
+      margin-bottom:15px;
+    }
+
+    p{
+      margin:12px 0;
+    }
+
+    ul{
+      padding-left:24px;
+    }
+
+    li{
+      margin:8px 0;
+    }
+
+    .box{
+      background:#181825;
+      border-left:5px solid #89b4fa;
+      padding:18px;
+      border-radius:10px;
+      margin:20px 0;
+    }
+
+    .code-title{
+      color:#f9e2af;
+      margin:14px 0 8px;
+      font-weight:bold;
+    }
+
+    pre{
+      background:#1e1e2e !important;
+      border-radius:12px;
+      padding:1rem;
+      overflow:auto;
+    }
+
+    code{
+      font-size:0.95rem;
+    }
+
+    .error{
+      color:#f38ba8;
+      font-weight:bold;
+    }
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      margin-top:20px;
+    }
+
+    th,td{
+      border:1px solid #45475a;
+      padding:12px;
+      text-align:left;
+    }
+
+    th{
+      background:#313244;
+      color:#89b4fa;
+    }
+
+    td{
+      background:#1e1e2e;
+    }
+
+  </style>
+
+</head>
+
+<body>
+
+  <h1>How do you implement a 'no whitespace only' validator?</h1>
+
+  <div class="box">
+
+    <p>
+      A whitespace validator prevents users from entering:
+    </p>
+
+    <ul>
+      <li>Empty spaces</li>
+      <li>Tabs</li>
+      <li>Only whitespace characters</li>
+    </ul>
+
+    <p>
+      It is commonly used for:
+    </p>
+
+    <ul>
+      <li>Name fields</li>
+      <li>Username fields</li>
+      <li>Comment boxes</li>
+    </ul>
+
+  </div>
+
+  <h2>Reactive Form Example</h2>
+
+  <div class="code-title">HTML Template</div>
+
+  <pre><code class="language-html">
+
+&lt;form [formGroup]="form"&gt;
+
+  &lt;input
+    type="text"
+    formControlName="username"
+    placeholder="Enter Username"
+  &gt;
+
+  &lt;div
+    class="error"
+    *ngIf="
+      form.get('username')?.hasError('whitespace')
+      &amp;&amp;
+      form.get('username')?.touched
+    "
+  &gt;
+
+    Username cannot contain only spaces
+
+  &lt;/div&gt;
+
+&lt;/form&gt;
+
+  </code></pre>
+
+  <div class="code-title">TypeScript</div>
+
+  <pre><code class="language-typescript">
+
+import {
+  AbstractControl,
+  ValidationErrors,
+  ValidatorFn,
+  FormControl,
+  FormGroup
+} from '@angular/forms';
+
+export class AppComponent {
+
+  form = new FormGroup({
+
+    username: new FormControl(
+      '',
+      [this.noWhitespaceValidator()]
+    )
+
+  });
+
+  noWhitespaceValidator(): ValidatorFn {
+
+    return (
+      control: AbstractControl
+    ): ValidationErrors | null =&gt; {
+
+      const value = control.value;
+
+      if (value == null) {
+        return null;
+      }
+
+      const isWhitespace =
+        value.trim().length === 0;
+
+      return isWhitespace
+        ? { whitespace: true }
+        : null;
+
+    };
+
+  }
+
+}
+
+  </code></pre>
+
+  <h2>How It Works</h2>
+
+  <table>
+
+    <tr>
+      <th>Code</th>
+      <th>Purpose</th>
+    </tr>
+
+    <tr>
+      <td>
+        <code>value.trim()</code>
+      </td>
+      <td>
+        Removes spaces from start and end
+      </td>
+    </tr>
+
+    <tr>
+      <td>
+        <code>length === 0</code>
+      </td>
+      <td>
+        Checks whether only spaces remain
+      </td>
+    </tr>
+
+    <tr>
+      <td>
+        <code>{ whitespace: true }</code>
+      </td>
+      <td>
+        Returns custom error
+      </td>
+    </tr>
+
+    <tr>
+      <td>
+        <code>hasError('whitespace')</code>
+      </td>
+      <td>
+        Displays error message in template
+      </td>
+    </tr>
+
+  </table>
+
+  <h2>Example Inputs</h2>
+
+  <table>
+
+    <tr>
+      <th>Input</th>
+      <th>Valid?</th>
+    </tr>
+
+    <tr>
+      <td>"Rizwan"</td>
+      <td>✅ Valid</td>
+    </tr>
+
+    <tr>
+      <td>" Rizwan "</td>
+      <td>✅ Valid</td>
+    </tr>
+
+    <tr>
+      <td>"      "</td>
+      <td>❌ Invalid</td>
+    </tr>
+
+    <tr>
+      <td>""</td>
+      <td>❌ Invalid</td>
+    </tr>
+
+  </table>
+
+</body>
+
+</html>

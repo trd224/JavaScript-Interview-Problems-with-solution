@@ -1,0 +1,768 @@
+<!-- <!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Async Validator with debounceTime in Angular</title>
+
+  <link rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css">
+
+  <style>
+
+    body{
+      font-family:'Segoe UI',sans-serif;
+      background:#0f0f1a;
+      color:#cdd6f4;
+      padding:2rem;
+      line-height:1.8;
+    }
+
+    h1{
+      color:#89b4fa;
+      text-align:center;
+      margin-bottom:40px;
+    }
+
+    h2{
+      color:#a6e3a1;
+      margin-top:35px;
+      margin-bottom:15px;
+    }
+
+    h3{
+      color:#f9e2af;
+      margin-top:25px;
+    }
+
+    p{
+      margin:12px 0;
+    }
+
+    ul{
+      padding-left:24px;
+    }
+
+    li{
+      margin:8px 0;
+    }
+
+    .highlight{
+      color:#f38ba8;
+      font-weight:bold;
+    }
+
+    .note{
+      background:#1e1e2e;
+      border-left:4px solid #89b4fa;
+      padding:1rem;
+      border-radius:10px;
+      margin:20px 0;
+    }
+
+    pre{
+      background:#1e1e2e !important;
+      border-radius:12px;
+      padding:1rem;
+      overflow:auto;
+      border:1px solid #313244;
+    }
+
+    code{
+      font-size:15px;
+    }
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      margin-top:20px;
+    }
+
+    th,td{
+      border:1px solid #45475a;
+      padding:12px;
+      text-align:left;
+    }
+
+    th{
+      background:#1e1e2e;
+      color:#f9e2af;
+    }
+
+  </style>
+
+</head>
+
+<body>
+
+  <h1>
+    Async Validator with debounceTime() in Angular
+  </h1>
+
+  <p>
+    This example checks username availability using an async validator with
+    <span class="highlight">debounceTime()</span>.
+  </p>
+
+  <div class="note">
+
+    Without debounce:
+
+    <ul>
+      <li>Every key press triggers API call</li>
+      <li>Too many unnecessary requests</li>
+    </ul>
+
+    With debounce:
+
+    <ul>
+      <li>Angular waits before calling API</li>
+      <li>Only latest value is checked</li>
+    </ul>
+
+  </div>
+
+  <h2>
+    Real Flow
+  </h2>
+
+  <table>
+
+    <tr>
+      <th>User Typing</th>
+      <th>Without debounce</th>
+      <th>With debounceTime(500)</th>
+    </tr>
+
+    <tr>
+      <td>r</td>
+      <td>API Call</td>
+      <td rowspan="6">
+        Wait until typing stops
+      </td>
+    </tr>
+
+    <tr>
+      <td>ri</td>
+      <td>API Call</td>
+    </tr>
+
+    <tr>
+      <td>riz</td>
+      <td>API Call</td>
+    </tr>
+
+    <tr>
+      <td>rizw</td>
+      <td>API Call</td>
+    </tr>
+
+    <tr>
+      <td>rizwa</td>
+      <td>API Call</td>
+    </tr>
+
+    <tr>
+      <td>rizwan</td>
+      <td>API Call</td>
+    </tr>
+
+    <tr>
+      <td colspan="3">
+        After 500ms → Only ONE API call
+      </td>
+    </tr>
+
+  </table>
+
+  <h2>
+    User Service
+  </h2>
+
+  <p>
+    Simulated backend API.
+  </p>
+
+  <pre><code class="language-ts">
+import { Injectable } from '@angular/core';
+
+import {
+  Observable,
+  of,
+  delay
+} from 'rxjs';
+
+@Injectable({
+  providedIn: 'root'
+})
+
+export class UserService {
+
+  checkUsername(username: string): Observable&lt;boolean&gt; {
+
+    const takenUsers = [
+      'admin',
+      'rizwan',
+      'john'
+    ];
+
+    const isAvailable =
+      !takenUsers.includes(username);
+
+    return of(isAvailable).pipe(
+      delay(2000)
+    );
+
+  }
+
+}
+  </code></pre>
+
+  <h3>
+    Meaning
+  </h3>
+
+  <table>
+
+    <tr>
+      <th>Username</th>
+      <th>Service Result</th>
+      <th>Meaning</th>
+    </tr>
+
+    <tr>
+      <td>admin</td>
+      <td>false</td>
+      <td>Already taken</td>
+    </tr>
+
+    <tr>
+      <td>rizwan</td>
+      <td>false</td>
+      <td>Already taken</td>
+    </tr>
+
+    <tr>
+      <td>sahil</td>
+      <td>true</td>
+      <td>Available</td>
+    </tr>
+
+  </table>
+
+  <h2>
+    Component TypeScript
+  </h2>
+
+  <pre><code class="language-ts">
+import { Component } from '@angular/core';
+
+import {
+  AbstractControl,
+  AsyncValidatorFn,
+  FormBuilder,
+  FormGroup,
+  ValidationErrors,
+  Validators
+} from '@angular/forms';
+
+import {
+  Observable,
+  of
+} from 'rxjs';
+
+import {
+  debounceTime,
+  distinctUntilChanged,
+  switchMap,
+  map,
+  catchError
+} from 'rxjs/operators';
+
+import { UserService } from './user.service';
+
+@Component({
+  selector: 'app-register',
+  templateUrl: './register.component.html'
+})
+
+export class RegisterComponent {
+
+  form: FormGroup;
+
+  constructor(
+    private fb: FormBuilder,
+    private userService: UserService
+  ) {
+
+    this.form = this.fb.group({
+
+      username: [
+        '',
+        [Validators.required],
+        [this.usernameValidator()]
+      ]
+
+    });
+
+  }
+
+  usernameValidator(): AsyncValidatorFn {
+
+    return (
+      control: AbstractControl
+    ): Observable&lt;ValidationErrors | null&gt; => {
+
+      return of(control.value).pipe(
+
+        debounceTime(500),
+
+        distinctUntilChanged(),
+
+        switchMap(username => {
+
+          if (!username) {
+            return of(null);
+          }
+
+          return this.userService
+            .checkUsername(username);
+
+        }),
+
+        map(isAvailable => {
+
+          return isAvailable
+            ? null
+            : { usernameTaken: true };
+
+        }),
+
+        catchError(() => of(null))
+
+      );
+
+    };
+
+  }
+
+  submitForm() {
+    console.log(this.form.value);
+  }
+
+}
+  </code></pre>
+
+  <h2>
+    HTML Template
+  </h2>
+
+  <pre><code class="language-html">
+&lt;form
+  [formGroup]="form"
+  (ngSubmit)="submitForm()"
+&gt;
+
+  &lt;label&gt;Username&lt;/label&gt;
+
+  &lt;input
+    type="text"
+    formControlName="username"
+  &gt;
+
+  &lt;br&gt;
+  &lt;br&gt;
+
+  &lt;div
+    *ngIf="form.get('username')?.pending"
+  &gt;
+    Checking username...
+  &lt;/div&gt;
+
+  &lt;div
+    *ngIf="form.get('username')?.errors?.['required']"
+  &gt;
+    Username is required
+  &lt;/div&gt;
+
+  &lt;div
+    *ngIf="form.get('username')?.errors?.['usernameTaken']"
+  &gt;
+    Username already taken
+  &lt;/div&gt;
+
+  &lt;br&gt;
+
+  &lt;button
+    type="submit"
+    [disabled]="form.invalid || form.pending"
+  &gt;
+    Register
+  &lt;/button&gt;
+
+&lt;/form&gt;
+  </code></pre>
+
+  <h2>
+    Understanding debounceTime()
+  </h2>
+
+  <pre><code class="language-ts">
+debounceTime(500)
+  </code></pre>
+
+  <p>
+    Waits 500 milliseconds after user stops typing.
+  </p>
+
+  <h3>
+    Example
+  </h3>
+
+  <table>
+
+    <tr>
+      <th>Typing</th>
+      <th>Action</th>
+    </tr>
+
+    <tr>
+      <td>r</td>
+      <td>Wait</td>
+    </tr>
+
+    <tr>
+      <td>ri</td>
+      <td>Reset timer</td>
+    </tr>
+
+    <tr>
+      <td>riz</td>
+      <td>Reset timer</td>
+    </tr>
+
+    <tr>
+      <td>rizwan</td>
+      <td>Wait 500ms</td>
+    </tr>
+
+    <tr>
+      <td>Stop typing</td>
+      <td>API Call</td>
+    </tr>
+
+  </table>
+
+  <h2>
+    Understanding distinctUntilChanged()
+  </h2>
+
+  <pre><code class="language-ts">
+distinctUntilChanged()
+  </code></pre>
+
+  <p>
+    Prevents duplicate API calls for same value.
+  </p>
+
+  <h3>
+    Example
+  </h3>
+
+  <pre><code class="language-text">
+rizwan
+rizwan
+  </code></pre>
+
+  <p>
+    Second API call is skipped.
+  </p>
+
+  <h2>
+    Understanding switchMap()
+  </h2>
+
+  <pre><code class="language-ts">
+switchMap(username => {
+  return this.userService
+    .checkUsername(username);
+})
+  </code></pre>
+
+  <p>
+    Cancels previous API request if user types again.
+  </p>
+
+  <h3>
+    Example
+  </h3>
+
+  <table>
+
+    <tr>
+      <th>Action</th>
+      <th>Result</th>
+    </tr>
+
+    <tr>
+      <td>User types "ri"</td>
+      <td>API Request Started</td>
+    </tr>
+
+    <tr>
+      <td>User quickly types "riz"</td>
+      <td>Old Request Cancelled</td>
+    </tr>
+
+    <tr>
+      <td>New Request</td>
+      <td>Uses latest value</td>
+    </tr>
+
+  </table>
+
+  <h2>
+    Understanding map()
+  </h2>
+
+  <pre><code class="language-ts">
+map(isAvailable => {
+
+  return isAvailable
+    ? null
+    : { usernameTaken: true };
+
+})
+  </code></pre>
+
+  <table>
+
+    <tr>
+      <th>API Result</th>
+      <th>Validator Return</th>
+      <th>Status</th>
+    </tr>
+
+    <tr>
+      <td>true</td>
+      <td>null</td>
+      <td>Valid</td>
+    </tr>
+
+    <tr>
+      <td>false</td>
+      <td>{ usernameTaken: true }</td>
+      <td>Invalid</td>
+    </tr>
+
+  </table>
+
+  <h2>
+    Understanding catchError()
+  </h2>
+
+  <pre><code class="language-ts">
+catchError(() => of(null))
+  </code></pre>
+
+  <p>
+    Prevents validator crash if API fails.
+  </p>
+
+  <h2>
+    Final Result
+  </h2>
+
+  <table>
+
+    <tr>
+      <th>Username</th>
+      <th>API Result</th>
+      <th>Validator Return</th>
+      <th>Status</th>
+    </tr>
+
+    <tr>
+      <td>admin</td>
+      <td>false</td>
+      <td>{ usernameTaken: true }</td>
+      <td>Invalid</td>
+    </tr>
+
+    <tr>
+      <td>rizwan</td>
+      <td>false</td>
+      <td>{ usernameTaken: true }</td>
+      <td>Invalid</td>
+    </tr>
+
+    <tr>
+      <td>sahil</td>
+      <td>true</td>
+      <td>null</td>
+      <td>Valid</td>
+    </tr>
+
+  </table>
+
+  <h2>
+    Short Definition
+  </h2>
+
+  <p>
+    <span class="highlight">debounceTime()</span> in Angular async validators delays API calls until the user stops typing for a specified time.
+  </p>
+
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-typescript.min.js"></script>
+
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-markup.min.js"></script>
+
+</body>
+
+</html> -->
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Debouncing in Async Validators - Angular</title>
+
+<style>
+body{
+  font-family: Arial, sans-serif;
+  background:#0f172a;
+  color:#e5e7eb;
+  padding:30px;
+  line-height:1.7;
+}
+
+h1{
+  color:#38bdf8;
+}
+
+h2{
+  color:#a78bfa;
+}
+
+p{
+  font-size:17px;
+}
+
+pre{
+  background:#020617;
+  color:#d1d5db;
+  padding:18px;
+  border-radius:10px;
+  overflow:auto;
+  border:1px solid #334155;
+}
+
+code{
+  font-family: Consolas, monospace;
+  font-size:15px;
+}
+
+.keyword{color:#c084fc;}
+.string{color:#86efac;}
+.function{color:#38bdf8;}
+.comment{color:#94a3b8;}
+.number{color:#facc15;}
+</style>
+</head>
+
+<body>
+
+<h1>How do you handle debouncing in async validators?</h1>
+
+<p>
+In Angular, debouncing in async validators means
+<strong>waiting for the user to stop typing before calling the API</strong>,
+so the API is not called on every key press.
+</p>
+
+<h2>Example: Async Validator with Debounce</h2>
+
+<pre><code><span class="keyword">import</span> { AbstractControl, AsyncValidatorFn, ValidationErrors, Validators } 
+<span class="keyword">from</span> <span class="string">'@angular/forms'</span>;
+
+<span class="keyword">import</span> { Observable, of, timer } 
+<span class="keyword">from</span> <span class="string">'rxjs'</span>;
+
+<span class="keyword">import</span> { switchMap, map, catchError } 
+<span class="keyword">from</span> <span class="string">'rxjs/operators'</span>;
+
+
+<span class="function">usernameValidator</span>(): AsyncValidatorFn {
+
+  <span class="keyword">return</span> (control: AbstractControl): Observable&lt;ValidationErrors | null&gt; =&gt; {
+
+    <span class="keyword">return</span> timer(<span class="number">500</span>).pipe(
+
+      switchMap(() =&gt;
+        this.userService.checkUsername(control.value)
+      ),
+
+      map(isTaken =&gt; isTaken ? { usernameTaken: true } : null),
+
+      catchError(() =&gt; of(null))
+
+    );
+
+  };
+
+}</code></pre>
+
+<h2>Use Validator in Reactive Form</h2>
+
+<pre><code>form = this.fb.group({
+
+  username: [
+    <span class="string">''</span>,
+    [Validators.required],
+    [this.usernameValidator()]
+  ]
+
+});</code></pre>
+
+<h2>Meaning</h2>
+
+<pre><code>timer(<span class="number">500</span>)</code></pre>
+
+<p>
+It waits <strong>500 milliseconds</strong> before calling the API.
+</p>
+
+<pre><code>switchMap(() =&gt; this.userService.checkUsername(control.value))</code></pre>
+
+<p>
+It calls the API and cancels the previous request when the user types again.
+</p>
+
+<pre><code>map(isTaken =&gt; isTaken ? { usernameTaken: true } : null)</code></pre>
+
+<p>
+It returns an error object if username is already taken, otherwise it returns null.
+</p>
+
+<pre><code>catchError(() =&gt; of(null))</code></pre>
+
+<p>
+It prevents validation failure if the API gives an error.
+</p>
+
+<h2>Main Point</h2>
+
+<pre><code>timer(<span class="number">500</span>) + switchMap(apiCall)</code></pre>
+
+<p>
+This is the common way to handle debouncing in Angular async validators.
+</p>
+
+</body>
+</html>

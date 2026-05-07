@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Display Error Message in Angular</title>
+
+<link rel="stylesheet"
+href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css">
+
+<style>
+
+body{
+  font-family:'Segoe UI',sans-serif;
+  background:#0f172a;
+  color:#e2e8f0;
+  padding:2rem;
+  line-height:1.8;
+}
+
+h1{
+  color:#38bdf8;
+  text-align:center;
+  margin-bottom:40px;
+}
+
+h2{
+  color:#a78bfa;
+  margin-top:35px;
+}
+
+p{
+  margin:12px 0;
+}
+
+ul{
+  padding-left:24px;
+}
+
+li{
+  margin:8px 0;
+}
+
+pre{
+  background:#020617 !important;
+  border:1px solid #334155;
+  border-radius:12px;
+  padding:1rem;
+  overflow:auto;
+}
+
+code{
+  font-size:15px;
+  font-family:Consolas,monospace;
+}
+
+.demo{
+  background:#1e293b;
+  padding:20px;
+  border-radius:12px;
+  margin-top:20px;
+  border:1px solid #334155;
+}
+
+input{
+  width:100%;
+  padding:12px;
+  margin-top:10px;
+  border-radius:8px;
+  border:1px solid #475569;
+  background:#0f172a;
+  color:white;
+  box-sizing:border-box;
+}
+
+.error{
+  color:#f87171;
+  margin-top:10px;
+  font-weight:bold;
+}
+
+button{
+  margin-top:15px;
+  padding:10px 18px;
+  border:none;
+  border-radius:8px;
+  background:#38bdf8;
+  color:black;
+  font-weight:bold;
+}
+
+.highlight{
+  color:#facc15;
+  font-weight:bold;
+}
+
+.note{
+  background:#1e293b;
+  padding:15px;
+  border-left:4px solid #38bdf8;
+  border-radius:8px;
+  margin-top:20px;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<h1>How do you display an error message when a field is invalid?</h1>
+
+<p>
+In Angular, error messages are usually shown using:
+</p>
+
+<pre><code class="language-html">
+*ngIf
+</code></pre>
+
+<p>
+with:
+</p>
+
+<pre><code class="language-ts">
+control.invalid
+</code></pre>
+
+or
+
+<pre><code class="language-ts">
+control.errors
+</code></pre>
+
+<h2>Reactive Form Example</h2>
+
+<pre><code class="language-ts">
+form = this.fb.group({
+
+  username: [
+
+    '',
+
+    [
+
+      Validators.required,
+
+      Validators.minLength(5)
+
+    ]
+
+  ]
+
+});
+</code></pre>
+
+<h2>HTML View</h2>
+
+<pre><code class="language-html">
+&lt;form [formGroup]="form"&gt;
+
+  &lt;input
+    type="text"
+    formControlName="username"
+    placeholder="Enter username"
+  &gt;
+
+  &lt;div
+    class="error"
+    *ngIf="
+      form.get('username')?.invalid
+      &amp;&amp;
+      form.get('username')?.touched
+    "
+  &gt;
+
+    Field is invalid
+
+  &lt;/div&gt;
+
+&lt;/form&gt;
+</code></pre>
+
+<h2>Specific Error Messages</h2>
+
+<pre><code class="language-html">
+&lt;div
+  class="error"
+  *ngIf="form.get('username')?.errors?.['required']"
+&gt;
+
+  Username is required
+
+&lt;/div&gt;
+
+&lt;div
+  class="error"
+  *ngIf="form.get('username')?.errors?.['minlength']"
+&gt;
+
+  Minimum 5 characters required
+
+&lt;/div&gt;
+</code></pre>
+
+<h2>Output Example</h2>
+
+<div class="demo">
+
+<label>Username</label>
+
+<input type="text" placeholder="ab">
+
+<div class="error">
+Minimum 5 characters required
+</div>
+
+<button disabled>
+Submit
+</button>
+
+</div>
+
+<h2>Why use touched?</h2>
+
+<pre><code class="language-ts">
+control.touched
+</code></pre>
+
+<p>
+It prevents error messages from showing immediately when page loads.
+</p>
+
+<p>
+Error appears only after user touches the field.
+</p>
+
+<h2>Main Point</h2>
+
+<ul>
+  <li><span class="highlight">invalid</span> → checks invalid state</li>
+  <li><span class="highlight">errors</span> → checks specific error</li>
+  <li><span class="highlight">touched</span> → shows error after interaction</li>
+</ul>
+
+<div class="note">
+
+<span class="highlight">Common Pattern:</span>
+
+<pre><code class="language-html">
+*ngIf="control.invalid &amp;&amp; control.touched"
+</code></pre>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-typescript.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-markup.min.js"></script>
+
+</body>
+
+</html>

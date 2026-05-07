@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Custom Validator Directive Interface in Angular</title>
+
+  <link rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css">
+
+  <style>
+
+    body{
+      font-family:'Segoe UI',sans-serif;
+      background:#0f0f1a;
+      color:#cdd6f4;
+      padding:2rem;
+      line-height:1.8;
+    }
+
+    h1{
+      color:#89b4fa;
+      text-align:center;
+      margin-bottom:40px;
+    }
+
+    h2{
+      color:#a6e3a1;
+      margin-top:35px;
+      margin-bottom:15px;
+    }
+
+    p{
+      margin:12px 0;
+    }
+
+    ul{
+      padding-left:24px;
+    }
+
+    li{
+      margin:8px 0;
+    }
+
+    .highlight{
+      color:#f9e2af;
+      font-weight:bold;
+    }
+
+    pre{
+      background:#1e1e2e !important;
+      border-radius:12px;
+      padding:1rem;
+      overflow:auto;
+      border:1px solid #313244;
+    }
+
+    code{
+      font-size:15px;
+    }
+
+  </style>
+
+</head>
+
+<body>
+
+  <h1>
+    What Interface Does a Custom Validator Directive Implement?
+  </h1>
+
+  <p>
+    In Angular, a custom validator directive implements the
+    <span class="highlight">Validator</span> interface.
+  </p>
+
+  <h2>
+    Validator Interface Example
+  </h2>
+
+  <pre><code class="language-ts">
+import { Directive } from '@angular/core';
+
+import {
+  AbstractControl,
+  NG_VALIDATORS,
+  ValidationErrors,
+  Validator
+} from '@angular/forms';
+
+@Directive({
+  selector: '[appForbiddenName]',
+  providers: [
+    {
+      provide: NG_VALIDATORS,
+      useExisting: ForbiddenNameDirective,
+      multi: true
+    }
+  ]
+})
+
+export class ForbiddenNameDirective implements Validator {
+
+  validate(control: AbstractControl): ValidationErrors | null {
+
+    if (control.value === 'admin') {
+      return { forbiddenName: true };
+    }
+
+    return null;
+  }
+}
+  </code></pre>
+
+  <h2>
+    Required Method
+  </h2>
+
+  <p>
+    The <span class="highlight">Validator</span> interface requires the
+    <span class="highlight">validate()</span> method.
+  </p>
+
+  <pre><code class="language-ts">
+validate(control: AbstractControl): ValidationErrors | null
+  </code></pre>
+
+  <ul>
+
+    <li>
+      Return <span class="highlight">null</span> → Valid
+    </li>
+
+    <li>
+      Return object → Invalid
+    </li>
+
+  </ul>
+
+  <h2>
+    Invalid Response Example
+  </h2>
+
+  <pre><code class="language-ts">
+return { forbiddenName: true };
+  </code></pre>
+
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-typescript.min.js"></script>
+
+</body>
+
+</html>

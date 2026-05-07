@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>ValidationErrors Type in Angular</title>
+
+<link rel="stylesheet"
+href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css">
+
+<style>
+
+body{
+  font-family:'Segoe UI',sans-serif;
+  background:#0f172a;
+  color:#e2e8f0;
+  padding:2rem;
+  line-height:1.8;
+}
+
+h1{
+  color:#38bdf8;
+  text-align:center;
+  margin-bottom:40px;
+}
+
+h2{
+  color:#a78bfa;
+  margin-top:35px;
+}
+
+p{
+  margin:12px 0;
+}
+
+ul{
+  padding-left:24px;
+}
+
+li{
+  margin:8px 0;
+}
+
+pre{
+  background:#020617 !important;
+  border:1px solid #334155;
+  border-radius:12px;
+  padding:1rem;
+  overflow:auto;
+}
+
+code{
+  font-size:15px;
+  font-family:Consolas,monospace;
+}
+
+.note{
+  background:#1e293b;
+  padding:15px;
+  border-left:4px solid #38bdf8;
+  border-radius:8px;
+  margin-top:20px;
+}
+
+.highlight{
+  color:#facc15;
+  font-weight:bold;
+}
+
+.demo{
+  background:#1e293b;
+  padding:20px;
+  border-radius:12px;
+  margin-top:20px;
+  border:1px solid #334155;
+}
+
+.error{
+  color:#f87171;
+  margin-top:10px;
+}
+
+input{
+  width:100%;
+  padding:12px;
+  margin-top:10px;
+  border-radius:8px;
+  border:1px solid #475569;
+  background:#0f172a;
+  color:white;
+  box-sizing:border-box;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<h1>What is the ValidationErrors type?</h1>
+
+<p>
+<span class="highlight">ValidationErrors</span> is an Angular type used to represent validation errors.
+</p>
+
+<p>
+It is basically an object containing validation error information.
+</p>
+
+<h2>Type Definition</h2>
+
+<pre><code class="language-ts">
+export type ValidationErrors = {
+
+  [key: string]: any;
+
+};
+</code></pre>
+
+<h2>Example Custom Validator</h2>
+
+<pre><code class="language-ts">
+function noSpaceValidator(
+  control: AbstractControl
+): ValidationErrors | null {
+
+  if (control.value?.includes(' ')) {
+
+    return {
+
+      noSpace: true
+
+    };
+
+  }
+
+  return null;
+
+}
+</code></pre>
+
+<h2>Meaning</h2>
+
+<p>
+If validation fails:
+</p>
+
+<pre><code class="language-ts">
+return {
+
+  noSpace: true
+
+};
+</code></pre>
+
+<p>
+If validation passes:
+</p>
+
+<pre><code class="language-ts">
+return null;
+</code></pre>
+
+<h2>Reactive Form Example</h2>
+
+<pre><code class="language-ts">
+form = this.fb.group({
+
+  username: [
+
+    '',
+
+    [
+
+      noSpaceValidator
+
+    ]
+
+  ]
+
+});
+</code></pre>
+
+<h2>HTML View</h2>
+
+<pre><code class="language-html">
+&lt;input
+  type="text"
+  formControlName="username"
+&gt;
+
+&lt;div
+  class="error"
+  *ngIf="form.get('username')?.errors?.['noSpace']"
+&gt;
+
+  Spaces are not allowed
+
+&lt;/div&gt;
+</code></pre>
+
+<h2>Output Example</h2>
+
+<div class="demo">
+
+<label>Username</label>
+
+<input type="text" placeholder="john doe">
+
+<div class="error">
+Spaces are not allowed
+</div>
+
+</div>
+
+<h2>Main Point</h2>
+
+<ul>
+  <li><span class="highlight">ValidationErrors</span> stores validation error data</li>
+  <li>Validators return <span class="highlight">ValidationErrors | null</span></li>
+  <li>Error object keys are used in the template</li>
+</ul>
+
+<div class="note">
+Angular checks the returned error object to determine whether the control is valid or invalid.
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-typescript.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-markup.min.js"></script>
+
+</body>
+
+</html>

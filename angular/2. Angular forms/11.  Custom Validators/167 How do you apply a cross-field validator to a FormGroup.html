@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Apply Cross Field Validator to FormGroup</title>
+
+<link rel="stylesheet"
+href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css">
+
+<style>
+
+body{
+  font-family:'Segoe UI',sans-serif;
+  background:#0f172a;
+  color:#e2e8f0;
+  padding:2rem;
+  line-height:1.8;
+}
+
+h1{
+  color:#38bdf8;
+  text-align:center;
+  margin-bottom:40px;
+}
+
+h2{
+  color:#a78bfa;
+  margin-top:35px;
+}
+
+p{
+  margin:12px 0;
+}
+
+pre{
+  background:#020617 !important;
+  border:1px solid #334155;
+  border-radius:12px;
+  padding:1rem;
+  overflow:auto;
+}
+
+code{
+  font-size:15px;
+  font-family:Consolas,monospace;
+}
+
+.note{
+  background:#1e293b;
+  padding:15px;
+  border-left:4px solid #38bdf8;
+  border-radius:8px;
+  margin-top:20px;
+}
+
+.highlight{
+  color:#facc15;
+  font-weight:bold;
+}
+
+</style>
+</head>
+
+<body>
+
+<h1>How do you apply a cross-field validator to a FormGroup?</h1>
+
+<p>
+A cross-field validator is applied using the 
+<span class="highlight">validators</span> property 
+inside the FormGroup configuration object.
+</p>
+
+<h2>Step 1: Create Cross-Field Validator</h2>
+
+<pre><code class="language-ts">
+passwordMatchValidator(form: AbstractControl) {
+
+  const password = form.get('password')?.value;
+
+  const confirmPassword = form.get('confirmPassword')?.value;
+
+  if (password !== confirmPassword) {
+
+    return { passwordMismatch: true };
+
+  }
+
+  return null;
+
+}
+</code></pre>
+
+<h2>Step 2: Apply Validator to FormGroup</h2>
+
+<pre><code class="language-ts">
+form = this.fb.group(
+
+  {
+
+    password: ['', Validators.required],
+
+    confirmPassword: ['', Validators.required]
+
+  },
+
+  {
+
+    validators: this.passwordMatchValidator
+
+  }
+
+);
+</code></pre>
+
+<h2>Step 3: Show Error Message</h2>
+
+<pre><code class="language-html">
+&lt;div *ngIf="form.errors?.['passwordMismatch']"&gt;
+
+  Password and Confirm Password do not match
+
+&lt;/div&gt;
+</code></pre>
+
+<h2>Main Point</h2>
+
+<pre><code class="language-ts">
+validators: this.passwordMatchValidator
+</code></pre>
+
+<div class="note">
+Cross-field validators are always applied on 
+<strong>FormGroup</strong>,
+because they compare multiple controls together.
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-typescript.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-markup.min.js"></script>
+
+</body>
+</html>

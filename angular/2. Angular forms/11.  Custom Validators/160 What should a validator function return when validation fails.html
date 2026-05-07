@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Validator Return Value When Validation Fails</title>
+
+  <link rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css">
+
+  <style>
+
+    body{
+      font-family:'Segoe UI',sans-serif;
+      background:#0f0f1a;
+      color:#cdd6f4;
+      padding:2rem;
+      line-height:1.8;
+    }
+
+    h1{
+      color:#89b4fa;
+      text-align:center;
+      margin-bottom:40px;
+    }
+
+    h2{
+      color:#a6e3a1;
+      margin-top:35px;
+      margin-bottom:15px;
+    }
+
+    p{
+      margin:12px 0;
+    }
+
+    ul{
+      padding-left:24px;
+    }
+
+    li{
+      margin:8px 0;
+    }
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      margin-top:20px;
+      overflow:hidden;
+      border-radius:10px;
+    }
+
+    th{
+      background:#89b4fa;
+      color:#11111b;
+      padding:12px;
+      text-align:left;
+    }
+
+    td{
+      border:1px solid #313244;
+      padding:12px;
+      background:#1e1e2e;
+    }
+
+    pre{
+      background:#1e1e2e !important;
+      border-radius:12px;
+      padding:1rem;
+      overflow:auto;
+      border:1px solid #313244;
+    }
+
+    code{
+      font-family:Consolas,monospace;
+      font-size:0.95rem;
+    }
+
+    .note{
+      background:#181825;
+      padding:14px;
+      border-left:5px solid #f38ba8;
+      border-radius:8px;
+      margin:18px 0;
+    }
+
+  </style>
+
+</head>
+
+<body>
+
+  <h1>What should a validator function return when validation fails?</h1>
+
+  <p>
+    When validation fails, a validator function should return:
+  </p>
+
+  <pre><code class="language-ts">
+{ errorName: true }
+  </code></pre>
+
+  <div class="note">
+    ❌ An error object means the form control is invalid.
+  </div>
+
+  <h2>🔹 Example Custom Validator</h2>
+
+  <pre><code class="language-ts">
+import { AbstractControl, ValidationErrors } from '@angular/forms';
+
+export function noAdminValidator(
+  control: AbstractControl
+): ValidationErrors | null {
+
+  if (control.value === 'admin') {
+    return { noAdmin: true };
+  }
+
+  return null;
+}
+  </code></pre>
+
+  <h2>🔹 Return Values Meaning</h2>
+
+  <table>
+
+    <tr>
+      <th>Return Value</th>
+      <th>Meaning</th>
+    </tr>
+
+    <tr>
+      <td><code>null</code></td>
+      <td>Validation passed</td>
+    </tr>
+
+    <tr>
+      <td><code>{ noAdmin: true }</code></td>
+      <td>Validation failed</td>
+    </tr>
+
+  </table>
+
+  <h2>🔹 Real Example</h2>
+
+  <p>
+    If input value is:
+  </p>
+
+  <pre><code class="language-ts">
+'admin'
+  </code></pre>
+
+  <p>
+    Validator returns:
+  </p>
+
+  <pre><code class="language-ts">
+{ noAdmin: true }
+  </code></pre>
+
+  <p>
+    Angular marks the form control as invalid.
+  </p>
+
+  <h2>🔹 Accessing Validation Error</h2>
+
+  <pre><code class="language-html">
+&lt;div *ngIf="userForm.get('username')?.errors?.noAdmin"&gt;
+  Username cannot be admin
+&lt;/div&gt;
+  </code></pre>
+
+  <h2>🔹 Summary</h2>
+
+  <ul>
+    <li>Validation failure returns an error object.</li>
+    <li>Error object contains custom error key.</li>
+    <li>Angular stores the error inside the <code>errors</code> property.</li>
+    <li>Returned object makes the control invalid.</li>
+  </ul>
+
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-typescript.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-markup.min.js"></script>
+
+</body>
+
+</html>

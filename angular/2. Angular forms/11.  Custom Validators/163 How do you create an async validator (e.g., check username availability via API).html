@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Async Validator in Angular</title>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css">
+
+<style>
+body{
+  font-family:'Segoe UI',sans-serif;
+  background:#0f0f1a;
+  color:#cdd6f4;
+  padding:2rem;
+  line-height:1.8;
+}
+h1{text-align:center;color:#89b4fa;}
+h2{color:#a6e3a1;margin-top:35px;}
+h3{color:#f9e2af;}
+.highlight{color:#f38ba8;font-weight:bold;}
+pre{
+  background:#1e1e2e!important;
+  border-radius:12px;
+  padding:1rem;
+  overflow:auto;
+  border:1px solid #313244;
+}
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin:20px 0;
+}
+th,td{
+  border:1px solid #45475a;
+  padding:10px;
+}
+th{background:#1e1e2e;color:#f9e2af;}
+.note{
+  background:#1e1e2e;
+  border-left:4px solid #89b4fa;
+  padding:1rem;
+  border-radius:10px;
+}
+</style>
+</head>
+
+<body>
+
+<h1>Async Validator in Angular</h1>
+
+<p>
+An <span class="highlight">async validator</span> is used when validation depends on an API or server response.
+</p>
+
+<div class="note">
+Example: Check whether a username is already taken or available.
+</div>
+
+<h2>Real Flow</h2>
+
+<table>
+<tr>
+<th>Step</th>
+<th>What Happens</th>
+</tr>
+<tr>
+<td>1</td>
+<td>User types username: <b>admin</b></td>
+</tr>
+<tr>
+<td>2</td>
+<td>Angular calls async validator</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Validator calls API/service</td>
+</tr>
+<tr>
+<td>4</td>
+<td>API checks username in database</td>
+</tr>
+<tr>
+<td>5</td>
+<td>If username exists, validator returns error</td>
+</tr>
+</table>
+
+<h2>1. User Service</h2>
+
+<p>This service simulates an API call.</p>
+
+<pre><code class="language-ts">
+import { Injectable } from '@angular/core';
+import { Observable, of, delay } from 'rxjs';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class UserService {
+
+  checkUsername(username: string): Observable&lt;boolean&gt; {
+
+    const takenUsers = ['admin', 'rizwan', 'john'];
+
+    const isAvailable = !takenUsers.includes(username);
+
+    return of(isAvailable).pipe(delay(2000));
+  }
+
+}
+</code></pre>
+
+<h3>Meaning</h3>
+
+<table>
+<tr>
+<th>Username</th>
+<th>Result</th>
+<th>Meaning</th>
+</tr>
+<tr>
+<td>admin</td>
+<td>false</td>
+<td>Username already taken</td>
+</tr>
+<tr>
+<td>sahil</td>
+<td>true</td>
+<td>Username available</td>
+</tr>
+</table>
+
+<h2>2. Component TypeScript File</h2>
+
+<pre><code class="language-ts">
+import { Component } from '@angular/core';
+import {
+  AbstractControl,
+  AsyncValidatorFn,
+  FormBuilder,
+  FormGroup,
+  ValidationErrors,
+  Validators
+} from '@angular/forms';
+
+import { Observable, map } from 'rxjs';
+import { UserService } from './user.service';
+
+@Component({
+  selector: 'app-register',
+  templateUrl: './register.component.html'
+})
+export class RegisterComponent {
+
+  form: FormGroup;
+
+  constructor(
+    private fb: FormBuilder,
+    private userService: UserService
+  ) {
+
+    this.form = this.fb.group({
+
+      username: [
+        '',
+        [Validators.required],
+        [this.usernameValidator.bind(this)]
+      ]
+
+    });
+
+  }
+
+  usernameValidator(control: AbstractControl)
+  : Observable&lt;ValidationErrors | null&gt; {
+
+    return this.userService.checkUsername(control.value).pipe(
+
+      map(isAvailable => {
+
+        if (isAvailable) {
+          return null;
+        }
+
+        return { usernameTaken: true };
+
+      })
+
+    );
+
+  }
+
+  submitForm() {
+    console.log(this.form.value);
+  }
+
+}
+</code></pre>
+
+<h2>3. HTML Template</h2>
+
+<pre><code class="language-html">
+&lt;form [formGroup]="form" (ngSubmit)="submitForm()"&gt;
+
+  &lt;label&gt;Username&lt;/label&gt;
+
+  &lt;input type="text" formControlName="username"&gt;
+
+  &lt;div *ngIf="form.get('username')?.pending"&gt;
+    Checking username...
+  &lt;/div&gt;
+
+  &lt;div *ngIf="form.get('username')?.errors?.['required']"&gt;
+    Username is required
+  &lt;/div&gt;
+
+  &lt;div *ngIf="form.get('username')?.errors?.['usernameTaken']"&gt;
+    Username already taken
+  &lt;/div&gt;
+
+  &lt;button type="submit" [disabled]="form.invalid || form.pending"&gt;
+    Register
+  &lt;/button&gt;
+
+&lt;/form&gt;
+</code></pre>
+
+<h2>4. Important Syntax</h2>
+
+<pre><code class="language-ts">
+username: [
+  '',
+  [Validators.required],
+  [this.usernameValidator.bind(this)]
+]
+</code></pre>
+
+<table>
+<tr>
+<th>Part</th>
+<th>Meaning</th>
+</tr>
+<tr>
+<td>''</td>
+<td>Initial value</td>
+</tr>
+<tr>
+<td>[Validators.required]</td>
+<td>Synchronous validator</td>
+</tr>
+<tr>
+<td>[this.usernameValidator.bind(this)]</td>
+<td>Async validator</td>
+</tr>
+</table>
+
+<h2>5. Why bind(this)?</h2>
+
+<p>
+<span class="highlight">bind(this)</span> is used because the validator uses:
+</p>
+
+<pre><code class="language-ts">
+this.userService.checkUsername(control.value)
+</code></pre>
+
+<p>
+If we do not use <span class="highlight">bind(this)</span>, Angular may call the function without component context.
+Then <span class="highlight">this.userService</span> becomes undefined.
+</p>
+
+<h3>Without bind(this)</h3>
+
+<pre><code class="language-ts">
+username: [
+  '',
+  [Validators.required],
+  [this.usernameValidator]
+]
+</code></pre>
+
+<p>This can cause error:</p>
+
+<pre><code class="language-text">
+Cannot read properties of undefined
+</code></pre>
+
+<h3>With bind(this)</h3>
+
+<pre><code class="language-ts">
+username: [
+  '',
+  [Validators.required],
+  [this.usernameValidator.bind(this)]
+]
+</code></pre>
+
+<p>
+Now the validator remembers the current component object.
+So this works correctly:
+</p>
+
+<pre><code class="language-ts">
+this.userService.checkUsername(control.value)
+</code></pre>
+
+<h2>6. JavaScript Example of bind(this)</h2>
+
+<h3>Without bind</h3>
+
+<pre><code class="language-ts">
+const person = {
+  name: 'Rizwan',
+
+  show() {
+    console.log(this.name);
+  }
+};
+
+const fn = person.show;
+
+fn();
+</code></pre>
+
+<p>Output:</p>
+
+<pre><code class="language-text">
+undefined
+</code></pre>
+
+<h3>With bind</h3>
+
+<pre><code class="language-ts">
+const fn = person.show.bind(person);
+
+fn();
+</code></pre>
+
+<p>Output:</p>
+
+<pre><code class="language-text">
+Rizwan
+</code></pre>
+
+<h2>7. Final Result</h2>
+
+<table>
+<tr>
+<th>Username</th>
+<th>API Result</th>
+<th>Validator Return</th>
+<th>Status</th>
+</tr>
+<tr>
+<td>admin</td>
+<td>false</td>
+<td>{ usernameTaken: true }</td>
+<td>Invalid</td>
+</tr>
+<tr>
+<td>rizwan</td>
+<td>false</td>
+<td>{ usernameTaken: true }</td>
+<td>Invalid</td>
+</tr>
+<tr>
+<td>sahil</td>
+<td>true</td>
+<td>null</td>
+<td>Valid</td>
+</tr>
+</table>
+
+<h2>Short Definition</h2>
+
+<p>
+An async validator in Angular is a validator that checks form value asynchronously, usually by calling an API, and returns
+<span class="highlight">null</span> for valid or an error object for invalid.
+</p>
+
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-typescript.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-markup.min.js"></script>
+
+</body>
+</html>

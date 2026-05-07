@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Custom Validator Directive in Template-Driven Forms</title>
+
+  <link rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css">
+
+  <style>
+
+    body{
+      font-family:'Segoe UI',sans-serif;
+      background:#0f0f1a;
+      color:#cdd6f4;
+      padding:2rem;
+      line-height:1.8;
+    }
+
+    h1{
+      color:#89b4fa;
+      text-align:center;
+      margin-bottom:40px;
+    }
+
+    h2{
+      color:#a6e3a1;
+      margin-top:35px;
+      margin-bottom:15px;
+    }
+
+    p{
+      margin:12px 0;
+    }
+
+    ul{
+      padding-left:24px;
+    }
+
+    li{
+      margin:8px 0;
+    }
+
+    pre{
+      background:#1e1e2e !important;
+      border-radius:12px;
+      padding:1rem;
+      overflow:auto;
+      border:1px solid #313244;
+    }
+
+    code{
+      font-family:Consolas,monospace;
+      font-size:0.95rem;
+    }
+
+    .note{
+      background:#181825;
+      padding:14px;
+      border-left:5px solid #89b4fa;
+      border-radius:8px;
+      margin:18px 0;
+    }
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      margin-top:20px;
+      overflow:hidden;
+      border-radius:10px;
+    }
+
+    th{
+      background:#89b4fa;
+      color:#11111b;
+      padding:12px;
+      text-align:left;
+    }
+
+    td{
+      border:1px solid #313244;
+      padding:12px;
+      background:#1e1e2e;
+    }
+
+  </style>
+
+</head>
+
+<body>
+
+  <h1>How do you create a custom validator directive for template-driven forms?</h1>
+
+  <p>
+    In template-driven forms, a custom validator is usually created using a
+    <strong>directive</strong> and registered with <code>NG_VALIDATORS</code>.
+  </p>
+
+  <div class="note">
+    The directive adds custom validation logic directly to HTML elements.
+  </div>
+
+  <h2>🔹 Step 1: Create Custom Validator Directive</h2>
+
+  <pre><code class="language-ts">
+import { Directive } from '@angular/core';
+
+import {
+  AbstractControl,
+  NG_VALIDATORS,
+  ValidationErrors,
+  Validator
+} from '@angular/forms';
+
+@Directive({
+  selector: '[appNoAdmin]',
+  providers: [
+    {
+      provide: NG_VALIDATORS,
+      useExisting: NoAdminValidatorDirective,
+      multi: true
+    }
+  ]
+})
+
+export class NoAdminValidatorDirective implements Validator {
+
+  validate(
+    control: AbstractControl
+  ): ValidationErrors | null {
+
+    if (control.value === 'admin') {
+      return { noAdmin: true };
+    }
+
+    return null;
+  }
+
+}
+  </code></pre>
+
+  <h2>🔹 Explanation of NG_VALIDATORS Provider</h2>
+
+  <p>
+    This provider object registers the directive as a validator in Angular forms.
+  </p>
+
+  <pre><code class="language-ts">
+{
+  provide: NG_VALIDATORS,
+  useExisting: NoAdminValidatorDirective,
+  multi: true
+}
+  </code></pre>
+
+  <table>
+
+    <tr>
+      <th>Property</th>
+      <th>Meaning</th>
+    </tr>
+
+    <tr>
+      <td><code>provide: NG_VALIDATORS</code></td>
+      <td>Registers this directive inside Angular's synchronous validator list.</td>
+    </tr>
+
+    <tr>
+      <td><code>useExisting: NoAdminValidatorDirective</code></td>
+      <td>Tells Angular to use this existing directive class as the validator.</td>
+    </tr>
+
+    <tr>
+      <td><code>multi: true</code></td>
+      <td>Allows this validator to work with other validators like <code>required</code>, instead of replacing them.</td>
+    </tr>
+
+  </table>
+
+  <div class="note">
+    Without <code>multi: true</code>, your custom validator may replace other validators.
+  </div>
+
+  <h2>🔹 Real Example with Multiple Validators</h2>
+
+  <pre><code class="language-html">
+&lt;input
+  type="text"
+  name="username"
+  ngModel
+  required
+  appNoAdmin
+  #username="ngModel"
+&gt;
+  </code></pre>
+
+  <p>
+    In this example, Angular applies both validators:
+  </p>
+
+  <ul>
+    <li><code>required</code> validator</li>
+    <li><code>appNoAdmin</code> custom validator</li>
+  </ul>
+
+  <h2>🔹 Step 2: Use Validator in Template-Driven Form</h2>
+
+  <pre><code class="language-html">
+&lt;form #userForm="ngForm"&gt;
+
+  &lt;input
+    type="text"
+    name="username"
+    ngModel
+    appNoAdmin
+    #username="ngModel"
+  &gt;
+
+  &lt;div *ngIf="username.errors?.['noAdmin']"&gt;
+    Username cannot be admin
+  &lt;/div&gt;
+
+&lt;/form&gt;
+  </code></pre>
+
+  <h2>🔹 How it Works</h2>
+
+  <ul>
+    <li><code>appNoAdmin</code> is the custom validator directive.</li>
+    <li>Angular calls the <code>validate()</code> method automatically.</li>
+    <li><code>NG_VALIDATORS</code> tells Angular this directive is a validator.</li>
+    <li><code>useExisting</code> uses the same directive instance.</li>
+    <li><code>multi: true</code> allows multiple validators together.</li>
+    <li>If validation fails, an error object is returned.</li>
+    <li>If validation passes, <code>null</code> is returned.</li>
+  </ul>
+
+  <h2>🔹 Validation Result</h2>
+
+  <table>
+
+    <tr>
+      <th>Input Value</th>
+      <th>Returned Value</th>
+      <th>Status</th>
+    </tr>
+
+    <tr>
+      <td><code>admin</code></td>
+      <td><code>{ noAdmin: true }</code></td>
+      <td>Invalid</td>
+    </tr>
+
+    <tr>
+      <td><code>john</code></td>
+      <td><code>null</code></td>
+      <td>Valid</td>
+    </tr>
+
+  </table>
+
+  <h2>🔹 Summary</h2>
+
+  <ul>
+    <li>Template-driven custom validators are usually directives.</li>
+    <li>They use <code>NG_VALIDATORS</code>.</li>
+    <li><code>provide: NG_VALIDATORS</code> registers validator with Angular Forms.</li>
+    <li><code>useExisting</code> tells Angular to use the directive class.</li>
+    <li><code>multi: true</code> allows this validator with other validators.</li>
+    <li>Validation logic is written inside <code>validate()</code>.</li>
+    <li>Directive is applied directly in HTML.</li>
+    <li>Return <code>null</code> for valid input.</li>
+    <li>Return error object for invalid input.</li>
+  </ul>
+
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-typescript.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-markup.min.js"></script>
+
+</body>
+
+</html>

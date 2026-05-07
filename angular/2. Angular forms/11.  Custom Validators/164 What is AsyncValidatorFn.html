@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>AsyncValidatorFn in Angular</title>
+
+  <link rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css">
+
+  <style>
+
+    body{
+      font-family:'Segoe UI',sans-serif;
+      background:#0f0f1a;
+      color:#cdd6f4;
+      padding:2rem;
+      line-height:1.8;
+    }
+
+    h1{
+      color:#89b4fa;
+      text-align:center;
+      margin-bottom:40px;
+    }
+
+    h2{
+      color:#a6e3a1;
+      margin-top:35px;
+      margin-bottom:15px;
+    }
+
+    h3{
+      color:#f9e2af;
+      margin-top:25px;
+    }
+
+    p{
+      margin:12px 0;
+    }
+
+    ul{
+      padding-left:24px;
+    }
+
+    li{
+      margin:8px 0;
+    }
+
+    .highlight{
+      color:#f38ba8;
+      font-weight:bold;
+    }
+
+    .note{
+      background:#1e1e2e;
+      border-left:4px solid #89b4fa;
+      padding:1rem;
+      border-radius:10px;
+      margin:20px 0;
+    }
+
+    pre{
+      background:#1e1e2e !important;
+      border-radius:12px;
+      padding:1rem;
+      overflow:auto;
+      border:1px solid #313244;
+    }
+
+    code{
+      font-size:15px;
+    }
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      margin-top:20px;
+    }
+
+    th,td{
+      border:1px solid #45475a;
+      padding:12px;
+      text-align:left;
+    }
+
+    th{
+      background:#1e1e2e;
+      color:#f9e2af;
+    }
+
+  </style>
+
+</head>
+
+<body>
+
+  <h1>
+    What is AsyncValidatorFn in Angular?
+  </h1>
+
+  <p>
+    <span class="highlight">AsyncValidatorFn</span> in Angular is a function type used to create asynchronous validators.
+  </p>
+
+  <div class="note">
+
+    Async validators are mainly used for:
+    
+    <ul>
+      <li>API validation</li>
+      <li>Database checks</li>
+      <li>Server-side validation</li>
+      <li>Username/email availability checking</li>
+    </ul>
+
+  </div>
+
+  <h2>
+    Syntax
+  </h2>
+
+  <pre><code class="language-ts">
+AsyncValidatorFn
+  </code></pre>
+
+  <h2>
+    Actual Type Definition
+  </h2>
+
+  <pre><code class="language-ts">
+(control: AbstractControl)
+=> Promise&lt;ValidationErrors | null&gt;
+| Observable&lt;ValidationErrors | null&gt;
+  </code></pre>
+
+  <h3>
+    Meaning
+  </h3>
+
+  <table>
+
+    <tr>
+      <th>Part</th>
+      <th>Meaning</th>
+    </tr>
+
+    <tr>
+      <td>AbstractControl</td>
+      <td>Current form control</td>
+    </tr>
+
+    <tr>
+      <td>null</td>
+      <td>Valid</td>
+    </tr>
+
+    <tr>
+      <td>ValidationErrors</td>
+      <td>Invalid</td>
+    </tr>
+
+    <tr>
+      <td>Observable / Promise</td>
+      <td>Async operation result</td>
+    </tr>
+
+  </table>
+
+  <h2>
+    Real Example
+  </h2>
+
+  <p>
+    Suppose we want to check whether username already exists in database.
+  </p>
+
+  <h2>
+    User Service
+  </h2>
+
+  <pre><code class="language-ts">
+import { Injectable } from '@angular/core';
+
+import {
+  Observable,
+  of,
+  delay
+} from 'rxjs';
+
+@Injectable({
+  providedIn: 'root'
+})
+
+export class UserService {
+
+  checkUsername(username: string): Observable&lt;boolean&gt; {
+
+    const takenUsers = ['admin', 'rizwan', 'john'];
+
+    const isAvailable = !takenUsers.includes(username);
+
+    return of(isAvailable).pipe(delay(2000));
+
+  }
+
+}
+  </code></pre>
+
+  <h3>
+    Service Logic
+  </h3>
+
+  <table>
+
+    <tr>
+      <th>Username</th>
+      <th>Result</th>
+      <th>Meaning</th>
+    </tr>
+
+    <tr>
+      <td>admin</td>
+      <td>false</td>
+      <td>Already taken</td>
+    </tr>
+
+    <tr>
+      <td>rizwan</td>
+      <td>false</td>
+      <td>Already taken</td>
+    </tr>
+
+    <tr>
+      <td>sahil</td>
+      <td>true</td>
+      <td>Available</td>
+    </tr>
+
+  </table>
+
+  <h2>
+    AsyncValidatorFn Example
+  </h2>
+
+  <pre><code class="language-ts">
+import {
+  AbstractControl,
+  AsyncValidatorFn,
+  ValidationErrors
+} from '@angular/forms';
+
+import {
+  Observable,
+  map
+} from 'rxjs';
+
+usernameValidator(): AsyncValidatorFn {
+
+  return (
+
+    control: AbstractControl
+
+  ): Observable&lt;ValidationErrors | null&gt; => {
+
+    return this.userService
+      .checkUsername(control.value)
+      .pipe(
+
+        map(isAvailable => {
+
+          if (isAvailable) {
+            return null;
+          }
+
+          return { usernameTaken: true };
+
+        })
+
+      );
+
+  };
+
+}
+  </code></pre>
+
+  <h2>
+    Step-by-Step Understanding
+  </h2>
+
+  <h3>
+    Step 1 → Angular Calls Validator
+  </h3>
+
+  <pre><code class="language-ts">
+validator(control)
+  </code></pre>
+
+  <p>
+    Example:
+  </p>
+
+  <pre><code class="language-ts">
+control.value = 'admin'
+  </code></pre>
+
+  <h3>
+    Step 2 → Service Checks Username
+  </h3>
+
+  <pre><code class="language-ts">
+checkUsername('admin')
+  </code></pre>
+
+  <h3>
+    Step 3 → Service Returns Result
+  </h3>
+
+  <pre><code class="language-ts">
+false
+  </code></pre>
+
+  <p>
+    Meaning:
+  </p>
+
+  <pre><code class="language-text">
+Username already exists
+  </code></pre>
+
+  <h3>
+    Step 4 → Validator Returns Error
+  </h3>
+
+  <pre><code class="language-ts">
+{ usernameTaken: true }
+  </code></pre>
+
+  <p>
+    Angular marks field invalid.
+  </p>
+
+  <h2>
+    If Username is Available
+  </h2>
+
+  <pre><code class="language-ts">
+checkUsername('sahil')
+  </code></pre>
+
+  <p>
+    Service returns:
+  </p>
+
+  <pre><code class="language-ts">
+true
+  </code></pre>
+
+  <p>
+    Validator returns:
+  </p>
+
+  <pre><code class="language-ts">
+null
+  </code></pre>
+
+  <p>
+    Meaning:
+  </p>
+
+  <pre><code class="language-text">
+No validation error
+  </code></pre>
+
+  <h2>
+    Using AsyncValidatorFn in Form
+  </h2>
+
+  <pre><code class="language-ts">
+this.form = this.fb.group({
+
+  username: [
+    '',
+    [],
+    [this.usernameValidator()]
+  ]
+
+});
+  </code></pre>
+
+  <h3>
+    Syntax Meaning
+  </h3>
+
+  <table>
+
+    <tr>
+      <th>Part</th>
+      <th>Meaning</th>
+    </tr>
+
+    <tr>
+      <td>''</td>
+      <td>Initial value</td>
+    </tr>
+
+    <tr>
+      <td>[]</td>
+      <td>Sync validators</td>
+    </tr>
+
+    <tr>
+      <td>[this.usernameValidator()]</td>
+      <td>Async validators</td>
+    </tr>
+
+  </table>
+
+  <h2>
+    Difference Between ValidatorFn and AsyncValidatorFn
+  </h2>
+
+  <table>
+
+    <tr>
+      <th>Type</th>
+      <th>Used For</th>
+      <th>Return Type</th>
+    </tr>
+
+    <tr>
+      <td>ValidatorFn</td>
+      <td>Synchronous validation</td>
+      <td>ValidationErrors | null</td>
+    </tr>
+
+    <tr>
+      <td>AsyncValidatorFn</td>
+      <td>Asynchronous validation</td>
+      <td>Observable or Promise</td>
+    </tr>
+
+  </table>
+
+  <h2>
+    Sync Validator Example
+  </h2>
+
+  <pre><code class="language-ts">
+Validators.required
+  </code></pre>
+
+  <p>
+    Runs instantly.
+  </p>
+
+  <h2>
+    Async Validator Example
+  </h2>
+
+  <pre><code class="language-ts">
+Check username availability from server
+  </code></pre>
+
+  <p>
+    Takes time because API request happens.
+  </p>
+
+  <h2>
+    Final Result Table
+  </h2>
+
+  <table>
+
+    <tr>
+      <th>Username</th>
+      <th>Service Result</th>
+      <th>Validator Return</th>
+      <th>Status</th>
+    </tr>
+
+    <tr>
+      <td>admin</td>
+      <td>false</td>
+      <td>{ usernameTaken: true }</td>
+      <td>Invalid</td>
+    </tr>
+
+    <tr>
+      <td>rizwan</td>
+      <td>false</td>
+      <td>{ usernameTaken: true }</td>
+      <td>Invalid</td>
+    </tr>
+
+    <tr>
+      <td>sahil</td>
+      <td>true</td>
+      <td>null</td>
+      <td>Valid</td>
+    </tr>
+
+  </table>
+
+  <h2>
+    Short Definition
+  </h2>
+
+  <p>
+    <span class="highlight">AsyncValidatorFn</span> is a function type in Angular used for asynchronous form validation that returns an Observable or Promise containing validation result.
+  </p>
+
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-typescript.min.js"></script>
+
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-markup.min.js"></script>
+
+</body>
+
+</html>
