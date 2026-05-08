@@ -1,0 +1,664 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>RxJS Interview Questions</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0d0f17;
+  --card: #111520;
+  --border: #1e2740;
+  --text: #cdd6f4;
+  --muted: #7f8ab3;
+  --orange: #fab387;
+  --cyan: #89dceb;
+  --purple: #b4befe;
+  --green: #a6e3a1;
+  --pink: #f5c2e7;
+  --red: #f38ba8;
+  --blue: #89b4fa;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background:
+    radial-gradient(ellipse 60% 40% at 10% 0%, #fab38712, transparent),
+    radial-gradient(ellipse 50% 35% at 90% 5%, #b4befe0e, transparent),
+    var(--bg);
+  color: var(--text);
+  font-family: Syne, system-ui, sans-serif;
+  line-height: 1.7;
+  padding-bottom: 80px;
+}
+
+/* Header */
+header { padding: 56px 24px 32px; text-align: center; }
+.logo-tag {
+  font: 700 11px 'JetBrains Mono', monospace;
+  letter-spacing: 5px; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 14px;
+}
+header h1 {
+  font-size: clamp(36px, 7vw, 76px); font-weight: 800; line-height: 1;
+  background: linear-gradient(135deg, var(--cyan), var(--purple), var(--pink));
+  -webkit-background-clip: text; color: transparent; margin-bottom: 14px;
+}
+.header-sub { color: var(--muted); font-size: 15px; max-width: 580px; margin: 0 auto 24px; }
+.stats-bar { display: flex; justify-content: center; gap: 16px; flex-wrap: wrap; margin-top: 16px; }
+.stat-pill {
+  display: flex; align-items: center; gap: 8px;
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 999px; padding: 7px 16px;
+  font: 600 12px 'JetBrains Mono', monospace;
+}
+.dot { width: 8px; height: 8px; border-radius: 50%; }
+
+/* Nav */
+.nav {
+  position: sticky; top: 0; z-index: 20;
+  background: #0d0f17ec; backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; padding: 0 20px;
+  overflow-x: auto; scrollbar-width: none;
+}
+.nav::-webkit-scrollbar { display: none; }
+.nav a {
+  color: var(--muted); text-decoration: none;
+  font: 600 12px 'JetBrains Mono', monospace;
+  padding: 14px 16px; white-space: nowrap;
+  border-bottom: 2px solid transparent; transition: color .2s, border-color .2s;
+}
+.nav a.b:hover { color: var(--green);  border-color: var(--green); }
+.nav a.m:hover { color: var(--blue);   border-color: var(--blue); }
+.nav a.a:hover { color: var(--red);    border-color: var(--red); }
+
+/* Search */
+.search-wrap { max-width: 1080px; margin: 28px auto 0; padding: 0 20px; }
+.search-box {
+  display: flex; align-items: center; gap: 10px;
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 12px; padding: 12px 16px; transition: border-color .2s;
+}
+.search-box:focus-within { border-color: var(--purple); }
+.search-box input {
+  flex: 1; background: none; border: none; outline: none;
+  color: var(--text); font: 14px Syne, sans-serif;
+}
+.search-box input::placeholder { color: var(--muted); }
+#search-count { font: 600 11px 'JetBrains Mono', monospace; color: var(--muted); white-space: nowrap; }
+
+/* Main */
+main { max-width: 1080px; margin: 0 auto; padding: 36px 20px; }
+
+/* Category */
+.cat-section { margin-bottom: 52px; }
+.cat-header {
+  display: flex; align-items: center; gap: 14px;
+  margin-bottom: 22px; padding-bottom: 14px;
+  border-bottom: 1px solid var(--border);
+}
+.cat-badge {
+  font: 700 10px 'JetBrains Mono', monospace;
+  text-transform: uppercase; letter-spacing: 2px;
+  border: 1.5px solid currentColor; border-radius: 7px; padding: 4px 11px;
+}
+.cat-badge.b { color: var(--green); }
+.cat-badge.m { color: var(--blue); }
+.cat-badge.a { color: var(--red); }
+.cat-title { font-size: 24px; font-weight: 800; }
+.cat-count {
+  margin-left: auto;
+  font: 600 11px 'JetBrains Mono', monospace; color: var(--muted);
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 999px; padding: 3px 12px;
+}
+
+/* Question cards */
+.q-list { display: flex; flex-direction: column; gap: 8px; }
+.q-card {
+  display: flex; align-items: flex-start; gap: 14px;
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 12px; padding: 15px 18px;
+  transition: border-color .18s, background .18s;
+}
+.q-card:hover { background: #131825; }
+.q-card.b:hover { border-color: #a6e3a140; }
+.q-card.m:hover { border-color: #89b4fa40; }
+.q-card.a:hover { border-color: #f38ba840; }
+.q-card.hidden { display: none; }
+.q-num {
+  font: 700 11px 'JetBrains Mono', monospace;
+  color: var(--muted); min-width: 30px; padding-top: 3px; flex-shrink: 0;
+}
+.q-text { font-size: 15px; color: var(--text); }
+.q-text code {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px; color: var(--green);
+  background: #a6e3a110; padding: 1px 6px; border-radius: 4px;
+}
+.q-tag {
+  margin-left: auto; flex-shrink: 0; align-self: flex-start; padding-top: 2px;
+  font: 600 10px 'JetBrains Mono', monospace; text-transform: uppercase; letter-spacing: 1px;
+  border-radius: 5px; padding: 3px 8px;
+}
+.q-tag.b { color: var(--green); background: #a6e3a10e; }
+.q-tag.m { color: var(--blue);  background: #89b4fa0e; }
+.q-tag.a { color: var(--red);   background: #f38ba80e; }
+
+/* No results */
+#no-results {
+  display: none; text-align: center; padding: 60px 20px;
+  font: 600 14px 'JetBrains Mono', monospace; color: var(--muted);
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo-tag">Interview Prep · RxJS</div>
+  <h1>RxJS Interview Questions</h1>
+  <p class="header-sub">267+ curated questions across Beginner, Mid-Level, Advanced, and Missing RxJS Operator categories to help you ace your next interview.</p>
+  <div class="stats-bar">
+    <div class="stat-pill"><span class="dot" style="background:var(--green)"></span>35 Beginner</div>
+    <div class="stat-pill"><span class="dot" style="background:var(--blue)"></span>40 Mid-Level</div>
+    <div class="stat-pill"><span class="dot" style="background:var(--red)"></span>35 Advanced</div>
+    <div class="stat-pill"><span class="dot" style="background:var(--orange)"></span>157 Missing Added</div>
+    <div class="stat-pill"><span class="dot" style="background:var(--purple)"></span>267 Total</div>
+  </div>
+</header>
+
+<nav class="nav">
+  <a href="#beginner" class="b">🟢 Beginner</a>
+  <a href="#mid" class="m">🔵 Mid-Level</a>
+  <a href="#advanced" class="a">🔴 Advanced</a>
+  <a href="#missing-creation-operators" class="a">🟣 Missing Operators</a>
+</nav>
+
+<div class="search-wrap">
+  <div class="search-box">
+    <span class="search-icon">🔍</span>
+    <input type="text" id="search-input" placeholder="Search questions… e.g. switchMap, Subject, bufferCount, takeUntilDestroyed" />
+    <span id="search-count">267 questions</span>
+  </div>
+</div>
+
+<main>
+
+<!-- ─── BEGINNER ─── -->
+<section class="cat-section" id="beginner">
+  <div class="cat-header">
+    <span class="cat-badge b">Beginner</span>
+    <span class="cat-title">Fundamentals & Core Concepts</span>
+    <span class="cat-count">35 questions</span>
+  </div>
+  <div class="q-list" id="list-beginner">
+    <div class="q-card b"><span class="q-num">01</span><span class="q-text">What is RxJS and why is it used in Angular?</span><span class="q-tag b">Beginner</span></div>
+    <div class="q-card b"><span class="q-num">02</span><span class="q-text">What is an Observable? How is it different from a Promise?</span><span class="q-tag b">Beginner</span></div>
+    <div class="q-card b"><span class="q-num">03</span><span class="q-text">What is a subscriber in RxJS?</span><span class="q-tag b">Beginner</span></div>
+    <div class="q-card b"><span class="q-num">04</span><span class="q-text">What does it mean to "subscribe" to an Observable?</span><span class="q-tag b">Beginner</span></div>
+    <div class="q-card b"><span class="q-num">05</span><span class="q-text">What are the three callbacks you can pass to <code>subscribe()</code>? (<code>next</code>, <code>error</code>, <code>complete</code>)</span><span class="q-tag b">Beginner</span></div>
+    <div class="q-card b"><span class="q-num">06</span><span class="q-text">What is the difference between a cold Observable and a hot Observable?</span><span class="q-tag b">Beginner</span></div>
+    <div class="q-card b"><span class="q-num">07</span><span class="q-text">What is a Subject in RxJS?</span><span class="q-tag b">Beginner</span></div>
+    <div class="q-card b"><span class="q-num">08</span><span class="q-text">What is the difference between a Subject and an Observable?</span><span class="q-tag b">Beginner</span></div>
+    <div class="q-card b"><span class="q-num">09</span><span class="q-text">What is <code>of()</code> and when would you use it?</span><span class="q-tag b">Beginner</span></div>
+    <div class="q-card b"><span class="q-num">10</span><span class="q-text">What is <code>from()</code> and what types of values can it accept?</span><span class="q-tag b">Beginner</span></div>
+    <div class="q-card b"><span class="q-num">11</span><span class="q-text">What does the <code>pipe()</code> operator do?</span><span class="q-tag b">Beginner</span></div>
+    <div class="q-card b"><span class="q-num">12</span><span class="q-text">What is the <code>map()</code> operator? Give a simple example.</span><span class="q-tag b">Beginner</span></div>
+    <div class="q-card b"><span class="q-num">13</span><span class="q-text">What does the <code>filter()</code> operator do?</span><span class="q-tag b">Beginner</span></div>
+    <div class="q-card b"><span class="q-num">14</span><span class="q-text">What is <code>tap()</code> used for?</span><span class="q-tag b">Beginner</span></div>
+    <div class="q-card b"><span class="q-num">15</span><span class="q-text">What is <code>take(n)</code> and when would you use it?</span><span class="q-tag b">Beginner</span></div>
+    <div class="q-card b"><span class="q-num">16</span><span class="q-text">How do you unsubscribe from an Observable? Why is it important?</span><span class="q-tag b">Beginner</span></div>
+    <div class="q-card b"><span class="q-num">17</span><span class="q-text">What is a <code>Subscription</code> object?</span><span class="q-tag b">Beginner</span></div>
+    <div class="q-card b"><span class="q-num">18</span><span class="q-text">What is <code>interval()</code> and how does it work?</span><span class="q-tag b">Beginner</span></div>
+    <div class="q-card b"><span class="q-num">19</span><span class="q-text">What is <code>timer()</code> in RxJS?</span><span class="q-tag b">Beginner</span></div>
+    <div class="q-card b"><span class="q-num">20</span><span class="q-text">What is <code>EMPTY</code> in RxJS and when would you use it?</span><span class="q-tag b">Beginner</span></div>
+    <div class="q-card b"><span class="q-num">21</span><span class="q-text">What is <code>NEVER</code> in RxJS?</span><span class="q-tag b">Beginner</span></div>
+    <div class="q-card b"><span class="q-num">22</span><span class="q-text">What does <code>first()</code> operator do?</span><span class="q-tag b">Beginner</span></div>
+    <div class="q-card b"><span class="q-num">23</span><span class="q-text">What does <code>last()</code> operator do?</span><span class="q-tag b">Beginner</span></div>
+    <div class="q-card b"><span class="q-num">24</span><span class="q-text">What is the difference between <code>take(1)</code> and <code>first()</code>?</span><span class="q-tag b">Beginner</span></div>
+    <div class="q-card b"><span class="q-num">25</span><span class="q-text">What is <code>BehaviorSubject</code>? How is it different from <code>Subject</code>?</span><span class="q-tag b">Beginner</span></div>
+    <div class="q-card b"><span class="q-num">26</span><span class="q-text">What is <code>ReplaySubject</code>?</span><span class="q-tag b">Beginner</span></div>
+    <div class="q-card b"><span class="q-num">27</span><span class="q-text">What is <code>AsyncSubject</code>?</span><span class="q-tag b">Beginner</span></div>
+    <div class="q-card b"><span class="q-num">28</span><span class="q-text">What does <code>catchError()</code> do?</span><span class="q-tag b">Beginner</span></div>
+    <div class="q-card b"><span class="q-num">29</span><span class="q-text">What is the <code>throwError()</code> creation function?</span><span class="q-tag b">Beginner</span></div>
+    <div class="q-card b"><span class="q-num">30</span><span class="q-text">What is <code>finalize()</code> and when would you use it?</span><span class="q-tag b">Beginner</span></div>
+    <div class="q-card b"><span class="q-num">31</span><span class="q-text">What is <code>distinctUntilChanged()</code>?</span><span class="q-tag b">Beginner</span></div>
+    <div class="q-card b"><span class="q-num">32</span><span class="q-text">What does <code>debounceTime()</code> do? Give a real-world use case.</span><span class="q-tag b">Beginner</span></div>
+    <div class="q-card b"><span class="q-num">33</span><span class="q-text">What is the difference between <code>debounceTime()</code> and <code>throttleTime()</code>?</span><span class="q-tag b">Beginner</span></div>
+    <div class="q-card b"><span class="q-num">34</span><span class="q-text">What is <code>fromEvent()</code> used for?</span><span class="q-tag b">Beginner</span></div>
+    <div class="q-card b"><span class="q-num">35</span><span class="q-text">What is the <code>async</code> pipe in Angular and how does it relate to RxJS Observables?</span><span class="q-tag b">Beginner</span></div>
+  </div>
+</section>
+
+<!-- ─── MID-LEVEL ─── -->
+<section class="cat-section" id="mid">
+  <div class="cat-header">
+    <span class="cat-badge m">Mid-Level</span>
+    <span class="cat-title">Operators, Patterns & Practical Usage</span>
+    <span class="cat-count">40 questions</span>
+  </div>
+  <div class="q-list" id="list-mid">
+    <div class="q-card m"><span class="q-num">36</span><span class="q-text">What is the difference between <code>mergeMap</code>, <code>switchMap</code>, <code>concatMap</code>, and <code>exhaustMap</code>?</span><span class="q-tag m">Mid</span></div>
+    <div class="q-card m"><span class="q-num">37</span><span class="q-text">When would you choose <code>switchMap</code> over <code>mergeMap</code>?</span><span class="q-tag m">Mid</span></div>
+    <div class="q-card m"><span class="q-num">38</span><span class="q-text">What is <code>exhaustMap</code> and what problem does it solve?</span><span class="q-tag m">Mid</span></div>
+    <div class="q-card m"><span class="q-num">39</span><span class="q-text">What does <code>combineLatest()</code> do? When does it emit?</span><span class="q-tag m">Mid</span></div>
+    <div class="q-card m"><span class="q-num">40</span><span class="q-text">What is the difference between <code>combineLatest()</code> and <code>zip()</code>?</span><span class="q-tag m">Mid</span></div>
+    <div class="q-card m"><span class="q-num">41</span><span class="q-text">What is <code>forkJoin()</code> and when would you use it?</span><span class="q-tag m">Mid</span></div>
+    <div class="q-card m"><span class="q-num">42</span><span class="q-text">What is the difference between <code>forkJoin()</code> and <code>combineLatest()</code>?</span><span class="q-tag m">Mid</span></div>
+    <div class="q-card m"><span class="q-num">43</span><span class="q-text">What does <code>withLatestFrom()</code> do?</span><span class="q-tag m">Mid</span></div>
+    <div class="q-card m"><span class="q-num">44</span><span class="q-text">What is <code>startWith()</code> and why is it useful?</span><span class="q-tag m">Mid</span></div>
+    <div class="q-card m"><span class="q-num">45</span><span class="q-text">What does <code>scan()</code> do? How is it like <code>reduce()</code> but for streams?</span><span class="q-tag m">Mid</span></div>
+    <div class="q-card m"><span class="q-num">46</span><span class="q-text">What is <code>reduce()</code> in RxJS and how does it differ from <code>scan()</code>?</span><span class="q-tag m">Mid</span></div>
+    <div class="q-card m"><span class="q-num">47</span><span class="q-text">What is <code>shareReplay()</code> and why would you use it?</span><span class="q-tag m">Mid</span></div>
+    <div class="q-card m"><span class="q-num">48</span><span class="q-text">What is the difference between <code>share()</code> and <code>shareReplay()</code>?</span><span class="q-tag m">Mid</span></div>
+    <div class="q-card m"><span class="q-num">49</span><span class="q-text">What is <code>publish()</code> and <code>connect()</code> in RxJS?</span><span class="q-tag m">Mid</span></div>
+    <div class="q-card m"><span class="q-num">50</span><span class="q-text">What is a multicast Observable?</span><span class="q-tag m">Mid</span></div>
+    <div class="q-card m"><span class="q-num">51</span><span class="q-text">How do you handle memory leaks caused by unsubscribed Observables in Angular?</span><span class="q-tag m">Mid</span></div>
+    <div class="q-card m"><span class="q-num">52</span><span class="q-text">What is the <code>takeUntil()</code> pattern and how is it used for cleanup?</span><span class="q-tag m">Mid</span></div>
+    <div class="q-card m"><span class="q-num">53</span><span class="q-text">What is <code>takeWhile()</code> and how does it differ from <code>takeUntil()</code>?</span><span class="q-tag m">Mid</span></div>
+    <div class="q-card m"><span class="q-num">54</span><span class="q-text">What does <code>skipUntil()</code> do?</span><span class="q-tag m">Mid</span></div>
+    <div class="q-card m"><span class="q-num">55</span><span class="q-text">What is <code>retry()</code> and when would you use it?</span><span class="q-tag m">Mid</span></div>
+    <div class="q-card m"><span class="q-num">56</span><span class="q-text">What is <code>retryWhen()</code> and how does it give you more control than <code>retry()</code>?</span><span class="q-tag m">Mid</span></div>
+    <div class="q-card m"><span class="q-num">57</span><span class="q-text">What is <code>mergeAll()</code> vs <code>concatAll()</code> vs <code>switchAll()</code>?</span><span class="q-tag m">Mid</span></div>
+    <div class="q-card m"><span class="q-num">58</span><span class="q-text">What is <code>pairwise()</code> and when is it useful?</span><span class="q-tag m">Mid</span></div>
+    <div class="q-card m"><span class="q-num">59</span><span class="q-text">What does <code>bufferTime()</code> do?</span><span class="q-tag m">Mid</span></div>
+    <div class="q-card m"><span class="q-num">60</span><span class="q-text">What is <code>windowTime()</code> and how does it differ from <code>bufferTime()</code>?</span><span class="q-tag m">Mid</span></div>
+    <div class="q-card m"><span class="q-num">61</span><span class="q-text">What is <code>groupBy()</code> in RxJS?</span><span class="q-tag m">Mid</span></div>
+    <div class="q-card m"><span class="q-num">62</span><span class="q-text">What does <code>pluck()</code> do? (deprecated in newer RxJS — what replaces it?)</span><span class="q-tag m">Mid</span></div>
+    <div class="q-card m"><span class="q-num">63</span><span class="q-text">What is <code>delay()</code> vs <code>delayWhen()</code>?</span><span class="q-tag m">Mid</span></div>
+    <div class="q-card m"><span class="q-num">64</span><span class="q-text">What is <code>auditTime()</code> and when would you use it over <code>debounceTime()</code>?</span><span class="q-tag m">Mid</span></div>
+    <div class="q-card m"><span class="q-num">65</span><span class="q-text">How would you implement a typeahead/autocomplete search using RxJS?</span><span class="q-tag m">Mid</span></div>
+    <div class="q-card m"><span class="q-num">66</span><span class="q-text">How would you cancel a pending HTTP request using RxJS?</span><span class="q-tag m">Mid</span></div>
+    <div class="q-card m"><span class="q-num">67</span><span class="q-text">How do you combine two Observables sequentially using <code>concat()</code>?</span><span class="q-tag m">Mid</span></div>
+    <div class="q-card m"><span class="q-num">68</span><span class="q-text">What is <code>race()</code> in RxJS?</span><span class="q-tag m">Mid</span></div>
+    <div class="q-card m"><span class="q-num">69</span><span class="q-text">What is the difference between <code>merge()</code> and <code>concat()</code>?</span><span class="q-tag m">Mid</span></div>
+    <div class="q-card m"><span class="q-num">70</span><span class="q-text">How does error handling work in an RxJS chain? What happens to the stream after an error?</span><span class="q-tag m">Mid</span></div>
+    <div class="q-card m"><span class="q-num">71</span><span class="q-text">What is <code>onErrorResumeNext()</code>?</span><span class="q-tag m">Mid</span></div>
+    <div class="q-card m"><span class="q-num">72</span><span class="q-text">How do you convert a Promise to an Observable?</span><span class="q-tag m">Mid</span></div>
+    <div class="q-card m"><span class="q-num">73</span><span class="q-text">How do you convert an Observable to a Promise?</span><span class="q-tag m">Mid</span></div>
+    <div class="q-card m"><span class="q-num">74</span><span class="q-text">What is the role of Schedulers in RxJS?</span><span class="q-tag m">Mid</span></div>
+    <div class="q-card m"><span class="q-num">75</span><span class="q-text">How would you make two parallel HTTP calls and wait for both to finish?</span><span class="q-tag m">Mid</span></div>
+  </div>
+</section>
+
+<!-- ─── ADVANCED ─── -->
+<section class="cat-section" id="advanced">
+  <div class="cat-header">
+    <span class="cat-badge a">Advanced</span>
+    <span class="cat-title">Internals, Architecture & Expert Patterns</span>
+    <span class="cat-count">35 questions</span>
+  </div>
+  <div class="q-list" id="list-advanced">
+    <div class="q-card a"><span class="q-num">76</span><span class="q-text">How does RxJS implement the Observer pattern internally?</span><span class="q-tag a">Advanced</span></div>
+    <div class="q-card a"><span class="q-num">77</span><span class="q-text">What is a Scheduler in RxJS and what are the built-in Scheduler types?</span><span class="q-tag a">Advanced</span></div>
+    <div class="q-card a"><span class="q-num">78</span><span class="q-text">What is the difference between <code>asyncScheduler</code>, <code>asapScheduler</code>, and <code>queueScheduler</code>?</span><span class="q-tag a">Advanced</span></div>
+    <div class="q-card a"><span class="q-num">79</span><span class="q-text">How does <code>observeOn()</code> differ from <code>subscribeOn()</code>?</span><span class="q-tag a">Advanced</span></div>
+    <div class="q-card a"><span class="q-num">80</span><span class="q-text">How would you write a custom RxJS operator?</span><span class="q-tag a">Advanced</span></div>
+    <div class="q-card a"><span class="q-num">81</span><span class="q-text">What is the difference between a pipeable operator and a creation operator?</span><span class="q-tag a">Advanced</span></div>
+    <div class="q-card a"><span class="q-num">82</span><span class="q-text">What are higher-order Observables and how do flattening operators handle them?</span><span class="q-tag a">Advanced</span></div>
+    <div class="q-card a"><span class="q-num">83</span><span class="q-text">What is backpressure in reactive streams and how does RxJS handle it?</span><span class="q-tag a">Advanced</span></div>
+    <div class="q-card a"><span class="q-num">84</span><span class="q-text">What is the difference between unicast and multicast Observables at the subscription level?</span><span class="q-tag a">Advanced</span></div>
+    <div class="q-card a"><span class="q-num">85</span><span class="q-text">How does <code>shareReplay({ bufferSize: 1, refCount: true })</code> behave differently from <code>shareReplay(1)</code>?</span><span class="q-tag a">Advanced</span></div>
+    <div class="q-card a"><span class="q-num">86</span><span class="q-text">What are the pitfalls of using <code>shareReplay()</code> and how can it cause memory leaks?</span><span class="q-tag a">Advanced</span></div>
+    <div class="q-card a"><span class="q-num">87</span><span class="q-text">How would you implement an exponential backoff retry strategy using RxJS?</span><span class="q-tag a">Advanced</span></div>
+    <div class="q-card a"><span class="q-num">88</span><span class="q-text">How does <code>switchMap</code> handle inner subscription cleanup under the hood?</span><span class="q-tag a">Advanced</span></div>
+    <div class="q-card a"><span class="q-num">89</span><span class="q-text">What is the difference between <code>Subject</code>, <code>BehaviorSubject</code>, <code>ReplaySubject</code>, and <code>AsyncSubject</code> at the multicasting level?</span><span class="q-tag a">Advanced</span></div>
+    <div class="q-card a"><span class="q-num">90</span><span class="q-text">When would you use a <code>BehaviorSubject</code> as a state store vs a proper state management library?</span><span class="q-tag a">Advanced</span></div>
+    <div class="q-card a"><span class="q-num">91</span><span class="q-text">How would you test RxJS code using marble testing?</span><span class="q-tag a">Advanced</span></div>
+    <div class="q-card a"><span class="q-num">92</span><span class="q-text">What is <code>TestScheduler</code> and how is it used in unit tests?</span><span class="q-tag a">Advanced</span></div>
+    <div class="q-card a"><span class="q-num">93</span><span class="q-text">What are marble diagrams and how do you read them?</span><span class="q-tag a">Advanced</span></div>
+    <div class="q-card a"><span class="q-num">94</span><span class="q-text">How does <code>connectable()</code> work in RxJS 7+? What replaced <code>publish()</code>?</span><span class="q-tag a">Advanced</span></div>
+    <div class="q-card a"><span class="q-num">95</span><span class="q-text">What is <code>connect()</code> operator (RxJS 7+) and how does it differ from the old multicasting approach?</span><span class="q-tag a">Advanced</span></div>
+    <div class="q-card a"><span class="q-num">96</span><span class="q-text">How would you implement a polling mechanism that stops when a condition is met?</span><span class="q-tag a">Advanced</span></div>
+    <div class="q-card a"><span class="q-num">97</span><span class="q-text">How do you prevent race conditions in parallel Observable streams?</span><span class="q-tag a">Advanced</span></div>
+    <div class="q-card a"><span class="q-num">98</span><span class="q-text">What is the <code>expand()</code> operator and what recursive patterns can it solve?</span><span class="q-tag a">Advanced</span></div>
+    <div class="q-card a"><span class="q-num">99</span><span class="q-text">How would you build a real-time data stream with WebSockets using RxJS?</span><span class="q-tag a">Advanced</span></div>
+    <div class="q-card a"><span class="q-num">100</span><span class="q-text">What is <code>animationFrameScheduler</code> and when would you use it?</span><span class="q-tag a">Advanced</span></div>
+    <div class="q-card a"><span class="q-num">101</span><span class="q-text">How does zone.js interact with RxJS Observables in Angular, and how can you run RxJS code outside Angular's zone?</span><span class="q-tag a">Advanced</span></div>
+    <div class="q-card a"><span class="q-num">102</span><span class="q-text">What are the key differences between RxJS 6 and RxJS 7?</span><span class="q-tag a">Advanced</span></div>
+    <div class="q-card a"><span class="q-num">103</span><span class="q-text">How do you compose complex async workflows using only RxJS without async/await?</span><span class="q-tag a">Advanced</span></div>
+    <div class="q-card a"><span class="q-num">104</span><span class="q-text">How would you implement optimistic UI updates with RxJS and handle rollback on failure?</span><span class="q-tag a">Advanced</span></div>
+    <div class="q-card a"><span class="q-num">105</span><span class="q-text">What are the implications of calling <code>next()</code> on a Subject from multiple async sources simultaneously?</span><span class="q-tag a">Advanced</span></div>
+    <div class="q-card a"><span class="q-num">106</span><span class="q-text">How do you handle dependent HTTP calls (request B depends on response of request A) using RxJS?</span><span class="q-tag a">Advanced</span></div>
+    <div class="q-card a"><span class="q-num">107</span><span class="q-text">What is the <code>generate()</code> creation operator and what use cases does it serve?</span><span class="q-tag a">Advanced</span></div>
+    <div class="q-card a"><span class="q-num">108</span><span class="q-text">How does RxJS handle synchronous vs asynchronous emissions differently?</span><span class="q-tag a">Advanced</span></div>
+    <div class="q-card a"><span class="q-num">109</span><span class="q-text">How would you architect a global event bus in Angular using RxJS Subjects?</span><span class="q-tag a">Advanced</span></div>
+    <div class="q-card a"><span class="q-num">110</span><span class="q-text">What are the tradeoffs between using <code>ngrx/effects</code> vs raw RxJS Subjects for managing side effects in large Angular apps?</span><span class="q-tag a">Advanced</span></div>
+  </div>
+</section>
+
+
+<!-- ─── CREATION OPERATORS ─── -->
+<section class="cat-section" id="missing-creation-operators">
+  <div class="cat-header">
+    <span class="cat-badge a">Extra</span>
+    <span class="cat-title">Creation Operators</span>
+    <span class="cat-count">15 questions</span>
+  </div>
+  <div class="q-list" id="list-missing-creation-operators">
+    <div class="q-card a"><span class="q-num">111</span><span class="q-text">What is <code>ajax()</code> in RxJS?</span><span class="q-tag a">Extra</span></div>
+    <div class="q-card a"><span class="q-num">112</span><span class="q-text">What is <code>bindCallback()</code>?</span><span class="q-tag a">Extra</span></div>
+    <div class="q-card a"><span class="q-num">113</span><span class="q-text">What is <code>bindNodeCallback()</code>?</span><span class="q-tag a">Extra</span></div>
+    <div class="q-card a"><span class="q-num">114</span><span class="q-text">What is <code>defer()</code> and when would you use it?</span><span class="q-tag a">Extra</span></div>
+    <div class="q-card a"><span class="q-num">115</span><span class="q-text">What is <code>empty()</code>? (legacy operator)</span><span class="q-tag a">Extra</span></div>
+    <div class="q-card a"><span class="q-num">116</span><span class="q-text">What is <code>iif()</code> in RxJS?</span><span class="q-tag a">Extra</span></div>
+    <div class="q-card a"><span class="q-num">117</span><span class="q-text">What is <code>range()</code> and how does it work?</span><span class="q-tag a">Extra</span></div>
+    <div class="q-card a"><span class="q-num">118</span><span class="q-text">What is <code>throwIfEmpty()</code>?</span><span class="q-tag a">Extra</span></div>
+    <div class="q-card a"><span class="q-num">119</span><span class="q-text">What is <code>using()</code> in RxJS?</span><span class="q-tag a">Extra</span></div>
+    <div class="q-card a"><span class="q-num">120</span><span class="q-text">What is <code>scheduled()</code> in RxJS 7?</span><span class="q-tag a">Extra</span></div>
+    <div class="q-card a"><span class="q-num">121</span><span class="q-text">What is <code>generate()</code> and how does it differ from <code>range()</code>?</span><span class="q-tag a">Extra</span></div>
+    <div class="q-card a"><span class="q-num">122</span><span class="q-text">What is <code>partition()</code>?</span><span class="q-tag a">Extra</span></div>
+    <div class="q-card a"><span class="q-num">123</span><span class="q-text">What is <code>fromFetch()</code>?</span><span class="q-tag a">Extra</span></div>
+    <div class="q-card a"><span class="q-num">124</span><span class="q-text">What is <code>webSocket()</code> in RxJS?</span><span class="q-tag a">Extra</span></div>
+    <div class="q-card a"><span class="q-num">125</span><span class="q-text">What is <code>animationFrames()</code>?</span><span class="q-tag a">Extra</span></div>
+  </div>
+</section>
+
+
+<!-- ─── TRANSFORMATION OPERATORS ─── -->
+<section class="cat-section" id="missing-transformation-operators">
+  <div class="cat-header">
+    <span class="cat-badge a">Extra</span>
+    <span class="cat-title">Transformation Operators</span>
+    <span class="cat-count">30 questions</span>
+  </div>
+  <div class="q-list" id="list-missing-transformation-operators">
+    <div class="q-card a"><span class="q-num">126</span><span class="q-text">What is <code>concatMapTo()</code>?</span><span class="q-tag a">Extra</span></div>
+    <div class="q-card a"><span class="q-num">127</span><span class="q-text">What is <code>mergeMapTo()</code>?</span><span class="q-tag a">Extra</span></div>
+    <div class="q-card a"><span class="q-num">128</span><span class="q-text">What is <code>switchMapTo()</code>?</span><span class="q-tag a">Extra</span></div>
+    <div class="q-card a"><span class="q-num">129</span><span class="q-text">What is <code>exhaustMapTo()</code>?</span><span class="q-tag a">Extra</span></div>
+    <div class="q-card a"><span class="q-num">130</span><span class="q-text">What is <code>mapTo()</code>?</span><span class="q-tag a">Extra</span></div>
+    <div class="q-card a"><span class="q-num">131</span><span class="q-text">What is <code>mergeScan()</code>?</span><span class="q-tag a">Extra</span></div>
+    <div class="q-card a"><span class="q-num">132</span><span class="q-text">What is <code>switchScan()</code>?</span><span class="q-tag a">Extra</span></div>
+    <div class="q-card a"><span class="q-num">133</span><span class="q-text">What is <code>concatScan()</code>?</span><span class="q-tag a">Extra</span></div>
+    <div class="q-card a"><span class="q-num">134</span><span class="q-text">What is <code>buffer()</code>?</span><span class="q-tag a">Extra</span></div>
+    <div class="q-card a"><span class="q-num">135</span><span class="q-text">What is <code>bufferCount()</code>?</span><span class="q-tag a">Extra</span></div>
+    <div class="q-card a"><span class="q-num">136</span><span class="q-text">What is <code>bufferToggle()</code>?</span><span class="q-tag a">Extra</span></div>
+    <div class="q-card a"><span class="q-num">137</span><span class="q-text">What is <code>bufferWhen()</code>?</span><span class="q-tag a">Extra</span></div>
+    <div class="q-card a"><span class="q-num">138</span><span class="q-text">What is <code>window()</code>?</span><span class="q-tag a">Extra</span></div>
+    <div class="q-card a"><span class="q-num">139</span><span class="q-text">What is <code>windowCount()</code>?</span><span class="q-tag a">Extra</span></div>
+    <div class="q-card a"><span class="q-num">140</span><span class="q-text">What is <code>windowToggle()</code>?</span><span class="q-tag a">Extra</span></div>
+    <div class="q-card a"><span class="q-num">141</span><span class="q-text">What is <code>windowWhen()</code>?</span><span class="q-tag a">Extra</span></div>
+    <div class="q-card a"><span class="q-num">142</span><span class="q-text">What is <code>toArray()</code>?</span><span class="q-tag a">Extra</span></div>
+    <div class="q-card a"><span class="q-num">143</span><span class="q-text">What is <code>materialize()</code>?</span><span class="q-tag a">Extra</span></div>
+    <div class="q-card a"><span class="q-num">144</span><span class="q-text">What is <code>dematerialize()</code>?</span><span class="q-tag a">Extra</span></div>
+    <div class="q-card a"><span class="q-num">145</span><span class="q-text">What is <code>timestamp()</code>?</span><span class="q-tag a">Extra</span></div>
+    <div class="q-card a"><span class="q-num">146</span><span class="q-text">What is <code>timeInterval()</code>?</span><span class="q-tag a">Extra</span></div>
+    <div class="q-card a"><span class="q-num">147</span><span class="q-text">What is <code>defaultIfEmpty()</code>?</span><span class="q-tag a">Extra</span></div>
+    <div class="q-card a"><span class="q-num">148</span><span class="q-text">What is <code>every()</code>?</span><span class="q-tag a">Extra</span></div>
+    <div class="q-card a"><span class="q-num">149</span><span class="q-text">What is <code>find()</code>?</span><span class="q-tag a">Extra</span></div>
+    <div class="q-card a"><span class="q-num">150</span><span class="q-text">What is <code>findIndex()</code>?</span><span class="q-tag a">Extra</span></div>
+    <div class="q-card a"><span class="q-num">151</span><span class="q-text">What is <code>isEmpty()</code>?</span><span class="q-tag a">Extra</span></div>
+    <div class="q-card a"><span class="q-num">152</span><span class="q-text">What is <code>count()</code>?</span><span class="q-tag a">Extra</span></div>
+    <div class="q-card a"><span class="q-num">153</span><span class="q-text">What is <code>max()</code>?</span><span class="q-tag a">Extra</span></div>
+    <div class="q-card a"><span class="q-num">154</span><span class="q-text">What is <code>min()</code>?</span><span class="q-tag a">Extra</span></div>
+    <div class="q-card a"><span class="q-num">155</span><span class="q-text">What is <code>sequenceEqual()</code>?</span><span class="q-tag a">Extra</span></div>
+  </div>
+</section>
+
+
+<!-- ─── FILTERING OPERATORS ─── -->
+<section class="cat-section" id="missing-filtering-operators">
+  <div class="cat-header">
+    <span class="cat-badge a">Extra</span>
+    <span class="cat-title">Filtering Operators</span>
+    <span class="cat-count">15 questions</span>
+  </div>
+  <div class="q-list" id="list-missing-filtering-operators">
+    <div class="q-card a"><span class="q-num">156</span><span class="q-text">What is <code>distinct()</code>?</span><span class="q-tag a">Extra</span></div>
+    <div class="q-card a"><span class="q-num">157</span><span class="q-text">What is <code>distinctUntilKeyChanged()</code>?</span><span class="q-tag a">Extra</span></div>
+    <div class="q-card a"><span class="q-num">158</span><span class="q-text">What is <code>elementAt()</code>?</span><span class="q-tag a">Extra</span></div>
+    <div class="q-card a"><span class="q-num">159</span><span class="q-text">What is <code>ignoreElements()</code>?</span><span class="q-tag a">Extra</span></div>
+    <div class="q-card a"><span class="q-num">160</span><span class="q-text">What is <code>sample()</code>?</span><span class="q-tag a">Extra</span></div>
+    <div class="q-card a"><span class="q-num">161</span><span class="q-text">What is <code>sampleTime()</code>?</span><span class="q-tag a">Extra</span></div>
+    <div class="q-card a"><span class="q-num">162</span><span class="q-text">What is <code>single()</code>?</span><span class="q-tag a">Extra</span></div>
+    <div class="q-card a"><span class="q-num">163</span><span class="q-text">What is <code>skip()</code>?</span><span class="q-tag a">Extra</span></div>
+    <div class="q-card a"><span class="q-num">164</span><span class="q-text">What is <code>skipLast()</code>?</span><span class="q-tag a">Extra</span></div>
+    <div class="q-card a"><span class="q-num">165</span><span class="q-text">What is <code>skipWhile()</code>?</span><span class="q-tag a">Extra</span></div>
+    <div class="q-card a"><span class="q-num">166</span><span class="q-text">What is <code>takeLast()</code>?</span><span class="q-tag a">Extra</span></div>
+    <div class="q-card a"><span class="q-num">167</span><span class="q-text">What is <code>takeUntilDestroyed()</code> in Angular?</span><span class="q-tag a">Extra</span></div>
+    <div class="q-card a"><span class="q-num">168</span><span class="q-text">What is <code>throttle()</code>?</span><span class="q-tag a">Extra</span></div>
+    <div class="q-card a"><span class="q-num">169</span><span class="q-text">What is <code>audit()</code>?</span><span class="q-tag a">Extra</span></div>
+    <div class="q-card a"><span class="q-num">170</span><span class="q-text">What is <code>debounce()</code>?</span><span class="q-tag a">Extra</span></div>
+  </div>
+</section>
+
+
+<!-- ─── COMBINATION OPERATORS ─── -->
+<section class="cat-section" id="missing-combination-operators">
+  <div class="cat-header">
+    <span class="cat-badge a">Extra</span>
+    <span class="cat-title">Combination Operators</span>
+    <span class="cat-count">14 questions</span>
+  </div>
+  <div class="q-list" id="list-missing-combination-operators">
+    <div class="q-card a"><span class="q-num">171</span><span class="q-text">What is <code>combineLatestAll()</code>?</span><span class="q-tag a">Extra</span></div>
+    <div class="q-card a"><span class="q-num">172</span><span class="q-text">What is <code>combineAll()</code>?</span><span class="q-tag a">Extra</span></div>
+    <div class="q-card a"><span class="q-num">173</span><span class="q-text">What is <code>concatAll()</code>?</span><span class="q-tag a">Extra</span></div>
+    <div class="q-card a"><span class="q-num">174</span><span class="q-text">What is <code>concatLatestFrom()</code> in NgRx?</span><span class="q-tag a">Extra</span></div>
+    <div class="q-card a"><span class="q-num">175</span><span class="q-text">What is <code>endWith()</code>?</span><span class="q-tag a">Extra</span></div>
+    <div class="q-card a"><span class="q-num">176</span><span class="q-text">What is <code>mergeWith()</code>?</span><span class="q-tag a">Extra</span></div>
+    <div class="q-card a"><span class="q-num">177</span><span class="q-text">What is <code>concatWith()</code>?</span><span class="q-tag a">Extra</span></div>
+    <div class="q-card a"><span class="q-num">178</span><span class="q-text">What is <code>raceWith()</code>?</span><span class="q-tag a">Extra</span></div>
+    <div class="q-card a"><span class="q-num">179</span><span class="q-text">What is <code>startWith()</code> vs <code>endWith()</code>?</span><span class="q-tag a">Extra</span></div>
+    <div class="q-card a"><span class="q-num">180</span><span class="q-text">What is <code>switchAll()</code>?</span><span class="q-tag a">Extra</span></div>
+    <div class="q-card a"><span class="q-num">181</span><span class="q-text">What is <code>combineLatestWith()</code>?</span><span class="q-tag a">Extra</span></div>
+    <div class="q-card a"><span class="q-num">182</span><span class="q-text">What is <code>zipAll()</code>?</span><span class="q-tag a">Extra</span></div>
+    <div class="q-card a"><span class="q-num">183</span><span class="q-text">What is <code>forkJoin()</code> behavior when one Observable errors?</span><span class="q-tag a">Extra</span></div>
+    <div class="q-card a"><span class="q-num">184</span><span class="q-text">What is <code>forkJoin()</code> behavior when one Observable never completes?</span><span class="q-tag a">Extra</span></div>
+  </div>
+</section>
+
+
+<!-- ─── ERROR HANDLING OPERATORS ─── -->
+<section class="cat-section" id="missing-error-handling-operators">
+  <div class="cat-header">
+    <span class="cat-badge a">Extra</span>
+    <span class="cat-title">Error Handling Operators</span>
+    <span class="cat-count">7 questions</span>
+  </div>
+  <div class="q-list" id="list-missing-error-handling-operators">
+    <div class="q-card a"><span class="q-num">185</span><span class="q-text">What is <code>onErrorResumeNextWith()</code>?</span><span class="q-tag a">Extra</span></div>
+    <div class="q-card a"><span class="q-num">186</span><span class="q-text">What is <code>retryWhen()</code> with exponential backoff?</span><span class="q-tag a">Extra</span></div>
+    <div class="q-card a"><span class="q-num">187</span><span class="q-text">What is <code>repeat()</code>?</span><span class="q-tag a">Extra</span></div>
+    <div class="q-card a"><span class="q-num">188</span><span class="q-text">What is <code>repeatWhen()</code>?</span><span class="q-tag a">Extra</span></div>
+    <div class="q-card a"><span class="q-num">189</span><span class="q-text">What is <code>timeout()</code>?</span><span class="q-tag a">Extra</span></div>
+    <div class="q-card a"><span class="q-num">190</span><span class="q-text">What is <code>timeoutWith()</code>?</span><span class="q-tag a">Extra</span></div>
+    <div class="q-card a"><span class="q-num">191</span><span class="q-text">What is <code>catchError()</code> placement inside vs outside <code>switchMap()</code>?</span><span class="q-tag a">Extra</span></div>
+  </div>
+</section>
+
+
+<!-- ─── UTILITY OPERATORS ─── -->
+<section class="cat-section" id="missing-utility-operators">
+  <div class="cat-header">
+    <span class="cat-badge a">Extra</span>
+    <span class="cat-title">Utility Operators</span>
+    <span class="cat-count">10 questions</span>
+  </div>
+  <div class="q-list" id="list-missing-utility-operators">
+    <div class="q-card a"><span class="q-num">192</span><span class="q-text">What is <code>delaySubscription()</code>?</span><span class="q-tag a">Extra</span></div>
+    <div class="q-card a"><span class="q-num">193</span><span class="q-text">What is <code>repeat()</code> and when would you use it?</span><span class="q-tag a">Extra</span></div>
+    <div class="q-card a"><span class="q-num">194</span><span class="q-text">What is <code>repeatWhen()</code>?</span><span class="q-tag a">Extra</span></div>
+    <div class="q-card a"><span class="q-num">195</span><span class="q-text">What is <code>subscribeOn()</code>?</span><span class="q-tag a">Extra</span></div>
+    <div class="q-card a"><span class="q-num">196</span><span class="q-text">What is <code>observeOn()</code>?</span><span class="q-tag a">Extra</span></div>
+    <div class="q-card a"><span class="q-num">197</span><span class="q-text">What is <code>tap()</code> vs <code>map()</code>?</span><span class="q-tag a">Extra</span></div>
+    <div class="q-card a"><span class="q-num">198</span><span class="q-text">What is <code>finalize()</code> vs <code>complete()</code> callback?</span><span class="q-tag a">Extra</span></div>
+    <div class="q-card a"><span class="q-num">199</span><span class="q-text">What is <code>timeout()</code> and when would you use it?</span><span class="q-tag a">Extra</span></div>
+    <div class="q-card a"><span class="q-num">200</span><span class="q-text">What is <code>timeInterval()</code>?</span><span class="q-tag a">Extra</span></div>
+    <div class="q-card a"><span class="q-num">201</span><span class="q-text">What is <code>timestamp()</code>?</span><span class="q-tag a">Extra</span></div>
+  </div>
+</section>
+
+
+<!-- ─── SUBJECT & MULTICASTING ─── -->
+<section class="cat-section" id="missing-subject-multicasting">
+  <div class="cat-header">
+    <span class="cat-badge a">Extra</span>
+    <span class="cat-title">Subject &amp; Multicasting</span>
+    <span class="cat-count">11 questions</span>
+  </div>
+  <div class="q-list" id="list-missing-subject-multicasting">
+    <div class="q-card a"><span class="q-num">202</span><span class="q-text">What is <code>AnonymousSubject</code>?</span><span class="q-tag a">Extra</span></div>
+    <div class="q-card a"><span class="q-num">203</span><span class="q-text">What is <code>WebSocketSubject</code>?</span><span class="q-tag a">Extra</span></div>
+    <div class="q-card a"><span class="q-num">204</span><span class="q-text">What is <code>Subject.asObservable()</code> and why is it important?</span><span class="q-tag a">Extra</span></div>
+    <div class="q-card a"><span class="q-num">205</span><span class="q-text">Why should services expose Observables instead of Subjects?</span><span class="q-tag a">Extra</span></div>
+    <div class="q-card a"><span class="q-num">206</span><span class="q-text">What are the risks of exposing a Subject publicly?</span><span class="q-tag a">Extra</span></div>
+    <div class="q-card a"><span class="q-num">207</span><span class="q-text">What is multicasting in RxJS?</span><span class="q-tag a">Extra</span></div>
+    <div class="q-card a"><span class="q-num">208</span><span class="q-text">What is <code>refCount()</code>?</span><span class="q-tag a">Extra</span></div>
+    <div class="q-card a"><span class="q-num">209</span><span class="q-text">What is <code>ConnectableObservable</code>?</span><span class="q-tag a">Extra</span></div>
+    <div class="q-card a"><span class="q-num">210</span><span class="q-text">What is <code>connectable()</code> in RxJS 7?</span><span class="q-tag a">Extra</span></div>
+    <div class="q-card a"><span class="q-num">211</span><span class="q-text">What is <code>share()</code> internally doing?</span><span class="q-tag a">Extra</span></div>
+    <div class="q-card a"><span class="q-num">212</span><span class="q-text">What is the difference between <code>shareReplay()</code> with and without <code>refCount</code>?</span><span class="q-tag a">Extra</span></div>
+  </div>
+</section>
+
+
+<!-- ─── SCHEDULERS ─── -->
+<section class="cat-section" id="missing-schedulers">
+  <div class="cat-header">
+    <span class="cat-badge a">Extra</span>
+    <span class="cat-title">Schedulers</span>
+    <span class="cat-count">7 questions</span>
+  </div>
+  <div class="q-list" id="list-missing-schedulers">
+    <div class="q-card a"><span class="q-num">213</span><span class="q-text">What is <code>VirtualTimeScheduler</code>?</span><span class="q-tag a">Extra</span></div>
+    <div class="q-card a"><span class="q-num">214</span><span class="q-text">What is <code>SchedulerLike</code>?</span><span class="q-tag a">Extra</span></div>
+    <div class="q-card a"><span class="q-num">215</span><span class="q-text">How do schedulers affect execution order?</span><span class="q-tag a">Extra</span></div>
+    <div class="q-card a"><span class="q-num">216</span><span class="q-text">How does RxJS scheduling interact with the JavaScript event loop?</span><span class="q-tag a">Extra</span></div>
+    <div class="q-card a"><span class="q-num">217</span><span class="q-text">What is microtask vs macrotask behavior in RxJS?</span><span class="q-tag a">Extra</span></div>
+    <div class="q-card a"><span class="q-num">218</span><span class="q-text">What is <code>queueScheduler</code> recursion?</span><span class="q-tag a">Extra</span></div>
+    <div class="q-card a"><span class="q-num">219</span><span class="q-text">When should you use <code>animationFrameScheduler</code>?</span><span class="q-tag a">Extra</span></div>
+  </div>
+</section>
+
+
+<!-- ─── ANGULAR + RXJS ─── -->
+<section class="cat-section" id="missing-angular-rxjs">
+  <div class="cat-header">
+    <span class="cat-badge a">Extra</span>
+    <span class="cat-title">Angular + RxJS</span>
+    <span class="cat-count">20 questions</span>
+  </div>
+  <div class="q-list" id="list-missing-angular-rxjs">
+    <div class="q-card a"><span class="q-num">220</span><span class="q-text">How does <code>HttpClient</code> use Observables internally?</span><span class="q-tag a">Extra</span></div>
+    <div class="q-card a"><span class="q-num">221</span><span class="q-text">Why are Angular HTTP Observables cold?</span><span class="q-tag a">Extra</span></div>
+    <div class="q-card a"><span class="q-num">222</span><span class="q-text">Why do Angular HTTP Observables complete automatically?</span><span class="q-tag a">Extra</span></div>
+    <div class="q-card a"><span class="q-num">223</span><span class="q-text">When do you NOT need to unsubscribe in Angular?</span><span class="q-tag a">Extra</span></div>
+    <div class="q-card a"><span class="q-num">224</span><span class="q-text">What is <code>takeUntilDestroyed()</code> in Angular 16+?</span><span class="q-tag a">Extra</span></div>
+    <div class="q-card a"><span class="q-num">225</span><span class="q-text">What is <code>DestroyRef</code> and how is it used with RxJS?</span><span class="q-tag a">Extra</span></div>
+    <div class="q-card a"><span class="q-num">226</span><span class="q-text">How do Signals integrate with RxJS in Angular?</span><span class="q-tag a">Extra</span></div>
+    <div class="q-card a"><span class="q-num">227</span><span class="q-text">What is <code>toSignal()</code>?</span><span class="q-tag a">Extra</span></div>
+    <div class="q-card a"><span class="q-num">228</span><span class="q-text">What is <code>toObservable()</code>?</span><span class="q-tag a">Extra</span></div>
+    <div class="q-card a"><span class="q-num">229</span><span class="q-text">How do you use RxJS with Angular Reactive Forms?</span><span class="q-tag a">Extra</span></div>
+    <div class="q-card a"><span class="q-num">230</span><span class="q-text">What is <code>valueChanges</code>?</span><span class="q-tag a">Extra</span></div>
+    <div class="q-card a"><span class="q-num">231</span><span class="q-text">What is <code>statusChanges</code>?</span><span class="q-tag a">Extra</span></div>
+    <div class="q-card a"><span class="q-num">232</span><span class="q-text">How do you debounce API calls in Angular forms?</span><span class="q-tag a">Extra</span></div>
+    <div class="q-card a"><span class="q-num">233</span><span class="q-text">How do you prevent duplicate HTTP calls using RxJS?</span><span class="q-tag a">Extra</span></div>
+    <div class="q-card a"><span class="q-num">234</span><span class="q-text">How do you cache HTTP responses using <code>shareReplay()</code>?</span><span class="q-tag a">Extra</span></div>
+    <div class="q-card a"><span class="q-num">235</span><span class="q-text">How do you cancel HTTP requests with <code>switchMap()</code>?</span><span class="q-tag a">Extra</span></div>
+    <div class="q-card a"><span class="q-num">236</span><span class="q-text">How do NgRx Effects use RxJS internally?</span><span class="q-tag a">Extra</span></div>
+    <div class="q-card a"><span class="q-num">237</span><span class="q-text">What RxJS operators are commonly used inside NgRx Effects?</span><span class="q-tag a">Extra</span></div>
+    <div class="q-card a"><span class="q-num">238</span><span class="q-text">Why is <code>concatLatestFrom()</code> preferred in NgRx Effects?</span><span class="q-tag a">Extra</span></div>
+    <div class="q-card a"><span class="q-num">239</span><span class="q-text">How do you handle side effects using RxJS in Angular?</span><span class="q-tag a">Extra</span></div>
+  </div>
+</section>
+
+
+<!-- ─── TESTING ─── -->
+<section class="cat-section" id="missing-testing">
+  <div class="cat-header">
+    <span class="cat-badge a">Extra</span>
+    <span class="cat-title">Testing</span>
+    <span class="cat-count">8 questions</span>
+  </div>
+  <div class="q-list" id="list-missing-testing">
+    <div class="q-card a"><span class="q-num">240</span><span class="q-text">What is hot marble testing?</span><span class="q-tag a">Extra</span></div>
+    <div class="q-card a"><span class="q-num">241</span><span class="q-text">What is cold marble testing?</span><span class="q-tag a">Extra</span></div>
+    <div class="q-card a"><span class="q-num">242</span><span class="q-text">How do you mock Observables in Angular tests?</span><span class="q-tag a">Extra</span></div>
+    <div class="q-card a"><span class="q-num">243</span><span class="q-text">How do you test Subjects?</span><span class="q-tag a">Extra</span></div>
+    <div class="q-card a"><span class="q-num">244</span><span class="q-text">How do you test timing-based operators like <code>debounceTime()</code>?</span><span class="q-tag a">Extra</span></div>
+    <div class="q-card a"><span class="q-num">245</span><span class="q-text">How do you test <code>switchMap()</code> cancellation behavior?</span><span class="q-tag a">Extra</span></div>
+    <div class="q-card a"><span class="q-num">246</span><span class="q-text">How does <code>fakeAsync()</code> interact with RxJS?</span><span class="q-tag a">Extra</span></div>
+    <div class="q-card a"><span class="q-num">247</span><span class="q-text">What is <code>flush()</code> in marble testing?</span><span class="q-tag a">Extra</span></div>
+  </div>
+</section>
+
+
+<!-- ─── ADVANCED ARCHITECTURE ─── -->
+<section class="cat-section" id="missing-advanced-architecture">
+  <div class="cat-header">
+    <span class="cat-badge a">Extra</span>
+    <span class="cat-title">Advanced Architecture</span>
+    <span class="cat-count">15 questions</span>
+  </div>
+  <div class="q-list" id="list-missing-advanced-architecture">
+    <div class="q-card a"><span class="q-num">248</span><span class="q-text">How would you build a reactive state management system using RxJS?</span><span class="q-tag a">Extra</span></div>
+    <div class="q-card a"><span class="q-num">249</span><span class="q-text">How would you implement undo/redo using RxJS?</span><span class="q-tag a">Extra</span></div>
+    <div class="q-card a"><span class="q-num">250</span><span class="q-text">How would you implement offline queueing using RxJS?</span><span class="q-tag a">Extra</span></div>
+    <div class="q-card a"><span class="q-num">251</span><span class="q-text">How would you implement live search with cancellation?</span><span class="q-tag a">Extra</span></div>
+    <div class="q-card a"><span class="q-num">252</span><span class="q-text">How would you implement infinite scrolling using RxJS?</span><span class="q-tag a">Extra</span></div>
+    <div class="q-card a"><span class="q-num">253</span><span class="q-text">How would you throttle scroll events efficiently?</span><span class="q-tag a">Extra</span></div>
+    <div class="q-card a"><span class="q-num">254</span><span class="q-text">How would you implement WebSocket reconnection logic?</span><span class="q-tag a">Extra</span></div>
+    <div class="q-card a"><span class="q-num">255</span><span class="q-text">How would you implement a reactive cache using RxJS?</span><span class="q-tag a">Extra</span></div>
+    <div class="q-card a"><span class="q-num">256</span><span class="q-text">How would you synchronize multiple streams safely?</span><span class="q-tag a">Extra</span></div>
+    <div class="q-card a"><span class="q-num">257</span><span class="q-text">How would you build a custom store using <code>BehaviorSubject</code>?</span><span class="q-tag a">Extra</span></div>
+    <div class="q-card a"><span class="q-num">258</span><span class="q-text">How would you avoid nested subscriptions?</span><span class="q-tag a">Extra</span></div>
+    <div class="q-card a"><span class="q-num">259</span><span class="q-text">Why are nested subscriptions considered bad practice?</span><span class="q-tag a">Extra</span></div>
+    <div class="q-card a"><span class="q-num">260</span><span class="q-text">How do you debug complex RxJS chains?</span><span class="q-tag a">Extra</span></div>
+    <div class="q-card a"><span class="q-num">261</span><span class="q-text">How do you improve RxJS performance in Angular apps?</span><span class="q-tag a">Extra</span></div>
+    <div class="q-card a"><span class="q-num">262</span><span class="q-text">What are common RxJS anti-patterns?</span><span class="q-tag a">Extra</span></div>
+  </div>
+</section>
+
+
+<!-- ─── DEPRECATED APIS ─── -->
+<section class="cat-section" id="missing-deprecated-apis">
+  <div class="cat-header">
+    <span class="cat-badge a">Extra</span>
+    <span class="cat-title">Deprecated APIs</span>
+    <span class="cat-count">5 questions</span>
+  </div>
+  <div class="q-list" id="list-missing-deprecated-apis">
+    <div class="q-card a"><span class="q-num">263</span><span class="q-text">Why was <code>pluck()</code> deprecated?</span><span class="q-tag a">Extra</span></div>
+    <div class="q-card a"><span class="q-num">264</span><span class="q-text">What replaced <code>toPromise()</code> in RxJS 7?</span><span class="q-tag a">Extra</span></div>
+    <div class="q-card a"><span class="q-num">265</span><span class="q-text">What replaced <code>publishReplay()</code>?</span><span class="q-tag a">Extra</span></div>
+    <div class="q-card a"><span class="q-num">266</span><span class="q-text">What replaced <code>multicast()</code>?</span><span class="q-tag a">Extra</span></div>
+    <div class="q-card a"><span class="q-num">267</span><span class="q-text">What changed in multicasting APIs in RxJS 7?</span><span class="q-tag a">Extra</span></div>
+  </div>
+</section>
+
+<div id="no-results">No questions match your search.</div>
+
+</main>
+
+<script>
+  const input = document.getElementById('search-input');
+  const count = document.getElementById('search-count');
+  const cards = document.querySelectorAll('.q-card');
+  const total = cards.length;
+
+  input.addEventListener('input', () => {
+    const q = input.value.trim().toLowerCase();
+    let visible = 0;
+    cards.forEach(card => {
+      const text = card.textContent.toLowerCase();
+      const match = !q || text.includes(q);
+      card.classList.toggle('hidden', !match);
+      if (match) visible++;
+    });
+    count.textContent = q ? `${visible} of ${total} questions` : `${total} questions`;
+    document.getElementById('no-results').style.display = visible === 0 ? 'block' : 'none';
+
+    // Hide empty section headers
+    document.querySelectorAll('.cat-section').forEach(sec => {
+      const anyVisible = [...sec.querySelectorAll('.q-card')].some(c => !c.classList.contains('hidden'));
+      sec.style.display = anyVisible ? '' : 'none';
+    });
+  });
+</script>
+</body>
+</html>

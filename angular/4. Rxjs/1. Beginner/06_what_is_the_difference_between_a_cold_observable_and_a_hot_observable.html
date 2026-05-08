@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>What is the difference between a cold Observable and a hot Observable?</title>
+<style>
+:root{
+  --bg:#0d1117; --card:#161b22; --card2:#0f1623; --border:#30363d;
+  --text:#e6edf3; --muted:#9aa7b4; --blue:#58a6ff; --green:#3fb950;
+  --purple:#bc8cff; --orange:#ffa657; --red:#ff7b72; --yellow:#d29922;
+  --cyan:#39c5cf; --pink:#ff7bcb;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  background:
+    radial-gradient(circle at top left, rgba(63,185,80,.14), transparent 35%),
+    radial-gradient(circle at top right, rgba(88,166,255,.12), transparent 32%),
+    var(--bg);
+  color:var(--text);
+  font-family:"Segoe UI",system-ui,sans-serif;
+  line-height:1.75;
+  padding:32px;
+}
+.wrapper{max-width:1120px;margin:auto}
+.header{
+  background:linear-gradient(135deg,rgba(63,185,80,.13),rgba(88,166,255,.12));
+  border:1px solid var(--border);
+  border-radius:22px;
+  padding:30px;
+  margin-bottom:24px;
+  box-shadow:0 16px 45px rgba(0,0,0,.28);
+}
+.badge{
+  display:inline-block;color:var(--green);border:1px solid rgba(63,185,80,.45);
+  background:rgba(63,185,80,.08);padding:5px 12px;border-radius:999px;
+  font:700 12px Consolas,monospace;letter-spacing:.7px;margin-bottom:14px;
+}
+h1{margin:0;color:var(--green);font-size:34px;line-height:1.25}
+.subtitle{color:var(--muted);margin-top:10px}
+.card{
+  background:rgba(22,27,34,.96);border:1px solid var(--border);
+  border-radius:18px;padding:24px;margin:20px 0;box-shadow:0 10px 32px rgba(0,0,0,.22);
+}
+h2{color:var(--purple);margin:0 0 12px;font-size:22px}
+h3{color:var(--orange);margin:22px 0 10px}
+p{margin:10px 0}
+ul{padding-left:24px;margin:10px 0}
+li{margin:7px 0}
+.answer{
+  font-size:17px;color:#eaffea;background:rgba(63,185,80,.08);
+  border:1px solid rgba(63,185,80,.25);border-left:5px solid var(--green);
+  padding:18px;border-radius:12px;
+}
+.answer-title{
+  color:var(--orange);
+  font-size:17px;
+  margin:18px 0 8px;
+  font-weight:800;
+}
+.answer-title:first-child{margin-top:0}
+.answer-list{margin:8px 0 0;padding-left:24px}
+.answer-list li{margin:8px 0}
+.answer-grid{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));
+  gap:12px;margin-top:12px;
+}
+.answer-mini{
+  background:#0f1623;border:1px solid #273241;border-radius:12px;padding:14px;
+}
+.answer-mini strong{color:var(--green);display:block;margin-bottom:6px}
+.note{
+  border-left:5px solid var(--yellow);background:rgba(210,153,34,.09);
+  padding:14px 16px;border-radius:10px;margin-top:14px;
+}
+pre{
+  margin:0 0 18px;background:#05080d;border:1px solid #273241;border-left:5px solid var(--green);
+  border-radius:14px;padding:20px;overflow:auto;font-size:14px;line-height:1.7;
+}
+.output pre{border-left-color:var(--blue);background:#06101f}
+.file-title{color:var(--cyan);font:700 13px Consolas,monospace;margin:16px 0 8px}
+code{font-family:Consolas,"JetBrains Mono","Courier New",monospace}
+.kw{color:#ff7b72}.str{color:#a5d6ff}.fn{color:#d2a8ff}.num{color:#79c0ff}
+.com{color:#8b949e;font-style:italic}.type{color:#7ee787}
+.nav-links{display:flex;justify-content:space-between;gap:12px;margin-top:20px}
+.nav-links a{
+  color:var(--green);text-decoration:none;border:1px solid var(--border);
+  background:var(--card2);padding:10px 14px;border-radius:10px;
+}
+.nav-links a:hover{border-color:var(--green)}
+.footer{text-align:center;color:var(--muted);margin-top:30px;font-size:13px}
+.link{
+  display:flex;gap:14px;align-items:center;color:var(--text);text-decoration:none;
+  background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:14px 18px;margin:10px 0;
+}
+.link:hover{border-color:var(--green);background:#1b2230}
+.link span{color:var(--green);font-family:Consolas,monospace;font-weight:700;min-width:44px}
+</style>
+</head>
+<body>
+<div class="wrapper">
+  <section class="header">
+    <div class="badge">RxJS Beginner · Question 06</div>
+    <h1>What is the difference between a cold Observable and a hot Observable?</h1>
+    <p class="subtitle">Beginner-friendly interview-level answer with headings, lists, full examples for every concept, colorful code, and expected behavior.</p>
+  </section>
+
+  <section class="card">
+    <h2>Interview-Level Answer</h2>
+    <div class="answer"><h3 class="answer-title">Cold Observable</h3>
+<p>A cold Observable starts a new independent execution for each subscriber. Angular HTTP Observables are cold.</p>
+<h3 class="answer-title">Hot Observable</h3>
+<p>A hot Observable shares the same execution/source among multiple subscribers. Subjects, DOM events, and WebSocket streams are common hot sources.</p>
+<h3 class="answer-title">Interview Difference</h3>
+<ul class="answer-list">
+  <li>Cold = each subscriber gets separate producer.</li>
+  <li>Hot = subscribers share same producer.</li>
+</ul></div>
+  </section>
+
+  <section class="card">
+    <h2>Key Points</h2>
+    <ul><li>Cold Observables are usually unicast.</li><li>Hot Observables are usually multicast.</li><li>This affects duplicate API calls and shared events.</li></ul>
+    <div class="note"><strong>Remember:</strong> Cold starts per subscriber; hot is already shared.</div>
+  </section>
+
+  <section class="card">
+    <h2>Full Understandable Example / Examples</h2>
+    <div class="file-title">cold-observable-example.ts</div>
+<pre><code><span class="kw">import</span> { <span class="type">Observable</span> } <span class="kw"><span class="fn">from</span></span> &#x27;rxjs&#x27;;
+
+<span class="kw">const</span> cold$ = <span class="kw">new</span> <span class="type">Observable</span>&lt;number&gt;(subscriber =&gt; {
+  <span class="kw">const</span> value = Math.random();
+  subscriber.<span class="fn">next</span>(value);
+  subscriber.<span class="fn">complete</span>();
+});
+
+cold$.<span class="fn">subscribe</span>(value =&gt; <span class="fn">console</span>.<span class="fn">log</span>(&#x27;Cold A:&#x27;, value));
+cold$.<span class="fn">subscribe</span>(value =&gt; <span class="fn">console</span>.<span class="fn">log</span>(&#x27;Cold B:&#x27;, value));</code></pre>
+<div class="file-title">hot-observable-example.ts</div>
+<pre><code><span class="kw">import</span> { <span class="type">Subject</span> } <span class="kw"><span class="fn">from</span></span> &#x27;rxjs&#x27;;
+
+<span class="kw">const</span> hot$ = <span class="kw">new</span> <span class="type">Subject</span>&lt;number&gt;();
+
+hot$.<span class="fn">subscribe</span>(value =&gt; <span class="fn">console</span>.<span class="fn">log</span>(&#x27;Hot A:&#x27;, value));
+hot$.<span class="fn">subscribe</span>(value =&gt; <span class="fn">console</span>.<span class="fn">log</span>(&#x27;Hot B:&#x27;, value));
+
+hot$.<span class="fn">next</span>(Math.random());</code></pre>
+
+  </section>
+
+  <section class="card output">
+    <h2>Expected Output / Behavior</h2>
+    <pre><code>Cold A and Cold B may get different values.
+Hot A and Hot B receive the same pushed value.</code></pre>
+  </section>
+
+  <div class="nav-links">
+    <a href="05_what_are_the_three_callbacks_you_can_pass_to_subscribe_next_error_comple.html">← Previous</a>
+    <a href="index.html">All Questions</a>
+    <a href="07_what_is_a_subject_in_rxjs.html">Next →</a>
+  </div>
+
+  <div class="footer">RxJS Beginner Interview Preparation · Question 06</div>
+</div>
+</body>
+</html>

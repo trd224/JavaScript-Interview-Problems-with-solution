@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>NgRx Actual Flow Guide</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0b0d14;--card:#13161f;--card2:#1a1e2e;--border:#2a3142;--text:#e2e8f7;--muted:#9aa6c3;--orange:#f97316;--cyan:#22d3ee;--purple:#a78bfa;--green:#34d399;--pink:#f472b6;--red:#fb7185;}
+*{box-sizing:border-box;margin:0;padding:0} body{background:radial-gradient(circle at top left,#f9731620,transparent 36%),radial-gradient(circle at top right,#a78bfa20,transparent 34%),var(--bg);color:var(--text);font-family:Syne,system-ui,sans-serif;line-height:1.7;padding-bottom:70px} 
+header{padding:56px 24px 28px;text-align:center} .logo{font:700 12px JetBrains Mono,monospace;letter-spacing:4px;text-transform:uppercase;color:var(--muted);margin-bottom:12px} h1{font-size:clamp(34px,6vw,70px);line-height:1;font-weight:800;background:linear-gradient(135deg,var(--orange),var(--green),var(--pink));-webkit-background-clip:text;color:transparent} .subtitle{max-width:760px;margin:18px auto 0;color:var(--muted);font-size:15px}
+.nav{position:sticky;top:0;z-index:10;background:#0b0d14dd;backdrop-filter:blur(14px);border-block:1px solid var(--border);display:flex;gap:8px;justify-content:center;flex-wrap:wrap;padding:12px 16px} .nav a{color:var(--text);text-decoration:none;border:1px solid var(--border);border-radius:999px;padding:8px 14px;font:600 12px JetBrains Mono,monospace;background:var(--card)} .nav a:hover{border-color:var(--purple)}
+main{max-width:1120px;margin:auto;padding:28px 20px} section{margin:28px 0 46px} .panel{background:linear-gradient(180deg,#13161f,#10131b);border:1px solid var(--border);border-radius:18px;padding:26px;margin-bottom:22px;box-shadow:0 20px 60px #0005} h2{font-size:30px;margin-bottom:10px} h3{font-size:20px;margin:18px 0 10px;color:var(--cyan)} p{color:var(--muted);margin:8px 0} code{font-family:JetBrains Mono,monospace;color:#c3e88d} .badge{display:inline-block;font:700 11px JetBrains Mono,monospace;text-transform:uppercase;letter-spacing:1px;border:1px solid currentColor;border-radius:999px;padding:4px 10px;margin-bottom:12px} .orange{color:var(--orange)} .cyan{color:var(--cyan)} .purple{color:var(--purple)} .green{color:var(--green)} .pink{color:var(--pink)} .red{color:var(--red)}
+.flow{display:grid;gap:12px;margin-top:20px} .flow-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:center} .node{border:1.5px solid;border-radius:12px;padding:10px 14px;background:#111827;font:700 12px JetBrains Mono,monospace;white-space:nowrap} .arrow{color:var(--muted);font-size:20px} .note{border-left:4px solid var(--purple);padding:14px 16px;background:#a78bfa12;border-radius:10px;color:#d9d1ff;margin-top:15px} .warn{border-left-color:var(--red);background:#fb718512;color:#ffd2da}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px} @media(max-width:800px){.grid{grid-template-columns:1fr}}
+.tree pre,.code-card pre{background:#070911;color:#d8e2ff;padding:20px;overflow:auto;font:13px/1.7 JetBrains Mono,monospace} .tree pre{border-radius:14px;border:1px solid var(--border)} .code-card{border:1px solid var(--border);border-radius:14px;overflow:hidden;background:#080b12;margin:18px 0} .code-head{display:flex;justify-content:space-between;gap:10px;align-items:center;background:var(--card2);border-bottom:1px solid var(--border);padding:12px 16px;font:600 12px JetBrains Mono,monospace;color:var(--muted)} .code-head b{color:var(--green);font-size:10px;text-transform:uppercase;letter-spacing:1px} .summary-list{display:grid;gap:10px;margin-top:14px} .summary-list div{background:#ffffff08;border:1px solid var(--border);border-radius:12px;padding:12px 14px;color:var(--muted)} ul{padding-left:22px;color:var(--muted)} li{margin:7px 0}
+
+/* Safe colorful code styling: does not change code content */
+.code-card pre[class*="language-"], .code-card pre {
+  background: #050816 !important;
+  color: #d8e2ff !important;
+  border-left: 4px solid #7c3aed;
+  box-shadow: inset 0 0 0 1px #ffffff0a;
+}
+.code-card code[class*="language-"] {
+  font-family: 'JetBrains Mono', monospace !important;
+  text-shadow: none !important;
+}
+.code-card .token.keyword { color: #c792ea !important; font-weight: 700; }
+.code-card .token.string { color: #c3e88d !important; }
+.code-card .token.function { color: #82aaff !important; }
+.code-card .token.class-name { color: #ffcb6b !important; }
+.code-card .token.operator, .code-card .token.punctuation { color: #89ddff !important; }
+.code-card .token.comment { color: #6b7280 !important; font-style: italic; }
+.code-card .token.number, .code-card .token.boolean { color: #f78c6c !important; }
+.code-card .token.decorator, .code-card .token.annotation { color: #f07178 !important; }
+.code-card .token.property { color: #80cbc4 !important; }
+.tree pre.nohighlight {
+  color: #e2e8f7 !important;
+  background: linear-gradient(135deg,#07111f,#100b1f) !important;
+  border-left: 4px solid #22d3ee;
+}
+code[class*=language-], pre[class*=language-]{font-size: 14px !important;}
+</style>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css">
+</head>
+<body>
+<header>
+  <div class="logo">Angular NgRx · Actual Project Flow</div>
+  <h1>NgRx Flow Guide</h1>
+  <p class="subtitle">Updated using <code>src.zip</code>. This version shows the real folder structure, actual NgRx files, and the correct flow: Effects listen to Actions in parallel, they are not after Selectors.</p>
+</header>
+<!-- <nav class="nav">
+  <a href="#folder">Folder Structure</a><a href="#correct-flow">Correct Flow</a><a href="#bootstrap">Bootstrap</a><a href="#product-flow">Product Async Flow</a><a href="#counter-flow">Counter Flow</a><a href="#cart-flow">Cart Flow</a><a href="#quick-map">Quick Map</a>
+</nav> -->
+<main>
+<section id="folder" class="panel">
+  <span class="badge purple">Project Structure</span>
+  <h2>Actual Folder Structure</h2>
+  <p>These are the important NgRx related files from your uploaded <code>src.zip</code>.</p>
+  <div class="tree"><pre class="nohighlight">src/
+├── main.ts
+├── index.html
+└── app/
+    ├── app.config.ts                 # NgRx store, feature states, effects, HTTP, router providers
+    ├── app.routes.ts                 # Lazy routes: products, counter, cart
+    ├── models/
+    │   └── product.interface.ts
+    ├── services/
+    │   └── product.service.ts        # HTTP API call used by ProductEffects
+    ├── state/
+    │   ├── app.state.ts              # Global AppState interface
+    │   ├── counter/
+    │   │   ├── counter.actions.ts
+    │   │   ├── counter.reducer.ts
+    │   │   └── counter.selector.ts
+    │   ├── product/
+    │   │   ├── product.actions.ts
+    │   │   ├── product.reducer.ts
+    │   │   ├── product.effects.ts
+    │   │   └── product.selectors.ts
+    │   └── cart/
+    │       ├── cart.actions.ts
+    │       ├── cart.reducer.ts
+    │       └── cart.selectors.ts
+    ├── pages/
+    │   ├── products/
+    │   │   ├── products.ts
+    │   │   └── products.html
+    │   ├── counter/
+    │   │   ├── counter.ts
+    │   │   └── counter.html
+    │   └── cart/
+    │       ├── cart.ts
+    │       └── cart.html
+    └── components/
+        ├── product/product.ts        # Dispatch addToCart()
+        ├── cart-item/cart-item.ts    # Dispatch increment/decrement/removeItem()
+        └── total-price-board/total-price-board.ts # Read cart selectors</pre></div>
+  <div class="note"><strong>Correction:</strong> <code>app.state.ts</code> is inside <code>src/app/state/</code>, not directly inside <code>src/app/</code>. That is why imports use <code>../app.state</code> from feature selector files and <code>../../state/app.state</code> from pages/components.</div>
+</section>
+
+<section id="correct-flow" class="panel">
+  <span class="badge orange">Important Correction</span>
+  <h2>Correct NgRx Flow</h2>
+  <p>Your old diagram placed <code>Effect</code> after <code>Selector</code>. That is wrong for NgRx. An Effect listens to the same dispatched Action stream. It runs side effects like API calls and then dispatches another Action.</p>
+  <div class="flow">
+    <div class="flow-row">
+      <div class="node orange">Component</div><span class="arrow">dispatches</span><div class="node orange">Action</div>
+    </div>
+    <div class="flow-row">
+      <div class="node cyan">Reducer</div><span class="arrow">updates</span><div class="node purple">Store</div><span class="arrow">read by</span><div class="node green">Selector</div><span class="arrow">shows in</span><div class="node orange">Component UI</div>
+    </div>
+    <div class="flow-row">
+      <div class="node orange">Action</div><span class="arrow">also listened by</span><div class="node pink">Effect</div><span class="arrow">calls</span><div class="node cyan">Service/API</div><span class="arrow">dispatches</span><div class="node orange">Success / Failure Action</div><span class="arrow">then</span><div class="node cyan">Reducer</div>
+    </div>
+  </div>
+  <div class="note warn"><strong>Correct mental model:</strong> Action is the starting point. Reducer and Effect can both react to that Action. Selector only reads data from Store; Selector does not trigger Effect.</div>
+</section>
+
+<section id="bootstrap" class="panel">
+  <span class="badge purple">Registration</span>
+  <h2>Store, Feature State and Effects Registration</h2>
+  <p><code>app.config.ts</code> is where the NgRx root store, feature reducers and effects are connected to Angular.</p>
+  
+    <article class="code-card">
+      <div class="code-head"><span>app/app.config.ts</span><b>actual file from src.zip</b></div>
+      <pre class="language-typescript"><code class="language-typescript">import { ApplicationConfig, provideBrowserGlobalErrorListeners } from &#x27;@angular/core&#x27;;
+import { provideRouter } from &#x27;@angular/router&#x27;;
+
+import { routes } from &#x27;./app.routes&#x27;;
+import { provideClientHydration, withEventReplay } from &#x27;@angular/platform-browser&#x27;;
+import { provideState, provideStore } from &#x27;@ngrx/store&#x27;;
+import { counterReducer } from &#x27;./state/counter/counter.reducer&#x27;;
+import { provideHttpClient, withFetch } from &#x27;@angular/common/http&#x27;;
+import { productReducer } from &#x27;./state/product/product.reducer&#x27;;
+import { ProductEffects } from &#x27;./state/product/product.effects&#x27;;
+import { provideEffects } from &#x27;@ngrx/effects&#x27;;
+import { cartReducer } from &#x27;./state/cart/cart.reducer&#x27;;
+
+export const appConfig: ApplicationConfig = {
+  providers: [
+    provideBrowserGlobalErrorListeners(),
+    provideRouter(routes), provideClientHydration(withEventReplay()),
+    provideClientHydration(withEventReplay()),
+    provideHttpClient(withFetch()),
+    provideStore(),
+    provideState({name: &quot;counter&quot;, reducer: counterReducer}),
+    provideState({ name: &#x27;products&#x27;, reducer: productReducer }),
+    provideState({ name: &#x27;cart&#x27;, reducer: cartReducer }),
+    provideEffects([ProductEffects]),
+]
+};
+</code></pre>
+    </article>
+  
+    <article class="code-card">
+      <div class="code-head"><span>app/app.routes.ts</span><b>actual file from src.zip</b></div>
+      <pre class="language-typescript"><code class="language-typescript">import { Routes } from &#x27;@angular/router&#x27;;
+
+export const routes: Routes = [
+    {
+        path:&#x27;&#x27;,
+        redirectTo: &#x27;products&#x27;,
+        pathMatch: &#x27;full&#x27;
+    },
+    {
+        path:&#x27;counter&#x27;,
+        loadComponent: () =&gt; import(&#x27;./pages/counter/counter&#x27;).then(c =&gt; c.Counter)
+    },
+    {
+        path:&#x27;products&#x27;,
+        loadComponent: () =&gt; import(&#x27;./pages/products/products&#x27;).then(c =&gt; c.Products)
+    },
+    {
+        path:&#x27;cart&#x27;,
+        loadComponent: () =&gt; import(&#x27;./pages/cart/cart&#x27;).then(c =&gt; c.Cart)
+    }
+];
+</code></pre>
+    </article>
+  
+    <article class="code-card">
+      <div class="code-head"><span>app/state/app.state.ts</span><b>actual file from src.zip</b></div>
+      <pre class="language-typescript"><code class="language-typescript">import { CartState } from &quot;./cart/cart.reducer&quot;;
+import { CounterState } from &quot;./counter/counter.reducer&quot;;
+import { ProductState } from &quot;./product/product.reducer&quot;;
+
+export interface AppState {
+    counter: CounterState,
+    products: ProductState
+    cart: CartState
+}</code></pre>
+    </article>
+</section>
+
+<section id="counter-flow" class="panel">
+  <span class="badge cyan">Sync Flow</span>
+  <h2>Counter Flow: Component → Action → Reducer → Store → Selector → UI</h2>
+  <p>Counter has no API call, so it does not need an Effect. It is a simple synchronous NgRx flow.</p>
+  
+    <article class="code-card">
+      <div class="code-head"><span>app/pages/counter/counter.ts</span><b>actual file from src.zip</b></div>
+      <pre class="language-typescript"><code class="language-typescript">import { Component } from &#x27;@angular/core&#x27;;
+import { Store } from &#x27;@ngrx/store&#x27;;
+import { AppState } from &#x27;../../state/app.state&#x27;;
+import { decrement, increment, reset } from &#x27;../../state/counter/counter.actions&#x27;;
+import { Observable } from &#x27;rxjs&#x27;;
+import { selectCount } from &#x27;../../state/counter/counter.selector&#x27;;
+import { AsyncPipe } from &#x27;@angular/common&#x27;;
+
+@Component({
+  selector: &#x27;app-counter&#x27;,
+  imports: [AsyncPipe],
+  templateUrl: &#x27;./counter.html&#x27;,
+  styleUrl: &#x27;./counter.scss&#x27;,
+})
+export class Counter {
+
+  count$: Observable&lt;number&gt;
+  constructor(private store: Store&lt;AppState&gt;){
+    this.count$ = this.store.select(selectCount)
+  }
+
+  increment(){
+    this.store.dispatch(increment())
+  }
+
+  decrement(){
+    this.store.dispatch(decrement())
+  }
+
+  reset(){
+    this.store.dispatch(reset())
+  }
+
+}
+</code></pre>
+    </article>
+  
+    <article class="code-card">
+      <div class="code-head"><span>app/pages/counter/counter.html</span><b>actual file from src.zip</b></div>
+      <pre class="language-typescript"><code class="language-typescript">&lt;div&gt;
+    &lt;span&gt;{{count$ | async}}&lt;/span&gt;
+    &lt;div&gt;
+        &lt;button (click)=&quot;increment()&quot;&gt;+&lt;/button&gt;
+        &lt;button (click)=&quot;decrement()&quot;&gt;-&lt;/button&gt;
+        &lt;button (click)=&quot;reset()&quot;&gt;reset&lt;/button&gt;
+    &lt;/div&gt;
+&lt;/div&gt;
+</code></pre>
+    </article>
+  
+    <article class="code-card">
+      <div class="code-head"><span>app/state/counter/counter.actions.ts</span><b>actual file from src.zip</b></div>
+      <pre class="language-typescript"><code class="language-typescript">import { createAction } from &quot;@ngrx/store&quot;;
+
+export const increment = createAction(&#x27;[counter component] increment&#x27;);
+export const decrement = createAction(&#x27;[counter component] decrement&#x27;);
+export const reset = createAction(&#x27;[counter component] reset&#x27;);
+</code></pre>
+    </article>
+  
+    <article class="code-card">
+      <div class="code-head"><span>app/state/counter/counter.reducer.ts</span><b>actual file from src.zip</b></div>
+      <pre class="language-typescript"><code class="language-typescript">import { createReducer, on } from &quot;@ngrx/store&quot;
+import { decrement, increment, reset } from &quot;./counter.actions&quot;
+
+export interface CounterState {
+ count: number
+}
+
+export const initialCounterState : CounterState= {
+    count: 0
+}
+
+export const counterReducer = createReducer(
+    initialCounterState,
+    on(increment, (state: CounterState) =&gt; {
+       // console.log(state)
+        return {
+            ...state,
+            count: state.count + 1
+        }
+    }),
+    on(decrement, (state: CounterState ) =&gt; ({...state, count: state.count - 1})),
+    on(reset, (state: CounterState) =&gt; ({...state, count: 0})),
+
+
+)</code></pre>
+    </article>
+  
+    <article class="code-card">
+      <div class="code-head"><span>app/state/counter/counter.selector.ts</span><b>actual file from src.zip</b></div>
+      <pre class="language-typescript"><code class="language-typescript">import { createSelector, State } from &quot;@ngrx/store&quot;;
+import { AppState } from &quot;../app.state&quot;;
+
+
+export const selectCounterState = (state: AppState) =&gt; state.counter;
+
+export const selectCount = createSelector(
+    selectCounterState,
+    (state) =&gt; state.count
+)</code></pre>
+    </article>
+</section>
+
+<section id="product-flow" class="panel">
+  <span class="badge pink">Async Flow</span>
+  <h2>Product Flow: Component → Action → Effect → API → Success/Failure → Reducer → Store → Selector → UI</h2>
+  <div class="summary-list">
+    <div><strong>1.</strong> <code>Products</code> page dispatches <code>loadProducts()</code> in constructor.</div>
+    <div><strong>2.</strong> <code>ProductEffects</code> listens using <code>ofType(loadProducts)</code>.</div>
+    <div><strong>3.</strong> Effect calls <code>ProductService.getAllProduct()</code>.</div>
+    <div><strong>4.</strong> Effect dispatches <code>loadProductsSuccess()</code> or <code>loadProductsFailure()</code>.</div>
+    <div><strong>5.</strong> <code>productReducer</code> updates <code>products</code>, <code>loading</code> and <code>error</code>.</div>
+    <div><strong>6.</strong> Product selectors read data and component displays it using <code>selectSignal()</code>.</div>
+  </div>
+  
+    <article class="code-card">
+      <div class="code-head"><span>app/pages/products/products.ts</span><b>actual file from src.zip</b></div>
+      <pre class="language-typescript"><code class="language-typescript">import { Component, inject } from &#x27;@angular/core&#x27;;
+import { ProductService } from &#x27;../../services/product.service&#x27;;
+import { IProduct } from &#x27;../../models/product.interface&#x27;;
+import { Product } from &#x27;../../components/product/product&#x27;;
+import { toSignal } from &#x27;@angular/core/rxjs-interop&#x27;;
+import { AppState } from &#x27;../../state/app.state&#x27;;
+import { Store } from &#x27;@ngrx/store&#x27;;
+import * as ProductSelectors from &#x27;../../state/product/product.selectors&#x27;;
+import * as ProductActions from &#x27;../../state/product/product.actions&#x27;;
+
+@Component({
+  selector: &#x27;app-products&#x27;,
+  imports: [Product],
+  templateUrl: &#x27;./products.html&#x27;,
+  styleUrl: &#x27;./products.scss&#x27;,
+})
+export class Products {
+
+  //private productService = inject(ProductService);
+
+  // // Angular will WAIT for this during SSR
+  // products$ = toSignal(
+  //   this.productService.getAllProduct(),
+  //   { initialValue: [] as IProduct[] }
+  // );
+
+
+  private store = inject(Store&lt;AppState&gt;)
+
+  // Signal from NgRx store (SSR-safe)
+  products$ = this.store.selectSignal(ProductSelectors.selectAllProduct);
+  error$ = this.store.selectSignal(ProductSelectors.selectProductError);
+
+  constructor(){
+    this.store.dispatch(ProductActions.loadProducts());
+  }
+
+}
+
+
+</code></pre>
+    </article>
+  
+    <article class="code-card">
+      <div class="code-head"><span>app/state/product/product.actions.ts</span><b>actual file from src.zip</b></div>
+      <pre class="language-typescript"><code class="language-typescript">import { createAction, props } from &quot;@ngrx/store&quot;;
+import { IProduct } from &quot;../../models/product.interface&quot;;
+
+export const loadProducts = createAction(&#x27;[Product] Load Products&#x27;);
+
+export const loadProductsSuccess = createAction(
+    &#x27;[Product] Load Product Success&#x27;,
+    props&lt;{products: IProduct[]}&gt;()
+)
+
+export const loadProductsFailure = createAction(
+    &#x27;[Product] Load Product Failure&#x27;,
+    props&lt;{error: any}&gt;()
+)</code></pre>
+    </article>
+  
+    <article class="code-card">
+      <div class="code-head"><span>app/state/product/product.effects.ts</span><b>actual file from src.zip</b></div>
+      <pre class="language-typescript"><code class="language-typescript">import { inject, Injectable } from &#x27;@angular/core&#x27;;
+import { Actions, createEffect, ofType } from &#x27;@ngrx/effects&#x27;;
+import { ProductService } from &#x27;../../services/product.service&#x27;;
+import * as ProductActions from &#x27;./product.actions&#x27;;
+import { catchError, map, mergeMap, of } from &#x27;rxjs&#x27;;
+
+@Injectable()
+export class ProductEffects {
+
+  private actions$ = inject(Actions);
+  private productService = inject(ProductService);
+
+  loadProducts$ = createEffect(() =&gt;
+    this.actions$.pipe(
+      ofType(ProductActions.loadProducts),
+      mergeMap(() =&gt;
+        this.productService.getAllProduct().pipe(
+          map(products =&gt;
+            ProductActions.loadProductsSuccess({ products })
+          ),
+          catchError(error =&gt;
+            of(ProductActions.loadProductsFailure({ error }))
+          )
+        )
+      )
+    )
+  );
+}
+</code></pre>
+    </article>
+  
+    <article class="code-card">
+      <div class="code-head"><span>app/services/product.service.ts</span><b>actual file from src.zip</b></div>
+      <pre class="language-typescript"><code class="language-typescript">import { HttpClient } from &#x27;@angular/common/http&#x27;;
+import { inject, Injectable } from &#x27;@angular/core&#x27;;
+import { IProduct } from &#x27;../models/product.interface&#x27;;
+import { map, Observable } from &#x27;rxjs&#x27;;
+
+@Injectable({
+  providedIn: &#x27;root&#x27;,
+})
+export class ProductService {
+   http = inject(HttpClient);
+
+  getAllProduct(): Observable&lt;IProduct[]&gt;{
+    return this.http.get&lt;IProduct[]&gt;(&#x27;https://fakestoreapi.com/products&#x27;).pipe(
+      map((products) =&gt; {
+        return products.map((product) =&gt; {
+          return {...product, quantity: 1}
+        })
+      })
+    )
+  }
+}
+</code></pre>
+    </article>
+  
+    <article class="code-card">
+      <div class="code-head"><span>app/state/product/product.reducer.ts</span><b>actual file from src.zip</b></div>
+      <pre class="language-typescript"><code class="language-typescript">import { createReducer, on } from &quot;@ngrx/store&quot;;
+import { IProduct } from &quot;../../models/product.interface&quot;;
+import * as ProductActions from &#x27;./product.actions&#x27;;
+
+export interface ProductState {
+    products: IProduct[];
+    loading: boolean;
+    error: any | null
+}
+
+export const initialState: ProductState = {
+    products: [],
+    loading: false,
+    error: null
+}
+
+export const productReducer = createReducer(
+    initialState,
+    on(ProductActions.loadProducts, (state: ProductState) =&gt; ({...state, loading: true})),
+
+    on(ProductActions.loadProductsSuccess, (state: ProductState, { products }) =&gt; ({...state, products: products, loading: false})),
+
+    on(ProductActions.loadProductsFailure, (state: ProductState, { error }) =&gt; ({...state,   error: error, loading: false}))
+)</code></pre>
+    </article>
+  
+    <article class="code-card">
+      <div class="code-head"><span>app/state/product/product.selectors.ts</span><b>actual file from src.zip</b></div>
+      <pre class="language-typescript"><code class="language-typescript">import { createFeatureSelector, createSelector } from &quot;@ngrx/store&quot;;
+import { ProductState } from &quot;./product.reducer&quot;;
+
+export const selectProductState = createFeatureSelector&lt;ProductState&gt;(&#x27;products&#x27;);
+
+export const selectAllProduct = createSelector(
+    selectProductState,
+    state =&gt; state.products
+)
+
+export const selectProductLoading = createSelector(
+    selectProductState,
+    state =&gt; state.loading
+)
+
+export const selectProductError = createSelector(
+    selectProductState,
+    state =&gt; state.error
+)</code></pre>
+    </article>
+  
+    <article class="code-card">
+      <div class="code-head"><span>app/pages/products/products.html</span><b>actual file from src.zip</b></div>
+      <pre class="language-typescript"><code class="language-typescript">&lt;div class=&quot;product-grid&quot;&gt;
+    @if (error$()) {
+        &lt;h1&gt;Somthing went wrong&lt;/h1&gt;
+    }
+    @else {
+        @for(product of products$(); track product.id){ 
+        &lt;app-product [product]=&quot;product&quot;&gt;&lt;/app-product&gt;
+      }
+    }
+    
+    
+&lt;/div&gt;
+</code></pre>
+    </article>
+</section>
+
+
+
+<section id="cart-flow" class="panel">
+  <span class="badge green">Cart Flow</span>
+  <h2>Cart Flow: Product Component Dispatches, Cart Reducer Updates, Cart Selectors Read</h2>
+  <p>Cart is also a synchronous flow. Product component dispatches <code>addToCart()</code>. Cart item dispatches quantity/remove actions. Cart page and total board read data using selectors.</p>
+  
+    <article class="code-card">
+      <div class="code-head"><span>app/state/cart/cart.actions.ts</span><b>actual file from src.zip</b></div>
+      <pre class="language-typescript"><code class="language-typescript">import { createAction, props } from &quot;@ngrx/store&quot;;
+import { IProduct } from &quot;../../models/product.interface&quot;;
+
+export const addToCart = createAction(&#x27;[Cart] Add To Cart&#x27;, props&lt;{product: IProduct}&gt;());
+
+export const increment = createAction(&#x27;[Cart] Increment&#x27;, props&lt;{itemId: number}&gt;());
+
+export const decrement = createAction(&#x27;[Cart] decrement&#x27;, props&lt;{itemId: number}&gt;());
+
+export const removeItem = createAction(&#x27;[Cart] Remove Item&#x27;, props&lt;{itemId: number}&gt;());</code></pre>
+    </article>
+  
+    <article class="code-card">
+      <div class="code-head"><span>app/state/cart/cart.reducer.ts</span><b>actual file from src.zip</b></div>
+      <pre class="language-typescript"><code class="language-typescript">import { createReducer, on } from &quot;@ngrx/store&quot;;
+import { IProduct } from &quot;../../models/product.interface&quot;;
+import { addToCart, decrement, increment, removeItem } from &quot;./cart.actions&quot;;
+
+export interface CartState {
+    products: IProduct[],
+    subTotal: number;
+    deliveryPrice: number;
+    discount: number;
+    totalPrice: number;
+}
+
+export const initialState: CartState = {
+    products: [],
+    subTotal: 0,
+    deliveryPrice: 50,   // example fixed delivery charge
+    discount: 0,
+    totalPrice: 0
+}
+
+export function calculateSubTotal(products: IProduct[]){
+    return products.reduce((total, product) =&gt; total + (product.price * product.quantity), 0);
+}
+
+export function calculateTotal(subTotal: number,deliveryPrice: number,discount: number) {
+  return subTotal + deliveryPrice - discount;
+}
+
+export const cartReducer = createReducer(
+    initialState,
+    on(addToCart, (state, {product}) =&gt; {
+        const updatedProducts = [...state.products, product];
+        const subTotal = calculateSubTotal(updatedProducts);
+        const totalPrice = calculateTotal(subTotal, state.deliveryPrice, state.discount);
+        return {
+            ...state, 
+            products: updatedProducts,
+            subTotal: subTotal,
+            totalPrice: totalPrice
+        }
+    }),
+
+   on(increment, (state, {itemId}) =&gt; {
+    const updatedProducts = state.products.map((product) =&gt; {
+        return product.id === itemId ? {...product, quantity: product.quantity + 1} : product
+    })
+     const subTotal = calculateSubTotal(updatedProducts);
+     const totalPrice = calculateTotal(subTotal, state.deliveryPrice, state.discount);
+
+    return {
+        ...state,
+        products: updatedProducts,
+        subTotal: subTotal,
+        totalPrice: totalPrice
+    }
+
+   }),
+
+   on(decrement, (state, {itemId}) =&gt; {
+    const updatedProducts = state.products.map((product) =&gt; {
+        return product.id === itemId ? {...product, quantity: product.quantity - 1} : product
+    })
+    const subTotal = calculateSubTotal(updatedProducts);
+    const totalPrice = calculateTotal(subTotal, state.deliveryPrice, state.discount);
+    return {
+        ...state,
+        products: updatedProducts,
+        subTotal: subTotal,
+        totalPrice: totalPrice
+    }
+   }),
+
+   on(removeItem, (state, {itemId}) =&gt; {
+    const updatedProducts = state.products.filter((product) =&gt; {
+        return product.id !== itemId 
+    })
+    const subTotal = calculateSubTotal(updatedProducts);
+    const totalPrice = calculateTotal(subTotal, state.deliveryPrice, state.discount);
+    return {
+        ...state,
+        products: updatedProducts,
+        subTotal: subTotal,
+        totalPrice: totalPrice
+    }
+   })
+)</code></pre>
+    </article>
+  
+    <article class="code-card">
+      <div class="code-head"><span>app/state/cart/cart.selectors.ts</span><b>actual file from src.zip</b></div>
+      <pre class="language-typescript"><code class="language-typescript">import { createSelector } from &quot;@ngrx/store&quot;;
+import { AppState } from &quot;../app.state&quot;;
+
+export const selectCartState = (state: AppState) =&gt; state.cart;
+
+export const selectAllCartItems = createSelector(
+    selectCartState,
+    (state) =&gt; state.products
+)
+
+export const selectSubTotal = createSelector(
+    selectCartState,
+    (state) =&gt; state.subTotal
+)
+
+export const selectCartDeliveryPrice = createSelector(
+  selectCartState,
+  state =&gt; state.deliveryPrice
+);
+
+export const selectCartDiscount = createSelector(
+  selectCartState,
+  state =&gt; state.discount
+);
+
+export const selectTotalPrice = createSelector(
+    selectCartState,
+    (state) =&gt; state.totalPrice
+)</code></pre>
+    </article>
+  
+    <article class="code-card">
+      <div class="code-head"><span>app/components/product/product.ts</span><b>actual file from src.zip</b></div>
+      <pre class="language-typescript"><code class="language-typescript">import { Component, effect, input, Input } from &#x27;@angular/core&#x27;;
+import { IProduct } from &#x27;../../models/product.interface&#x27;;
+import { AppState } from &#x27;../../state/app.state&#x27;;
+import { Store } from &#x27;@ngrx/store&#x27;;
+import { addToCart } from &#x27;../../state/cart/cart.actions&#x27;;
+
+@Component({
+  selector: &#x27;app-product&#x27;,
+  imports: [],
+  templateUrl: &#x27;./product.html&#x27;,
+  styleUrl: &#x27;./product.scss&#x27;,
+})
+export class Product {
+
+  // @Input() product!: IProduct;
+  product = input&lt;IProduct | undefined&gt;();
+
+
+
+  constructor(private store: Store&lt;AppState&gt;) {
+      // effect(() =&gt; {
+      //   console.log(&#x27;Product input value:&#x27;, this.product());
+      // });
+  }
+
+  //  ngOnInit() {
+  //   console.log(&#x27;Product in ngOnInit:&#x27;, this.product());
+  // }
+
+  addToCart(product: IProduct | undefined){
+    // console.log(&quot;kkk&quot;)
+     if (!product) {
+      return; // or show error / disable button
+    }
+    console.log(product);
+    this.store.dispatch(addToCart({product}))
+
+  }
+
+}
+</code></pre>
+    </article>
+  
+    <article class="code-card">
+      <div class="code-head"><span>app/components/product/product.html</span><b>actual file from src.zip</b></div>
+      <pre class="language-typescript"><code class="language-typescript">&lt;div class=&quot;product-card&quot;&gt;
+  &lt;div class=&quot;image-wrapper&quot;&gt;
+    &lt;img src=&quot;https://via.placeholder.com/300x300&quot; alt=&quot;Product Image&quot; /&gt;
+    &lt;!-- &lt;span class=&quot;badge&quot;&gt;New&lt;/span&gt; --&gt;
+  &lt;/div&gt;
+
+  &lt;div class=&quot;content&quot;&gt;
+    &lt;h3 class=&quot;title&quot;&gt;{{product()?.title}}&lt;/h3&gt;
+    &lt;p class=&quot;description&quot;&gt;
+      {{product()?.description}}
+    &lt;/p&gt;
+
+    &lt;div class=&quot;price-row&quot;&gt;
+      &lt;span class=&quot;price&quot;&gt;₹ {{product()?.price}}&lt;/span&gt;
+      &lt;!-- &lt;span class=&quot;old-price&quot;&gt;₹3,999&lt;/span&gt; --&gt;
+    &lt;/div&gt;
+
+    &lt;div class=&quot;actions&quot;&gt;
+      &lt;button class=&quot;btn outline&quot;&gt;Wishlist&lt;/button&gt;
+      &lt;button class=&quot;btn primary&quot; (click)=&quot;addToCart(product())&quot;&gt;Add to Cart&lt;/button&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+</code></pre>
+    </article>
+  
+    <article class="code-card">
+      <div class="code-head"><span>app/pages/cart/cart.ts</span><b>actual file from src.zip</b></div>
+      <pre class="language-typescript"><code class="language-typescript">import { Component, inject, OnInit } from &#x27;@angular/core&#x27;;
+import { AppState } from &#x27;../../state/app.state&#x27;;
+import { Store } from &#x27;@ngrx/store&#x27;;
+// import { selectAllCartItems } from &#x27;../../state/cart/cart.selectors&#x27;;
+import * as CartSelectors from &#x27;../../state/cart/cart.selectors&#x27;;
+import { CartItem } from &#x27;../../components/cart-item/cart-item&#x27;;
+import { TotalPriceBoard } from &#x27;../../components/total-price-board/total-price-board&#x27;;
+
+@Component({
+  selector: &#x27;app-cart&#x27;,
+  imports: [CartItem, TotalPriceBoard],
+  templateUrl: &#x27;./cart.html&#x27;,
+  styleUrl: &#x27;./cart.scss&#x27;,
+})
+export class Cart {
+     private store = inject(Store&lt;AppState&gt;)
+   
+     // Signal from NgRx store (SSR-safe)
+     cartItems = this.store.selectSignal(CartSelectors.selectAllCartItems);
+
+ 
+    
+     
+}
+</code></pre>
+    </article>
+  
+    <article class="code-card">
+      <div class="code-head"><span>app/pages/cart/cart.html</span><b>actual file from src.zip</b></div>
+      <pre class="language-typescript"><code class="language-typescript">&lt;!-- @for(item of cartItems$(); track item.id){ 
+        &lt;h1&gt;{{item.title}}&lt;/h1&gt;
+ } --&gt;
+
+&lt;div class=&quot;cart-container&quot;&gt;
+  &lt;div class=&quot;cart-left&quot;&gt;
+    &lt;h2&gt;Your Cart&lt;/h2&gt;
+
+    &lt;!-- Static cart item --&gt;
+     @for(item of cartItems(); track item.id){
+       &lt;app-cart-item [item]=&quot;item&quot;&gt;&lt;/app-cart-item&gt;
+     }
+    
+
+  &lt;/div&gt;
+
+  &lt;!-- Right side price summary --&gt;
+  &lt;div class=&quot;cart-right&quot;&gt;
+       &lt;app-total-price-board&gt;&lt;/app-total-price-board&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+</code></pre>
+    </article>
+  
+    <article class="code-card">
+      <div class="code-head"><span>app/components/cart-item/cart-item.ts</span><b>actual file from src.zip</b></div>
+      <pre class="language-typescript"><code class="language-typescript">import { Component, inject, input } from &#x27;@angular/core&#x27;;
+import { IProduct } from &#x27;../../models/product.interface&#x27;;
+import { AppState } from &#x27;../../state/app.state&#x27;;
+import { Store } from &#x27;@ngrx/store&#x27;;
+import { decrement, increment, removeItem } from &#x27;../../state/cart/cart.actions&#x27;;
+
+@Component({
+  selector: &#x27;app-cart-item&#x27;,
+  imports: [],
+  templateUrl: &#x27;./cart-item.html&#x27;,
+  styleUrl: &#x27;./cart-item.scss&#x27;,
+})
+export class CartItem {
+  item = input&lt;IProduct | undefined&gt;();
+  store = inject(Store&lt;AppState&gt;);
+
+  increment(itemId: number | undefined){
+     if (!itemId) {
+      return;
+    }
+    this.store.dispatch(increment({itemId}) )
+  }
+
+  decrement(itemId: number | undefined){
+     if (!itemId) {
+      return;
+    }
+    this.store.dispatch(decrement({itemId}) )
+  }
+
+  removeItem(itemId: number | undefined){
+    if (!itemId) {
+      return;
+    }
+    this.store.dispatch(removeItem({itemId}))
+  }
+}
+</code></pre>
+    </article>
+  
+    <article class="code-card">
+      <div class="code-head"><span>app/components/total-price-board/total-price-board.ts</span><b>actual file from src.zip</b></div>
+      <pre class="language-typescript"><code class="language-typescript">import { Component, inject } from &#x27;@angular/core&#x27;;
+import { AppState } from &#x27;../../state/app.state&#x27;;
+import { Store } from &#x27;@ngrx/store&#x27;;
+import * as CartSelectors from &#x27;../../state/cart/cart.selectors&#x27;;
+
+@Component({
+  selector: &#x27;app-total-price-board&#x27;,
+  imports: [],
+  templateUrl: &#x27;./total-price-board.html&#x27;,
+  styleUrl: &#x27;./total-price-board.scss&#x27;,
+})
+export class TotalPriceBoard {
+  private store = inject(Store&lt;AppState&gt;);
+  subTotal = this.store.selectSignal(CartSelectors.selectSubTotal);
+  deliveryPrice = this.store.selectSignal(CartSelectors.selectCartDeliveryPrice);
+  discount = this.store.selectSignal(CartSelectors.selectCartDiscount);
+  totalPrice = this.store.selectSignal(CartSelectors.selectTotalPrice);
+ 
+}
+</code></pre>
+    </article>
+</section>
+
+<section id="quick-map" class="panel">
+  <span class="badge orange">Remember</span>
+  <h2>NgRx File Responsibility Map</h2>
+  <div class="grid">
+    <div class="note"><strong>actions.ts</strong><br>Only declares events: <code>loadProducts</code>, <code>addToCart</code>, <code>increment</code>.</div>
+    <div class="note"><strong>reducer.ts</strong><br>Only changes state immutably. No API call here.</div>
+    <div class="note"><strong>effects.ts</strong><br>Only for side effects like HTTP. It listens to actions and returns new actions.</div>
+    <div class="note"><strong>selectors.ts</strong><br>Only reads/derives state from Store. It does not modify state.</div>
+    <div class="note"><strong>app.config.ts</strong><br>Registers <code>provideStore()</code>, <code>provideState()</code>, and <code>provideEffects()</code>.</div>
+    <div class="note"><strong>component.ts</strong><br>Dispatches actions and reads selectors using <code>store.select()</code> or <code>store.selectSignal()</code>.</div>
+  </div>
+</section>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-core.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+<script>
+  // Highlight only in browser. Original code text remains unchanged in HTML.
+  if (window.Prism) { Prism.highlightAll(); }
+</script>
+</body>
+</html>

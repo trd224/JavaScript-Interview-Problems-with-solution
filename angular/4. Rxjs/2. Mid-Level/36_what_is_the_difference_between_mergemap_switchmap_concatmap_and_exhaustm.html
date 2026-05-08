@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>What is the difference between mergeMap, switchMap, concatMap, and exhaustMap?</title>
+<style>
+:root{
+  --bg:#0d1117; --card:#161b22; --card2:#0f1623; --border:#30363d;
+  --text:#e6edf3; --muted:#9aa7b4; --blue:#58a6ff; --green:#3fb950;
+  --purple:#bc8cff; --orange:#ffa657; --red:#ff7b72; --yellow:#d29922;
+  --cyan:#39c5cf; --pink:#ff7bcb;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  background:
+    radial-gradient(circle at top left, rgba(88,166,255,.14), transparent 35%),
+    radial-gradient(circle at top right, rgba(188,140,255,.12), transparent 32%),
+    var(--bg);
+  color:var(--text);
+  font-family:"Segoe UI",system-ui,sans-serif;
+  line-height:1.75;
+  padding:32px;
+}
+.wrapper{max-width:1120px;margin:auto}
+.header{
+  background:linear-gradient(135deg,rgba(88,166,255,.13),rgba(188,140,255,.12));
+  border:1px solid var(--border);
+  border-radius:22px;
+  padding:30px;
+  margin-bottom:24px;
+  box-shadow:0 16px 45px rgba(0,0,0,.28);
+}
+.badge{
+  display:inline-block;color:var(--blue);border:1px solid rgba(88,166,255,.45);
+  background:rgba(88,166,255,.08);padding:5px 12px;border-radius:999px;
+  font:700 12px Consolas,monospace;letter-spacing:.7px;margin-bottom:14px;
+}
+h1{margin:0;color:var(--blue);font-size:34px;line-height:1.25}
+.subtitle{color:var(--muted);margin-top:10px}
+.card{
+  background:rgba(22,27,34,.96);border:1px solid var(--border);
+  border-radius:18px;padding:24px;margin:20px 0;box-shadow:0 10px 32px rgba(0,0,0,.22);
+}
+h2{color:var(--purple);margin:0 0 12px;font-size:22px}
+h3{color:var(--orange);margin:22px 0 10px}
+p{margin:10px 0}
+ul{padding-left:24px;margin:10px 0}
+li{margin:7px 0}
+.answer{
+  font-size:17px;color:#e7f2ff;background:rgba(88,166,255,.08);
+  border:1px solid rgba(88,166,255,.25);border-left:5px solid var(--blue);
+  padding:18px;border-radius:12px;
+}
+.answer p{margin:0 0 12px}
+.answer p:last-child{margin-bottom:0}
+.answer-title{
+  color:var(--orange);
+  font-size:17px;
+  margin:18px 0 8px;
+  font-weight:800;
+}
+.answer-title:first-child{margin-top:0}
+.answer-list{
+  margin:8px 0 0;
+  padding-left:24px;
+}
+.answer-list li{
+  margin:8px 0;
+}
+.answer-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:12px;
+  margin-top:12px;
+}
+.answer-mini{
+  background:#0f1623;
+  border:1px solid #273241;
+  border-radius:12px;
+  padding:14px;
+}
+.answer-mini strong{
+  color:var(--green);
+  display:block;
+  margin-bottom:6px;
+}
+.subbox{
+  background:#0f1623;border:1px solid #273241;border-radius:14px;padding:16px;margin:14px 0;
+}
+.subbox strong{color:var(--green)}
+.note{
+  border-left:5px solid var(--yellow);background:rgba(210,153,34,.09);
+  padding:14px 16px;border-radius:10px;margin-top:14px;
+}
+pre{
+  margin:0 0 18px;background:#05080d;border:1px solid #273241;border-left:5px solid var(--blue);
+  border-radius:14px;padding:20px;overflow:auto;font-size:14px;line-height:1.7;
+}
+.output pre{border-left-color:var(--green);background:#06120b}
+.file-title{color:var(--cyan);font:700 13px Consolas,monospace;margin:16px 0 8px}
+code{font-family:Consolas,"JetBrains Mono","Courier New",monospace}
+.kw{color:#ff7b72}.str{color:#a5d6ff}.fn{color:#d2a8ff}.num{color:#79c0ff}
+.com{color:#8b949e;font-style:italic}.type{color:#7ee787}
+.nav-links{display:flex;justify-content:space-between;gap:12px;margin-top:20px}
+.nav-links a{
+  color:var(--blue);text-decoration:none;border:1px solid var(--border);
+  background:var(--card2);padding:10px 14px;border-radius:10px;
+}
+.nav-links a:hover{border-color:var(--blue)}
+.footer{text-align:center;color:var(--muted);margin-top:30px;font-size:13px}
+.link{
+  display:flex;gap:14px;align-items:center;color:var(--text);text-decoration:none;
+  background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:14px 18px;margin:10px 0;
+}
+.link:hover{border-color:var(--blue);background:#1b2230}
+.link span{color:var(--blue);font-family:Consolas,monospace;font-weight:700;min-width:44px}
+</style>
+</head>
+<body>
+<div class="wrapper">
+  <section class="header">
+    <div class="badge">RxJS Mid-Level · Question 36</div>
+    <h1>What is the difference between mergeMap, switchMap, concatMap, and exhaustMap?</h1>
+    <p class="subtitle">Interview-level answer with full explanation, real Angular-style example, colorful code, and expected output.</p>
+  </section>
+
+  <section class="card">
+    <h2>Interview-Level Answer</h2>
+    <div class="answer"><h3 class="answer-title">Definition</h3>
+<p>mergeMap, switchMap, concatMap, and exhaustMap are higher-order mapping operators. They are used when a source Observable emits a value and that value must be converted into another Observable, usually an HTTP request.</p>
+
+<h3 class="answer-title">Main Difference</h3>
+<p>The main difference between them is how they handle multiple inner Observables when new values keep coming from the source Observable.</p>
+
+<div class="answer-grid">
+  <div class="answer-mini"><strong>mergeMap</strong>Runs all inner Observables in parallel. Use it when every request must complete and order is not important.</div>
+  <div class="answer-mini"><strong>switchMap</strong>Cancels the previous inner Observable and keeps only the latest one. Use it for search, filters, and route-param API calls.</div>
+  <div class="answer-mini"><strong>concatMap</strong>Queues inner Observables and runs them one by one. Use it when order must be preserved.</div>
+  <div class="answer-mini"><strong>exhaustMap</strong>Ignores new source values while the current inner Observable is running. Use it for login, submit, or payment buttons.</div>
+</div>
+
+<h3 class="answer-title">Angular Interview Use Case</h3>
+<ul class="answer-list">
+  <li>Use <strong>switchMap</strong> for typeahead search because old API calls should be cancelled.</li>
+  <li>Use <strong>mergeMap</strong> for independent parallel save operations.</li>
+  <li>Use <strong>concatMap</strong> when API calls must run in exact order.</li>
+  <li>Use <strong>exhaustMap</strong> when duplicate button clicks must be ignored while one request is running.</li>
+</ul></div>
+  </section>
+
+  <section class="card">
+    <h2>Key Points</h2>
+    <ul><li>They are used for flattening Observables returned from another Observable.</li><li>The correct operator depends on concurrency, cancellation, ordering, and duplicate-event handling.</li><li>Wrong choice can cause duplicate API calls, stale UI data, broken order, or ignored requests.</li></ul>
+    <div class="note"><strong>Remember:</strong> mergeMap = parallel, switchMap = cancel old and keep latest, concatMap = queue in order, exhaustMap = ignore new while busy.</div>
+  </section>
+
+  <section class="card">
+    <h2>Full Understandable Example / Examples</h2>
+    <div class="file-title">mergeMap-example.ts</div>
+<pre><code><span class="kw">import</span> { <span class="kw"><span class="fn">from</span></span> } <span class="kw"><span class="fn">from</span></span> &#x27;rxjs&#x27;;
+<span class="kw">import</span> { <span class="fn">mergeMap</span> } <span class="kw"><span class="fn">from</span></span> &#x27;rxjs/operators&#x27;;
+
+<span class="com">// Use case: save multiple independent records in parallel.</span>
+<span class="com">// Order is not guaranteed, but all requests are allowed to complete.</span>
+
+<span class="kw">const</span> userIds$ = <span class="kw"><span class="fn">from</span></span>([<span class="num">101</span>, <span class="num">102</span>, <span class="num">103</span>]);
+
+userIds$.<span class="fn">pipe</span>(
+  <span class="fn">mergeMap</span>(id =&gt; http.<span class="fn">post</span>(<span class="str">`/api/users/${id}/save`</span>, {}))
+).<span class="fn">subscribe</span>(result =&gt; {
+  <span class="fn">console</span>.<span class="fn">log</span>(&#x27;<span class="fn">mergeMap</span> save result:&#x27;, result);
+});</code></pre>
+<div class="file-title">switchMap-example.ts</div>
+<pre><code><span class="kw">import</span> { <span class="type">FormControl</span> } <span class="kw"><span class="fn">from</span></span> &#x27;@angular/forms&#x27;;
+<span class="kw">import</span> { <span class="fn">debounceTime</span>, <span class="fn">distinctUntilChanged</span>, <span class="fn">switchMap</span> } <span class="kw"><span class="fn">from</span></span> &#x27;rxjs/operators&#x27;;
+
+<span class="com">// Use case: typeahead search.</span>
+<span class="com">// Previous API call is cancelled when user types a new value.</span>
+
+<span class="kw">const</span> searchControl = <span class="kw">new</span> <span class="type">FormControl</span>(&#x27;&#x27;);
+
+searchControl.valueChanges.<span class="fn">pipe</span>(
+  <span class="fn">debounceTime</span>(<span class="num">400</span>),
+  <span class="fn">distinctUntilChanged</span>(),
+  <span class="fn">switchMap</span>(text =&gt; http.<span class="fn">get</span>(<span class="str">`/api/users?q=${text}`</span>))
+).<span class="fn">subscribe</span>(users =&gt; {
+  <span class="fn">console</span>.<span class="fn">log</span>(&#x27;Latest search users:&#x27;, users);
+});</code></pre>
+<div class="file-title">concatMap-example.ts</div>
+<pre><code><span class="kw">import</span> { <span class="kw"><span class="fn">from</span></span> } <span class="kw"><span class="fn">from</span></span> &#x27;rxjs&#x27;;
+<span class="kw">import</span> { <span class="fn">concatMap</span> } <span class="kw"><span class="fn">from</span></span> &#x27;rxjs/operators&#x27;;
+
+<span class="com">// Use case: ordered API calls.</span>
+<span class="com">// Next request starts only after previous request completes.</span>
+
+<span class="kw">const</span> orderIds$ = <span class="kw"><span class="fn">from</span></span>([<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>]);
+
+orderIds$.<span class="fn">pipe</span>(
+  <span class="fn">concatMap</span>(id =&gt; http.<span class="fn">post</span>(<span class="str">`/api/orders/${id}/process`</span>, {}))
+).<span class="fn">subscribe</span>(result =&gt; {
+  <span class="fn">console</span>.<span class="fn">log</span>(&#x27;<span class="fn">concatMap</span> processed:&#x27;, result);
+});</code></pre>
+<div class="file-title">exhaustMap-example.ts</div>
+<pre><code><span class="kw">import</span> { <span class="fn">fromEvent</span> } <span class="kw"><span class="fn">from</span></span> &#x27;rxjs&#x27;;
+<span class="kw">import</span> { <span class="fn">exhaustMap</span> } <span class="kw"><span class="fn">from</span></span> &#x27;rxjs/operators&#x27;;
+
+<span class="com">// Use case: login button.</span>
+<span class="com">// Extra clicks are ignored while login request is running.</span>
+
+<span class="kw">const</span> loginButton = document.getElementById(&#x27;loginBtn&#x27;)!;
+
+<span class="fn">fromEvent</span>(loginButton, &#x27;click&#x27;).<span class="fn">pipe</span>(
+  <span class="fn">exhaustMap</span>(() =&gt; http.<span class="fn">post</span>(&#x27;/api/login&#x27;, {
+    username: &#x27;rizwan&#x27;,
+    password: &#x27;secret&#x27;
+  }))
+).<span class="fn">subscribe</span>(response =&gt; {
+  <span class="fn">console</span>.<span class="fn">log</span>(&#x27;Login response:&#x27;, response);
+});</code></pre>
+
+
+  </section>
+
+  <section class="card output">
+    <h2>Expected Output / Behavior</h2>
+    <pre><code>mergeMap: requests may complete in any order.
+switchMap: only latest active request result is used.
+concatMap: requests complete in source order.
+exhaustMap: extra emissions are ignored while one request is active.</code></pre>
+  </section>
+
+  <div class="nav-links">
+    <span></span>
+    <a href="index.html">All Questions</a>
+    <a href="37_when_would_you_choose_switchmap_over_mergemap.html">Next →</a>
+  </div>
+
+  <div class="footer">RxJS Mid-Level Interview Preparation · Question 36</div>
+</div>
+</body>
+</html>

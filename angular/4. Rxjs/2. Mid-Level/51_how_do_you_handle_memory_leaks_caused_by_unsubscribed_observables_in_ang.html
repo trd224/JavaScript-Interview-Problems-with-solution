@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How do you handle memory leaks caused by unsubscribed Observables in Angular?</title>
+<style>
+:root{
+  --bg:#0d1117; --card:#161b22; --card2:#0f1623; --border:#30363d;
+  --text:#e6edf3; --muted:#9aa7b4; --blue:#58a6ff; --green:#3fb950;
+  --purple:#bc8cff; --orange:#ffa657; --red:#ff7b72; --yellow:#d29922;
+  --cyan:#39c5cf; --pink:#ff7bcb;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  background:
+    radial-gradient(circle at top left, rgba(88,166,255,.14), transparent 35%),
+    radial-gradient(circle at top right, rgba(188,140,255,.12), transparent 32%),
+    var(--bg);
+  color:var(--text);
+  font-family:"Segoe UI",system-ui,sans-serif;
+  line-height:1.75;
+  padding:32px;
+}
+.wrapper{max-width:1120px;margin:auto}
+.header{
+  background:linear-gradient(135deg,rgba(88,166,255,.13),rgba(188,140,255,.12));
+  border:1px solid var(--border);
+  border-radius:22px;
+  padding:30px;
+  margin-bottom:24px;
+  box-shadow:0 16px 45px rgba(0,0,0,.28);
+}
+.badge{
+  display:inline-block;color:var(--blue);border:1px solid rgba(88,166,255,.45);
+  background:rgba(88,166,255,.08);padding:5px 12px;border-radius:999px;
+  font:700 12px Consolas,monospace;letter-spacing:.7px;margin-bottom:14px;
+}
+h1{margin:0;color:var(--blue);font-size:34px;line-height:1.25}
+.subtitle{color:var(--muted);margin-top:10px}
+.card{
+  background:rgba(22,27,34,.96);border:1px solid var(--border);
+  border-radius:18px;padding:24px;margin:20px 0;box-shadow:0 10px 32px rgba(0,0,0,.22);
+}
+h2{color:var(--purple);margin:0 0 12px;font-size:22px}
+h3{color:var(--orange);margin:22px 0 10px}
+p{margin:10px 0}
+ul{padding-left:24px;margin:10px 0}
+li{margin:7px 0}
+.answer{
+  font-size:17px;color:#e7f2ff;background:rgba(88,166,255,.08);
+  border:1px solid rgba(88,166,255,.25);border-left:5px solid var(--blue);
+  padding:18px;border-radius:12px;
+}
+.answer p{margin:0 0 12px}
+.answer p:last-child{margin-bottom:0}
+.answer-title{
+  color:var(--orange);
+  font-size:17px;
+  margin:18px 0 8px;
+  font-weight:800;
+}
+.answer-title:first-child{margin-top:0}
+.answer-list{
+  margin:8px 0 0;
+  padding-left:24px;
+}
+.answer-list li{
+  margin:8px 0;
+}
+.answer-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:12px;
+  margin-top:12px;
+}
+.answer-mini{
+  background:#0f1623;
+  border:1px solid #273241;
+  border-radius:12px;
+  padding:14px;
+}
+.answer-mini strong{
+  color:var(--green);
+  display:block;
+  margin-bottom:6px;
+}
+.subbox{
+  background:#0f1623;border:1px solid #273241;border-radius:14px;padding:16px;margin:14px 0;
+}
+.subbox strong{color:var(--green)}
+.note{
+  border-left:5px solid var(--yellow);background:rgba(210,153,34,.09);
+  padding:14px 16px;border-radius:10px;margin-top:14px;
+}
+pre{
+  margin:0 0 18px;background:#05080d;border:1px solid #273241;border-left:5px solid var(--blue);
+  border-radius:14px;padding:20px;overflow:auto;font-size:14px;line-height:1.7;
+}
+.output pre{border-left-color:var(--green);background:#06120b}
+.file-title{color:var(--cyan);font:700 13px Consolas,monospace;margin:16px 0 8px}
+code{font-family:Consolas,"JetBrains Mono","Courier New",monospace}
+.kw{color:#ff7b72}.str{color:#a5d6ff}.fn{color:#d2a8ff}.num{color:#79c0ff}
+.com{color:#8b949e;font-style:italic}.type{color:#7ee787}
+.nav-links{display:flex;justify-content:space-between;gap:12px;margin-top:20px}
+.nav-links a{
+  color:var(--blue);text-decoration:none;border:1px solid var(--border);
+  background:var(--card2);padding:10px 14px;border-radius:10px;
+}
+.nav-links a:hover{border-color:var(--blue)}
+.footer{text-align:center;color:var(--muted);margin-top:30px;font-size:13px}
+.link{
+  display:flex;gap:14px;align-items:center;color:var(--text);text-decoration:none;
+  background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:14px 18px;margin:10px 0;
+}
+.link:hover{border-color:var(--blue);background:#1b2230}
+.link span{color:var(--blue);font-family:Consolas,monospace;font-weight:700;min-width:44px}
+</style>
+</head>
+<body>
+<div class="wrapper">
+  <section class="header">
+    <div class="badge">RxJS Mid-Level · Question 51</div>
+    <h1>How do you handle memory leaks caused by unsubscribed Observables in Angular?</h1>
+    <p class="subtitle">Interview-level answer with full explanation, real Angular-style example, colorful code, and expected output.</p>
+  </section>
+
+  <section class="card">
+    <h2>Interview-Level Answer</h2>
+    <div class="answer"><h3 class="answer-title">Definition</h3>
+<p>Memory leaks happen when long-running Observables continue emitting after an Angular component is destroyed.</p>
+
+<h3 class="answer-title">How To Prevent</h3>
+<ul class="answer-list">
+  <li>Use async pipe for template subscriptions.</li>
+  <li>Use takeUntilDestroyed() in Angular 16+.</li>
+  <li>Use takeUntil with destroy$ Subject.</li>
+  <li>Use manual unsubscribe when managing Subscription objects directly.</li>
+</ul>
+
+<h3 class="answer-title">Important Interview Point</h3>
+<p>Angular HttpClient Observables usually complete automatically, but interval, WebSocket, DOM events, Subjects, and valueChanges often need cleanup.</p></div>
+  </section>
+
+  <section class="card">
+    <h2>Key Points</h2>
+    <ul><li>Use async pipe when data is only displayed in template.</li><li>Use takeUntil/takeUntilDestroyed for component subscriptions.</li><li>Manual unsubscribe is also valid when subscriptions are stored.</li></ul>
+    <div class="note"><strong>Remember:</strong> Always clean long-running streams; HTTP usually completes automatically.</div>
+  </section>
+
+  <section class="card">
+    <h2>Full Understandable Example / Examples</h2>
+    <div class="file-title">app.component.ts</div>
+<pre><code><span class="kw">import</span> { <span class="type">Component</span>, <span class="type">OnDestroy</span>, <span class="type">OnInit</span> } <span class="kw"><span class="fn">from</span></span> &#x27;@angular/core&#x27;;
+<span class="kw">import</span> { <span class="type">Subject</span>, <span class="fn">interval</span> } <span class="kw"><span class="fn">from</span></span> &#x27;rxjs&#x27;;
+<span class="kw">import</span> { <span class="fn">takeUntil</span> } <span class="kw"><span class="fn">from</span></span> &#x27;rxjs/operators&#x27;;
+
+@<span class="type">Component</span>({
+  selector: &#x27;app-root&#x27;,
+  template: <span class="str">`&amp;lt;p&amp;gt;Check console&amp;lt;/p&amp;gt;`</span>
+})
+<span class="kw">export</span> <span class="kw">class</span> AppComponent <span class="kw">implements</span> <span class="type">OnInit</span>, <span class="type">OnDestroy</span> {
+  <span class="kw">private</span> destroy$ = <span class="kw">new</span> <span class="type">Subject</span>&lt;void&gt;();
+
+  ngOnInit() {
+    <span class="fn">interval</span>(<span class="num">1000</span>).<span class="fn">pipe</span>(
+      <span class="fn">takeUntil</span>(this.destroy$)
+    ).<span class="fn">subscribe</span>(value =&gt; {
+      <span class="fn">console</span>.<span class="fn">log</span>(&#x27;Timer:&#x27;, value);
+    });
+  }
+
+  ngOnDestroy() {
+    this.destroy$.<span class="fn">next</span>();
+    this.destroy$.<span class="fn">complete</span>();
+  }
+}</code></pre>
+
+  </section>
+
+  <section class="card output">
+    <h2>Expected Output / Behavior</h2>
+    <pre><code>Timer prints while component is alive.
+When component is destroyed, destroy$ emits and timer stops.</code></pre>
+  </section>
+
+  <div class="nav-links">
+    <a href="50_what_is_a_multicast_observable.html">← Previous</a>
+    <a href="index.html">All Questions</a>
+    <a href="52_what_is_the_takeuntil_pattern_and_how_is_it_used_for_cleanup.html">Next →</a>
+  </div>
+
+  <div class="footer">RxJS Mid-Level Interview Preparation · Question 51</div>
+</div>
+</body>
+</html>

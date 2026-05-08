@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How does zone.js interact with RxJS Observables in Angular, and how can you run RxJS code outside Angular&#x27;s zone?</title>
+<style>
+:root{
+  --bg:#0d1117; --card:#161b22; --card2:#0f1623; --border:#30363d;
+  --text:#e6edf3; --muted:#9aa7b4; --blue:#58a6ff; --green:#3fb950;
+  --purple:#bc8cff; --orange:#ffa657; --red:#ff7b72; --yellow:#d29922;
+  --cyan:#39c5cf; --pink:#ff7bcb;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  background:
+    radial-gradient(circle at top left, rgba(255,123,114,.14), transparent 35%),
+    radial-gradient(circle at top right, rgba(188,140,255,.12), transparent 32%),
+    var(--bg);
+  color:var(--text);
+  font-family:"Segoe UI",system-ui,sans-serif;
+  line-height:1.75;
+  padding:32px;
+}
+.wrapper{max-width:1120px;margin:auto}
+.header{
+  background:linear-gradient(135deg,rgba(255,123,114,.13),rgba(188,140,255,.12));
+  border:1px solid var(--border);
+  border-radius:22px;
+  padding:30px;
+  margin-bottom:24px;
+  box-shadow:0 16px 45px rgba(0,0,0,.28);
+}
+.badge{
+  display:inline-block;color:var(--red);border:1px solid rgba(255,123,114,.45);
+  background:rgba(255,123,114,.08);padding:5px 12px;border-radius:999px;
+  font:700 12px Consolas,monospace;letter-spacing:.7px;margin-bottom:14px;
+}
+h1{margin:0;color:var(--red);font-size:34px;line-height:1.25}
+.subtitle{color:var(--muted);margin-top:10px}
+.card{
+  background:rgba(22,27,34,.96);border:1px solid var(--border);
+  border-radius:18px;padding:24px;margin:20px 0;box-shadow:0 10px 32px rgba(0,0,0,.22);
+}
+h2{color:var(--purple);margin:0 0 12px;font-size:22px}
+h3{color:var(--orange);margin:22px 0 10px}
+p{margin:10px 0}
+ul{padding-left:24px;margin:10px 0}
+li{margin:7px 0}
+.answer{
+  font-size:17px;color:#fff0f0;background:rgba(255,123,114,.08);
+  border:1px solid rgba(255,123,114,.25);border-left:5px solid var(--red);
+  padding:18px;border-radius:12px;
+}
+.answer-title{
+  color:var(--orange);
+  font-size:17px;
+  margin:18px 0 8px;
+  font-weight:800;
+}
+.answer-title:first-child{margin-top:0}
+.answer-list{margin:8px 0 0;padding-left:24px}
+.answer-list li{margin:8px 0}
+.answer-grid{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));
+  gap:12px;margin-top:12px;
+}
+.answer-mini{
+  background:#0f1623;border:1px solid #273241;border-radius:12px;padding:14px;
+}
+.answer-mini strong{color:var(--green);display:block;margin-bottom:6px}
+.note{
+  border-left:5px solid var(--yellow);background:rgba(210,153,34,.09);
+  padding:14px 16px;border-radius:10px;margin-top:14px;
+}
+pre{
+  margin:0 0 18px;background:#05080d;border:1px solid #273241;border-left:5px solid var(--red);
+  border-radius:14px;padding:20px;overflow:auto;font-size:14px;line-height:1.7;
+}
+.output pre{border-left-color:var(--green);background:#06120b}
+.file-title{color:var(--cyan);font:700 13px Consolas,monospace;margin:16px 0 8px}
+code{font-family:Consolas,"JetBrains Mono","Courier New",monospace}
+.kw{color:#ff7b72}.str{color:#a5d6ff}.fn{color:#d2a8ff}.num{color:#79c0ff}
+.com{color:#8b949e;font-style:italic}.type{color:#7ee787}
+.nav-links{display:flex;justify-content:space-between;gap:12px;margin-top:20px}
+.nav-links a{
+  color:var(--red);text-decoration:none;border:1px solid var(--border);
+  background:var(--card2);padding:10px 14px;border-radius:10px;
+}
+.nav-links a:hover{border-color:var(--red)}
+.footer{text-align:center;color:var(--muted);margin-top:30px;font-size:13px}
+.link{
+  display:flex;gap:14px;align-items:center;color:var(--text);text-decoration:none;
+  background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:14px 18px;margin:10px 0;
+}
+.link:hover{border-color:var(--red);background:#1b2230}
+.link span{color:var(--red);font-family:Consolas,monospace;font-weight:700;min-width:44px}
+</style>
+</head>
+<body>
+<div class="wrapper">
+  <section class="header">
+    <div class="badge">RxJS Advanced · Question 101</div>
+    <h1>How does zone.js interact with RxJS Observables in Angular, and how can you run RxJS code outside Angular&#x27;s zone?</h1>
+    <p class="subtitle">Advanced interview-level answer with headings, lists, full examples for every concept, colorful code, and expected behavior.</p>
+  </section>
+
+  <section class="card">
+    <h2>Interview-Level Answer</h2>
+    <div class="answer"><h3 class="answer-title">Definition</h3>
+<p>zone.js patches async APIs and helps Angular know when to run change detection. RxJS async emissions can trigger Angular change detection when they run inside Angular's zone.</p>
+<h3 class="answer-title">Problem</h3>
+<p>High-frequency streams like scroll, mousemove, or interval can trigger too many change detection cycles and hurt performance.</p>
+<h3 class="answer-title">Solution</h3>
+<ul class="answer-list">
+  <li>Use NgZone.runOutsideAngular() for high-frequency work.</li>
+  <li>Re-enter Angular zone with ngZone.run() only when UI update is needed.</li>
+</ul></div>
+  </section>
+
+  <section class="card">
+    <h2>Key Points</h2>
+    <ul><li>zone.js helps Angular detect async work.</li><li>High-frequency RxJS streams can cause excessive change detection.</li><li>NgZone can run work outside Angular for performance.</li></ul>
+    <div class="note"><strong>Remember:</strong> Run noisy streams outside Angular; re-enter only for UI updates.</div>
+  </section>
+
+  <section class="card">
+    <h2>Full Understandable Example / Examples</h2>
+    <div class="file-title">zone-rxjs-example.component.ts</div>
+<pre><code><span class="kw">import</span> { <span class="type">Component</span>, <span class="type">NgZone</span>, <span class="type">OnInit</span> } <span class="kw"><span class="fn">from</span></span> &#x27;@angular/core&#x27;;
+<span class="kw">import</span> { <span class="fn">fromEvent</span> } <span class="kw"><span class="fn">from</span></span> &#x27;rxjs&#x27;;
+<span class="kw">import</span> { <span class="fn">throttleTime</span> } <span class="kw"><span class="fn">from</span></span> &#x27;rxjs/operators&#x27;;
+
+@<span class="type">Component</span>({
+  selector: &#x27;app-scroll&#x27;,
+  template: <span class="str">`&amp;lt;p&amp;gt;Scroll Y: {{ scrollY }}&amp;lt;/p&amp;gt;`</span>
+})
+<span class="kw">export</span> <span class="kw">class</span> ScrollComponent <span class="kw">implements</span> <span class="type">OnInit</span> {
+  scrollY = <span class="num">0</span>;
+
+  <span class="kw">constructor</span>(<span class="kw">private</span> ngZone: <span class="type">NgZone</span>) {}
+
+  ngOnInit() {
+    this.ngZone.<span class="fn">runOutsideAngular</span>(() =&gt; {
+      <span class="fn">fromEvent</span>(window, &#x27;scroll&#x27;).<span class="fn">pipe</span>(
+        <span class="fn">throttleTime</span>(<span class="num">500</span>)
+      ).<span class="fn">subscribe</span>(() =&gt; {
+        <span class="kw">const</span> y = window.scrollY;
+
+        this.ngZone.<span class="fn">run</span>(() =&gt; {
+          this.scrollY = y;
+        });
+      });
+    });
+  }
+}</code></pre>
+
+  </section>
+
+  <section class="card output">
+    <h2>Expected Output / Behavior</h2>
+    <pre><code>Scroll events are handled outside Angular.
+UI update enters Angular only every 500ms.</code></pre>
+  </section>
+
+  <div class="nav-links">
+    <a href="100_what_is_animationframescheduler_and_when_would_you_use_it.html">← Previous</a>
+    <a href="index.html">All Questions</a>
+    <a href="102_what_are_the_key_differences_between_rxjs_6_and_rxjs_7.html">Next →</a>
+  </div>
+
+  <div class="footer">RxJS Advanced Interview Preparation · Question 101</div>
+</div>
+</body>
+</html>

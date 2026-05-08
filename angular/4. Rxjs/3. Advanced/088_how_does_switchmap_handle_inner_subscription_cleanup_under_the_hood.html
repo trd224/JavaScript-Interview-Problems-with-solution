@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How does switchMap handle inner subscription cleanup under the hood?</title>
+<style>
+:root{
+  --bg:#0d1117; --card:#161b22; --card2:#0f1623; --border:#30363d;
+  --text:#e6edf3; --muted:#9aa7b4; --blue:#58a6ff; --green:#3fb950;
+  --purple:#bc8cff; --orange:#ffa657; --red:#ff7b72; --yellow:#d29922;
+  --cyan:#39c5cf; --pink:#ff7bcb;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  background:
+    radial-gradient(circle at top left, rgba(255,123,114,.14), transparent 35%),
+    radial-gradient(circle at top right, rgba(188,140,255,.12), transparent 32%),
+    var(--bg);
+  color:var(--text);
+  font-family:"Segoe UI",system-ui,sans-serif;
+  line-height:1.75;
+  padding:32px;
+}
+.wrapper{max-width:1120px;margin:auto}
+.header{
+  background:linear-gradient(135deg,rgba(255,123,114,.13),rgba(188,140,255,.12));
+  border:1px solid var(--border);
+  border-radius:22px;
+  padding:30px;
+  margin-bottom:24px;
+  box-shadow:0 16px 45px rgba(0,0,0,.28);
+}
+.badge{
+  display:inline-block;color:var(--red);border:1px solid rgba(255,123,114,.45);
+  background:rgba(255,123,114,.08);padding:5px 12px;border-radius:999px;
+  font:700 12px Consolas,monospace;letter-spacing:.7px;margin-bottom:14px;
+}
+h1{margin:0;color:var(--red);font-size:34px;line-height:1.25}
+.subtitle{color:var(--muted);margin-top:10px}
+.card{
+  background:rgba(22,27,34,.96);border:1px solid var(--border);
+  border-radius:18px;padding:24px;margin:20px 0;box-shadow:0 10px 32px rgba(0,0,0,.22);
+}
+h2{color:var(--purple);margin:0 0 12px;font-size:22px}
+h3{color:var(--orange);margin:22px 0 10px}
+p{margin:10px 0}
+ul{padding-left:24px;margin:10px 0}
+li{margin:7px 0}
+.answer{
+  font-size:17px;color:#fff0f0;background:rgba(255,123,114,.08);
+  border:1px solid rgba(255,123,114,.25);border-left:5px solid var(--red);
+  padding:18px;border-radius:12px;
+}
+.answer-title{
+  color:var(--orange);
+  font-size:17px;
+  margin:18px 0 8px;
+  font-weight:800;
+}
+.answer-title:first-child{margin-top:0}
+.answer-list{margin:8px 0 0;padding-left:24px}
+.answer-list li{margin:8px 0}
+.answer-grid{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));
+  gap:12px;margin-top:12px;
+}
+.answer-mini{
+  background:#0f1623;border:1px solid #273241;border-radius:12px;padding:14px;
+}
+.answer-mini strong{color:var(--green);display:block;margin-bottom:6px}
+.note{
+  border-left:5px solid var(--yellow);background:rgba(210,153,34,.09);
+  padding:14px 16px;border-radius:10px;margin-top:14px;
+}
+pre{
+  margin:0 0 18px;background:#05080d;border:1px solid #273241;border-left:5px solid var(--red);
+  border-radius:14px;padding:20px;overflow:auto;font-size:14px;line-height:1.7;
+}
+.output pre{border-left-color:var(--green);background:#06120b}
+.file-title{color:var(--cyan);font:700 13px Consolas,monospace;margin:16px 0 8px}
+code{font-family:Consolas,"JetBrains Mono","Courier New",monospace}
+.kw{color:#ff7b72}.str{color:#a5d6ff}.fn{color:#d2a8ff}.num{color:#79c0ff}
+.com{color:#8b949e;font-style:italic}.type{color:#7ee787}
+.nav-links{display:flex;justify-content:space-between;gap:12px;margin-top:20px}
+.nav-links a{
+  color:var(--red);text-decoration:none;border:1px solid var(--border);
+  background:var(--card2);padding:10px 14px;border-radius:10px;
+}
+.nav-links a:hover{border-color:var(--red)}
+.footer{text-align:center;color:var(--muted);margin-top:30px;font-size:13px}
+.link{
+  display:flex;gap:14px;align-items:center;color:var(--text);text-decoration:none;
+  background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:14px 18px;margin:10px 0;
+}
+.link:hover{border-color:var(--red);background:#1b2230}
+.link span{color:var(--red);font-family:Consolas,monospace;font-weight:700;min-width:44px}
+</style>
+</head>
+<body>
+<div class="wrapper">
+  <section class="header">
+    <div class="badge">RxJS Advanced · Question 088</div>
+    <h1>How does switchMap handle inner subscription cleanup under the hood?</h1>
+    <p class="subtitle">Advanced interview-level answer with headings, lists, full examples for every concept, colorful code, and expected behavior.</p>
+  </section>
+
+  <section class="card">
+    <h2>Interview-Level Answer</h2>
+    <div class="answer"><h3 class="answer-title">Definition</h3>
+<p>switchMap maps each source value to an inner Observable. When a new source value arrives, it unsubscribes from the previous inner Observable before subscribing to the new one.</p>
+<h3 class="answer-title">Cleanup Behavior</h3>
+<ul class="answer-list">
+  <li>Only one inner subscription is active at a time.</li>
+  <li>Previous inner subscription is cancelled on new source emission.</li>
+  <li>For Angular HttpClient, cancellation can abort the HTTP request.</li>
+</ul>
+<h3 class="answer-title">Interview Point</h3>
+<p>switchMap does not wait for previous inner Observable to complete. It actively unsubscribes from it when switching.</p></div>
+  </section>
+
+  <section class="card">
+    <h2>Key Points</h2>
+    <ul><li>switchMap keeps latest inner Observable.</li><li>Old inner subscription is unsubscribed.</li><li>Useful for cancellation and stale response prevention.</li></ul>
+    <div class="note"><strong>Remember:</strong> switchMap cleanup = unsubscribe previous inner stream.</div>
+  </section>
+
+  <section class="card">
+    <h2>Full Understandable Example / Examples</h2>
+    <div class="file-title">switchMap-cleanup-example.ts</div>
+<pre><code>searchControl.valueChanges.<span class="fn">pipe</span>(
+  <span class="fn">debounceTime</span>(<span class="num">300</span>),
+  <span class="fn">switchMap</span>(text =&gt; {
+    <span class="fn">console</span>.<span class="fn">log</span>(&#x27;Starting request <span class="kw">for</span>:&#x27;, text);
+    <span class="kw">return</span> http.<span class="fn">get</span>(<span class="str">`/api/search?q=${text}`</span>);
+  })
+).<span class="fn">subscribe</span>(result =&gt; {
+  <span class="fn">console</span>.<span class="fn">log</span>(&#x27;Latest result:&#x27;, result);
+});</code></pre>
+<div class="file-title">manual-cleanup-analogy.ts</div>
+<pre><code><span class="com">// Conceptually similar to:</span>
+<span class="kw">let</span> innerSubscription: <span class="type">Subscription</span> | <span class="kw">null</span> = <span class="kw">null</span>;
+
+source$.<span class="fn">subscribe</span>(value =&gt; {
+  <span class="kw">if</span> (innerSubscription) {
+    innerSubscription.<span class="fn">unsubscribe</span>();
+  }
+
+  innerSubscription = <span class="fn">apiCall</span>(value).<span class="fn">subscribe</span>(result =&gt; {
+    <span class="fn">console</span>.<span class="fn">log</span>(result);
+  });
+});</code></pre>
+
+  </section>
+
+  <section class="card output">
+    <h2>Expected Output / Behavior</h2>
+    <pre><code>When new search text arrives, previous HTTP Observable is unsubscribed and only latest result is used.</code></pre>
+  </section>
+
+  <div class="nav-links">
+    <a href="087_how_would_you_implement_an_exponential_backoff_retry_strategy_using_rxjs.html">← Previous</a>
+    <a href="index.html">All Questions</a>
+    <a href="089_what_is_the_difference_between_subject_behaviorsubject_replaysubject_and.html">Next →</a>
+  </div>
+
+  <div class="footer">RxJS Advanced Interview Preparation · Question 088</div>
+</div>
+</body>
+</html>

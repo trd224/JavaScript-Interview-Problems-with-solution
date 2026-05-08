@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How would you write a custom RxJS operator?</title>
+<style>
+:root{
+  --bg:#0d1117; --card:#161b22; --card2:#0f1623; --border:#30363d;
+  --text:#e6edf3; --muted:#9aa7b4; --blue:#58a6ff; --green:#3fb950;
+  --purple:#bc8cff; --orange:#ffa657; --red:#ff7b72; --yellow:#d29922;
+  --cyan:#39c5cf; --pink:#ff7bcb;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  background:
+    radial-gradient(circle at top left, rgba(255,123,114,.14), transparent 35%),
+    radial-gradient(circle at top right, rgba(188,140,255,.12), transparent 32%),
+    var(--bg);
+  color:var(--text);
+  font-family:"Segoe UI",system-ui,sans-serif;
+  line-height:1.75;
+  padding:32px;
+}
+.wrapper{max-width:1120px;margin:auto}
+.header{
+  background:linear-gradient(135deg,rgba(255,123,114,.13),rgba(188,140,255,.12));
+  border:1px solid var(--border);
+  border-radius:22px;
+  padding:30px;
+  margin-bottom:24px;
+  box-shadow:0 16px 45px rgba(0,0,0,.28);
+}
+.badge{
+  display:inline-block;color:var(--red);border:1px solid rgba(255,123,114,.45);
+  background:rgba(255,123,114,.08);padding:5px 12px;border-radius:999px;
+  font:700 12px Consolas,monospace;letter-spacing:.7px;margin-bottom:14px;
+}
+h1{margin:0;color:var(--red);font-size:34px;line-height:1.25}
+.subtitle{color:var(--muted);margin-top:10px}
+.card{
+  background:rgba(22,27,34,.96);border:1px solid var(--border);
+  border-radius:18px;padding:24px;margin:20px 0;box-shadow:0 10px 32px rgba(0,0,0,.22);
+}
+h2{color:var(--purple);margin:0 0 12px;font-size:22px}
+h3{color:var(--orange);margin:22px 0 10px}
+p{margin:10px 0}
+ul{padding-left:24px;margin:10px 0}
+li{margin:7px 0}
+.answer{
+  font-size:17px;color:#fff0f0;background:rgba(255,123,114,.08);
+  border:1px solid rgba(255,123,114,.25);border-left:5px solid var(--red);
+  padding:18px;border-radius:12px;
+}
+.answer-title{
+  color:var(--orange);
+  font-size:17px;
+  margin:18px 0 8px;
+  font-weight:800;
+}
+.answer-title:first-child{margin-top:0}
+.answer-list{margin:8px 0 0;padding-left:24px}
+.answer-list li{margin:8px 0}
+.answer-grid{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));
+  gap:12px;margin-top:12px;
+}
+.answer-mini{
+  background:#0f1623;border:1px solid #273241;border-radius:12px;padding:14px;
+}
+.answer-mini strong{color:var(--green);display:block;margin-bottom:6px}
+.note{
+  border-left:5px solid var(--yellow);background:rgba(210,153,34,.09);
+  padding:14px 16px;border-radius:10px;margin-top:14px;
+}
+pre{
+  margin:0 0 18px;background:#05080d;border:1px solid #273241;border-left:5px solid var(--red);
+  border-radius:14px;padding:20px;overflow:auto;font-size:14px;line-height:1.7;
+}
+.output pre{border-left-color:var(--green);background:#06120b}
+.file-title{color:var(--cyan);font:700 13px Consolas,monospace;margin:16px 0 8px}
+code{font-family:Consolas,"JetBrains Mono","Courier New",monospace}
+.kw{color:#ff7b72}.str{color:#a5d6ff}.fn{color:#d2a8ff}.num{color:#79c0ff}
+.com{color:#8b949e;font-style:italic}.type{color:#7ee787}
+.nav-links{display:flex;justify-content:space-between;gap:12px;margin-top:20px}
+.nav-links a{
+  color:var(--red);text-decoration:none;border:1px solid var(--border);
+  background:var(--card2);padding:10px 14px;border-radius:10px;
+}
+.nav-links a:hover{border-color:var(--red)}
+.footer{text-align:center;color:var(--muted);margin-top:30px;font-size:13px}
+.link{
+  display:flex;gap:14px;align-items:center;color:var(--text);text-decoration:none;
+  background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:14px 18px;margin:10px 0;
+}
+.link:hover{border-color:var(--red);background:#1b2230}
+.link span{color:var(--red);font-family:Consolas,monospace;font-weight:700;min-width:44px}
+</style>
+</head>
+<body>
+<div class="wrapper">
+  <section class="header">
+    <div class="badge">RxJS Advanced · Question 080</div>
+    <h1>How would you write a custom RxJS operator?</h1>
+    <p class="subtitle">Advanced interview-level answer with headings, lists, full examples for every concept, colorful code, and expected behavior.</p>
+  </section>
+
+  <section class="card">
+    <h2>Interview-Level Answer</h2>
+    <div class="answer"><h3 class="answer-title">Definition</h3>
+<p>A custom RxJS operator is a reusable function that takes an Observable as input and returns another Observable. In modern RxJS, custom operators are usually pipeable operators.</p>
+<h3 class="answer-title">How To Create</h3>
+<ul class="answer-list">
+  <li>Create a function that returns a function.</li>
+  <li>The inner function receives the source Observable.</li>
+  <li>Return source.pipe(...) with existing operators or return a new Observable manually.</li>
+</ul>
+<h3 class="answer-title">Best Practice</h3>
+<p>Prefer composing existing operators unless you need full manual control.</p></div>
+  </section>
+
+  <section class="card">
+    <h2>Key Points</h2>
+    <ul><li>Custom operators improve reuse and readability.</li><li>Most custom operators compose existing operators.</li><li>Manual Observable creation is needed only for advanced behavior.</li></ul>
+    <div class="note"><strong>Remember:</strong> Custom operator = function(source$) =&gt; new/transformed Observable.</div>
+  </section>
+
+  <section class="card">
+    <h2>Full Understandable Example / Examples</h2>
+    <div class="file-title">custom-operator-compose.ts</div>
+<pre><code><span class="kw">import</span> { <span class="type">Observable</span> } <span class="kw"><span class="fn">from</span></span> &#x27;rxjs&#x27;;
+<span class="kw">import</span> { <span class="fn">filter</span>, <span class="fn">map</span> } <span class="kw"><span class="fn">from</span></span> &#x27;rxjs/operators&#x27;;
+
+<span class="kw">function</span> activeUserNames() {
+  <span class="kw">return</span> (source$: <span class="type">Observable</span>&lt;any[]&gt;) =&gt;
+    source$.<span class="fn">pipe</span>(
+      <span class="fn">map</span>(users =&gt; users.<span class="fn">filter</span>(user =&gt; user.active)),
+      <span class="fn">map</span>(users =&gt; users.<span class="fn">map</span>(user =&gt; user.name))
+    );
+}
+
+this.http.<span class="fn">get</span>&lt;any[]&gt;(&#x27;/api/users&#x27;).<span class="fn">pipe</span>(
+  activeUserNames()
+).<span class="fn">subscribe</span>(names =&gt; {
+  <span class="fn">console</span>.<span class="fn">log</span>(&#x27;Active user names:&#x27;, names);
+});</code></pre>
+<div class="file-title">custom-operator-manual.ts</div>
+<pre><code><span class="kw">import</span> { <span class="type">Observable</span> } <span class="kw"><span class="fn">from</span></span> &#x27;rxjs&#x27;;
+
+<span class="kw">function</span> multiplyBy(multiplier: number) {
+  <span class="kw">return</span> (source$: <span class="type">Observable</span>&lt;number&gt;) =&gt;
+    <span class="kw">new</span> <span class="type">Observable</span>&lt;number&gt;(subscriber =&gt; {
+      <span class="kw">const</span> subscription = source$.<span class="fn">subscribe</span>({
+        <span class="fn">next</span>: value =&gt; subscriber.<span class="fn">next</span>(value * multiplier),
+        <span class="fn">error</span>: <span class="fn">error</span> =&gt; subscriber.<span class="fn">error</span>(<span class="fn">error</span>),
+        <span class="fn">complete</span>: () =&gt; subscriber.<span class="fn">complete</span>()
+      });
+
+      <span class="kw">return</span> () =&gt; subscription.<span class="fn">unsubscribe</span>();
+    });
+}</code></pre>
+
+  </section>
+
+  <section class="card output">
+    <h2>Expected Output / Behavior</h2>
+    <pre><code>activeUserNames returns filtered names.
+multiplyBy transforms each number and cleans up subscription.</code></pre>
+  </section>
+
+  <div class="nav-links">
+    <a href="079_how_does_observeon_differ_from_subscribeon.html">← Previous</a>
+    <a href="index.html">All Questions</a>
+    <a href="081_what_is_the_difference_between_a_pipeable_operator_and_a_creation_operat.html">Next →</a>
+  </div>
+
+  <div class="footer">RxJS Advanced Interview Preparation · Question 080</div>
+</div>
+</body>
+</html>
