@@ -104,11 +104,11 @@ code{font-family:Consolas,"JetBrains Mono","Courier New",monospace}
   <section class="header">
     <div class="badge">RxJS Advanced · Question 105</div>
     <h1>What are the implications of calling next() on a Subject from multiple async sources simultaneously?</h1>
-    <p class="subtitle">Advanced interview-level answer with headings, lists, full examples for every concept, colorful code, and expected behavior.</p>
+    <p class="subtitle">Advanced  with headings, lists, full examples for every concept, colorful code, and expected behavior.</p>
   </section>
 
   <section class="card">
-    <h2>Interview-Level Answer</h2>
+    <h2></h2>
     <div class="answer"><h3 class="answer-title">Definition</h3>
 <p>A Subject is a shared multicast source. Calling next() from multiple async sources can create ordering, consistency, and state-management issues.</p>
 <h3 class="answer-title">Implications</h3>
@@ -137,6 +137,9 @@ code{font-family:Consolas,"JetBrains Mono","Courier New",monospace}
   <span class="com">// Bad: any component can call next()</span>
   user$ = <span class="kw">new</span> <span class="type">Subject</span>&lt;any&gt;();
 }</code></pre>
+<div class="output">
+<pre><code>Bad version allows uncontrolled writes.</code></pre>
+</div>
 <div class="file-title">better-private-subject.ts</div>
 <pre><code>@<span class="type">Injectable</span>({ providedIn: &#x27;root&#x27; })
 <span class="kw">export</span> <span class="kw">class</span> GoodStore {
@@ -148,6 +151,9 @@ code{font-family:Consolas,"JetBrains Mono","Courier New",monospace}
     this.userSubject.<span class="fn">next</span>(user);
   }
 }</code></pre>
+<div class="output">
+<pre><code>Good version centralizes writes.</code></pre>
+</div>
 <div class="file-title">state-with-scan.ts</div>
 <pre><code><span class="kw">const</span> actions$ = <span class="kw">new</span> <span class="type">Subject</span>&lt;any&gt;();
 
@@ -161,17 +167,12 @@ code{font-family:Consolas,"JetBrains Mono","Courier New",monospace}
     }
   }, { count: <span class="num">0</span> })
 );</code></pre>
+<div class="output">
+<pre><code>scan version makes state transitions predictable.</code></pre>
+</div>
 
   </section>
-
-  <section class="card output">
-    <h2>Expected Output / Behavior</h2>
-    <pre><code>Bad version allows uncontrolled writes.
-Good version centralizes writes.
-scan version makes state transitions predictable.</code></pre>
-  </section>
-
-  <div class="nav-links">
+<div class="nav-links">
     <a href="104_how_would_you_implement_optimistic_ui_updates_with_rxjs_and_handle_rollb.html">← Previous</a>
     <a href="index.html">All Questions</a>
     <a href="106_how_do_you_handle_dependent_http_calls_request_b_depends_on_response_of_.html">Next →</a>

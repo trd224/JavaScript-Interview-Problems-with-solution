@@ -104,11 +104,11 @@ code{font-family:Consolas,"JetBrains Mono","Courier New",monospace}
   <section class="header">
     <div class="badge">RxJS Advanced · Question 086</div>
     <h1>What are the pitfalls of using shareReplay() and how can it cause memory leaks?</h1>
-    <p class="subtitle">Advanced interview-level answer with headings, lists, full examples for every concept, colorful code, and expected behavior.</p>
+    <p class="subtitle">Advanced  with headings, lists, full examples for every concept, colorful code, and expected behavior.</p>
   </section>
 
   <section class="card">
-    <h2>Interview-Level Answer</h2>
+    <h2></h2>
     <div class="answer"><h3 class="answer-title">Definition</h3>
 <p>shareReplay caches emitted values and can keep source subscriptions alive. This is useful for caching, but dangerous if used with infinite or long-running streams without proper lifecycle control.</p>
 <h3 class="answer-title">Pitfalls</h3>
@@ -139,6 +139,9 @@ code{font-family:Consolas,"JetBrains Mono","Courier New",monospace}
 <span class="kw">const</span> sub = live$.<span class="fn">subscribe</span>(value =&gt; <span class="fn">console</span>.<span class="fn">log</span>(value));
 
 sub.<span class="fn">unsubscribe</span>();</code></pre>
+<div class="output">
+<pre><code>Risky version may keep long-running source active.</code></pre>
+</div>
 <div class="file-title">safer-shareReplay.ts</div>
 <pre><code><span class="kw">const</span> live$ = <span class="fn">interval</span>(<span class="num">1000</span>).<span class="fn">pipe</span>(
   <span class="fn">shareReplay</span>({
@@ -150,16 +153,12 @@ sub.<span class="fn">unsubscribe</span>();</code></pre>
 <span class="kw">const</span> sub = live$.<span class="fn">subscribe</span>(value =&gt; <span class="fn">console</span>.<span class="fn">log</span>(value));
 
 sub.<span class="fn">unsubscribe</span>();</code></pre>
+<div class="output">
+<pre><code>refCount version disconnects when no subscribers remain.</code></pre>
+</div>
 
   </section>
-
-  <section class="card output">
-    <h2>Expected Output / Behavior</h2>
-    <pre><code>Risky version may keep long-running source active.
-refCount version disconnects when no subscribers remain.</code></pre>
-  </section>
-
-  <div class="nav-links">
+<div class="nav-links">
     <a href="085_how_does_sharereplay_buffersize_1_refcount_true_behave_differently_from_.html">← Previous</a>
     <a href="index.html">All Questions</a>
     <a href="087_how_would_you_implement_an_exponential_backoff_retry_strategy_using_rxjs.html">Next →</a>

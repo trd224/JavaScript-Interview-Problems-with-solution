@@ -104,11 +104,11 @@ code{font-family:Consolas,"JetBrains Mono","Courier New",monospace}
   <section class="header">
     <div class="badge">RxJS Advanced · Question 089</div>
     <h1>What is the difference between Subject, BehaviorSubject, ReplaySubject, and AsyncSubject at the multicasting level?</h1>
-    <p class="subtitle">Advanced interview-level answer with headings, lists, full examples for every concept, colorful code, and expected behavior.</p>
+    <p class="subtitle">Advanced  with headings, lists, full examples for every concept, colorful code, and expected behavior.</p>
   </section>
 
   <section class="card">
-    <h2>Interview-Level Answer</h2>
+    <h2></h2>
     <div class="answer"><h3 class="answer-title">Definition</h3>
 <p>All Subject types are multicast, meaning they can send the same emitted value to multiple subscribers. The difference is how they store or replay values.</p>
 <div class="answer-grid">
@@ -137,6 +137,9 @@ subject$.<span class="fn">next</span>(&#x27;Hello&#x27;);
 
 subject$.<span class="fn">subscribe</span>(value =&gt; <span class="fn">console</span>.<span class="fn">log</span>(&#x27;B:&#x27;, value));
 subject$.<span class="fn">next</span>(&#x27;World&#x27;);</code></pre>
+<div class="output">
+<pre><code>Subject: late subscriber misses old values.</code></pre>
+</div>
 <div class="file-title">behaviorSubject-example.ts</div>
 <pre><code><span class="kw">const</span> state$ = <span class="kw">new</span> <span class="type">BehaviorSubject</span>&lt;string&gt;(&#x27;Initial&#x27;);
 
@@ -144,6 +147,9 @@ state$.<span class="fn">subscribe</span>(value =&gt; <span class="fn">console</s
 state$.<span class="fn">next</span>(&#x27;Updated&#x27;);
 
 state$.<span class="fn">subscribe</span>(value =&gt; <span class="fn">console</span>.<span class="fn">log</span>(&#x27;B:&#x27;, value));</code></pre>
+<div class="output">
+<pre><code>BehaviorSubject: late subscriber gets latest.</code></pre>
+</div>
 <div class="file-title">replaySubject-example.ts</div>
 <pre><code><span class="kw">const</span> replay$ = <span class="kw">new</span> <span class="type">ReplaySubject</span>&lt;string&gt;(<span class="num">2</span>);
 
@@ -152,6 +158,9 @@ replay$.<span class="fn">next</span>(&#x27;B&#x27;);
 replay$.<span class="fn">next</span>(&#x27;C&#x27;);
 
 replay$.<span class="fn">subscribe</span>(value =&gt; <span class="fn">console</span>.<span class="fn">log</span>(value));</code></pre>
+<div class="output">
+<pre><code>ReplaySubject(2): late subscriber gets last 2 values.</code></pre>
+</div>
 <div class="file-title">asyncSubject-example.ts</div>
 <pre><code><span class="kw">const</span> <span class="kw">async</span>$ = <span class="kw">new</span> <span class="type">AsyncSubject</span>&lt;number&gt;();
 
@@ -161,18 +170,12 @@ replay$.<span class="fn">subscribe</span>(value =&gt; <span class="fn">console</
 <span class="kw">async</span>$.<span class="fn">next</span>(<span class="num">2</span>);
 <span class="kw">async</span>$.<span class="fn">next</span>(<span class="num">3</span>);
 <span class="kw">async</span>$.<span class="fn">complete</span>();</code></pre>
+<div class="output">
+<pre><code>AsyncSubject: emits last value only on complete.</code></pre>
+</div>
 
   </section>
-
-  <section class="card output">
-    <h2>Expected Output / Behavior</h2>
-    <pre><code>Subject: late subscriber misses old values.
-BehaviorSubject: late subscriber gets latest.
-ReplaySubject(2): late subscriber gets last 2 values.
-AsyncSubject: emits last value only on complete.</code></pre>
-  </section>
-
-  <div class="nav-links">
+<div class="nav-links">
     <a href="088_how_does_switchmap_handle_inner_subscription_cleanup_under_the_hood.html">← Previous</a>
     <a href="index.html">All Questions</a>
     <a href="090_when_would_you_use_a_behaviorsubject_as_a_state_store_vs_a_proper_state_.html">Next →</a>
