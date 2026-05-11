@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -103,6 +104,11 @@ pre{
 code{font-family:Consolas,"JetBrains Mono","Courier New",monospace}
 .kw{color:#ff7b72}.str{color:#a5d6ff}.fn{color:#d2a8ff}.num{color:#79c0ff}
 .com{color:#8b949e;font-style:italic}.type{color:#7ee787}
+.table-wrap{overflow:auto;margin-top:14px}
+table{width:100%;border-collapse:collapse;background:#0f1623;border:1px solid #273241;border-radius:14px;overflow:hidden}
+th,td{border:1px solid #273241;padding:12px 14px;text-align:left;vertical-align:top}
+th{color:var(--cyan);background:#111a29}
+td strong{color:var(--green)}
 .nav-links{display:flex;justify-content:space-between;gap:12px;margin-top:20px}
 .nav-links a{
   color:var(--blue);text-decoration:none;border:1px solid var(--border);
@@ -124,57 +130,178 @@ code{font-family:Consolas,"JetBrains Mono","Courier New",monospace}
   <section class="header">
     <div class="badge">RxJS Mid-Level · Question 45</div>
     <h1>What does scan() do? How is it like reduce() but for streams?</h1>
-    <p class="subtitle"> </p>
+    <p class="subtitle">scan gives running accumulated values, while reduce gives only the final accumulated value after completion.</p>
   </section>
 
   <section class="card">
-    <h2></h2>
+    <h2>Answer</h2>
     <div class="answer"><h3 class="answer-title">Definition</h3>
-<p>scan accumulates values over time and emits the accumulated result after every source emission.</p>
+<p><strong>scan()</strong> accumulates values over time and emits the updated accumulated result after every source emission.</p>
 
 <h3 class="answer-title">How It Is Like reduce</h3>
 <ul class="answer-list">
-  <li>Both scan and reduce accumulate values.</li>
-  <li>scan emits every intermediate accumulated value.</li>
-  <li>reduce emits only the final value after completion.</li>
+  <li>Both <strong>scan()</strong> and <strong>reduce()</strong> accumulate values.</li>
+  <li><strong>scan()</strong> emits every intermediate accumulated value.</li>
+  <li><strong>reduce()</strong> emits only the final value after the Observable completes.</li>
+</ul>
+
+<h3 class="answer-title">Simple Understanding</h3>
+<ul class="answer-list">
+  <li><strong>scan()</strong> → running total</li>
+  <li><strong>reduce()</strong> → final total</li>
 </ul>
 
 <h3 class="answer-title">Angular Use Case</h3>
-<p>Use scan for counters, cart totals, local component state, undo/redo state, and event accumulation.</p></div>
+<p>Use <strong>scan()</strong> for live counters, cart totals, local component state, undo/redo state, and event accumulation.</p>
+<p>Use <strong>reduce()</strong> when you need only one final result, like final API data summary, total price after all items load, or final report generation.</p></div>
+  </section>
+
+  <section class="card">
+    <h2>Difference Between scan() and reduce()</h2>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Feature</th>
+            <th>scan()</th>
+            <th>reduce()</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Emission</td>
+            <td>Emits after every value</td>
+            <td>Emits only once at the end</td>
+          </tr>
+          <tr>
+            <td>Output Type</td>
+            <td>Running accumulated values</td>
+            <td>Final accumulated value</td>
+          </tr>
+          <tr>
+            <td>Works Before Completion</td>
+            <td>Yes</td>
+            <td>No</td>
+          </tr>
+          <tr>
+            <td>Similar To</td>
+            <td>Array running total</td>
+            <td>Array reduce final result</td>
+          </tr>
+          <tr>
+            <td>Common Use Case</td>
+            <td>Live counters, totals, state updates</td>
+            <td>Final summary/result</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="note"><strong>Remember:</strong> scan is reduce for live streams.</div>
   </section>
 
   <section class="card">
     <h2>Key Points</h2>
-    <ul><li>Maintains accumulated state over time.</li><li>Emits intermediate accumulated values.</li><li>Useful for counters, cart totals, and simple state stores.</li></ul>
-    <div class="note"><strong>Remember:</strong> scan is reduce for live streams.</div>
+    <ul>
+      <li><strong>scan()</strong> maintains accumulated state over time.</li>
+      <li><strong>scan()</strong> emits intermediate accumulated values.</li>
+      <li><strong>reduce()</strong> waits for Observable completion.</li>
+      <li><strong>reduce()</strong> emits only one final accumulated value.</li>
+    </ul>
   </section>
 
   <section class="card">
     <h2>Full Understandable Example / Examples</h2>
     <div class="file-title">scan-example.ts</div>
-<pre><code><span class="kw">import</span> { <span class="fn">of</span> } <span class="kw"><span class="fn">from</span></span> &#x27;rxjs&#x27;;
-<span class="kw">import</span> { <span class="fn">scan</span> } <span class="kw"><span class="fn">from</span></span> &#x27;rxjs/operators&#x27;;
+<pre><code><span class="kw">import</span> { <span class="fn">of</span> } <span class="kw">from</span> <span class="str">'rxjs'</span>;
+<span class="kw">import</span> { <span class="fn">scan</span> } <span class="kw">from</span> <span class="str">'rxjs/operators'</span>;
 
 <span class="com">// scan emits running accumulated values.</span>
 
 <span class="fn">of</span>(<span class="num">100</span>, <span class="num">200</span>, <span class="num">300</span>).<span class="fn">pipe</span>(
   <span class="fn">scan</span>((total, value) =&gt; total + value, <span class="num">0</span>)
-).<span class="fn">subscribe</span>(total =&gt; <span class="fn">console</span>.<span class="fn">log</span>(&#x27;<span class="fn">scan</span>:&#x27;, total));</code></pre>
+).<span class="fn">subscribe</span>(total =&gt; <span class="fn">console</span>.<span class="fn">log</span>(<span class="str">'scan:'</span>, total));</code></pre>
 <div class="output">
-<pre><code>Click 1: Running total: 100
-Click 2: Running total: 200
-Click 3: Running total: 300</code></pre>
+<pre><code>scan: 100
+scan: 300
+scan: 600</code></pre>
 </div>
+
+<h3>scan() Step-by-step</h3>
+<p>Initial accumulator value = <strong>0</strong></p>
+<div class="table-wrap">
+  <table>
+    <thead>
+      <tr>
+        <th>Current Value</th>
+        <th>Calculation</th>
+        <th>Output</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>100</td>
+        <td>0 + 100</td>
+        <td>100</td>
+      </tr>
+      <tr>
+        <td>200</td>
+        <td>100 + 200</td>
+        <td>300</td>
+      </tr>
+      <tr>
+        <td>300</td>
+        <td>300 + 300</td>
+        <td>600</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+<p><strong>scan()</strong> works like a running total accumulator. It emits the updated accumulated value after every emission.</p>
+
 <div class="file-title">reduce-comparison-example.ts</div>
-<pre><code><span class="kw">import</span> { <span class="fn">of</span> } <span class="kw"><span class="fn">from</span></span> &#x27;rxjs&#x27;;
-<span class="kw">import</span> { <span class="fn">reduce</span> } <span class="kw"><span class="fn">from</span></span> &#x27;rxjs/operators&#x27;;
+<pre><code><span class="kw">import</span> { <span class="fn">of</span> } <span class="kw">from</span> <span class="str">'rxjs'</span>;
+<span class="kw">import</span> { <span class="fn">reduce</span> } <span class="kw">from</span> <span class="str">'rxjs/operators'</span>;
 
 <span class="com">// reduce emits only final accumulated value after completion.</span>
 
 <span class="fn">of</span>(<span class="num">100</span>, <span class="num">200</span>, <span class="num">300</span>).<span class="fn">pipe</span>(
   <span class="fn">reduce</span>((total, value) =&gt; total + value, <span class="num">0</span>)
-).<span class="fn">subscribe</span>(total =&gt; <span class="fn">console</span>.<span class="fn">log</span>(&#x27;<span class="fn">reduce</span>:&#x27;, total));</code></pre>
+).<span class="fn">subscribe</span>(total =&gt; <span class="fn">console</span>.<span class="fn">log</span>(<span class="str">'reduce:'</span>, total));</code></pre>
+<div class="output">
+<pre><code>reduce: 600</code></pre>
+</div>
 
+<h3>reduce() Step-by-step</h3>
+<p>Initial accumulator value = <strong>0</strong></p>
+<div class="table-wrap">
+  <table>
+    <thead>
+      <tr>
+        <th>Current Value</th>
+        <th>Calculation</th>
+        <th>Accumulated</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>100</td>
+        <td>0 + 100</td>
+        <td>100</td>
+      </tr>
+      <tr>
+        <td>200</td>
+        <td>100 + 200</td>
+        <td>300</td>
+      </tr>
+      <tr>
+        <td>300</td>
+        <td>300 + 300</td>
+        <td>600</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+<p>After the Observable completes, <strong>reduce()</strong> emits only the final accumulated value.</p>
 
   </section>
 <div class="nav-links">

@@ -172,6 +172,86 @@ ngOnInit() {
 If still failing, catchError returns empty array [].</code></pre>
 </div>
 
+<section class="card">
+
+  <h2>Retry With 1 Second Delay Between Each Retry</h2>
+
+  <p>
+    Sometimes retrying immediately is not good because the server may still be temporarily down.
+    In such cases, we can wait before each retry attempt.
+  </p>
+
+  <div class="file-title">retry-delay-example.service.ts</div>
+
+<pre><code><span class="kw">import</span> { <span class="fn">timer</span>, <span class="fn">throwError</span> } <span class="kw"><span class="fn">from</span></span> <span class="str">'rxjs'</span>;
+<span class="kw">import</span> { <span class="fn">mergeMap</span>, <span class="fn">retryWhen</span>, <span class="fn">delayWhen</span>, <span class="fn">take</span> } <span class="kw"><span class="fn">from</span></span> <span class="str">'rxjs/operators'</span>;
+
+getUsers() {
+
+  <span class="kw">return</span> this.http.<span class="fn">get</span>&lt;any[]&gt;(<span class="str">'/api/users'</span>).<span class="fn">pipe</span>(
+
+    <span class="fn">retryWhen</span>(errors =&gt;
+
+      errors.<span class="fn">pipe</span>(
+
+        <span class="com">// wait 1 second before retry</span>
+        <span class="fn">delayWhen</span>(() =&gt; <span class="fn">timer</span>(<span class="num">1000</span>)),
+
+        <span class="com">// retry only 3 times</span>
+        <span class="fn">take</span>(<span class="num">3</span>)
+      )
+    )
+  );
+}
+
+ngOnInit() {
+
+  this.getUsers().<span class="fn">subscribe</span>({
+    next: users =&gt; {
+      <span class="fn">console</span>.<span class="fn">log</span>(<span class="str">'Users:'</span>, users);
+    },
+
+    error: err =&gt; {
+      <span class="fn">console</span>.<span class="fn">error</span>(<span class="str">'Final Error:'</span>, err);
+    }
+  });
+
+}</code></pre>
+
+<div class="output">
+<pre><code>API failed
+Wait 1 second...
+
+Retry 1
+
+API failed
+Wait 1 second...
+
+Retry 2
+
+API failed
+Wait 1 second...
+
+Retry 3
+
+Still failing
+Final Error shown</code></pre>
+</div>
+
+<div class="note">
+<strong>Why use delay between retries?</strong>
+Immediate retries can overload the server again.
+Waiting 1 second gives the backend time to recover.
+</div>
+
+<div class="note">
+<strong>Interview Point:</strong>
+<code>retry()</code> retries immediately.
+<code>retryWhen()</code> gives advanced control like delay, exponential backoff, custom retry conditions, etc.
+</div>
+
+</section>
+
   </section>
 <div class="nav-links">
     <a href="54_what_does_skipuntil_do.html">← Previous</a>

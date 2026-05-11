@@ -182,6 +182,72 @@ code{font-family:Consolas,"JetBrains Mono","Courier New",monospace}
 When component is destroyed, destroy$ emits and timer stops.</code></pre>
 </div>
 
+<section class="card">
+
+  <h2>Angular 16+ takeUntilDestroyed() Example</h2>
+
+  <p>
+    Angular 16 introduced <code>takeUntilDestroyed()</code>, which automatically unsubscribes
+    when the component is destroyed. This removes the need for a manual
+    <code>destroy$</code> Subject.
+  </p>
+
+  <div class="file-title">app.component.ts</div>
+
+<pre><code><span class="kw">import</span> { <span class="type">Component</span>, <span class="type">OnInit</span>, <span class="type">DestroyRef</span>, <span class="fn">inject</span> } <span class="kw"><span class="fn">from</span></span> <span class="str">'@angular/core'</span>;
+<span class="kw">import</span> { <span class="fn">interval</span> } <span class="kw"><span class="fn">from</span></span> <span class="str">'rxjs'</span>;
+<span class="kw">import</span> { <span class="fn">takeUntilDestroyed</span> } <span class="kw"><span class="fn">from</span></span> <span class="str">'@angular/core/rxjs-interop'</span>;
+
+@<span class="type">Component</span>({
+  selector: <span class="str">'app-root'</span>,
+  template: <span class="str">`&lt;p&gt;Check console&lt;/p&gt;`</span>
+})
+<span class="kw">export class</span> <span class="type">AppComponent</span> <span class="kw">implements</span> <span class="type">OnInit</span> {
+
+  <span class="kw">private</span> destroyRef = <span class="fn">inject</span>(<span class="type">DestroyRef</span>);
+
+  <span class="fn">ngOnInit</span>() {
+
+    <span class="fn">interval</span>(<span class="num">1000</span>).<span class="fn">pipe</span>(
+      <span class="fn">takeUntilDestroyed</span>(<span class="kw">this</span>.destroyRef)
+    ).<span class="fn">subscribe</span>(value =&gt; {
+
+      <span class="fn">console</span>.<span class="fn">log</span>(<span class="str">'Timer:'</span>, value);
+
+    });
+
+  }
+
+}</code></pre>
+
+<div class="output">
+<pre><code>Timer: 0
+Timer: 1
+Timer: 2
+...
+
+Component destroyed
+Subscription automatically unsubscribed</code></pre>
+</div>
+
+<div class="note">
+<strong>Why use takeUntilDestroyed()?</strong>
+Angular automatically handles cleanup when the component is destroyed.
+You do not need:
+<ul class="answer-list">
+  <li>destroy$ Subject</li>
+  <li>ngOnDestroy()</li>
+  <li>manual unsubscribe logic</li>
+</ul>
+</div>
+
+<div class="note">
+<strong>Interview Point:</strong>
+<code>takeUntilDestroyed()</code> is the modern Angular 16+ recommended approach for preventing memory leaks in component subscriptions.
+</div>
+
+</section>
+
   </section>
 <div class="nav-links">
     <a href="50_what_is_a_multicast_observable.html">← Previous</a>
