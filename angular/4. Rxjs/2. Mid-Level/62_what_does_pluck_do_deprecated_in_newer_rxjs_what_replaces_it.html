@@ -173,6 +173,187 @@ user$.<span class="fn">pipe</span>(
 </div>
 
   </section>
+  <section class="card">
+  <h2>Deep Understanding of map() in RxJS</h2>
+
+  <div class="answer">
+
+    <h3 class="answer-title">Common Confusion</h3>
+
+    <p>
+      Many developers confuse JavaScript Array <code>map()</code>
+      with RxJS <code>map()</code>.
+    </p>
+
+    <div class="note">
+      <strong>Important:</strong>
+      Both have the same name, but they work differently.
+    </div>
+
+    <h3 class="answer-title">1. JavaScript Array map()</h3>
+
+    <p>
+      Array map() transforms array items.
+    </p>
+
+<pre><code>[1,2,3].map(x => x * 2)</code></pre>
+
+    <div class="output">
+<pre><code>[2,4,6]</code></pre>
+    </div>
+
+    <p>
+      Here each array item is transformed.
+    </p>
+
+    <h3 class="answer-title">2. RxJS map()</h3>
+
+    <p>
+      RxJS map() transforms emitted Observable values.
+    </p>
+
+    <p>
+      It does NOT care whether the emitted value is:
+    </p>
+
+    <ul class="answer-list">
+      <li>Object</li>
+      <li>String</li>
+      <li>Number</li>
+      <li>Boolean</li>
+      <li>Array</li>
+    </ul>
+
+    <h3 class="answer-title">Your Example Flow</h3>
+
+<pre><code>const user$ = of({
+  id: 1,
+  profile: {
+    name: 'Rizwan'
+  }
+});</code></pre>
+
+    <p>
+      <code>of()</code> emits ONE object.
+    </p>
+
+    <div class="subbox">
+      <strong>Observable Emission</strong>
+
+<pre><code>{
+  id: 1,
+  profile: {
+    name: 'Rizwan'
+  }
+}</code></pre>
+    </div>
+
+    <h3 class="answer-title">Then RxJS map() Runs</h3>
+
+<pre><code>map(user => user.profile.name)</code></pre>
+
+    <p>
+      Here:
+    </p>
+
+<pre><code>user</code></pre>
+
+    <p>
+      represents the emitted object.
+    </p>
+
+    <p>
+      So this:
+    </p>
+
+<pre><code>user.profile.name</code></pre>
+
+    <p>
+      extracts:
+    </p>
+
+<pre><code>'Rizwan'</code></pre>
+
+    <h3 class="answer-title">Visual Flow</h3>
+
+<pre><code>Observable emits object
+        ↓
+
+{
+  id:1,
+  profile:{
+    name:'Rizwan'
+  }
+}
+
+        ↓
+
+map(user => user.profile.name)
+
+        ↓
+
+'Rizwan'</code></pre>
+
+    <h3 class="answer-title">More RxJS map() Examples</h3>
+
+    <div class="subbox">
+      <strong>Number Example</strong>
+
+<pre><code>of(10).pipe(
+  map(x => x * 2)
+)</code></pre>
+
+<div class="output">
+<pre><code>20</code></pre>
+</div>
+    </div>
+
+    <div class="subbox">
+      <strong>String Example</strong>
+
+<pre><code>of('rizwan').pipe(
+  map(name => name.toUpperCase())
+)</code></pre>
+
+<div class="output">
+<pre><code>RIZWAN</code></pre>
+</div>
+    </div>
+
+    <div class="subbox">
+      <strong>Object Example</strong>
+
+<pre><code>of({name:'Rizwan'}).pipe(
+  map(user => user.name)
+)</code></pre>
+
+<div class="output">
+<pre><code>Rizwan</code></pre>
+</div>
+    </div>
+
+    <h3 class="answer-title">Important Interview Point</h3>
+
+    <p>
+      RxJS map() transforms emitted Observable values,
+      while JavaScript Array map() transforms array items.
+    </p>
+
+    <h3 class="answer-title">Short Interview Answer</h3>
+
+    <p>
+      RxJS map() works on Observable emissions, not directly on arrays.
+    </p>
+
+    <h3 class="answer-title">One-Line Interview Answer</h3>
+
+    <p>
+      RxJS map() transforms emitted Observable values,
+      while Array map() transforms array elements.
+    </p>
+
+  </div>
+</section>
 <div class="nav-links">
     <a href="61_what_is_groupby_in_rxjs.html">← Previous</a>
     <a href="index.html">All Questions</a>

@@ -181,6 +181,200 @@ code{font-family:Consolas,"JetBrains Mono","Courier New",monospace}
 </div>
 
   </section>
+
+  <section class="card">
+  <h2>Step-by-Step Explanation</h2>
+
+  <div class="answer">
+
+    <h3 class="answer-title">Step 1 → from(orders)</h3>
+
+    <p>
+      <code>from(orders)</code> converts the array into an Observable stream.
+    </p>
+
+<pre><code>{ id: 1, status: 'pending' }
+
+{ id: 2, status: 'completed' }
+
+{ id: 3, status: 'pending' }</code></pre>
+
+    <h3 class="answer-title">Step 2 → groupBy(order => order.status)</h3>
+
+    <p>
+      groupBy creates separate grouped Observables based on the status.
+    </p>
+
+    <div class="subbox">
+      <strong>Group 1 Key:</strong> pending
+<pre><code>{ id: 1, status: 'pending' }
+
+{ id: 3, status: 'pending' }</code></pre>
+    </div>
+
+    <div class="subbox">
+      <strong>Group 2 Key:</strong> completed
+<pre><code>{ id: 2, status: 'completed' }</code></pre>
+    </div>
+
+    <div class="note">
+      <strong>Important:</strong>
+      groupBy() does NOT return grouped arrays directly.
+      It returns grouped inner Observables.
+    </div>
+    <div class="subbox">
+      <pre><code> Main Stream
+      |
+      |---- pending$ ----> order1 ----> order3
+      |
+      |---- completed$ --> order2</code></pre>
+     
+    </div>
+
+    <h3 class="answer-title">Step 3 → mergeMap(group$ => ...)</h3>
+
+    <p>
+      Each group itself is an Observable, so we use
+      <code>mergeMap()</code> to process every group separately.
+    </p>
+
+<pre><code>mergeMap(group$ => ...)</code></pre>
+
+    <p>
+      Here:
+    </p>
+
+<pre><code>group$.key === 'pending'
+
+group$.key === 'completed'</code></pre>
+
+    <h3 class="answer-title">Step 4 → toArray()</h3>
+
+    <p>
+      <code>toArray()</code> collects all values emitted by each group
+      into a single array.
+    </p>
+
+    <div class="subbox">
+      <strong>Pending Group After toArray()</strong>
+
+<pre><code>[
+  { id: 1, status: 'pending' },
+  { id: 3, status: 'pending' }
+]</code></pre>
+    </div>
+
+    <div class="subbox">
+      <strong>Completed Group After toArray()</strong>
+
+<pre><code>[
+  { id: 2, status: 'completed' }
+]</code></pre>
+    </div>
+
+    <h3 class="answer-title">Step 5 → map()</h3>
+
+    <p>
+      map() creates the final object structure.
+    </p>
+
+<pre><code>map(items => ({
+  status: group$.key,
+  orders: items
+}))</code></pre>
+
+    <h3 class="answer-title">Final Output</h3>
+
+<pre><code>{
+  status: 'pending',
+  orders: [
+    { id: 1, status: 'pending' },
+    { id: 3, status: 'pending' }
+  ]
+}
+
+{
+  status: 'completed',
+  orders: [
+    { id: 2, status: 'completed' }
+  ]
+}</code></pre>
+
+    <h3 class="answer-title">Visual Flow</h3>
+
+<pre><code>from(orders)
+
+   ↓
+
+1 pending
+2 completed
+3 pending
+
+   ↓
+
+groupBy(status)
+
+   ↓
+
+Group: pending
+  ├── order 1
+  └── order 3
+
+Group: completed
+  └── order 2
+
+   ↓
+
+toArray()
+
+   ↓
+
+pending → [1,3]
+
+completed → [2]
+
+   ↓
+
+map()
+
+   ↓
+
+Final Objects</code></pre>
+
+    <h3 class="answer-title">Real Project Use Cases</h3>
+
+    <ul class="answer-list">
+      <li>Orders grouped by status</li>
+      <li>Products grouped by category</li>
+      <li>Employees grouped by department</li>
+      <li>Chat messages grouped by roomId</li>
+      <li>Logs grouped by severity</li>
+    </ul>
+
+    <h3 class="answer-title">Important Interview Point</h3>
+
+    <p>
+      groupBy() creates multiple inner Observables.
+      That is why operators like mergeMap(),
+      concatMap(), or switchMap() are commonly used after it.
+    </p>
+
+    <h3 class="answer-title">Short Interview Answer</h3>
+
+    <p>
+      groupBy() splits Observable values into grouped inner Observables
+      based on a key. Each group must be processed separately.
+    </p>
+
+    <h3 class="answer-title">One-Line Interview Answer</h3>
+
+    <p>
+      groupBy() groups emitted Observable values by a condition
+      and returns grouped inner Observables.
+    </p>
+
+  </div>
+</section>
 <div class="nav-links">
     <a href="60_what_is_windowtime_and_how_does_it_differ_from_buffertime.html">← Previous</a>
     <a href="index.html">All Questions</a>
