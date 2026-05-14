@@ -155,6 +155,302 @@ async B</code></pre>
 </div>
 
   </section>
+  <section class="card">
+  <h2>Complete Difference Between All 4 Schedulers</h2>
+
+  <div class="answer">
+
+    <h3 class="answer-title">Simple Comparison Table</h3>
+
+    <table style="width:100%;border-collapse:collapse;margin-top:12px">
+      <thead>
+        <tr style="background:#111827">
+          <th style="border:1px solid #30363d;padding:12px;color:#ff7b72;text-align:left">Scheduler</th>
+          <th style="border:1px solid #30363d;padding:12px;color:#ff7b72;text-align:left">Runs When</th>
+          <th style="border:1px solid #30363d;padding:12px;color:#ff7b72;text-align:left">Based On</th>
+          <th style="border:1px solid #30363d;padding:12px;color:#ff7b72;text-align:left">Main Use</th>
+        </tr>
+      </thead>
+
+      <tbody>
+
+        <tr>
+          <td style="border:1px solid #30363d;padding:12px;color:#7ee787">queueScheduler</td>
+          <td style="border:1px solid #30363d;padding:12px">Immediately</td>
+          <td style="border:1px solid #30363d;padding:12px">Synchronous Queue</td>
+          <td style="border:1px solid #30363d;padding:12px">Ordered sync tasks</td>
+        </tr>
+
+        <tr>
+          <td style="border:1px solid #30363d;padding:12px;color:#7ee787">asapScheduler</td>
+          <td style="border:1px solid #30363d;padding:12px">After current sync code</td>
+          <td style="border:1px solid #30363d;padding:12px">Microtask Queue</td>
+          <td style="border:1px solid #30363d;padding:12px">Defer slightly</td>
+        </tr>
+
+        <tr>
+          <td style="border:1px solid #30363d;padding:12px;color:#7ee787">asyncScheduler</td>
+          <td style="border:1px solid #30363d;padding:12px">Later</td>
+          <td style="border:1px solid #30363d;padding:12px">setTimeout</td>
+          <td style="border:1px solid #30363d;padding:12px">Delayed tasks</td>
+        </tr>
+
+        <tr>
+          <td style="border:1px solid #30363d;padding:12px;color:#7ee787">animationFrameScheduler</td>
+          <td style="border:1px solid #30363d;padding:12px">Before browser repaint</td>
+          <td style="border:1px solid #30363d;padding:12px">requestAnimationFrame</td>
+          <td style="border:1px solid #30363d;padding:12px">UI animations</td>
+        </tr>
+
+      </tbody>
+    </table>
+
+    <h3 class="answer-title">Visual Timeline</h3>
+
+<pre><code>CURRENT SYNCHRONOUS CODE
+│
+├── queueScheduler (runs NOW)
+│
+└── sync code finishes
+      │
+      ├── asapScheduler
+      │
+      ├── asyncScheduler
+      │
+      └── animationFrameScheduler
+</code></pre>
+
+  </div>
+</section>
+
+<section class="card">
+
+  <h2>queueScheduler Example</h2>
+
+  <div class="file-title">queueScheduler-example.ts</div>
+
+<pre><code><span class="kw">import</span> { <span class="fn">of</span>, queueScheduler } <span class="kw">from</span> <span class="str">'rxjs'</span>;
+<span class="kw">import</span> { <span class="fn">observeOn</span> } <span class="kw">from</span> <span class="str">'rxjs/operators'</span>;
+
+<span class="fn">console</span>.<span class="fn">log</span>(<span class="str">'Start'</span>);
+
+<span class="fn">of</span>(<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>).<span class="fn">pipe</span>(
+  <span class="fn">observeOn</span>(queueScheduler)
+).<span class="fn">subscribe</span>(value =&gt; {
+  <span class="fn">console</span>.<span class="fn">log</span>(<span class="str">'Queue:'</span>, value);
+});
+
+<span class="fn">console</span>.<span class="fn">log</span>(<span class="str">'End'</span>);</code></pre>
+
+<div class="output">
+<pre><code>Start
+Queue: 1
+Queue: 2
+Queue: 3
+End</code></pre>
+</div>
+
+  <div class="answer">
+    <h3 class="answer-title">Real Understanding</h3>
+    <p>queueScheduler runs immediately inside the current synchronous execution.</p>
+
+    <div class="note">
+      <strong>Important:</strong> queueScheduler runs BEFORE the synchronous code finishes.
+    </div>
+  </div>
+
+</section>
+
+<section class="card">
+
+  <h2>asapScheduler Example</h2>
+
+  <div class="file-title">asapScheduler-example.ts</div>
+
+<pre><code><span class="kw">import</span> { <span class="fn">of</span>, asapScheduler } <span class="kw">from</span> <span class="str">'rxjs'</span>;
+<span class="kw">import</span> { <span class="fn">observeOn</span> } <span class="kw">from</span> <span class="str">'rxjs/operators'</span>;
+
+<span class="fn">console</span>.<span class="fn">log</span>(<span class="str">'Start'</span>);
+
+<span class="fn">of</span>(<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>).<span class="fn">pipe</span>(
+  <span class="fn">observeOn</span>(asapScheduler)
+).<span class="fn">subscribe</span>(value =&gt; {
+  <span class="fn">console</span>.<span class="fn">log</span>(<span class="str">'ASAP:'</span>, value);
+});
+
+<span class="fn">console</span>.<span class="fn">log</span>(<span class="str">'End'</span>);</code></pre>
+
+<div class="output">
+<pre><code>Start
+End
+ASAP: 1
+ASAP: 2
+ASAP: 3</code></pre>
+</div>
+
+  <div class="answer">
+    <h3 class="answer-title">Real Understanding</h3>
+    <p>asapScheduler waits until current synchronous code finishes, then executes.</p>
+
+    <div class="note">
+      <strong>Important:</strong> asapScheduler uses microtask-like execution similar to Promise.resolve().then().
+    </div>
+  </div>
+
+</section>
+
+<section class="card">
+
+  <h2>asyncScheduler Example</h2>
+
+  <div class="file-title">asyncScheduler-example.ts</div>
+
+<pre><code><span class="kw">import</span> { asyncScheduler } <span class="kw">from</span> <span class="str">'rxjs'</span>;
+
+<span class="fn">console</span>.<span class="fn">log</span>(<span class="str">'Start'</span>);
+
+asyncScheduler.<span class="fn">schedule</span>(() =&gt; {
+  <span class="fn">console</span>.<span class="fn">log</span>(<span class="str">'Runs later'</span>);
+}, <span class="num">2000</span>);
+
+<span class="fn">console</span>.<span class="fn">log</span>(<span class="str">'End'</span>);</code></pre>
+
+<div class="output">
+<pre><code>Start
+End
+
+(after 2 seconds)
+
+Runs later</code></pre>
+</div>
+
+  <div class="answer">
+    <h3 class="answer-title">Real Understanding</h3>
+    <p>asyncScheduler works like setTimeout and runs tasks asynchronously.</p>
+  </div>
+
+</section>
+
+<section class="card">
+
+  <h2>animationFrameScheduler Example</h2>
+
+  <div class="file-title">animationFrameScheduler-example.ts</div>
+
+<pre><code><span class="kw">import</span> { animationFrameScheduler } <span class="kw">from</span> <span class="str">'rxjs'</span>;
+
+animationFrameScheduler.<span class="fn">schedule</span>(() =&gt; {
+  <span class="fn">console</span>.<span class="fn">log</span>(<span class="str">'Update UI'</span>);
+});</code></pre>
+
+<div class="output">
+<pre><code>Update UI</code></pre>
+</div>
+
+  <div class="answer">
+    <h3 class="answer-title">Real Understanding</h3>
+    <p>animationFrameScheduler executes before browser repaint and is mainly used for smooth animations and UI updates.</p>
+  </div>
+
+</section>
+
+<section class="card">
+
+  <h2>Full Combined Example</h2>
+
+  <div class="file-title">all-schedulers-example.ts</div>
+
+<pre><code><span class="kw">import</span> {
+  <span class="fn">of</span>,
+  queueScheduler,
+  asapScheduler,
+  asyncScheduler,
+  animationFrameScheduler
+} <span class="kw">from</span> <span class="str">'rxjs'</span>;
+
+<span class="kw">import</span> { <span class="fn">observeOn</span> } <span class="kw">from</span> <span class="str">'rxjs/operators'</span>;
+
+<span class="fn">console</span>.<span class="fn">log</span>(<span class="str">'Start'</span>);
+
+<span class="fn">of</span>(<span class="str">'QUEUE'</span>).<span class="fn">pipe</span>(
+  <span class="fn">observeOn</span>(queueScheduler)
+).<span class="fn">subscribe</span>(value =&gt; <span class="fn">console</span>.<span class="fn">log</span>(value));
+
+<span class="fn">of</span>(<span class="str">'ASAP'</span>).<span class="fn">pipe</span>(
+  <span class="fn">observeOn</span>(asapScheduler)
+).<span class="fn">subscribe</span>(value =&gt; <span class="fn">console</span>.<span class="fn">log</span>(value));
+
+<span class="fn">of</span>(<span class="str">'ASYNC'</span>).<span class="fn">pipe</span>(
+  <span class="fn">observeOn</span>(asyncScheduler)
+).<span class="fn">subscribe</span>(value =&gt; <span class="fn">console</span>.<span class="fn">log</span>(value));
+
+<span class="fn">of</span>(<span class="str">'ANIMATION'</span>).<span class="fn">pipe</span>(
+  <span class="fn">observeOn</span>(animationFrameScheduler)
+).<span class="fn">subscribe</span>(value =&gt; <span class="fn">console</span>.<span class="fn">log</span>(value));
+
+<span class="fn">console</span>.<span class="fn">log</span>(<span class="str">'End'</span>);</code></pre>
+
+<div class="output">
+<pre><code>Start
+QUEUE
+End
+ASAP
+ASYNC
+ANIMATION</code></pre>
+</div>
+
+</section>
+
+<section class="card">
+
+  <h2>Browser Internal Mapping</h2>
+
+  <table style="width:100%;border-collapse:collapse">
+
+    <thead>
+      <tr style="background:#111827">
+        <th style="border:1px solid #30363d;padding:12px;color:#ff7b72;text-align:left">Scheduler</th>
+        <th style="border:1px solid #30363d;padding:12px;color:#ff7b72;text-align:left">Browser Mechanism</th>
+      </tr>
+    </thead>
+
+    <tbody>
+
+      <tr>
+        <td style="border:1px solid #30363d;padding:12px;color:#7ee787">queueScheduler</td>
+        <td style="border:1px solid #30363d;padding:12px">Call Stack</td>
+      </tr>
+
+      <tr>
+        <td style="border:1px solid #30363d;padding:12px;color:#7ee787">asapScheduler</td>
+        <td style="border:1px solid #30363d;padding:12px">Microtask Queue</td>
+      </tr>
+
+      <tr>
+        <td style="border:1px solid #30363d;padding:12px;color:#7ee787">asyncScheduler</td>
+        <td style="border:1px solid #30363d;padding:12px">Macrotask Queue</td>
+      </tr>
+
+      <tr>
+        <td style="border:1px solid #30363d;padding:12px;color:#7ee787">animationFrameScheduler</td>
+        <td style="border:1px solid #30363d;padding:12px">requestAnimationFrame</td>
+      </tr>
+
+    </tbody>
+
+  </table>
+
+</section>
+
+<section class="card">
+
+  <h2>Interview Answer</h2>
+
+  <div class="answer">
+    <p>RxJS schedulers control when Observable tasks execute. queueScheduler runs synchronously in the current call stack, asapScheduler runs after current synchronous code using microtasks, asyncScheduler runs asynchronously using timers like setTimeout, and animationFrameScheduler runs before the browser repaints and is mainly used for smooth UI animations.</p>
+  </div>
+
+</section>
 <div class="nav-links">
     <a href="076_how_does_rxjs_implement_the_observer_pattern_internally.html">← Previous</a>
     <a href="index.html">All Questions</a>

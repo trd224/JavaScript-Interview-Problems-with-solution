@@ -106,6 +106,57 @@ code{font-family:Consolas,"JetBrains Mono","Courier New",monospace}
     <h1>How does observeOn() differ from subscribeOn()?</h1>
     <p class="subtitle">Advanced  with headings, lists, full examples for every concept, colorful code, and expected behavior.</p>
   </section>
+  <section class="card">
+
+  <h2>First Understand the Two Different Phases</h2>
+
+  <div class="answer">
+
+    <p>An Observable has mainly 2 phases:</p>
+
+    <table style="width:100%;border-collapse:collapse;margin-top:16px">
+
+      <thead>
+        <tr style="background:#111827">
+          <th style="border:1px solid #30363d;padding:12px;color:#ff7b72;text-align:left">
+            Phase
+          </th>
+
+          <th style="border:1px solid #30363d;padding:12px;color:#ff7b72;text-align:left">
+            Meaning
+          </th>
+        </tr>
+      </thead>
+
+      <tbody>
+
+        <tr>
+          <td style="border:1px solid #30363d;padding:12px;color:#7ee787">
+            Subscription Phase
+          </td>
+
+          <td style="border:1px solid #30363d;padding:12px">
+            When Observable starts executing
+          </td>
+        </tr>
+
+        <tr>
+          <td style="border:1px solid #30363d;padding:12px;color:#7ee787">
+            Notification Phase
+          </td>
+
+          <td style="border:1px solid #30363d;padding:12px">
+            When next/error/complete values are delivered
+          </td>
+        </tr>
+
+      </tbody>
+
+    </table>
+
+  </div>
+
+</section>
 
   <section class="card">
     <h2></h2>
@@ -169,6 +220,290 @@ source$.<span class="fn">pipe</span>(
 </div>
 
   </section>
+  <section class="card">
+
+  <h2>How does observeOn() differ from subscribeOn()?</h2>
+
+  <div class="answer">
+
+    <h3 class="answer-title">Biggest Difference</h3>
+
+    <table style="width:100%;border-collapse:collapse;margin-top:12px">
+
+      <thead>
+        <tr style="background:#111827">
+          <th style="border:1px solid #30363d;padding:12px;color:#ff7b72;text-align:left">Operator</th>
+          <th style="border:1px solid #30363d;padding:12px;color:#ff7b72;text-align:left">Controls</th>
+        </tr>
+      </thead>
+
+      <tbody>
+
+        <tr>
+          <td style="border:1px solid #30363d;padding:12px;color:#7ee787">subscribeOn()</td>
+          <td style="border:1px solid #30363d;padding:12px">Where Observable STARTS execution</td>
+        </tr>
+
+        <tr>
+          <td style="border:1px solid #30363d;padding:12px;color:#7ee787">observeOn()</td>
+          <td style="border:1px solid #30363d;padding:12px">Where emitted VALUES continue execution</td>
+        </tr>
+
+      </tbody>
+
+    </table>
+
+    <div class="note">
+      <strong>Remember:</strong> subscribeOn() affects Observable startup, while observeOn() affects downstream notifications.
+    </div>
+
+  </div>
+
+</section>
+
+<section class="card">
+
+  <h2>Visual Flow</h2>
+
+<pre><code>Observable Creation
+        │
+        │   ← subscribeOn()
+        ▼
+Source Emits Values
+        │
+        │   ← observeOn()
+        ▼
+Subscriber Receives Values
+</code></pre>
+
+</section>
+
+<section class="card">
+
+  <h2>subscribeOn() Example</h2>
+
+  <div class="file-title">subscribeOn-example.ts</div>
+
+<pre><code><span class="kw">import</span> { <span class="fn">of</span>, asyncScheduler } <span class="kw">from</span> <span class="str">'rxjs'</span>;
+<span class="kw">import</span> { subscribeOn, tap } <span class="kw">from</span> <span class="str">'rxjs/operators'</span>;
+
+<span class="fn">console</span>.<span class="fn">log</span>(<span class="str">'Start'</span>);
+
+<span class="fn">of</span>(<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>).<span class="fn">pipe</span>(
+
+  <span class="fn">tap</span>(value =&gt; {
+    <span class="fn">console</span>.<span class="fn">log</span>(<span class="str">'Before subscribeOn:'</span>, value);
+  }),
+
+  <span class="fn">subscribeOn</span>(asyncScheduler)
+
+).<span class="fn">subscribe</span>(value =&gt; {
+  <span class="fn">console</span>.<span class="fn">log</span>(<span class="str">'Subscriber:'</span>, value);
+});
+
+<span class="fn">console</span>.<span class="fn">log</span>(<span class="str">'End'</span>);</code></pre>
+
+<div class="output">
+<pre><code>Start
+End
+Before subscribeOn: 1
+Subscriber: 1
+Before subscribeOn: 2
+Subscriber: 2
+Before subscribeOn: 3
+Subscriber: 3</code></pre>
+</div>
+
+  <div class="answer">
+
+    <h3 class="answer-title">Why?</h3>
+
+    <p>subscribeOn(asyncScheduler) moves the ENTIRE Observable startup to async execution.</p>
+
+    <div class="note">
+      <strong>Important:</strong> subscribeOn() changes when the Observable starts.
+    </div>
+
+  </div>
+
+</section>
+
+<section class="card">
+
+  <h2>observeOn() Example</h2>
+
+  <div class="file-title">observeOn-example.ts</div>
+
+<pre><code><span class="kw">import</span> { <span class="fn">of</span>, asyncScheduler } <span class="kw">from</span> <span class="str">'rxjs'</span>;
+<span class="kw">import</span> { observeOn, tap } <span class="kw">from</span> <span class="str">'rxjs/operators'</span>;
+
+<span class="fn">console</span>.<span class="fn">log</span>(<span class="str">'Start'</span>);
+
+<span class="fn">of</span>(<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>).<span class="fn">pipe</span>(
+
+  <span class="fn">tap</span>(value =&gt; {
+    <span class="fn">console</span>.<span class="fn">log</span>(<span class="str">'Before observeOn:'</span>, value);
+  }),
+
+  <span class="fn">observeOn</span>(asyncScheduler)
+
+).<span class="fn">subscribe</span>(value =&gt; {
+  <span class="fn">console</span>.<span class="fn">log</span>(<span class="str">'Subscriber:'</span>, value);
+});
+
+<span class="fn">console</span>.<span class="fn">log</span>(<span class="str">'End'</span>);</code></pre>
+
+<div class="output">
+<pre><code>Start
+Before observeOn: 1
+Before observeOn: 2
+Before observeOn: 3
+End
+Subscriber: 1
+Subscriber: 2
+Subscriber: 3</code></pre>
+</div>
+
+  <div class="answer">
+
+    <h3 class="answer-title">Why?</h3>
+
+    <p>observeOn(asyncScheduler) changes downstream execution only. Source still emits synchronously, but subscriber receives values asynchronously.</p>
+
+    <div class="note">
+      <strong>Important:</strong> observeOn() affects operators and subscribers AFTER its position in the pipe.
+    </div>
+
+  </div>
+
+</section>
+
+<section class="card">
+
+  <h2>Most Important Difference</h2>
+
+<div class="answer-grid">
+
+  <div class="answer-mini">
+    <strong>subscribeOn()</strong>
+    Controls Observable STARTUP execution.
+  </div>
+
+  <div class="answer-mini">
+    <strong>observeOn()</strong>
+    Controls notification DELIVERY execution.
+  </div>
+
+</div>
+
+</section>
+
+<section class="card">
+
+  <h2>observeOn() Affects Only Downstream</h2>
+
+  <div class="file-title">observeOn-downstream-example.ts</div>
+
+<pre><code><span class="kw">import</span> { <span class="fn">of</span>, asyncScheduler } <span class="kw">from</span> <span class="str">'rxjs'</span>;
+<span class="kw">import</span> { observeOn, tap } <span class="kw">from</span> <span class="str">'rxjs/operators'</span>;
+
+<span class="fn">of</span>(<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>).<span class="fn">pipe</span>(
+
+  <span class="fn">tap</span>(v =&gt; <span class="fn">console</span>.<span class="fn">log</span>(<span class="str">'Sync:'</span>, v)),
+
+  <span class="fn">observeOn</span>(asyncScheduler),
+
+  <span class="fn">tap</span>(v =&gt; <span class="fn">console</span>.<span class="fn">log</span>(<span class="str">'Async:'</span>, v))
+
+).<span class="fn">subscribe</span>();</code></pre>
+
+<div class="output">
+<pre><code>Sync: 1
+Sync: 2
+Sync: 3
+
+Async: 1
+Async: 2
+Async: 3</code></pre>
+</div>
+
+</section>
+
+<section class="card">
+
+  <h2>Full Combined Example</h2>
+
+  <div class="file-title">subscribeOn-vs-observeOn.ts</div>
+
+<pre><code><span class="kw">import</span> {
+  <span class="fn">of</span>,
+  asyncScheduler
+} <span class="kw">from</span> <span class="str">'rxjs'</span>;
+
+<span class="kw">import</span> {
+  subscribeOn,
+  observeOn,
+  tap
+} <span class="kw">from</span> <span class="str">'rxjs/operators'</span>;
+
+<span class="fn">console</span>.<span class="fn">log</span>(<span class="str">'Start'</span>);
+
+<span class="fn">of</span>(<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>).<span class="fn">pipe</span>(
+
+  <span class="fn">tap</span>(v =&gt; <span class="fn">console</span>.<span class="fn">log</span>(<span class="str">'Source:'</span>, v)),
+
+  <span class="fn">subscribeOn</span>(asyncScheduler),
+
+  <span class="fn">observeOn</span>(asyncScheduler)
+
+).<span class="fn">subscribe</span>(v =&gt; {
+  <span class="fn">console</span>.<span class="fn">log</span>(<span class="str">'Subscriber:'</span>, v);
+});
+
+<span class="fn">console</span>.<span class="fn">log</span>(<span class="str">'End'</span>);</code></pre>
+
+<div class="output">
+<pre><code>Start
+End
+Source: 1
+Source: 2
+Source: 3
+Subscriber: 1
+Subscriber: 2
+Subscriber: 3</code></pre>
+</div>
+
+</section>
+
+<section class="card">
+
+  <h2>Easy Human Example</h2>
+
+  <div class="answer">
+
+    <h3 class="answer-title">subscribeOn()</h3>
+
+    <p>Controls when the kitchen starts cooking food.</p>
+
+    <h3 class="answer-title">observeOn()</h3>
+
+    <p>Controls how and when the waiter serves food to customers.</p>
+
+  </div>
+
+</section>
+
+<section class="card">
+
+  <h2>Interview Answer</h2>
+
+  <div class="answer">
+
+    <p>subscribeOn() controls which scheduler is used when the Observable starts executing, while observeOn() controls which scheduler is used for delivering emitted values to downstream operators and subscribers. subscribeOn() affects source subscription timing, whereas observeOn() affects execution after its position in the pipe.</p>
+
+  </div>
+
+</section>
 <div class="nav-links">
     <a href="078_what_is_the_difference_between_asyncscheduler_asapscheduler_and_queuesch.html">← Previous</a>
     <a href="index.html">All Questions</a>

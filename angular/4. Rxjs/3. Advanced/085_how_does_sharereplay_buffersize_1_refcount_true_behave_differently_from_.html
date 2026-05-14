@@ -160,6 +160,229 @@ users$.<span class="fn">subscribe</span>(users =&gt; <span class="fn">console</s
 </div>
 
   </section>
+  <section class="card">
+  <h2>Detailed Interview Explanation</h2>
+
+  <div class="answer">
+
+    <h3 class="answer-title">One-Line Definition</h3>
+
+    <p>
+      shareReplay({ bufferSize: 1, refCount: true }) automatically disconnects from the source when no subscribers remain, while shareReplay(1) usually keeps the source alive.
+    </p>
+
+    <h3 class="answer-title">Main Difference</h3>
+
+    <div class="answer-grid">
+
+      <div class="answer-mini">
+        <strong>shareReplay(1)</strong>
+        Keeps source subscription alive by default.
+      </div>
+
+      <div class="answer-mini">
+        <strong>refCount true</strong>
+        Automatically unsubscribes when subscriber count becomes zero.
+      </div>
+
+      <div class="answer-mini">
+        <strong>Memory Usage</strong>
+        refCount true is safer for long-running streams.
+      </div>
+
+      <div class="answer-mini">
+        <strong>Angular Usage</strong>
+        Recommended for interval, websocket, router events, form streams.
+      </div>
+
+    </div>
+
+    <h3 class="answer-title">Very Important Concept</h3>
+
+    <p>
+      shareReplay(1) internally behaves similar to:
+    </p>
+
+<pre><code><span class="fn">shareReplay</span>({
+  bufferSize: <span class="num">1</span>,
+  refCount: <span class="kw">false</span>
+})</code></pre>
+
+    <p>
+      Meaning the source may continue running even after all subscribers unsubscribe.
+    </p>
+
+  </div>
+</section>
+
+<section class="card">
+
+  <h2>Memory Leak Example — shareReplay(1)</h2>
+
+  <div class="file-title">shareReplay-memory-leak.ts</div>
+
+<pre><code><span class="kw">import</span> { interval } <span class="kw">from</span> <span class="str">'rxjs'</span>;
+<span class="kw">import</span> { shareReplay } <span class="kw">from</span> <span class="str">'rxjs/operators'</span>;
+
+<span class="kw">const</span> source$ = <span class="fn">interval</span>(<span class="num">1000</span>).<span class="fn">pipe</span>(
+  <span class="fn">shareReplay</span>(<span class="num">1</span>)
+);
+
+<span class="kw">const</span> sub1 = source$.<span class="fn">subscribe</span>(value =&gt; {
+  <span class="fn">console</span>.<span class="fn">log</span>(<span class="str">'A:'</span>, value);
+});
+
+<span class="kw">setTimeout</span>(() =&gt; {
+
+  sub1.<span class="fn">unsubscribe</span>();
+
+  <span class="fn">console</span>.<span class="fn">log</span>(<span class="str">'A unsubscribed'</span>);
+
+}, <span class="num">3000</span>);
+
+<span class="kw">setTimeout</span>(() =&gt; {
+
+  source$.<span class="fn">subscribe</span>(value =&gt; {
+    <span class="fn">console</span>.<span class="fn">log</span>(<span class="str">'B:'</span>, value);
+  });
+
+}, <span class="num">5000</span>);</code></pre>
+
+<div class="output">
+<pre><code>A: 0
+A: 1
+A: 2
+A unsubscribed
+
+// interval still running internally
+
+B: 4
+B: 5
+B: 6</code></pre>
+</div>
+
+<div class="note">
+  <strong>Important:</strong>
+  Even after A unsubscribes, the interval continues running in the background.
+</div>
+
+</section>
+
+<section class="card">
+
+  <h2>Safer Version — refCount true</h2>
+
+  <div class="file-title">shareReplay-refCount-safe.ts</div>
+
+<pre><code><span class="kw">import</span> { interval } <span class="kw">from</span> <span class="str">'rxjs'</span>;
+<span class="kw">import</span> { shareReplay } <span class="kw">from</span> <span class="str">'rxjs/operators'</span>;
+
+<span class="kw">const</span> source$ = <span class="fn">interval</span>(<span class="num">1000</span>).<span class="fn">pipe</span>(
+
+  <span class="fn">shareReplay</span>({
+    bufferSize: <span class="num">1</span>,
+    refCount: <span class="kw">true</span>
+  })
+
+);
+
+<span class="kw">const</span> sub1 = source$.<span class="fn">subscribe</span>(value =&gt; {
+  <span class="fn">console</span>.<span class="fn">log</span>(<span class="str">'A:'</span>, value);
+});
+
+<span class="kw">setTimeout</span>(() =&gt; {
+
+  sub1.<span class="fn">unsubscribe</span>();
+
+  <span class="fn">console</span>.<span class="fn">log</span>(<span class="str">'A unsubscribed'</span>);
+
+}, <span class="num">3000</span>);
+
+<span class="kw">setTimeout</span>(() =&gt; {
+
+  source$.<span class="fn">subscribe</span>(value =&gt; {
+    <span class="fn">console</span>.<span class="fn">log</span>(<span class="str">'B:'</span>, value);
+  });
+
+}, <span class="num">5000</span>);</code></pre>
+
+<div class="output">
+<pre><code>A: 0
+A: 1
+A: 2
+A unsubscribed
+
+// source stopped completely
+
+B: 0
+B: 1
+B: 2</code></pre>
+</div>
+
+<div class="note">
+  <strong>Why B restarted from 0?</strong>
+  Because refCount true disconnected the source after the last unsubscribe. New subscriber created a fresh execution.
+</div>
+
+</section>
+
+<section class="card">
+
+  <h2>Real Angular Use Case</h2>
+
+  <div class="file-title">users.service.ts</div>
+
+<pre><code><span class="kw">users$</span> = <span class="kw">this</span>.http.<span class="fn">get</span>(<span class="str">'/api/users'</span>).<span class="fn">pipe</span>(
+
+  <span class="fn">shareReplay</span>({
+    bufferSize: <span class="num">1</span>,
+    refCount: <span class="kw">true</span>
+  })
+
+);</code></pre>
+
+<div class="output">
+<pre><code>Multiple Angular components can share the same cached API response safely.</code></pre>
+</div>
+
+<ul class="answer-list">
+  <li>Prevents duplicate API calls.</li>
+  <li>Replays latest response to new subscribers.</li>
+  <li>Automatically cleans resources when unused.</li>
+</ul>
+
+</section>
+
+<section class="card">
+
+  <h2>Interview Points</h2>
+
+  <div class="answer">
+
+    <h3 class="answer-title">Important Interview Point</h3>
+
+    <ul class="answer-list">
+      <li>shareReplay(1) can accidentally create memory leaks.</li>
+      <li>refCount true is safer for infinite Observables.</li>
+      <li>HTTP Observables usually complete automatically, so risk is smaller.</li>
+      <li>Long-running streams should usually use refCount true.</li>
+    </ul>
+
+    <h3 class="answer-title">Short Interview Answer</h3>
+
+    <p>
+      shareReplay(1) keeps the source alive even with zero subscribers, while shareReplay({ bufferSize: 1, refCount: true }) automatically disconnects from the source when all subscribers unsubscribe.
+    </p>
+
+    <h3 class="answer-title">One-Line Interview Answer</h3>
+
+    <p>
+      refCount true makes shareReplay automatically clean up unused subscriptions.
+    </p>
+
+  </div>
+
+</section>
 <div class="nav-links">
     <a href="084_what_is_the_difference_between_unicast_and_multicast_observables_at_the_.html">← Previous</a>
     <a href="index.html">All Questions</a>
