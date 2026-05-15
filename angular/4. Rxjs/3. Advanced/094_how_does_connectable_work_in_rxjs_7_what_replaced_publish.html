@@ -154,6 +154,174 @@ B: 2</code></pre>
 </div>
 
   </section>
+
+<section class="card">
+  <h2>connectable() vs share()</h2>
+
+  <div class="answer">
+
+    <h3 class="answer-title">First Understand the Problem</h3>
+
+    <p>
+      Normally, Observables are <strong>unicast</strong>.
+      Every subscription creates a separate execution.
+    </p>
+
+<pre><code><span class="fn">interval</span>(<span class="num">1000</span>).<span class="fn">subscribe</span>();
+<span class="fn">interval</span>(<span class="num">1000</span>).<span class="fn">subscribe</span>();</code></pre>
+
+    <p>
+      Here two separate interval timers are created.
+    </p>
+
+    <h3 class="answer-title">What connectable() Does</h3>
+
+    <p>
+      connectable() converts a normal Observable into a shared multicasted Observable.
+    </p>
+
+    <div class="note">
+      <strong>Important:</strong>
+      Source execution does NOT start until connect() is called.
+    </div>
+
+    <h3 class="answer-title">Why connector Is Needed</h3>
+
+    <p>
+      connectable() needs something that can:
+    </p>
+
+    <ul class="answer-list">
+      <li>Receive values from source</li>
+      <li>Distribute values to all subscribers</li>
+      <li>Share single execution</li>
+    </ul>
+
+    <p>
+      That is why we use:
+    </p>
+
+<pre><code>connector: () =&gt; <span class="kw">new</span> <span class="type">Subject</span>()</code></pre>
+
+    <h3 class="answer-title">Internal Flow</h3>
+
+<pre><code>interval()
+    ↓
+ Subject
+  ↙   ↘
+ A     B</code></pre>
+
+    <p>
+      Subject receives values from source and broadcasts them to all subscribers.
+    </p>
+
+    <h3 class="answer-title">Step-by-Step Execution</h3>
+
+    <ul class="answer-list">
+      <li>Subscriber A subscribes.</li>
+      <li>Subscriber B subscribes.</li>
+      <li>Still source does NOT start.</li>
+      <li>connect() is called.</li>
+      <li>Now source execution starts.</li>
+    </ul>
+
+<pre><code><span class="kw">const</span> connection = shared$.<span class="fn">connect</span>();</code></pre>
+
+    <h3 class="answer-title">Output</h3>
+
+<div class="output">
+<pre><code>A: 0
+B: 0
+
+A: 1
+B: 1
+
+A: 2
+B: 2</code></pre>
+</div>
+
+    <h3 class="answer-title">Same Thing Using share()</h3>
+
+<pre><code><span class="kw">import</span> { <span class="fn">interval</span> } <span class="kw">from</span> <span class="str">'rxjs'</span>;
+<span class="kw">import</span> { <span class="fn">take</span>, <span class="fn">share</span> } <span class="kw">from</span> <span class="str">'rxjs/operators'</span>;
+
+<span class="kw">const</span> shared$ = <span class="fn">interval</span>(<span class="num">1000</span>).<span class="fn">pipe</span>(
+  <span class="fn">take</span>(<span class="num">3</span>),
+  <span class="fn">share</span>()
+);
+
+shared$.<span class="fn">subscribe</span>(v =&gt; <span class="fn">console</span>.<span class="fn">log</span>(<span class="str">'A:'</span>, v));
+shared$.<span class="fn">subscribe</span>(v =&gt; <span class="fn">console</span>.<span class="fn">log</span>(<span class="str">'B:'</span>, v));</code></pre>
+
+    <div class="output">
+<pre><code>A: 0
+B: 0
+
+A: 1
+B: 1
+
+A: 2
+B: 2</code></pre>
+</div>
+
+    <h3 class="answer-title">Biggest Difference</h3>
+
+    <div class="answer-grid">
+
+      <div class="answer-mini">
+        <strong>connectable()</strong>
+        Manual connect()
+        <br><br>
+        Full multicast control
+        <br><br>
+        Custom Subject support
+      </div>
+
+      <div class="answer-mini">
+        <strong>share()</strong>
+        Automatic connection
+        <br><br>
+        Easier syntax
+        <br><br>
+        Internally uses Subject
+      </div>
+
+    </div>
+
+    <h3 class="answer-title">Real-World Example</h3>
+
+    <p>
+      Suppose 5 components subscribe to a WebSocket.
+    </p>
+
+    <p>
+      Without sharing:
+    </p>
+
+<pre><code>5 subscribers = 5 websocket connections</code></pre>
+
+    <p>
+      With connectable/share:
+    </p>
+
+<pre><code>1 websocket → shared to all subscribers</code></pre>
+
+    <h3 class="answer-title">Short Interview Answer</h3>
+
+    <p>
+      connectable() creates a multicasted Observable using a connector like Subject and requires manual connect(). share() is a simplified automatic multicasting operator that internally uses a Subject and auto-connects.
+    </p>
+
+    <h3 class="answer-title">One-Line Interview Answer</h3>
+
+    <p>
+      connectable() gives manual multicast control, while share() automatically multicasts using an internal Subject.
+    </p>
+
+  </div>
+</section>
+
+
 <div class="nav-links">
     <a href="093_what_are_marble_diagrams_and_how_do_you_read_them.html">← Previous</a>
     <a href="index.html">All Questions</a>

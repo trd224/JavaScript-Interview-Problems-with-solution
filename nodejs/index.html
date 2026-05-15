@@ -1,0 +1,699 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Node.js Interview Questions</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Syne:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0e1a;
+    --border: #1e2d40;
+    --green: #00ff88;
+    --yellow: #ffcc00;
+    --red: #ff4d6d;
+    --text: #e2e8f0;
+    --muted: #64748b;
+    --card: #131d2e;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--bg); color: var(--text); font-family: 'Syne', sans-serif; min-height: 100vh; background-image: radial-gradient(ellipse at 10% 0%, rgba(0,255,136,0.06) 0%, transparent 50%), radial-gradient(ellipse at 90% 100%, rgba(56,189,248,0.06) 0%, transparent 50%); }
+  header { text-align: center; padding: 50px 20px 30px; border-bottom: 1px solid var(--border); }
+  .logo-badge { display: inline-block; background: linear-gradient(135deg, #00ff88, #00cc66); color: #000; font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 700; letter-spacing: 0.15em; padding: 5px 14px; border-radius: 2px; margin-bottom: 16px; text-transform: uppercase; }
+  h1 { font-size: clamp(32px, 5vw, 60px); font-weight: 800; line-height: 1.05; letter-spacing: -0.03em; margin-bottom: 10px; }
+  h1 span { color: var(--green); }
+  .subtitle { color: var(--muted); font-family: 'JetBrains Mono', monospace; font-size: 13px; }
+  .stats { display: flex; justify-content: center; gap: 40px; margin-top: 24px; flex-wrap: wrap; }
+  .stat { text-align: center; }
+  .stat-num { font-size: 26px; font-weight: 800; color: var(--green); font-family: 'JetBrains Mono', monospace; }
+  .stat-label { font-size: 11px; color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; margin-top: 2px; }
+  .nav-wrap { max-width: 1000px; margin: 0 auto; padding: 0 20px; }
+  .tabs { display: flex; justify-content: center; padding: 28px 0 0; border-bottom: 1px solid var(--border); }
+  .tab { padding: 13px 26px; cursor: pointer; font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; border: none; background: transparent; color: var(--muted); border-bottom: 3px solid transparent; transition: all 0.2s; }
+  .tab:hover { color: var(--text); }
+  .tab.beginner.active { color: var(--green); border-bottom-color: var(--green); }
+  .tab.mid.active { color: var(--yellow); border-bottom-color: var(--yellow); }
+  .tab.advanced.active { color: var(--red); border-bottom-color: var(--red); }
+  .search-wrap { max-width: 1000px; margin: 24px auto 0; padding: 0 20px; }
+  .search-box { width: 100%; background: var(--card); border: 1px solid var(--border); border-radius: 6px; padding: 13px 20px 13px 46px; color: var(--text); font-family: 'JetBrains Mono', monospace; font-size: 13px; outline: none; transition: border-color 0.2s; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%2364748b' viewBox='0 0 16 16'%3E%3Cpath d='M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.099zm-5.242 1.656a5.5 5.5 0 1 1 0-11 5.5 5.5 0 0 1 0 11z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: 15px center; }
+  .search-box:focus { border-color: var(--green); }
+  .search-box::placeholder { color: var(--muted); }
+  .content { max-width: 1000px; margin: 0 auto; padding: 36px 20px 80px; }
+  .section { display: none; }
+  .section.active { display: block; }
+  .level-header { display: flex; align-items: center; gap: 14px; margin-bottom: 28px; }
+  .level-tag { font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 700; letter-spacing: 0.15em; padding: 5px 12px; border-radius: 2px; text-transform: uppercase; }
+  .beginner .level-tag { background: rgba(0,255,136,0.15); color: var(--green); }
+  .mid .level-tag { background: rgba(255,204,0,0.15); color: var(--yellow); }
+  .advanced .level-tag { background: rgba(255,77,109,0.15); color: var(--red); }
+  .level-title { font-size: 20px; font-weight: 800; }
+  .category { margin-bottom: 30px; }
+  .category-name { font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 10px; padding-left: 14px; border-left: 2px solid var(--border); }
+  .beginner .category-name { border-left-color: var(--green); color: var(--green); }
+  .mid .category-name { border-left-color: var(--yellow); color: var(--yellow); }
+  .advanced .category-name { border-left-color: var(--red); color: var(--red); }
+  .questions-grid { display: grid; gap: 7px; }
+  .q-item { display: flex; align-items: flex-start; gap: 12px; background: var(--card); border: 1px solid var(--border); border-radius: 5px; padding: 12px 14px; transition: border-color 0.18s, transform 0.15s; }
+  .q-item:hover { border-color: var(--muted); transform: translateX(3px); }
+  .q-item.hidden { display: none; }
+  .q-num { font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 700; min-width: 30px; padding-top: 2px; opacity: 0.45; flex-shrink: 0; }
+  .beginner .q-num { color: var(--green); }
+  .mid .q-num { color: var(--yellow); }
+  .advanced .q-num { color: var(--red); }
+  .q-text { font-size: 14px; line-height: 1.6; color: var(--text); }
+  .no-results { text-align: center; color: var(--muted); padding: 60px 20px; font-family: 'JetBrains Mono', monospace; font-size: 13px; display: none; }
+  footer { text-align: center; padding: 28px; border-top: 1px solid var(--border); font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--muted); }
+  @media(max-width:600px){ .tab{padding:11px 12px;font-size:11px;} .stats{gap:20px;} }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo-badge">Node.js Prep</div>
+  <h1>Interview <span>Questions</span></h1>
+  <p class="subtitle">// Beginner &middot; Mid-Level &middot; Advanced</p>
+  <div class="stats">
+    <div class="stat"><div class="stat-num" id="totalCount">...</div><div class="stat-label">Questions</div></div>
+    <div class="stat"><div class="stat-num">3</div><div class="stat-label">Levels</div></div>
+    <div class="stat"><div class="stat-num">25+</div><div class="stat-label">Topics</div></div>
+  </div>
+</header>
+
+<div class="nav-wrap">
+  <div class="tabs">
+    <button class="tab beginner active" onclick="switchTab('beginner')">🟢 Beginner</button>
+    <button class="tab mid" onclick="switchTab('mid')">🟡 Mid-Level</button>
+    <button class="tab advanced" onclick="switchTab('advanced')">🔴 Advanced</button>
+  </div>
+</div>
+
+<div class="search-wrap">
+  <input class="search-box" type="text" id="searchInput" placeholder="Search any question...">
+</div>
+
+<div class="content">
+  <div class="no-results" id="noResults">No questions found. Try a different keyword.</div>
+  <div class="section beginner active" id="beginner"><div class="level-header"><span class="level-tag">Level 01</span><span class="level-title">Beginner — Foundations</span></div></div>
+  <div class="section mid" id="mid"><div class="level-header"><span class="level-tag">Level 02</span><span class="level-title">Mid-Level — Core Skills</span></div></div>
+  <div class="section advanced" id="advanced"><div class="level-header"><span class="level-tag">Level 03</span><span class="level-title">Advanced — Expert Topics</span></div></div>
+</div>
+
+<footer>Node.js Interview Prep &mdash; All Levels Covered</footer>
+
+<script>
+const data = {
+  beginner: {
+    "Introduction to Node.js": [
+      "What is Node.js?",
+      "Who created Node.js and when was it first released?",
+      "What is the V8 JavaScript engine?",
+      "What does it mean that Node.js is event-driven?",
+      "What does single-threaded mean in Node.js?",
+      "What is non-blocking I/O in Node.js?",
+      "What are the main use cases of Node.js?",
+      "What are the advantages of using Node.js?",
+      "What are the disadvantages or limitations of Node.js?",
+      "What is the difference between Node.js and traditional server-side languages like PHP or Java?",
+      "What is the difference between Node.js and browser-based JavaScript?",
+      "What is libuv and what role does it play in Node.js?",
+    ],
+    "Globals & Process": [
+      "What is the `global` object in Node.js?",
+      "What is the `process` object in Node.js?",
+      "What is `process.argv` and how do you use it?",
+      "What is `process.env` used for?",
+      "What is `process.exit()` and when should you use it?",
+      "What is `process.cwd()`?",
+      "What is `process.pid`?",
+      "What is `process.platform`?",
+      "What is `__dirname` in Node.js?",
+      "What is `__filename` in Node.js?",
+      "What is REPL in Node.js?",
+      "How do you run a Node.js script from the terminal?",
+      "What is `console.log`, `console.error`, `console.warn`?",
+      "What is `console.time()` and `console.timeEnd()`?",
+      "What is `console.table()`?",
+    ],
+    "Modules & CommonJS": [
+      "What is a module in Node.js?",
+      "What is CommonJS (CJS)?",
+      "How do you export a value using `module.exports`?",
+      "How do you import a module using `require()`?",
+      "What is the difference between `module.exports` and `exports`?",
+      "What are core (built-in) modules in Node.js? Give five examples.",
+      "What are third-party modules?",
+      "What are local modules?",
+      "What is ES Modules (ESM) in Node.js?",
+      "What is the difference between `require()` and `import`?",
+      "How does Node.js resolve module paths?",
+      "What are circular dependencies in Node.js?",
+      "What is `require.resolve()`?",
+      "What is `require.cache`?",
+    ],
+    "NPM & Package Management": [
+      "What is `package.json` and what does it contain?",
+      "What is `npm` and what is it used for?",
+      "What does `npm init` do?",
+      "What does `npm install <package>` do?",
+      "What is the difference between `dependencies` and `devDependencies`?",
+      "What is `peerDependencies`?",
+      "What is `package-lock.json`?",
+      "What is `node_modules` folder?",
+      "What is semantic versioning (semver)?",
+      "What does `^` and `~` mean in a version number?",
+      "What is `npx`?",
+      "What does `npm install -g` do?",
+      "What is `npm uninstall`?",
+      "What is `npm update`?",
+      "What is `npm run` and the `scripts` field?",
+      "What is `npm ci`?",
+      "What is the difference between `npm install` and `npm ci`?",
+      "What is `.npmignore`?",
+      "What is a scoped npm package?",
+      "What is yarn and how does it differ from npm?",
+    ],
+    "File System (fs)": [
+      "What is the `fs` module in Node.js?",
+      "What is the difference between `fs.readFile()` and `fs.readFileSync()`?",
+      "How do you read a file asynchronously in Node.js?",
+      "How do you write to a file using `fs.writeFile()`?",
+      "How do you append data to a file using `fs.appendFile()`?",
+      "How do you delete a file using `fs.unlink()`?",
+      "How do you check if a file or directory exists in Node.js?",
+      "How do you create a directory using `fs.mkdir()`?",
+      "How do you read the contents of a directory with `fs.readdir()`?",
+      "How do you rename a file using `fs.rename()`?",
+      "What is `fs.stat()` used for?",
+      "What is `fs.watch()` used for?",
+      "What is `fs.promises` (the promise-based fs API)?",
+      "What is `fs.copyFile()`?",
+    ],
+    "Path Module": [
+      "What is the `path` module in Node.js?",
+      "What is `path.join()` and why is it important?",
+      "What is `path.resolve()`?",
+      "What is the difference between `path.join()` and `path.resolve()`?",
+      "What is `path.basename()`?",
+      "What is `path.dirname()`?",
+      "What is `path.extname()`?",
+      "What is `path.parse()` and `path.format()`?",
+      "What is `path.sep` and `path.delimiter`?",
+      "Why should you use `path.join()` instead of string concatenation?",
+    ],
+    "Buffers": [
+      "What is a Buffer in Node.js?",
+      "Why do Buffers exist in Node.js?",
+      "How do you create a Buffer using `Buffer.from()`?",
+      "How do you create a Buffer using `Buffer.alloc()`?",
+      "What is the difference between `Buffer.alloc()` and `Buffer.allocUnsafe()`?",
+      "How do you convert a Buffer to a string?",
+      "What encodings does Node.js Buffer support?",
+      "What is `Buffer.concat()`?",
+      "How do you get the byte length of a Buffer?",
+      "What is the difference between a Buffer and a typed array (Uint8Array)?",
+    ],
+    "HTTP & Basic Server": [
+      "How do you create a basic HTTP server using Node.js?",
+      "What is `req` and `res` in an HTTP server?",
+      "What is `res.writeHead()` used for?",
+      "What is `res.end()` used for?",
+      "What is `req.url` and `req.method`?",
+      "What are common HTTP status codes? (200, 201, 204, 400, 401, 403, 404, 500)",
+      "What is the difference between GET, POST, PUT, PATCH, DELETE?",
+      "What is JSON and how do you send a JSON response?",
+      "How do you parse query strings in Node.js using `url` module?",
+      "What is the `querystring` module?",
+      "What is CORS?",
+      "What is the `Content-Type` header?",
+      "What is the difference between HTTP and HTTPS?",
+      "What is `nodemon` and why is it useful in development?",
+      "What is `http.get()` used for?",
+    ],
+    "Callbacks & Async Basics": [
+      "What is a callback function?",
+      "What is the error-first callback convention in Node.js?",
+      "What is callback hell?",
+      "What is a Promise?",
+      "How do you create a Promise using `new Promise()`?",
+      "What is `.then()` and `.catch()` on a Promise?",
+      "What is `.finally()` on a Promise?",
+      "What is `async/await`?",
+      "How do you handle errors with async/await using try/catch?",
+      "What is `Promise.all()`?",
+      "What is `Promise.race()`?",
+      "What is `Promise.allSettled()`?",
+      "What is `Promise.any()`?",
+      "What is `setTimeout()` in Node.js?",
+      "What is `setInterval()` in Node.js?",
+      "What is `clearTimeout()` and `clearInterval()`?",
+      "What is `setImmediate()` in Node.js?",
+      "What is the difference between synchronous and asynchronous code?",
+      "What is a race condition?",
+    ],
+  },
+
+  mid: {
+    "Event Loop In-Depth": [
+      "Explain the Node.js event loop in detail.",
+      "What are the six phases of the event loop?",
+      "What happens in the timers phase of the event loop?",
+      "What happens in the I/O callbacks phase?",
+      "What happens in the poll phase?",
+      "What happens in the check phase?",
+      "What happens in the close callbacks phase?",
+      "What is the difference between `setImmediate()` and `setTimeout(0ms)`?",
+      "What is the microtask queue?",
+      "What is the macrotask (task) queue?",
+      "What is the difference between microtasks and macrotasks? Give examples.",
+      "What is `process.nextTick()` and how does it differ from `setImmediate()`?",
+      "Which runs first: `process.nextTick()` or `Promise.resolve().then()`?",
+      "What is libuv and what does it provide to Node.js?",
+      "What is the libuv thread pool?",
+      "How many threads are in the libuv thread pool by default?",
+      "What is `UV_THREADPOOL_SIZE` environment variable?",
+      "Which Node.js operations use the thread pool?",
+      "What happens when you block the event loop?",
+      "How do you avoid blocking the event loop?",
+    ],
+    "EventEmitter": [
+      "What is the EventEmitter class in Node.js?",
+      "How do you create a custom EventEmitter class?",
+      "What is the difference between `.on()` and `.once()`?",
+      "How do you emit a custom event with `emit()`?",
+      "How do you remove a specific event listener with `off()` / `removeListener()`?",
+      "What is `removeAllListeners()`?",
+      "What is the default maximum number of listeners and what is the warning?",
+      "How do you change the max listeners limit with `setMaxListeners()`?",
+      "What is the special `error` event in EventEmitter?",
+      "What is `listenerCount()`?",
+      "What is `eventNames()`?",
+      "How do you pass data arguments to event listeners?",
+      "What are memory leaks caused by EventEmitters?",
+      "How do you debug EventEmitter memory leaks?",
+      "How does EventEmitter implement the observer (pub/sub) pattern?",
+    ],
+    "Streams": [
+      "What are streams in Node.js and why are they useful?",
+      "What are the four types of streams in Node.js?",
+      "What is a Readable stream? Give a real example.",
+      "What is a Writable stream? Give a real example.",
+      "What is a Duplex stream?",
+      "What is a Transform stream?",
+      "What is backpressure in Node.js streams?",
+      "How do you pipe streams together using `pipe()`?",
+      "What is the difference between `pipe()` and `pipeline()`?",
+      "How do you read a large file efficiently using streams?",
+      "What is `highWaterMark` in streams?",
+      "What events does a Readable stream emit?",
+      "What is the difference between flowing mode and paused mode in a Readable stream?",
+      "How do you switch a Readable stream between modes?",
+      "How do you create a custom Transform stream?",
+      "What is the `zlib` module used for?",
+      "How do you gzip a file using streams in Node.js?",
+      "What is `stream.pipeline()` and why is it safer than `pipe()`?",
+      "What are object mode streams?",
+    ],
+    "Express.js": [
+      "What is Express.js and why is it popular?",
+      "How do you create a basic Express server?",
+      "What is middleware in Express.js?",
+      "What is the difference between `app.use()` and `app.get()`?",
+      "How does middleware execution order matter?",
+      "What is `next()` in Express middleware?",
+      "What does `next(err)` do?",
+      "What is `express.json()`?",
+      "What is `express.urlencoded()`?",
+      "How do you define route parameters in Express (e.g., `/users/:id`)?",
+      "What is the difference between `req.params`, `req.query`, and `req.body`?",
+      "How do you use Express Router to organize routes?",
+      "How do you serve static files in Express using `express.static()`?",
+      "How do you implement error-handling middleware?",
+      "What is the four-argument signature of error-handling middleware?",
+      "What is the difference between `res.send()`, `res.json()`, and `res.end()`?",
+      "What is `res.status()` used for?",
+      "What is `res.redirect()`?",
+      "How do you set response headers in Express?",
+      "How do you read cookies in Express using `cookie-parser`?",
+      "What is `express-validator` used for?",
+      "How do you implement pagination in a Node.js REST API?",
+      "What is rate limiting and how do you implement it using `express-rate-limit`?",
+      "How do you enable CORS in Express using the `cors` package?",
+      "What is `app.locals` and `res.locals`?",
+    ],
+    "Error Handling": [
+      "What is the difference between operational errors and programmer errors?",
+      "How do you handle uncaught exceptions using `process.on('uncaughtException')`?",
+      "What is `process.on('unhandledRejection')` used for?",
+      "Should you continue running after an `uncaughtException`? Why or why not?",
+      "How do you create a custom Error class in Node.js?",
+      "How do you attach extra metadata (like statusCode) to an error?",
+      "How do you use `try/catch` with async/await?",
+      "How do you propagate errors in a Promise chain?",
+      "What is a centralized error handler in Express?",
+      "What is the difference between 4xx and 5xx HTTP errors?",
+      "What is `console.trace()`?",
+      "How do you use the `debug` npm package for conditional logging?",
+      "What is structured logging and why is it important?",
+      "What is the `winston` logging library?",
+      "What is the `morgan` HTTP request logger middleware?",
+      "How do you read a Node.js stack trace?",
+      "What is `domain` module in Node.js (deprecated)?",
+    ],
+    "Authentication & Security": [
+      "What is JWT (JSON Web Token) and how does it work?",
+      "What are the three parts of a JWT?",
+      "What is the difference between authentication and authorization?",
+      "How do you sign and verify a JWT in Node.js?",
+      "What is `bcrypt` and why do we use it for password hashing?",
+      "What is the difference between hashing and encryption?",
+      "What is salting a password?",
+      "What is the `bcrypt` work factor / cost factor?",
+      "What is session-based authentication?",
+      "What is token-based (stateless) authentication?",
+      "What is OAuth 2.0?",
+      "What is OpenID Connect?",
+      "What is a refresh token and how does it differ from an access token?",
+      "What is CSRF and how do you prevent it?",
+      "What is XSS and how do you prevent it in Node.js?",
+      "What is SQL injection and how do you prevent it?",
+      "What is the `helmet` npm package?",
+      "What is `dotenv` and how do you use it?",
+      "How do you store secrets securely in a Node.js app?",
+      "What is HTTPS and how do you set it up in Node.js?",
+      "What is the difference between symmetric and asymmetric JWT signing (HS256 vs RS256)?",
+      "What is RBAC (Role-Based Access Control)?",
+    ],
+    "Database Integration": [
+      "How do you connect Node.js to MongoDB using Mongoose?",
+      "What is a Mongoose Schema and Model?",
+      "What is the difference between `find()`, `findOne()`, and `findById()` in Mongoose?",
+      "How do you perform CRUD operations in Mongoose?",
+      "What is `populate()` in Mongoose used for?",
+      "What are Mongoose middleware hooks (pre/post)?",
+      "What is the `lean()` method in Mongoose and when do you use it?",
+      "What is the difference between `save()` and `updateOne()` in Mongoose?",
+      "How do you connect Node.js to PostgreSQL using `pg`?",
+      "What is an ORM and what is an ODM?",
+      "What is Sequelize?",
+      "What is Prisma ORM?",
+      "What is the difference between SQL and NoSQL databases?",
+      "What is database indexing and why does it matter?",
+      "What is a connection pool and why is it important?",
+      "What are database transactions?",
+      "How do you use transactions in Sequelize?",
+      "How do you handle database connection errors?",
+      "What is Redis and how do you use it with Node.js?",
+      "What is database migration and how is it done in Node.js?",
+      "What is an aggregation pipeline in MongoDB?",
+    ],
+    "HTTP Advanced & REST Design": [
+      "What is RESTful API design?",
+      "What are the HTTP methods used for CRUD operations?",
+      "What is idempotency in HTTP? Which methods are idempotent?",
+      "What is the difference between PUT and PATCH?",
+      "What is content negotiation in HTTP?",
+      "What is HTTP/2 and how does Node.js support it?",
+      "What are common HTTP headers and their purpose?",
+      "What is the `axios` library and how does it differ from `fetch`?",
+      "What is the built-in `fetch` API available in Node.js 18+?",
+      "What is GraphQL and how does it compare to REST?",
+      "What is API versioning?",
+      "What is HATEOAS?",
+      "What is an API Gateway?",
+      "What is the difference between `http` and `https` modules in Node.js?",
+    ],
+  },
+
+  advanced: {
+    "Performance & Profiling": [
+      "How do you profile a Node.js application for performance bottlenecks?",
+      "What is the `--prof` flag in Node.js?",
+      "How do you process V8 profiling output using `--prof-process`?",
+      "How do you analyze a CPU flame graph?",
+      "What is `clinic.js` and what tools does it include?",
+      "What is the `0x` flame graph profiling tool?",
+      "What is `autocannon` and how do you load test with it?",
+      "What is throughput vs latency in API performance?",
+      "How do you implement in-memory LRU caching in Node.js?",
+      "How do you implement Redis caching with TTL in Node.js?",
+      "What is cache invalidation and what strategies exist (TTL, event-driven, write-through)?",
+      "What is the difference between horizontal and vertical scaling?",
+      "How does Nginx work as a reverse proxy in front of Node.js?",
+      "What is `compression` middleware and how does it improve performance?",
+      "How does HTTP keep-alive improve performance?",
+      "What is connection pooling and why does it matter for databases?",
+      "What is lazy loading and code splitting in a Node.js context?",
+      "How do you reduce cold start time in a Node.js Lambda function?",
+      "What is the `--max-semi-space-size` and `--max-old-space-size` flag?",
+      "What is the performance impact of using `JSON.parse` / `JSON.stringify` on large payloads?",
+    ],
+    "Clustering & Worker Threads": [
+      "What is the Node.js `cluster` module?",
+      "How do you fork worker processes with `cluster.fork()`?",
+      "How does the primary process communicate with workers via IPC?",
+      "How do you implement zero-downtime restarts with the cluster module?",
+      "What happens when a cluster worker crashes and how do you respawn it?",
+      "What is `worker_threads` in Node.js?",
+      "What is the difference between `cluster` and `worker_threads`?",
+      "When would you use `worker_threads` instead of `child_process`?",
+      "What is `SharedArrayBuffer` and why is it used with worker threads?",
+      "What is `Atomics` and why is it needed with SharedArrayBuffer?",
+      "What is `child_process.fork()`?",
+      "What is `child_process.spawn()`?",
+      "What is `child_process.exec()`?",
+      "What is `child_process.execFile()`?",
+      "What is the difference between `spawn` and `exec`?",
+      "How do you pass data to a worker thread using `MessageChannel`?",
+      "How do you offload a CPU-intensive task to a worker thread?",
+      "How do you use `os.cpus()` to determine the optimal number of workers?",
+      "What is sticky session load balancing and when is it required?",
+      "What is the `--experimental-vm-modules` flag?",
+    ],
+    "Memory Management & V8 Internals": [
+      "How does garbage collection work in V8?",
+      "What is the V8 heap and how is it structured?",
+      "What is the difference between the call stack and the heap?",
+      "What are the young generation (new space) and old generation (old space) in V8?",
+      "What is generational garbage collection?",
+      "What is the Scavenger (minor GC) algorithm?",
+      "What is the Mark-Sweep-Compact (major GC) algorithm?",
+      "What is incremental marking in V8?",
+      "What is concurrent garbage collection in V8?",
+      "What is a memory leak in Node.js?",
+      "What are common causes of memory leaks in Node.js?",
+      "How do you detect a memory leak in production?",
+      "How do you take and analyze a heap snapshot?",
+      "What is `process.memoryUsage()` and what do its fields mean?",
+      "What is RSS (Resident Set Size)?",
+      "What is `heapUsed` vs `heapTotal`?",
+      "What is the `--expose-gc` flag used for?",
+      "What are hidden classes in V8 and how do they optimize code?",
+      "What is inline caching (IC) in V8?",
+      "What is JIT (Just-In-Time) compilation in V8?",
+      "What is V8 Turbofan and Maglev?",
+      "What is a deoptimization in V8 and how does it affect performance?",
+      "What is `WeakMap`, `WeakSet`, and `WeakRef` in the context of memory?",
+      "How do you fix a memory leak caused by uncleaned event listeners?",
+    ],
+    "Microservices & Architecture": [
+      "What is microservices architecture?",
+      "What is the difference between monolithic and microservices architecture?",
+      "What are the advantages and disadvantages of microservices?",
+      "How do microservices communicate synchronously (REST, gRPC)?",
+      "How do microservices communicate asynchronously (message queues)?",
+      "What is a message broker and what are common examples?",
+      "How do you use RabbitMQ with Node.js?",
+      "How do you use Apache Kafka with Node.js?",
+      "What is the event-driven architecture pattern?",
+      "What is CQRS (Command Query Responsibility Segregation)?",
+      "What is Event Sourcing?",
+      "What is the Saga pattern and what are its types (choreography vs orchestration)?",
+      "What is an API Gateway pattern?",
+      "What is the circuit breaker pattern and why is it important?",
+      "What is service discovery?",
+      "What is gRPC and when would you use it over REST?",
+      "What is Protocol Buffers (protobuf)?",
+      "What is the strangler fig pattern for microservices migration?",
+      "What is domain-driven design (DDD)?",
+      "What is a bounded context in DDD?",
+      "What is the 12-factor app methodology?",
+      "What is service mesh?",
+      "How do you handle distributed transactions across microservices?",
+      "What is the outbox pattern?",
+      "What is idempotency in microservices and why does it matter?",
+    ],
+    "Testing": [
+      "What is the difference between unit, integration, and end-to-end (E2E) tests?",
+      "What testing frameworks are popular in Node.js?",
+      "How do you write unit tests using Jest?",
+      "What is mocking and how do you mock modules in Jest?",
+      "What is `jest.fn()` and `jest.spyOn()`?",
+      "How do you mock an entire module using `jest.mock()`?",
+      "What is `supertest` and how do you use it to test Express routes?",
+      "What is TDD (Test-Driven Development)?",
+      "What is BDD (Behavior-Driven Development)?",
+      "What is code coverage and what are the coverage metrics?",
+      "How do you measure code coverage with Jest's `--coverage` flag?",
+      "How do you test asynchronous code in Jest?",
+      "What are test doubles: mocks, stubs, fakes, spies, dummies?",
+      "What is snapshot testing?",
+      "What is `beforeAll`, `beforeEach`, `afterAll`, `afterEach` in Jest?",
+      "How do you test error scenarios and edge cases?",
+      "What is Mocha and how does it compare to Jest?",
+      "What is Chai assertion library?",
+      "What is Sinon.js?",
+      "What is contract testing and when do you use it in microservices?",
+      "How do you run tests in parallel to speed up CI?",
+    ],
+    "Real-Time & WebSockets": [
+      "What is WebSocket protocol and how does it differ from HTTP?",
+      "How do you implement WebSockets using the `ws` library in Node.js?",
+      "What is Socket.IO?",
+      "How does Socket.IO differ from raw WebSockets?",
+      "What is long polling and how does it compare to WebSockets?",
+      "What are Server-Sent Events (SSE)?",
+      "When would you choose SSE over WebSockets?",
+      "How do you broadcast a message to all connected WebSocket clients?",
+      "What are rooms in Socket.IO?",
+      "What are namespaces in Socket.IO?",
+      "How do you scale WebSocket connections across multiple Node.js instances?",
+      "What is the role of Redis pub/sub adapter in scaling Socket.IO?",
+      "How do you handle WebSocket reconnection logic?",
+      "What is the heartbeat (ping/pong) mechanism in WebSockets?",
+      "How do you authenticate WebSocket connections using JWT?",
+      "What is GraphQL subscriptions and how are they implemented in Node.js?",
+      "How do you implement a real-time notification system?",
+      "What are the performance limits of WebSockets in Node.js?",
+    ],
+    "CI/CD & DevOps": [
+      "How do you containerize a Node.js application with Docker?",
+      "What should a production-ready Dockerfile for Node.js look like?",
+      "What is a multi-stage Docker build and why use it?",
+      "What is `.dockerignore` and why is it important?",
+      "How do you orchestrate Node.js containers with Kubernetes?",
+      "What is a Kubernetes Pod, Deployment, and Service?",
+      "What are Kubernetes ConfigMaps and Secrets?",
+      "What is blue-green deployment?",
+      "What is a canary release?",
+      "How do you set up a CI/CD pipeline using GitHub Actions for Node.js?",
+      "What is a readiness probe vs a liveness probe in Kubernetes?",
+      "How do you implement graceful shutdown in Node.js?",
+      "What is `SIGTERM` and how do you handle it properly?",
+      "What is `SIGINT`?",
+      "How do you use PM2 in production?",
+      "What is PM2 cluster mode?",
+      "How do you manage Node.js versions using `.nvmrc` or `volta`?",
+      "What is the Node.js LTS release schedule?",
+      "What is feature flagging in production?",
+      "How do you implement zero-downtime deployments for Node.js?",
+    ],
+    "Observability & Monitoring": [
+      "What is structured logging and why does it matter in production?",
+      "What is distributed tracing?",
+      "What is OpenTelemetry and how do you use it with Node.js?",
+      "What is APM (Application Performance Monitoring)?",
+      "What is the ELK stack (Elasticsearch, Logstash, Kibana)?",
+      "What is Prometheus and how do you expose metrics from Node.js?",
+      "What is Grafana and how does it work with Prometheus?",
+      "What is `prom-client` npm library?",
+      "What are the four golden signals of monitoring?",
+      "What is trace context propagation (W3C TraceContext)?",
+      "What is a span in distributed tracing?",
+      "What is log correlation and why is it useful?",
+      "What is an alert and what should you alert on?",
+    ],
+    "Advanced Patterns & Node.js Internals": [
+      "What is the Repository pattern in Node.js?",
+      "What is dependency injection and how do you implement it in Node.js?",
+      "What is inversion of control (IoC)?",
+      "What is the decorator pattern in Node.js?",
+      "What is the factory pattern in Node.js?",
+      "What is AOP (Aspect-Oriented Programming) in Node.js?",
+      "What is the `async_hooks` module in Node.js?",
+      "What is `AsyncLocalStorage` and when do you use it?",
+      "What is context propagation in Node.js?",
+      "What is the `vm` module in Node.js?",
+      "What is the `node:` protocol for importing built-in modules?",
+      "What is top-level `await` in ES modules in Node.js?",
+      "What are native addons in Node.js (N-API / node-addon-api)?",
+      "What is the `perf_hooks` module?",
+      "What is `PerformanceObserver` used for?",
+      "What is `AbortController` and `AbortSignal` in Node.js?",
+      "What is the `diagnostics_channel` module?",
+      "What is the difference between Node.js LTS and Current releases?",
+      "What is the Node.js Permission Model (introduced in Node.js 20)?",
+      "What is Single Executable Application (SEA) in Node.js 21+?",
+    ],
+  }
+};
+
+let totalCount = 0;
+
+function buildSection(levelKey, sectionEl) {
+  const categories = data[levelKey];
+  for (const [catName, questions] of Object.entries(categories)) {
+    totalCount += questions.length;
+    const catDiv = document.createElement('div');
+    catDiv.className = 'category';
+    const catTitle = document.createElement('div');
+    catTitle.className = 'category-name';
+    catTitle.textContent = catName;
+    catDiv.appendChild(catTitle);
+    const grid = document.createElement('div');
+    grid.className = 'questions-grid';
+    questions.forEach((q, i) => {
+      const item = document.createElement('div');
+      item.className = 'q-item';
+      item.dataset.q = q.toLowerCase();
+      item.dataset.level = levelKey;
+      item.innerHTML = `<span class="q-num">${String(i+1).padStart(2,'0')}</span><span class="q-text">${q}</span>`;
+      grid.appendChild(item);
+    });
+    catDiv.appendChild(grid);
+    sectionEl.appendChild(catDiv);
+  }
+}
+
+buildSection('beginner', document.getElementById('beginner'));
+buildSection('mid', document.getElementById('mid'));
+buildSection('advanced', document.getElementById('advanced'));
+document.getElementById('totalCount').textContent = totalCount;
+
+let currentTab = 'beginner';
+function switchTab(level) {
+  currentTab = level;
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(level).classList.add('active');
+  document.querySelector('.tab.' + level).classList.add('active');
+  const val = document.getElementById('searchInput').value.trim().toLowerCase();
+  if (!val) document.querySelectorAll('.q-item').forEach(i => i.classList.remove('hidden'));
+  else runSearch(val);
+}
+
+document.getElementById('searchInput').addEventListener('input', function() {
+  runSearch(this.value.trim().toLowerCase());
+});
+
+function runSearch(val) {
+  const allItems = document.querySelectorAll('.q-item');
+  if (!val) {
+    allItems.forEach(i => i.classList.remove('hidden'));
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.getElementById(currentTab).classList.add('active');
+    document.getElementById('noResults').style.display = 'none';
+    return;
+  }
+  document.querySelectorAll('.section').forEach(s => s.classList.add('active'));
+  let found = 0;
+  allItems.forEach(item => {
+    const matches = item.dataset.q.includes(val);
+    item.classList.toggle('hidden', !matches);
+    if (matches) found++;
+  });
+  document.getElementById('noResults').style.display = found === 0 ? 'block' : 'none';
+}
+</script>
+</body>
+</html>
