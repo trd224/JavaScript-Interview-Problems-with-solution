@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>063 - Child to Parent Data Passing in React</title>
+
+  <style>
+
+    body{
+      margin:0;
+      padding:0;
+      background:#000814;
+      color:#e2e8f0;
+      font-family:Arial, sans-serif;
+      line-height:1.7;
+    }
+
+    .container{
+      max-width:1000px;
+      margin:40px auto;
+      background:#020617;
+      padding:40px;
+      border-radius:18px;
+      border:1px solid #0f172a;
+      box-shadow:0 0 40px rgba(0,0,0,0.95);
+    }
+
+    h1{
+      color:#f8fafc;
+      margin-bottom:30px;
+      font-size:34px;
+    }
+
+    h2{
+      color:#c084fc;
+      margin-top:35px;
+      margin-bottom:15px;
+      font-size:26px;
+    }
+
+    p{
+      color:#cbd5e1;
+    }
+
+    ul{
+      padding-left:24px;
+    }
+
+    li{
+      margin-bottom:10px;
+      color:#cbd5e1;
+    }
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      margin-top:20px;
+    }
+
+    table th,
+    table td{
+      border:1px solid #1e293b;
+      padding:14px;
+      text-align:left;
+      vertical-align:top;
+    }
+
+    table th{
+      background:#0f172a;
+      color:#38bdf8;
+    }
+
+    table td{
+      background:#020617;
+      color:#d1d5db;
+    }
+
+    .highlight{
+      background:#0f172a;
+      padding:18px;
+      border-left:5px solid #38bdf8;
+      border-radius:10px;
+      margin-top:15px;
+      color:#e5e7eb;
+    }
+
+    .flow{
+      background:#020617;
+      border:1px solid #1e293b;
+      padding:20px;
+      border-radius:10px;
+      margin-top:15px;
+      color:#e2e8f0;
+      line-height:2;
+      text-align:center;
+      font-size:18px;
+    }
+
+    pre{
+      background:#000000;
+      padding:22px;
+      border-radius:12px;
+      overflow-x:auto;
+      border:1px solid #0f172a;
+    }
+
+    code{
+      font-family:Consolas, monospace;
+      font-size:15px;
+    }
+
+    .keyword{
+      color:#c084fc;
+    }
+
+    .function{
+      color:#38bdf8;
+    }
+
+    .string{
+      color:#facc15;
+    }
+
+    .tag{
+      color:#f472b6;
+    }
+
+    .comment{
+      color:#94a3b8;
+    }
+
+    .output{
+      color:#4ade80;
+    }
+
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+
+    <h1>063. How do you pass data from child to parent component?</h1>
+
+    <h2>One-Line Definition</h2>
+
+    <div class="highlight">
+      In React, child components send data to parent components by calling functions passed through props.
+    </div>
+
+    <h2>Important Concept</h2>
+
+    <p>
+      React normally follows:
+    </p>
+
+    <div class="highlight">
+      Parent → Child Data Flow
+    </div>
+
+    <p>
+      So child components cannot directly modify parent data.
+    </p>
+
+    <p>
+      Instead:
+    </p>
+
+    <div class="flow">
+      Parent Passes Function
+      <br>
+      ↓
+      <br>
+      Child Calls Function
+      <br>
+      ↓
+      <br>
+      Parent Receives Data
+    </div>
+
+    <h2>Basic Example</h2>
+
+    <pre><code><span class="keyword">function</span> <span class="function">Child</span>({ sendData }) {
+
+  <span class="keyword">return</span> (
+
+    <span class="tag">&lt;button</span> onClick={() => sendData(<span class="string">'Rizwan'</span>)}<span class="tag">&gt;</span>
+      Send Data
+    <span class="tag">&lt;/button&gt;</span>
+
+  );
+
+}
+
+<span class="keyword">function</span> <span class="function">App</span>() {
+
+  <span class="keyword">const</span> receiveData = (name) => {
+
+    console.log(name);
+
+  };
+
+  <span class="keyword">return</span> (
+
+    <span class="tag">&lt;Child</span> sendData={receiveData} <span class="tag">/&gt;</span>
+
+  );
+
+}</code></pre>
+
+    <h2>Output</h2>
+
+    <pre class="output"><code>Rizwan</code></pre>
+
+    <h2>How It Works</h2>
+
+    <table>
+
+      <tr>
+        <th>Step</th>
+        <th>Description</th>
+      </tr>
+
+      <tr>
+        <td>1</td>
+        <td>Parent creates function</td>
+      </tr>
+
+      <tr>
+        <td>2</td>
+        <td>Parent passes function as prop</td>
+      </tr>
+
+      <tr>
+        <td>3</td>
+        <td>Child calls function</td>
+      </tr>
+
+      <tr>
+        <td>4</td>
+        <td>Parent receives child data</td>
+      </tr>
+
+    </table>
+
+    <h2>Data Flow Visualization</h2>
+
+    <div class="flow">
+      Parent Component
+      <br>
+      ↓
+      <br>
+      Pass Function via Props
+      <br>
+      ↓
+      <br>
+      Child Component
+      <br>
+      ↓
+      <br>
+      Child Calls Function with Data
+      <br>
+      ↓
+      <br>
+      Parent Receives Data
+    </div>
+
+    <h2>Real Example with useState</h2>
+
+    <pre><code><span class="keyword">import</span> { useState } from <span class="string">'react'</span>;
+
+<span class="keyword">function</span> <span class="function">Child</span>({ updateName }) {
+
+  <span class="keyword">return</span> (
+
+    <span class="tag">&lt;button</span> onClick={() => updateName(<span class="string">'Aman'</span>)}<span class="tag">&gt;</span>
+      Change Name
+    <span class="tag">&lt;/button&gt;</span>
+
+  );
+
+}
+
+<span class="keyword">function</span> <span class="function">App</span>() {
+
+  <span class="keyword">const</span> [name, setName] = useState(<span class="string">'Rizwan'</span>);
+
+  <span class="keyword">return</span> (
+
+    <span class="tag">&lt;div&gt;</span>
+
+      <span class="tag">&lt;h1&gt;</span>{name}<span class="tag">&lt;/h1&gt;</span>
+
+      <span class="tag">&lt;Child</span> updateName={setName} <span class="tag">/&gt;</span>
+
+    <span class="tag">&lt;/div&gt;</span>
+
+  );
+
+}</code></pre>
+
+    <h2>Output Before Click</h2>
+
+    <pre class="output"><code>Rizwan</code></pre>
+
+    <h2>Output After Click</h2>
+
+    <pre class="output"><code>Aman</code></pre>
+
+    <h2>Why This Pattern Is Used</h2>
+
+    <ul>
+      <li>Maintains one-way data flow</li>
+      <li>Keeps state controlled by parent</li>
+      <li>Improves predictability</li>
+      <li>Better architecture</li>
+    </ul>
+
+    <h2>Common Real-World Use Cases</h2>
+
+    <table>
+
+      <tr>
+        <th>Feature</th>
+        <th>Child Sends</th>
+      </tr>
+
+      <tr>
+        <td>Search box</td>
+        <td>Search text</td>
+      </tr>
+
+      <tr>
+        <td>Login form</td>
+        <td>User credentials</td>
+      </tr>
+
+      <tr>
+        <td>OTP component</td>
+        <td>OTP value</td>
+      </tr>
+
+      <tr>
+        <td>Popup component</td>
+        <td>Close event</td>
+      </tr>
+
+      <tr>
+        <td>Reusable button</td>
+        <td>Click events</td>
+      </tr>
+
+    </table>
+
+    <h2>Passing Multiple Values</h2>
+
+    <pre><code><span class="tag">&lt;button</span>
+
+  onClick={() => sendData({
+
+    name: <span class="string">'Rizwan'</span>,
+    age: 25
+
+  })}
+
+<span class="tag">&gt;</span>
+
+  Send
+
+<span class="tag">&lt;/button&gt;</span></code></pre>
+
+    <h2>Parent Receives Object</h2>
+
+    <pre><code><span class="keyword">const</span> receiveData = (user) => {
+
+  console.log(user.name);
+
+  console.log(user.age);
+
+};</code></pre>
+
+    <h2>Important Note</h2>
+
+    <div class="highlight">
+      Child components do NOT directly update parent state.  
+      They only notify the parent using callback functions.
+    </div>
+
+    <h2>Important Interview Points</h2>
+
+    <ul>
+      <li>Child-to-parent communication uses callback functions.</li>
+      <li>Functions are passed via props.</li>
+      <li>Child calls parent function with data.</li>
+      <li>Maintains React one-way data flow.</li>
+      <li>Very common in forms and reusable components.</li>
+    </ul>
+
+    <h2>Short Interview Answer</h2>
+
+    <div class="highlight">
+      In React, child components send data to parent components by calling callback functions passed from the parent through props.
+    </div>
+
+    <h2>One-Line Interview Answer</h2>
+
+    <div class="highlight">
+      Child components pass data to parents by calling functions received through props.
+    </div>
+
+  </div>
+
+</body>
+</html>

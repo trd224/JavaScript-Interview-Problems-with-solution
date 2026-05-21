@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>051 - Can You Modify Props in React?</title>
+
+  <style>
+
+    body{
+      margin:0;
+      padding:0;
+      background:#000814;
+      color:#e2e8f0;
+      font-family:Arial, sans-serif;
+      line-height:1.7;
+    }
+
+    .container{
+      max-width:1000px;
+      margin:40px auto;
+      background:#020617;
+      padding:40px;
+      border-radius:18px;
+      border:1px solid #0f172a;
+      box-shadow:0 0 40px rgba(0,0,0,0.95);
+    }
+
+    h1{
+      color:#f8fafc;
+      margin-bottom:30px;
+      font-size:34px;
+    }
+
+    h2{
+      color:#c084fc;
+      margin-top:35px;
+      margin-bottom:15px;
+      font-size:26px;
+    }
+
+    p{
+      color:#cbd5e1;
+    }
+
+    ul{
+      padding-left:24px;
+    }
+
+    li{
+      margin-bottom:10px;
+      color:#cbd5e1;
+    }
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      margin-top:20px;
+    }
+
+    table th,
+    table td{
+      border:1px solid #1e293b;
+      padding:14px;
+      text-align:left;
+      vertical-align:top;
+    }
+
+    table th{
+      background:#0f172a;
+      color:#38bdf8;
+    }
+
+    table td{
+      background:#020617;
+      color:#d1d5db;
+    }
+
+    .highlight{
+      background:#0f172a;
+      padding:18px;
+      border-left:5px solid #38bdf8;
+      border-radius:10px;
+      margin-top:15px;
+      color:#e5e7eb;
+    }
+
+    .flow{
+      background:#020617;
+      border:1px solid #1e293b;
+      padding:20px;
+      border-radius:10px;
+      margin-top:15px;
+      color:#e2e8f0;
+      line-height:2;
+      text-align:center;
+      font-size:18px;
+    }
+
+    pre{
+      background:#000000;
+      padding:22px;
+      border-radius:12px;
+      overflow-x:auto;
+      border:1px solid #0f172a;
+    }
+
+    code{
+      font-family:Consolas, monospace;
+      font-size:15px;
+    }
+
+    .keyword{
+      color:#c084fc;
+    }
+
+    .function{
+      color:#38bdf8;
+    }
+
+    .string{
+      color:#facc15;
+    }
+
+    .tag{
+      color:#f472b6;
+    }
+
+    .comment{
+      color:#94a3b8;
+    }
+
+    .wrong{
+      color:#fb7185;
+    }
+
+    .correct{
+      color:#4ade80;
+    }
+
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+
+    <h1>051. Can you modify props inside a component?</h1>
+
+    <h2>One-Line Definition</h2>
+
+    <div class="highlight">
+      No, props should never be modified inside a component because props are read-only in React.
+    </div>
+
+    <h2>Why Props Cannot Be Modified</h2>
+
+    <p>
+      React follows:
+    </p>
+
+    <div class="highlight">
+      One-Way Data Flow
+    </div>
+
+    <p>
+      Data always moves:
+    </p>
+
+    <div class="flow">
+      Parent Component
+      <br>
+      ↓
+      <br>
+      Child Component
+    </div>
+
+    <p>
+      The child component receives props but should not change them.
+    </p>
+
+    <h2>Props Are Immutable</h2>
+
+    <p>
+      Immutable means:
+    </p>
+
+    <div class="highlight">
+      Cannot be changed directly.
+    </div>
+
+    <h2>Wrong Example</h2>
+
+    <pre><code><span class="keyword">function</span> <span class="function">User</span>(props) {
+
+  <span class="comment">// Wrong</span>
+
+  props.name = <span class="string">'Aman'</span>;
+
+  <span class="keyword">return</span> (
+
+    <span class="tag">&lt;h1&gt;</span>
+      {props.name}
+    <span class="tag">&lt;/h1&gt;</span>
+
+  );
+
+}</code></pre>
+
+    <h2>Why This Is Wrong</h2>
+
+    <ul>
+      <li>Breaks React data flow</li>
+      <li>Makes UI unpredictable</li>
+      <li>Can cause rendering bugs</li>
+      <li>Violates React principles</li>
+    </ul>
+
+    <h2>Correct Approach</h2>
+
+    <p>
+      If data needs to change:
+    </p>
+
+    <ul>
+      <li>Use state</li>
+      <li>Or ask parent component to update props</li>
+    </ul>
+
+    <h2>Correct Example Using State</h2>
+
+    <pre><code><span class="keyword">import</span> { useState } <span class="keyword">from</span> <span class="string">'react'</span>;
+
+<span class="keyword">function</span> <span class="function">User</span>({ initialName }) {
+
+  <span class="keyword">const</span> [name, setName] = useState(initialName);
+
+  <span class="keyword">return</span> (
+
+    <span class="tag">&lt;button</span> onClick={() => setName(<span class="string">'Aman'</span>)}<span class="tag">&gt;</span>
+      {name}
+    <span class="tag">&lt;/button&gt;</span>
+
+  );
+
+}</code></pre>
+
+    <h2>What Happens Here?</h2>
+
+    <table>
+
+      <tr>
+        <th>Item</th>
+        <th>Purpose</th>
+      </tr>
+
+      <tr>
+        <td>initialName prop</td>
+        <td>Initial value from parent</td>
+      </tr>
+
+      <tr>
+        <td>state variable</td>
+        <td>Local editable value</td>
+      </tr>
+
+      <tr>
+        <td>setName()</td>
+        <td>Updates local state</td>
+      </tr>
+
+    </table>
+
+    <h2>Flow Diagram</h2>
+
+    <div class="flow">
+      Parent Passes Props
+      <br>
+      ↓
+      <br>
+      Child Receives Props
+      <br>
+      ↓
+      <br>
+      Child Uses Props
+      <br>
+      ↓
+      <br>
+      State Handles Changes
+    </div>
+
+    <h2>What If Parent Needs Updated Data?</h2>
+
+    <p>
+      Child components should notify parent using callback functions.
+    </p>
+
+    <h2>Example</h2>
+
+    <pre><code><span class="keyword">function</span> <span class="function">Child</span>({ changeName }) {
+
+  <span class="keyword">return</span> (
+
+    <span class="tag">&lt;button</span> onClick={() => changeName(<span class="string">'Aman'</span>)}<span class="tag">&gt;</span>
+      Change Name
+    <span class="tag">&lt;/button&gt;</span>
+
+  );
+
+}</code></pre>
+
+    <h2>Parent Updates the Data</h2>
+
+    <p>
+      Parent owns the state.
+    </p>
+
+    <p>
+      Child only requests updates.
+    </p>
+
+    <h2>Important Difference</h2>
+
+    <table>
+
+      <tr>
+        <th>Props</th>
+        <th>State</th>
+      </tr>
+
+      <tr>
+        <td>Read-only</td>
+        <td>Mutable using setState</td>
+      </tr>
+
+      <tr>
+        <td>Passed from parent</td>
+        <td>Managed inside component</td>
+      </tr>
+
+      <tr>
+        <td>External data</td>
+        <td>Internal component data</td>
+      </tr>
+
+    </table>
+
+    <h2>Real Project Use Cases</h2>
+
+    <table>
+
+      <tr>
+        <th>Scenario</th>
+        <th>Correct Approach</th>
+      </tr>
+
+      <tr>
+        <td>User profile update</td>
+        <td>Update parent state</td>
+      </tr>
+
+      <tr>
+        <td>OTP verification</td>
+        <td>Use state for changes</td>
+      </tr>
+
+      <tr>
+        <td>Theme switch</td>
+        <td>Parent controls theme props</td>
+      </tr>
+
+      <tr>
+        <td>Form editing</td>
+        <td>Use local state</td>
+      </tr>
+
+    </table>
+
+    <h2>Important React Principle</h2>
+
+    <div class="highlight">
+      Props are inputs, not editable variables.
+    </div>
+
+    <h2>Important Interview Points</h2>
+
+    <ul>
+      <li>Props are read-only.</li>
+      <li>Props should never be modified directly.</li>
+      <li>React follows one-way data flow.</li>
+      <li>Use state for editable data.</li>
+      <li>Parent components own props data.</li>
+    </ul>
+
+    <h2>Short Interview Answer</h2>
+
+    <div class="highlight">
+      No, props cannot be modified inside a component because they are immutable and follow React’s one-way data flow. State should be used for mutable data.
+    </div>
+
+    <h2>One-Line Interview Answer</h2>
+
+    <div class="highlight">
+      No, props are read-only and should never be modified directly in React.
+    </div>
+
+  </div>
+
+</body>
+</html>

@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>005 - Virtual DOM vs Real DOM</title>
+
+  <style>
+
+    body{
+      margin:0;
+      padding:0;
+      background:#0f172a;
+      color:#e2e8f0;
+      font-family:Arial, sans-serif;
+      line-height:1.7;
+    }
+
+    .container{
+      max-width:1000px;
+      margin:40px auto;
+      background:#111827;
+      padding:40px;
+      border-radius:16px;
+      box-shadow:0 0 20px rgba(0,0,0,0.4);
+    }
+
+    h1{
+      color:#38bdf8;
+      margin-bottom:30px;
+    }
+
+    h2{
+      color:#a78bfa;
+      margin-top:35px;
+      margin-bottom:15px;
+    }
+
+    h3{
+      color:#f472b6;
+      margin-top:25px;
+    }
+
+    p{
+      color:#cbd5e1;
+    }
+
+    ul{
+      padding-left:22px;
+    }
+
+    li{
+      margin-bottom:8px;
+    }
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      margin-top:20px;
+    }
+
+    table th,
+    table td{
+      border:1px solid #334155;
+      padding:14px;
+      text-align:left;
+    }
+
+    table th{
+      background:#1e293b;
+      color:#38bdf8;
+    }
+
+    table td{
+      background:#111827;
+      color:#cbd5e1;
+    }
+
+    .highlight{
+      background:#1e293b;
+      padding:16px;
+      border-left:5px solid #38bdf8;
+      border-radius:8px;
+      margin-top:15px;
+    }
+
+    pre{
+      background:#020617;
+      padding:20px;
+      border-radius:10px;
+      overflow-x:auto;
+      border:1px solid #334155;
+    }
+
+    code{
+      font-family:Consolas, monospace;
+      font-size:15px;
+    }
+
+    .keyword{
+      color:#c084fc;
+    }
+
+    .function{
+      color:#38bdf8;
+    }
+
+    .string{
+      color:#facc15;
+    }
+
+    .tag{
+      color:#f472b6;
+    }
+
+    .variable{
+      color:#4ade80;
+    }
+
+    .comment{
+      color:#94a3b8;
+    }
+
+    .output{
+      color:#4ade80;
+    }
+
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+
+    <h1>005. How does the Virtual DOM differ from the Real DOM?</h1>
+
+    <h2>One-Line Definition</h2>
+
+    <div class="highlight">
+      The Real DOM is the actual webpage inside the browser, while the Virtual DOM is a lightweight JavaScript copy used by React for faster updates.
+    </div>
+
+    <h2>What Is the Real DOM?</h2>
+
+    <p>
+      The Real DOM is the actual HTML structure rendered inside the browser.
+    </p>
+
+    <h3>Example Real DOM</h3>
+
+    <pre><code><span class="tag">&lt;body&gt;</span>
+
+  <span class="tag">&lt;h1&gt;</span>Hello<span class="tag">&lt;/h1&gt;</span>
+
+  <span class="tag">&lt;p&gt;</span>Welcome<span class="tag">&lt;/p&gt;</span>
+
+<span class="tag">&lt;/body&gt;</span></code></pre>
+
+    <p>
+      Every change in the Real DOM directly affects the browser UI.
+    </p>
+
+    <h2>What Is the Virtual DOM?</h2>
+
+    <p>
+      The Virtual DOM is a JavaScript object representation of the Real DOM.
+    </p>
+
+    <h3>Example Virtual DOM</h3>
+
+    <pre><code><span class="keyword">const</span> virtualDOM = {
+  type: <span class="string">'h1'</span>,
+  props: {
+    children: <span class="string">'Hello'</span>
+  }
+};</code></pre>
+
+    <p>
+      React uses this lightweight copy to compare UI changes before updating the Real DOM.
+    </p>
+
+    <h2>Main Difference</h2>
+
+    <table>
+
+      <tr>
+        <th>Virtual DOM</th>
+        <th>Real DOM</th>
+      </tr>
+
+      <tr>
+        <td>Lightweight JavaScript object</td>
+        <td>Actual browser DOM</td>
+      </tr>
+
+      <tr>
+        <td>Fast updates</td>
+        <td>Slow updates</td>
+      </tr>
+
+      <tr>
+        <td>Updates only changed parts</td>
+        <td>May re-render larger sections</td>
+      </tr>
+
+      <tr>
+        <td>Exists in memory</td>
+        <td>Exists in browser</td>
+      </tr>
+
+      <tr>
+        <td>Used by React internally</td>
+        <td>Used by browser rendering engine</td>
+      </tr>
+
+      <tr>
+        <td>Improves performance</td>
+        <td>Direct manipulation is expensive</td>
+      </tr>
+
+    </table>
+
+    <h2>How React Uses the Virtual DOM</h2>
+
+    <table>
+
+      <tr>
+        <th>Step</th>
+        <th>Process</th>
+      </tr>
+
+      <tr>
+        <td>1</td>
+        <td>User action changes state</td>
+      </tr>
+
+      <tr>
+        <td>2</td>
+        <td>React creates a new Virtual DOM</td>
+      </tr>
+
+      <tr>
+        <td>3</td>
+        <td>React compares old vs new Virtual DOM</td>
+      </tr>
+
+      <tr>
+        <td>4</td>
+        <td>React finds changed elements</td>
+      </tr>
+
+      <tr>
+        <td>5</td>
+        <td>Only changed parts update in Real DOM</td>
+      </tr>
+
+    </table>
+
+    <h2>Example</h2>
+
+    <h3>Initial UI</h3>
+
+    <pre><code><span class="tag">&lt;h1&gt;</span>Hello<span class="tag">&lt;/h1&gt;</span></code></pre>
+
+    <h3>Updated UI</h3>
+
+    <pre><code><span class="tag">&lt;h1&gt;</span>Hello Rizwan<span class="tag">&lt;/h1&gt;</span></code></pre>
+
+    <p>
+      React compares the old and new Virtual DOM and updates only the changed text,
+      instead of reloading the entire page.
+    </p>
+
+    <h2>Real Project Use Case</h2>
+
+    <p>
+      Suppose you are building:
+    </p>
+
+    <ul>
+      <li>Live Chat Application</li>
+      <li>OTP Verification Screen</li>
+      <li>Stock Market Dashboard</li>
+      <li>Notification System</li>
+    </ul>
+
+    <p>
+      Data changes continuously.
+      React uses the Virtual DOM to efficiently update only changed UI elements,
+      making applications fast and smooth.
+    </p>
+
+    <h2>Example Code</h2>
+
+    <pre><code><span class="keyword">import</span> { useState } <span class="keyword">from</span> <span class="string">'react'</span>;
+
+<span class="keyword">function</span> <span class="function">Counter</span>() {
+
+  <span class="keyword">const</span> [count, setCount] = useState(0);
+
+  <span class="keyword">return</span> (
+    <span class="tag">&lt;div&gt;</span>
+
+      <span class="tag">&lt;h1&gt;</span>{count}<span class="tag">&lt;/h1&gt;</span>
+
+      <span class="tag">&lt;button</span>
+        onClick={() => setCount(count + 1)}
+      <span class="tag">&gt;</span>
+
+        Increment
+
+      <span class="tag">&lt;/button&gt;</span>
+
+    <span class="tag">&lt;/div&gt;</span>
+  );
+}</code></pre>
+
+    <h2>What Happens Internally?</h2>
+
+    <ul>
+      <li>Button click changes state</li>
+      <li>React creates a new Virtual DOM</li>
+      <li>React compares old vs new Virtual DOM</li>
+      <li>Only the changed count updates in Real DOM</li>
+    </ul>
+
+    <h2>Important Interview Points</h2>
+
+    <ul>
+      <li>Virtual DOM is a copy of the Real DOM.</li>
+      <li>Real DOM updates are slower.</li>
+      <li>Virtual DOM improves performance.</li>
+      <li>React uses diffing and reconciliation.</li>
+      <li>Only changed elements update in the Real DOM.</li>
+    </ul>
+
+    <h2>Short Interview Answer</h2>
+
+    <div class="highlight">
+      The Real DOM is the actual browser DOM, while the Virtual DOM is a lightweight copy used by React to optimize UI updates and improve performance.
+    </div>
+
+    <h2>One-Line Interview Answer</h2>
+
+    <div class="highlight">
+      React uses the Virtual DOM to compare changes and efficiently update the Real DOM.
+    </div>
+
+  </div>
+
+</body>
+</html>

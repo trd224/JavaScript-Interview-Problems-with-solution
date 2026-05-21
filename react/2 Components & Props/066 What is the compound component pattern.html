@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>066 - Compound Component Pattern in React</title>
+
+  <style>
+
+    body{
+      margin:0;
+      padding:0;
+      background:#000814;
+      color:#e2e8f0;
+      font-family:Arial, sans-serif;
+      line-height:1.7;
+    }
+
+    .container{
+      max-width:1000px;
+      margin:40px auto;
+      background:#020617;
+      padding:40px;
+      border-radius:18px;
+      border:1px solid #0f172a;
+      box-shadow:0 0 40px rgba(0,0,0,0.95);
+    }
+
+    h1{
+      color:#f8fafc;
+      margin-bottom:30px;
+      font-size:34px;
+    }
+
+    h2{
+      color:#c084fc;
+      margin-top:35px;
+      margin-bottom:15px;
+      font-size:26px;
+    }
+
+    p{
+      color:#cbd5e1;
+    }
+
+    ul{
+      padding-left:24px;
+    }
+
+    li{
+      margin-bottom:10px;
+      color:#cbd5e1;
+    }
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      margin-top:20px;
+    }
+
+    table th,
+    table td{
+      border:1px solid #1e293b;
+      padding:14px;
+      text-align:left;
+      vertical-align:top;
+    }
+
+    table th{
+      background:#0f172a;
+      color:#38bdf8;
+    }
+
+    table td{
+      background:#020617;
+      color:#d1d5db;
+    }
+
+    .highlight{
+      background:#0f172a;
+      padding:18px;
+      border-left:5px solid #38bdf8;
+      border-radius:10px;
+      margin-top:15px;
+      color:#e5e7eb;
+    }
+
+    .flow{
+      background:#020617;
+      border:1px solid #1e293b;
+      padding:20px;
+      border-radius:10px;
+      margin-top:15px;
+      color:#e2e8f0;
+      line-height:2;
+      text-align:center;
+      font-size:18px;
+    }
+
+    pre{
+      background:#000000;
+      padding:22px;
+      border-radius:12px;
+      overflow-x:auto;
+      border:1px solid #0f172a;
+    }
+
+    code{
+      font-family:Consolas, monospace;
+      font-size:15px;
+    }
+
+    .keyword{
+      color:#c084fc;
+    }
+
+    .function{
+      color:#38bdf8;
+    }
+
+    .string{
+      color:#facc15;
+    }
+
+    .tag{
+      color:#f472b6;
+    }
+
+    .comment{
+      color:#94a3b8;
+    }
+
+    .good{
+      color:#4ade80;
+    }
+
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+
+    <h1>066. What is the compound component pattern?</h1>
+
+    <h2>One-Line Definition</h2>
+
+    <div class="highlight">
+      The compound component pattern is a React pattern where multiple related components work together while sharing internal state and behavior.
+    </div>
+
+    <h2>Simple Understanding</h2>
+
+    <p>
+      Instead of creating one huge component:
+    </p>
+
+    <ul>
+      <li>We split functionality into smaller connected components</li>
+      <li>These components communicate internally</li>
+      <li>They work together as a group</li>
+    </ul>
+
+    <h2>Real-Life Analogy</h2>
+
+    <p>
+      Think about:
+    </p>
+
+    <div class="flow">
+      Tabs
+      <br>
+      ├── Tab List
+      <br>
+      ├── Tab Button
+      <br>
+      └── Tab Panel
+    </div>
+
+    <p>
+      All parts are separate components, but they work together.
+    </p>
+
+    <h2>Main Idea</h2>
+
+    <div class="flow">
+      Parent Component
+      <br>
+      ↓
+      <br>
+      Shared State
+      <br>
+      ↓
+      <br>
+      Child Components Access Shared Behavior
+    </div>
+
+    <h2>Basic Compound Component Example</h2>
+
+    <pre><code><span class="keyword">function</span> <span class="function">Accordion</span>({ children }) {
+
+  <span class="keyword">return</span> (
+
+    <span class="tag">&lt;div&gt;</span>{children}<span class="tag">&lt;/div&gt;</span>
+
+  );
+
+}
+
+<span class="keyword">function</span> <span class="function">AccordionItem</span>({ title, children }) {
+
+  <span class="keyword">return</span> (
+
+    <span class="tag">&lt;div&gt;</span>
+
+      <span class="tag">&lt;h2&gt;</span>{title}<span class="tag">&lt;/h2&gt;</span>
+
+      <span class="tag">&lt;div&gt;</span>{children}<span class="tag">&lt;/div&gt;</span>
+
+    <span class="tag">&lt;/div&gt;</span>
+
+  );
+
+}</code></pre>
+
+    <h2>Usage</h2>
+
+    <pre><code><span class="tag">&lt;Accordion&gt;</span>
+
+  <span class="tag">&lt;AccordionItem</span> title=<span class="string">"What is React?"</span><span class="tag">&gt;</span>
+
+    React is a UI library.
+
+  <span class="tag">&lt;/AccordionItem&gt;</span>
+
+  <span class="tag">&lt;AccordionItem</span> title=<span class="string">"What is JSX?"</span><span class="tag">&gt;</span>
+
+    JSX is syntax for React UI.
+
+  <span class="tag">&lt;/AccordionItem&gt;</span>
+
+<span class="tag">&lt;/Accordion&gt;</span></code></pre>
+
+    <h2>Why It Is Called Compound Component</h2>
+
+    <p>
+      Because multiple smaller components combine to create one complete feature.
+    </p>
+
+    <h2>Most Common Examples</h2>
+
+    <table>
+
+      <tr>
+        <th>UI Feature</th>
+        <th>Compound Components</th>
+      </tr>
+
+      <tr>
+        <td>Tabs</td>
+        <td>Tabs, TabList, TabPanel</td>
+      </tr>
+
+      <tr>
+        <td>Accordion</td>
+        <td>Accordion, AccordionItem</td>
+      </tr>
+
+      <tr>
+        <td>Dropdown</td>
+        <td>Dropdown, Menu, MenuItem</td>
+      </tr>
+
+      <tr>
+        <td>Modal</td>
+        <td>Modal, Header, Body, Footer</td>
+      </tr>
+
+    </table>
+
+    <h2>Advanced Compound Pattern</h2>
+
+    <p>
+      Usually compound components share state using:
+    </p>
+
+    <ul>
+      <li>Context API</li>
+      <li>React.cloneElement()</li>
+      <li>Custom hooks</li>
+    </ul>
+
+    <h2>Example with Context</h2>
+
+    <pre><code><span class="keyword">const</span> TabsContext = createContext();</code></pre>
+
+    <p>
+      Parent component stores shared state.
+    </p>
+
+    <p>
+      Child components access it using:
+    </p>
+
+    <pre><code>useContext()</code></pre>
+
+    <h2>Why Compound Components Are Powerful</h2>
+
+    <ul>
+      <li>Flexible APIs</li>
+      <li>Cleaner JSX</li>
+      <li>Better reusability</li>
+      <li>Encapsulated logic</li>
+      <li>Customizable layouts</li>
+    </ul>
+
+    <h2>Example of Clean API</h2>
+
+    <pre><code><span class="tag">&lt;Modal&gt;</span>
+
+  <span class="tag">&lt;Modal.Header&gt;</span>
+    Login
+  <span class="tag">&lt;/Modal.Header&gt;</span>
+
+  <span class="tag">&lt;Modal.Body&gt;</span>
+    Form Content
+  <span class="tag">&lt;/Modal.Body&gt;</span>
+
+  <span class="tag">&lt;Modal.Footer&gt;</span>
+    Buttons
+  <span class="tag">&lt;/Modal.Footer&gt;</span>
+
+<span class="tag">&lt;/Modal&gt;</span></code></pre>
+
+    <h2>How This Helps</h2>
+
+    <p>
+      Instead of huge prop-based configuration:
+    </p>
+
+    <pre><code><span class="comment">// Hard to manage</span>
+
+<span class="tag">&lt;Modal</span>
+
+  header=<span class="string">"Login"</span>
+
+  body=<span class="string">"..."</span>
+
+  footer=<span class="string">"..."</span>
+
+<span class="tag">/&gt;</span></code></pre>
+
+    <p>
+      Compound components create cleaner structure.
+    </p>
+
+    <h2>Compound Components vs Regular Components</h2>
+
+    <table>
+
+      <tr>
+        <th>Regular Components</th>
+        <th>Compound Components</th>
+      </tr>
+
+      <tr>
+        <td>Independent</td>
+        <td>Connected together</td>
+      </tr>
+
+      <tr>
+        <td>Limited flexibility</td>
+        <td>Highly flexible</td>
+      </tr>
+
+      <tr>
+        <td>More props needed</td>
+        <td>Cleaner API</td>
+      </tr>
+
+      <tr>
+        <td>Simple structures</td>
+        <td>Complex reusable UI</td>
+      </tr>
+
+    </table>
+
+    <h2>Real Project Use Cases</h2>
+
+    <table>
+
+      <tr>
+        <th>Feature</th>
+        <th>Compound Structure</th>
+      </tr>
+
+      <tr>
+        <td>Authentication popup</td>
+        <td>Header + Body + Footer</td>
+      </tr>
+
+      <tr>
+        <td>Dashboard tabs</td>
+        <td>Tabs + Panels</td>
+      </tr>
+
+      <tr>
+        <td>Accordion FAQs</td>
+        <td>Accordion + Items</td>
+      </tr>
+
+      <tr>
+        <td>Dropdown menu</td>
+        <td>Menu + MenuItem</td>
+      </tr>
+
+    </table>
+
+    <h2>Important Note</h2>
+
+    <div class="highlight">
+      Compound components are commonly used in UI libraries like Material UI, Radix UI, and Headless UI.
+    </div>
+
+    <h2>Important Interview Points</h2>
+
+    <ul>
+      <li>Compound components work together as a group.</li>
+      <li>They usually share internal state.</li>
+      <li>Commonly implemented using Context API.</li>
+      <li>Provide flexible and clean APIs.</li>
+      <li>Useful for reusable complex UI components.</li>
+    </ul>
+
+    <h2>Short Interview Answer</h2>
+
+    <div class="highlight">
+      The compound component pattern is a React design pattern where multiple related components share internal state and behavior to build flexible and reusable UI structures.
+    </div>
+
+    <h2>One-Line Interview Answer</h2>
+
+    <div class="highlight">
+      Compound components are multiple connected React components that work together using shared internal state.
+    </div>
+
+  </div>
+
+</body>
+</html>

@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>009 - One-Way Data Flow in React</title>
+
+  <style>
+
+    body{
+      margin:0;
+      padding:0;
+      background:#000814;
+      color:#e2e8f0;
+      font-family:Arial, sans-serif;
+      line-height:1.7;
+    }
+
+    .container{
+      max-width:1000px;
+      margin:40px auto;
+      background:#020617;
+      padding:40px;
+      border-radius:18px;
+      border:1px solid #0f172a;
+      box-shadow:0 0 40px rgba(0,0,0,0.95);
+    }
+
+    h1{
+      color:#f8fafc;
+      margin-bottom:30px;
+      font-size:34px;
+    }
+
+    h2{
+      color:#c084fc;
+      margin-top:35px;
+      margin-bottom:15px;
+      font-size:26px;
+    }
+
+    h3{
+      color:#f472b6;
+      margin-top:25px;
+    }
+
+    p{
+      color:#cbd5e1;
+    }
+
+    ul{
+      padding-left:24px;
+    }
+
+    li{
+      margin-bottom:10px;
+      color:#cbd5e1;
+    }
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      margin-top:20px;
+    }
+
+    table th,
+    table td{
+      border:1px solid #1e293b;
+      padding:14px;
+      text-align:left;
+      vertical-align:top;
+    }
+
+    table th{
+      background:#0f172a;
+      color:#38bdf8;
+    }
+
+    table td{
+      background:#020617;
+      color:#d1d5db;
+    }
+
+    .highlight{
+      background:#0f172a;
+      padding:18px;
+      border-left:5px solid #38bdf8;
+      border-radius:10px;
+      margin-top:15px;
+      color:#e5e7eb;
+    }
+
+    .flow{
+      background:#020617;
+      border:1px solid #1e293b;
+      padding:18px;
+      border-radius:10px;
+      margin-top:15px;
+      color:#e2e8f0;
+      text-align:center;
+      font-size:18px;
+    }
+
+    pre{
+      background:#000000;
+      padding:22px;
+      border-radius:12px;
+      overflow-x:auto;
+      border:1px solid #0f172a;
+    }
+
+    code{
+      font-family:Consolas, monospace;
+      font-size:15px;
+    }
+
+    .keyword{
+      color:#c084fc;
+    }
+
+    .function{
+      color:#38bdf8;
+    }
+
+    .string{
+      color:#facc15;
+    }
+
+    .tag{
+      color:#f472b6;
+    }
+
+    .variable{
+      color:#4ade80;
+    }
+
+    .comment{
+      color:#94a3b8;
+    }
+
+    .output{
+      color:#4ade80;
+    }
+
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+
+    <h1>009. What is one-way data flow in React?</h1>
+
+    <h2>One-Line Definition</h2>
+
+    <div class="highlight">
+      One-way data flow means data moves only from parent component to child component in React.
+    </div>
+
+    <h2>Why Is It Used?</h2>
+
+    <p>
+      One-way data flow makes React applications:
+    </p>
+
+    <ul>
+      <li>Predictable</li>
+      <li>Easier to debug</li>
+      <li>Easier to maintain</li>
+      <li>More organized</li>
+      <li>Better for large applications</li>
+    </ul>
+
+    <p>
+      Since data moves in only one direction, developers can easily track where data comes from and where it changes.
+    </p>
+
+    <h2>Simple Flow</h2>
+
+    <div class="flow">
+      Parent Component → Child Component
+    </div>
+
+    <h2>How React Passes Data</h2>
+
+    <p>
+      React passes data from parent to child using <strong>props</strong>.
+    </p>
+
+    <h2>Example</h2>
+
+    <h3>Parent Component</h3>
+
+    <pre><code><span class="keyword">function</span> <span class="function">App</span>() {
+
+  <span class="keyword">const</span> name = <span class="string">'Rizwan'</span>;
+
+  <span class="keyword">return</span> (
+    <span class="tag">&lt;User</span> name={name} <span class="tag">/&gt;</span>
+  );
+
+}</code></pre>
+
+    <h3>Child Component</h3>
+
+    <pre><code><span class="keyword">function</span> <span class="function">User</span>(props) {
+
+  <span class="keyword">return</span> (
+    <span class="tag">&lt;h1&gt;</span>Hello {props.name}<span class="tag">&lt;/h1&gt;</span>
+  );
+
+}</code></pre>
+
+    <h2>Output</h2>
+
+    <pre class="output"><code>Hello Rizwan</code></pre>
+
+    <h2>Data Flow Explanation</h2>
+
+    <table>
+
+      <tr>
+        <th>Step</th>
+        <th>What Happens</th>
+      </tr>
+
+      <tr>
+        <td>1</td>
+        <td>Parent component creates data</td>
+      </tr>
+
+      <tr>
+        <td>2</td>
+        <td>Parent sends data using props</td>
+      </tr>
+
+      <tr>
+        <td>3</td>
+        <td>Child receives props</td>
+      </tr>
+
+      <tr>
+        <td>4</td>
+        <td>Child displays the data</td>
+      </tr>
+
+    </table>
+
+    <h2>Important Point</h2>
+
+    <div class="highlight">
+      Child components cannot directly modify parent data.
+    </div>
+
+    <p>
+      If a child wants to change parent data, the parent must provide a callback function.
+    </p>
+
+    <h2>Example with Callback</h2>
+
+    <h3>Parent Component</h3>
+
+    <pre><code><span class="keyword">function</span> <span class="function">App</span>() {
+
+  <span class="keyword">const</span> [count, setCount] = useState(0);
+
+  <span class="keyword">return</span> (
+    <span class="tag">&lt;Counter</span> increase={() => setCount(count + 1)} <span class="tag">/&gt;</span>
+  );
+
+}</code></pre>
+
+    <h3>Child Component</h3>
+
+    <pre><code><span class="keyword">function</span> <span class="function">Counter</span>(props) {
+
+  <span class="keyword">return</span> (
+    <span class="tag">&lt;button</span> onClick={props.increase} <span class="tag">&gt;</span>
+      Increment
+    <span class="tag">&lt;/button&gt;</span>
+  );
+
+}</code></pre>
+
+    <h2>Real Project Use Case</h2>
+
+    <p>
+      Suppose you are building:
+    </p>
+
+    <ul>
+      <li>Authentication Portal</li>
+      <li>Dashboard</li>
+      <li>Shopping Cart</li>
+      <li>Chat Application</li>
+    </ul>
+
+    <p>
+      The parent component stores the main application state, while child components only receive and display data.
+    </p>
+
+    <p>
+      This keeps the application structure clean and predictable.
+    </p>
+
+    <h2>One-Way vs Two-Way Data Flow</h2>
+
+    <table>
+
+      <tr>
+        <th>One-Way Data Flow</th>
+        <th>Two-Way Data Flow</th>
+      </tr>
+
+      <tr>
+        <td>Data moves in one direction</td>
+        <td>Data moves both directions</td>
+      </tr>
+
+      <tr>
+        <td>Easier to debug</td>
+        <td>Harder to track changes</td>
+      </tr>
+
+      <tr>
+        <td>Used in React</td>
+        <td>Common in some other frameworks</td>
+      </tr>
+
+      <tr>
+        <td>More predictable</td>
+        <td>Can become complex</td>
+      </tr>
+
+    </table>
+
+    <h2>Important Interview Points</h2>
+
+    <ul>
+      <li>React follows one-way data binding.</li>
+      <li>Data flows from parent to child.</li>
+      <li>Props are used for passing data.</li>
+      <li>Child components cannot directly change parent state.</li>
+      <li>Callbacks help child components communicate with parent components.</li>
+    </ul>
+
+    <h2>Short Interview Answer</h2>
+
+    <div class="highlight">
+      One-way data flow means data moves only from parent to child components in React. This makes applications easier to understand and debug.
+    </div>
+
+    <h2>One-Line Interview Answer</h2>
+
+    <div class="highlight">
+      React follows one-way data flow where parent components pass data to child components using props.
+    </div>
+
+  </div>
+
+</body>
+</html>

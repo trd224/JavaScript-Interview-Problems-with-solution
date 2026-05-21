@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>060 - Rendering Lists in React</title>
+
+  <style>
+
+    body{
+      margin:0;
+      padding:0;
+      background:#000814;
+      color:#e2e8f0;
+      font-family:Arial, sans-serif;
+      line-height:1.7;
+    }
+
+    .container{
+      max-width:1000px;
+      margin:40px auto;
+      background:#020617;
+      padding:40px;
+      border-radius:18px;
+      border:1px solid #0f172a;
+      box-shadow:0 0 40px rgba(0,0,0,0.95);
+    }
+
+    h1{
+      color:#f8fafc;
+      margin-bottom:30px;
+      font-size:34px;
+    }
+
+    h2{
+      color:#c084fc;
+      margin-top:35px;
+      margin-bottom:15px;
+      font-size:26px;
+    }
+
+    p{
+      color:#cbd5e1;
+    }
+
+    ul{
+      padding-left:24px;
+    }
+
+    li{
+      margin-bottom:10px;
+      color:#cbd5e1;
+    }
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      margin-top:20px;
+    }
+
+    table th,
+    table td{
+      border:1px solid #1e293b;
+      padding:14px;
+      text-align:left;
+      vertical-align:top;
+    }
+
+    table th{
+      background:#0f172a;
+      color:#38bdf8;
+    }
+
+    table td{
+      background:#020617;
+      color:#d1d5db;
+    }
+
+    .highlight{
+      background:#0f172a;
+      padding:18px;
+      border-left:5px solid #38bdf8;
+      border-radius:10px;
+      margin-top:15px;
+      color:#e5e7eb;
+    }
+
+    .flow{
+      background:#020617;
+      border:1px solid #1e293b;
+      padding:20px;
+      border-radius:10px;
+      margin-top:15px;
+      color:#e2e8f0;
+      line-height:2;
+      text-align:center;
+      font-size:18px;
+    }
+
+    pre{
+      background:#000000;
+      padding:22px;
+      border-radius:12px;
+      overflow-x:auto;
+      border:1px solid #0f172a;
+    }
+
+    code{
+      font-family:Consolas, monospace;
+      font-size:15px;
+    }
+
+    .keyword{
+      color:#c084fc;
+    }
+
+    .function{
+      color:#38bdf8;
+    }
+
+    .string{
+      color:#facc15;
+    }
+
+    .tag{
+      color:#f472b6;
+    }
+
+    .comment{
+      color:#94a3b8;
+    }
+
+    .output{
+      color:#4ade80;
+    }
+
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+
+    <h1>060. How do you render a list of items in React?</h1>
+
+    <h2>One-Line Definition</h2>
+
+    <div class="highlight">
+      In React, lists are rendered by using JavaScript array methods like map() to convert data into JSX elements.
+    </div>
+
+    <h2>Why List Rendering Is Needed</h2>
+
+    <p>
+      Real applications often display collections of data like:
+    </p>
+
+    <ul>
+      <li>Users</li>
+      <li>Products</li>
+      <li>Notifications</li>
+      <li>Messages</li>
+      <li>Orders</li>
+    </ul>
+
+    <p>
+      React renders these collections dynamically using list rendering.
+    </p>
+
+    <h2>Most Common Method - map()</h2>
+
+    <p>
+      React commonly uses:
+    </p>
+
+    <pre><code>array.map()</code></pre>
+
+    <p>
+      to generate JSX for each item.
+    </p>
+
+    <h2>Basic Example</h2>
+
+    <pre><code><span class="keyword">function</span> <span class="function">App</span>() {
+
+  <span class="keyword">const</span> users = [
+
+    <span class="string">'Rizwan'</span>,
+    <span class="string">'Aman'</span>,
+    <span class="string">'Rahul'</span>
+
+  ];
+
+  <span class="keyword">return</span> (
+
+    <span class="tag">&lt;ul&gt;</span>
+      {users.map((user) => <span class="tag">&lt;li&gt;</span>{user}<span class="tag">&lt;/li&gt;</span>)}
+    <span class="tag">&lt;/ul&gt;</span>
+
+  );
+
+}</code></pre>
+
+    <h2>Output</h2>
+
+    <pre class="output"><code>
+• Rizwan
+• Aman
+• Rahul
+</code></pre>
+
+    <h2>How map() Works</h2>
+
+    <div class="flow">
+      Array Items
+      <br>
+      ↓
+      <br>
+      map() Iterates Each Item
+      <br>
+      ↓
+      <br>
+      React Creates JSX Elements
+      <br>
+      ↓
+      <br>
+      UI Renders List
+    </div>
+
+    <h2>Important Problem</h2>
+
+    <p>
+      React needs a unique identifier for each rendered item.
+    </p>
+
+    <p>
+      This identifier is called:
+    </p>
+
+    <div class="highlight">
+      key
+    </div>
+
+    <h2>Correct Example with key</h2>
+
+    <pre><code><span class="keyword">function</span> <span class="function">App</span>() {
+
+  <span class="keyword">const</span> users = [
+
+    { id: 1, name: <span class="string">'Rizwan'</span> },
+    { id: 2, name: <span class="string">'Aman'</span> },
+    { id: 3, name: <span class="string">'Rahul'</span> }
+
+  ];
+
+  <span class="keyword">return</span> (
+
+    <span class="tag">&lt;ul&gt;</span>
+      {users.map((user) => <span class="tag">&lt;li</span> key={user.id}<span class="tag">&gt;</span>{user.name}<span class="tag">&lt;/li&gt;</span>)}
+    <span class="tag">&lt;/ul&gt;</span>
+
+  );
+
+}</code></pre>
+
+    <h2>Why key Is Important</h2>
+
+    <ul>
+      <li>Helps React identify items</li>
+      <li>Improves rendering performance</li>
+      <li>Helps React track updates</li>
+      <li>Prevents rendering bugs</li>
+    </ul>
+
+    <h2>React Internal Process</h2>
+
+    <div class="flow">
+      Old List
+      <br>
+      ↓
+      <br>
+      New List
+      <br>
+      ↓
+      <br>
+      React Compares Keys
+      <br>
+      ↓
+      <br>
+      Updates Only Changed Items
+    </div>
+
+    <h2>Wrong Example</h2>
+
+    <pre><code><span class="comment">// Warning: Missing key</span>
+
+users.map((user) => <span class="tag">&lt;li&gt;</span>{user.name}<span class="tag">&lt;/li&gt;</span>)</code></pre>
+
+    <h2>React Warning</h2>
+
+    <pre class="output"><code>
+Each child in a list should have a unique "key" prop
+</code></pre>
+
+    <h2>Can We Use Index as key?</h2>
+
+    <p>
+      Yes, but only when list order never changes.
+    </p>
+
+    <pre><code>key={index}</code></pre>
+
+    <h2>Why Index Is Not Recommended</h2>
+
+    <ul>
+      <li>Can cause incorrect UI updates</li>
+      <li>Problems during reordering</li>
+      <li>Issues with insertion/deletion</li>
+    </ul>
+
+    <h2>Best Practice</h2>
+
+    <div class="highlight">
+      Always use stable unique IDs as keys whenever possible.
+    </div>
+
+    <h2>Rendering Complex Objects</h2>
+
+    <pre><code><span class="keyword">const</span> products = [
+
+  {
+    id: 1,
+    name: <span class="string">'Laptop'</span>,
+    price: 50000
+  },
+
+  {
+    id: 2,
+    name: <span class="string">'Mobile'</span>,
+    price: 20000
+  }
+
+];</code></pre>
+
+    <h2>Render Products</h2>
+
+    <pre><code><span class="tag">&lt;div&gt;</span>
+
+  {
+
+    products.map((product) => (
+
+      <span class="tag">&lt;div</span> key={product.id}<span class="tag">&gt;</span>
+
+        <span class="tag">&lt;h2&gt;</span>{product.name}<span class="tag">&lt;/h2&gt;</span>
+
+        <span class="tag">&lt;p&gt;</span>₹{product.price}<span class="tag">&lt;/p&gt;</span>
+
+      <span class="tag">&lt;/div&gt;</span>
+
+    ))
+
+  }
+
+<span class="tag">&lt;/div&gt;</span></code></pre>
+
+    <h2>Conditional List Rendering</h2>
+
+    <pre><code>{
+
+  users.length > 0
+    ? users.map((user) => <span class="tag">&lt;li</span> key={user.id}<span class="tag">&gt;</span>{user.name}<span class="tag">&lt;/li&gt;</span>)
+    : <span class="tag">&lt;p&gt;</span>No Users<span class="tag">&lt;/p&gt;</span>
+
+}</code></pre>
+
+    <h2>Real Project Use Cases</h2>
+
+    <table>
+
+      <tr>
+        <th>Feature</th>
+        <th>List Rendering Usage</th>
+      </tr>
+
+      <tr>
+        <td>User table</td>
+        <td>Render users dynamically</td>
+      </tr>
+
+      <tr>
+        <td>Notification list</td>
+        <td>Display alerts</td>
+      </tr>
+
+      <tr>
+        <td>OTP logs</td>
+        <td>Render authentication history</td>
+      </tr>
+
+      <tr>
+        <td>Menus</td>
+        <td>Dynamic navigation items</td>
+      </tr>
+
+    </table>
+
+    <h2>Important Interview Points</h2>
+
+    <ul>
+      <li>map() is commonly used for list rendering.</li>
+      <li>Each list item should have a unique key prop.</li>
+      <li>Keys help React optimize rendering.</li>
+      <li>Avoid using array index as key when possible.</li>
+      <li>List rendering is essential for dynamic UI.</li>
+    </ul>
+
+    <h2>Short Interview Answer</h2>
+
+    <div class="highlight">
+      In React, lists are rendered by using array.map() to transform array data into JSX elements, and each item should include a unique key prop for efficient rendering.
+    </div>
+
+    <h2>One-Line Interview Answer</h2>
+
+    <div class="highlight">
+      React renders lists using map() and unique key props.
+    </div>
+
+  </div>
+
+</body>
+</html>

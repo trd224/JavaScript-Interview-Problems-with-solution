@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>033 - Reconciliation Process in React</title>
+
+  <style>
+
+    body{
+      margin:0;
+      padding:0;
+      background:#000814;
+      color:#e2e8f0;
+      font-family:Arial, sans-serif;
+      line-height:1.7;
+    }
+
+    .container{
+      max-width:1000px;
+      margin:40px auto;
+      background:#020617;
+      padding:40px;
+      border-radius:18px;
+      border:1px solid #0f172a;
+      box-shadow:0 0 40px rgba(0,0,0,0.95);
+    }
+
+    h1{
+      color:#f8fafc;
+      margin-bottom:30px;
+      font-size:34px;
+    }
+
+    h2{
+      color:#c084fc;
+      margin-top:35px;
+      margin-bottom:15px;
+      font-size:26px;
+    }
+
+    p{
+      color:#cbd5e1;
+    }
+
+    ul{
+      padding-left:24px;
+    }
+
+    li{
+      margin-bottom:10px;
+      color:#cbd5e1;
+    }
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      margin-top:20px;
+    }
+
+    table th,
+    table td{
+      border:1px solid #1e293b;
+      padding:14px;
+      text-align:left;
+      vertical-align:top;
+    }
+
+    table th{
+      background:#0f172a;
+      color:#38bdf8;
+    }
+
+    table td{
+      background:#020617;
+      color:#d1d5db;
+    }
+
+    .highlight{
+      background:#0f172a;
+      padding:18px;
+      border-left:5px solid #38bdf8;
+      border-radius:10px;
+      margin-top:15px;
+      color:#e5e7eb;
+    }
+
+    .flow{
+      background:#020617;
+      border:1px solid #1e293b;
+      padding:18px;
+      border-radius:10px;
+      margin-top:15px;
+      color:#e2e8f0;
+      text-align:center;
+      font-size:18px;
+      line-height:2;
+    }
+
+    pre{
+      background:#000000;
+      padding:22px;
+      border-radius:12px;
+      overflow-x:auto;
+      border:1px solid #0f172a;
+    }
+
+    code{
+      font-family:Consolas, monospace;
+      font-size:15px;
+    }
+
+    .keyword{
+      color:#c084fc;
+    }
+
+    .function{
+      color:#38bdf8;
+    }
+
+    .string{
+      color:#facc15;
+    }
+
+    .tag{
+      color:#f472b6;
+    }
+
+    .variable{
+      color:#4ade80;
+    }
+
+    .output{
+      color:#4ade80;
+    }
+
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+
+    <h1>033. What is the reconciliation process in React?</h1>
+
+    <h2>One-Line Definition</h2>
+
+    <div class="highlight">
+      Reconciliation is the React process of comparing old and new Virtual DOM trees to update only the changed parts in the real DOM.
+    </div>
+
+    <h2>Why Reconciliation Is Needed</h2>
+
+    <p>
+      Updating the real DOM directly is slow and expensive.
+    </p>
+
+    <p>
+      React improves performance by updating only the necessary DOM elements instead of reloading the whole page.
+    </p>
+
+    <h2>Simple Understanding</h2>
+
+    <p>
+      Whenever:
+    </p>
+
+    <ul>
+      <li>state changes</li>
+      <li>props change</li>
+      <li>component re-renders</li>
+    </ul>
+
+    <p>
+      React creates a new Virtual DOM and compares it with the previous Virtual DOM.
+    </p>
+
+    <p>
+      This comparison process is called:
+    </p>
+
+    <div class="highlight">
+      Reconciliation
+    </div>
+
+    <h2>Flow Diagram</h2>
+
+    <div class="flow">
+      State Change
+      <br>
+      ↓
+      <br>
+      New Virtual DOM Created
+      <br>
+      ↓
+      <br>
+      Compare Old vs New Virtual DOM
+      <br>
+      ↓
+      <br>
+      Find Differences
+      <br>
+      ↓
+      <br>
+      Update Only Changed Real DOM Parts
+    </div>
+
+    <h2>Example</h2>
+
+    <pre><code><span class="keyword">function</span> <span class="function">App</span>() {
+
+  <span class="keyword">const</span> [count, setCount] = React.useState(0);
+
+  <span class="keyword">return</span> (
+
+    <span class="tag">&lt;div&gt;</span>
+
+      <span class="tag">&lt;h1&gt;</span>{count}<span class="tag">&lt;/h1&gt;</span>
+
+      <span class="tag">&lt;button</span> onClick={() => setCount(count + 1)}<span class="tag">&gt;</span>
+        Increment
+      <span class="tag">&lt;/button&gt;</span>
+
+    <span class="tag">&lt;/div&gt;</span>
+
+  );
+
+}</code></pre>
+
+    <h2>What Happens Internally?</h2>
+
+    <table>
+
+      <tr>
+        <th>Step</th>
+        <th>React Behavior</th>
+      </tr>
+
+      <tr>
+        <td>Button clicked</td>
+        <td>State changes</td>
+      </tr>
+
+      <tr>
+        <td>Component re-renders</td>
+        <td>New Virtual DOM created</td>
+      </tr>
+
+      <tr>
+        <td>Comparison happens</td>
+        <td>Old vs new Virtual DOM</td>
+      </tr>
+
+      <tr>
+        <td>Difference found</td>
+        <td>Only h1 text changed</td>
+      </tr>
+
+      <tr>
+        <td>Real DOM updated</td>
+        <td>Only h1 updated</td>
+      </tr>
+
+    </table>
+
+    <h2>Important Point</h2>
+
+    <div class="highlight">
+      React does NOT replace the entire DOM during re-rendering.
+    </div>
+
+    <p>
+      React updates only the changed elements.
+    </p>
+
+    <h2>What Algorithm React Uses?</h2>
+
+    <p>
+      React uses a fast comparison algorithm called:
+    </p>
+
+    <div class="highlight">
+      Diffing Algorithm
+    </div>
+
+    <h2>Diffing Algorithm Rules</h2>
+
+    <table>
+
+      <tr>
+        <th>Rule</th>
+        <th>Behavior</th>
+      </tr>
+
+      <tr>
+        <td>Different element types</td>
+        <td>Destroy old tree and create new tree</td>
+      </tr>
+
+      <tr>
+        <td>Same element type</td>
+        <td>Update only changed attributes</td>
+      </tr>
+
+      <tr>
+        <td>List rendering</td>
+        <td>Uses key prop for optimization</td>
+      </tr>
+
+    </table>
+
+    <h2>Example of Same Element Type</h2>
+
+    <pre><code><span class="comment">// Old</span>
+
+<span class="tag">&lt;h1</span> className=<span class="string">"red"</span><span class="tag">&gt;</span>Hello<span class="tag">&lt;/h1&gt;</span>
+
+<span class="comment">// New</span>
+
+<span class="tag">&lt;h1</span> className=<span class="string">"blue"</span><span class="tag">&gt;</span>Hello<span class="tag">&lt;/h1&gt;</span></code></pre>
+
+    <p>
+      React only updates:
+    </p>
+
+    <pre class="output"><code>className</code></pre>
+
+    <h2>Example of Different Element Type</h2>
+
+    <pre><code><span class="comment">// Old</span>
+
+<span class="tag">&lt;h1&gt;</span>Hello<span class="tag">&lt;/h1&gt;</span>
+
+<span class="comment">// New</span>
+
+<span class="tag">&lt;p&gt;</span>Hello<span class="tag">&lt;/p&gt;</span></code></pre>
+
+    <p>
+      React destroys old h1 and creates new p element.
+    </p>
+
+    <h2>Role of Keys in Reconciliation</h2>
+
+    <p>
+      Keys help React identify changed list items efficiently.
+    </p>
+
+    <pre><code>users.map(user => (
+  <span class="tag">&lt;li</span> key={user.id}<span class="tag">&gt;</span>
+    {user.name}
+  <span class="tag">&lt;/li&gt;</span>
+));</code></pre>
+
+    <h2>Without Keys Problem</h2>
+
+    <ul>
+      <li>Incorrect DOM updates</li>
+      <li>Poor performance</li>
+      <li>UI bugs in lists</li>
+    </ul>
+
+    <h2>Why Reconciliation Is Fast</h2>
+
+    <ul>
+      <li>Virtual DOM comparison is lightweight</li>
+      <li>Only changed nodes are updated</li>
+      <li>Minimizes expensive real DOM operations</li>
+    </ul>
+
+    <h2>Real Project Use Cases</h2>
+
+    <table>
+
+      <tr>
+        <th>Feature</th>
+        <th>Reconciliation Benefit</th>
+      </tr>
+
+      <tr>
+        <td>Live dashboards</td>
+        <td>Efficient updates</td>
+      </tr>
+
+      <tr>
+        <td>Chat applications</td>
+        <td>Fast UI rendering</td>
+      </tr>
+
+      <tr>
+        <td>OTP forms</td>
+        <td>Minimal input updates</td>
+      </tr>
+
+      <tr>
+        <td>Large tables</td>
+        <td>Optimized list rendering</td>
+      </tr>
+
+    </table>
+
+    <h2>Important Interview Points</h2>
+
+    <ul>
+      <li>Reconciliation compares old and new Virtual DOM.</li>
+      <li>React uses the diffing algorithm.</li>
+      <li>Only changed DOM parts are updated.</li>
+      <li>Keys help optimize list reconciliation.</li>
+      <li>Improves React application performance.</li>
+    </ul>
+
+    <h2>Short Interview Answer</h2>
+
+    <div class="highlight">
+      Reconciliation is React’s process of comparing old and new Virtual DOM trees to efficiently update only the changed parts in the real DOM.
+    </div>
+
+    <h2>One-Line Interview Answer</h2>
+
+    <div class="highlight">
+      Reconciliation is React’s DOM comparison process used to efficiently update the UI.
+    </div>
+
+  </div>
+
+</body>
+</html>
