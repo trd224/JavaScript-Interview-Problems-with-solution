@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>126 - Rules of Hooks in React</title>
+
+  <style>
+
+    body{
+      margin:0;
+      padding:0;
+      background:#000814;
+      color:#e2e8f0;
+      font-family:Arial, sans-serif;
+      line-height:1.7;
+    }
+
+    .container{
+      max-width:1000px;
+      margin:40px auto;
+      background:#020617;
+      padding:40px;
+      border-radius:18px;
+      border:1px solid #0f172a;
+      box-shadow:0 0 40px rgba(0,0,0,0.95);
+    }
+
+    h1{
+      color:#f8fafc;
+      margin-bottom:30px;
+      font-size:34px;
+    }
+
+    h2{
+      color:#c084fc;
+      margin-top:35px;
+      margin-bottom:15px;
+      font-size:26px;
+    }
+
+    p{
+      color:#cbd5e1;
+    }
+
+    ul{
+      padding-left:24px;
+    }
+
+    li{
+      margin-bottom:10px;
+      color:#cbd5e1;
+    }
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      margin-top:20px;
+    }
+
+    table th,
+    table td{
+      border:1px solid #1e293b;
+      padding:14px;
+      text-align:left;
+      vertical-align:top;
+    }
+
+    table th{
+      background:#0f172a;
+      color:#38bdf8;
+    }
+
+    table td{
+      background:#020617;
+      color:#d1d5db;
+    }
+
+    .highlight{
+      background:#0f172a;
+      padding:18px;
+      border-left:5px solid #38bdf8;
+      border-radius:10px;
+      margin-top:15px;
+      color:#e5e7eb;
+    }
+
+    .flow{
+      background:#020617;
+      border:1px solid #1e293b;
+      padding:20px;
+      border-radius:10px;
+      margin-top:15px;
+      color:#e2e8f0;
+      line-height:2;
+      text-align:center;
+      font-size:18px;
+    }
+
+    pre{
+      background:#000000;
+      padding:22px;
+      border-radius:12px;
+      overflow-x:auto;
+      border:1px solid #0f172a;
+    }
+
+    code{
+      font-family:Consolas, monospace;
+      font-size:15px;
+    }
+
+    .keyword{
+      color:#c084fc;
+    }
+
+    .function{
+      color:#38bdf8;
+    }
+
+    .string{
+      color:#facc15;
+    }
+
+    .tag{
+      color:#f472b6;
+    }
+
+    .comment{
+      color:#94a3b8;
+    }
+
+    .output{
+      color:#4ade80;
+    }
+
+    .warning{
+      color:#fb7185;
+    }
+
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+
+    <h1>126. What are the rules of hooks?</h1>
+
+    <h2>One-Line Definition</h2>
+
+    <div class="highlight">
+      Rules of Hooks are special rules that ensure React hooks work correctly and maintain proper state behavior.
+    </div>
+
+    <h2>Main Rules of Hooks</h2>
+
+    <table>
+
+      <tr>
+        <th>Rule</th>
+        <th>Meaning</th>
+      </tr>
+
+      <tr>
+        <td>Only call hooks at top level</td>
+        <td>Do not call hooks inside loops, conditions, or nested functions</td>
+      </tr>
+
+      <tr>
+        <td>Only call hooks in React functions</td>
+        <td>Hooks can be used only inside components or custom hooks</td>
+      </tr>
+
+      <tr>
+        <td>Custom hooks must start with use</td>
+        <td>Example: useCounter, useAuth</td>
+      </tr>
+
+    </table>
+
+    <h2>Why These Rules Exist</h2>
+
+    <div class="highlight">
+      React depends on hook call order to correctly preserve state between renders.
+    </div>
+
+    <h2>Main Internal Concept</h2>
+
+    <div class="flow">
+      Component Render
+      <br>
+      ↓
+      <br>
+      React Reads Hooks In Order
+      <br>
+      ↓
+      <br>
+      React Matches State Correctly
+    </div>
+
+    <h2>Rule 1 - Only Call Hooks at Top Level</h2>
+
+    <p>
+      Hooks should always run in the same order.
+    </p>
+
+    <h2>Correct Example</h2>
+
+    <pre><code><span class="keyword">function</span> <span class="function">App</span>() {
+
+  <span class="keyword">const</span> [count, setCount] = useState(0);
+
+  useEffect(() => {
+
+    console.log(count);
+
+  }, [count]);
+
+}</code></pre>
+
+    <h2>Wrong Example</h2>
+
+    <pre><code><span class="comment">// Wrong  </span>
+
+<span class="keyword">function</span> <span class="function">App</span>() {
+
+  <span class="keyword">if</span> (true) {
+
+    useEffect(() => {
+
+      console.log(<span class="string">'Hello'</span>);
+
+    }, []);
+
+  }
+
+}</code></pre>
+
+    <h2>Why This Is Wrong</h2>
+
+    <div class="warning">
+      Conditional hooks can break hook order between renders.
+    </div>
+
+    <h2>Problem Example</h2>
+
+    <pre><code><span class="comment">// First render</span>
+
+useState();
+useEffect();
+
+<span class="comment">// Second render</span>
+
+useState();</code></pre>
+
+    <h2>Problem</h2>
+
+    <p>
+      React becomes confused because hook order changed.
+    </p>
+
+    <h2>Rule 2 - Only Call Hooks Inside React Functions</h2>
+
+    <p>
+      Hooks can only be used inside:
+    </p>
+
+    <ul>
+      <li>React functional components</li>
+      <li>Custom hooks</li>
+    </ul>
+
+    <h2>Correct Example</h2>
+
+    <pre><code><span class="keyword">function</span> <span class="function">App</span>() {
+
+  <span class="keyword">const</span> [count, setCount] = useState(0);
+
+}</code></pre>
+
+    <h2>Wrong Example</h2>
+
+    <pre><code><span class="comment">// Wrong - Can not use inside a normal function</span>
+
+<span class="keyword">function</span> <span class="function">calculate</span>() {
+
+  <span class="keyword">const</span> [count, setCount] = useState(0);
+
+}</code></pre>
+
+    <h2>Why?</h2>
+
+    <p>
+      React hooks require React rendering context.
+    </p>
+
+    <h2>Rule 3 - Custom Hooks Must Start With "use"</h2>
+
+    <h2>Correct Example</h2>
+
+    <pre><code><span class="keyword">function</span> <span class="function">useCounter</span>() {
+
+  <span class="keyword">const</span> [count, setCount] = useState(0);
+
+}</code></pre>
+
+    <h2>Wrong Example</h2>
+
+    <pre><code><span class="comment">// Wrong naming</span>
+
+<span class="keyword">function</span> <span class="function">counterHook</span>() {
+
+  <span class="keyword">const</span> [count, setCount] = useState(0);
+
+}</code></pre>
+
+    <h2>Why Naming Matters</h2>
+
+    <ul>
+      <li>React ESLint rules detect hooks</li>
+      <li>Improves readability</li>
+      <li>Helps developers identify hooks easily</li>
+    </ul>
+
+    <h2>Custom Hook Example</h2>
+
+    <pre><code><span class="keyword">import</span> { useState } from <span class="string">'react'</span>;
+
+<span class="keyword">function</span> <span class="function">useCounter</span>() {
+
+  <span class="keyword">const</span> [count, setCount] = useState(0);
+
+  <span class="keyword">const</span> increment = () => {
+
+    setCount((prev) => prev + 1);
+
+  };
+
+  <span class="keyword">return</span> {
+
+    count,
+    increment
+
+  };
+
+}</code></pre>
+
+    <h2>How To Use This Hook</h2>
+
+    <pre><code><span class="keyword">function</span> <span class="function">App</span>() {
+
+  <span class="keyword">const</span> {
+
+    count,
+    increment
+
+  } = useCounter();
+
+  <span class="keyword">return</span> (
+
+    <span class="tag">&lt;button</span> onClick={increment}<span class="tag">&gt;</span>
+
+      {count}
+
+    <span class="tag">&lt;/button&gt;</span>
+
+  );
+
+}</code></pre>
+
+    <h2>What React Internally Does</h2>
+
+    <div class="flow">
+      First Hook → State Slot 1
+      <br>
+      ↓
+      <br>
+      Second Hook → State Slot 2
+      <br>
+      ↓
+      <br>
+      Third Hook → State Slot 3
+    </div>
+
+    <h2>Why Hook Order Is Important</h2>
+
+    <p>
+      React identifies hooks by their execution order.
+    </p>
+
+    <p>
+      NOT by variable names.
+    </p>
+
+    <h2>Rules of Hooks ESLint Plugin</h2>
+
+    <p>
+      React provides ESLint rules to automatically detect hook mistakes.
+    </p>
+
+    <pre><code>eslint-plugin-react-hooks</code></pre>
+
+    <h2>Common Hook Mistakes</h2>
+
+    <table>
+
+      <tr>
+        <th>Mistake</th>
+        <th>Problem</th>
+      </tr>
+
+      <tr>
+        <td>Hooks inside if statements</td>
+        <td>Hook order breaks</td>
+      </tr>
+
+      <tr>
+        <td>Hooks inside loops</td>
+        <td>Inconsistent execution</td>
+      </tr>
+
+      <tr>
+        <td>Hooks inside event handlers</td>
+        <td>Invalid hook call</td>
+      </tr>
+
+      <tr>
+        <td>Hooks inside normal functions</td>
+        <td>No React context</td>
+      </tr>
+
+    </table>
+
+    <h2>Real Project Use Cases</h2>
+
+    <table>
+
+      <tr>
+        <th>Feature</th>
+        <th>Hook Usage</th>
+      </tr>
+
+      <tr>
+        <td>OTP forms</td>
+        <td>useState</td>
+      </tr>
+
+      <tr>
+        <td>API requests</td>
+        <td>useEffect</td>
+      </tr>
+
+      <tr>
+        <td>Captcha tracking</td>
+        <td>Custom hooks</td>
+      </tr>
+
+      <tr>
+        <td>Theme management</td>
+        <td>useContext</td>
+      </tr>
+
+      <tr>
+        <td>Authentication system</td>
+        <td>Custom auth hooks</td>
+      </tr>
+
+    </table>
+
+    <h2>Important Interview Points</h2>
+
+    <ul>
+      <li>Hooks must always run in same order.</li>
+      <li>Never call hooks inside conditions or loops.</li>
+      <li>Hooks work only in React functions.</li>
+      <li>Custom hooks start with use.</li>
+      <li>React tracks hooks using execution order.</li>
+    </ul>
+
+    <h2>Short Interview Answer</h2>
+
+    <div class="highlight">
+      Rules of Hooks ensure hooks execute in a consistent order by allowing hooks only at the top level of React components or custom hooks, preventing broken state behavior.
+    </div>
+
+    <h2>One-Line Interview Answer</h2>
+
+    <div class="highlight">
+      Hooks must be called only at the top level of React components or custom hooks.
+    </div>
+
+  </div>
+
+</body>
+</html>

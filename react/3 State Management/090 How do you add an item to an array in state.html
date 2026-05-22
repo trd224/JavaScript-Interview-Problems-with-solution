@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>090 - Adding Item to Array in React State</title>
+
+  <style>
+
+    body{
+      margin:0;
+      padding:0;
+      background:#000814;
+      color:#e2e8f0;
+      font-family:Arial, sans-serif;
+      line-height:1.7;
+    }
+
+    .container{
+      max-width:1000px;
+      margin:40px auto;
+      background:#020617;
+      padding:40px;
+      border-radius:18px;
+      border:1px solid #0f172a;
+      box-shadow:0 0 40px rgba(0,0,0,0.95);
+    }
+
+    h1{
+      color:#f8fafc;
+      margin-bottom:30px;
+      font-size:34px;
+    }
+
+    h2{
+      color:#c084fc;
+      margin-top:35px;
+      margin-bottom:15px;
+      font-size:26px;
+    }
+
+    p{
+      color:#cbd5e1;
+    }
+
+    ul{
+      padding-left:24px;
+    }
+
+    li{
+      margin-bottom:10px;
+      color:#cbd5e1;
+    }
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      margin-top:20px;
+    }
+
+    table th,
+    table td{
+      border:1px solid #1e293b;
+      padding:14px;
+      text-align:left;
+      vertical-align:top;
+    }
+
+    table th{
+      background:#0f172a;
+      color:#38bdf8;
+    }
+
+    table td{
+      background:#020617;
+      color:#d1d5db;
+    }
+
+    .highlight{
+      background:#0f172a;
+      padding:18px;
+      border-left:5px solid #38bdf8;
+      border-radius:10px;
+      margin-top:15px;
+      color:#e5e7eb;
+    }
+
+    .flow{
+      background:#020617;
+      border:1px solid #1e293b;
+      padding:20px;
+      border-radius:10px;
+      margin-top:15px;
+      color:#e2e8f0;
+      line-height:2;
+      text-align:center;
+      font-size:18px;
+    }
+
+    pre{
+      background:#000000;
+      padding:22px;
+      border-radius:12px;
+      overflow-x:auto;
+      border:1px solid #0f172a;
+    }
+
+    code{
+      font-family:Consolas, monospace;
+      font-size:15px;
+    }
+
+    .keyword{
+      color:#c084fc;
+    }
+
+    .function{
+      color:#38bdf8;
+    }
+
+    .string{
+      color:#facc15;
+    }
+
+    .tag{
+      color:#f472b6;
+    }
+
+    .comment{
+      color:#94a3b8;
+    }
+
+    .output{
+      color:#4ade80;
+    }
+
+    .warning{
+      color:#fb7185;
+    }
+
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+
+    <h1>090. How do you add an item to an array in state?</h1>
+
+    <h2>One-Line Definition</h2>
+
+    <div class="highlight">
+      In React, items are added to an array in state immutably using the spread operator.
+    </div>
+
+    <h2>Basic Array State</h2>
+
+    <pre><code><span class="keyword">const</span> [users, setUsers] = useState([
+
+  <span class="string">'Rizwan'</span>,
+  <span class="string">'Aman'</span>
+
+]);</code></pre>
+
+    <h2>Wrong Way</h2>
+
+    <pre><code><span class="comment">// Wrong</span>
+
+users.push(<span class="string">'Rahul'</span>);
+
+setUsers(users);</code></pre>
+
+    <h2>Why This Is Wrong</h2>
+
+    <ul>
+      <li>Mutates existing array directly</li>
+      <li>Reference remains same</li>
+      <li>React may not detect update</li>
+      <li>UI may not re-render properly</li>
+    </ul>
+
+    <h2>Correct Way</h2>
+
+    <pre><code>setUsers([
+
+  ...users,
+  <span class="string">'Rahul'</span>
+
+]);</code></pre>
+
+    <h2>What Happens Here?</h2>
+
+    <table>
+
+      <tr>
+        <th>Code</th>
+        <th>Purpose</th>
+      </tr>
+
+      <tr>
+        <td>...users</td>
+        <td>Copies old array items</td>
+      </tr>
+
+      <tr>
+        <td>'Rahul'</td>
+        <td>Adds new item</td>
+      </tr>
+
+    </table>
+
+    <h2>Result</h2>
+
+    <pre class="output"><code>[
+  'Rizwan',
+  'Aman',
+  'Rahul'
+]</code></pre>
+
+    <h2>Main Flow</h2>
+
+    <div class="flow">
+      Old Array
+      <br>
+      ↓
+      <br>
+      Create New Array Copy
+      <br>
+      ↓
+      <br>
+      Add New Item
+      <br>
+      ↓
+      <br>
+      New Array Reference
+      <br>
+      ↓
+      <br>
+      React Re-Renders
+    </div>
+
+    <h2>Real Example</h2>
+
+    <pre><code><span class="keyword">import</span> { useState } from <span class="string">'react'</span>;
+
+<span class="keyword">function</span> <span class="function">App</span>() {
+
+  <span class="keyword">const</span> [users, setUsers] = useState([
+
+    <span class="string">'Rizwan'</span>
+
+  ]);
+
+  <span class="keyword">const</span> addUser = () => {
+
+    setUsers([
+
+      ...users,
+      <span class="string">'Aman'</span>
+
+    ]);
+
+  };
+
+  <span class="keyword">return</span> (
+
+    <span class="tag">&lt;div&gt;</span>
+
+      <span class="tag">&lt;button</span> onClick={addUser}<span class="tag">&gt;</span>
+        Add User
+      <span class="tag">&lt;/button&gt;</span>
+
+      <span class="tag">&lt;ul&gt;</span>
+
+        {users.map((user) => (
+          <span class="tag">&lt;li&gt;</span>{user}<span class="tag">&lt;/li&gt;</span>
+        ))}
+
+      <span class="tag">&lt;/ul&gt;</span>
+
+    <span class="tag">&lt;/div&gt;</span>
+
+  );
+
+}</code></pre>
+
+    <h2>Output Before Click</h2>
+
+    <pre class="output"><code>Rizwan</code></pre>
+
+    <h2>Output After Click</h2>
+
+    <pre class="output"><code>
+Rizwan
+Aman
+</code></pre>
+
+    <h2>Functional Update Version</h2>
+
+    <p>
+      Recommended when update depends on previous state.
+    </p>
+
+    <pre><code>setUsers((prevUsers) => ([
+
+  ...prevUsers,
+  <span class="string">'Rahul'</span>
+
+]));</code></pre>
+
+    <h2>Why Functional Updates Are Better</h2>
+
+    <ul>
+      <li>Always uses latest state</li>
+      <li>Avoids stale state problems</li>
+      <li>Safer for async updates</li>
+    </ul>
+
+    <h2>Adding Object to Array</h2>
+
+    <pre><code>setUsers([
+
+  ...users,
+
+  {
+    id: 1,
+    name: <span class="string">'Rizwan'</span>
+  }
+
+]);</code></pre>
+
+    <h2>Adding Item at Beginning</h2>
+
+    <pre><code>setUsers([
+
+  <span class="string">'Rahul'</span>,
+  ...users
+
+]);</code></pre>
+
+    <h2>Why React Requires Immutable Updates</h2>
+
+    <div class="highlight">
+      React detects changes using reference comparison, so immutable updates create new array references that React can detect efficiently.
+    </div>
+
+    <h2>Mutable vs Immutable Array Updates</h2>
+
+    <table>
+
+      <tr>
+        <th>Mutable</th>
+        <th>Immutable</th>
+      </tr>
+
+      <tr>
+        <td>push()</td>
+        <td>[...array, item]</td>
+      </tr>
+
+      <tr>
+        <td>splice()</td>
+        <td>filter()</td>
+      </tr>
+
+      <tr>
+        <td>sort()</td>
+        <td>[...array].sort()</td>
+      </tr>
+
+      <tr>
+        <td>reverse()</td>
+        <td>[...array].reverse()</td>
+      </tr>
+
+    </table>
+
+    <h2>Real Project Use Cases</h2>
+
+    <table>
+
+      <tr>
+        <th>Feature</th>
+        <th>Array Update</th>
+      </tr>
+
+      <tr>
+        <td>Todo app</td>
+        <td>Add new task</td>
+      </tr>
+
+      <tr>
+        <td>Shopping cart</td>
+        <td>Add product</td>
+      </tr>
+
+      <tr>
+        <td>Chat app</td>
+        <td>Add new message</td>
+      </tr>
+
+      <tr>
+        <td>Notifications</td>
+        <td>Add alerts</td>
+      </tr>
+
+      <tr>
+        <td>OTP logs</td>
+        <td>Add verification history</td>
+      </tr>
+
+    </table>
+
+    <h2>Important Interview Points</h2>
+
+    <ul>
+      <li>Never mutate arrays directly.</li>
+      <li>Use spread operator for immutable updates.</li>
+      <li>push() mutates original array.</li>
+      <li>Functional updates are safer.</li>
+      <li>React depends on new references for change detection.</li>
+    </ul>
+
+    <h2>Short Interview Answer</h2>
+
+    <div class="highlight">
+      Items are added to React state arrays immutably using the spread operator to create a new array with existing items and the new item.
+    </div>
+
+    <h2>One-Line Interview Answer</h2>
+
+    <div class="highlight">
+      Add items to React state arrays using immutable updates with the spread operator.
+    </div>
+
+  </div>
+
+</body>
+</html>

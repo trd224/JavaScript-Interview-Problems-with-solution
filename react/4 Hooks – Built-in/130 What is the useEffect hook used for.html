@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>130 - useEffect Hook in React</title>
+
+  <style>
+
+    body{
+      margin:0;
+      padding:40px 20px;
+      background:#000814;
+      color:#e2e8f0;
+      font-family:Arial, sans-serif;
+      line-height:1.7;
+    }
+
+    .container{
+      max-width:1000px;
+      margin:auto;
+    }
+
+    .card{
+      background:#020617;
+      border:1px solid #1e293b;
+      border-radius:18px;
+      padding:35px;
+      margin-bottom:30px;
+      box-shadow:0 0 25px rgba(0,0,0,0.6);
+    }
+
+    h1{
+      color:#f8fafc;
+      font-size:38px;
+      margin:0;
+    }
+
+    h2{
+      color:#c084fc;
+      margin-top:0;
+      margin-bottom:18px;
+      font-size:28px;
+    }
+
+    h3{
+      color:#38bdf8;
+      margin-top:25px;
+      margin-bottom:12px;
+      font-size:20px;
+    }
+
+    p{
+      color:#cbd5e1;
+    }
+
+    ul{
+      padding-left:24px;
+    }
+
+    li{
+      margin-bottom:10px;
+      color:#cbd5e1;
+    }
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      margin-top:20px;
+    }
+
+    table th,
+    table td{
+      border:1px solid #334155;
+      padding:14px;
+      text-align:left;
+      vertical-align:top;
+    }
+
+    table th{
+      background:#0f172a;
+      color:#38bdf8;
+    }
+
+    table td{
+      color:#d1d5db;
+    }
+
+    .highlight{
+      background:#0f172a;
+      padding:18px;
+      border-left:5px solid #38bdf8;
+      border-radius:10px;
+      color:#e5e7eb;
+    }
+
+    .flow{
+      background:#000000;
+      border:1px solid #334155;
+      padding:20px;
+      border-radius:12px;
+      color:#e2e8f0;
+      line-height:2;
+      text-align:center;
+      font-size:18px;
+    }
+
+    pre{
+      background:#000000;
+      padding:22px;
+      border-radius:12px;
+      overflow-x:auto;
+      border:1px solid #1e293b;
+    }
+
+    code{
+      font-family:Consolas, monospace;
+      font-size:15px;
+    }
+
+    .keyword{
+      color:#c084fc;
+    }
+
+    .function{
+      color:#38bdf8;
+    }
+
+    .string{
+      color:#facc15;
+    }
+
+    .tag{
+      color:#f472b6;
+    }
+
+    .comment{
+      color:#94a3b8;
+    }
+
+    .output{
+      color:#4ade80;
+    }
+
+  </style>
+
+</head>
+
+<body>
+
+  <div class="container">
+
+    <section class="card">
+
+      <h1>130. What is the useEffect hook used for?</h1>
+
+    </section>
+
+    <section class="card">
+
+      <h2>One-Line Definition</h2>
+
+      <div class="highlight">
+        useEffect is a React hook used to handle side effects in functional components.
+      </div>
+
+      <h2>What Is a Side Effect?</h2>
+
+      <p>
+        A side effect means work that happens outside normal UI rendering.
+      </p>
+
+      <h2>Examples of Side Effects</h2>
+
+      <ul>
+        <li>API calls</li>
+        <li>Timers</li>
+        <li>Event listeners</li>
+        <li>DOM updates</li>
+        <li>Local storage access</li>
+        <li>Subscriptions</li>
+      </ul>
+
+    </section>
+
+    <section class="card">
+
+      <h2>Main Idea</h2>
+
+      <div class="flow">
+        Component Renders
+        <br>
+        ↓
+        <br>
+        useEffect Runs
+        <br>
+        ↓
+        <br>
+        Side Effect Executes
+      </div>
+
+      <h2>Basic Syntax</h2>
+
+      <pre><code>useEffect(() => {
+
+  <span class="comment">// Side effect code</span>
+
+}, dependencies);</code></pre>
+
+    </section>
+
+    <section class="card">
+
+      <h2>useEffect Without Dependency Array</h2>
+
+      <pre><code><span class="keyword">import</span> { useEffect } from <span class="string">'react'</span>;
+
+<span class="keyword">function</span> <span class="function">App</span>() {
+
+  useEffect(() => {
+
+    console.log(<span class="string">'Runs After Every Render'</span>);
+
+  });
+
+}</code></pre>
+
+      <h3>What Happens?</h3>
+
+      <p>
+        This useEffect runs after every render because no dependency array is provided.
+      </p>
+
+      <h2>useEffect with Empty Dependency Array</h2>
+
+      <pre><code>useEffect(() => {
+
+  console.log(<span class="string">'Runs Once After First Render'</span>);
+
+}, []);</code></pre>
+
+      <h3>What Happens?</h3>
+
+      <div class="highlight">
+        This useEffect runs only once after the first render.
+      </div>
+
+      <h3>Equivalent Class Lifecycle</h3>
+
+      <pre><code>componentDidMount()</code></pre>
+
+      <h2>useEffect with Dependencies</h2>
+
+      <pre><code><span class="keyword">import</span> { useEffect, useState } from <span class="string">'react'</span>;
+
+<span class="keyword">function</span> <span class="function">App</span>() {
+
+  <span class="keyword">const</span> [count, setCount] = useState(0);
+
+  useEffect(() => {
+
+    console.log(<span class="string">'Count Changed'</span>);
+
+  }, [count]);
+
+  <span class="keyword">return</span> (
+
+    <span class="tag">&lt;button</span> onClick={() => setCount(count + 1)}<span class="tag">&gt;</span>{count}<span class="tag">&lt;/button&gt;</span>
+
+  );
+
+}</code></pre>
+
+      <h3>What Happens?</h3>
+
+      <ul>
+        <li>Runs after first render</li>
+        <li>Runs again whenever count changes</li>
+      </ul>
+
+    </section>
+
+    <section class="card">
+
+      <h2>Main Dependency Flow</h2>
+
+      <div class="flow">
+        Dependency Changes
+        <br>
+        ↓
+        <br>
+        useEffect Re-Runs
+        <br>
+        ↓
+        <br>
+        Side Effect Updates
+      </div>
+
+      <h2>useEffect Dependency Behavior</h2>
+
+      <table>
+
+        <tr>
+          <th>Code</th>
+          <th>Behavior</th>
+        </tr>
+
+        <tr>
+          <td>useEffect(fn)</td>
+          <td>Runs after every render</td>
+        </tr>
+
+        <tr>
+          <td>useEffect(fn, [])</td>
+          <td>Runs once after first render</td>
+        </tr>
+
+        <tr>
+          <td>useEffect(fn, [count])</td>
+          <td>Runs when count changes</td>
+        </tr>
+
+      </table>
+
+    </section>
+
+    <section class="card">
+
+      <h2>Cleanup Function</h2>
+
+      <pre><code>useEffect(() => {
+
+  console.log(<span class="string">'Mounted'</span>);
+
+  <span class="keyword">return</span> () => {
+
+    console.log(<span class="string">'Cleanup'</span>);
+
+  };
+
+}, []);</code></pre>
+
+      <h3>When Cleanup Runs</h3>
+
+      <ul>
+        <li>Before effect re-runs</li>
+        <li>When component unmounts</li>
+      </ul>
+
+      <h3>Why Cleanup Is Important</h3>
+
+      <ul>
+        <li>Prevents memory leaks</li>
+        <li>Stops duplicate listeners</li>
+        <li>Cleans subscriptions/timers</li>
+      </ul>
+
+    </section>
+
+    <section class="card">
+
+      <h2>Real Timer Example</h2>
+
+      <pre><code><span class="keyword">import</span> { useEffect, useState } from <span class="string">'react'</span>;
+
+<span class="keyword">function</span> <span class="function">App</span>() {
+
+  <span class="keyword">const</span> [count, setCount] = useState(0);
+
+  useEffect(() => {
+
+    <span class="keyword">const</span> timer = setInterval(() => {
+
+      setCount((prev) => prev + 1);
+
+    }, 1000);
+
+    <span class="keyword">return</span> () => clearInterval(timer);
+
+  }, []);
+
+  <span class="keyword">return</span> <span class="tag">&lt;h1&gt;</span>{count}<span class="tag">&lt;/h1&gt;</span>;
+
+}</code></pre>
+
+      <h2>API Call Example</h2>
+
+      <pre><code><span class="keyword">import</span> { useEffect, useState } from <span class="string">'react'</span>;
+
+<span class="keyword">function</span> <span class="function">App</span>() {
+
+  <span class="keyword">const</span> [users, setUsers] = useState([]);
+
+  useEffect(() => {
+
+    fetch(<span class="string">'https://api.com/users'</span>)
+      .then((res) => res.json())
+      .then((data) => setUsers(data));
+
+  }, []);
+
+}</code></pre>
+
+    </section>
+
+    <section class="card">
+
+      <h2>Before Hooks</h2>
+
+      <pre><code><span class="comment">// Class Component</span>
+
+componentDidMount();
+
+componentDidUpdate();
+
+componentWillUnmount();</code></pre>
+
+      <h2>After Hooks</h2>
+
+      <pre><code>useEffect()</code></pre>
+
+      <h2>Why useEffect Was Introduced</h2>
+
+      <ul>
+        <li>Simplified lifecycle handling</li>
+        <li>Reduced duplicate code</li>
+        <li>Made functional components powerful</li>
+        <li>Cleaner side-effect management</li>
+      </ul>
+
+    </section>
+
+    <section class="card">
+
+      <h2>Rules of useEffect</h2>
+
+      <table>
+
+        <tr>
+          <th>Rule</th>
+          <th>Meaning</th>
+        </tr>
+
+        <tr>
+          <td>Top-level only</td>
+          <td>No loops or conditions</td>
+        </tr>
+
+        <tr>
+          <td>Dependency array controls execution</td>
+          <td>Determines when effect re-runs</td>
+        </tr>
+
+        <tr>
+          <td>Cleanup removes effects</td>
+          <td>Prevents memory leaks</td>
+        </tr>
+
+      </table>
+
+      <h2>Important Interview Points</h2>
+
+      <ul>
+        <li>useEffect handles side effects.</li>
+        <li>Runs after render.</li>
+        <li>Dependency array controls execution.</li>
+        <li>Cleanup prevents memory leaks.</li>
+        <li>Replaces lifecycle methods in functional components.</li>
+      </ul>
+
+    </section>
+
+    <section class="card">
+
+      <h2>Real Project Use Cases</h2>
+
+      <table>
+
+        <tr>
+          <th>Feature</th>
+          <th>useEffect Usage</th>
+        </tr>
+
+        <tr>
+          <td>OTP timer</td>
+          <td>setInterval()</td>
+        </tr>
+
+        <tr>
+          <td>Authentication</td>
+          <td>API calls</td>
+        </tr>
+
+        <tr>
+          <td>Captcha tracking</td>
+          <td>Event listeners</td>
+        </tr>
+
+        <tr>
+          <td>Theme saving</td>
+          <td>localStorage</td>
+        </tr>
+
+        <tr>
+          <td>SignalR/WebSocket</td>
+          <td>Subscriptions</td>
+        </tr>
+
+      </table>
+
+      <h2>Short Interview Answer</h2>
+
+      <div class="highlight">
+        useEffect is a React hook used for handling side effects like API calls, timers, subscriptions, event listeners, and lifecycle-related logic inside functional components.
+      </div>
+
+      <h2>One-Line Interview Answer</h2>
+
+      <div class="highlight">
+        useEffect is used to handle side effects in React functional components.
+      </div>
+
+    </section>
+
+  </div>
+
+</body>
+</html>

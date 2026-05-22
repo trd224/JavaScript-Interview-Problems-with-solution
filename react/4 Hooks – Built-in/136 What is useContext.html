@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>136 - What is useContext?</title>
+
+  <style>
+
+    body{
+      margin:0;
+      padding:40px 20px;
+      background:#000814;
+      color:#e2e8f0;
+      font-family:Arial,sans-serif;
+      line-height:1.7;
+    }
+
+    .container{
+      max-width:1000px;
+      margin:auto;
+    }
+
+    .card{
+      background:#020617;
+      border:1px solid #1e293b;
+      border-radius:18px;
+      padding:35px;
+      margin-bottom:30px;
+      box-shadow:0 0 25px rgba(0,0,0,0.6);
+    }
+
+    h1{
+      color:#f8fafc;
+      font-size:38px;
+      margin:0;
+    }
+
+    h2{
+      color:#c084fc;
+      margin-top:0;
+      margin-bottom:18px;
+      font-size:28px;
+    }
+
+    h3{
+      color:#38bdf8;
+      margin-top:25px;
+      margin-bottom:12px;
+      font-size:20px;
+    }
+
+    p{
+      color:#cbd5e1;
+    }
+
+    ul{
+      padding-left:24px;
+    }
+
+    li{
+      margin-bottom:10px;
+      color:#cbd5e1;
+    }
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      margin-top:20px;
+    }
+
+    table th,
+    table td{
+      border:1px solid #334155;
+      padding:14px;
+      text-align:left;
+      vertical-align:top;
+    }
+
+    table th{
+      background:#0f172a;
+      color:#38bdf8;
+    }
+
+    table td{
+      color:#d1d5db;
+    }
+
+    .highlight{
+      background:#0f172a;
+      padding:18px;
+      border-left:5px solid #38bdf8;
+      border-radius:10px;
+      color:#e5e7eb;
+    }
+
+    .flow{
+      background:#000000;
+      border:1px solid #334155;
+      padding:20px;
+      border-radius:12px;
+      color:#e2e8f0;
+      line-height:2;
+      text-align:center;
+      font-size:18px;
+    }
+
+    pre{
+      background:#000000;
+      padding:22px;
+      border-radius:12px;
+      overflow-x:auto;
+      border:1px solid #1e293b;
+    }
+
+    code{
+      font-family:Consolas,monospace;
+      font-size:15px;
+    }
+
+    .keyword{
+      color:#c084fc;
+    }
+
+    .function{
+      color:#38bdf8;
+    }
+
+    .string{
+      color:#facc15;
+    }
+
+    .tag{
+      color:#f472b6;
+    }
+
+    .comment{
+      color:#94a3b8;
+    }
+
+    .output{
+      color:#4ade80;
+    }
+
+  </style>
+
+</head>
+
+<body>
+
+  <div class="container">
+
+    <section class="card">
+
+      <h1>136. What is useContext?</h1>
+
+    </section>
+
+    <section class="card">
+
+      <h2>One-Line Definition</h2>
+
+      <div class="highlight">
+        useContext is a React hook used to access shared Context data directly inside components.
+      </div>
+
+      <h2>Simple Understanding</h2>
+
+      <p>
+        useContext helps components access common/shared data without passing props manually through multiple component levels.
+      </p>
+
+      <h2>Common Shared Data Examples</h2>
+
+      <ul>
+        <li>Theme</li>
+        <li>Logged-in user</li>
+        <li>Language</li>
+        <li>Authentication state</li>
+        <li>Settings</li>
+      </ul>
+
+    </section>
+
+    <section class="card">
+
+      <h2>Main Problem Without useContext</h2>
+
+      <p>
+        Normally data is passed from parent to child using props.
+      </p>
+
+      <h3>Prop Drilling Example</h3>
+
+      <div class="flow">
+        App
+        <br>
+        ↓ props
+        <br>
+        Parent
+        <br>
+        ↓ props
+        <br>
+        Child
+        <br>
+        ↓ props
+        <br>
+        GrandChild
+      </div>
+
+      <h3>Problem</h3>
+
+      <div class="highlight">
+        Passing props through many components is called prop drilling.
+      </div>
+
+    </section>
+
+    <section class="card">
+
+      <h2>How useContext Solves This</h2>
+
+      <div class="flow">
+        Context Provider Stores Data
+        <br>
+        ↓
+        <br>
+        Any Child Component Can Access It Directly
+      </div>
+
+      <h2>Basic Syntax</h2>
+
+      <pre><code><span class="keyword">const</span> value = useContext(MyContext);</code></pre>
+
+    </section>
+
+    <section class="card">
+
+      <h2>Project Structure</h2>
+
+      <pre><code>src/
+├── App.jsx
+├── context/
+│   └── UserContext.jsx
+├── components/
+│   └── Profile.jsx</code></pre>
+
+    </section>
+
+    <section class="card">
+
+      <h2>Step 1 - Create Context</h2>
+
+      <h3>context/UserContext.jsx</h3>
+
+      <pre><code><span class="keyword">import</span> { createContext } <span class="keyword">from</span> <span class="string">'react'</span>;
+
+<span class="keyword">export const</span> UserContext = createContext();</code></pre>
+
+    </section>
+
+    <section class="card">
+
+      <h2>Step 2 - Access Context Using useContext</h2>
+
+      <h3>components/Profile.jsx</h3>
+
+      <pre><code><span class="keyword">import</span> { useContext } <span class="keyword">from</span> <span class="string">'react'</span>;
+<span class="keyword">import</span> { UserContext } <span class="keyword">from</span> <span class="string">'../context/UserContext'</span>;
+
+<span class="keyword">function</span> <span class="function">Profile</span>() {
+
+  <span class="keyword">const</span> user = useContext(UserContext);
+
+  <span class="keyword">return</span> <span class="tag">&lt;h1&gt;</span>Hello {user}<span class="tag">&lt;/h1&gt;</span>;
+
+}
+
+<span class="keyword">export default</span> Profile;</code></pre>
+
+    </section>
+
+    <section class="card">
+
+      <h2>Step 3 - Provide Context Value</h2>
+
+      <h3>App.jsx</h3>
+
+      <pre><code><span class="keyword">import</span> { useState } <span class="keyword">from</span> <span class="string">'react'</span>;
+<span class="keyword">import</span> { UserContext } <span class="keyword">from</span> <span class="string">'./context/UserContext'</span>;
+<span class="keyword">import</span> Profile <span class="keyword">from</span> <span class="string">'./components/Profile'</span>;
+
+<span class="keyword">function</span> <span class="function">App</span>() {
+
+  <span class="keyword">const</span> [user] = useState(<span class="string">'Rizwan'</span>);
+
+  <span class="keyword">return</span> (
+
+    <span class="tag">&lt;UserContext.Provider</span> value={user}<span class="tag">&gt;</span>
+
+      <span class="tag">&lt;Profile</span> <span class="tag">/&gt;</span>
+
+    <span class="tag">&lt;/UserContext.Provider&gt;</span>
+
+  );
+
+}
+
+<span class="keyword">export default</span> App;</code></pre>
+
+      <h3>Output</h3>
+
+      <pre class="output"><code>Hello Rizwan</code></pre>
+
+    </section>
+
+    <section class="card">
+
+      <h2>Complete Flow</h2>
+
+      <div class="flow">
+        createContext()
+        <br>
+        ↓
+        <br>
+        Provider Stores Value
+        <br>
+        ↓
+        <br>
+        useContext Reads Value
+      </div>
+
+    </section>
+
+    <section class="card">
+
+      <h2>Why useContext Is Useful</h2>
+
+      <ul>
+        <li>Avoids prop drilling</li>
+        <li>Cleaner component structure</li>
+        <li>Easier state sharing</li>
+        <li>Useful for global/shared data</li>
+      </ul>
+
+    </section>
+
+    <section class="card">
+
+      <h2>Real Project Example</h2>
+
+      <table>
+
+        <tr>
+          <th>Feature</th>
+          <th>Shared Through Context</th>
+        </tr>
+
+        <tr>
+          <td>Authentication</td>
+          <td>User data</td>
+        </tr>
+
+        <tr>
+          <td>Theme</td>
+          <td>Dark/light mode</td>
+        </tr>
+
+        <tr>
+          <td>Language</td>
+          <td>Translation settings</td>
+        </tr>
+
+        <tr>
+          <td>Shopping cart</td>
+          <td>Cart items</td>
+        </tr>
+
+        <tr>
+          <td>Permissions</td>
+          <td>User roles</td>
+        </tr>
+
+      </table>
+
+    </section>
+
+    <section class="card">
+
+      <h2>Important Rule</h2>
+
+      <div class="highlight">
+        useContext must be used inside a matching Context Provider.
+      </div>
+
+    </section>
+
+    <section class="card">
+
+      <h2>Default Value Example</h2>
+
+      <pre><code><span class="keyword">const</span> UserContext = createContext(<span class="string">'Guest'</span>);</code></pre>
+
+      <h3>Without Provider</h3>
+
+      <pre class="output"><code>Guest</code></pre>
+
+    </section>
+
+    <section class="card">
+
+      <h2>Props vs useContext</h2>
+
+      <table>
+
+        <tr>
+          <th>Props</th>
+          <th>useContext</th>
+        </tr>
+
+        <tr>
+          <td>Pass manually</td>
+          <td>Access directly</td>
+        </tr>
+
+        <tr>
+          <td>Can create prop drilling</td>
+          <td>Avoids prop drilling</td>
+        </tr>
+
+        <tr>
+          <td>Good for local data</td>
+          <td>Good for shared/global data</td>
+        </tr>
+
+      </table>
+
+    </section>
+
+    <section class="card">
+
+      <h2>Important Interview Points</h2>
+
+      <ul>
+        <li>useContext accesses Context data.</li>
+        <li>Used to avoid prop drilling.</li>
+        <li>Works with Context Provider.</li>
+        <li>Useful for shared/global state.</li>
+        <li>Often used for authentication and themes.</li>
+      </ul>
+
+      <h2>Short Interview Answer</h2>
+
+      <div class="highlight">
+        useContext is a React hook that allows components to directly access shared Context data without manually passing props through multiple levels.
+      </div>
+
+      <h2>One-Line Interview Answer</h2>
+
+      <div class="highlight">
+        useContext is used to access shared Context data in React.
+      </div>
+
+    </section>
+
+  </div>
+
+</body>
+</html>
