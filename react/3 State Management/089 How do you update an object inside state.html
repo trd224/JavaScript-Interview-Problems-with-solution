@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>089 - Updating an Object Inside State in React</title>
+
+  <style>
+
+    body{
+      margin:0;
+      padding:0;
+      background:#000814;
+      color:#e2e8f0;
+      font-family:Arial, sans-serif;
+      line-height:1.7;
+    }
+
+    .container{
+      max-width:1000px;
+      margin:40px auto;
+      background:#020617;
+      padding:40px;
+      border-radius:18px;
+      border:1px solid #0f172a;
+      box-shadow:0 0 40px rgba(0,0,0,0.95);
+    }
+
+    h1{
+      color:#f8fafc;
+      margin-bottom:30px;
+      font-size:34px;
+    }
+
+    h2{
+      color:#c084fc;
+      margin-top:35px;
+      margin-bottom:15px;
+      font-size:26px;
+    }
+
+    p{
+      color:#cbd5e1;
+    }
+
+    ul{
+      padding-left:24px;
+    }
+
+    li{
+      margin-bottom:10px;
+      color:#cbd5e1;
+    }
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      margin-top:20px;
+    }
+
+    table th,
+    table td{
+      border:1px solid #1e293b;
+      padding:14px;
+      text-align:left;
+      vertical-align:top;
+    }
+
+    table th{
+      background:#0f172a;
+      color:#38bdf8;
+    }
+
+    table td{
+      background:#020617;
+      color:#d1d5db;
+    }
+
+    .highlight{
+      background:#0f172a;
+      padding:18px;
+      border-left:5px solid #38bdf8;
+      border-radius:10px;
+      margin-top:15px;
+      color:#e5e7eb;
+    }
+
+    .flow{
+      background:#020617;
+      border:1px solid #1e293b;
+      padding:20px;
+      border-radius:10px;
+      margin-top:15px;
+      color:#e2e8f0;
+      line-height:2;
+      text-align:center;
+      font-size:18px;
+    }
+
+    pre{
+      background:#000000;
+      padding:22px;
+      border-radius:12px;
+      overflow-x:auto;
+      border:1px solid #0f172a;
+    }
+
+    code{
+      font-family:Consolas, monospace;
+      font-size:15px;
+    }
+
+    .keyword{
+      color:#c084fc;
+    }
+
+    .function{
+      color:#38bdf8;
+    }
+
+    .string{
+      color:#facc15;
+    }
+
+    .tag{
+      color:#f472b6;
+    }
+
+    .comment{
+      color:#94a3b8;
+    }
+
+    .output{
+      color:#4ade80;
+    }
+
+    .warning{
+      color:#fb7185;
+    }
+
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+
+    <h1>089. How do you update an object inside state?</h1>
+
+    <h2>One-Line Definition</h2>
+
+    <div class="highlight">
+      An object inside React state is updated immutably using the spread operator to create a new object with updated values.
+    </div>
+
+    <h2>Basic State Object</h2>
+
+    <pre><code><span class="keyword">const</span> [user, setUser] = useState({
+
+  name: <span class="string">'Rizwan'</span>,
+  age: 25,
+  city: <span class="string">'Jaipur'</span>
+
+});</code></pre>
+
+    <h2>Wrong Way</h2>
+
+    <pre><code><span class="comment">// Wrong</span>
+
+user.age = 26;
+
+setUser(user);</code></pre>
+
+    <h2>Why This Is Wrong</h2>
+
+    <ul>
+      <li>Directly mutates existing object</li>
+      <li>Reference remains same</li>
+      <li>React may not detect update</li>
+      <li>UI may fail to re-render</li>
+    </ul>
+
+    <h2>Correct Way</h2>
+
+    <pre><code>setUser({
+
+  ...user,
+  age: 26
+
+});</code></pre>
+
+    <h2>What Happens Here?</h2>
+
+    <table>
+
+      <tr>
+        <th>Code</th>
+        <th>Purpose</th>
+      </tr>
+
+      <tr>
+        <td>...user</td>
+        <td>Copies old properties</td>
+      </tr>
+
+      <tr>
+        <td>age: 26</td>
+        <td>Updates age property</td>
+      </tr>
+
+    </table>
+
+    <h2>Result</h2>
+
+    <pre class="output"><code>{
+  name: 'Rizwan',
+  age: 26,
+  city: 'Jaipur'
+}</code></pre>
+
+    <h2>Main Flow</h2>
+
+    <div class="flow">
+      Existing Object
+      <br>
+      ↓
+      <br>
+      Create New Copy
+      <br>
+      ↓
+      <br>
+      Update Required Property
+      <br>
+      ↓
+      <br>
+      New Object Reference
+      <br>
+      ↓
+      <br>
+      React Re-Renders
+    </div>
+
+    <h2>Updating Multiple Properties</h2>
+
+    <pre><code>setUser({
+
+  ...user,
+  age: 26,
+  city: <span class="string">'Delhi'</span>
+
+});</code></pre>
+
+    <h2>Functional Update Version</h2>
+
+    <p>
+      Recommended when update depends on previous state.
+    </p>
+
+    <pre><code>setUser((prevUser) => ({
+
+  ...prevUser,
+  age: prevUser.age + 1
+
+}));</code></pre>
+
+    <h2>Why Functional Updates Are Useful</h2>
+
+    <ul>
+      <li>Always uses latest state</li>
+      <li>Avoids stale state problems</li>
+      <li>Safer for async updates</li>
+    </ul>
+
+    <h2>Updating Nested Objects</h2>
+
+    <pre><code><span class="keyword">const</span> [user, setUser] = useState({
+
+  name: <span class="string">'Rizwan'</span>,
+
+  address: {
+
+    city: <span class="string">'Jaipur'</span>,
+    state: <span class="string">'Rajasthan'</span>
+
+  }
+
+});</code></pre>
+
+    <h2>Correct Nested Update</h2>
+
+    <pre><code>setUser({
+
+  ...user,
+
+  address: {
+
+    ...user.address,
+    city: <span class="string">'Delhi'</span>
+
+  }
+
+});</code></pre>
+
+    <h2>Why Nested Spread Is Needed</h2>
+
+    <p>
+      Nested objects also need immutable updates.
+    </p>
+
+    <h2>Common Mistake</h2>
+
+    <pre><code><span class="comment">// Wrong</span>
+
+setUser({
+
+  age: 26
+
+});</code></pre>
+
+    <h2>Problem</h2>
+
+    <pre class="warning"><code>{
+  age: 26
+}</code></pre>
+
+    <p>
+      Other properties are removed because useState replaces the entire object.
+    </p>
+
+    <h2>Correct Version</h2>
+
+    <pre><code>setUser({
+
+  ...user,
+  age: 26
+
+});</code></pre>
+
+    <h2>Why React Requires Immutable Updates</h2>
+
+    <div class="highlight">
+      React detects state changes using reference comparison, so immutable updates create new references that React can detect efficiently.
+    </div>
+
+    <h2>Mutable vs Immutable Updates</h2>
+
+    <table>
+
+      <tr>
+        <th>Mutable</th>
+        <th>Immutable</th>
+      </tr>
+
+      <tr>
+        <td>user.age = 26</td>
+        <td>{ ...user, age: 26 }</td>
+      </tr>
+
+      <tr>
+        <td>array.push()</td>
+        <td>[...array, item]</td>
+      </tr>
+
+      <tr>
+        <td>array.splice()</td>
+        <td>array.filter()</td>
+      </tr>
+
+    </table>
+
+    <h2>Real Project Use Cases</h2>
+
+    <table>
+
+      <tr>
+        <th>Feature</th>
+        <th>Object Update</th>
+      </tr>
+
+      <tr>
+        <td>User profile</td>
+        <td>Update user information</td>
+      </tr>
+
+      <tr>
+        <td>OTP form</td>
+        <td>Update verification state</td>
+      </tr>
+
+      <tr>
+        <td>Captcha tracking</td>
+        <td>Update activity object</td>
+      </tr>
+
+      <tr>
+        <td>Theme settings</td>
+        <td>Update config object</td>
+      </tr>
+
+      <tr>
+        <td>API state</td>
+        <td>Update loading/data/error object</td>
+      </tr>
+
+    </table>
+
+    <h2>Important Interview Points</h2>
+
+    <ul>
+      <li>Never mutate state objects directly.</li>
+      <li>Use spread operator for immutable updates.</li>
+      <li>useState replaces entire object.</li>
+      <li>Nested objects require nested spreads.</li>
+      <li>Functional updates are safer for previous-state calculations.</li>
+    </ul>
+
+    <h2>Short Interview Answer</h2>
+
+    <div class="highlight">
+      Objects inside React state are updated immutably using the spread operator to create a new object while preserving existing properties.
+    </div>
+
+    <h2>One-Line Interview Answer</h2>
+
+    <div class="highlight">
+      Update React state objects immutably using the spread operator.
+    </div>
+
+  </div>
+
+</body>
+</html>

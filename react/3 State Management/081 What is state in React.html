@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>081 - State in React</title>
+
+  <style>
+
+    body{
+      margin:0;
+      padding:0;
+      background:#000814;
+      color:#e2e8f0;
+      font-family:Arial, sans-serif;
+      line-height:1.7;
+    }
+
+    .container{
+      max-width:1000px;
+      margin:40px auto;
+      background:#020617;
+      padding:40px;
+      border-radius:18px;
+      border:1px solid #0f172a;
+      box-shadow:0 0 40px rgba(0,0,0,0.95);
+    }
+
+    h1{
+      color:#f8fafc;
+      margin-bottom:30px;
+      font-size:34px;
+    }
+
+    h2{
+      color:#c084fc;
+      margin-top:35px;
+      margin-bottom:15px;
+      font-size:26px;
+    }
+
+    p{
+      color:#cbd5e1;
+    }
+
+    ul{
+      padding-left:24px;
+    }
+
+    li{
+      margin-bottom:10px;
+      color:#cbd5e1;
+    }
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      margin-top:20px;
+    }
+
+    table th,
+    table td{
+      border:1px solid #1e293b;
+      padding:14px;
+      text-align:left;
+      vertical-align:top;
+    }
+
+    table th{
+      background:#0f172a;
+      color:#38bdf8;
+    }
+
+    table td{
+      background:#020617;
+      color:#d1d5db;
+    }
+
+    .highlight{
+      background:#0f172a;
+      padding:18px;
+      border-left:5px solid #38bdf8;
+      border-radius:10px;
+      margin-top:15px;
+      color:#e5e7eb;
+    }
+
+    .flow{
+      background:#020617;
+      border:1px solid #1e293b;
+      padding:20px;
+      border-radius:10px;
+      margin-top:15px;
+      color:#e2e8f0;
+      line-height:2;
+      text-align:center;
+      font-size:18px;
+    }
+
+    pre{
+      background:#000000;
+      padding:22px;
+      border-radius:12px;
+      overflow-x:auto;
+      border:1px solid #0f172a;
+    }
+
+    code{
+      font-family:Consolas, monospace;
+      font-size:15px;
+    }
+
+    .keyword{
+      color:#c084fc;
+    }
+
+    .function{
+      color:#38bdf8;
+    }
+
+    .string{
+      color:#facc15;
+    }
+
+    .tag{
+      color:#f472b6;
+    }
+
+    .comment{
+      color:#94a3b8;
+    }
+
+    .output{
+      color:#4ade80;
+    }
+
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+
+    <h1>081. What is state in React?</h1>
+
+    <h2>One-Line Definition</h2>
+
+    <div class="highlight">
+      State in React is a built-in object used to store and manage dynamic data that changes over time inside a component.
+    </div>
+
+    <h2>Simple Understanding</h2>
+
+    <p>
+      State stores values that can change while the application is running.
+    </p>
+
+    <p>
+      When state changes:
+    </p>
+
+    <div class="highlight">
+      React automatically re-renders the component UI.
+    </div>
+
+    <h2>Examples of State</h2>
+
+    <ul>
+      <li>Counter value</li>
+      <li>Form input text</li>
+      <li>OTP value</li>
+      <li>Theme mode</li>
+      <li>Popup open/close status</li>
+      <li>API response data</li>
+    </ul>
+
+    <h2>Main Idea</h2>
+
+    <div class="flow">
+      State Changes
+      <br>
+      ↓
+      <br>
+      React Detects Change
+      <br>
+      ↓
+      <br>
+      Component Re-Renders
+      <br>
+      ↓
+      <br>
+      UI Updates Automatically
+    </div>
+
+    <h2>Basic Example Using useState</h2>
+
+    <pre><code><span class="keyword">import</span> { useState } from <span class="string">'react'</span>;
+
+<span class="keyword">function</span> <span class="function">App</span>() {
+
+  <span class="keyword">const</span> [count, setCount] = useState(0);
+
+  <span class="keyword">return</span> (
+
+    <span class="tag">&lt;div&gt;</span>
+
+      <span class="tag">&lt;h1&gt;</span>{count}<span class="tag">&lt;/h1&gt;</span>
+
+      <span class="tag">&lt;button</span> onClick={() => setCount(count + 1)}<span class="tag">&gt;</span>
+        Increment
+      <span class="tag">&lt;/button&gt;</span>
+
+    <span class="tag">&lt;/div&gt;</span>
+
+  );
+
+}</code></pre>
+
+    <h2>Output Before Click</h2>
+
+    <pre class="output"><code>0</code></pre>
+
+    <h2>Output After Click</h2>
+
+    <pre class="output"><code>1</code></pre>
+
+    <h2>How useState Works</h2>
+
+    <pre><code><span class="keyword">const</span> [count, setCount] = useState(0);</code></pre>
+
+    <table>
+
+      <tr>
+        <th>Part</th>
+        <th>Meaning</th>
+      </tr>
+
+      <tr>
+        <td>count</td>
+        <td>Current state value</td>
+      </tr>
+
+      <tr>
+        <td>setCount</td>
+        <td>Function to update state</td>
+      </tr>
+
+      <tr>
+        <td>0</td>
+        <td>Initial state value</td>
+      </tr>
+
+    </table>
+
+    <h2>Important Rule</h2>
+
+    <div class="highlight">
+      Never modify state directly.
+    </div>
+
+    <h2>Wrong Example</h2>
+
+    <pre><code><span class="comment">// Wrong</span>
+
+count = count + 1;</code></pre>
+
+    <h2>Correct Example</h2>
+
+    <pre><code>setCount(count + 1);</code></pre>
+
+    <h2>Why Direct Modification Is Wrong</h2>
+
+    <p>
+      React will not detect state changes if state is modified directly.
+    </p>
+
+    <p>
+      Therefore:
+    </p>
+
+    <div class="highlight">
+      UI will not update properly.
+    </div>
+
+    <h2>State Can Store Different Data Types</h2>
+
+    <table>
+
+      <tr>
+        <th>Type</th>
+        <th>Example</th>
+      </tr>
+
+      <tr>
+        <td>String</td>
+        <td>useState('Rizwan')</td>
+      </tr>
+
+      <tr>
+        <td>Number</td>
+        <td>useState(0)</td>
+      </tr>
+
+      <tr>
+        <td>Boolean</td>
+        <td>useState(false)</td>
+      </tr>
+
+      <tr>
+        <td>Array</td>
+        <td>useState([])</td>
+      </tr>
+
+      <tr>
+        <td>Object</td>
+        <td>useState({})</td>
+      </tr>
+
+    </table>
+
+    <h2>Example with Object State</h2>
+
+    <pre><code><span class="keyword">const</span> [user, setUser] = useState({
+
+  name: <span class="string">'Rizwan'</span>,
+  age: 25
+
+});</code></pre>
+
+    <h2>Updating Object State</h2>
+
+    <pre><code>setUser({
+
+  ...user,
+  age: 26
+
+});</code></pre>
+
+    <h2>Why State Is Important</h2>
+
+    <ul>
+      <li>Creates interactive UI</li>
+      <li>Handles dynamic data</li>
+      <li>Controls application behavior</li>
+      <li>Updates UI automatically</li>
+    </ul>
+
+    <h2>State vs Props</h2>
+
+    <table>
+
+      <tr>
+        <th>State</th>
+        <th>Props</th>
+      </tr>
+
+      <tr>
+        <td>Managed inside component</td>
+        <td>Passed from parent</td>
+      </tr>
+
+      <tr>
+        <td>Mutable using setter</td>
+        <td>Read-only</td>
+      </tr>
+
+      <tr>
+        <td>Dynamic data</td>
+        <td>External data</td>
+      </tr>
+
+      <tr>
+        <td>Can change over time</td>
+        <td>Controlled by parent</td>
+      </tr>
+
+    </table>
+
+    <h2>Real Project Use Cases</h2>
+
+    <table>
+
+      <tr>
+        <th>Feature</th>
+        <th>State Usage</th>
+      </tr>
+
+      <tr>
+        <td>OTP authentication</td>
+        <td>Store OTP value</td>
+      </tr>
+
+      <tr>
+        <td>Captcha system</td>
+        <td>Track validation state</td>
+      </tr>
+
+      <tr>
+        <td>Popup modal</td>
+        <td>Open/close status</td>
+      </tr>
+
+      <tr>
+        <td>Theme switching</td>
+        <td>Dark/light mode</td>
+      </tr>
+
+      <tr>
+        <td>API loading</td>
+        <td>Loading indicators</td>
+      </tr>
+
+    </table>
+
+    <h2>Important Interview Points</h2>
+
+    <ul>
+      <li>State stores dynamic component data.</li>
+      <li>Updating state triggers re-rendering.</li>
+      <li>useState is commonly used in functional components.</li>
+      <li>Never mutate state directly.</li>
+      <li>State makes React applications interactive.</li>
+    </ul>
+
+    <h2>Short Interview Answer</h2>
+
+    <div class="highlight">
+      State in React is a mechanism used to store and update dynamic data inside components, where state changes automatically trigger UI re-rendering.
+    </div>
+
+    <h2>One-Line Interview Answer</h2>
+
+    <div class="highlight">
+      State in React stores dynamic data that updates the UI when changed.
+    </div>
+
+  </div>
+
+</body>
+</html>

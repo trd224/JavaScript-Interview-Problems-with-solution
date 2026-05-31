@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>138 - What is useRef and what are its use cases?</title>
+
+  <style>
+
+    body{
+      margin:0;
+      padding:40px 20px;
+      background:#000814;
+      color:#e2e8f0;
+      font-family:Arial,sans-serif;
+      line-height:1.7;
+    }
+
+    .container{
+      max-width:1000px;
+      margin:auto;
+    }
+
+    .card{
+      background:#020617;
+      border:1px solid #1e293b;
+      border-radius:18px;
+      padding:35px;
+      margin-bottom:30px;
+      box-shadow:0 0 25px rgba(0,0,0,0.6);
+    }
+
+    h1{
+      color:#f8fafc;
+      font-size:38px;
+      margin:0;
+    }
+
+    h2{
+      color:#c084fc;
+      margin-top:0;
+      margin-bottom:18px;
+      font-size:28px;
+    }
+
+    h3{
+      color:#38bdf8;
+      margin-top:25px;
+      margin-bottom:12px;
+      font-size:20px;
+    }
+
+    p{
+      color:#cbd5e1;
+    }
+
+    ul{
+      padding-left:24px;
+    }
+
+    li{
+      margin-bottom:10px;
+      color:#cbd5e1;
+    }
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      margin-top:20px;
+    }
+
+    table th,
+    table td{
+      border:1px solid #334155;
+      padding:14px;
+      text-align:left;
+      vertical-align:top;
+    }
+
+    table th{
+      background:#0f172a;
+      color:#38bdf8;
+    }
+
+    table td{
+      color:#d1d5db;
+    }
+
+    .highlight{
+      background:#0f172a;
+      padding:18px;
+      border-left:5px solid #38bdf8;
+      border-radius:10px;
+      color:#e5e7eb;
+    }
+
+    .flow{
+      background:#000000;
+      border:1px solid #334155;
+      padding:20px;
+      border-radius:12px;
+      color:#e2e8f0;
+      line-height:2;
+      text-align:center;
+      font-size:18px;
+    }
+
+    pre{
+      background:#000000;
+      padding:22px;
+      border-radius:12px;
+      overflow-x:auto;
+      border:1px solid #1e293b;
+    }
+
+    code{
+      font-family:Consolas,monospace;
+      font-size:15px;
+    }
+
+    .keyword{
+      color:#c084fc;
+    }
+
+    .function{
+      color:#38bdf8;
+    }
+
+    .string{
+      color:#facc15;
+    }
+
+    .tag{
+      color:#f472b6;
+    }
+
+    .comment{
+      color:#94a3b8;
+    }
+
+    .output{
+      color:#4ade80;
+    }
+
+  </style>
+
+</head>
+
+<body>
+
+  <div class="container">
+
+    <section class="card">
+
+      <h1>138. What is useRef and what are its use cases?</h1>
+
+    </section>
+
+    <section class="card">
+
+      <h2>One-Line Definition</h2>
+
+      <div class="highlight">
+        useRef is a React hook used to store mutable values and access DOM elements without causing re-renders.
+      </div>
+
+      <h2>Simple Understanding</h2>
+
+      <p>
+        useRef creates a persistent object that stays the same between renders.
+      </p>
+
+      <h2>Main Features</h2>
+
+      <ul>
+        <li>Stores mutable values</li>
+        <li>Accesses DOM elements</li>
+        <li>Does not trigger re-render</li>
+        <li>Value persists across renders</li>
+      </ul>
+
+    </section>
+
+    <section class="card">
+
+      <h2>Main Idea</h2>
+
+      <div class="flow">
+        useRef()
+        <br>
+        ↓
+        <br>
+        Creates Ref Object
+        <br>
+        ↓
+        <br>
+        Stored in ref.current
+        <br>
+        ↓
+        <br>
+        Value Persists Between Renders
+      </div>
+
+      <h2>Basic Syntax</h2>
+
+      <pre><code><span class="keyword">const</span> ref = useRef(initialValue);</code></pre>
+
+    </section>
+
+    <section class="card">
+
+      <h2>Important Structure</h2>
+
+      <pre><code><span class="keyword">const</span> ref = useRef(0);
+
+console.log(ref);
+
+<span class="comment">// Output</span>
+
+{
+  current: 0
+}</code></pre>
+
+      <h3>Important Point</h3>
+
+      <div class="highlight">
+        useRef stores data inside the current property.
+      </div>
+
+    </section>
+
+    <section class="card">
+
+      <h2>Project Structure</h2>
+
+      <pre><code>src/
+├── App.jsx
+├── components/
+│   └── InputFocus.jsx</code></pre>
+
+    </section>
+
+    <section class="card">
+
+      <h2>DOM Access Example</h2>
+
+      <h3>components/InputFocus.jsx</h3>
+
+      <pre><code><span class="keyword">import</span> { useRef } <span class="keyword">from</span> <span class="string">'react'</span>;
+
+<span class="keyword">function</span> <span class="function">InputFocus</span>() {
+
+  <span class="keyword">const</span> inputRef = useRef(null);
+
+  <span class="keyword">const</span> focusInput = () => {
+
+    inputRef.current.focus();
+
+  };
+
+  <span class="keyword">return</span> (
+
+    <span class="tag">&lt;&gt;</span>
+
+      <span class="tag">&lt;input</span> ref={inputRef} <span class="tag">/&gt;</span>
+
+      <span class="tag">&lt;button</span> onClick={focusInput}<span class="tag">&gt;</span>
+
+        Focus Input
+
+      <span class="tag">&lt;/button&gt;</span>
+
+    <span class="tag">&lt;/&gt;</span>
+
+  );
+
+}
+
+<span class="keyword">export default</span> InputFocus;</code></pre>
+
+    </section>
+
+    <section class="card">
+
+      <h2>App Component</h2>
+
+      <h3>App.jsx</h3>
+
+      <pre><code><span class="keyword">import</span> InputFocus <span class="keyword">from</span> <span class="string">'./components/InputFocus'</span>;
+
+<span class="keyword">function</span> <span class="function">App</span>() {
+
+  <span class="keyword">return</span> <span class="tag">&lt;InputFocus</span> <span class="tag">/&gt;</span>;
+
+}
+
+<span class="keyword">export default</span> App;</code></pre>
+
+      <h3>What Happens?</h3>
+
+      <ul>
+        <li>Button click triggers focusInput()</li>
+        <li>inputRef.current points to input DOM element</li>
+        <li>Input gets focused</li>
+      </ul>
+
+    </section>
+
+    <section class="card">
+
+      <h2>Store Mutable Value Example</h2>
+
+      <pre><code><span class="keyword">import</span> { useRef } <span class="keyword">from</span> <span class="string">'react'</span>;
+
+<span class="keyword">function</span> <span class="function">Counter</span>() {
+
+  <span class="keyword">const</span> countRef = useRef(0);
+
+  <span class="keyword">const</span> increase = () => {
+
+    countRef.current++;
+
+    console.log(countRef.current);
+
+  };
+
+  <span class="keyword">return</span> (
+
+    <span class="tag">&lt;button</span> onClick={increase}<span class="tag">&gt;</span>
+
+      Increase
+
+    <span class="tag">&lt;/button&gt;</span>
+
+  );
+
+}
+
+<span class="keyword">export default</span> Counter;</code></pre>
+
+      <h3>Output</h3>
+
+      <pre class="output"><code>1
+2
+3</code></pre>
+
+    </section>
+
+    <section class="card">
+
+      <h2>Important Difference Between useRef and useState</h2>
+
+      <table>
+
+        <tr>
+          <th>useRef</th>
+          <th>useState</th>
+        </tr>
+
+        <tr>
+          <td>Does not re-render component</td>
+          <td>Triggers re-render</td>
+        </tr>
+
+        <tr>
+          <td>Stores mutable value</td>
+          <td>Stores reactive state</td>
+        </tr>
+
+        <tr>
+          <td>Uses current property</td>
+          <td>Uses setter function</td>
+        </tr>
+
+      </table>
+
+    </section>
+
+    <section class="card">
+
+      <h2>Why useRef Does Not Re-Render?</h2>
+
+      <div class="highlight">
+        React does not track changes inside ref.current for rendering updates.
+      </div>
+
+    </section>
+
+    <section class="card">
+
+      <h2>Persist Value Between Renders</h2>
+
+      <pre><code><span class="keyword">import</span> { useRef, useState } <span class="keyword">from</span> <span class="string">'react'</span>;
+
+<span class="keyword">function</span> <span class="function">App</span>() {
+
+  <span class="keyword">const</span> renderCount = useRef(0);
+
+  <span class="keyword">const</span> [count, setCount] = useState(0);
+
+  renderCount.current++;
+
+  <span class="keyword">return</span> (
+
+    <span class="tag">&lt;&gt;</span>
+
+      <span class="tag">&lt;h1&gt;</span>Render Count: {renderCount.current}<span class="tag">&lt;/h1&gt;</span>
+
+      <span class="tag">&lt;button</span> onClick={() => setCount(count + 1)}<span class="tag">&gt;</span>
+
+        {count}
+
+      <span class="tag">&lt;/button&gt;</span>
+
+    <span class="tag">&lt;/&gt;</span>
+
+  );
+
+}
+
+<span class="keyword">export default</span> App;</code></pre>
+
+    </section>
+
+    <section class="card">
+
+      <h2>Common useRef Use Cases</h2>
+
+      <table>
+
+        <tr>
+          <th>Use Case</th>
+          <th>Purpose</th>
+        </tr>
+
+        <tr>
+          <td>Input focus</td>
+          <td>Access DOM element</td>
+        </tr>
+
+        <tr>
+          <td>Timer IDs</td>
+          <td>Store interval/timeout</td>
+        </tr>
+
+        <tr>
+          <td>Previous value tracking</td>
+          <td>Store old state</td>
+        </tr>
+
+        <tr>
+          <td>WebSocket instance</td>
+          <td>Persist connection object</td>
+        </tr>
+
+        <tr>
+          <td>Mutable counters</td>
+          <td>Store value without re-render</td>
+        </tr>
+
+      </table>
+
+    </section>
+
+    <section class="card">
+
+      <h2>Timer Example</h2>
+
+      <pre><code><span class="keyword">const</span> timerRef = useRef(null);
+
+timerRef.current = setInterval(() => {
+
+  console.log(<span class="string">'Running'</span>);
+
+}, 1000);
+
+clearInterval(timerRef.current);</code></pre>
+
+    </section>
+
+    <section class="card">
+
+      <h2>Previous State Tracking Example</h2>
+
+      <pre><code><span class="keyword">import</span> {
+
+  useEffect,
+  useRef,
+  useState
+
+} <span class="keyword">from</span> <span class="string">'react'</span>;
+
+<span class="keyword">function</span> <span class="function">App</span>() {
+
+  <span class="keyword">const</span> [count, setCount] = useState(0);
+
+  <span class="keyword">const</span> previousCount = useRef();
+
+  useEffect(() => {
+
+    previousCount.current = count;
+
+  }, [count]);
+
+  <span class="keyword">return</span> (
+
+    <span class="tag">&lt;&gt;</span>
+
+      <span class="tag">&lt;h2&gt;</span>Current: {count}<span class="tag">&lt;/h2&gt;</span>
+
+      <span class="tag">&lt;h2&gt;</span>Previous: {previousCount.current}<span class="tag">&lt;/h2&gt;</span>
+
+      <span class="tag">&lt;button</span> onClick={() => setCount(count + 1)}<span class="tag">&gt;</span>
+
+        Increase
+
+      <span class="tag">&lt;/button&gt;</span>
+
+    <span class="tag">&lt;/&gt;</span>
+
+  );
+
+}
+
+<span class="keyword">export default</span> App;</code></pre>
+
+    </section>
+
+    <section class="card">
+
+      <h2>Main useRef Flow</h2>
+
+      <div class="flow">
+        useRef()
+        <br>
+        ↓
+        <br>
+        Creates Persistent Ref Object
+        <br>
+        ↓
+        <br>
+        Stored in current
+        <br>
+        ↓
+        <br>
+        Value Persists Without Re-Render
+      </div>
+
+    </section>
+
+    <section class="card">
+
+      <h2>Important Interview Points</h2>
+
+      <ul>
+        <li>useRef stores mutable values.</li>
+        <li>useRef does not trigger re-render.</li>
+        <li>Used for DOM access.</li>
+        <li>Value stored in current property.</li>
+        <li>Value persists between renders.</li>
+      </ul>
+
+      <h2>Short Interview Answer</h2>
+
+      <div class="highlight">
+        useRef is a React hook used to store mutable values and access DOM elements without causing component re-renders.
+      </div>
+
+      <h2>One-Line Interview Answer</h2>
+
+      <div class="highlight">
+        useRef stores persistent mutable values without triggering re-renders.
+      </div>
+
+    </section>
+
+  </div>
+
+</body>
+</html>
