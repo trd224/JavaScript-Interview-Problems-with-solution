@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>What is Incremental Static Regeneration (ISR) and How Do You Enable It?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+}
+
+body{
+  background:#0f172a;
+  color:#e2e8f0;
+  font-family:Arial,sans-serif;
+  line-height:1.8;
+  padding:40px 20px;
+}
+
+.container{
+  max-width:1000px;
+  margin:auto;
+  background:#111827;
+  padding:40px;
+  border-radius:16px;
+}
+
+h1{
+  color:#38bdf8;
+  margin-bottom:20px;
+}
+
+h2{
+  color:#a78bfa;
+  margin-top:30px;
+  margin-bottom:10px;
+}
+
+h3{
+  color:#fbbf24;
+  margin-top:25px;
+  margin-bottom:10px;
+}
+
+p{
+  margin-bottom:15px;
+}
+
+ul{
+  margin-left:20px;
+}
+
+li{
+  margin-bottom:8px;
+}
+
+.feature{
+  background:#1e293b;
+  border-left:5px solid #38bdf8;
+  padding:15px;
+  border-radius:8px;
+  margin:20px 0;
+}
+
+.code-title{
+  background:#1e293b;
+  color:#93c5fd;
+  padding:10px;
+  font-weight:bold;
+}
+
+pre[class*="language-"]{
+  margin:0!important;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:20px;
+}
+
+th{
+  background:#1e293b;
+  color:#38bdf8;
+  text-align:left;
+  padding:12px;
+}
+
+td{
+  padding:12px;
+  border-top:1px solid #334155;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>What is Incremental Static Regeneration (ISR) and How Do You Enable It?</h1>
+
+<p>
+Incremental Static Regeneration (ISR) is a Next.js feature that combines the speed of Static Site Generation (SSG) with the ability to update static pages after deployment.
+</p>
+
+<div class="feature">
+ISR allows us to regenerate static pages in the background at a specified interval without rebuilding the entire application.
+</div>
+
+<h2>Why Do We Need ISR?</h2>
+
+<p>
+SSG generates pages during the build process.
+</p>
+
+<p>
+The problem is that data may change after deployment.
+</p>
+
+<p>
+Without ISR:
+</p>
+
+<div class="code-title">Problem</div>
+
+<pre><code class="language-text">Build Application
+       │
+       ▼
+Generate HTML
+       │
+       ▼
+Deploy
+
+Data Changes Later
+
+       │
+       ▼
+HTML Becomes Outdated
+</code></pre>
+
+<p>
+To get fresh data, we would need to rebuild and redeploy the application.
+</p>
+
+<p>
+ISR solves this problem.
+</p>
+
+<h2>How ISR Works</h2>
+
+<div class="code-title">ISR Flow</div>
+
+<pre><code class="language-text">Build Application
+       │
+       ▼
+Generate Static HTML
+       │
+       ▼
+Deploy
+
+After Revalidate Time
+
+       │
+       ▼
+Next Request Arrives
+       │
+       ▼
+Regenerate Page
+In Background
+       │
+       ▼
+Update Cached Page
+</code></pre>
+
+<h2>Basic Example</h2>
+
+<div class="code-title">pages/posts.js</div>
+
+<pre><code class="language-jsx">export async function getStaticProps() {
+
+  const res = await fetch(
+    'https://api.example.com/posts'
+  );
+
+  const posts = await res.json();
+
+  return {
+    props: { posts },
+    revalidate: 60
+  };
+
+}
+
+export default function Posts({ posts }) {
+
+  return (
+    &lt;h1&gt;
+      Total Posts: {posts.length}
+    &lt;/h1&gt;
+  );
+
+}</code></pre>
+
+<h2>How Do We Enable ISR?</h2>
+
+<p>
+ISR is enabled by returning the <code>revalidate</code> property from <code>getStaticProps()</code>.
+</p>
+
+<div class="code-title">Enable ISR</div>
+
+<pre><code class="language-jsx">return {
+  props: { posts },
+  revalidate: 60
+};</code></pre>
+
+<p>
+Meaning:
+</p>
+
+<pre><code class="language-text">Regenerate Page
+Every 60 Seconds
+</code></pre>
+
+<h2>What Happens Internally?</h2>
+
+<div class="code-title">Timeline</div>
+
+<pre><code class="language-text">12:00 PM
+      │
+      ▼
+Build Generates Page
+
+12:01 PM
+      │
+      ▼
+User Visits Page
+      │
+      ▼
+Serve Cached HTML
+
+12:02 PM
+      │
+      ▼
+User Visits Page
+      │
+      ▼
+Serve Cached HTML
+
+12:03 PM
+(60 Seconds Passed)
+      │
+      ▼
+User Visits Page
+      │
+      ▼
+Serve Old HTML
+      │
+      ▼
+Regenerate Page
+In Background
+      │
+      ▼
+Cache Updated HTML
+
+Next User
+      │
+      ▼
+Receives New HTML
+</code></pre>
+
+<h2>Important Point</h2>
+
+<div class="feature">
+The user who triggers regeneration still receives the old cached page. Regeneration happens in the background, and future users receive the updated page.
+</div>
+
+<h2>Real Example</h2>
+
+<p>
+Suppose our application displays product information.
+</p>
+
+<div class="code-title">Route</div>
+
+<pre><code class="language-text">/products</code></pre>
+
+<p>
+Products rarely change, but updates may occur every few minutes.
+</p>
+
+<div class="code-title">ISR Configuration</div>
+
+<pre><code class="language-jsx">return {
+  props: { products },
+  revalidate: 300
+};</code></pre>
+
+<p>
+Meaning:
+</p>
+
+<pre><code class="language-text">Regenerate Page
+Every 5 Minutes
+</code></pre>
+
+<p>
+We get:
+</p>
+
+<ul>
+<li>Static page performance.</li>
+<li>Automatic updates.</li>
+<li>No manual rebuilds.</li>
+</ul>
+
+<h2>ISR with Dynamic Routes</h2>
+
+<div class="code-title">pages/products/[id].js</div>
+
+<pre><code class="language-jsx">export async function getStaticPaths() {
+
+  return {
+    paths: [
+      { params: { id: '1' } }
+    ],
+    fallback: 'blocking'
+  };
+
+}
+
+export async function getStaticProps({ params }) {
+
+  return {
+    props: {
+      id: params.id
+    },
+    revalidate: 60
+  };
+
+}</code></pre>
+
+<p>
+Each generated page can be regenerated independently.
+</p>
+
+<h2>SSR vs SSG vs ISR</h2>
+
+<table>
+<tr>
+<th>Feature</th>
+<th>SSR</th>
+<th>SSG</th>
+<th>ISR</th>
+</tr>
+
+<tr>
+<td>HTML Generated</td>
+<td>Every Request</td>
+<td>Build Time</td>
+<td>Build Time + Regeneration</td>
+</tr>
+
+<tr>
+<td>Fresh Data</td>
+<td>Always</td>
+<td>Build Time Data</td>
+<td>Periodic Updates</td>
+</tr>
+
+<tr>
+<td>Performance</td>
+<td>Slower</td>
+<td>Fastest</td>
+<td>Very Fast</td>
+</tr>
+
+<tr>
+<td>Server Load</td>
+<td>High</td>
+<td>Very Low</td>
+<td>Low</td>
+</tr>
+</table>
+
+<h2>When Should We Use ISR?</h2>
+
+<ul>
+<li>Blogs</li>
+<li>News Websites</li>
+<li>Product Catalogs</li>
+<li>E-commerce Websites</li>
+<li>Documentation Sites</li>
+<li>Marketing Websites</li>
+</ul>
+
+<p>
+These pages need occasional updates but do not require fresh data on every request.
+</p>
+
+<h2>When Should We Avoid ISR?</h2>
+
+<ul>
+<li>User Dashboards</li>
+<li>Stock Prices</li>
+<li>Live Sports Scores</li>
+<li>Real-Time Analytics</li>
+</ul>
+
+<p>
+These pages require SSR because data must always be fresh.
+</p>
+
+<h2>App Router Equivalent</h2>
+
+<p>
+In the App Router, ISR is enabled using the <code>revalidate</code> export.
+</p>
+
+<div class="code-title">app/posts/page.js</div>
+
+<pre><code class="language-jsx">export const revalidate = 60;
+
+async function getPosts() {
+
+  const res = await fetch(
+    'https://api.example.com/posts'
+  );
+
+  return res.json();
+
+}
+
+export default async function Posts() {
+
+  const posts = await getPosts();
+
+  return (
+    &lt;h1&gt;
+      {posts.length}
+    &lt;/h1&gt;
+  );
+
+}</code></pre>
+
+<p>
+Meaning:
+</p>
+
+<pre><code class="language-text">Regenerate Page
+Every 60 Seconds
+</code></pre>
+
+<h2>Interview Tip</h2>
+
+<div class="feature">
+A common misconception is that ISR regenerates pages exactly when the revalidate time expires. In reality, regeneration happens only when a new request arrives after the revalidate period has passed.
+</div>
+
+<div class="feature">
+<strong>One-Line Definition:</strong><br>
+Incremental Static Regeneration (ISR) is a Next.js feature that allows statically generated pages to be automatically regenerated in the background after a specified interval without rebuilding the entire application.
+</div>
+
+<h2>Does ISR Regenerate Automatically?</h2>
+
+<div class="feature">
+<strong>Important:</strong><br>
+A common misconception is that ISR automatically regenerates pages exactly when the revalidate time expires. This is not true.
+</div>
+
+<p>
+ISR does not regenerate pages automatically when the timer expires.
+</p>
+
+<p>
+Instead, Next.js waits for a new request after the revalidate period has passed.
+</p>
+
+<div class="code-title">Actual ISR Rule</div>
+
+<pre><code class="language-text">Revalidate Time Expires
+          +
+New Request Arrives
+          =
+Regeneration Happens
+</code></pre>
+
+<p>
+Not:
+</p>
+
+<div class="code-title">Incorrect Assumption</div>
+
+<pre><code class="language-text">Revalidate Time Expires
+          =
+Regeneration Happens ❌
+</code></pre>
+
+<h3>Example Timeline</h3>
+
+<div class="code-title">Timeline</div>
+
+<pre><code class="language-text">12:00 PM
+      │
+      ▼
+Page Generated
+
+12:01 PM
+      │
+      ▼
+Data Changes In Database
+
+12:02 PM
+(60 Seconds Passed)
+      │
+      ▼
+No User Visits
+      │
+      ▼
+Nothing Happens
+
+12:05 PM
+      │
+      ▼
+First User Visits
+      │
+      ▼
+Serve Old Cached Page
+      │
+      ▼
+Regenerate Page In Background
+      │
+      ▼
+Update Cache
+
+12:06 PM
+      │
+      ▼
+Next User Visits
+      │
+      ▼
+Receives Updated Page
+</code></pre>
+
+<p>
+The first user after the revalidate period usually receives the old cached page while regeneration happens in the background.
+</p>
+
+<div class="feature">
+ISR regeneration is triggered by a request after the revalidate period has passed, not by the timer itself.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+
+</body>
+</html>

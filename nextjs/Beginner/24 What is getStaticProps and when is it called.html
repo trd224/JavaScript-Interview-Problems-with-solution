@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>What is getStaticProps and When is it Called?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+}
+
+body{
+  background:#0f172a;
+  color:#e2e8f0;
+  font-family:Arial,sans-serif;
+  line-height:1.8;
+  padding:40px 20px;
+}
+
+.container{
+  max-width:1000px;
+  margin:auto;
+  background:#111827;
+  padding:40px;
+  border-radius:16px;
+  box-shadow:0 0 30px rgba(0,0,0,.4);
+}
+
+h1{
+  color:#38bdf8;
+  margin-bottom:20px;
+}
+
+h2{
+  color:#a78bfa;
+  margin-top:30px;
+  margin-bottom:10px;
+}
+
+h3{
+  color:#fbbf24;
+  margin-top:25px;
+  margin-bottom:10px;
+}
+
+p{
+  margin-bottom:15px;
+}
+
+ul{
+  margin-left:20px;
+}
+
+li{
+  margin-bottom:8px;
+}
+
+.feature{
+  background:#1e293b;
+  border-left:5px solid #38bdf8;
+  padding:15px;
+  border-radius:8px;
+  margin:20px 0;
+}
+
+.code-title{
+  background:#1e293b;
+  color:#93c5fd;
+  padding:10px;
+  font-weight:bold;
+  border-top-left-radius:8px;
+  border-top-right-radius:8px;
+}
+
+pre[class*="language-"]{
+  margin:0!important;
+  border-bottom-left-radius:8px;
+  border-bottom-right-radius:8px;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:20px;
+}
+
+th{
+  background:#1e293b;
+  color:#38bdf8;
+  text-align:left;
+  padding:12px;
+}
+
+td{
+  padding:12px;
+  border-top:1px solid #334155;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>What is getStaticProps and When is it Called?</h1>
+
+<p>
+<code>getStaticProps()</code> is a special Next.js function used in the Pages Router to fetch data at build time for Static Site Generation (SSG).
+</p>
+
+<div class="feature">
+<code>getStaticProps()</code> runs during the build process, generates static HTML, and provides the fetched data as props to the page component.
+</div>
+
+<h2>Why Do We Need getStaticProps()?</h2>
+
+<p>
+Some pages contain data that does not change frequently.
+</p>
+
+Examples:
+
+<ul>
+<li>Blog Posts</li>
+<li>Documentation Pages</li>
+<li>Landing Pages</li>
+<li>Company Information Pages</li>
+<li>Marketing Websites</li>
+</ul>
+
+<p>
+Instead of fetching data for every request, we can fetch it once during the build process.
+</p>
+
+<h2>Basic Example</h2>
+
+<div class="code-title">pages/posts.js</div>
+
+<pre><code class="language-jsx">export async function getStaticProps() {
+
+  const res = await fetch(
+    'https://api.example.com/posts'
+  );
+
+  const posts = await res.json();
+
+  return {
+    props: { posts }
+  };
+
+}
+
+export default function Posts({ posts }) {
+
+  return (
+    &lt;h1&gt;
+      Total Posts: {posts.length}
+    &lt;/h1&gt;
+  );
+
+}</code></pre>
+
+<h2>When is getStaticProps() Called?</h2>
+
+<div class="feature">
+The most important thing to remember is that <code>getStaticProps()</code> is NOT called when users visit the page.
+</div>
+
+<h3>Called During Build</h3>
+
+<div class="code-title">Build Process</div>
+
+<pre><code class="language-text">npm run build
+       │
+       ▼
+getStaticProps()
+       │
+       ▼
+Fetch Data
+       │
+       ▼
+Generate HTML
+       │
+       ▼
+Save Static File
+</code></pre>
+
+<p>
+This happens only during the build process.
+</p>
+
+<h3>User Requests</h3>
+
+<div class="code-title">After Deployment</div>
+
+<pre><code class="language-text">User A Request
+      │
+      ▼
+Serve Existing HTML
+
+User B Request
+      │
+      ▼
+Serve Same HTML
+
+User C Request
+      │
+      ▼
+Serve Same HTML
+</code></pre>
+
+<p>
+Notice that <code>getStaticProps()</code> is not executed for these requests.
+</p>
+
+<h2>What Happens Internally?</h2>
+
+<div class="code-title">Full Flow</div>
+
+<pre><code class="language-text">npm run build
+      │
+      ▼
+getStaticProps()
+Runs Once
+      │
+      ▼
+Fetch Data
+      │
+      ▼
+Generate HTML
+      │
+      ▼
+Store HTML File
+      │
+      ▼
+Deploy
+
+────────────────────
+
+User Requests Page
+      │
+      ▼
+Serve Existing HTML
+      │
+      ▼
+No Data Fetching
+      │
+      ▼
+No getStaticProps()
+Execution
+</code></pre>
+
+<h2>Real Example</h2>
+
+<p>
+Suppose our application contains a blog page.
+</p>
+
+<div class="code-title">Route</div>
+
+<pre><code class="language-text">/blog</code></pre>
+
+<p>
+During build:
+</p>
+
+<div class="code-title">Build Time</div>
+
+<pre><code class="language-text">Fetch Blog Posts
+      │
+      ▼
+Generate HTML
+      │
+      ▼
+Save blog.html
+</code></pre>
+
+<p>
+After deployment:
+</p>
+
+<div class="code-title">Runtime</div>
+
+<pre><code class="language-text">User Visits /blog
+      │
+      ▼
+Serve Existing blog.html
+</code></pre>
+
+<p>
+No database query or API request occurs at runtime.
+</p>
+
+<h2>What Does getStaticProps() Return?</h2>
+
+<div class="code-title">Return Object</div>
+
+<pre><code class="language-jsx">return {
+  props: {
+    posts
+  }
+};</code></pre>
+
+<p>
+The returned props are passed directly to the page component.
+</p>
+
+<div class="code-title">Page Component</div>
+
+<pre><code class="language-jsx">export default function Posts({ posts }) {
+
+  return (
+    &lt;h1&gt;
+      {posts.length}
+    &lt;/h1&gt;
+  );
+
+}</code></pre>
+
+<h2>Using revalidate (ISR)</h2>
+
+<p>
+We can regenerate the page periodically using Incremental Static Regeneration (ISR).
+</p>
+
+<div class="code-title">ISR Example</div>
+
+<pre><code class="language-jsx">export async function getStaticProps() {
+
+  const posts = await fetchPosts();
+
+  return {
+    props: { posts },
+    revalidate: 60
+  };
+
+}</code></pre>
+
+<p>
+Meaning:
+</p>
+
+<div class="code-title">ISR Flow</div>
+
+<pre><code class="language-text">Generate Page
+
+After 60 Seconds
+
+Next Request
+      │
+      ▼
+Regenerate Page
+In Background
+</code></pre>
+
+<h2>getStaticProps vs getServerSideProps</h2>
+
+<table>
+<tr>
+<th>Feature</th>
+<th>getStaticProps</th>
+<th>getServerSideProps</th>
+</tr>
+
+<tr>
+<td>Called</td>
+<td>Build Time</td>
+<td>Every Request</td>
+</tr>
+
+<tr>
+<td>Rendering Type</td>
+<td>SSG</td>
+<td>SSR</td>
+</tr>
+
+<tr>
+<td>Performance</td>
+<td>Very Fast</td>
+<td>Slower</td>
+</tr>
+
+<tr>
+<td>Fresh Data</td>
+<td>Build Time Data</td>
+<td>Always Fresh</td>
+</tr>
+
+<tr>
+<td>Server Load</td>
+<td>Low</td>
+<td>Higher</td>
+</tr>
+</table>
+
+<h2>Important Limitations</h2>
+
+<ul>
+<li>Only works in the Pages Router.</li>
+<li>Cannot access request-specific data.</li>
+<li>Cannot access cookies or headers.</li>
+<li>Cannot access authenticated user information.</li>
+</ul>
+
+<h2>App Router Equivalent</h2>
+
+<p>
+The App Router does not use <code>getStaticProps()</code>.
+</p>
+
+<p>
+Instead, static generation happens automatically when data is cacheable.
+</p>
+
+<div class="code-title">App Router</div>
+
+<pre><code class="language-jsx">async function getPosts() {
+
+  const res = await fetch(
+    'https://api.example.com/posts'
+  );
+
+  return res.json();
+
+}
+
+export default async function Blog() {
+
+  const posts = await getPosts();
+
+  return (
+    &lt;h1&gt;
+      {posts.length}
+    &lt;/h1&gt;
+  );
+
+}</code></pre>
+
+<h2>Interview Tip</h2>
+
+<div class="feature">
+A common misconception is that <code>getStaticProps()</code> runs when users visit the page. In reality, it runs during the build process and the generated HTML is reused for all users.
+</div>
+
+<div class="feature">
+<strong>One-Line Definition:</strong><br>
+<code>getStaticProps()</code> is a Pages Router function that fetches data during the build process and provides it to a statically generated page.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+
+</body>
+</html>

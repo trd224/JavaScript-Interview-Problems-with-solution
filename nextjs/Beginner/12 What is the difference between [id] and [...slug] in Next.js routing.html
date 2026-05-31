@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Difference Between [id] and [...slug] in Next.js Routing</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+    background:#0f172a;
+    color:#e2e8f0;
+    font-family:Arial, Helvetica, sans-serif;
+    line-height:1.8;
+    padding:40px 20px;
+}
+
+.container{
+    max-width:1000px;
+    margin:auto;
+    background:#111827;
+    padding:40px;
+    border-radius:16px;
+    box-shadow:0 0 30px rgba(0,0,0,.45);
+}
+
+h1{
+    color:#38bdf8;
+    font-size:36px;
+    margin-bottom:20px;
+}
+
+h2{
+    color:#a78bfa;
+    margin-top:35px;
+    margin-bottom:10px;
+}
+
+p{
+    color:#d1d5db;
+    margin-bottom:15px;
+}
+
+ul,ol{
+    margin-left:25px;
+    margin-bottom:15px;
+}
+
+li{
+    margin-bottom:8px;
+}
+
+.feature{
+    background:#1e293b;
+    border-left:5px solid #38bdf8;
+    padding:15px;
+    border-radius:8px;
+    margin:15px 0;
+}
+
+.code-block{
+    margin:20px 0;
+    border:1px solid #334155;
+    border-radius:12px;
+    overflow:hidden;
+}
+
+.code-title{
+    background:#1e293b;
+    color:#93c5fd;
+    padding:12px 16px;
+    font-weight:bold;
+    border-bottom:1px solid #334155;
+}
+
+pre[class*="language-"]{
+    margin:0!important;
+    border-radius:0!important;
+    font-size:15px;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+    margin-top:20px;
+}
+
+th{
+    background:#1e293b;
+    color:#38bdf8;
+    text-align:left;
+    padding:14px;
+}
+
+td{
+    border-top:1px solid #334155;
+    padding:14px;
+    color:#e5e7eb;
+}
+
+.summary{
+    margin-top:30px;
+    background:#082f49;
+    border-left:5px solid #38bdf8;
+    padding:20px;
+    border-radius:10px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>What is the Difference Between [id] and [...slug] in Next.js Routing?</h1>
+
+<p>
+Both <code>[id]</code> and <code>[...slug]</code> are used for dynamic routing in Next.js, but they behave differently.
+</p>
+
+<div class="feature">
+<code>[id]</code> captures a single URL segment, while <code>[...slug]</code> captures multiple URL segments as an array.
+</div>
+
+<h2>1. Single Dynamic Route: [id]</h2>
+
+<p>
+The <code>[id]</code> syntax matches exactly one dynamic segment.
+</p>
+
+<div class="code-block">
+<div class="code-title">App Router Structure</div>
+
+<pre><code class="language-text">app/
+└── products/
+    └── [id]/
+        └── page.js
+</code></pre>
+
+</div>
+
+<p>
+Supported URLs:
+</p>
+
+<div class="code-block">
+<div class="code-title">URLs</div>
+
+<pre><code class="language-text">/products/1
+/products/10
+/products/500
+</code></pre>
+
+</div>
+
+<p>
+Not Supported:
+</p>
+
+<div class="code-block">
+<div class="code-title">Invalid URLs</div>
+
+<pre><code class="language-text">/products
+/products/10/reviews
+</code></pre>
+
+</div>
+
+<div class="code-block">
+<div class="code-title">Accessing the Parameter</div>
+
+<pre><code class="language-jsx">export default function Product({
+  params
+}) {
+
+  return (
+    &lt;h1&gt;
+      {params.id}
+    &lt;/h1&gt;
+  );
+
+}
+</code></pre>
+
+</div>
+
+<p>
+URL:
+</p>
+
+<div class="code-block">
+<div class="code-title">Example</div>
+
+<pre><code class="language-text">/products/100
+</code></pre>
+
+</div>
+
+<p>
+Output:
+</p>
+
+<div class="code-block">
+<div class="code-title">params</div>
+
+<pre><code class="language-javascript">{
+  id: "100"
+}
+</code></pre>
+
+</div>
+
+<h2>2. Catch-All Route: [...slug]</h2>
+
+<p>
+The <code>[...slug]</code> syntax matches one or more URL segments.
+</p>
+
+<div class="code-block">
+<div class="code-title">App Router Structure</div>
+
+<pre><code class="language-text">app/
+└── docs/
+    └── [...slug]/
+        └── page.js
+</code></pre>
+
+</div>
+
+<p>
+Supported URLs:
+</p>
+
+<div class="code-block">
+<div class="code-title">URLs</div>
+
+<pre><code class="language-text">/docs/react
+/docs/react/hooks
+/docs/react/hooks/useState
+</code></pre>
+
+</div>
+
+<div class="code-block">
+<div class="code-title">Accessing Parameters</div>
+
+<pre><code class="language-jsx">export default function Docs({
+  params
+}) {
+
+  return (
+    &lt;pre&gt;
+      {JSON.stringify(params.slug)}
+    &lt;/pre&gt;
+  );
+
+}
+</code></pre>
+
+</div>
+
+<p>
+URL:
+</p>
+
+<div class="code-block">
+<div class="code-title">Example</div>
+
+<pre><code class="language-text">/docs/react/hooks
+</code></pre>
+
+</div>
+
+<p>
+Output:
+</p>
+
+<div class="code-block">
+<div class="code-title">params</div>
+
+<pre><code class="language-javascript">{
+  slug: ["react", "hooks"]
+}
+</code></pre>
+
+</div>
+
+<h2>Visual Comparison</h2>
+
+<div class="code-block">
+<div class="code-title">[id]</div>
+
+<pre><code class="language-text">/products/100
+
+id = "100"
+</code></pre>
+
+</div>
+
+<div class="code-block">
+<div class="code-title">[...slug]</div>
+
+<pre><code class="language-text">/docs/react/hooks/useState
+
+slug = [
+  "react",
+  "hooks",
+  "useState"
+]
+</code></pre>
+
+</div>
+
+<h2>Real-World Example</h2>
+
+<h3>Product Page</h3>
+
+<p>
+A product usually needs only one ID.
+</p>
+
+<div class="code-block">
+<div class="code-title">Product Route</div>
+
+<pre><code class="language-text">app/
+└── products/
+    └── [id]/
+        └── page.js
+</code></pre>
+
+</div>
+
+<p>
+URLs:
+</p>
+
+<div class="code-block">
+<div class="code-title">Examples</div>
+
+<pre><code class="language-text">/products/1
+/products/25
+/products/100
+</code></pre>
+
+</div>
+
+<p>
+Use <code>[id]</code>.
+</p>
+
+<h3>Documentation Website</h3>
+
+<p>
+Documentation often contains multiple nested paths.
+</p>
+
+<div class="code-block">
+<div class="code-title">Docs Route</div>
+
+<pre><code class="language-text">app/
+└── docs/
+    └── [...slug]/
+        └── page.js
+</code></pre>
+
+</div>
+
+<p>
+URLs:
+</p>
+
+<div class="code-block">
+<div class="code-title">Examples</div>
+
+<pre><code class="language-text">/docs/react
+/docs/react/hooks
+/docs/react/hooks/useState
+</code></pre>
+
+</div>
+
+<p>
+Use <code>[...slug]</code>.
+</p>
+
+<h2>Optional Catch-All Route</h2>
+
+<p>
+Next.js also supports <code>[[...slug]]</code>.
+</p>
+
+<div class="code-block">
+<div class="code-title">Optional Catch-All</div>
+
+<pre><code class="language-text">app/
+└── docs/
+    └── [[...slug]]/
+        └── page.js
+</code></pre>
+
+</div>
+
+<p>
+Supported URLs:
+</p>
+
+<div class="code-block">
+<div class="code-title">URLs</div>
+
+<pre><code class="language-text">/docs
+/docs/react
+/docs/react/hooks
+</code></pre>
+
+</div>
+
+<p>
+Unlike <code>[...slug]</code>, this route also matches <code>/docs</code>.
+</p>
+
+<h2>Main Differences</h2>
+
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>[id]</th>
+<th>[...slug]</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Matches</td>
+<td>One segment</td>
+<td>One or more segments</td>
+</tr>
+<tr>
+<td>Returned Value</td>
+<td>String</td>
+<td>Array</td>
+</tr>
+<tr>
+<td>Example URL</td>
+<td>/products/100</td>
+<td>/docs/react/hooks</td>
+</tr>
+<tr>
+<td>Parameter Value</td>
+<td>"100"</td>
+<td>["react","hooks"]</td>
+</tr>
+<tr>
+<td>Use Case</td>
+<td>Product ID, User ID</td>
+<td>Documentation, Categories</td>
+</tr>
+</tbody>
+</table>
+
+<h2>Quick Memory Trick</h2>
+
+<div class="feature">
+Think of <code>[id]</code> as capturing a single value and <code>[...slug]</code> as capturing the rest of the URL path.
+</div>
+
+<div class="summary">
+<strong>One-Line Definition:</strong><br>
+<code>[id]</code> captures a single dynamic URL segment and returns a string, while <code>[...slug]</code> captures multiple URL segments and returns them as an array.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+
+</body>
+</html>

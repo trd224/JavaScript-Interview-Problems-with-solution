@@ -1,0 +1,906 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Next.js Interview Questions</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #111118;
+    --border: #1e1e2e;
+    --text: #e2e2f0;
+    --muted: #6b6b8a;
+    --beginner: #00e5a0;
+    --mid: #ff9f43;
+    --advanced: #ff4d6d;
+    --beginner-bg: rgba(0,229,160,0.06);
+    --mid-bg: rgba(255,159,67,0.06);
+    --advanced-bg: rgba(255,77,109,0.06);
+    /* version colors */
+    --v-legacy: #8b8b9e;
+    --v-legacy-bg: rgba(139,139,158,0.1);
+    --v9:  #a78bfa;
+    --v9-bg: rgba(167,139,250,0.1);
+    --v12: #60a5fa;
+    --v12-bg: rgba(96,165,250,0.1);
+    --v13: #34d399;
+    --v13-bg: rgba(52,211,153,0.1);
+    --v14: #fbbf24;
+    --v14-bg: rgba(251,191,36,0.1);
+    --v15: #fb7185;
+    --v15-bg: rgba(251,113,133,0.1);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Syne', sans-serif;
+    min-height: 100vh;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container { max-width: 1060px; margin: 0 auto; padding: 60px 24px; position: relative; z-index: 1; }
+
+  /* Header */
+  header { text-align: center; margin-bottom: 56px; }
+  .logo-tag {
+    display: inline-block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--muted); border: 1px solid var(--border);
+    padding: 6px 14px; border-radius: 2px; margin-bottom: 24px;
+  }
+  h1 { font-size: clamp(2.2rem, 5vw, 3.6rem); font-weight: 800; line-height: 1.05; letter-spacing: -0.03em; margin-bottom: 12px; }
+  h1 span.iq { background: linear-gradient(135deg, #00e5a0, #00b4d8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+  .subtitle { color: var(--muted); font-size: 0.9rem; font-family: 'JetBrains Mono', monospace; }
+
+  .stats-bar { display: flex; justify-content: center; gap: 32px; margin-top: 36px; flex-wrap: wrap; }
+  .stat { text-align: center; }
+  .stat-num { font-size: 1.8rem; font-weight: 800; display: block; line-height: 1; }
+  .stat-label { font-size: 0.68rem; font-family: 'JetBrains Mono', monospace; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); margin-top: 4px; }
+  .stat.b .stat-num { color: var(--beginner); }
+  .stat.m .stat-num { color: var(--mid); }
+  .stat.a .stat-num { color: var(--advanced); }
+  .stat.t .stat-num { color: #e2e2f0; }
+
+  /* Version legend */
+  .legend {
+    display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 28px;
+    background: var(--surface); border: 1px solid var(--border);
+    padding: 14px 16px; border-radius: 6px; align-items: center;
+  }
+  .legend-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); margin-right: 4px; }
+
+  /* Version badge (inline on questions) */
+  .vtag {
+    display: inline-block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px; font-weight: 500;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    padding: 2px 7px; border-radius: 2px;
+    white-space: nowrap; flex-shrink: 0;
+    margin-left: 2px;
+  }
+  .vtag.legacy { background: var(--v-legacy-bg); color: var(--v-legacy); border: 1px solid rgba(139,139,158,0.25); }
+  .vtag.v9    { background: var(--v9-bg);  color: var(--v9);  border: 1px solid rgba(167,139,250,0.25); }
+  .vtag.v12   { background: var(--v12-bg); color: var(--v12); border: 1px solid rgba(96,165,250,0.25); }
+  .vtag.v13   { background: var(--v13-bg); color: var(--v13); border: 1px solid rgba(52,211,153,0.25); }
+  .vtag.v14   { background: var(--v14-bg); color: var(--v14); border: 1px solid rgba(251,191,36,0.25); }
+  .vtag.v15   { background: var(--v15-bg); color: var(--v15); border: 1px solid rgba(251,113,133,0.25); }
+
+  /* Toolbar */
+  .toolbar { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 24px; align-items: center; }
+  .tab-nav { display: flex; gap: 4px; background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 4px; }
+  .tab-btn {
+    background: none; border: none; cursor: pointer;
+    font-family: 'Syne', sans-serif; font-size: 0.82rem; font-weight: 600;
+    padding: 9px 18px; border-radius: 4px; transition: all 0.2s;
+    color: var(--muted); letter-spacing: 0.02em;
+  }
+  .tab-btn:hover { color: var(--text); }
+  .tab-btn.active[data-level="all"]      { background: rgba(255,255,255,0.07); color: var(--text); }
+  .tab-btn.active[data-level="beginner"] { background: var(--beginner-bg); color: var(--beginner); box-shadow: inset 0 0 0 1px rgba(0,229,160,0.2); }
+  .tab-btn.active[data-level="mid"]      { background: var(--mid-bg); color: var(--mid); box-shadow: inset 0 0 0 1px rgba(255,159,67,0.2); }
+  .tab-btn.active[data-level="advanced"] { background: var(--advanced-bg); color: var(--advanced); box-shadow: inset 0 0 0 1px rgba(255,77,109,0.2); }
+
+  /* Version filter */
+  .ver-filter { display: flex; gap: 4px; flex-wrap: wrap; }
+  .vf-btn {
+    background: none; border: 1px solid var(--border); cursor: pointer;
+    font-family: 'JetBrains Mono', monospace; font-size: 9px; font-weight: 500;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    padding: 5px 10px; border-radius: 3px; color: var(--muted); transition: all 0.15s;
+  }
+  .vf-btn:hover { color: var(--text); border-color: #333350; }
+  .vf-btn.active.legacy { background: var(--v-legacy-bg); color: var(--v-legacy); border-color: rgba(139,139,158,0.4); }
+  .vf-btn.active.v9     { background: var(--v9-bg);  color: var(--v9);  border-color: rgba(167,139,250,0.4); }
+  .vf-btn.active.v12    { background: var(--v12-bg); color: var(--v12); border-color: rgba(96,165,250,0.4); }
+  .vf-btn.active.v13    { background: var(--v13-bg); color: var(--v13); border-color: rgba(52,211,153,0.4); }
+  .vf-btn.active.v14    { background: var(--v14-bg); color: var(--v14); border-color: rgba(251,191,36,0.4); }
+  .vf-btn.active.v15    { background: var(--v15-bg); color: var(--v15); border-color: rgba(251,113,133,0.4); }
+
+  /* Search */
+  .search-wrap { margin-bottom: 28px; position: relative; }
+  .search-input {
+    width: 100%; background: var(--surface); border: 1px solid var(--border);
+    color: var(--text); font-family: 'JetBrains Mono', monospace; font-size: 0.83rem;
+    padding: 11px 16px 11px 42px; border-radius: 6px; outline: none; transition: border-color 0.2s;
+  }
+  .search-input:focus { border-color: #333350; }
+  .search-input::placeholder { color: var(--muted); }
+  .search-icon { position: absolute; left: 13px; top: 50%; transform: translateY(-50%); color: var(--muted); font-size: 15px; pointer-events: none; }
+
+  /* Sections */
+  .section { display: none; }
+  .section.active { display: block; }
+
+  .section-header { display: flex; align-items: center; gap: 14px; margin-bottom: 28px; padding-bottom: 18px; border-bottom: 1px solid var(--border); }
+  .level-badge { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; padding: 5px 12px; border-radius: 2px; }
+  .level-badge.beginner { background: var(--beginner-bg); color: var(--beginner); border: 1px solid rgba(0,229,160,0.2); }
+  .level-badge.mid      { background: var(--mid-bg);      color: var(--mid);      border: 1px solid rgba(255,159,67,0.2); }
+  .level-badge.advanced { background: var(--advanced-bg); color: var(--advanced); border: 1px solid rgba(255,77,109,0.2); }
+  .section-title { font-size: 1.35rem; font-weight: 700; letter-spacing: -0.02em; }
+
+  .category { margin-bottom: 32px; }
+  .category-title { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.25em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; padding-left: 2px; }
+
+  .q-list { list-style: none; display: flex; flex-direction: column; gap: 2px; }
+  .q-item {
+    display: flex; align-items: flex-start; gap: 12px;
+    padding: 11px 14px; border-radius: 4px; border: 1px solid transparent; transition: all 0.15s; cursor: default;
+  }
+  .q-item:hover { background: var(--surface); border-color: var(--border); }
+
+  .q-num { font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 500; min-width: 28px; padding-top: 2px; flex-shrink: 0; }
+  [data-section="beginner"] .q-num { color: rgba(0,229,160,0.4); }
+  [data-section="mid"]      .q-num { color: rgba(255,159,67,0.4); }
+  [data-section="advanced"] .q-num { color: rgba(255,77,109,0.4); }
+
+  .q-body { display: flex; align-items: flex-start; gap: 10px; flex-wrap: wrap; flex: 1; }
+  .q-text { font-size: 0.92rem; font-weight: 400; line-height: 1.5; color: #c8c8df; flex: 1; min-width: 200px; }
+
+  .section-block { margin-bottom: 52px; }
+
+  .no-results { text-align: center; padding: 40px; color: var(--muted); font-family: 'JetBrains Mono', monospace; font-size: 0.83rem; display: none; }
+
+  footer { margin-top: 72px; padding-top: 28px; border-top: 1px solid var(--border); text-align: center; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--muted); letter-spacing: 0.1em; }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <div class="logo-tag">Interview Prep Kit · 2025</div>
+    <h1>Next.js<br><span class="iq">Interview Questions</span></h1>
+    <p class="subtitle">// 210+ questions · version-tagged · no answers</p>
+    <div class="stats-bar">
+      <div class="stat b"><span class="stat-num">70</span><span class="stat-label">Beginner</span></div>
+      <div class="stat m"><span class="stat-num">80</span><span class="stat-label">Mid-Level</span></div>
+      <div class="stat a"><span class="stat-num">65</span><span class="stat-label">Advanced</span></div>
+      <div class="stat t"><span class="stat-num">215</span><span class="stat-label">Total</span></div>
+    </div>
+  </header>
+
+  <!-- Legend -->
+  <div class="legend">
+    <span class="legend-label">Version:</span>
+    <span class="vtag legacy">Legacy (&lt;9)</span>
+    <span class="vtag v9">v9–11</span>
+    <span class="vtag v12">v12</span>
+    <span class="vtag v13">v13–14 App Router</span>
+    <span class="vtag v14">v14 Stable</span>
+    <span class="vtag v15">v15 Latest</span>
+  </div>
+
+  <!-- Search -->
+  <div class="search-wrap">
+    <span class="search-icon">⌕</span>
+    <input class="search-input" type="text" id="searchInput" placeholder="Search questions...">
+  </div>
+
+  <!-- Toolbar -->
+  <div class="toolbar">
+    <div class="tab-nav">
+      <button class="tab-btn active" data-level="all"      onclick="switchTab('all')">All</button>
+      <button class="tab-btn"        data-level="beginner" onclick="switchTab('beginner')">Beginner</button>
+      <button class="tab-btn"        data-level="mid"      onclick="switchTab('mid')">Mid-Level</button>
+      <button class="tab-btn"        data-level="advanced" onclick="switchTab('advanced')">Advanced</button>
+    </div>
+    <div class="ver-filter" id="verFilter">
+      <button class="vf-btn active legacy" data-ver="legacy" onclick="toggleVer(this,'legacy')">Legacy</button>
+      <button class="vf-btn active v9"     data-ver="v9"     onclick="toggleVer(this,'v9')">v9–11</button>
+      <button class="vf-btn active v12"    data-ver="v12"    onclick="toggleVer(this,'v12')">v12</button>
+      <button class="vf-btn active v13"    data-ver="v13"    onclick="toggleVer(this,'v13')">v13–14</button>
+      <button class="vf-btn active v14"    data-ver="v14"    onclick="toggleVer(this,'v14')">v14</button>
+      <button class="vf-btn active v15"    data-ver="v15"    onclick="toggleVer(this,'v15')">v15</button>
+    </div>
+  </div>
+
+  <!-- Helper macro: each q-item uses data-ver attribute -->
+
+  <!-- ===================== BEGINNER ===================== -->
+  <div id="beginner-section" class="section" data-section="beginner">
+    <div class="section-header">
+      <span class="level-badge beginner">Beginner</span>
+      <h2 class="section-title">Foundations &amp; Core Concepts</h2>
+    </div>
+
+    <div class="category">
+      <p class="category-title">// Introduction &amp; Basics</p>
+      <ul class="q-list">
+        <li class="q-item" data-ver="v9"><span class="q-num">01</span><div class="q-body"><span class="q-text">What is Next.js and how does it differ from React?</span><span class="vtag v9">v9–11</span></div></li>
+        <li class="q-item" data-ver="v9"><span class="q-num">02</span><div class="q-body"><span class="q-text">What are the main features of Next.js?</span><span class="vtag v9">v9–11</span></div></li>
+        <li class="q-item" data-ver="v9"><span class="q-num">03</span><div class="q-body"><span class="q-text">What is the difference between Next.js and a plain React app (Create React App)?</span><span class="vtag v9">v9–11</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">04</span><div class="q-body"><span class="q-text">How do you create a new Next.js project using <code>create-next-app</code>?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v9"><span class="q-num">05</span><div class="q-body"><span class="q-text">What is the purpose of the <code>pages</code> directory in Next.js?</span><span class="vtag v9">v9–11</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">06</span><div class="q-body"><span class="q-text">What is the <code>app</code> directory introduced in Next.js 13?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v9"><span class="q-num">07</span><div class="q-body"><span class="q-text">What is file-based routing in Next.js?</span><span class="vtag v9">v9–11</span></div></li>
+        <li class="q-item" data-ver="v9"><span class="q-num">08</span><div class="q-body"><span class="q-text">What is <code>_app.js</code> and what is it used for?</span><span class="vtag v9">v9–11</span></div></li>
+        <li class="q-item" data-ver="v9"><span class="q-num">09</span><div class="q-body"><span class="q-text">What is <code>_document.js</code> and when would you use it?</span><span class="vtag v9">v9–11</span></div></li>
+        <li class="q-item" data-ver="v15"><span class="q-num">10</span><div class="q-body"><span class="q-text">What is Turbopack and why is it the default dev bundler in Next.js 15?</span><span class="vtag v15">v15</span></div></li>
+      </ul>
+    </div>
+
+    <div class="category">
+      <p class="category-title">// Routing</p>
+      <ul class="q-list">
+        <li class="q-item" data-ver="v9"><span class="q-num">11</span><div class="q-body"><span class="q-text">How does dynamic routing work in Next.js?</span><span class="vtag v9">v9–11</span></div></li>
+        <li class="q-item" data-ver="v9"><span class="q-num">12</span><div class="q-body"><span class="q-text">What is the difference between <code>[id]</code> and <code>[...slug]</code> in Next.js routing?</span><span class="vtag v9">v9–11</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">13</span><div class="q-body"><span class="q-text">What is the difference between <code>[[...slug]]</code> (optional catch-all) and <code>[...slug]</code>?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v9"><span class="q-num">14</span><div class="q-body"><span class="q-text">How do you navigate between pages using the <code>Link</code> component?</span><span class="vtag v9">v9–11</span></div></li>
+        <li class="q-item" data-ver="v9"><span class="q-num">15</span><div class="q-body"><span class="q-text">What is the <code>useRouter</code> hook and what can you do with it?</span><span class="vtag v9">v9–11</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">16</span><div class="q-body"><span class="q-text">What is the difference between <code>useRouter</code> from <code>next/navigation</code> vs <code>next/router</code>?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v9"><span class="q-num">17</span><div class="q-body"><span class="q-text">How do you access query parameters in Next.js?</span><span class="vtag v9">v9–11</span></div></li>
+        <li class="q-item" data-ver="v9"><span class="q-num">18</span><div class="q-body"><span class="q-text">How do you create a custom 404 page in Next.js?</span><span class="vtag v9">v9–11</span></div></li>
+        <li class="q-item" data-ver="v12"><span class="q-num">19</span><div class="q-body"><span class="q-text">What is shallow routing and when would you use it?</span><span class="vtag v12">v12</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">20</span><div class="q-body"><span class="q-text">What is the <code>redirect()</code> function in the App Router?</span><span class="vtag v13">v13–14</span></div></li>
+      </ul>
+    </div>
+
+    <div class="category">
+      <p class="category-title">// Rendering Strategies</p>
+      <ul class="q-list">
+        <li class="q-item" data-ver="v9"><span class="q-num">21</span><div class="q-body"><span class="q-text">What is Server-Side Rendering (SSR) in Next.js?</span><span class="vtag v9">v9–11</span></div></li>
+        <li class="q-item" data-ver="v9"><span class="q-num">22</span><div class="q-body"><span class="q-text">What is Static Site Generation (SSG) in Next.js?</span><span class="vtag v9">v9–11</span></div></li>
+        <li class="q-item" data-ver="v9"><span class="q-num">23</span><div class="q-body"><span class="q-text">What is Client-Side Rendering (CSR) and when should you choose it?</span><span class="vtag v9">v9–11</span></div></li>
+        <li class="q-item" data-ver="v9"><span class="q-num">24</span><div class="q-body"><span class="q-text">What is <code>getStaticProps</code> and when is it called?</span><span class="vtag v9">v9–11</span></div></li>
+        <li class="q-item" data-ver="v9"><span class="q-num">25</span><div class="q-body"><span class="q-text">What is <code>getServerSideProps</code> and how does it differ from <code>getStaticProps</code>?</span><span class="vtag v9">v9–11</span></div></li>
+        <li class="q-item" data-ver="v9"><span class="q-num">26</span><div class="q-body"><span class="q-text">What is <code>getStaticPaths</code> and what does it return?</span><span class="vtag v9">v9–11</span></div></li>
+        <li class="q-item" data-ver="v10"><span class="q-num">27</span><div class="q-body"><span class="q-text">What is the difference between <code>fallback: true</code>, <code>false</code>, and <code>'blocking'</code>?</span><span class="vtag v9">v9–11</span></div></li>
+        <li class="q-item" data-ver="v12"><span class="q-num">28</span><div class="q-body"><span class="q-text">What is Incremental Static Regeneration (ISR) and how do you enable it?</span><span class="vtag v12">v12</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">29</span><div class="q-body"><span class="q-text">Are <code>getStaticProps</code> / <code>getServerSideProps</code> available in the App Router?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v15"><span class="q-num">30</span><div class="q-body"><span class="q-text">What is Partial Prerendering (PPR) introduced as stable in Next.js 15?</span><span class="vtag v15">v15</span></div></li>
+      </ul>
+    </div>
+
+    <div class="category">
+      <p class="category-title">// Styling &amp; Assets</p>
+      <ul class="q-list">
+        <li class="q-item" data-ver="v9"><span class="q-num">31</span><div class="q-body"><span class="q-text">How do you add global CSS to a Next.js application?</span><span class="vtag v9">v9–11</span></div></li>
+        <li class="q-item" data-ver="v9"><span class="q-num">32</span><div class="q-body"><span class="q-text">What are CSS Modules and how do you use them in Next.js?</span><span class="vtag v9">v9–11</span></div></li>
+        <li class="q-item" data-ver="v10"><span class="q-num">33</span><div class="q-body"><span class="q-text">How does the <code>next/image</code> component improve performance over a plain <code>&lt;img&gt;</code>?</span><span class="vtag v9">v9–11</span></div></li>
+        <li class="q-item" data-ver="v9"><span class="q-num">34</span><div class="q-body"><span class="q-text">What is the <code>public</code> folder used for?</span><span class="vtag v9">v9–11</span></div></li>
+        <li class="q-item" data-ver="v12"><span class="q-num">35</span><div class="q-body"><span class="q-text">How do you configure Tailwind CSS with Next.js?</span><span class="vtag v12">v12</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">36</span><div class="q-body"><span class="q-text">What is <code>next/font</code> and how does it eliminate layout shift from font loading?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">37</span><div class="q-body"><span class="q-text">How do you use a Google Font vs a local font with <code>next/font</code>?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v12"><span class="q-num">38</span><div class="q-body"><span class="q-text">How do you configure remote image domains in <code>next.config.js</code>?</span><span class="vtag v12">v12</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">39</span><div class="q-body"><span class="q-text">What built-in CSS-in-JS solution does Next.js support in the App Router?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">40</span><div class="q-body"><span class="q-text">How do you import and use SVG files as React components in Next.js?</span><span class="vtag v13">v13–14</span></div></li>
+      </ul>
+    </div>
+
+    <div class="category">
+      <p class="category-title">// API Routes &amp; Environment</p>
+      <ul class="q-list">
+        <li class="q-item" data-ver="v9"><span class="q-num">41</span><div class="q-body"><span class="q-text">What are API routes in Next.js and where do you place them?</span><span class="vtag v9">v9–11</span></div></li>
+        <li class="q-item" data-ver="v9"><span class="q-num">42</span><div class="q-body"><span class="q-text">How do you handle different HTTP methods in a single API route?</span><span class="vtag v9">v9–11</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">43</span><div class="q-body"><span class="q-text">What are Route Handlers (<code>route.ts</code>) in the App Router and how do they replace API routes?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">44</span><div class="q-body"><span class="q-text">What is <code>next.config.js</code> / <code>next.config.ts</code> and what can you configure in it?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v9"><span class="q-num">45</span><div class="q-body"><span class="q-text">How do you set environment variables in Next.js?</span><span class="vtag v9">v9–11</span></div></li>
+        <li class="q-item" data-ver="v9"><span class="q-num">46</span><div class="q-body"><span class="q-text">What is the difference between <code>NEXT_PUBLIC_</code> and non-prefixed env variables?</span><span class="vtag v9">v9–11</span></div></li>
+        <li class="q-item" data-ver="v9"><span class="q-num">47</span><div class="q-body"><span class="q-text">How do you fetch data on the client side in a Next.js app?</span><span class="vtag v9">v9–11</span></div></li>
+        <li class="q-item" data-ver="v12"><span class="q-num">48</span><div class="q-body"><span class="q-text">What is SWR and how does it integrate with Next.js?</span><span class="vtag v12">v12</span></div></li>
+        <li class="q-item" data-ver="v15"><span class="q-num">49</span><div class="q-body"><span class="q-text">What changed with <code>cookies()</code>, <code>headers()</code>, and <code>params</code> becoming async in Next.js 15?</span><span class="vtag v15">v15</span></div></li>
+        <li class="q-item" data-ver="v15"><span class="q-num">50</span><div class="q-body"><span class="q-text">What is the <code>connection()</code> API introduced in Next.js 15?</span><span class="vtag v15">v15</span></div></li>
+      </ul>
+    </div>
+
+    <div class="category">
+      <p class="category-title">// SEO &amp; Metadata</p>
+      <ul class="q-list">
+        <li class="q-item" data-ver="v9"><span class="q-num">51</span><div class="q-body"><span class="q-text">How do you add meta tags using the <code>Head</code> component (Pages Router)?</span><span class="vtag v9">v9–11</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">52</span><div class="q-body"><span class="q-text">What is the <code>metadata</code> export in the App Router?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">53</span><div class="q-body"><span class="q-text">How do you generate dynamic metadata using <code>generateMetadata()</code>?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">54</span><div class="q-body"><span class="q-text">How do you generate a <code>sitemap.xml</code> using the App Router file convention?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">55</span><div class="q-body"><span class="q-text">How do you configure <code>robots.txt</code> in Next.js?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">56</span><div class="q-body"><span class="q-text">How do you add Open Graph and Twitter card tags in the App Router?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v14"><span class="q-num">57</span><div class="q-body"><span class="q-text">What is the <code>opengraph-image.tsx</code> file convention in Next.js 14?</span><span class="vtag v14">v14</span></div></li>
+        <li class="q-item" data-ver="v9"><span class="q-num">58</span><div class="q-body"><span class="q-text">Why is SSR/SSG better for SEO than pure CSR?</span><span class="vtag v9">v9–11</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">59</span><div class="q-body"><span class="q-text">How does the metadata <code>title.template</code> work in nested layouts?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">60</span><div class="q-body"><span class="q-text">What is <code>metadataBase</code> and why is it important for Open Graph URLs?</span><span class="vtag v13">v13–14</span></div></li>
+      </ul>
+    </div>
+
+    <div class="category">
+      <p class="category-title">// Deployment &amp; Tooling</p>
+      <ul class="q-list">
+        <li class="q-item" data-ver="v9"><span class="q-num">61</span><div class="q-body"><span class="q-text">How do you build and start a Next.js app for production?</span><span class="vtag v9">v9–11</span></div></li>
+        <li class="q-item" data-ver="v9"><span class="q-num">62</span><div class="q-body"><span class="q-text">What is Vercel and how does it relate to Next.js?</span><span class="vtag v9">v9–11</span></div></li>
+        <li class="q-item" data-ver="v9"><span class="q-num">63</span><div class="q-body"><span class="q-text">What does the <code>next build</code> command output?</span><span class="vtag v9">v9–11</span></div></li>
+        <li class="q-item" data-ver="v12"><span class="q-num">64</span><div class="q-body"><span class="q-text">What is Fast Refresh and how does it improve DX?</span><span class="vtag v12">v12</span></div></li>
+        <li class="q-item" data-ver="v9"><span class="q-num">65</span><div class="q-body"><span class="q-text">What TypeScript support does Next.js have out of the box?</span><span class="vtag v9">v9–11</span></div></li>
+        <li class="q-item" data-ver="v9"><span class="q-num">66</span><div class="q-body"><span class="q-text">What is the <code>.next</code> folder and what does it contain?</span><span class="vtag v9">v9–11</span></div></li>
+        <li class="q-item" data-ver="v9"><span class="q-num">67</span><div class="q-body"><span class="q-text">What is automatic code splitting in Next.js?</span><span class="vtag v9">v9–11</span></div></li>
+        <li class="q-item" data-ver="v12"><span class="q-num">68</span><div class="q-body"><span class="q-text">How do you add and configure ESLint in a Next.js project?</span><span class="vtag v12">v12</span></div></li>
+        <li class="q-item" data-ver="legacy"><span class="q-num">69</span><div class="q-body"><span class="q-text">What is <code>next export</code> and when was it removed?</span><span class="vtag legacy">Legacy</span></div></li>
+        <li class="q-item" data-ver="v15"><span class="q-num">70</span><div class="q-body"><span class="q-text">What is the difference between the <code>dev</code>, <code>build</code>, and <code>start</code> scripts in Next.js 15?</span><span class="vtag v15">v15</span></div></li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ===================== MID ===================== -->
+  <div id="mid-section" class="section" data-section="mid">
+    <div class="section-header">
+      <span class="level-badge mid">Mid-Level</span>
+      <h2 class="section-title">Intermediate Patterns &amp; Performance</h2>
+    </div>
+
+    <div class="category">
+      <p class="category-title">// App Router Deep Dive</p>
+      <ul class="q-list">
+        <li class="q-item" data-ver="v13"><span class="q-num">01</span><div class="q-body"><span class="q-text">What is the difference between the Pages Router and the App Router?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">02</span><div class="q-body"><span class="q-text">What are React Server Components (RSC) and how does Next.js leverage them?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">03</span><div class="q-body"><span class="q-text">What is the difference between Server Components and Client Components?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">04</span><div class="q-body"><span class="q-text">How do you mark a component as a Client Component with <code>'use client'</code>?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">05</span><div class="q-body"><span class="q-text">What are layouts in the App Router and how do they persist across navigations?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">06</span><div class="q-body"><span class="q-text">What is the root layout and why is it required in the App Router?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">07</span><div class="q-body"><span class="q-text">What is a <code>template.js</code> file and how is it different from a layout?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">08</span><div class="q-body"><span class="q-text">How does <code>loading.js</code> work with React Suspense?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">09</span><div class="q-body"><span class="q-text">What is the <code>error.js</code> file and what is its Error Boundary contract?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">10</span><div class="q-body"><span class="q-text">What are Route Groups <code>(folder)</code> and when do you use them?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">11</span><div class="q-body"><span class="q-text">What are Parallel Routes (<code>@slot</code>) and when would you use them?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">12</span><div class="q-body"><span class="q-text">What are Intercepting Routes and what UX problem do they solve?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">13</span><div class="q-body"><span class="q-text">How do you use <code>useSelectedLayoutSegment</code> and <code>useSelectedLayoutSegments</code>?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v15"><span class="q-num">14</span><div class="q-body"><span class="q-text">What are the new <code>forbidden()</code> and <code>unauthorized()</code> functions added in Next.js 15?</span><span class="vtag v15">v15</span></div></li>
+        <li class="q-item" data-ver="v15"><span class="q-num">15</span><div class="q-body"><span class="q-text">What is the <code>forbidden.js</code> / <code>unauthorized.js</code> convention in Next.js 15?</span><span class="vtag v15">v15</span></div></li>
+      </ul>
+    </div>
+
+    <div class="category">
+      <p class="category-title">// Data Fetching (App Router)</p>
+      <ul class="q-list">
+        <li class="q-item" data-ver="v13"><span class="q-num">16</span><div class="q-body"><span class="q-text">How does async data fetching work directly inside Server Components?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">17</span><div class="q-body"><span class="q-text">What is the extended <code>fetch</code> API in Next.js and what caching options does it add?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">18</span><div class="q-body"><span class="q-text">What is the difference between <code>cache: 'force-cache'</code> and <code>cache: 'no-store'</code>?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">19</span><div class="q-body"><span class="q-text">What does <code>next: { revalidate: N }</code> do in a fetch call?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">20</span><div class="q-body"><span class="q-text">What is on-demand revalidation and how do you trigger it via an API route?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">21</span><div class="q-body"><span class="q-text">What is <code>revalidatePath</code> vs <code>revalidateTag</code>?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v14"><span class="q-num">22</span><div class="q-body"><span class="q-text">What is <code>unstable_cache</code> and when would you use it over fetch caching?</span><span class="vtag v14">v14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">23</span><div class="q-body"><span class="q-text">What is request deduplication (memoization) in Next.js fetch calls?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">24</span><div class="q-body"><span class="q-text">How do you use <code>React.cache</code> for per-request memoization of non-fetch calls?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v15"><span class="q-num">25</span><div class="q-body"><span class="q-text">What is the <code>use cache</code> directive introduced in Next.js 15 and how does it differ from <code>unstable_cache</code>?</span><span class="vtag v15">v15</span></div></li>
+        <li class="q-item" data-ver="v15"><span class="q-num">26</span><div class="q-body"><span class="q-text">What are <code>cacheLife</code> and <code>cacheTag</code> APIs in Next.js 15?</span><span class="vtag v15">v15</span></div></li>
+        <li class="q-item" data-ver="v15"><span class="q-num">27</span><div class="q-body"><span class="q-text">How does <code>next/after</code> (the <code>unstable_after</code> API) allow post-response work in Next.js 15?</span><span class="vtag v15">v15</span></div></li>
+      </ul>
+    </div>
+
+    <div class="category">
+      <p class="category-title">// Server Actions</p>
+      <ul class="q-list">
+        <li class="q-item" data-ver="v13"><span class="q-num">28</span><div class="q-body"><span class="q-text">What are Server Actions in Next.js and what problem do they solve?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">29</span><div class="q-body"><span class="q-text">What is the <code>'use server'</code> directive and where can you place it?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v14"><span class="q-num">30</span><div class="q-body"><span class="q-text">Server Actions became stable in which Next.js version?</span><span class="vtag v14">v14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">31</span><div class="q-body"><span class="q-text">How do Server Actions integrate with HTML <code>&lt;form&gt;</code> elements?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v15"><span class="q-num">32</span><div class="q-body"><span class="q-text">What is <code>useActionState</code> (React 19) and how does it replace <code>useFormState</code> in Next.js 15?</span><span class="vtag v15">v15</span></div></li>
+        <li class="q-item" data-ver="v14"><span class="q-num">33</span><div class="q-body"><span class="q-text">What is <code>useFormStatus</code> and what does it provide during a Server Action submission?</span><span class="vtag v14">v14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">34</span><div class="q-body"><span class="q-text">How do you handle and surface validation errors from a Server Action?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">35</span><div class="q-body"><span class="q-text">Can Server Actions be called from Client Components? How?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v14"><span class="q-num">36</span><div class="q-body"><span class="q-text">What are the security considerations and CSRF handling for Server Actions?</span><span class="vtag v14">v14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">37</span><div class="q-body"><span class="q-text">How do you redirect inside a Server Action without triggering a client-side navigation?</span><span class="vtag v13">v13–14</span></div></li>
+      </ul>
+    </div>
+
+    <div class="category">
+      <p class="category-title">// Middleware &amp; Authentication</p>
+      <ul class="q-list">
+        <li class="q-item" data-ver="v12"><span class="q-num">38</span><div class="q-body"><span class="q-text">What is middleware in Next.js and where (Edge Runtime) does it execute?</span><span class="vtag v12">v12</span></div></li>
+        <li class="q-item" data-ver="v12"><span class="q-num">39</span><div class="q-body"><span class="q-text">How do you create a <code>middleware.ts</code> file and configure the <code>matcher</code>?</span><span class="vtag v12">v12</span></div></li>
+        <li class="q-item" data-ver="v12"><span class="q-num">40</span><div class="q-body"><span class="q-text">How do you protect routes and redirect unauthenticated users in middleware?</span><span class="vtag v12">v12</span></div></li>
+        <li class="q-item" data-ver="v12"><span class="q-num">41</span><div class="q-body"><span class="q-text">What are <code>NextRequest</code> and <code>NextResponse</code> and how do you use them?</span><span class="vtag v12">v12</span></div></li>
+        <li class="q-item" data-ver="v12"><span class="q-num">42</span><div class="q-body"><span class="q-text">How do you read/write cookies and add custom headers in middleware?</span><span class="vtag v12">v12</span></div></li>
+        <li class="q-item" data-ver="v14"><span class="q-num">43</span><div class="q-body"><span class="q-text">How do you implement authentication with Auth.js (NextAuth v5) in the App Router?</span><span class="vtag v14">v14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">44</span><div class="q-body"><span class="q-text">What is <code>getServerSession</code> vs the <code>auth()</code> helper in Auth.js v5?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">45</span><div class="q-body"><span class="q-text">How do you handle JWT tokens in Next.js Route Handlers?</span><span class="vtag v13">v13–14</span></div></li>
+      </ul>
+    </div>
+
+    <div class="category">
+      <p class="category-title">// Performance Optimization</p>
+      <ul class="q-list">
+        <li class="q-item" data-ver="v9"><span class="q-num">46</span><div class="q-body"><span class="q-text">What is <code>next/dynamic</code> and what options (<code>ssr</code>, <code>loading</code>) does it accept?</span><span class="vtag v9">v9–11</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">47</span><div class="q-body"><span class="q-text">How do you lazy-load a heavy Client Component to avoid hydration cost?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v10"><span class="q-num">48</span><div class="q-body"><span class="q-text">What is the <code>priority</code> prop on <code>next/image</code> and when must you set it?</span><span class="vtag v9">v9–11</span></div></li>
+        <li class="q-item" data-ver="v11"><span class="q-num">49</span><div class="q-body"><span class="q-text">What strategies does the <code>next/script</code> component offer and when do you use each?</span><span class="vtag v9">v9–11</span></div></li>
+        <li class="q-item" data-ver="v9"><span class="q-num">50</span><div class="q-body"><span class="q-text">How does prefetching work in the <code>Link</code> component and how did it change in v13?</span><span class="vtag v9">v9–11</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">51</span><div class="q-body"><span class="q-text">What are Core Web Vitals and which Next.js features directly improve each?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">52</span><div class="q-body"><span class="q-text">How do you analyze and reduce bundle size in a Next.js app?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v15"><span class="q-num">53</span><div class="q-body"><span class="q-text">How does Turbopack improve build performance compared to Webpack in Next.js 15?</span><span class="vtag v15">v15</span></div></li>
+        <li class="q-item" data-ver="v14"><span class="q-num">54</span><div class="q-body"><span class="q-text">What is the <code>staleTimes</code> config option introduced in Next.js 14.2 for Router Cache?</span><span class="vtag v14">v14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">55</span><div class="q-body"><span class="q-text">How do you implement granular Suspense boundaries to avoid render waterfalls?</span><span class="vtag v13">v13–14</span></div></li>
+      </ul>
+    </div>
+
+    <div class="category">
+      <p class="category-title">// State Management &amp; Patterns</p>
+      <ul class="q-list">
+        <li class="q-item" data-ver="v13"><span class="q-num">56</span><div class="q-body"><span class="q-text">How do you share state between Server and Client Components?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">57</span><div class="q-body"><span class="q-text">Why can't you use React Context directly in a Server Component?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">58</span><div class="q-body"><span class="q-text">How does Zustand integrate with Next.js App Router (per-request store pattern)?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">59</span><div class="q-body"><span class="q-text">How do you hydrate TanStack Query from Server Component data?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v14"><span class="q-num">60</span><div class="q-body"><span class="q-text">What is <code>useOptimistic</code> and how does it work with Server Actions?</span><span class="vtag v14">v14</span></div></li>
+        <li class="q-item" data-ver="v15"><span class="q-num">61</span><div class="q-body"><span class="q-text">What is the <code>use()</code> hook in React 19 and how does Next.js 15 use it for promises?</span><span class="vtag v15">v15</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">62</span><div class="q-body"><span class="q-text">How do you implement URL-state-based filtering with <code>useSearchParams</code>?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">63</span><div class="q-body"><span class="q-text">What are the challenges of using Redux with the App Router?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">64</span><div class="q-body"><span class="q-text">How do you pass data down from a Server Component as props to a Client Component?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v14"><span class="q-num">65</span><div class="q-body"><span class="q-text">How do you implement Optimistic UI with <code>useOptimistic</code> and a Server Action?</span><span class="vtag v14">v14</span></div></li>
+      </ul>
+    </div>
+
+    <div class="category">
+      <p class="category-title">// Testing, Errors &amp; i18n</p>
+      <ul class="q-list">
+        <li class="q-item" data-ver="v13"><span class="q-num">66</span><div class="q-body"><span class="q-text">How do you test Next.js App Router pages with React Testing Library?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">67</span><div class="q-body"><span class="q-text">How do you mock <code>next/navigation</code> hooks in unit tests?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">68</span><div class="q-body"><span class="q-text">How do you write integration tests for Route Handlers?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">69</span><div class="q-body"><span class="q-text">What is the difference between <code>error.js</code> and <code>global-error.js</code>?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">70</span><div class="q-body"><span class="q-text">What is the <code>notFound()</code> function and what file does it render?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">71</span><div class="q-body"><span class="q-text">How do you write unit tests for Server Actions?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">72</span><div class="q-body"><span class="q-text">How do you set up Cypress or Playwright for E2E testing in Next.js?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">73</span><div class="q-body"><span class="q-text">How do you implement i18n in the App Router using <code>next-intl</code>?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">74</span><div class="q-body"><span class="q-text">What is the difference between sub-path routing and domain routing for i18n?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">75</span><div class="q-body"><span class="q-text">How do you handle RTL layouts in a Next.js application?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v14"><span class="q-num">76</span><div class="q-body"><span class="q-text">How do you set up Sentry error tracking with source maps in Next.js 14?</span><span class="vtag v14">v14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">77</span><div class="q-body"><span class="q-text">How do you handle async errors thrown inside Server Components?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">78</span><div class="q-body"><span class="q-text">How do you implement locale detection in Next.js middleware?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v15"><span class="q-num">79</span><div class="q-body"><span class="q-text">How does Next.js 15 support React 19's new form hooks (<code>useActionState</code>, <code>useFormStatus</code>)?</span><span class="vtag v15">v15</span></div></li>
+        <li class="q-item" data-ver="v14"><span class="q-num">80</span><div class="q-body"><span class="q-text">What is the <code>instrumentation.ts</code> file and what lifecycle hooks does it expose?</span><span class="vtag v14">v14</span></div></li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ===================== ADVANCED ===================== -->
+  <div id="advanced-section" class="section" data-section="advanced">
+    <div class="section-header">
+      <span class="level-badge advanced">Advanced</span>
+      <h2 class="section-title">Architecture, Internals &amp; Expert Topics</h2>
+    </div>
+
+    <div class="category">
+      <p class="category-title">// Architecture &amp; Design Patterns</p>
+      <ul class="q-list">
+        <li class="q-item" data-ver="v13"><span class="q-num">01</span><div class="q-body"><span class="q-text">How do you architect a large Next.js application using Domain-Driven Design (DDD)?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">02</span><div class="q-body"><span class="q-text">How do you design a clean Data Access Layer (DAL) to keep DB logic out of components?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v14"><span class="q-num">03</span><div class="q-body"><span class="q-text">How do you implement a micro-frontend architecture with Module Federation in Next.js?</span><span class="vtag v14">v14</span></div></li>
+        <li class="q-item" data-ver="v14"><span class="q-num">04</span><div class="q-body"><span class="q-text">How do you structure a Turborepo monorepo containing multiple Next.js apps and shared packages?</span><span class="vtag v14">v14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">05</span><div class="q-body"><span class="q-text">What is the Strangler Fig pattern and how would you apply it when migrating to Next.js?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v14"><span class="q-num">06</span><div class="q-body"><span class="q-text">How do you implement feature flags in Next.js with middleware-based routing?</span><span class="vtag v14">v14</span></div></li>
+        <li class="q-item" data-ver="v14"><span class="q-num">07</span><div class="q-body"><span class="q-text">How do you implement A/B testing at the edge in Next.js without impacting caching?</span><span class="vtag v14">v14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">08</span><div class="q-body"><span class="q-text">How do you implement a multi-tenant SaaS app in Next.js using subdomain routing via middleware?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">09</span><div class="q-body"><span class="q-text">What is the Repository pattern and how does it apply to Next.js Server Component data fetching?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v15"><span class="q-num">10</span><div class="q-body"><span class="q-text">How do you migrate a Next.js 14 codebase to use the new async request APIs in Next.js 15?</span><span class="vtag v15">v15</span></div></li>
+      </ul>
+    </div>
+
+    <div class="category">
+      <p class="category-title">// Rendering Internals &amp; Caching</p>
+      <ul class="q-list">
+        <li class="q-item" data-ver="v13"><span class="q-num">11</span><div class="q-body"><span class="q-text">Explain the RSC payload format and how it is streamed from server to client.</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">12</span><div class="q-body"><span class="q-text">What triggers a route segment to switch from static to dynamic rendering?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">13</span><div class="q-body"><span class="q-text">How does Next.js implement streaming HTML with Suspense and out-of-order flushing?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">14</span><div class="q-body"><span class="q-text">What causes hydration mismatches in Next.js and how do you debug them?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v15"><span class="q-num">15</span><div class="q-body"><span class="q-text">What is Partial Prerendering (PPR) and how does it combine static shells with dynamic holes?</span><span class="vtag v15">v15</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">16</span><div class="q-body"><span class="q-text">What are the four caching layers in the App Router (Request Memoization, Data Cache, Full Route Cache, Router Cache)?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">17</span><div class="q-body"><span class="q-text">What is the difference between the Full Route Cache (server) and the Router Cache (client-side)?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v15"><span class="q-num">18</span><div class="q-body"><span class="q-text">How did the Router Cache (client-side) default behavior change in Next.js 15?</span><span class="vtag v15">v15</span></div></li>
+        <li class="q-item" data-ver="v14"><span class="q-num">19</span><div class="q-body"><span class="q-text">How do you opt out of caching at the route-segment, fetch, and component level?</span><span class="vtag v14">v14</span></div></li>
+        <li class="q-item" data-ver="v15"><span class="q-num">20</span><div class="q-body"><span class="q-text">How does the <code>use cache</code> directive's <code>cacheLife</code> profile system work?</span><span class="vtag v15">v15</span></div></li>
+      </ul>
+    </div>
+
+    <div class="category">
+      <p class="category-title">// Edge Runtime &amp; Serverless</p>
+      <ul class="q-list">
+        <li class="q-item" data-ver="v12"><span class="q-num">21</span><div class="q-body"><span class="q-text">What is the Edge Runtime and what are its constraints vs the Node.js runtime?</span><span class="vtag v12">v12</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">22</span><div class="q-body"><span class="q-text">How do you specify <code>export const runtime = 'edge'</code> for a route segment?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">23</span><div class="q-body"><span class="q-text">What are Vercel Edge Functions vs Vercel Serverless Functions in a Next.js context?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">24</span><div class="q-body"><span class="q-text">How do you handle cold start problems for serverless Next.js deployments?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">25</span><div class="q-body"><span class="q-text">What is <code>output: 'standalone'</code> in <code>next.config.js</code> and when do you use it for Docker?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">26</span><div class="q-body"><span class="q-text">How do you deploy Next.js to AWS (Lambda, ECS, or App Runner)?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">27</span><div class="q-body"><span class="q-text">How do you configure Next.js to run correctly behind an nginx reverse proxy?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">28</span><div class="q-body"><span class="q-text">How do you implement WebSocket support alongside a Next.js server?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v14"><span class="q-num">29</span><div class="q-body"><span class="q-text">What is <code>export const maxDuration</code> and what is the limit per plan on Vercel?</span><span class="vtag v14">v14</span></div></li>
+        <li class="q-item" data-ver="v15"><span class="q-num">30</span><div class="q-body"><span class="q-text">How does <code>unstable_after</code> / <code>next/after</code> help with background tasks after response is sent?</span><span class="vtag v15">v15</span></div></li>
+      </ul>
+    </div>
+
+    <div class="category">
+      <p class="category-title">// Security</p>
+      <ul class="q-list">
+        <li class="q-item" data-ver="v14"><span class="q-num">31</span><div class="q-body"><span class="q-text">How do Next.js Server Actions prevent CSRF attacks by default?</span><span class="vtag v14">v14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">32</span><div class="q-body"><span class="q-text">How do you implement Content Security Policy (CSP) headers with nonces in Next.js?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">33</span><div class="q-body"><span class="q-text">What is a <code>server-only</code> module and why is it critical for preventing data leaks?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v14"><span class="q-num">34</span><div class="q-body"><span class="q-text">What is the React <code>taint</code> API (<code>taintObjectReference</code>, <code>taintUniqueValue</code>) and how does Next.js use it?</span><span class="vtag v14">v14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">35</span><div class="q-body"><span class="q-text">How do you prevent sensitive data from leaking from Server Components into the RSC payload?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">36</span><div class="q-body"><span class="q-text">How do you implement rate limiting in Next.js Route Handlers using Upstash/Redis?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">37</span><div class="q-body"><span class="q-text">How do you configure CORS in Next.js Route Handlers?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">38</span><div class="q-body"><span class="q-text">How do you sanitize and validate Server Action inputs to prevent injection attacks?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v12"><span class="q-num">39</span><div class="q-body"><span class="q-text">How do you protect against open redirect vulnerabilities in <code>next/navigation</code> redirects?</span><span class="vtag v12">v12</span></div></li>
+        <li class="q-item" data-ver="v15"><span class="q-num">40</span><div class="q-body"><span class="q-text">How do the new <code>forbidden()</code> and <code>unauthorized()</code> functions in Next.js 15 improve auth-layer security?</span><span class="vtag v15">v15</span></div></li>
+      </ul>
+    </div>
+
+    <div class="category">
+      <p class="category-title">// Advanced Performance</p>
+      <ul class="q-list">
+        <li class="q-item" data-ver="v14"><span class="q-num">41</span><div class="q-body"><span class="q-text">How do you reduce TTFB in a Next.js application using streaming and PPR?</span><span class="vtag v14">v14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">42</span><div class="q-body"><span class="q-text">How do you implement stale-while-revalidate at the CDN/Vercel edge layer?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v14"><span class="q-num">43</span><div class="q-body"><span class="q-text">How do you profile slow Server Component renders with React DevTools and Vercel Speed Insights?</span><span class="vtag v14">v14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">44</span><div class="q-body"><span class="q-text">How do you implement a custom image CDN loader with <code>next/image</code>?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">45</span><div class="q-body"><span class="q-text">What is font subsetting and how does <code>next/font</code> handle it automatically?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v15"><span class="q-num">46</span><div class="q-body"><span class="q-text">What is the Speculation Rules API and how can Next.js 15 prefetch with it?</span><span class="vtag v15">v15</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">47</span><div class="q-body"><span class="q-text">How do you implement virtual scrolling in a Next.js app for very large lists?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v14"><span class="q-num">48</span><div class="q-body"><span class="q-text">How does the new <code>staleTimes</code> config option in Next.js 14 control client-side Router Cache TTL?</span><span class="vtag v14">v14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">49</span><div class="q-body"><span class="q-text">How do you mitigate the performance impact of third-party scripts using <code>next/script</code>?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v15"><span class="q-num">50</span><div class="q-body"><span class="q-text">How do you configure custom <code>cacheLife</code> profiles for the <code>use cache</code> directive in Next.js 15?</span><span class="vtag v15">v15</span></div></li>
+      </ul>
+    </div>
+
+    <div class="category">
+      <p class="category-title">// Advanced Integrations</p>
+      <ul class="q-list">
+        <li class="q-item" data-ver="v14"><span class="q-num">51</span><div class="q-body"><span class="q-text">How do you build a full-stack app with Prisma ORM and Next.js Server Actions?</span><span class="vtag v14">v14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">52</span><div class="q-body"><span class="q-text">How do you integrate a headless CMS (Contentful, Sanity) with ISR in the App Router?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v14"><span class="q-num">53</span><div class="q-body"><span class="q-text">How do you handle large file uploads in Next.js 14 Server Actions?</span><span class="vtag v14">v14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">54</span><div class="q-body"><span class="q-text">How do you integrate GraphQL (Apollo Client + Server Component) in the App Router?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">55</span><div class="q-body"><span class="q-text">How do you implement real-time features (Server-Sent Events or WebSockets) alongside Next.js?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v14"><span class="q-num">56</span><div class="q-body"><span class="q-text">What is <code>next-safe-action</code> and how does it type-safe and validate Server Actions?</span><span class="vtag v14">v14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">57</span><div class="q-body"><span class="q-text">How do you implement cursor-based pagination with Server Components and URL state?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">58</span><div class="q-body"><span class="q-text">How do you implement debounced search that updates URL params and fetches from the server?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v15"><span class="q-num">59</span><div class="q-body"><span class="q-text">How do you use <code>next/after</code> to send analytics or clean up resources after a response is flushed?</span><span class="vtag v15">v15</span></div></li>
+        <li class="q-item" data-ver="v15"><span class="q-num">60</span><div class="q-body"><span class="q-text">How does React 19's native <code>&lt;form&gt;</code> action integration work in a Next.js 15 project?</span><span class="vtag v15">v15</span></div></li>
+      </ul>
+    </div>
+
+    <div class="category">
+      <p class="category-title">// CI/CD &amp; Observability</p>
+      <ul class="q-list">
+        <li class="q-item" data-ver="v14"><span class="q-num">61</span><div class="q-body"><span class="q-text">How do you set up a CI/CD pipeline for Next.js with GitHub Actions including preview deployments?</span><span class="vtag v14">v14</span></div></li>
+        <li class="q-item" data-ver="v14"><span class="q-num">62</span><div class="q-body"><span class="q-text">What is Next.js's built-in OpenTelemetry instrumentation and how do you enable it?</span><span class="vtag v14">v14</span></div></li>
+        <li class="q-item" data-ver="v14"><span class="q-num">63</span><div class="q-body"><span class="q-text">How do you implement distributed tracing across Next.js Server Components and Route Handlers?</span><span class="vtag v14">v14</span></div></li>
+        <li class="q-item" data-ver="v14"><span class="q-num">64</span><div class="q-body"><span class="q-text">How do you implement canary / blue-green deployments for a Next.js application?</span><span class="vtag v14">v14</span></div></li>
+        <li class="q-item" data-ver="v14"><span class="q-num">65</span><div class="q-body"><span class="q-text">How do you manage secrets and environment variables securely across staging and production in Next.js?</span><span class="vtag v14">v14</span></div></li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ===================== ALL VIEW ===================== -->
+  <div id="all-section" class="section active">
+    <p style="color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:0.8rem;margin-bottom:32px;">
+      // Showing all 215 questions. Use tabs or version filters to narrow down.
+    </p>
+    <!-- Beginner block -->
+    <div class="section-block" data-section="beginner">
+      <div class="section-header"><span class="level-badge beginner">Beginner</span><h2 class="section-title">Foundations &amp; Core Concepts <span style="color:var(--muted);font-size:0.9rem;font-weight:400">— 70 questions</span></h2></div>
+      <div class="category"><p class="category-title">// Introduction &amp; Basics</p><ul class="q-list">
+        <li class="q-item" data-ver="v9"><span class="q-num">01</span><div class="q-body"><span class="q-text">What is Next.js and how does it differ from React?</span><span class="vtag v9">v9–11</span></div></li>
+        <li class="q-item" data-ver="v9"><span class="q-num">02</span><div class="q-body"><span class="q-text">What are the main features of Next.js?</span><span class="vtag v9">v9–11</span></div></li>
+        <li class="q-item" data-ver="v9"><span class="q-num">03</span><div class="q-body"><span class="q-text">What is the difference between Next.js and Create React App?</span><span class="vtag v9">v9–11</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">04</span><div class="q-body"><span class="q-text">How do you create a new Next.js project using <code>create-next-app</code>?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v9"><span class="q-num">05</span><div class="q-body"><span class="q-text">What is the purpose of the <code>pages</code> directory in Next.js?</span><span class="vtag v9">v9–11</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">06</span><div class="q-body"><span class="q-text">What is the <code>app</code> directory introduced in Next.js 13?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v9"><span class="q-num">07</span><div class="q-body"><span class="q-text">What is file-based routing in Next.js?</span><span class="vtag v9">v9–11</span></div></li>
+        <li class="q-item" data-ver="v9"><span class="q-num">08</span><div class="q-body"><span class="q-text">What is <code>_app.js</code> and what is it used for?</span><span class="vtag v9">v9–11</span></div></li>
+        <li class="q-item" data-ver="v9"><span class="q-num">09</span><div class="q-body"><span class="q-text">What is <code>_document.js</code> and when would you use it?</span><span class="vtag v9">v9–11</span></div></li>
+        <li class="q-item" data-ver="v15"><span class="q-num">10</span><div class="q-body"><span class="q-text">What is Turbopack and why is it the default dev bundler in Next.js 15?</span><span class="vtag v15">v15</span></div></li>
+      </ul></div>
+      <div class="category"><p class="category-title">// Routing</p><ul class="q-list">
+        <li class="q-item" data-ver="v9"><span class="q-num">11</span><div class="q-body"><span class="q-text">How does dynamic routing work in Next.js?</span><span class="vtag v9">v9–11</span></div></li>
+        <li class="q-item" data-ver="v9"><span class="q-num">12</span><div class="q-body"><span class="q-text">What is the difference between <code>[id]</code> and <code>[...slug]</code> in Next.js routing?</span><span class="vtag v9">v9–11</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">13</span><div class="q-body"><span class="q-text">What is the difference between <code>[[...slug]]</code> and <code>[...slug]</code>?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v9"><span class="q-num">14</span><div class="q-body"><span class="q-text">How do you navigate between pages using the <code>Link</code> component?</span><span class="vtag v9">v9–11</span></div></li>
+        <li class="q-item" data-ver="v9"><span class="q-num">15</span><div class="q-body"><span class="q-text">What is the <code>useRouter</code> hook and what can you do with it?</span><span class="vtag v9">v9–11</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">16</span><div class="q-body"><span class="q-text">What is the difference between <code>useRouter</code> from <code>next/navigation</code> vs <code>next/router</code>?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v9"><span class="q-num">17</span><div class="q-body"><span class="q-text">How do you access query parameters in Next.js?</span><span class="vtag v9">v9–11</span></div></li>
+        <li class="q-item" data-ver="v9"><span class="q-num">18</span><div class="q-body"><span class="q-text">How do you create a custom 404 page in Next.js?</span><span class="vtag v9">v9–11</span></div></li>
+        <li class="q-item" data-ver="v12"><span class="q-num">19</span><div class="q-body"><span class="q-text">What is shallow routing and when would you use it?</span><span class="vtag v12">v12</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">20</span><div class="q-body"><span class="q-text">What is the <code>redirect()</code> function in the App Router?</span><span class="vtag v13">v13–14</span></div></li>
+      </ul></div>
+      <div class="category"><p class="category-title">// Rendering Strategies</p><ul class="q-list">
+        <li class="q-item" data-ver="v9"><span class="q-num">21</span><div class="q-body"><span class="q-text">What is Server-Side Rendering (SSR) in Next.js?</span><span class="vtag v9">v9–11</span></div></li>
+        <li class="q-item" data-ver="v9"><span class="q-num">22</span><div class="q-body"><span class="q-text">What is Static Site Generation (SSG) in Next.js?</span><span class="vtag v9">v9–11</span></div></li>
+        <li class="q-item" data-ver="v9"><span class="q-num">23</span><div class="q-body"><span class="q-text">What is Client-Side Rendering (CSR) and when should you choose it?</span><span class="vtag v9">v9–11</span></div></li>
+        <li class="q-item" data-ver="v9"><span class="q-num">24</span><div class="q-body"><span class="q-text">What is <code>getStaticProps</code> and when is it called?</span><span class="vtag v9">v9–11</span></div></li>
+        <li class="q-item" data-ver="v9"><span class="q-num">25</span><div class="q-body"><span class="q-text">What is <code>getServerSideProps</code> and how does it differ from <code>getStaticProps</code>?</span><span class="vtag v9">v9–11</span></div></li>
+        <li class="q-item" data-ver="v9"><span class="q-num">26</span><div class="q-body"><span class="q-text">What is <code>getStaticPaths</code> and what does it return?</span><span class="vtag v9">v9–11</span></div></li>
+        <li class="q-item" data-ver="v9"><span class="q-num">27</span><div class="q-body"><span class="q-text">What is the difference between <code>fallback: true</code>, <code>false</code>, and <code>'blocking'</code>?</span><span class="vtag v9">v9–11</span></div></li>
+        <li class="q-item" data-ver="v12"><span class="q-num">28</span><div class="q-body"><span class="q-text">What is Incremental Static Regeneration (ISR) and how do you enable it?</span><span class="vtag v12">v12</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">29</span><div class="q-body"><span class="q-text">Are <code>getStaticProps</code> / <code>getServerSideProps</code> available in the App Router?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v15"><span class="q-num">30</span><div class="q-body"><span class="q-text">What is Partial Prerendering (PPR) introduced as stable in Next.js 15?</span><span class="vtag v15">v15</span></div></li>
+      </ul></div>
+      <div class="category"><p class="category-title">// Styling &amp; Assets</p><ul class="q-list">
+        <li class="q-item" data-ver="v9"><span class="q-num">31</span><div class="q-body"><span class="q-text">How do you add global CSS to a Next.js application?</span><span class="vtag v9">v9–11</span></div></li>
+        <li class="q-item" data-ver="v9"><span class="q-num">32</span><div class="q-body"><span class="q-text">What are CSS Modules and how do you use them in Next.js?</span><span class="vtag v9">v9–11</span></div></li>
+        <li class="q-item" data-ver="v9"><span class="q-num">33</span><div class="q-body"><span class="q-text">How does the <code>next/image</code> component improve performance over a plain <code>&lt;img&gt;</code>?</span><span class="vtag v9">v9–11</span></div></li>
+        <li class="q-item" data-ver="v9"><span class="q-num">34</span><div class="q-body"><span class="q-text">What is the <code>public</code> folder used for?</span><span class="vtag v9">v9–11</span></div></li>
+        <li class="q-item" data-ver="v12"><span class="q-num">35</span><div class="q-body"><span class="q-text">How do you configure Tailwind CSS with Next.js?</span><span class="vtag v12">v12</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">36</span><div class="q-body"><span class="q-text">What is <code>next/font</code> and how does it eliminate layout shift from font loading?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">37</span><div class="q-body"><span class="q-text">How do you use a Google Font vs a local font with <code>next/font</code>?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v12"><span class="q-num">38</span><div class="q-body"><span class="q-text">How do you configure remote image domains in <code>next.config.js</code>?</span><span class="vtag v12">v12</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">39</span><div class="q-body"><span class="q-text">What built-in CSS-in-JS solution does Next.js support in the App Router?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">40</span><div class="q-body"><span class="q-text">How do you import and use SVG files as React components in Next.js?</span><span class="vtag v13">v13–14</span></div></li>
+      </ul></div>
+      <div class="category"><p class="category-title">// API Routes &amp; Environment</p><ul class="q-list">
+        <li class="q-item" data-ver="v9"><span class="q-num">41</span><div class="q-body"><span class="q-text">What are API routes in Next.js and where do you place them?</span><span class="vtag v9">v9–11</span></div></li>
+        <li class="q-item" data-ver="v9"><span class="q-num">42</span><div class="q-body"><span class="q-text">How do you handle different HTTP methods in a single API route?</span><span class="vtag v9">v9–11</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">43</span><div class="q-body"><span class="q-text">What are Route Handlers (<code>route.ts</code>) in the App Router?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">44</span><div class="q-body"><span class="q-text">What is <code>next.config.js</code> / <code>next.config.ts</code> and what can you configure in it?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v9"><span class="q-num">45</span><div class="q-body"><span class="q-text">How do you set environment variables in Next.js?</span><span class="vtag v9">v9–11</span></div></li>
+        <li class="q-item" data-ver="v9"><span class="q-num">46</span><div class="q-body"><span class="q-text">What is the difference between <code>NEXT_PUBLIC_</code> and non-prefixed env variables?</span><span class="vtag v9">v9–11</span></div></li>
+        <li class="q-item" data-ver="v9"><span class="q-num">47</span><div class="q-body"><span class="q-text">How do you fetch data on the client side in a Next.js app?</span><span class="vtag v9">v9–11</span></div></li>
+        <li class="q-item" data-ver="v12"><span class="q-num">48</span><div class="q-body"><span class="q-text">What is SWR and how does it integrate with Next.js?</span><span class="vtag v12">v12</span></div></li>
+        <li class="q-item" data-ver="v15"><span class="q-num">49</span><div class="q-body"><span class="q-text">What changed with <code>cookies()</code>, <code>headers()</code>, and <code>params</code> becoming async in Next.js 15?</span><span class="vtag v15">v15</span></div></li>
+        <li class="q-item" data-ver="v15"><span class="q-num">50</span><div class="q-body"><span class="q-text">What is the <code>connection()</code> API introduced in Next.js 15?</span><span class="vtag v15">v15</span></div></li>
+      </ul></div>
+      <div class="category"><p class="category-title">// SEO, Metadata &amp; Deployment</p><ul class="q-list">
+        <li class="q-item" data-ver="v9"><span class="q-num">51</span><div class="q-body"><span class="q-text">How do you add meta tags using the <code>Head</code> component (Pages Router)?</span><span class="vtag v9">v9–11</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">52</span><div class="q-body"><span class="q-text">What is the <code>metadata</code> export in the App Router?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">53</span><div class="q-body"><span class="q-text">How do you generate dynamic metadata using <code>generateMetadata()</code>?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">54</span><div class="q-body"><span class="q-text">How do you generate a <code>sitemap.xml</code> using the App Router file convention?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">55</span><div class="q-body"><span class="q-text">How do you configure <code>robots.txt</code> in Next.js?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">56</span><div class="q-body"><span class="q-text">How do you add Open Graph and Twitter card tags in the App Router?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v14"><span class="q-num">57</span><div class="q-body"><span class="q-text">What is the <code>opengraph-image.tsx</code> file convention in Next.js 14?</span><span class="vtag v14">v14</span></div></li>
+        <li class="q-item" data-ver="v9"><span class="q-num">58</span><div class="q-body"><span class="q-text">Why is SSR/SSG better for SEO than pure CSR?</span><span class="vtag v9">v9–11</span></div></li>
+        <li class="q-item" data-ver="v9"><span class="q-num">59</span><div class="q-body"><span class="q-text">How do you build and start a Next.js app for production?</span><span class="vtag v9">v9–11</span></div></li>
+        <li class="q-item" data-ver="v9"><span class="q-num">60</span><div class="q-body"><span class="q-text">What is Vercel and how does it relate to Next.js?</span><span class="vtag v9">v9–11</span></div></li>
+        <li class="q-item" data-ver="v12"><span class="q-num">61</span><div class="q-body"><span class="q-text">What is Fast Refresh and how does it improve DX?</span><span class="vtag v12">v12</span></div></li>
+        <li class="q-item" data-ver="v9"><span class="q-num">62</span><div class="q-body"><span class="q-text">What TypeScript support does Next.js have out of the box?</span><span class="vtag v9">v9–11</span></div></li>
+        <li class="q-item" data-ver="v9"><span class="q-num">63</span><div class="q-body"><span class="q-text">What is the <code>.next</code> folder and what does it contain?</span><span class="vtag v9">v9–11</span></div></li>
+        <li class="q-item" data-ver="v9"><span class="q-num">64</span><div class="q-body"><span class="q-text">What is automatic code splitting in Next.js?</span><span class="vtag v9">v9–11</span></div></li>
+        <li class="q-item" data-ver="v12"><span class="q-num">65</span><div class="q-body"><span class="q-text">How do you add and configure ESLint in a Next.js project?</span><span class="vtag v12">v12</span></div></li>
+        <li class="q-item" data-ver="legacy"><span class="q-num">66</span><div class="q-body"><span class="q-text">What is <code>next export</code> and when was it removed?</span><span class="vtag legacy">Legacy</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">67</span><div class="q-body"><span class="q-text">How does metadata <code>title.template</code> work in nested layouts?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">68</span><div class="q-body"><span class="q-text">What is <code>metadataBase</code> and why is it important for Open Graph URLs?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v15"><span class="q-num">69</span><div class="q-body"><span class="q-text">What is the difference between the <code>dev</code>, <code>build</code>, and <code>start</code> scripts in Next.js 15?</span><span class="vtag v15">v15</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">70</span><div class="q-body"><span class="q-text">What does <code>next build</code> output and how do you read the route table it prints?</span><span class="vtag v13">v13–14</span></div></li>
+      </ul></div>
+    </div>
+
+    <!-- Mid block in All – abbreviated to keep file manageable, links to mid tab -->
+    <div class="section-block" data-section="mid">
+      <div class="section-header"><span class="level-badge mid">Mid-Level</span><h2 class="section-title">Intermediate Patterns &amp; Performance <span style="color:var(--muted);font-size:0.9rem;font-weight:400">— 80 questions</span></h2></div>
+      <p style="font-family:'JetBrains Mono',monospace;font-size:0.78rem;color:var(--muted);margin-bottom:20px;">// Questions 71–150 — switch to <button onclick="switchTab('mid')" style="background:none;border:none;cursor:pointer;color:var(--mid);font-family:'JetBrains Mono',monospace;font-size:0.78rem;text-decoration:underline;">Mid-Level tab</button> for detailed view or use search above.</p>
+      <div class="category"><p class="category-title">// App Router, Data, Server Actions, Middleware, Performance, State, Testing (71–150)</p><ul class="q-list">
+        <li class="q-item" data-ver="v13"><span class="q-num">71</span><div class="q-body"><span class="q-text">What is the difference between the Pages Router and the App Router?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">72</span><div class="q-body"><span class="q-text">What are React Server Components (RSC) and how does Next.js leverage them?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">73</span><div class="q-body"><span class="q-text">What is the difference between Server Components and Client Components?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">74</span><div class="q-body"><span class="q-text">How do you mark a component as a Client Component with <code>'use client'</code>?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">75</span><div class="q-body"><span class="q-text">What are layouts in the App Router and how do they persist across navigations?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">76</span><div class="q-body"><span class="q-text">What is the root layout and why is it required?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">77</span><div class="q-body"><span class="q-text">What is a <code>template.js</code> file and how is it different from a layout?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">78</span><div class="q-body"><span class="q-text">How does <code>loading.js</code> work with React Suspense?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">79</span><div class="q-body"><span class="q-text">What is the <code>error.js</code> file and what is its Error Boundary contract?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">80</span><div class="q-body"><span class="q-text">What are Route Groups <code>(folder)</code> and when do you use them?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">81</span><div class="q-body"><span class="q-text">What are Parallel Routes (<code>@slot</code>) and when would you use them?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">82</span><div class="q-body"><span class="q-text">What are Intercepting Routes and what UX problem do they solve?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v15"><span class="q-num">83</span><div class="q-body"><span class="q-text">What are the new <code>forbidden()</code> and <code>unauthorized()</code> functions added in Next.js 15?</span><span class="vtag v15">v15</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">84</span><div class="q-body"><span class="q-text">How does async data fetching work directly inside Server Components?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">85</span><div class="q-body"><span class="q-text">What is the extended <code>fetch</code> API in Next.js and what caching options does it add?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">86</span><div class="q-body"><span class="q-text">What is the difference between <code>cache: 'force-cache'</code> and <code>cache: 'no-store'</code>?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">87</span><div class="q-body"><span class="q-text">What is on-demand revalidation and how do you trigger it?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">88</span><div class="q-body"><span class="q-text">What is <code>revalidatePath</code> vs <code>revalidateTag</code>?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v15"><span class="q-num">89</span><div class="q-body"><span class="q-text">What is the <code>use cache</code> directive in Next.js 15 and how does it differ from <code>unstable_cache</code>?</span><span class="vtag v15">v15</span></div></li>
+        <li class="q-item" data-ver="v15"><span class="q-num">90</span><div class="q-body"><span class="q-text">What are <code>cacheLife</code> and <code>cacheTag</code> APIs in Next.js 15?</span><span class="vtag v15">v15</span></div></li>
+        <li class="q-item" data-ver="v15"><span class="q-num">91</span><div class="q-body"><span class="q-text">How does <code>next/after</code> allow post-response work in Next.js 15?</span><span class="vtag v15">v15</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">92</span><div class="q-body"><span class="q-text">What are Server Actions and what problem do they solve?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v14"><span class="q-num">93</span><div class="q-body"><span class="q-text">Server Actions became stable in which Next.js version?</span><span class="vtag v14">v14</span></div></li>
+        <li class="q-item" data-ver="v15"><span class="q-num">94</span><div class="q-body"><span class="q-text">What is <code>useActionState</code> (React 19) and how does it replace <code>useFormState</code>?</span><span class="vtag v15">v15</span></div></li>
+        <li class="q-item" data-ver="v14"><span class="q-num">95</span><div class="q-body"><span class="q-text">What is <code>useFormStatus</code> and what does it provide during a Server Action submission?</span><span class="vtag v14">v14</span></div></li>
+        <li class="q-item" data-ver="v12"><span class="q-num">96</span><div class="q-body"><span class="q-text">What is middleware in Next.js and where (Edge Runtime) does it execute?</span><span class="vtag v12">v12</span></div></li>
+        <li class="q-item" data-ver="v12"><span class="q-num">97</span><div class="q-body"><span class="q-text">How do you create a <code>middleware.ts</code> file and configure the <code>matcher</code>?</span><span class="vtag v12">v12</span></div></li>
+        <li class="q-item" data-ver="v14"><span class="q-num">98</span><div class="q-body"><span class="q-text">How do you implement authentication with Auth.js (NextAuth v5) in the App Router?</span><span class="vtag v14">v14</span></div></li>
+        <li class="q-item" data-ver="v9"><span class="q-num">99</span><div class="q-body"><span class="q-text">What is <code>next/dynamic</code> and what options does it accept?</span><span class="vtag v9">v9–11</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">100</span><div class="q-body"><span class="q-text">What are Core Web Vitals and which Next.js features improve each metric?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">101</span><div class="q-body"><span class="q-text">Why can't you use React Context directly in a Server Component?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">102</span><div class="q-body"><span class="q-text">How does Zustand integrate with Next.js App Router (per-request store pattern)?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v14"><span class="q-num">103</span><div class="q-body"><span class="q-text">What is <code>useOptimistic</code> and how does it work with Server Actions?</span><span class="vtag v14">v14</span></div></li>
+        <li class="q-item" data-ver="v15"><span class="q-num">104</span><div class="q-body"><span class="q-text">What is the <code>use()</code> hook in React 19 and how does Next.js 15 use it for promises?</span><span class="vtag v15">v15</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">105</span><div class="q-body"><span class="q-text">How do you implement URL-state-based filtering with <code>useSearchParams</code>?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">106</span><div class="q-body"><span class="q-text">How do you test Next.js App Router pages with React Testing Library?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">107</span><div class="q-body"><span class="q-text">How do you mock <code>next/navigation</code> hooks in unit tests?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">108</span><div class="q-body"><span class="q-text">What is the difference between <code>error.js</code> and <code>global-error.js</code>?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">109</span><div class="q-body"><span class="q-text">How do you implement i18n in the App Router using <code>next-intl</code>?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v14"><span class="q-num">110</span><div class="q-body"><span class="q-text">What is the <code>instrumentation.ts</code> file and what lifecycle hooks does it expose?</span><span class="vtag v14">v14</span></div></li>
+        <li class="q-item" data-ver="v15"><span class="q-num">111</span><div class="q-body"><span class="q-text">How does Next.js 15 support React 19's new form hooks (<code>useActionState</code>, <code>useFormStatus</code>)?</span><span class="vtag v15">v15</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">112</span><div class="q-body"><span class="q-text">How do you handle TanStack Query hydration from Server Component data?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v15"><span class="q-num">113</span><div class="q-body"><span class="q-text">How did the Router Cache default behaviour change in Next.js 15?</span><span class="vtag v15">v15</span></div></li>
+        <li class="q-item" data-ver="v14"><span class="q-num">114</span><div class="q-body"><span class="q-text">What is the <code>staleTimes</code> config option introduced in Next.js 14.2?</span><span class="vtag v14">v14</span></div></li>
+        <li class="q-item" data-ver="v15"><span class="q-num">115</span><div class="q-body"><span class="q-text">How does Turbopack improve build performance compared to Webpack in Next.js 15?</span><span class="vtag v15">v15</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">116</span><div class="q-body"><span class="q-text">How do you analyze and reduce bundle size in a Next.js app?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">117</span><div class="q-body"><span class="q-text">How do you handle async errors thrown inside Server Components?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v14"><span class="q-num">118</span><div class="q-body"><span class="q-text">How do you set up Sentry error tracking with source maps in Next.js 14?</span><span class="vtag v14">v14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">119</span><div class="q-body"><span class="q-text">How do you implement cursor-based pagination with Server Components and URL state?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">120</span><div class="q-body"><span class="q-text">How do you handle and surface validation errors from a Server Action?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">121</span><div class="q-body"><span class="q-text">What is request deduplication (memoization) in Next.js fetch calls?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">122</span><div class="q-body"><span class="q-text">How do you use <code>React.cache</code> for per-request memoization of non-fetch calls?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v14"><span class="q-num">123</span><div class="q-body"><span class="q-text">How do you implement Optimistic UI with <code>useOptimistic</code> and a Server Action?</span><span class="vtag v14">v14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">124</span><div class="q-body"><span class="q-text">How do you pass data from a Server Component as props to a Client Component?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">125</span><div class="q-body"><span class="q-text">What are the security considerations and CSRF handling for Server Actions?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">126</span><div class="q-body"><span class="q-text">What are the challenges of using Redux with the App Router?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">127</span><div class="q-body"><span class="q-text">How do you write integration tests for Route Handlers?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">128</span><div class="q-body"><span class="q-text">How do you set up Cypress or Playwright for E2E testing in Next.js?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">129</span><div class="q-body"><span class="q-text">What is the difference between sub-path routing and domain routing for i18n?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">130</span><div class="q-body"><span class="q-text">How do you implement locale detection in Next.js middleware?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v12"><span class="q-num">131</span><div class="q-body"><span class="q-text">What are <code>NextRequest</code> and <code>NextResponse</code> in middleware?</span><span class="vtag v12">v12</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">132</span><div class="q-body"><span class="q-text">How do you use <code>useSelectedLayoutSegment</code> and <code>useSelectedLayoutSegments</code>?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v14"><span class="q-num">133</span><div class="q-body"><span class="q-text">What is <code>unstable_cache</code> and when would you use it over fetch caching?</span><span class="vtag v14">v14</span></div></li>
+        <li class="q-item" data-ver="v11"><span class="q-num">134</span><div class="q-body"><span class="q-text">What strategies does the <code>next/script</code> component offer and when do you use each?</span><span class="vtag v9">v9–11</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">135</span><div class="q-body"><span class="q-text">What is the <code>not-found.js</code> file in the App Router?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">136</span><div class="q-body"><span class="q-text">What is the <code>notFound()</code> function and what file does it render?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">137</span><div class="q-body"><span class="q-text">How do you implement granular Suspense boundaries to avoid render waterfalls?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">138</span><div class="q-body"><span class="q-text">How do you write unit tests for Server Actions?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v15"><span class="q-num">139</span><div class="q-body"><span class="q-text">How does Next.js 15 with React 19 handle native <code>&lt;form&gt;</code> action integration?</span><span class="vtag v15">v15</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">140</span><div class="q-body"><span class="q-text">Can Server Actions be called from Client Components? How?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v15"><span class="q-num">141</span><div class="q-body"><span class="q-text">What is the <code>forbidden.js</code> / <code>unauthorized.js</code> convention in Next.js 15?</span><span class="vtag v15">v15</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">142</span><div class="q-body"><span class="q-text">What is the difference between static and dynamic data fetching in App Router?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">143</span><div class="q-body"><span class="q-text">How do you redirect inside a Server Action without triggering a client-side navigation?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">144</span><div class="q-body"><span class="q-text">How do you handle JWT tokens in Next.js Route Handlers?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">145</span><div class="q-body"><span class="q-text">What is the <code>'use server'</code> directive and where can you place it?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">146</span><div class="q-body"><span class="q-text">How do Server Actions integrate with HTML <code>&lt;form&gt;</code> elements?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">147</span><div class="q-body"><span class="q-text">How does prefetching work in the <code>Link</code> component and how did it change in v13?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">148</span><div class="q-body"><span class="q-text">How do you lazy-load a heavy Client Component to avoid hydration cost?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">149</span><div class="q-body"><span class="q-text">What is the <code>priority</code> prop on <code>next/image</code> and when must you set it?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">150</span><div class="q-body"><span class="q-text">How do you protect routes and redirect unauthenticated users in middleware?</span><span class="vtag v12">v12</span></div></li>
+      </ul></div>
+    </div>
+
+    <!-- Advanced block in All -->
+    <div class="section-block" data-section="advanced">
+      <div class="section-header"><span class="level-badge advanced">Advanced</span><h2 class="section-title">Architecture, Internals &amp; Expert Topics <span style="color:var(--muted);font-size:0.9rem;font-weight:400">— 65 questions</span></h2></div>
+      <p style="font-family:'JetBrains Mono',monospace;font-size:0.78rem;color:var(--muted);margin-bottom:20px;">// Questions 151–215 — switch to <button onclick="switchTab('advanced')" style="background:none;border:none;cursor:pointer;color:var(--advanced);font-family:'JetBrains Mono',monospace;font-size:0.78rem;text-decoration:underline;">Advanced tab</button> for detailed view.</p>
+      <div class="category"><p class="category-title">// Architecture, Rendering, Edge, Security, Performance, Integrations, CI/CD (151–215)</p><ul class="q-list">
+        <li class="q-item" data-ver="v13"><span class="q-num">151</span><div class="q-body"><span class="q-text">How do you architect a large Next.js application using Domain-Driven Design?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">152</span><div class="q-body"><span class="q-text">How do you design a clean Data Access Layer (DAL) to keep DB logic out of components?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v14"><span class="q-num">153</span><div class="q-body"><span class="q-text">How do you implement a micro-frontend architecture with Module Federation in Next.js?</span><span class="vtag v14">v14</span></div></li>
+        <li class="q-item" data-ver="v14"><span class="q-num">154</span><div class="q-body"><span class="q-text">How do you structure a Turborepo monorepo with multiple Next.js apps and shared packages?</span><span class="vtag v14">v14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">155</span><div class="q-body"><span class="q-text">What is the Strangler Fig pattern and how would you apply it when migrating to Next.js?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v14"><span class="q-num">156</span><div class="q-body"><span class="q-text">How do you implement A/B testing at the edge in Next.js without impacting caching?</span><span class="vtag v14">v14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">157</span><div class="q-body"><span class="q-text">How do you implement a multi-tenant SaaS app using subdomain routing via middleware?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v15"><span class="q-num">158</span><div class="q-body"><span class="q-text">How do you migrate a Next.js 14 codebase to use the new async request APIs in v15?</span><span class="vtag v15">v15</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">159</span><div class="q-body"><span class="q-text">Explain the RSC payload format and how it is streamed from server to client.</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">160</span><div class="q-body"><span class="q-text">What triggers a route segment to switch from static to dynamic rendering?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">161</span><div class="q-body"><span class="q-text">How does Next.js implement streaming HTML with Suspense and out-of-order flushing?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">162</span><div class="q-body"><span class="q-text">What causes hydration mismatches in Next.js and how do you debug them?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v15"><span class="q-num">163</span><div class="q-body"><span class="q-text">What is Partial Prerendering (PPR) and how does it combine static shells with dynamic holes?</span><span class="vtag v15">v15</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">164</span><div class="q-body"><span class="q-text">What are the four caching layers in the App Router (Memoization, Data Cache, Full Route Cache, Router Cache)?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">165</span><div class="q-body"><span class="q-text">What is the difference between the Full Route Cache (server) and the Router Cache (client)?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v15"><span class="q-num">166</span><div class="q-body"><span class="q-text">How did the Router Cache default behavior change in Next.js 15?</span><span class="vtag v15">v15</span></div></li>
+        <li class="q-item" data-ver="v15"><span class="q-num">167</span><div class="q-body"><span class="q-text">How does the <code>use cache</code> directive's <code>cacheLife</code> profile system work?</span><span class="vtag v15">v15</span></div></li>
+        <li class="q-item" data-ver="v12"><span class="q-num">168</span><div class="q-body"><span class="q-text">What is the Edge Runtime and what are its constraints vs the Node.js runtime?</span><span class="vtag v12">v12</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">169</span><div class="q-body"><span class="q-text">What are Vercel Edge Functions vs Vercel Serverless Functions in a Next.js context?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">170</span><div class="q-body"><span class="q-text">What is <code>output: 'standalone'</code> and when do you use it for Docker?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">171</span><div class="q-body"><span class="q-text">How do you deploy Next.js to AWS (Lambda, ECS, or App Runner)?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v15"><span class="q-num">172</span><div class="q-body"><span class="q-text">How does <code>unstable_after</code> / <code>next/after</code> help with background tasks after response is sent?</span><span class="vtag v15">v15</span></div></li>
+        <li class="q-item" data-ver="v14"><span class="q-num">173</span><div class="q-body"><span class="q-text">How do Next.js Server Actions prevent CSRF attacks by default?</span><span class="vtag v14">v14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">174</span><div class="q-body"><span class="q-text">How do you implement Content Security Policy (CSP) headers with nonces in Next.js?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">175</span><div class="q-body"><span class="q-text">What is a <code>server-only</code> module and why is it critical for preventing data leaks?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v14"><span class="q-num">176</span><div class="q-body"><span class="q-text">What is the React <code>taint</code> API and how does Next.js use it for security?</span><span class="vtag v14">v14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">177</span><div class="q-body"><span class="q-text">How do you implement rate limiting in Next.js Route Handlers using Upstash/Redis?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">178</span><div class="q-body"><span class="q-text">How do you configure CORS in Next.js Route Handlers?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v15"><span class="q-num">179</span><div class="q-body"><span class="q-text">How do the new <code>forbidden()</code> and <code>unauthorized()</code> functions in Next.js 15 improve auth-layer security?</span><span class="vtag v15">v15</span></div></li>
+        <li class="q-item" data-ver="v14"><span class="q-num">180</span><div class="q-body"><span class="q-text">How do you reduce TTFB in a Next.js application using streaming and PPR?</span><span class="vtag v14">v14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">181</span><div class="q-body"><span class="q-text">How do you implement stale-while-revalidate at the CDN/Vercel edge layer?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v14"><span class="q-num">182</span><div class="q-body"><span class="q-text">How do you profile slow Server Component renders with React DevTools and Vercel Speed Insights?</span><span class="vtag v14">v14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">183</span><div class="q-body"><span class="q-text">How do you implement a custom image CDN loader with <code>next/image</code>?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v15"><span class="q-num">184</span><div class="q-body"><span class="q-text">What is the Speculation Rules API and how can Next.js 15 prefetch with it?</span><span class="vtag v15">v15</span></div></li>
+        <li class="q-item" data-ver="v15"><span class="q-num">185</span><div class="q-body"><span class="q-text">How do you configure custom <code>cacheLife</code> profiles for the <code>use cache</code> directive?</span><span class="vtag v15">v15</span></div></li>
+        <li class="q-item" data-ver="v14"><span class="q-num">186</span><div class="q-body"><span class="q-text">How do you build a full-stack app with Prisma ORM and Next.js Server Actions?</span><span class="vtag v14">v14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">187</span><div class="q-body"><span class="q-text">How do you integrate a headless CMS (Contentful, Sanity) with ISR in the App Router?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v14"><span class="q-num">188</span><div class="q-body"><span class="q-text">How do you handle large file uploads in Next.js 14 Server Actions?</span><span class="vtag v14">v14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">189</span><div class="q-body"><span class="q-text">How do you integrate GraphQL (Apollo Client + Server Component) in the App Router?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">190</span><div class="q-body"><span class="q-text">How do you implement real-time features (SSE or WebSockets) alongside Next.js?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v14"><span class="q-num">191</span><div class="q-body"><span class="q-text">What is <code>next-safe-action</code> and how does it type-safe and validate Server Actions?</span><span class="vtag v14">v14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">192</span><div class="q-body"><span class="q-text">How do you implement debounced search that updates URL params and fetches from the server?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v15"><span class="q-num">193</span><div class="q-body"><span class="q-text">How do you use <code>next/after</code> to send analytics or clean up resources after response is flushed?</span><span class="vtag v15">v15</span></div></li>
+        <li class="q-item" data-ver="v15"><span class="q-num">194</span><div class="q-body"><span class="q-text">How does React 19's native <code>&lt;form&gt;</code> action integration work in a Next.js 15 project?</span><span class="vtag v15">v15</span></div></li>
+        <li class="q-item" data-ver="v14"><span class="q-num">195</span><div class="q-body"><span class="q-text">How do you set up a CI/CD pipeline for Next.js with GitHub Actions including preview deployments?</span><span class="vtag v14">v14</span></div></li>
+        <li class="q-item" data-ver="v14"><span class="q-num">196</span><div class="q-body"><span class="q-text">What is Next.js's built-in OpenTelemetry instrumentation and how do you enable it?</span><span class="vtag v14">v14</span></div></li>
+        <li class="q-item" data-ver="v14"><span class="q-num">197</span><div class="q-body"><span class="q-text">How do you implement distributed tracing across Server Components and Route Handlers?</span><span class="vtag v14">v14</span></div></li>
+        <li class="q-item" data-ver="v14"><span class="q-num">198</span><div class="q-body"><span class="q-text">How do you implement canary / blue-green deployments for a Next.js application?</span><span class="vtag v14">v14</span></div></li>
+        <li class="q-item" data-ver="v14"><span class="q-num">199</span><div class="q-body"><span class="q-text">How do you manage secrets securely across staging and production in Next.js?</span><span class="vtag v14">v14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">200</span><div class="q-body"><span class="q-text">How do you handle cold start problems for serverless Next.js deployments?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">201</span><div class="q-body"><span class="q-text">How do you sanitize and validate Server Action inputs to prevent injection attacks?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">202</span><div class="q-body"><span class="q-text">How do you prevent sensitive data from leaking from Server Components into the RSC payload?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">203</span><div class="q-body"><span class="q-text">How do you protect against open redirect vulnerabilities in <code>next/navigation</code> redirects?</span><span class="vtag v12">v12</span></div></li>
+        <li class="q-item" data-ver="v14"><span class="q-num">204</span><div class="q-body"><span class="q-text">How do you handle virtual scrolling in a Next.js app for very large lists?</span><span class="vtag v14">v14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">205</span><div class="q-body"><span class="q-text">How do you configure Next.js to run correctly behind an nginx reverse proxy?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">206</span><div class="q-body"><span class="q-text">How do you implement WebSocket support alongside a Next.js server?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v14"><span class="q-num">207</span><div class="q-body"><span class="q-text">What is <code>export const maxDuration</code> and what is the limit per plan on Vercel?</span><span class="vtag v14">v14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">208</span><div class="q-body"><span class="q-text">How do you specify <code>export const runtime = 'edge'</code> for a route segment?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v14"><span class="q-num">209</span><div class="q-body"><span class="q-text">How do you mitigate the performance impact of third-party scripts using <code>next/script</code>?</span><span class="vtag v14">v14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">210</span><div class="q-body"><span class="q-text">What is font subsetting and how does <code>next/font</code> handle it automatically?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">211</span><div class="q-body"><span class="q-text">How do you implement cursor-based pagination with Server Components?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v14"><span class="q-num">212</span><div class="q-body"><span class="q-text">How do you implement feature flags in Next.js with middleware-based routing?</span><span class="vtag v14">v14</span></div></li>
+        <li class="q-item" data-ver="v13"><span class="q-num">213</span><div class="q-body"><span class="q-text">What is the Repository pattern and how does it apply to Next.js data fetching?</span><span class="vtag v13">v13–14</span></div></li>
+        <li class="q-item" data-ver="v14"><span class="q-num">214</span><div class="q-body"><span class="q-text">How do you build a headless CMS integration with incremental static regeneration?</span><span class="vtag v14">v14</span></div></li>
+        <li class="q-item" data-ver="v14"><span class="q-num">215</span><div class="q-body"><span class="q-text">How do you profile and diagnose slow Server Component renders?</span><span class="vtag v14">v14</span></div></li>
+      </ul></div>
+    </div>
+  </div>
+
+  <div class="no-results" id="noResults">No questions match your search or filters.</div>
+
+  <footer>© 2025 · Next.js Interview Questions · 215 questions · v9 → v15 tagged</footer>
+</div>
+
+<script>
+  let activeVersions = new Set(['legacy','v9','v12','v13','v14','v15']);
+
+  function switchTab(level) {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelector(`[data-level="${level}"]`).classList.add('active');
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.getElementById(`${level}-section`).classList.add('active');
+    document.getElementById('searchInput').value = '';
+    applyFilters();
+  }
+
+  function toggleVer(btn, ver) {
+    if (activeVersions.has(ver)) {
+      if (activeVersions.size === 1) return; // keep at least one
+      activeVersions.delete(ver);
+      btn.classList.remove('active');
+    } else {
+      activeVersions.add(ver);
+      btn.classList.add('active');
+    }
+    applyFilters();
+  }
+
+  function applyFilters() {
+    const q = document.getElementById('searchInput').value.toLowerCase().trim();
+    let anyVisible = false;
+
+    document.querySelectorAll('.section.active .q-item').forEach(item => {
+      const ver = item.dataset.ver;
+      const text = item.querySelector('.q-text').textContent.toLowerCase();
+      const verMatch = activeVersions.has(ver);
+      const textMatch = !q || text.includes(q);
+      const show = verMatch && textMatch;
+      item.style.display = show ? 'flex' : 'none';
+      if (show) anyVisible = true;
+    });
+
+    document.querySelectorAll('.section.active .category').forEach(cat => {
+      const hasVisible = [...cat.querySelectorAll('.q-item')].some(i => i.style.display !== 'none');
+      cat.style.display = hasVisible ? 'block' : 'none';
+    });
+
+    document.getElementById('noResults').style.display = anyVisible ? 'none' : 'block';
+  }
+
+  document.getElementById('searchInput').addEventListener('input', applyFilters);
+</script>
+</body>
+</html>

@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>What is Shallow Routing and When Would We Use It?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+}
+
+body{
+  background:#0f172a;
+  color:#e2e8f0;
+  font-family:Arial,sans-serif;
+  line-height:1.8;
+  padding:40px 20px;
+}
+
+.container{
+  max-width:1000px;
+  margin:auto;
+  background:#111827;
+  padding:40px;
+  border-radius:16px;
+  box-shadow:0 0 30px rgba(0,0,0,.4);
+}
+
+h1{
+  color:#38bdf8;
+  margin-bottom:20px;
+}
+
+h2{
+  color:#a78bfa;
+  margin-top:30px;
+  margin-bottom:10px;
+}
+
+h3{
+  color:#fbbf24;
+  margin-top:25px;
+  margin-bottom:10px;
+}
+
+p{
+  margin-bottom:15px;
+}
+
+ul{
+  margin-left:20px;
+}
+
+li{
+  margin-bottom:8px;
+}
+
+.feature{
+  background:#1e293b;
+  border-left:5px solid #38bdf8;
+  padding:15px;
+  border-radius:8px;
+  margin:20px 0;
+}
+
+.code-title{
+  background:#1e293b;
+  color:#93c5fd;
+  padding:10px;
+  font-weight:bold;
+  border-top-left-radius:8px;
+  border-top-right-radius:8px;
+}
+
+pre[class*="language-"]{
+  margin:0!important;
+  border-bottom-left-radius:8px;
+  border-bottom-right-radius:8px;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:20px;
+}
+
+th{
+  background:#1e293b;
+  color:#38bdf8;
+  text-align:left;
+  padding:12px;
+}
+
+td{
+  padding:12px;
+  border-top:1px solid #334155;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>What is Shallow Routing and When Would We Use It?</h1>
+
+<p>
+Shallow Routing is a feature in Next.js that allows us to change the URL without re-running data fetching methods or fully reloading the current page.
+</p>
+
+<div class="feature">
+Shallow Routing updates the URL and router state while keeping the current page component mounted and avoiding unnecessary data fetching.
+</div>
+
+<h2>Why Do We Need Shallow Routing?</h2>
+
+<p>
+Suppose our application displays products with pagination, sorting, or filters.
+</p>
+
+<p>
+When a user changes a filter or page number, we may want to update the URL so it can be bookmarked, refreshed, or shared with others.
+</p>
+
+<p>
+Without Shallow Routing, changing the URL may trigger data fetching methods again.
+</p>
+
+<div class="feature">
+<strong>Note:</strong><br>
+Shallow Routing is most useful when our application data has already been loaded and we only want to update the URL or UI state. In such cases, re-fetching the same data from the server would be unnecessary.
+</div>
+
+<div class="code-title">Example</div>
+
+<pre><code class="language-text">All Products Already Loaded
+
+User Changes:
+
+✔ View Mode
+✔ Selected Tab
+✔ Sort Order
+✔ Filter State
+
+Only URL Changes
+
+No Need To Fetch Data Again
+</code></pre>
+
+<p>
+In these situations, Shallow Routing updates the URL without re-running page data fetching methods.
+</p>
+
+<div class="code-title">Current URL</div>
+
+<pre><code class="language-text">/products?page=1</code></pre>
+
+<p>
+After clicking the next page:
+</p>
+
+<div class="code-title">Updated URL</div>
+
+<pre><code class="language-text">/products?page=2</code></pre>
+
+<p>
+We may only want the URL to change without causing a complete page refresh cycle.
+</p>
+
+<h2>Basic Example</h2>
+
+<div class="code-title">Pages Router</div>
+
+<pre><code class="language-jsx">import { useRouter } from 'next/router';
+
+export default function Products() {
+
+  const router = useRouter();
+
+  const nextPage = () => {
+
+    router.push('/products?page=2', undefined, { shallow: true });  //router.push(url, as, options);
+
+  };
+
+  return (
+    &lt;button onClick={nextPage}&gt;
+      Next Page
+    &lt;/button&gt;
+  );
+
+}</code></pre>
+
+<pre>
+| Parameter | Purpose                                                               |
+| --------- | --------------------------------------------------------------------- |
+| `url`     | Actual route to navigate to                                           |
+| `as`      | URL shown in the browser (mainly for older dynamic routing use cases) |
+| `options` | Extra options such as `shallow`, `scroll`, `locale`                   |
+
+</pre>
+
+<h2>What Happens Internally?</h2>
+
+<h3>Normal Routing</h3>
+
+<div class="code-title">Flow</div>
+
+<pre><code class="language-text">URL Change
+    │
+    ▼
+Next.js Navigation
+    │
+    ▼
+getServerSideProps()
+or
+getStaticProps()
+Runs Again
+    │
+    ▼
+Page Re-renders
+</code></pre>
+
+<h3>Shallow Routing</h3>
+
+<div class="code-title">Flow</div>
+
+<pre><code class="language-text">URL Change
+    │
+    ▼
+Router State Updates
+    │
+    ▼
+Current Component Stays Mounted
+    │
+    ▼
+No Data Fetching Re-execution
+    │
+    ▼
+UI Updates Using New Query Values
+</code></pre>
+
+<h2>Reading the Updated Query Parameter</h2>
+
+<div class="code-title">Example</div>
+
+<pre><code class="language-jsx">import { useRouter } from 'next/router';
+
+export default function Products() {
+
+  const router = useRouter();
+
+  return (
+    &lt;h2&gt;Page: {router.query.page}&lt;/h2&gt;
+  );
+
+}</code></pre>
+
+<p>
+URL:
+</p>
+
+<pre><code class="language-text">/products?page=2</code></pre>
+
+<p>
+Output:
+</p>
+
+<pre><code class="language-text">Page: 2</code></pre>
+
+<h2>Using replace() with Shallow Routing</h2>
+
+<div class="code-title">router.replace()</div>
+
+<pre><code class="language-jsx">router.replace(
+  '/products?page=3',
+  undefined,
+  { shallow: true }
+);</code></pre>
+
+<p>
+Unlike <code>push()</code>, <code>replace()</code> does not create a new browser history entry.
+</p>
+
+<h2>Real-World Use Cases</h2>
+
+<ul>
+  <li>Pagination</li>
+  <li>Search Filters</li>
+  <li>Sorting</li>
+  <li>Dashboard State</li>
+  <li>Wizard Steps</li>
+  <li>Tab Navigation</li>
+</ul>
+
+<h2>Example: Pagination</h2>
+
+<div class="code-title">URL Changes</div>
+
+<pre><code class="language-text">/products?page=1
+/products?page=2
+/products?page=3
+</code></pre>
+
+<p>
+The URL changes while the page component remains mounted.
+</p>
+
+<h2>Example: Tab Navigation</h2>
+
+<div class="code-title">URL Changes</div>
+
+<pre><code class="language-text">/profile?tab=posts
+/profile?tab=photos
+/profile?tab=settings
+</code></pre>
+
+<p>
+Using Shallow Routing, we can switch tabs without re-running page data fetching methods.
+</p>
+
+<h2>Important Limitation</h2>
+
+<div class="feature">
+Shallow Routing only works when navigating within the same page.
+</div>
+
+<p>
+Valid:
+</p>
+
+<pre><code class="language-text">/products?page=1
+       ↓
+/products?page=2
+</code></pre>
+
+<p>
+Not Valid:
+</p>
+
+<pre><code class="language-text">/products?page=1
+       ↓
+/about
+</code></pre>
+
+<p>
+Navigating to a different page always performs normal routing.
+</p>
+
+<h2>Data Fetching Methods Affected</h2>
+
+<p>
+When using Shallow Routing, these methods are not re-executed:
+</p>
+
+<ul>
+  <li>getServerSideProps()</li>
+  <li>getStaticProps()</li>
+  <li>getInitialProps()</li>
+</ul>
+
+<h2>Pages Router vs App Router</h2>
+
+<table>
+<tr>
+<th>Feature</th>
+<th>Pages Router</th>
+<th>App Router</th>
+</tr>
+
+<tr>
+<td>shallow option</td>
+<td>✅ Supported</td>
+<td>❌ Not Available</td>
+</tr>
+
+<tr>
+<td>router.push(..., { shallow: true })</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+
+<tr>
+<td>Main Purpose</td>
+<td>Update URL without re-fetching data</td>
+<td>Uses a different routing architecture</td>
+</tr>
+</table>
+
+<h2>App Router Note</h2>
+
+<p>
+The App Router does not support the <code>shallow</code> option.
+</p>
+
+<p>
+Instead, App Router uses:
+</p>
+
+<ul>
+  <li>useSearchParams()</li>
+  <li>Server Components</li>
+  <li>Client Components</li>
+  <li>router.push()</li>
+  <li>router.replace()</li>
+</ul>
+
+<p>
+Because of the new architecture, traditional shallow routing is generally unnecessary in most App Router scenarios.
+</p>
+
+<div class="feature">
+<strong>One-Line Definition:</strong><br>
+Shallow Routing is a Pages Router feature that allows us to update the URL and query parameters without re-running data fetching methods or fully reloading the current page.
+</div>
+
+
+<h2>Good Use Case for Shallow Routing</h2>
+
+<p>
+Shallow Routing is useful when all required data is already available in the browser and we only want to update the URL to reflect UI state.
+</p>
+
+<div class="code-title">Example Data</div>
+
+<pre><code class="language-jsx">const products = allProducts;</code></pre>
+
+<p>
+Suppose our application supports different views.
+</p>
+
+<div class="code-title">Current URL</div>
+
+<pre><code class="language-text">/products?view=grid</code></pre>
+
+<p>
+User switches to List View:
+</p>
+
+<div class="code-title">Updated URL</div>
+
+<pre><code class="language-text">/products?view=list</code></pre>
+
+<p>
+In this case, no new server data is needed because all products are already loaded.
+</p>
+
+<div class="code-title">What We Want</div>
+
+<pre><code class="language-text">✔ Update URL
+✔ Update UI
+✔ Update router.query
+
+✘ Don't run getServerSideProps()
+✘ Don't run getStaticProps()
+✘ Don't make API calls again
+</code></pre>
+
+<p>
+This is an ideal use case for Shallow Routing because only the UI state changes while the underlying data remains the same.
+</p>
+
+<h2>Bad Use Case for Shallow Routing</h2>
+
+<p>
+Suppose each page requires new data from the server.
+</p>
+
+<div class="code-title">Current URL</div>
+
+<pre><code class="language-text">/products?page=1</code></pre>
+
+<p>
+User navigates to:
+</p>
+
+<div class="code-title">Updated URL</div>
+
+<pre><code class="language-text">/products?page=2</code></pre>
+
+<p>
+Page 2 contains completely different products:
+</p>
+
+<div class="code-title">Page Data</div>
+
+<pre><code class="language-text">Page 1:
+Product 1
+Product 2
+Product 3
+
+Page 2:
+Product 4
+Product 5
+Product 6
+</code></pre>
+
+<p>
+In this scenario, we must fetch new data from the server.
+</p>
+
+<div class="code-title">What We Need</div>
+
+<pre><code class="language-text">✔ Run getServerSideProps()
+✔ Fetch new data
+✔ Render new products
+</code></pre>
+
+<p>
+This is a poor use case for Shallow Routing because the page content depends on new server data.
+</p>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+
+</body>
+</html>

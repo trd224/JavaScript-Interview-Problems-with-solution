@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How do you configure Tailwind CSS with Next.js?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+}
+
+body{
+  background:#0f172a;
+  color:#e2e8f0;
+  font-family:Arial,sans-serif;
+  line-height:1.8;
+  padding:40px 20px;
+}
+
+.container{
+  max-width:1000px;
+  margin:auto;
+  background:#111827;
+  padding:40px;
+  border-radius:16px;
+}
+
+h1{
+  color:#38bdf8;
+  margin-bottom:20px;
+}
+
+h2{
+  color:#a78bfa;
+  margin-top:30px;
+  margin-bottom:10px;
+}
+
+h3{
+  color:#fbbf24;
+  margin-top:25px;
+  margin-bottom:10px;
+}
+
+p{
+  margin-bottom:15px;
+}
+
+ul{
+  margin-left:20px;
+}
+
+li{
+  margin-bottom:8px;
+}
+
+.feature{
+  background:#1e293b;
+  border-left:5px solid #38bdf8;
+  padding:15px;
+  border-radius:8px;
+  margin:20px 0;
+}
+
+.code-title{
+  background:#1e293b;
+  color:#93c5fd;
+  padding:10px;
+  font-weight:bold;
+}
+
+pre[class*="language-"]{
+  margin:0!important;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:20px;
+}
+
+th{
+  background:#1e293b;
+  color:#38bdf8;
+  text-align:left;
+  padding:12px;
+}
+
+td{
+  padding:12px;
+  border-top:1px solid #334155;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>How do you configure Tailwind CSS with Next.js?</h1>
+
+<p>
+Tailwind CSS is a utility-first CSS framework that allows us to style our Next.js application using utility classes directly inside JSX.
+</p>
+
+<div class="feature">
+In modern Next.js projects, Tailwind CSS can be added during project creation, or manually installed using Tailwind CSS packages and PostCSS configuration.
+</div>
+
+<h2>Method 1: Configure Tailwind During Project Creation</h2>
+
+<p>
+The easiest way is to select Tailwind CSS while creating a new Next.js project.
+</p>
+
+<div class="code-title">Create Next.js App</div>
+
+<pre><code class="language-bash">npx create-next-app@latest my-app</code></pre>
+
+<p>
+During setup, choose:
+</p>
+
+<div class="code-title">CLI Option</div>
+
+<pre><code class="language-text">Would you like to use Tailwind CSS? Yes</code></pre>
+
+<p>
+Next.js will automatically create the required Tailwind setup.
+</p>
+
+<h2>Method 2: Manual Setup</h2>
+
+<p>
+If our application already exists, we can install Tailwind CSS manually.
+</p>
+
+<h3>Step 1: Install Tailwind CSS</h3>
+
+<div class="code-title">Terminal</div>
+
+<pre><code class="language-bash">npm install tailwindcss @tailwindcss/postcss postcss</code></pre>
+
+<p>
+In the latest Tailwind setup, <code>@tailwindcss/postcss</code> is used as the PostCSS plugin.
+</p>
+
+<h3>Step 2: Create PostCSS Config</h3>
+
+<div class="code-title">postcss.config.mjs</div>
+
+<pre><code class="language-jsx">const config = {
+  plugins: {
+    '@tailwindcss/postcss': {}
+  }
+};
+
+export default config;</code></pre>
+
+<h3>Step 3: Import Tailwind in Global CSS</h3>
+
+<div class="code-title">app/globals.css</div>
+
+<pre><code class="language-css">@import 'tailwindcss';</code></pre>
+
+<h3>Step 4: Import Global CSS in Root Layout</h3>
+
+<div class="code-title">app/layout.js</div>
+
+<pre><code class="language-jsx">import './globals.css';
+
+export default function RootLayout({ children }) {
+
+  return (
+    &lt;html lang="en"&gt;
+      &lt;body&gt;{children}&lt;/body&gt;
+    &lt;/html&gt;
+  );
+
+}</code></pre>
+
+<h3>Step 5: Use Tailwind Classes</h3>
+
+<div class="code-title">app/page.js</div>
+
+<pre><code class="language-jsx">export default function Home() {
+
+  return (
+    &lt;main className="min-h-screen bg-slate-900 p-10 text-white"&gt;
+      &lt;h1 className="text-4xl font-bold text-sky-400"&gt;
+        Hello Tailwind
+      &lt;/h1&gt;
+    &lt;/main&gt;
+  );
+
+}</code></pre>
+
+<h2>Project Structure</h2>
+
+<div class="code-title">App Router Structure</div>
+
+<pre><code class="language-text">my-app/
+├── app/
+│   ├── globals.css
+│   ├── layout.js
+│   └── page.js
+├── postcss.config.mjs
+├── package.json
+└── next.config.js
+</code></pre>
+
+<h2>What Happens Internally?</h2>
+
+<div class="code-title">Flow</div>
+
+<pre><code class="language-text">Tailwind Classes In JSX
+        │
+        ▼
+Tailwind CSS Compiler
+        │
+        ▼
+Generate Required CSS
+        │
+        ▼
+PostCSS Processes CSS
+        │
+        ▼
+Browser Receives Final CSS
+</code></pre>
+
+<h2>Example UI</h2>
+
+<div class="code-title">Tailwind Card Example</div>
+
+<pre><code class="language-jsx">export default function Card() {
+
+  return (
+    &lt;div className="rounded-xl bg-white p-6 shadow-lg"&gt;
+      &lt;h2 className="text-2xl font-bold text-gray-900"&gt;
+        Product Card
+      &lt;/h2&gt;
+
+      &lt;p className="mt-2 text-gray-600"&gt;
+        This card is styled using Tailwind CSS.
+      &lt;/p&gt;
+    &lt;/div&gt;
+  );
+
+}</code></pre>
+
+<h2>Tailwind with Pages Router</h2>
+
+<p>
+In the Pages Router, global CSS is imported inside <code>pages/_app.js</code>.
+</p>
+
+<div class="code-title">styles/globals.css</div>
+
+<pre><code class="language-css">@import 'tailwindcss';</code></pre>
+
+<div class="code-title">pages/_app.js</div>
+
+<pre><code class="language-jsx">import '../styles/globals.css';
+
+export default function MyApp({ Component, pageProps }) {
+
+  return &lt;Component {...pageProps} /&gt;;
+
+}</code></pre>
+
+<h2>Tailwind v3 Setup Note</h2>
+
+<p>
+Older projects using Tailwind CSS v3 commonly use <code>tailwind.config.js</code> and these CSS directives:
+</p>
+
+<div class="code-title">Tailwind v3 globals.css</div>
+
+<pre><code class="language-css">@tailwind base;
+@tailwind components;
+@tailwind utilities;</code></pre>
+
+<div class="code-title">tailwind.config.js</div>
+
+<pre><code class="language-jsx">module.exports = {
+  content: [
+    './app/**/*.{js,ts,jsx,tsx,mdx}',
+    './pages/**/*.{js,ts,jsx,tsx,mdx}',
+    './components/**/*.{js,ts,jsx,tsx,mdx}'
+  ],
+  theme: {
+    extend: {}
+  },
+  plugins: []
+};</code></pre>
+
+<p>
+For new projects, the latest Tailwind setup uses <code>@import 'tailwindcss'</code> and <code>@tailwindcss/postcss</code>. :contentReference[oaicite:0]{index=0}
+</p>
+
+<h2>Common Mistakes</h2>
+
+<table>
+<tr>
+<th>Mistake</th>
+<th>Fix</th>
+</tr>
+
+<tr>
+<td>Tailwind classes not working</td>
+<td>Make sure <code>globals.css</code> is imported in <code>layout.js</code> or <code>_app.js</code></td>
+</tr>
+
+<tr>
+<td>Using old Tailwind directives in new setup</td>
+<td>Use <code>@import 'tailwindcss'</code> for latest Tailwind</td>
+</tr>
+
+<tr>
+<td>Missing PostCSS config</td>
+<td>Create <code>postcss.config.mjs</code></td>
+</tr>
+
+<tr>
+<td>Wrong file location</td>
+<td>Use <code>app/globals.css</code> for App Router or <code>styles/globals.css</code> for Pages Router</td>
+</tr>
+</table>
+
+<h2>When Should We Use Tailwind CSS?</h2>
+
+<ul>
+<li>When we want fast UI development.</li>
+<li>When we want utility-first styling.</li>
+<li>When we want consistent spacing, colors, and typography.</li>
+<li>When we want to avoid writing many custom CSS files.</li>
+<li>When our application needs responsive design quickly.</li>
+</ul>
+
+<h2>Interview Tip</h2>
+
+<div class="feature">
+A common misconception is that Tailwind replaces CSS completely. In reality, Tailwind provides utility classes, but it still generates normal CSS behind the scenes.
+</div>
+
+<div class="feature">
+<strong>One-Line Definition:</strong><br>
+Tailwind CSS is configured in Next.js by installing Tailwind packages, adding the PostCSS plugin, importing Tailwind in global CSS, and then using utility classes directly inside our JSX.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+
+</body>
+</html>

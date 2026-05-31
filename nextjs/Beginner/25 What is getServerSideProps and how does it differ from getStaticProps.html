@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>What is getServerSideProps and How Does It Differ from getStaticProps?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+}
+
+body{
+  background:#0f172a;
+  color:#e2e8f0;
+  font-family:Arial,sans-serif;
+  line-height:1.8;
+  padding:40px 20px;
+}
+
+.container{
+  max-width:1000px;
+  margin:auto;
+  background:#111827;
+  padding:40px;
+  border-radius:16px;
+  box-shadow:0 0 30px rgba(0,0,0,.4);
+}
+
+h1{
+  color:#38bdf8;
+  margin-bottom:20px;
+}
+
+h2{
+  color:#a78bfa;
+  margin-top:30px;
+  margin-bottom:10px;
+}
+
+h3{
+  color:#fbbf24;
+  margin-top:25px;
+  margin-bottom:10px;
+}
+
+p{
+  margin-bottom:15px;
+}
+
+ul{
+  margin-left:20px;
+}
+
+li{
+  margin-bottom:8px;
+}
+
+.feature{
+  background:#1e293b;
+  border-left:5px solid #38bdf8;
+  padding:15px;
+  border-radius:8px;
+  margin:20px 0;
+}
+
+.code-title{
+  background:#1e293b;
+  color:#93c5fd;
+  padding:10px;
+  font-weight:bold;
+  border-top-left-radius:8px;
+  border-top-right-radius:8px;
+}
+
+pre[class*="language-"]{
+  margin:0!important;
+  border-bottom-left-radius:8px;
+  border-bottom-right-radius:8px;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:20px;
+}
+
+th{
+  background:#1e293b;
+  color:#38bdf8;
+  text-align:left;
+  padding:12px;
+}
+
+td{
+  padding:12px;
+  border-top:1px solid #334155;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>What is getServerSideProps and How Does It Differ from getStaticProps?</h1>
+
+<p>
+<code>getServerSideProps()</code> is a special Next.js function used in the Pages Router to fetch data on every request and generate fresh HTML for each user request.
+</p>
+
+<div class="feature">
+<code>getServerSideProps()</code> runs on every request, while <code>getStaticProps()</code> runs during the build process.
+</div>
+
+<h2>Why Do We Need getServerSideProps()?</h2>
+
+<p>
+Some pages require fresh data every time users visit them.
+</p>
+
+Examples:
+
+<ul>
+<li>Stock Prices</li>
+<li>Weather Information</li>
+<li>User Dashboards</li>
+<li>Live Reports</li>
+<li>Real-Time Analytics</li>
+</ul>
+
+<p>
+In these cases, build-time data may become outdated.
+</p>
+
+<h2>Basic Example</h2>
+
+<div class="code-title">pages/products.js</div>
+
+<pre><code class="language-jsx">export async function getServerSideProps() {
+
+  const res = await fetch(
+    'https://api.example.com/products'
+  );
+
+  const products = await res.json();
+
+  return {
+    props: { products }
+  };
+
+}
+
+export default function Products({ products }) {
+
+  return (
+    &lt;h1&gt;
+      Total Products: {products.length}
+    &lt;/h1&gt;
+  );
+
+}</code></pre>
+
+<h2>When is getServerSideProps() Called?</h2>
+
+<div class="feature">
+Unlike getStaticProps(), getServerSideProps() runs every time a user requests the page.
+</div>
+
+<div class="code-title">Request Flow</div>
+
+<pre><code class="language-text">User A Requests Page
+         │
+         ▼
+getServerSideProps()
+         │
+         ▼
+Fetch Fresh Data
+         │
+         ▼
+Generate HTML
+         │
+         ▼
+Send HTML
+
+
+User B Requests Page
+         │
+         ▼
+getServerSideProps()
+         │
+         ▼
+Fetch Fresh Data Again
+         │
+         ▼
+Generate New HTML
+         │
+         ▼
+Send HTML
+</code></pre>
+
+<h2>What Happens Internally?</h2>
+
+<div class="code-title">SSR Flow</div>
+
+<pre><code class="language-text">Browser Request
+       │
+       ▼
+Next.js Server
+       │
+       ▼
+getServerSideProps()
+       │
+       ▼
+Fetch Data
+       │
+       ▼
+Generate HTML
+       │
+       ▼
+Send HTML To Browser
+</code></pre>
+
+<p>
+This process happens for every request.
+</p>
+
+<h2>Real Example</h2>
+
+<p>
+Suppose our application displays today's weather.
+</p>
+
+<div class="code-title">Route</div>
+
+<pre><code class="language-text">/weather</code></pre>
+
+<p>
+10:00 AM:
+</p>
+
+<div class="code-title">Request #1</div>
+
+<pre><code class="language-text">Fetch Weather
+Generate HTML
+Send HTML
+</code></pre>
+
+<p>
+10:05 AM:
+</p>
+
+<div class="code-title">Request #2</div>
+
+<pre><code class="language-text">Fetch Latest Weather Again
+Generate New HTML
+Send New HTML
+</code></pre>
+
+<p>
+Each request receives fresh data.
+</p>
+
+<h2>Accessing Request Information</h2>
+
+<p>
+One major advantage of getServerSideProps() is access to request-specific data.
+</p>
+
+<div class="code-title">Context Object</div>
+
+<pre><code class="language-jsx">export async function getServerSideProps(context) {
+
+  console.log(context.req);
+  console.log(context.res);
+  console.log(context.query);
+
+}</code></pre>
+
+<p>
+This allows us to access:
+</p>
+
+<ul>
+<li>Cookies</li>
+<li>Headers</li>
+<li>Query Parameters</li>
+<li>User Information</li>
+<li>Authentication Tokens</li>
+</ul>
+
+<h2>Example: Authentication</h2>
+
+<div class="code-title">Protected Page</div>
+
+<pre><code class="language-jsx">export async function getServerSideProps(context) {
+
+  const token =
+    context.req.cookies.token;
+
+  if (!token) {
+
+    return {
+      redirect: {
+        destination: '/login',
+        permanent: false
+      }
+    };
+
+  }
+
+  return {
+    props: {}
+  };
+
+}</code></pre>
+
+<p>
+This is impossible with getStaticProps() because build-time code has no access to user requests.
+</p>
+
+<h2>How Does It Differ from getStaticProps?</h2>
+
+<table>
+<tr>
+<th>Feature</th>
+<th>getServerSideProps</th>
+<th>getStaticProps</th>
+</tr>
+
+<tr>
+<td>Rendering Type</td>
+<td>SSR</td>
+<td>SSG</td>
+</tr>
+
+<tr>
+<td>Runs</td>
+<td>Every Request</td>
+<td>Build Time</td>
+</tr>
+
+<tr>
+<td>Fresh Data</td>
+<td>Always Fresh</td>
+<td>Build-Time Data</td>
+</tr>
+
+<tr>
+<td>Performance</td>
+<td>Slower</td>
+<td>Very Fast</td>
+</tr>
+
+<tr>
+<td>Server Load</td>
+<td>Higher</td>
+<td>Lower</td>
+</tr>
+
+<tr>
+<td>Access Cookies</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+
+<tr>
+<td>Access Headers</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+
+<tr>
+<td>Access Request Data</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+</table>
+
+<h2>Visual Comparison</h2>
+
+<h3>getStaticProps()</h3>
+
+<div class="code-title">Build Time</div>
+
+<pre><code class="language-text">npm run build
+      │
+      ▼
+getStaticProps()
+Runs Once
+      │
+      ▼
+Generate HTML
+      │
+      ▼
+Store Static File
+      │
+      ▼
+All Users Receive Same HTML
+</code></pre>
+
+<h3>getServerSideProps()</h3>
+
+<div class="code-title">Runtime</div>
+
+<pre><code class="language-text">User A Request
+      │
+      ▼
+getServerSideProps()
+      │
+      ▼
+Generate HTML #1
+
+User B Request
+      │
+      ▼
+getServerSideProps()
+      │
+      ▼
+Generate HTML #2
+
+User C Request
+      │
+      ▼
+getServerSideProps()
+      │
+      ▼
+Generate HTML #3
+</code></pre>
+
+<h2>When Should We Use getServerSideProps()?</h2>
+
+<ul>
+<li>User-Specific Pages</li>
+<li>Authentication</li>
+<li>Real-Time Data</li>
+<li>Stock Prices</li>
+<li>Weather Information</li>
+<li>Live Dashboards</li>
+</ul>
+
+<h2>When Should We Avoid It?</h2>
+
+<ul>
+<li>Blogs</li>
+<li>Documentation Sites</li>
+<li>Marketing Pages</li>
+<li>Landing Pages</li>
+<li>Static Content</li>
+</ul>
+
+<h2>Important Note</h2>
+
+<div class="feature">
+A common misconception is that getServerSideProps() runs once when the application starts. In reality, it executes for every incoming request and generates fresh HTML each time.
+</div>
+
+<h2>App Router Equivalent</h2>
+
+<p>
+The App Router does not use getServerSideProps().
+</p>
+
+<p>
+Instead, SSR is achieved by fetching data inside a Server Component using:
+</p>
+
+<div class="code-title">App Router SSR</div>
+
+<pre><code class="language-jsx">async function getProducts() {
+
+  const res = await fetch(
+    'https://api.example.com/products',
+    { cache: 'no-store' }
+  );
+
+  return res.json();
+
+}
+
+export default async function Products() {
+
+  const products = await getProducts();
+
+  return (
+    &lt;h1&gt;
+      {products.length}
+    &lt;/h1&gt;
+  );
+
+}</code></pre>
+
+<p>
+Using <code>cache: 'no-store'</code> ensures fresh data on every request.
+</p>
+
+<div class="feature">
+<strong>One-Line Definition:</strong><br>
+<code>getServerSideProps()</code> is a Pages Router function that runs on every request, fetches fresh data, and generates HTML on the server before sending it to the browser.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+
+</body>
+</html>

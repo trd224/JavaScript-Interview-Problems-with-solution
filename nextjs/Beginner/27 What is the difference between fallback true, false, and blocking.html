@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>What is the Difference Between fallback: true, false, and 'blocking'?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+}
+
+body{
+  background:#0f172a;
+  color:#e2e8f0;
+  font-family:Arial,sans-serif;
+  line-height:1.8;
+  padding:40px 20px;
+}
+
+.container{
+  max-width:1000px;
+  margin:auto;
+  background:#111827;
+  padding:40px;
+  border-radius:16px;
+}
+
+h1{
+  color:#38bdf8;
+  margin-bottom:20px;
+}
+
+h2{
+  color:#a78bfa;
+  margin-top:30px;
+  margin-bottom:10px;
+}
+
+h3{
+  color:#fbbf24;
+  margin-top:25px;
+  margin-bottom:10px;
+}
+
+p{
+  margin-bottom:15px;
+}
+
+ul{
+  margin-left:20px;
+}
+
+li{
+  margin-bottom:8px;
+}
+
+.feature{
+  background:#1e293b;
+  border-left:5px solid #38bdf8;
+  padding:15px;
+  border-radius:8px;
+  margin:20px 0;
+}
+
+.code-title{
+  background:#1e293b;
+  color:#93c5fd;
+  padding:10px;
+  font-weight:bold;
+}
+
+pre[class*="language-"]{
+  margin:0!important;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:20px;
+}
+
+th{
+  background:#1e293b;
+  color:#38bdf8;
+  text-align:left;
+  padding:12px;
+}
+
+td{
+  padding:12px;
+  border-top:1px solid #334155;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>What is the Difference Between fallback: true, false, and 'blocking'?</h1>
+
+<p>
+The <code>fallback</code> option is returned from <code>getStaticPaths()</code> and controls what Next.js should do when a user requests a dynamic page that was not generated during the build process.
+</p>
+
+<div class="feature">
+The fallback option determines how Next.js handles routes that are missing from the <code>paths</code> array.
+</div>
+
+<h2>Example Setup</h2>
+
+<p>
+Suppose our application contains these products:
+</p>
+
+<div class="code-title">Database</div>
+
+<pre><code class="language-text">Product 1
+Product 2
+Product 3
+Product 4
+Product 5
+</code></pre>
+
+<p>
+During build we generate only:
+</p>
+
+<div class="code-title">Generated Pages</div>
+
+<pre><code class="language-text">/products/1
+/products/2
+</code></pre>
+
+<p>
+Now a user visits:
+</p>
+
+<pre><code class="language-text">/products/3</code></pre>
+
+<p>
+The result depends on the fallback value.
+</p>
+
+<hr>
+
+<h2>fallback: false</h2>
+
+<p>
+Only pages listed in <code>paths</code> are generated.
+</p>
+
+<div class="code-title">Complete Example</div>
+
+<pre><code class="language-jsx">export async function getStaticPaths() {
+
+  return {
+    paths: [
+      { params: { id: '1' } },
+      { params: { id: '2' } }
+    ],
+    fallback: false
+  };
+
+}
+
+export async function getStaticProps({ params }) {
+
+  return {
+    props: {
+      productId: params.id
+    }
+  };
+
+}
+
+export default function Product({ productId }) {
+
+  return (
+    &lt;h1&gt;Product {productId}&lt;/h1&gt;
+  );
+
+}</code></pre>
+
+<h3>Generated During Build</h3>
+
+<pre><code class="language-text">/products/1
+/products/2
+</code></pre>
+
+<h3>User Requests</h3>
+
+<pre><code class="language-text">/products/1 → Product 1
+/products/2 → Product 2
+/products/3 → 404 Page
+</code></pre>
+
+<h3>Flow</h3>
+
+<pre><code class="language-text">Request /products/3
+        │
+        ▼
+Not Found In paths
+        │
+        ▼
+404 Page
+</code></pre>
+
+<div class="feature">
+Use fallback: false when all pages are known during build time.
+</div>
+
+<hr>
+
+<h2>fallback: true</h2>
+
+<p>
+Unknown pages are generated on demand.
+</p>
+
+<p>
+The user first sees a loading state.
+</p>
+
+<div class="code-title">Complete Example</div>
+
+<pre><code class="language-jsx">import { useRouter } from 'next/router';
+
+export async function getStaticPaths() {
+
+  return {
+    paths: [
+      { params: { id: '1' } },
+      { params: { id: '2' } }
+    ],
+    fallback: true
+  };
+
+}
+
+export async function getStaticProps({ params }) {
+
+  return {
+    props: {
+      product: {
+        id: params.id
+      }
+    }
+  };
+
+}
+
+export default function Product({ product }) {
+
+  const router = useRouter();
+
+  if (router.isFallback) {
+    return &lt;h1&gt;Loading...&lt;/h1&gt;;
+  }
+
+  return (
+    &lt;h1&gt;Product {product.id}&lt;/h1&gt;
+  );
+
+}</code></pre>
+
+<h3>First User Visits</h3>
+
+<pre><code class="language-text">/products/3
+</code></pre>
+
+<h3>User Experience</h3>
+
+<pre><code class="language-text">Loading...
+      │
+      ▼
+Product 3
+</code></pre>
+
+<h3>Flow</h3>
+
+<pre><code class="language-text">Request /products/3
+        │
+        ▼
+Show Loading Page
+        │
+        ▼
+Generate Page
+        │
+        ▼
+Show Product 3
+        │
+        ▼
+Cache Page
+</code></pre>
+
+<h3>Future Requests</h3>
+
+<pre><code class="language-text">/products/3
+      │
+      ▼
+Product 3 (Immediately)
+</code></pre>
+
+<div class="feature">
+Use fallback: true when generating all pages during build would take too long and a temporary loading state is acceptable.
+</div>
+
+<hr>
+
+<h2>fallback: 'blocking'</h2>
+
+<p>
+Unknown pages are generated on demand, but users do not see a loading state.
+</p>
+
+<div class="code-title">Complete Example</div>
+
+<pre><code class="language-jsx">export async function getStaticPaths() {
+
+  return {
+    paths: [
+      { params: { id: '1' } },
+      { params: { id: '2' } }
+    ],
+    fallback: 'blocking'
+  };
+
+}
+
+export async function getStaticProps({ params }) {
+
+  return {
+    props: {
+      product: {
+        id: params.id
+      }
+    }
+  };
+
+}
+
+export default function Product({ product }) {
+
+  return (
+    &lt;h1&gt;Product {product.id}&lt;/h1&gt;
+  );
+
+}</code></pre>
+
+<h3>First User Visits</h3>
+
+<pre><code class="language-text">/products/3
+</code></pre>
+
+<h3>User Experience</h3>
+
+<pre><code class="language-text">Wait...
+      │
+      ▼
+Product 3
+</code></pre>
+
+<p>
+No loading UI is shown.
+</p>
+
+<h3>Flow</h3>
+
+<pre><code class="language-text">Request /products/3
+        │
+        ▼
+Wait
+        │
+        ▼
+Generate Page
+        │
+        ▼
+Send Completed HTML
+        │
+        ▼
+Cache Page
+</code></pre>
+
+<h3>Future Requests</h3>
+
+<pre><code class="language-text">/products/3
+      │
+      ▼
+Product 3 (Immediately)
+</code></pre>
+
+<div class="feature">
+Use fallback: 'blocking' when SEO is important and we do not want users to see a loading screen.
+</div>
+
+<h2>Visual Comparison</h2>
+
+<table>
+<tr>
+<th>User Visits</th>
+<th>false</th>
+<th>true</th>
+<th>'blocking'</th>
+</tr>
+
+<tr>
+<td>/products/3</td>
+<td>404</td>
+<td>Loading → Content</td>
+<td>Wait → Content</td>
+</tr>
+</table>
+
+<h2>Detailed Comparison</h2>
+
+<table>
+<tr>
+<th>Feature</th>
+<th>false</th>
+<th>true</th>
+<th>'blocking'</th>
+</tr>
+
+<tr>
+<td>Unknown Route</td>
+<td>404</td>
+<td>Generated</td>
+<td>Generated</td>
+</tr>
+
+<tr>
+<td>Loading Screen</td>
+<td>❌</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+
+<tr>
+<td>User Waits</td>
+<td>❌</td>
+<td>Very Little</td>
+<td>✅</td>
+</tr>
+
+<tr>
+<td>SEO Friendly</td>
+<td>✅</td>
+<td>Less Ideal</td>
+<td>✅</td>
+</tr>
+
+<tr>
+<td>Page Cached After Generation</td>
+<td>❌</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+</table>
+
+<h2>Interview Tip</h2>
+
+<div class="feature">
+A common misconception is that fallback generates pages during the build process. In reality, fallback only affects pages that were NOT generated during the build process.
+</div>
+
+<div class="feature">
+<strong>One-Line Definition:</strong><br>
+<code>fallback: false</code> returns 404 for unknown pages, <code>fallback: true</code> shows a loading page while generating the page, and <code>fallback: 'blocking'</code> waits for page generation before sending the completed HTML.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+
+</body>
+</html>

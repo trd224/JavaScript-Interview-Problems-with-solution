@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How does Dynamic Routing work in Next.js?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+    background:#0f172a;
+    color:#e2e8f0;
+    font-family:Arial, Helvetica, sans-serif;
+    line-height:1.8;
+    padding:40px 20px;
+}
+
+.container{
+    max-width:1000px;
+    margin:auto;
+    background:#111827;
+    padding:40px;
+    border-radius:16px;
+    box-shadow:0 0 30px rgba(0,0,0,.45);
+}
+
+h1{
+    color:#38bdf8;
+    font-size:36px;
+    margin-bottom:20px;
+}
+
+h2{
+    color:#a78bfa;
+    margin-top:35px;
+    margin-bottom:10px;
+}
+
+h3{
+    color:#fbbf24;
+    margin-top:25px;
+    margin-bottom:10px;
+}
+
+p{
+    color:#d1d5db;
+    margin-bottom:15px;
+}
+
+ul,ol{
+    margin-left:25px;
+    margin-bottom:15px;
+}
+
+li{
+    margin-bottom:8px;
+}
+
+.feature{
+    background:#1e293b;
+    border-left:5px solid #38bdf8;
+    padding:15px;
+    border-radius:8px;
+    margin:15px 0;
+}
+
+.code-block{
+    margin:20px 0;
+    border:1px solid #334155;
+    border-radius:12px;
+    overflow:hidden;
+}
+
+.code-title{
+    background:#1e293b;
+    color:#93c5fd;
+    padding:12px 16px;
+    font-size:14px;
+    font-weight:bold;
+    border-bottom:1px solid #334155;
+}
+
+pre[class*="language-"]{
+    margin:0!important;
+    border-radius:0!important;
+    font-size:15px;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+    margin-top:20px;
+}
+
+th{
+    background:#1e293b;
+    color:#38bdf8;
+    text-align:left;
+    padding:14px;
+}
+
+td{
+    border-top:1px solid #334155;
+    padding:14px;
+    color:#e5e7eb;
+}
+
+.summary{
+    margin-top:30px;
+    background:#082f49;
+    border-left:5px solid #38bdf8;
+    padding:20px;
+    border-radius:10px;
+}
+
+.summary strong{
+    color:#38bdf8;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>How does Dynamic Routing work in Next.js?</h1>
+
+<p>
+Dynamic Routing in Next.js allows us to create routes whose URL segments are determined at runtime instead of being fixed at development time.
+</p>
+
+<div class="feature">
+Dynamic routes are created using square brackets <code>[]</code>. The value inside the URL is captured as a route parameter.
+</div>
+
+<h2>Why Do We Need Dynamic Routing?</h2>
+
+<p>
+Suppose our application displays products.
+</p>
+
+<p>
+Creating a separate file for every product would be impossible:
+</p>
+
+<div class="code-block">
+<div class="code-title">Bad Approach</div>
+
+<pre><code class="language-text">products-1.js
+products-2.js
+products-3.js
+products-100.js
+products-1000.js
+</code></pre>
+
+</div>
+
+<p>
+Instead, we create a single dynamic route that handles all product IDs.
+</p>
+
+<h2>Pages Router Dynamic Route</h2>
+
+<div class="code-block">
+<div class="code-title">Folder Structure</div>
+
+<pre><code class="language-text">pages/
+└── products/
+    └── [id].js
+</code></pre>
+
+</div>
+
+<p>
+The <code>[id]</code> segment is dynamic.
+</p>
+
+<p>
+This single file can handle:
+</p>
+
+<div class="code-block">
+<div class="code-title">URLs</div>
+
+<pre><code class="language-text">/products/1
+/products/5
+/products/100
+/products/999
+</code></pre>
+
+</div>
+
+<h2>Accessing Route Parameters (Pages Router)</h2>
+
+<div class="code-block">
+<div class="code-title">pages/products/[id].js</div>
+
+<pre><code class="language-jsx">import { useRouter } from 'next/router';
+
+export default function Product() {
+
+  const router = useRouter();
+
+  return (
+    &lt;h1&gt;
+      Product ID: {router.query.id}
+    &lt;/h1&gt;
+  );
+
+}
+</code></pre>
+
+</div>
+
+<p>
+If the URL is:
+</p>
+
+<div class="code-block">
+<div class="code-title">URL</div>
+
+<pre><code class="language-text">/products/100
+</code></pre>
+
+</div>
+
+<p>
+Output:
+</p>
+
+<div class="code-block">
+<div class="code-title">Output</div>
+
+<pre><code class="language-text">Product ID: 100
+</code></pre>
+
+</div>
+
+<h2>App Router Dynamic Route</h2>
+
+<p>
+In modern Next.js applications, dynamic routes are created inside the <code>app</code> directory.
+</p>
+
+<div class="code-block">
+<div class="code-title">Folder Structure</div>
+
+<pre><code class="language-text">app/
+└── products/
+    └── [id]/
+        └── page.js
+</code></pre>
+
+</div>
+
+<h2>Accessing Route Parameters (App Router)</h2>
+
+<div class="code-block">
+<div class="code-title">app/products/[id]/page.js</div>
+
+<pre><code class="language-jsx">export default function Product({
+  params
+}) {
+
+  return (
+    &lt;h1&gt;
+      Product ID: {params.id}
+    &lt;/h1&gt;
+  );
+
+}
+</code></pre>
+
+</div>
+
+<p>
+For the URL:
+</p>
+
+<div class="code-block">
+<div class="code-title">URL</div>
+
+<pre><code class="language-text">/products/100
+</code></pre>
+
+</div>
+
+<p>
+Output:
+</p>
+
+<div class="code-block">
+<div class="code-title">Output</div>
+
+<pre><code class="language-text">Product ID: 100
+</code></pre>
+
+</div>
+
+<h2>Multiple Dynamic Parameters</h2>
+
+<p>
+We can create multiple dynamic segments.
+</p>
+
+<div class="code-block">
+<div class="code-title">Folder Structure</div>
+
+<pre><code class="language-text">app/
+└── users/
+    └── [userId]/
+        └── orders/
+            └── [orderId]/
+                └── page.js
+</code></pre>
+
+</div>
+
+<p>
+Supported URL:
+</p>
+
+<div class="code-block">
+<div class="code-title">URL</div>
+
+<pre><code class="language-text">/users/10/orders/500
+</code></pre>
+
+</div>
+
+<div class="code-block">
+<div class="code-title">Access Parameters</div>
+
+<pre><code class="language-jsx">export default function Order({
+  params
+}) {
+
+  return (
+    &lt;&gt;
+      User: {params.userId}
+      Order: {params.orderId}
+    &lt;/&gt;
+  );
+
+}
+</code></pre>
+
+</div>
+
+<h2>Catch-All Routes</h2>
+
+<p>
+Catch-all routes match multiple URL segments.
+</p>
+
+<div class="code-block">
+<div class="code-title">Folder Structure</div>
+
+<pre><code class="language-text">app/
+└── docs/
+    └── [...slug]/
+        └── page.js
+</code></pre>
+
+</div>
+
+<p>
+Can match:
+</p>
+
+<div class="code-block">
+<div class="code-title">URLs</div>
+
+<pre><code class="language-text">/docs/react
+/docs/react/hooks
+/docs/react/hooks/useState
+</code></pre>
+
+</div>
+
+<div class="code-block">
+<div class="code-title">Access Values</div>
+
+<pre><code class="language-jsx">export default function Docs({
+  params
+}) {
+
+  return (
+    &lt;pre&gt;
+      {JSON.stringify(params.slug)}
+    &lt;/pre&gt;
+  );
+
+}
+</code></pre>
+
+</div>
+
+<p>
+For:
+</p>
+
+<div class="code-block">
+<div class="code-title">URL</div>
+
+<pre><code class="language-text">/docs/react/hooks
+</code></pre>
+
+</div>
+
+<p>
+Output:
+</p>
+
+<div class="code-block">
+<div class="code-title">Output</div>
+
+<pre><code class="language-text">["react", "hooks"]
+</code></pre>
+
+</div>
+
+<h2>Optional Catch-All Routes</h2>
+
+<p>
+Optional catch-all routes can match zero or more segments.
+</p>
+
+<div class="code-block">
+<div class="code-title">Folder Structure</div>
+
+<pre><code class="language-text">app/
+└── docs/
+    └── [[...slug]]/
+        └── page.js
+</code></pre>
+
+</div>
+
+<p>
+Can match:
+</p>
+
+<div class="code-block">
+<div class="code-title">URLs</div>
+
+<pre><code class="language-text">/docs
+/docs/react
+/docs/react/hooks
+</code></pre>
+
+</div>
+
+<h2>Real-World Example</h2>
+
+<p>
+Suppose our e-commerce application has thousands of products.
+</p>
+
+<div class="code-block">
+<div class="code-title">Dynamic Product Route</div>
+
+<pre><code class="language-text">app/
+└── products/
+    └── [id]/
+        └── page.js
+</code></pre>
+
+</div>
+
+<p>
+URLs:
+</p>
+
+<div class="code-block">
+<div class="code-title">Examples</div>
+
+<pre><code class="language-text">/products/1
+/products/25
+/products/1000
+/products/5000
+</code></pre>
+
+</div>
+
+<p>
+A single page handles all product IDs.
+</p>
+
+<h2>Dynamic Routing vs Static Routing</h2>
+
+<table>
+<thead>
+<tr>
+<th>Static Route</th>
+<th>Dynamic Route</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>/about</td>
+<td>/products/[id]</td>
+</tr>
+<tr>
+<td>Fixed URL</td>
+<td>Variable URL</td>
+</tr>
+<tr>
+<td>One page per route</td>
+<td>One page handles many routes</td>
+</tr>
+<tr>
+<td>No route parameters</td>
+<td>Supports route parameters</td>
+</tr>
+</tbody>
+</table>
+
+<h2>Pages Router vs App Router</h2>
+
+<table>
+<thead>
+<tr>
+<th>Pages Router</th>
+<th>App Router</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>pages/products/[id].js</td>
+<td>app/products/[id]/page.js</td>
+</tr>
+<tr>
+<td>useRouter()</td>
+<td>params</td>
+</tr>
+<tr>
+<td>next/router</td>
+<td>next/navigation</td>
+</tr>
+</tbody>
+</table>
+
+<div class="summary">
+<strong>One-Line Definition:</strong><br>
+Dynamic Routing in Next.js allows us to create routes with variable URL segments using square brackets (<code>[]</code>), enabling a single page to handle multiple URLs by accessing route parameters.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+
+</body>
+</html>

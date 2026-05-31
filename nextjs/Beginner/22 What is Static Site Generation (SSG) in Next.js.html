@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>What is Static Site Generation (SSG) in Next.js?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+}
+
+body{
+  background:#0f172a;
+  color:#e2e8f0;
+  font-family:Arial,sans-serif;
+  line-height:1.8;
+  padding:40px 20px;
+}
+
+.container{
+  max-width:1000px;
+  margin:auto;
+  background:#111827;
+  padding:40px;
+  border-radius:16px;
+  box-shadow:0 0 30px rgba(0,0,0,.4);
+}
+
+h1{
+  color:#38bdf8;
+  margin-bottom:20px;
+}
+
+h2{
+  color:#a78bfa;
+  margin-top:30px;
+  margin-bottom:10px;
+}
+
+h3{
+  color:#fbbf24;
+  margin-top:25px;
+  margin-bottom:10px;
+}
+
+p{
+  margin-bottom:15px;
+}
+
+ul{
+  margin-left:20px;
+}
+
+li{
+  margin-bottom:8px;
+}
+
+.feature{
+  background:#1e293b;
+  border-left:5px solid #38bdf8;
+  padding:15px;
+  border-radius:8px;
+  margin:20px 0;
+}
+
+.code-title{
+  background:#1e293b;
+  color:#93c5fd;
+  padding:10px;
+  font-weight:bold;
+  border-top-left-radius:8px;
+  border-top-right-radius:8px;
+}
+
+pre[class*="language-"]{
+  margin:0!important;
+  border-bottom-left-radius:8px;
+  border-bottom-right-radius:8px;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:20px;
+}
+
+th{
+  background:#1e293b;
+  color:#38bdf8;
+  text-align:left;
+  padding:12px;
+}
+
+td{
+  padding:12px;
+  border-top:1px solid #334155;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>What is Static Site Generation (SSG) in Next.js?</h1>
+
+<p>
+Static Site Generation (SSG) is a rendering technique where Next.js generates HTML pages during the build process and stores them as static files.
+</p>
+
+<div class="feature">
+SSG allows us to generate pages once at build time and serve the same pre-generated HTML to all users.
+</div>
+
+<h2>Why Do We Need SSG?</h2>
+
+<p>
+Many pages do not change frequently.
+</p>
+
+Examples:
+
+<ul>
+  <li>Blog Posts</li>
+  <li>Documentation Websites</li>
+  <li>Marketing Pages</li>
+  <li>Landing Pages</li>
+  <li>Company Information Pages</li>
+</ul>
+
+<p>
+Generating these pages on every request would be unnecessary.
+</p>
+
+<p>
+Instead, we can generate them once during the build process.
+</p>
+
+<h2>How SSG Works</h2>
+
+<div class="code-title">SSG Flow</div>
+
+<pre><code class="language-text">npm run build
+       │
+       ▼
+Fetch Data
+       │
+       ▼
+Generate HTML
+       │
+       ▼
+Store Static Files
+       │
+       ▼
+Deploy
+       │
+       ▼
+Users Receive Same HTML
+</code></pre>
+
+<h2>What Happens Internally?</h2>
+
+<div class="code-title">Build Time</div>
+
+<pre><code class="language-text">Build Starts
+      │
+      ▼
+Fetch Data Once
+      │
+      ▼
+Generate HTML Once
+      │
+      ▼
+Save HTML File
+</code></pre>
+
+<p>
+After deployment:
+</p>
+
+<div class="code-title">Runtime</div>
+
+<pre><code class="language-text">User A Request
+      │
+      ▼
+Serve Existing HTML
+
+User B Request
+      │
+      ▼
+Serve Same HTML
+
+User C Request
+      │
+      ▼
+Serve Same HTML
+</code></pre>
+
+<p>
+No new HTML is generated when users visit the page.
+</p>
+
+<h2>Real Example</h2>
+
+<p>
+Suppose our application has a blog.
+</p>
+
+<div class="code-title">Blog Page</div>
+
+<pre><code class="language-text">/blog/react-hooks
+</code></pre>
+
+<p>
+During build:
+</p>
+
+<div class="code-title">Build Process</div>
+
+<pre><code class="language-text">1. Fetch Blog Content
+2. Generate HTML
+3. Save HTML File
+</code></pre>
+
+<p>
+After deployment:
+</p>
+
+<div class="code-title">User Requests</div>
+
+<pre><code class="language-text">User A → Existing HTML
+
+User B → Same HTML
+
+User C → Same HTML
+</code></pre>
+
+<h2>SSG in the Pages Router</h2>
+
+<p>
+In the Pages Router, SSG is implemented using <code>getStaticProps()</code>.
+</p>
+
+<div class="code-title">pages/blog.js</div>
+
+<pre><code class="language-jsx">export async function getStaticProps() {
+
+  const res = await fetch(
+    'https://api.example.com/posts'
+  );
+
+  const posts = await res.json();
+
+  return {
+    props: { posts }
+  };
+
+}
+
+export default function Blog({ posts }) {
+
+  return (
+    &lt;h1&gt;
+      Total Posts: {posts.length}
+    &lt;/h1&gt;
+  );
+
+}</code></pre>
+
+<h2>Dynamic SSG Pages</h2>
+
+<p>
+For dynamic routes, we use <code>getStaticPaths()</code>.
+</p>
+
+<div class="code-title">pages/posts/[id].js</div>
+
+<pre><code class="language-jsx">export async function getStaticPaths() {
+
+  return {
+    paths: [
+      { params: { id: '1' } },
+      { params: { id: '2' } }
+    ],
+    fallback: false
+  };
+
+}
+
+export async function getStaticProps({ params }) {
+
+  return {
+    props: {
+      id: params.id
+    }
+  };
+
+}</code></pre>
+
+<h2>SSG in the App Router</h2>
+
+<p>
+The App Router does not use <code>getStaticProps()</code>.
+</p>
+
+<p>
+By default, many App Router pages are statically generated when possible.
+</p>
+
+<div class="code-title">app/blog/page.js</div>
+
+<pre><code class="language-jsx">async function getPosts() {
+
+  const res = await fetch(
+    'https://api.example.com/posts'
+  );
+
+  return res.json();
+
+}
+
+export default async function Blog() {
+
+  const posts = await getPosts();
+
+  return (
+    &lt;h1&gt;
+      Total Posts: {posts.length}
+    &lt;/h1&gt;
+  );
+
+}</code></pre>
+
+<p>
+If the data is static and cacheable, Next.js may generate the page during the build process.
+</p>
+
+<h2>SSR vs SSG</h2>
+
+<table>
+<tr>
+<th>Feature</th>
+<th>SSR</th>
+<th>SSG</th>
+</tr>
+
+<tr>
+<td>HTML Generated</td>
+<td>Every Request</td>
+<td>Build Time</td>
+</tr>
+
+<tr>
+<td>Data Fetching</td>
+<td>Every Request</td>
+<td>Build Time</td>
+</tr>
+
+<tr>
+<td>Performance</td>
+<td>Slower</td>
+<td>Very Fast</td>
+</tr>
+
+<tr>
+<td>Server Load</td>
+<td>Higher</td>
+<td>Minimal</td>
+</tr>
+
+<tr>
+<td>Fresh Data</td>
+<td>Always Fresh</td>
+<td>Can Become Outdated</td>
+</tr>
+</table>
+
+<h2>SSG vs CSR</h2>
+
+<table>
+<tr>
+<th>Feature</th>
+<th>SSG</th>
+<th>CSR</th>
+</tr>
+
+<tr>
+<td>HTML Generated</td>
+<td>Build Time</td>
+<td>Browser</td>
+</tr>
+
+<tr>
+<td>SEO</td>
+<td>Excellent</td>
+<td>Limited</td>
+</tr>
+
+<tr>
+<td>First Load</td>
+<td>Very Fast</td>
+<td>Usually Slower</td>
+</tr>
+</table>
+
+<h2>Advantages of SSG</h2>
+
+<ul>
+  <li>Very fast page loading.</li>
+  <li>Excellent SEO.</li>
+  <li>Low server cost.</li>
+  <li>Can be served from a CDN.</li>
+  <li>Highly scalable.</li>
+</ul>
+
+<h2>Disadvantages of SSG</h2>
+
+<ul>
+  <li>Data can become outdated.</li>
+  <li>Requires rebuilding for content updates.</li>
+  <li>Large sites may have longer build times.</li>
+</ul>
+
+<h2>When Should We Use SSG?</h2>
+
+<ul>
+  <li>Blogs</li>
+  <li>Documentation Sites</li>
+  <li>Landing Pages</li>
+  <li>Portfolio Websites</li>
+  <li>Marketing Pages</li>
+  <li>Company Websites</li>
+</ul>
+
+<h2>Important Difference Between SSR and SSG</h2>
+
+<div class="feature">
+<strong>SSR:</strong><br>
+HTML is generated every time a user requests the page.
+</div>
+
+<div class="feature">
+<strong>SSG:</strong><br>
+HTML is generated once during the build process and the same HTML is served to all users.
+</div>
+
+<div class="code-title">Comparison</div>
+
+<pre><code class="language-text">SSR
+
+User A Request
+      │
+      ▼
+Generate HTML #1
+
+User B Request
+      │
+      ▼
+Generate HTML #2
+
+User C Request
+      │
+      ▼
+Generate HTML #3
+
+
+SSG
+
+npm run build
+      │
+      ▼
+Generate HTML Once
+      │
+      ▼
+Store HTML File
+      │
+      ▼
+All Users Receive Same HTML
+</code></pre>
+
+<div class="feature">
+<strong>One-Line Definition:</strong><br>
+Static Site Generation (SSG) is a rendering technique in Next.js where HTML pages are generated during the build process and served as static files to all users.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>What is SWR and how does it integrate with Next.js?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+}
+
+body{
+  background:#0f172a;
+  color:#e2e8f0;
+  font-family:Arial,sans-serif;
+  line-height:1.8;
+  padding:40px 20px;
+}
+
+.container{
+  max-width:1000px;
+  margin:auto;
+  background:#111827;
+  padding:40px;
+  border-radius:16px;
+}
+
+h1{
+  color:#38bdf8;
+  margin-bottom:20px;
+}
+
+h2{
+  color:#a78bfa;
+  margin-top:30px;
+  margin-bottom:10px;
+}
+
+h3{
+  color:#fbbf24;
+  margin-top:25px;
+  margin-bottom:10px;
+}
+
+p{
+  margin-bottom:15px;
+}
+
+ul{
+  margin-left:20px;
+}
+
+li{
+  margin-bottom:8px;
+}
+
+.feature{
+  background:#1e293b;
+  border-left:5px solid #38bdf8;
+  padding:15px;
+  border-radius:8px;
+  margin:20px 0;
+}
+
+.code-title{
+  background:#1e293b;
+  color:#93c5fd;
+  padding:10px;
+  font-weight:bold;
+}
+
+pre[class*="language-"]{
+  margin:0!important;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:20px;
+}
+
+th{
+  background:#1e293b;
+  color:#38bdf8;
+  text-align:left;
+  padding:12px;
+}
+
+td{
+  padding:12px;
+  border-top:1px solid #334155;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>What is SWR and how does it integrate with Next.js?</h1>
+
+<p>
+SWR is a React data fetching library created by Vercel that provides caching, automatic revalidation, request deduplication, polling, and real-time data synchronization.
+</p>
+
+<div class="feature">
+SWR stands for <strong>Stale-While-Revalidate</strong>. It immediately shows cached data (stale data), then fetches fresh data in the background and updates the UI automatically.
+</div>
+
+<h2>Why Do We Need SWR?</h2>
+
+<p>
+Without SWR, we often write repetitive code for:
+</p>
+
+<ul>
+<li>Loading states</li>
+<li>Error handling</li>
+<li>Caching</li>
+<li>Refetching</li>
+<li>Revalidation</li>
+</ul>
+
+<div class="code-title">Without SWR</div>
+
+<pre><code class="language-jsx">'use client';
+
+import { useEffect, useState } from 'react';
+
+export default function Users() {
+
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+
+    async function loadUsers() {
+
+      const res = await fetch('/api/users');
+      const data = await res.json();
+
+      setUsers(data);
+      setLoading(false);
+
+    }
+
+    loadUsers();
+
+  }, []);
+
+  return loading
+    ? &lt;h2&gt;Loading...&lt;/h2&gt;
+    : &lt;div&gt;{users.length}&lt;/div&gt;;
+
+}</code></pre>
+
+<p>
+SWR handles most of this automatically.
+</p>
+
+<h2>Install SWR</h2>
+
+<div class="code-title">Terminal</div>
+
+<pre><code class="language-bash">npm install swr</code></pre>
+
+<h2>Basic SWR Example</h2>
+
+<div class="code-title">Client Component</div>
+
+<pre><code class="language-jsx">'use client';
+
+import useSWR from 'swr';
+
+const fetcher = url =>
+  fetch(url).then(res => res.json());
+
+export default function Users() {
+
+  const {
+    data,
+    error,
+    isLoading
+  } = useSWR(
+    '/api/users',
+    fetcher
+  );
+
+  if (isLoading) {
+    return &lt;h2&gt;Loading...&lt;/h2&gt;;
+  }
+
+  if (error) {
+    return &lt;h2&gt;Error Loading Users&lt;/h2&gt;;
+  }
+
+  return (
+    &lt;div&gt;
+      {data.map(user => (
+        &lt;p key={user.id}&gt;
+          {user.name}
+        &lt;/p&gt;
+      ))}
+    &lt;/div&gt;
+  );
+
+}</code></pre>
+
+<h2>What Does SWR Mean?</h2>
+
+<div class="code-title">Stale-While-Revalidate Flow</div>
+
+<pre><code class="language-text">Cached Data
+      │
+      ▼
+Show Immediately
+      │
+      ▼
+Fetch Fresh Data
+In Background
+      │
+      ▼
+Update Cache
+      │
+      ▼
+Re-render UI
+</code></pre>
+
+<h2>Example Timeline</h2>
+
+<div class="code-title">Timeline</div>
+
+<pre><code class="language-text">First Visit
+
+      │
+      ▼
+
+API Request
+
+      │
+      ▼
+
+Cache Result
+
+      │
+      ▼
+
+User Leaves Page
+
+      │
+      ▼
+
+Returns Later
+
+      │
+      ▼
+
+Show Cached Data
+Immediately
+
+      │
+      ▼
+
+Fetch Latest Data
+
+      │
+      ▼
+
+Update Screen
+</code></pre>
+
+<h2>Why Is SWR Fast?</h2>
+
+<p>
+Because cached data can be displayed instantly.
+</p>
+
+<p>
+Users do not always need to wait for a new API request.
+</p>
+
+<h2>Automatic Revalidation</h2>
+
+<p>
+SWR automatically refetches data when:
+</p>
+
+<ul>
+<li>User returns to the tab.</li>
+<li>Network reconnects.</li>
+<li>Component remounts.</li>
+</ul>
+
+<div class="code-title">Example</div>
+
+<pre><code class="language-jsx">const {
+  data
+} = useSWR(
+  '/api/users',
+  fetcher
+);</code></pre>
+
+<p>
+These behaviors work automatically.
+</p>
+
+<h2>Polling Data</h2>
+
+<p>
+SWR can automatically refresh data at a specified interval.
+</p>
+
+<div class="code-title">Auto Refresh Every 5 Seconds</div>
+
+<pre><code class="language-jsx">const {
+  data
+} = useSWR(
+  '/api/users',
+  fetcher,
+  {
+    refreshInterval: 5000
+  }
+);</code></pre>
+
+<h2>Manual Revalidation</h2>
+
+<p>
+We can force SWR to refetch data.
+</p>
+
+<div class="code-title">Example</div>
+
+<pre><code class="language-jsx">import useSWR, {
+  mutate
+} from 'swr';
+
+const refresh = () => {
+  mutate('/api/users');
+};</code></pre>
+
+<h2>What Happens Internally?</h2>
+
+<div class="code-title">SWR Flow</div>
+
+<pre><code class="language-text">Component Mounts
+       │
+       ▼
+Check Cache
+       │
+       ├── Exists
+       │      │
+       │      ▼
+       │   Show Data
+       │
+       ▼
+Fetch Latest Data
+       │
+       ▼
+Update Cache
+       │
+       ▼
+Update UI
+</code></pre>
+
+<h2>How Does SWR Integrate With Next.js?</h2>
+
+<p>
+SWR works especially well with Next.js because both are maintained by Vercel.
+</p>
+
+<ul>
+<li>Works in Client Components.</li>
+<li>Works with API Routes.</li>
+<li>Works with Route Handlers.</li>
+<li>Works with Server Components + Client Components.</li>
+<li>Supports Next.js caching strategies.</li>
+</ul>
+
+<h2>App Router Example</h2>
+
+<div class="code-title">app/users/page.js</div>
+
+<pre><code class="language-jsx">'use client';
+
+import useSWR from 'swr';
+
+const fetcher = url =>
+  fetch(url).then(res => res.json());
+
+export default function UsersPage() {
+
+  const {
+    data,
+    isLoading
+  } = useSWR(
+    '/api/users',
+    fetcher
+  );
+
+  if (isLoading) {
+    return &lt;h2&gt;Loading...&lt;/h2&gt;;
+  }
+
+  return (
+    &lt;div&gt;
+      Total Users:
+      {data.length}
+    &lt;/div&gt;
+  );
+
+}</code></pre>
+
+<h2>Pages Router Example</h2>
+
+<div class="code-title">pages/users.js</div>
+
+<pre><code class="language-jsx">import useSWR from 'swr';
+
+const fetcher = url =>
+  fetch(url).then(res => res.json());
+
+export default function Users() {
+
+  const {
+    data
+  } = useSWR(
+    '/api/users',
+    fetcher
+  );
+
+  return (
+    &lt;div&gt;
+      {data?.length}
+    &lt;/div&gt;
+  );
+
+}</code></pre>
+
+<h2>SWR vs useEffect</h2>
+
+<table>
+<tr>
+<th>Feature</th>
+<th>useEffect + fetch</th>
+<th>SWR</th>
+</tr>
+
+<tr>
+<td>Loading State</td>
+<td>Manual</td>
+<td>Built-in</td>
+</tr>
+
+<tr>
+<td>Error Handling</td>
+<td>Manual</td>
+<td>Built-in</td>
+</tr>
+
+<tr>
+<td>Caching</td>
+<td>Manual</td>
+<td>Built-in</td>
+</tr>
+
+<tr>
+<td>Revalidation</td>
+<td>Manual</td>
+<td>Built-in</td>
+</tr>
+
+<tr>
+<td>Polling</td>
+<td>Manual</td>
+<td>Built-in</td>
+</tr>
+
+<tr>
+<td>Request Deduplication</td>
+<td>Manual</td>
+<td>Built-in</td>
+</tr>
+</table>
+
+<h2>When Should We Use SWR?</h2>
+
+<ul>
+<li>User dashboards.</li>
+<li>Profile pages.</li>
+<li>Live statistics.</li>
+<li>Search results.</li>
+<li>Admin panels.</li>
+<li>Frequently changing data.</li>
+</ul>
+
+<h2>When Should We Avoid SWR?</h2>
+
+<ul>
+<li>SEO-critical pages.</li>
+<li>Static marketing pages.</li>
+<li>Pages that should be rendered fully on the server.</li>
+</ul>
+
+<h2>Important Note</h2>
+
+<div class="feature">
+SWR runs in Client Components. If we need SEO-friendly data fetching, Server Components or server-side data fetching should usually be preferred.
+</div>
+
+<h2>Interview Tip</h2>
+
+<div class="feature">
+A common misconception is that SWR replaces server-side rendering. In reality, SWR is primarily for client-side data fetching, caching, and revalidation.
+</div>
+
+<div class="feature">
+<strong>One-Line Definition:</strong><br>
+SWR is a React data fetching library from Vercel that integrates seamlessly with Next.js by providing client-side caching, automatic revalidation, polling, and stale-while-revalidate data fetching.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+
+</body>
+</html>

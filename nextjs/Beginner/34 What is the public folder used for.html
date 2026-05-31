@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>What is the public folder used for?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+}
+
+body{
+  background:#0f172a;
+  color:#e2e8f0;
+  font-family:Arial,sans-serif;
+  line-height:1.8;
+  padding:40px 20px;
+}
+
+.container{
+  max-width:1000px;
+  margin:auto;
+  background:#111827;
+  padding:40px;
+  border-radius:16px;
+}
+
+h1{
+  color:#38bdf8;
+  margin-bottom:20px;
+}
+
+h2{
+  color:#a78bfa;
+  margin-top:30px;
+  margin-bottom:10px;
+}
+
+h3{
+  color:#fbbf24;
+  margin-top:25px;
+  margin-bottom:10px;
+}
+
+p{
+  margin-bottom:15px;
+}
+
+ul{
+  margin-left:20px;
+}
+
+li{
+  margin-bottom:8px;
+}
+
+.feature{
+  background:#1e293b;
+  border-left:5px solid #38bdf8;
+  padding:15px;
+  border-radius:8px;
+  margin:20px 0;
+}
+
+.code-title{
+  background:#1e293b;
+  color:#93c5fd;
+  padding:10px;
+  font-weight:bold;
+}
+
+pre[class*="language-"]{
+  margin:0!important;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:20px;
+}
+
+th{
+  background:#1e293b;
+  color:#38bdf8;
+  text-align:left;
+  padding:12px;
+}
+
+td{
+  padding:12px;
+  border-top:1px solid #334155;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>What is the public folder used for?</h1>
+
+<p>
+The <code>public</code> folder is a special folder in Next.js used to store static files that should be served directly to the browser without processing by Next.js.
+</p>
+
+<div class="feature">
+The public folder allows us to store images, icons, videos, PDFs, robots.txt, sitemap.xml, and other static assets that can be accessed directly through a URL.
+</div>
+
+<h2>Why Do We Need the public Folder?</h2>
+
+<p>
+Some files do not need bundling, compilation, or optimization.
+</p>
+
+<p>
+Examples:
+</p>
+
+<ul>
+<li>Images</li>
+<li>Favicons</li>
+<li>PDF Files</li>
+<li>Videos</li>
+<li>robots.txt</li>
+<li>sitemap.xml</li>
+</ul>
+
+<p>
+These files can simply be served as-is.
+</p>
+
+<h2>Project Structure</h2>
+
+<div class="code-title">Example</div>
+
+<pre><code class="language-text">my-app/
+
+├── app/
+├── components/
+├── public/
+│   ├── logo.png
+│   ├── banner.jpg
+│   ├── video.mp4
+│   ├── brochure.pdf
+│   └── favicon.ico
+├── package.json
+└── next.config.js
+</code></pre>
+
+<h2>How Files Are Accessed</h2>
+
+<p>
+Files inside the public folder are automatically available from the root URL.
+</p>
+
+<div class="code-title">Folder</div>
+
+<pre><code class="language-text">public/logo.png
+</code></pre>
+
+<p>
+URL:
+</p>
+
+<div class="code-title">Browser URL</div>
+
+<pre><code class="language-text">/logo.png
+</code></pre>
+
+<p>
+Notice that the word <code>public</code> is not included in the URL.
+</p>
+
+<h2>Using Images from public</h2>
+
+<h3>Using img</h3>
+
+<div class="code-title">Example</div>
+
+<pre><code class="language-jsx">export default function Home() {
+
+  return (
+    &lt;img
+      src="/logo.png"
+      alt="Logo"
+    /&gt;
+  );
+
+}</code></pre>
+
+<h3>Using next/image</h3>
+
+<div class="code-title">Example</div>
+
+<pre><code class="language-jsx">import Image from 'next/image';
+
+export default function Home() {
+
+  return (
+    &lt;Image
+      src="/logo.png"
+      alt="Logo"
+      width={200}
+      height={100}
+    /&gt;
+  );
+
+}</code></pre>
+
+<h2>Using PDFs</h2>
+
+<div class="code-title">Folder</div>
+
+<pre><code class="language-text">public/brochure.pdf
+</code></pre>
+
+<div class="code-title">Link</div>
+
+<pre><code class="language-jsx">&lt;a href="/brochure.pdf"&gt;
+  Download PDF
+&lt;/a&gt;</code></pre>
+
+<h2>Using Videos</h2>
+
+<div class="code-title">Folder</div>
+
+<pre><code class="language-text">public/video.mp4
+</code></pre>
+
+<div class="code-title">Example</div>
+
+<pre><code class="language-jsx">&lt;video controls&gt;
+  &lt;source
+    src="/video.mp4"
+    type="video/mp4"
+  /&gt;
+&lt;/video&gt;</code></pre>
+
+<h2>Using Favicons</h2>
+
+<div class="code-title">Folder</div>
+
+<pre><code class="language-text">public/favicon.ico
+</code></pre>
+
+<p>
+Browser URL:
+</p>
+
+<pre><code class="language-text">/favicon.ico
+</code></pre>
+
+<h2>What Happens Internally?</h2>
+
+<div class="code-title">Request Flow</div>
+
+<pre><code class="language-text">Browser Requests
+
+/logo.png
+
+       │
+       ▼
+
+Next.js Server
+
+       │
+       ▼
+
+Read File From
+
+public/logo.png
+
+       │
+       ▼
+
+Send File Directly
+</code></pre>
+
+<p>
+No React rendering occurs.
+</p>
+
+<p>
+No JavaScript bundle is involved.
+</p>
+
+<h2>public Folder vs Importing Assets</h2>
+
+<table>
+<tr>
+<th>Feature</th>
+<th>public Folder</th>
+<th>Import Asset</th>
+</tr>
+
+<tr>
+<td>Accessed Via URL</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+
+<tr>
+<td>Bundled by Next.js</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+
+<tr>
+<td>Can Be Referenced Dynamically</td>
+<td>✅</td>
+<td>Limited</td>
+</tr>
+
+<tr>
+<td>Good For Large Static Files</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+</table>
+
+<h2>Example: Importing an Asset</h2>
+
+<div class="code-title">Local Import</div>
+
+<pre><code class="language-jsx">import logo from './logo.png';
+
+export default function Home() {
+
+  return (
+    &lt;img
+      src={logo.src}
+      alt="Logo"
+    /&gt;
+  );
+
+}</code></pre>
+
+<p>
+Here the image becomes part of the application bundle.
+</p>
+
+<h2>When Should We Use the public Folder?</h2>
+
+<ul>
+<li>Images shared across the application.</li>
+<li>Favicons.</li>
+<li>PDF downloads.</li>
+<li>Videos.</li>
+<li>robots.txt.</li>
+<li>sitemap.xml.</li>
+<li>Static assets referenced by URL.</li>
+</ul>
+
+<h2>When Should We Avoid It?</h2>
+
+<ul>
+<li>Component-specific assets.</li>
+<li>Assets that should be bundled.</li>
+<li>Assets imported directly into React components.</li>
+</ul>
+
+<h2>Pages Router vs App Router</h2>
+
+<p>
+The public folder works exactly the same in both routers.
+</p>
+
+<table>
+<tr>
+<th>Router</th>
+<th>Supports public Folder</th>
+</tr>
+
+<tr>
+<td>Pages Router</td>
+<td>✅</td>
+</tr>
+
+<tr>
+<td>App Router</td>
+<td>✅</td>
+</tr>
+</table>
+
+<h2>Interview Tip</h2>
+
+<div class="feature">
+A common misconception is that files inside the public folder are imported into the JavaScript bundle. In reality, files in the public folder are served directly by Next.js and accessed using URLs.
+</div>
+
+<div class="feature">
+<strong>One-Line Definition:</strong><br>
+The <code>public</code> folder is a special Next.js folder used to store static assets that are served directly to the browser and accessed through root-based URLs such as <code>/logo.png</code>.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+
+</body>
+</html>

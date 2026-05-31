@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>What is _document.js and When Would We Use It?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+    background:#0f172a;
+    color:#e2e8f0;
+    font-family:Arial, Helvetica, sans-serif;
+    line-height:1.8;
+    padding:40px 20px;
+}
+
+.container{
+    max-width:1000px;
+    margin:auto;
+    background:#111827;
+    padding:40px;
+    border-radius:16px;
+    box-shadow:0 0 30px rgba(0,0,0,.45);
+}
+
+h1{
+    color:#38bdf8;
+    font-size:36px;
+    margin-bottom:20px;
+}
+
+h2{
+    color:#a78bfa;
+    margin-top:35px;
+    margin-bottom:10px;
+}
+
+h3{
+    color:#fbbf24;
+    margin-top:25px;
+    margin-bottom:10px;
+}
+
+p{
+    color:#d1d5db;
+    margin-bottom:15px;
+}
+
+ul,ol{
+    margin-left:25px;
+    margin-bottom:15px;
+}
+
+li{
+    margin-bottom:8px;
+}
+
+.feature{
+    background:#1e293b;
+    border-left:5px solid #38bdf8;
+    padding:15px;
+    border-radius:8px;
+    margin:15px 0;
+}
+
+.code-block{
+    margin:20px 0;
+    border:1px solid #334155;
+    border-radius:12px;
+    overflow:hidden;
+}
+
+.code-title{
+    background:#1e293b;
+    color:#93c5fd;
+    padding:12px 16px;
+    font-size:14px;
+    font-weight:bold;
+    border-bottom:1px solid #334155;
+}
+
+pre[class*="language-"]{
+    margin:0!important;
+    border-radius:0!important;
+    font-size:15px;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+    margin-top:20px;
+}
+
+th{
+    background:#1e293b;
+    color:#38bdf8;
+    text-align:left;
+    padding:14px;
+}
+
+td{
+    border-top:1px solid #334155;
+    padding:14px;
+    color:#e5e7eb;
+}
+
+.summary{
+    margin-top:30px;
+    background:#082f49;
+    border-left:5px solid #38bdf8;
+    padding:20px;
+    border-radius:10px;
+}
+
+.summary strong{
+    color:#38bdf8;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>What is _document.js and When Would We Use It?</h1>
+
+<p>
+<strong>_document.js</strong> is a special file in the <strong>Pages Router</strong> of Next.js that allows us to customize the HTML document structure that Next.js sends to the browser.
+</p>
+
+<div class="feature">
+Unlike <code>_app.js</code>, which controls React components, <code>_document.js</code> controls the root HTML structure such as <code>&lt;html&gt;</code>, <code>&lt;body&gt;</code>, and other document-level settings.
+</div>
+
+<h2>Where is _document.js Located?</h2>
+
+<div class="code-block">
+<div class="code-title">Project Structure</div>
+
+<pre><code class="language-text">pages/
+├── _app.js
+├── _document.js
+├── index.js
+└── about.js
+</code></pre>
+
+</div>
+
+<h2>Why Do We Need _document.js?</h2>
+
+<p>
+Normally, Next.js generates the HTML document automatically.
+</p>
+
+<div class="code-block">
+<div class="code-title">Generated HTML</div>
+
+<pre><code class="language-html">&lt;html&gt;
+  &lt;body&gt;
+    &lt;div id="__next"&gt;&lt;/div&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+
+</div>
+
+<p>
+Sometimes we need to customize this structure. That's when we use <code>_document.js</code>.
+</p>
+
+<h2>Basic Example</h2>
+
+<div class="code-block">
+<div class="code-title">pages/_document.js</div>
+
+<pre><code class="language-jsx">import {
+  Html,
+  Head,
+  Main,
+  NextScript
+} from 'next/document';
+
+export default function Document() {
+
+  return (
+    &lt;Html&gt;
+      &lt;Head /&gt;
+
+      &lt;body&gt;
+        &lt;Main /&gt;
+        &lt;NextScript /&gt;
+      &lt;/body&gt;
+    &lt;/Html&gt;
+  );
+
+}
+</code></pre>
+
+</div>
+
+<h2>Important Components</h2>
+
+<table>
+<thead>
+<tr>
+<th>Component</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Html</td>
+<td>Represents the root &lt;html&gt; element</td>
+</tr>
+<tr>
+<td>Head</td>
+<td>Used for document-level head content</td>
+</tr>
+<tr>
+<td>Main</td>
+<td>Renders the application content</td>
+</tr>
+<tr>
+<td>NextScript</td>
+<td>Loads Next.js JavaScript files</td>
+</tr>
+</tbody>
+</table>
+
+<h2>Use Case 1: Set HTML Language</h2>
+
+<p>
+We can define the language of our application.
+</p>
+
+<div class="code-block">
+<div class="code-title">Language Example</div>
+
+<pre><code class="language-jsx">&lt;Html lang="en"&gt;
+  ...
+&lt;/Html&gt;
+</code></pre>
+
+</div>
+
+<p>
+Generated HTML:
+</p>
+
+<div class="code-block">
+<div class="code-title">Output</div>
+
+<pre><code class="language-html">&lt;html lang="en"&gt;
+</code></pre>
+
+</div>
+
+<h2>Use Case 2: Add Custom Fonts</h2>
+
+<div class="code-block">
+<div class="code-title">Google Font Example</div>
+
+<pre><code class="language-jsx">&lt;Head&gt;
+  &lt;link
+    rel="preconnect"
+    href="https://fonts.googleapis.com"
+  /&gt;
+&lt;/Head&gt;
+</code></pre>
+
+</div>
+
+<h2>Use Case 3: Add External Scripts</h2>
+
+<div class="code-block">
+<div class="code-title">External Script Example</div>
+
+<pre><code class="language-jsx">&lt;Head&gt;
+  &lt;script
+    src="https://example.com/script.js"
+  /&gt;
+&lt;/Head&gt;
+</code></pre>
+
+</div>
+
+<h2>Use Case 4: Add Global Body Classes</h2>
+
+<div class="code-block">
+<div class="code-title">Body Class Example</div>
+
+<pre><code class="language-jsx">&lt;body className="dark-theme"&gt;
+  &lt;Main /&gt;
+  &lt;NextScript /&gt;
+&lt;/body&gt;
+</code></pre>
+
+</div>
+
+<h2>Rendering Flow</h2>
+
+<div class="code-block">
+<div class="code-title">Request Flow</div>
+
+<pre><code class="language-text">User Request
+      │
+      ▼
+_document.js
+      │
+      ▼
+_app.js
+      │
+      ▼
+Current Page
+      │
+      ▼
+Browser
+</code></pre>
+
+</div>
+
+<h2>_document.js vs _app.js</h2>
+
+<table>
+<thead>
+<tr>
+<th>_document.js</th>
+<th>_app.js</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Controls HTML document structure</td>
+<td>Controls React application structure</td>
+</tr>
+<tr>
+<td>Works with Html, Head, Body</td>
+<td>Works with React components</td>
+</tr>
+<tr>
+<td>Rendered only on the server</td>
+<td>Rendered on both server and client</td>
+</tr>
+<tr>
+<td>Cannot use React hooks</td>
+<td>Can use React hooks</td>
+</tr>
+<tr>
+<td>Used for document customization</td>
+<td>Used for layouts, providers, CSS</td>
+</tr>
+</tbody>
+</table>
+
+<h2>Can We Add Meta Tags Here?</h2>
+
+<p>
+Technically yes, but it is generally better to add page-specific metadata using:
+</p>
+
+<div class="code-block">
+<div class="code-title">Page Metadata</div>
+
+<pre><code class="language-jsx">import Head from 'next/head';
+
+export default function Home() {
+
+  return (
+    &lt;&gt;
+      &lt;Head&gt;
+        &lt;title&gt;Home Page&lt;/title&gt;
+      &lt;/Head&gt;
+    &lt;/&gt;
+  );
+
+}
+</code></pre>
+
+</div>
+
+<h2>Pages Router vs App Router</h2>
+
+<table>
+<thead>
+<tr>
+<th>Pages Router</th>
+<th>App Router</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Uses _document.js</td>
+<td>No _document.js</td>
+</tr>
+<tr>
+<td>Uses _app.js</td>
+<td>Uses layout.js</td>
+</tr>
+<tr>
+<td>Older routing system</td>
+<td>Modern routing system</td>
+</tr>
+</tbody>
+</table>
+
+<h2>What Replaces _document.js in App Router?</h2>
+
+<p>
+In Next.js 13+, the root HTML structure is usually defined inside <code>app/layout.js</code>.
+</p>
+
+<div class="code-block">
+<div class="code-title">app/layout.js</div>
+
+<pre><code class="language-jsx">export default function RootLayout({
+  children
+}) {
+
+  return (
+    &lt;html lang="en"&gt;
+      &lt;body&gt;
+        {children}
+      &lt;/body&gt;
+    &lt;/html&gt;
+  );
+
+}
+</code></pre>
+
+</div>
+
+<h2>When Would We Use _document.js?</h2>
+
+<ul>
+<li>Setting the HTML language attribute.</li>
+<li>Adding custom fonts globally.</li>
+<li>Adding external scripts.</li>
+<li>Customizing the body element.</li>
+<li>Customizing the root HTML structure.</li>
+<li>Adding document-level settings.</li>
+</ul>
+
+<div class="summary">
+<strong>One-Line Definition:</strong><br>
+<code>_document.js</code> is a special file in the Next.js Pages Router that allows us to customize the HTML document structure sent to the browser, including the <code>&lt;html&gt;</code>, <code>&lt;head&gt;</code>, and <code>&lt;body&gt;</code> elements.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js"></script>
+
+</body>
+</html>

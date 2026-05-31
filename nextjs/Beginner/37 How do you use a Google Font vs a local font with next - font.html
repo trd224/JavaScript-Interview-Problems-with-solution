@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How do you use a Google Font vs a local font with next/font?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+}
+
+body{
+  background:#0f172a;
+  color:#e2e8f0;
+  font-family:Arial,sans-serif;
+  line-height:1.8;
+  padding:40px 20px;
+}
+
+.container{
+  max-width:1000px;
+  margin:auto;
+  background:#111827;
+  padding:40px;
+  border-radius:16px;
+}
+
+h1{
+  color:#38bdf8;
+  margin-bottom:20px;
+}
+
+h2{
+  color:#a78bfa;
+  margin-top:30px;
+  margin-bottom:10px;
+}
+
+h3{
+  color:#fbbf24;
+  margin-top:25px;
+  margin-bottom:10px;
+}
+
+p{
+  margin-bottom:15px;
+}
+
+ul{
+  margin-left:20px;
+}
+
+li{
+  margin-bottom:8px;
+}
+
+.feature{
+  background:#1e293b;
+  border-left:5px solid #38bdf8;
+  padding:15px;
+  border-radius:8px;
+  margin:20px 0;
+}
+
+.code-title{
+  background:#1e293b;
+  color:#93c5fd;
+  padding:10px;
+  font-weight:bold;
+}
+
+pre[class*="language-"]{
+  margin:0!important;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:20px;
+}
+
+th{
+  background:#1e293b;
+  color:#38bdf8;
+  text-align:left;
+  padding:12px;
+}
+
+td{
+  padding:12px;
+  border-top:1px solid #334155;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>How do you use a Google Font vs a local font with next/font?</h1>
+
+<p>
+The <code>next/font</code> package allows us to use both Google Fonts and local fonts with automatic optimization, self-hosting, and layout shift prevention.
+</p>
+
+<div class="feature">
+Google Fonts are imported from <code>next/font/google</code>, while local fonts are imported from <code>next/font/local</code>.
+</div>
+
+<h2>Google Font</h2>
+
+<p>
+Use Google Fonts when the font is available in the Google Fonts library.
+</p>
+
+<h3>Import a Google Font</h3>
+
+<div class="code-title">app/layout.js</div>
+
+<pre><code class="language-jsx">import { Inter } from 'next/font/google';
+
+const inter = Inter({
+  subsets: ['latin']
+});
+
+export default function RootLayout({ children }) {
+
+  return (
+    &lt;html lang="en"&gt;
+      &lt;body className={inter.className}&gt;
+        {children}
+      &lt;/body&gt;
+    &lt;/html&gt;
+  );
+
+}</code></pre>
+
+<h3>What Happens Internally?</h3>
+
+<div class="code-title">Flow</div>
+
+<pre><code class="language-text">Build Time
+      │
+      ▼
+Download Inter Font
+      │
+      ▼
+Self Host Font
+      │
+      ▼
+Deploy Application
+      │
+      ▼
+Font Available Immediately
+</code></pre>
+
+<h2>Using Multiple Weights</h2>
+
+<div class="code-title">Example</div>
+
+<pre><code class="language-jsx">import { Inter } from 'next/font/google';
+
+const inter = Inter({
+  subsets: ['latin'],
+  weight: ['400', '700']
+});</code></pre>
+
+<h2>Using Multiple Styles</h2>
+
+<div class="code-title">Example</div>
+
+<pre><code class="language-jsx">import { Roboto } from 'next/font/google';
+
+const roboto = Roboto({
+  subsets: ['latin'],
+  weight: ['400', '700'],
+  style: ['normal', 'italic']
+});</code></pre>
+
+<h2>Local Font</h2>
+
+<p>
+Use a local font when the font file exists inside our project.
+</p>
+
+<h3>Project Structure</h3>
+
+<div class="code-title">Example</div>
+
+<pre><code class="language-text">app/
+├── fonts/
+│   └── MyFont.woff2
+├── layout.js
+└── page.js
+</code></pre>
+
+<h3>Import a Local Font</h3>
+
+<div class="code-title">app/layout.js</div>
+
+<pre><code class="language-jsx">import localFont from 'next/font/local';
+
+const myFont = localFont({
+  src: './fonts/MyFont.woff2'
+});
+
+export default function RootLayout({ children }) {
+
+  return (
+    &lt;html lang="en"&gt;
+      &lt;body className={myFont.className}&gt;
+        {children}
+      &lt;/body&gt;
+    &lt;/html&gt;
+  );
+
+}</code></pre>
+
+<h3>What Happens Internally?</h3>
+
+<div class="code-title">Flow</div>
+
+<pre><code class="language-text">Local Font File
+      │
+      ▼
+Build Process
+      │
+      ▼
+Optimize Font
+      │
+      ▼
+Self Host Font
+      │
+      ▼
+Serve Font To Browser
+</code></pre>
+
+<h2>Local Font with Multiple Files</h2>
+
+<p>
+Many fonts have separate files for different weights.
+</p>
+
+<div class="code-title">Example</div>
+
+<pre><code class="language-jsx">import localFont from 'next/font/local';
+
+const myFont = localFont({
+  src: [
+    {
+      path: './fonts/MyFont-Regular.woff2',
+      weight: '400',
+      style: 'normal'
+    },
+    {
+      path: './fonts/MyFont-Bold.woff2',
+      weight: '700',
+      style: 'normal'
+    }
+  ]
+});</code></pre>
+
+<h2>Using CSS Variables</h2>
+
+<p>
+Fonts can be exposed as CSS variables.
+</p>
+
+<div class="code-title">Example</div>
+
+<pre><code class="language-jsx">import { Inter } from 'next/font/google';
+
+const inter = Inter({
+  subsets: ['latin'],
+  variable: '--font-inter'
+});
+
+export default function RootLayout({ children }) {
+
+  return (
+    &lt;html
+      lang="en"
+      className={inter.variable}
+    &gt;
+      &lt;body&gt;{children}&lt;/body&gt;
+    &lt;/html&gt;
+  );
+
+}</code></pre>
+
+<div class="code-title">globals.css</div>
+
+<pre><code class="language-css">body {
+  font-family: var(--font-inter);
+}</code></pre>
+
+<h2>Google Font vs Local Font</h2>
+
+<table>
+<tr>
+<th>Feature</th>
+<th>Google Font</th>
+<th>Local Font</th>
+</tr>
+
+<tr>
+<td>Import From</td>
+<td>next/font/google</td>
+<td>next/font/local</td>
+</tr>
+
+<tr>
+<td>Requires Font File</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+
+<tr>
+<td>Google Fonts Library</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+
+<tr>
+<td>Custom Fonts Supported</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+
+<tr>
+<td>Self Hosted</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+
+<tr>
+<td>Layout Shift Prevention</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+</table>
+
+<h2>Real-World Example</h2>
+
+<p>
+Suppose our company uses a custom brand font.
+</p>
+
+<div class="code-title">Recommended</div>
+
+<pre><code class="language-text">Use next/font/local
+</code></pre>
+
+<p>
+Suppose we want a popular font like Inter or Roboto.
+</p>
+
+<div class="code-title">Recommended</div>
+
+<pre><code class="language-text">Use next/font/google
+</code></pre>
+
+<h2>Pages Router Example</h2>
+
+<div class="code-title">pages/_app.js</div>
+
+<pre><code class="language-jsx">import { Inter } from 'next/font/google';
+
+const inter = Inter({
+  subsets: ['latin']
+});
+
+export default function MyApp({ Component, pageProps }) {
+
+  return (
+    &lt;main className={inter.className}&gt;
+      &lt;Component {...pageProps} /&gt;
+    &lt;/main&gt;
+  );
+
+}</code></pre>
+
+<h2>Interview Tip</h2>
+
+<div class="feature">
+A common misconception is that Google Fonts loaded through next/font are fetched from Google every time a user visits the site. In reality, Next.js downloads and self-hosts the fonts during the build process.
+</div>
+
+<div class="feature">
+<strong>One-Line Definition:</strong><br>
+Google Fonts are used through <code>next/font/google</code>, local fonts are used through <code>next/font/local</code>, and both are automatically optimized and self-hosted by Next.js to improve performance and eliminate layout shift.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+
+</body>
+</html>

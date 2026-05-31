@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>What is Client-Side Rendering (CSR) and When Should We Choose It?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+}
+
+body{
+  background:#0f172a;
+  color:#e2e8f0;
+  font-family:Arial,sans-serif;
+  line-height:1.8;
+  padding:40px 20px;
+}
+
+.container{
+  max-width:1000px;
+  margin:auto;
+  background:#111827;
+  padding:40px;
+  border-radius:16px;
+  box-shadow:0 0 30px rgba(0,0,0,.4);
+}
+
+h1{
+  color:#38bdf8;
+  margin-bottom:20px;
+}
+
+h2{
+  color:#a78bfa;
+  margin-top:30px;
+  margin-bottom:10px;
+}
+
+h3{
+  color:#fbbf24;
+  margin-top:25px;
+  margin-bottom:10px;
+}
+
+p{
+  margin-bottom:15px;
+}
+
+ul{
+  margin-left:20px;
+}
+
+li{
+  margin-bottom:8px;
+}
+
+.feature{
+  background:#1e293b;
+  border-left:5px solid #38bdf8;
+  padding:15px;
+  border-radius:8px;
+  margin:20px 0;
+}
+
+.code-title{
+  background:#1e293b;
+  color:#93c5fd;
+  padding:10px;
+  font-weight:bold;
+  border-top-left-radius:8px;
+  border-top-right-radius:8px;
+}
+
+pre[class*="language-"]{
+  margin:0!important;
+  border-bottom-left-radius:8px;
+  border-bottom-right-radius:8px;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:20px;
+}
+
+th{
+  background:#1e293b;
+  color:#38bdf8;
+  text-align:left;
+  padding:12px;
+}
+
+td{
+  padding:12px;
+  border-top:1px solid #334155;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>What is Client-Side Rendering (CSR) and When Should We Choose It?</h1>
+
+<p>
+Client-Side Rendering (CSR) is a rendering technique where the browser downloads JavaScript and generates the page UI on the client side.
+</p>
+
+<div class="feature">
+In CSR, the server sends a minimal HTML page and JavaScript bundle, and the browser renders the application after the JavaScript executes.
+</div>
+
+<h2>Why Do We Need CSR?</h2>
+
+<p>
+Some applications are highly interactive and depend heavily on user actions.
+</p>
+
+Examples:
+
+<ul>
+  <li>Admin Dashboards</li>
+  <li>Project Management Tools</li>
+  <li>Chat Applications</li>
+  <li>Internal Business Applications</li>
+  <li>Analytics Dashboards</li>
+</ul>
+
+<p>
+For these applications, SEO is usually less important than user interaction.
+</p>
+
+<h2>How CSR Works</h2>
+
+<div class="code-title">CSR Flow</div>
+
+<pre><code class="language-text">User Requests Page
+        │
+        ▼
+Server Sends HTML + JS
+        │
+        ▼
+Browser Downloads JS
+        │
+        ▼
+React Executes
+        │
+        ▼
+Fetch Data
+        │
+        ▼
+Generate UI
+</code></pre>
+
+<h2>What Happens Internally?</h2>
+
+<div class="code-title">Request Flow</div>
+
+<pre><code class="language-text">User Opens Page
+       │
+       ▼
+HTML Sent
+
+&lt;div id="root"&gt;&lt;/div&gt;
+
+       │
+       ▼
+JavaScript Downloads
+       │
+       ▼
+React Starts
+       │
+       ▼
+API Call
+       │
+       ▼
+Data Received
+       │
+       ▼
+UI Rendered
+</code></pre>
+
+<h2>Real Example</h2>
+
+<p>
+Suppose our application contains a dashboard showing user information.
+</p>
+
+<div class="code-title">Dashboard Page</div>
+
+<pre><code class="language-text">/dashboard</code></pre>
+
+<p>
+Browser Process:
+</p>
+
+<div class="code-title">Flow</div>
+
+<pre><code class="language-text">1. Download JavaScript
+2. Fetch User Data
+3. Render Dashboard
+</code></pre>
+
+<h2>CSR Example in React</h2>
+
+<div class="code-title">Client-Side Data Fetching</div>
+
+<pre><code class="language-jsx">import { useEffect, useState } from 'react';
+
+export default function Users() {
+
+  const [users, setUsers] = useState([]);
+
+  useEffect(() => {
+
+    fetch('/api/users')
+      .then(res => res.json())
+      .then(data => setUsers(data));
+
+  }, []);
+
+  return (
+    &lt;h1&gt;
+      Users: {users.length}
+    &lt;/h1&gt;
+  );
+
+}</code></pre>
+
+<h2>CSR in Next.js</h2>
+
+<p>
+In Next.js App Router, Client Components use CSR behavior.
+</p>
+
+<div class="code-title">Client Component</div>
+
+<pre><code class="language-jsx">'use client';
+
+import { useEffect, useState } from 'react';
+
+export default function Dashboard() {
+
+  const [users, setUsers] = useState([]);
+
+  useEffect(() => {
+
+    fetch('/api/users')
+      .then(res => res.json())
+      .then(data => setUsers(data));
+
+  }, []);
+
+  return (
+    &lt;h1&gt;
+      Users: {users.length}
+    &lt;/h1&gt;
+  );
+
+}</code></pre>
+
+<h2>What Does the Server Send?</h2>
+
+<p>
+Initially the server sends very little HTML.
+</p>
+
+<div class="code-title">Initial HTML</div>
+
+<pre><code class="language-html">&lt;div id="root"&gt;&lt;/div&gt;
+</code></pre>
+
+<p>
+Then JavaScript builds the UI in the browser.
+</p>
+
+<h2>SSR vs CSR</h2>
+
+<table>
+<tr>
+<th>Feature</th>
+<th>SSR</th>
+<th>CSR</th>
+</tr>
+
+<tr>
+<td>HTML Generated</td>
+<td>Server</td>
+<td>Browser</td>
+</tr>
+
+<tr>
+<td>SEO</td>
+<td>Excellent</td>
+<td>Limited</td>
+</tr>
+
+<tr>
+<td>Initial Content</td>
+<td>Immediately Available</td>
+<td>Waits For JS</td>
+</tr>
+
+<tr>
+<td>Server Load</td>
+<td>Higher</td>
+<td>Lower</td>
+</tr>
+
+<tr>
+<td>User Interaction</td>
+<td>Good</td>
+<td>Excellent</td>
+</tr>
+</table>
+
+<h2>SSG vs CSR</h2>
+
+<table>
+<tr>
+<th>Feature</th>
+<th>SSG</th>
+<th>CSR</th>
+</tr>
+
+<tr>
+<td>HTML Generated</td>
+<td>Build Time</td>
+<td>Browser</td>
+</tr>
+
+<tr>
+<td>SEO</td>
+<td>Excellent</td>
+<td>Limited</td>
+</tr>
+
+<tr>
+<td>Performance</td>
+<td>Very Fast</td>
+<td>Depends On JS</td>
+</tr>
+
+<tr>
+<td>Data Freshness</td>
+<td>Build Time Data</td>
+<td>Latest Client Data</td>
+</tr>
+</table>
+
+<h2>Advantages of CSR</h2>
+
+<ul>
+<li>Highly interactive UI.</li>
+<li>Less server work.</li>
+<li>Fast page transitions after initial load.</li>
+<li>Good for authenticated applications.</li>
+<li>Works well with real-time updates.</li>
+</ul>
+
+<h2>Disadvantages of CSR</h2>
+
+<ul>
+<li>Poorer SEO.</li>
+<li>Slower first page load.</li>
+<li>Requires JavaScript.</li>
+<li>Users may initially see loading states.</li>
+</ul>
+
+<h2>When Should We Choose CSR?</h2>
+
+<ul>
+<li>Admin Dashboards</li>
+<li>Internal Company Tools</li>
+<li>Chat Applications</li>
+<li>Project Management Systems</li>
+<li>Analytics Dashboards</li>
+<li>User-Specific Applications</li>
+</ul>
+
+<h2>When Should We Avoid CSR?</h2>
+
+<ul>
+<li>Marketing Pages</li>
+<li>Blogs</li>
+<li>News Websites</li>
+<li>Documentation Sites</li>
+<li>SEO-Focused Pages</li>
+</ul>
+
+<h2>Important Difference Between SSR and CSR</h2>
+
+<div class="feature">
+<strong>SSR:</strong><br>
+The server generates HTML before sending it to the browser.
+</div>
+
+<div class="feature">
+<strong>CSR:</strong><br>
+The browser downloads JavaScript and generates the UI after the page loads.
+</div>
+
+<div class="code-title">Comparison</div>
+
+<pre><code class="language-text">SSR
+
+Request
+   │
+   ▼
+Server Generates HTML
+   │
+   ▼
+Browser Receives Ready UI
+
+
+CSR
+
+Request
+   │
+   ▼
+Server Sends JS
+   │
+   ▼
+Browser Runs React
+   │
+   ▼
+Fetch Data
+   │
+   ▼
+Generate UI
+</code></pre>
+
+<div class="feature">
+<strong>One-Line Definition:</strong><br>
+Client-Side Rendering (CSR) is a rendering technique where the browser executes JavaScript and generates the page UI on the client side after the page loads.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+
+</body>
+</html>

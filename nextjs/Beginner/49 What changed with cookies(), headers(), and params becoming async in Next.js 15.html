@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>What changed with cookies(), headers(), and params becoming async in Next.js 15?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+}
+
+body{
+  background:#0f172a;
+  color:#e2e8f0;
+  font-family:Arial,sans-serif;
+  line-height:1.8;
+  padding:40px 20px;
+}
+
+.container{
+  max-width:1000px;
+  margin:auto;
+  background:#111827;
+  padding:40px;
+  border-radius:16px;
+}
+
+h1{color:#38bdf8;margin-bottom:20px}
+h2{color:#a78bfa;margin-top:30px;margin-bottom:10px}
+h3{color:#fbbf24;margin-top:25px;margin-bottom:10px}
+
+p{margin-bottom:15px}
+
+ul{
+  margin-left:20px;
+}
+
+li{
+  margin-bottom:8px;
+}
+
+.feature{
+  background:#1e293b;
+  border-left:5px solid #38bdf8;
+  padding:15px;
+  border-radius:8px;
+  margin:20px 0;
+}
+
+.code-title{
+  background:#1e293b;
+  color:#93c5fd;
+  padding:10px;
+  font-weight:bold;
+}
+
+pre[class*="language-"]{
+  margin:0!important;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:20px;
+}
+
+th{
+  background:#1e293b;
+  color:#38bdf8;
+  text-align:left;
+  padding:12px;
+}
+
+td{
+  padding:12px;
+  border-top:1px solid #334155;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>What changed with cookies(), headers(), and params becoming async in Next.js 15?</h1>
+
+<p>
+In Next.js 15, <code>cookies()</code>, <code>headers()</code>, <code>params</code>, and <code>searchParams</code> became asynchronous APIs.
+</p>
+
+<div class="feature">
+Before Next.js 15, these APIs could be accessed directly. In Next.js 15, we must use <code>await</code> because they now return Promises.
+</div>
+
+<h2>Why Did Next.js Make Them Async?</h2>
+
+<p>
+This change helps Next.js support:
+</p>
+
+<ul>
+<li>Streaming</li>
+<li>Partial Prerendering (PPR)</li>
+<li>Server Components</li>
+<li>Future rendering optimizations</li>
+</ul>
+
+<p>
+Making these APIs asynchronous gives Next.js more flexibility when preparing and rendering pages.
+</p>
+
+<h2>cookies() Before Next.js 15</h2>
+
+<div class="code-title">Old Version</div>
+
+<pre><code class="language-jsx">import { cookies } from 'next/headers';
+
+export default function Page() {
+
+  const cookieStore = cookies();
+
+  const token = cookieStore.get('token');
+
+  return &lt;h1&gt;{token?.value}&lt;/h1&gt;;
+
+}</code></pre>
+
+<h2>cookies() In Next.js 15</h2>
+
+<div class="code-title">Next.js 15</div>
+
+<pre><code class="language-jsx">import { cookies } from 'next/headers';
+
+export default async function Page() {
+
+  const cookieStore = await cookies();
+
+  const token = cookieStore.get('token');
+
+  return &lt;h1&gt;{token?.value}&lt;/h1&gt;;
+
+}</code></pre>
+
+<p>
+Or more commonly:
+</p>
+
+<div class="code-title">Compact Version</div>
+
+<pre><code class="language-jsx">const token = (await cookies()).get('token')?.value;</code></pre>
+
+<h2>headers() Before Next.js 15</h2>
+
+<div class="code-title">Old Version</div>
+
+<pre><code class="language-jsx">import { headers } from 'next/headers';
+
+export default function Page() {
+
+  const headerList = headers();
+
+  const userAgent = headerList.get('user-agent');
+
+  return &lt;h1&gt;{userAgent}&lt;/h1&gt;;
+
+}</code></pre>
+
+<h2>headers() In Next.js 15</h2>
+
+<div class="code-title">Next.js 15</div>
+
+<pre><code class="language-jsx">import { headers } from 'next/headers';
+
+export default async function Page() {
+
+  const headerList = await headers();
+
+  const userAgent = headerList.get('user-agent');
+
+  return &lt;h1&gt;{userAgent}&lt;/h1&gt;;
+
+}</code></pre>
+
+<h2>params Before Next.js 15</h2>
+
+<div class="code-title">Old Version</div>
+
+<pre><code class="language-jsx">export default function Product({ params }) {
+
+  return &lt;h1&gt;{params.id}&lt;/h1&gt;;
+
+}</code></pre>
+
+<h2>params In Next.js 15</h2>
+
+<div class="code-title">Next.js 15</div>
+
+<pre><code class="language-jsx">export default async function Product({ params }) {
+
+  const { id } = await params;
+
+  return &lt;h1&gt;{id}&lt;/h1&gt;;
+
+}</code></pre>
+
+<h2>searchParams In Next.js 15</h2>
+
+<div class="code-title">Example</div>
+
+<pre><code class="language-jsx">export default async function Products({ searchParams }) {
+
+  const { page } = await searchParams;
+
+  return &lt;h1&gt;Page {page}&lt;/h1&gt;;
+
+}</code></pre>
+
+<h2>What Happens Internally?</h2>
+
+<div class="code-title">Before Next.js 15</div>
+
+<pre><code class="language-text">Request
+   │
+   ▼
+cookies()
+   │
+   ▼
+Return Value
+Immediately
+</code></pre>
+
+<div class="code-title">Next.js 15</div>
+
+<pre><code class="language-text">Request
+   │
+   ▼
+cookies()
+   │
+   ▼
+Promise
+   │
+   ▼
+await
+   │
+   ▼
+Cookie Store
+</code></pre>
+
+<h2>Migration Example</h2>
+
+<div class="code-title">Before</div>
+
+<pre><code class="language-jsx">const token = cookies().get('token')?.value;</code></pre>
+
+<div class="code-title">After</div>
+
+<pre><code class="language-jsx">const token = (await cookies()).get('token')?.value;</code></pre>
+
+<h2>Common Error</h2>
+
+<div class="code-title">Incorrect</div>
+
+<pre><code class="language-jsx">const cookieStore = cookies();
+
+cookieStore.get('token');</code></pre>
+
+<p>
+Error:
+</p>
+
+<pre><code class="language-text">cookieStore.get is not a function
+</code></pre>
+
+<p>
+Because:
+</p>
+
+<pre><code class="language-text">cookieStore is a Promise
+not a CookieStore
+</code></pre>
+
+<h2>Real-World Example</h2>
+
+<div class="code-title">Authentication Check</div>
+
+<pre><code class="language-jsx">import { cookies } from 'next/headers';
+
+export default async function Dashboard() {
+
+  const token = (await cookies()).get('token')?.value;
+
+  if (!token) {
+    return &lt;h1&gt;Unauthorized&lt;/h1&gt;;
+  }
+
+  return &lt;h1&gt;Dashboard&lt;/h1&gt;;
+
+}</code></pre>
+
+<h2>Summary Table</h2>
+
+<table>
+<tr>
+<th>API</th>
+<th>Before Next.js 15</th>
+<th>Next.js 15</th>
+</tr>
+
+<tr>
+<td>cookies()</td>
+<td>Synchronous</td>
+<td>Asynchronous</td>
+</tr>
+
+<tr>
+<td>headers()</td>
+<td>Synchronous</td>
+<td>Asynchronous</td>
+</tr>
+
+<tr>
+<td>params</td>
+<td>Object</td>
+<td>Promise</td>
+</tr>
+
+<tr>
+<td>searchParams</td>
+<td>Object</td>
+<td>Promise</td>
+</tr>
+</table>
+
+<h2>Important Note</h2>
+
+<div class="feature">
+After upgrading to Next.js 15, one of the most common migration issues is forgetting to add <code>await</code> when accessing cookies(), headers(), params, or searchParams.
+</div>
+
+<h2>Interview Tip</h2>
+
+<div class="feature">
+A common misconception is that only cookies() and headers() became async. In reality, params and searchParams also became asynchronous and should be awaited in Next.js 15.
+</div>
+
+<div class="feature">
+<strong>One-Line Definition:</strong><br>
+In Next.js 15, <code>cookies()</code>, <code>headers()</code>, <code>params</code>, and <code>searchParams</code> became asynchronous APIs, requiring us to use <code>await</code> before accessing their values.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+
+</body>
+</html>

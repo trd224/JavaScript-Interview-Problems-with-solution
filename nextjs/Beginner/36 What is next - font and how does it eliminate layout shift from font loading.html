@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>What is next/font and how does it eliminate layout shift from font loading?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+}
+
+body{
+  background:#0f172a;
+  color:#e2e8f0;
+  font-family:Arial,sans-serif;
+  line-height:1.8;
+  padding:40px 20px;
+}
+
+.container{
+  max-width:1000px;
+  margin:auto;
+  background:#111827;
+  padding:40px;
+  border-radius:16px;
+}
+
+h1{
+  color:#38bdf8;
+  margin-bottom:20px;
+}
+
+h2{
+  color:#a78bfa;
+  margin-top:30px;
+  margin-bottom:10px;
+}
+
+h3{
+  color:#fbbf24;
+  margin-top:25px;
+  margin-bottom:10px;
+}
+
+p{
+  margin-bottom:15px;
+}
+
+ul{
+  margin-left:20px;
+}
+
+li{
+  margin-bottom:8px;
+}
+
+.feature{
+  background:#1e293b;
+  border-left:5px solid #38bdf8;
+  padding:15px;
+  border-radius:8px;
+  margin:20px 0;
+}
+
+.code-title{
+  background:#1e293b;
+  color:#93c5fd;
+  padding:10px;
+  font-weight:bold;
+}
+
+pre[class*="language-"]{
+  margin:0!important;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:20px;
+}
+
+th{
+  background:#1e293b;
+  color:#38bdf8;
+  text-align:left;
+  padding:12px;
+}
+
+td{
+  padding:12px;
+  border-top:1px solid #334155;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>What is next/font and how does it eliminate layout shift from font loading?</h1>
+
+<p>
+<code>next/font</code> is a built-in Next.js feature that optimizes font loading by downloading, self-hosting, and serving fonts directly from our application.
+</p>
+
+<div class="feature">
+<code>next/font</code> helps eliminate layout shift caused by font loading and improves Core Web Vitals such as CLS (Cumulative Layout Shift).
+</div>
+
+<h2>Why Do We Need next/font?</h2>
+
+<p>
+Traditionally, web fonts are loaded from external servers such as Google Fonts.
+</p>
+
+<div class="code-title">Traditional Method</div>
+
+<pre><code class="language-html">&lt;link
+  href="https://fonts.googleapis.com/css2?family=Roboto"
+  rel="stylesheet"
+/&gt;</code></pre>
+
+<p>
+This causes an extra network request before the font becomes available.
+</p>
+
+<h2>The Layout Shift Problem</h2>
+
+<p>
+Suppose our page contains:
+</p>
+
+<div class="code-title">HTML</div>
+
+<pre><code class="language-html">&lt;h1&gt;Welcome To Next.js&lt;/h1&gt;</code></pre>
+
+<p>
+When the page loads:
+</p>
+
+<div class="code-title">Step 1</div>
+
+<pre><code class="language-text">Font Not Loaded Yet
+
+Browser Uses
+Fallback Font
+
+Welcome To Next.js
+</code></pre>
+
+<p>
+After the font downloads:
+</p>
+
+<div class="code-title">Step 2</div>
+
+<pre><code class="language-text">Custom Font Loaded
+
+Welcome To Next.js
+</code></pre>
+
+<p>
+The text width and height may change.
+</p>
+
+<p>
+This causes content movement on the screen.
+</p>
+
+<h2>What is Layout Shift?</h2>
+
+<div class="code-title">Without next/font</div>
+
+<pre><code class="language-text">Page Loads
+      │
+      ▼
+Fallback Font
+
+Welcome To Next.js
+
+      │
+      ▼
+Font Downloads
+
+      │
+      ▼
+Text Resizes
+
+      │
+      ▼
+Content Moves
+</code></pre>
+
+<p>
+Users see the page jump unexpectedly.
+</p>
+
+<h2>How next/font Solves This</h2>
+
+<p>
+Next.js downloads the font during the build process and serves it directly from our application.
+</p>
+
+<div class="code-title">next/font Flow</div>
+
+<pre><code class="language-text">Build Application
+      │
+      ▼
+Download Font
+      │
+      ▼
+Self Host Font
+      │
+      ▼
+Deploy
+
+User Visits Page
+      │
+      ▼
+Font Available Immediately
+      │
+      ▼
+No Layout Shift
+</code></pre>
+
+<h2>Using Google Fonts</h2>
+
+<div class="code-title">app/layout.js</div>
+
+<pre><code class="language-jsx">import { Inter } from 'next/font/google';
+
+const inter = Inter({
+  subsets: ['latin']
+});
+
+export default function RootLayout({
+  children
+}) {
+
+  return (
+    &lt;html lang="en"&gt;
+      &lt;body className={inter.className}&gt;
+        {children}
+      &lt;/body&gt;
+    &lt;/html&gt;
+  );
+
+}</code></pre>
+
+<h2>Using Local Fonts</h2>
+
+<div class="code-title">app/layout.js</div>
+
+<pre><code class="language-jsx">import localFont from 'next/font/local';
+
+const myFont = localFont({
+  src: './fonts/MyFont.woff2'
+});
+
+export default function RootLayout({
+  children
+}) {
+
+  return (
+    &lt;html&gt;
+      &lt;body className={myFont.className}&gt;
+        {children}
+      &lt;/body&gt;
+    &lt;/html&gt;
+  );
+
+}</code></pre>
+
+<h2>Project Structure</h2>
+
+<div class="code-title">Local Font Example</div>
+
+<pre><code class="language-text">app/
+├── fonts/
+│   └── MyFont.woff2
+├── layout.js
+└── page.js
+</code></pre>
+
+<h2>What Happens Internally?</h2>
+
+<div class="code-title">Traditional Google Fonts</div>
+
+<pre><code class="language-text">User Visits Page
+      │
+      ▼
+Download HTML
+      │
+      ▼
+Request Google Fonts
+      │
+      ▼
+Wait For Font
+      │
+      ▼
+Render Font
+</code></pre>
+
+<div class="code-title">next/font</div>
+
+<pre><code class="language-text">Build Time
+      │
+      ▼
+Download Font
+      │
+      ▼
+Store In Application
+
+User Visits Page
+      │
+      ▼
+Font Already Available
+      │
+      ▼
+Render Immediately
+</code></pre>
+
+<h2>Font Display Optimization</h2>
+
+<p>
+Next.js automatically applies font loading optimizations.
+</p>
+
+<div class="code-title">Example</div>
+
+<pre><code class="language-jsx">const inter = Inter({
+  subsets: ['latin'],
+  display: 'swap'
+});</code></pre>
+
+<p>
+This helps improve perceived loading performance.
+</p>
+
+<h2>Benefits of next/font</h2>
+
+<ul>
+<li>Eliminates layout shift from font loading.</li>
+<li>Self-hosts fonts automatically.</li>
+<li>Removes extra font requests.</li>
+<li>Improves CLS score.</li>
+<li>Improves page performance.</li>
+<li>Works with Google Fonts and local fonts.</li>
+</ul>
+
+<h2>next/font vs Traditional Google Fonts</h2>
+
+<table>
+<tr>
+<th>Feature</th>
+<th>next/font</th>
+<th>Google Font Link</th>
+</tr>
+
+<tr>
+<td>Self Hosted</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+
+<tr>
+<td>Extra Network Request</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+
+<tr>
+<td>Automatic Optimization</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+
+<tr>
+<td>Layout Shift Reduction</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+
+<tr>
+<td>Core Web Vitals Friendly</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+</table>
+
+<h2>Real-World Example</h2>
+
+<p>
+Suppose our application uses the Inter font on every page.
+</p>
+
+<div class="code-title">Without next/font</div>
+
+<pre><code class="language-text">Load HTML
+      │
+      ▼
+Request Google Fonts
+      │
+      ▼
+Wait
+      │
+      ▼
+Render Font
+      │
+      ▼
+Possible Layout Shift
+</code></pre>
+
+<div class="code-title">With next/font</div>
+
+<pre><code class="language-text">Load HTML
+      │
+      ▼
+Font Already Available
+      │
+      ▼
+Render Immediately
+      │
+      ▼
+No Layout Shift
+</code></pre>
+
+<h2>Pages Router Example</h2>
+
+<div class="code-title">pages/_app.js</div>
+
+<pre><code class="language-jsx">import { Inter } from 'next/font/google';
+
+const inter = Inter({
+  subsets: ['latin']
+});
+
+export default function MyApp({
+  Component,
+  pageProps
+}) {
+
+  return (
+    &lt;main className={inter.className}&gt;
+      &lt;Component {...pageProps} /&gt;
+    &lt;/main&gt;
+  );
+
+}</code></pre>
+
+<h2>Interview Tip</h2>
+
+<div class="feature">
+A common misconception is that next/font only downloads fonts. In reality, it downloads, self-hosts, optimizes, and serves fonts in a way that minimizes layout shifts and improves performance.
+</div>
+
+<div class="feature">
+<strong>One-Line Definition:</strong><br>
+<code>next/font</code> is a built-in Next.js font optimization feature that self-hosts fonts and eliminates layout shift by ensuring optimized fonts are available immediately when the page renders.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+
+</body>
+</html>

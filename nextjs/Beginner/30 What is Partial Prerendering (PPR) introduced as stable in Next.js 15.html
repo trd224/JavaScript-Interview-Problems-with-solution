@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>What is Partial Prerendering (PPR) in Next.js 15?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+}
+
+body{
+  background:#0f172a;
+  color:#e2e8f0;
+  font-family:Arial,sans-serif;
+  line-height:1.8;
+  padding:40px 20px;
+}
+
+.container{
+  max-width:1000px;
+  margin:auto;
+  background:#111827;
+  padding:40px;
+  border-radius:16px;
+}
+
+h1{
+  color:#38bdf8;
+  margin-bottom:20px;
+}
+
+h2{
+  color:#a78bfa;
+  margin-top:30px;
+  margin-bottom:10px;
+}
+
+h3{
+  color:#fbbf24;
+  margin-top:25px;
+  margin-bottom:10px;
+}
+
+p{
+  margin-bottom:15px;
+}
+
+ul{
+  margin-left:20px;
+}
+
+li{
+  margin-bottom:8px;
+}
+
+.feature{
+  background:#1e293b;
+  border-left:5px solid #38bdf8;
+  padding:15px;
+  border-radius:8px;
+  margin:20px 0;
+}
+
+.code-title{
+  background:#1e293b;
+  color:#93c5fd;
+  padding:10px;
+  font-weight:bold;
+}
+
+pre[class*="language-"]{
+  margin:0!important;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:20px;
+}
+
+th{
+  background:#1e293b;
+  color:#38bdf8;
+  text-align:left;
+  padding:12px;
+}
+
+td{
+  padding:12px;
+  border-top:1px solid #334155;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>What is Partial Prerendering (PPR) Introduced as Stable in Next.js 15?</h1>
+
+<p>
+Partial Prerendering (PPR) is a rendering strategy that combines static rendering and dynamic rendering on the same page.
+</p>
+
+<div class="feature">
+PPR allows us to prerender the static parts of a page at build time while dynamically rendering only the parts that require fresh data.
+</div>
+
+<h2>Why Was PPR Introduced?</h2>
+
+<p>
+Before PPR, we usually had two choices:
+</p>
+
+<ul>
+<li>Generate the entire page statically (SSG).</li>
+<li>Render the entire page dynamically (SSR).</li>
+</ul>
+
+<p>
+This created a problem because many pages contain both static and dynamic content.
+</p>
+
+<h2>Example Problem</h2>
+
+<p>
+Suppose our homepage contains:
+</p>
+
+<div class="code-title">Homepage</div>
+
+<pre><code class="language-text">Header
+Hero Section
+Features Section
+Latest Notifications
+Current User Data
+Footer
+</code></pre>
+
+<p>
+Static content:
+</p>
+
+<pre><code class="language-text">Header
+Hero Section
+Features Section
+Footer
+</code></pre>
+
+<p>
+Dynamic content:
+</p>
+
+<pre><code class="language-text">Latest Notifications
+Current User Data
+</code></pre>
+
+<p>
+Before PPR:
+</p>
+
+<pre><code class="language-text">Entire Page = SSR
+
+OR
+
+Entire Page = SSG
+</code></pre>
+
+<p>
+There was no built-in way to mix both efficiently.
+</p>
+
+<h2>How PPR Solves This</h2>
+
+<div class="code-title">PPR Page</div>
+
+<pre><code class="language-text">Static HTML
+      │
+      ├── Header
+      ├── Hero
+      ├── Features
+      └── Footer
+
+Dynamic Islands
+      │
+      ├── Notifications
+      └── User Profile
+</code></pre>
+
+<p>
+The static content is served immediately.
+</p>
+
+<p>
+Dynamic sections are streamed and filled in later.
+</p>
+
+<h2>What Happens Internally?</h2>
+
+<div class="code-title">PPR Flow</div>
+
+<pre><code class="language-text">Build Time
+      │
+      ▼
+Generate Static Shell
+      │
+      ▼
+Deploy
+
+User Requests Page
+      │
+      ▼
+Serve Static Shell Immediately
+      │
+      ▼
+Dynamic Sections Render
+      │
+      ▼
+Stream Dynamic Content
+      │
+      ▼
+Page Complete
+</code></pre>
+
+<h2>Visual Comparison</h2>
+
+<h3>Traditional SSR</h3>
+
+<pre><code class="language-text">Request
+   │
+   ▼
+Wait For Entire Page
+   │
+   ▼
+Send HTML
+</code></pre>
+
+<h3>PPR</h3>
+
+<pre><code class="language-text">Request
+   │
+   ▼
+Send Static Parts Immediately
+   │
+   ▼
+Load Dynamic Parts Later
+</code></pre>
+
+<h2>Example Component Structure</h2>
+
+<div class="code-title">Dashboard Page</div>
+
+<pre><code class="language-jsx">export default function Dashboard() {
+
+  return (
+    &lt;&gt;
+      &lt;Header /&gt;
+      &lt;Hero /&gt;
+
+      &lt;Suspense fallback="Loading..."&gt;
+        &lt;UserStats /&gt;
+      &lt;/Suspense&gt;
+
+      &lt;Footer /&gt;
+    &lt;/&gt;
+  );
+
+}</code></pre>
+
+<p>
+Static parts:
+</p>
+
+<pre><code class="language-text">Header
+Hero
+Footer
+</code></pre>
+
+<p>
+Dynamic part:
+</p>
+
+<pre><code class="language-text">UserStats
+</code></pre>
+
+<h2>Why Suspense is Important?</h2>
+
+<p>
+PPR relies heavily on React Suspense boundaries.
+</p>
+
+<div class="code-title">Example</div>
+
+<pre><code class="language-jsx">&lt;Suspense fallback="Loading..."&gt;
+  &lt;UserStats /&gt;
+&lt;/Suspense&gt;</code></pre>
+
+<p>
+The Suspense boundary tells Next.js:
+</p>
+
+<pre><code class="language-text">Static Content Can Be Sent Now
+
+UserStats Can Arrive Later
+</code></pre>
+
+<h2>SSR vs SSG vs PPR</h2>
+
+<table>
+<tr>
+<th>Feature</th>
+<th>SSR</th>
+<th>SSG</th>
+<th>PPR</th>
+</tr>
+
+<tr>
+<td>Static Content</td>
+<td>❌</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+
+<tr>
+<td>Dynamic Content</td>
+<td>✅</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+
+<tr>
+<td>Page Generated</td>
+<td>Every Request</td>
+<td>Build Time</td>
+<td>Mixed</td>
+</tr>
+
+<tr>
+<td>Performance</td>
+<td>Good</td>
+<td>Excellent</td>
+<td>Excellent</td>
+</tr>
+
+<tr>
+<td>Fresh Data</td>
+<td>Always</td>
+<td>No</td>
+<td>Only Dynamic Parts</td>
+</tr>
+</table>
+
+<h2>Real-World Example</h2>
+
+<p>
+Consider an e-commerce homepage:
+</p>
+
+<div class="code-title">Homepage Sections</div>
+
+<pre><code class="language-text">Logo
+Navigation
+Banner
+Categories
+Live Cart Count
+Recommended Products
+Footer
+</code></pre>
+
+<p>
+PPR may prerender:
+</p>
+
+<pre><code class="language-text">Logo
+Navigation
+Banner
+Categories
+Footer
+</code></pre>
+
+<p>
+And dynamically render:
+</p>
+
+<pre><code class="language-text">Live Cart Count
+Recommended Products
+</code></pre>
+
+<h2>Benefits of PPR</h2>
+
+<ul>
+<li>Faster initial page load.</li>
+<li>Better user experience.</li>
+<li>Keeps dynamic content fresh.</li>
+<li>Reduces server work.</li>
+<li>Combines benefits of SSG and SSR.</li>
+</ul>
+
+<h2>Important Note</h2>
+
+<div class="feature">
+A common misconception is that PPR generates the entire page statically. In reality, PPR generates only the static shell and streams dynamic sections separately.
+</div>
+
+<h2>When Should We Use PPR?</h2>
+
+<ul>
+<li>Dashboards</li>
+<li>E-commerce Websites</li>
+<li>News Portals</li>
+<li>Personalized Homepages</li>
+<li>Applications with mixed static and dynamic content</li>
+</ul>
+
+<h2>Interview Tip</h2>
+
+<div class="feature">
+Think of PPR as "SSG for static sections + SSR for dynamic sections" on the same page.
+</div>
+
+<div class="feature">
+<strong>One-Line Definition:</strong><br>
+Partial Prerendering (PPR) is a Next.js 15 rendering strategy that prerenders static parts of a page while dynamically rendering and streaming only the sections that require fresh data.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+
+</body>
+</html>

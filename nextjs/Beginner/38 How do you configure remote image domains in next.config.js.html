@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How do you configure remote image domains in next.config.js?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+}
+
+body{
+  background:#0f172a;
+  color:#e2e8f0;
+  font-family:Arial,sans-serif;
+  line-height:1.8;
+  padding:40px 20px;
+}
+
+.container{
+  max-width:1000px;
+  margin:auto;
+  background:#111827;
+  padding:40px;
+  border-radius:16px;
+}
+
+h1{
+  color:#38bdf8;
+  margin-bottom:20px;
+}
+
+h2{
+  color:#a78bfa;
+  margin-top:30px;
+  margin-bottom:10px;
+}
+
+h3{
+  color:#fbbf24;
+  margin-top:25px;
+  margin-bottom:10px;
+}
+
+p{
+  margin-bottom:15px;
+}
+
+ul{
+  margin-left:20px;
+}
+
+li{
+  margin-bottom:8px;
+}
+
+.feature{
+  background:#1e293b;
+  border-left:5px solid #38bdf8;
+  padding:15px;
+  border-radius:8px;
+  margin:20px 0;
+}
+
+.code-title{
+  background:#1e293b;
+  color:#93c5fd;
+  padding:10px;
+  font-weight:bold;
+}
+
+pre[class*="language-"]{
+  margin:0!important;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:20px;
+}
+
+th{
+  background:#1e293b;
+  color:#38bdf8;
+  text-align:left;
+  padding:12px;
+}
+
+td{
+  padding:12px;
+  border-top:1px solid #334155;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>How do you configure remote image domains in next.config.js?</h1>
+
+<p>
+By default, the <code>next/image</code> component only optimizes local images and trusted remote sources.
+</p>
+
+<div class="feature">
+To use external images with <code>next/image</code>, we must explicitly allow the image domain in <code>next.config.js</code>.
+</div>
+
+<h2>Why Is Configuration Required?</h2>
+
+<p>
+Suppose our application displays an image from:
+</p>
+
+<div class="code-title">Remote Image URL</div>
+
+<pre><code class="language-text">https://images.example.com/product.jpg</code></pre>
+
+<p>
+Using it directly:
+</p>
+
+<div class="code-title">Image Component</div>
+
+<pre><code class="language-jsx">import Image from 'next/image';
+
+export default function Product() {
+
+  return (
+    &lt;Image
+      src="https://images.example.com/product.jpg"
+      alt="Product"
+      width={500}
+      height={300}
+    /&gt;
+  );
+
+}</code></pre>
+
+<p>
+Will produce an error because Next.js does not trust unknown domains.
+</p>
+
+<h2>Error Example</h2>
+
+<div class="code-title">Runtime Error</div>
+
+<pre><code class="language-text">Invalid src prop
+
+Hostname "images.example.com"
+is not configured under images
+in your next.config.js
+</code></pre>
+
+<h2>Solution: Configure Remote Domains</h2>
+
+<div class="code-title">next.config.js</div>
+
+<pre><code class="language-js">/** @type {import('next').NextConfig} */
+
+const nextConfig = {
+  images: {
+    domains: [
+      'images.example.com'
+    ]
+  }
+};
+
+module.exports = nextConfig;</code></pre>
+
+<p>
+Now Next.js allows images from:
+</p>
+
+<pre><code class="language-text">https://images.example.com
+</code></pre>
+
+<h2>Complete Example</h2>
+
+<div class="code-title">next.config.js</div>
+
+<pre><code class="language-js">const nextConfig = {
+  images: {
+    domains: [
+      'images.example.com'
+    ]
+  }
+};
+
+module.exports = nextConfig;</code></pre>
+
+<div class="code-title">app/page.js</div>
+
+<pre><code class="language-jsx">import Image from 'next/image';
+
+export default function Home() {
+
+  return (
+    &lt;Image
+      src="https://images.example.com/product.jpg"
+      alt="Product"
+      width={600}
+      height={400}
+    /&gt;
+  );
+
+}</code></pre>
+
+<h2>Modern Approach: remotePatterns</h2>
+
+<p>
+In newer versions of Next.js, <code>remotePatterns</code> is preferred because it provides more control.
+</p>
+
+<div class="code-title">next.config.js</div>
+
+<pre><code class="language-js">const nextConfig = {
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'images.example.com',
+        pathname: '/**'
+      }
+    ]
+  }
+};
+
+module.exports = nextConfig;</code></pre>
+
+<h2>Why remotePatterns Is Better?</h2>
+
+<p>
+With <code>domains</code>, all images from the domain are allowed.
+</p>
+
+<p>
+With <code>remotePatterns</code>, we can restrict:
+</p>
+
+<ul>
+<li>Protocol</li>
+<li>Hostname</li>
+<li>Port</li>
+<li>Pathname</li>
+</ul>
+
+<h3>Example</h3>
+
+<div class="code-title">Specific Folder Only</div>
+
+<pre><code class="language-js">const nextConfig = {
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'images.example.com',
+        pathname: '/products/**'
+      }
+    ]
+  }
+};
+
+module.exports = nextConfig;</code></pre>
+
+<p>
+Allowed:
+</p>
+
+<pre><code class="language-text">https://images.example.com/products/shirt.jpg
+https://images.example.com/products/shoes.jpg
+</code></pre>
+
+<p>
+Blocked:
+</p>
+
+<pre><code class="language-text">https://images.example.com/users/profile.jpg
+</code></pre>
+
+<h2>Multiple Domains</h2>
+
+<div class="code-title">next.config.js</div>
+
+<pre><code class="language-js">const nextConfig = {
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'images.example.com'
+      },
+      {
+        protocol: 'https',
+        hostname: 'cdn.example.com'
+      }
+    ]
+  }
+};
+
+module.exports = nextConfig;</code></pre>
+
+<h2>What Happens Internally?</h2>
+
+<div class="code-title">Request Flow</div>
+
+<pre><code class="language-text">Browser Requests Image
+          │
+          ▼
+next/image
+          │
+          ▼
+Check next.config.js
+          │
+          ▼
+Domain Allowed?
+     │         │
+    Yes        No
+     │         │
+     ▼         ▼
+Optimize    Throw Error
+Image
+</code></pre>
+
+<h2>Why Does Next.js Restrict Domains?</h2>
+
+<ul>
+<li>Security</li>
+<li>Performance</li>
+<li>Prevent Abuse</li>
+<li>Control Optimization Sources</li>
+</ul>
+
+<p>
+Next.js needs to know which remote images it is allowed to download and optimize.
+</p>
+
+<h2>domains vs remotePatterns</h2>
+
+<table>
+<tr>
+<th>Feature</th>
+<th>domains</th>
+<th>remotePatterns</th>
+</tr>
+
+<tr>
+<td>Simple Setup</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+
+<tr>
+<td>Control Protocol</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+
+<tr>
+<td>Control Path</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+
+<tr>
+<td>Control Port</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+
+<tr>
+<td>Recommended</td>
+<td>Older Approach</td>
+<td>Modern Approach</td>
+</tr>
+</table>
+
+<h2>Common Mistake</h2>
+
+<div class="code-title">Incorrect</div>
+
+<pre><code class="language-jsx">&lt;Image
+  src="https://images.example.com/photo.jpg"
+  alt="Photo"
+  width={500}
+  height={300}
+/&gt;</code></pre>
+
+<p>
+Without updating <code>next.config.js</code>, this will fail.
+</p>
+
+<h2>After Updating Configuration</h2>
+
+<div class="code-title">Correct</div>
+
+<pre><code class="language-text">next.config.js
+      │
+      ▼
+Allow Domain
+      │
+      ▼
+Restart Dev Server
+      │
+      ▼
+Image Works Correctly
+</code></pre>
+
+<h2>Important Note</h2>
+
+<div class="feature">
+After changing <code>next.config.js</code>, we must restart the Next.js development server because configuration files are loaded only during startup.
+</div>
+
+<h2>Interview Tip</h2>
+
+<div class="feature">
+A common misconception is that next/image can load any remote image automatically. In reality, remote image domains must be explicitly configured in <code>next.config.js</code> before Next.js will optimize and serve them.
+</div>
+
+<div class="feature">
+<strong>One-Line Definition:</strong><br>
+Remote image domains are configured in <code>next.config.js</code> using <code>images.domains</code> or the recommended <code>images.remotePatterns</code> option, allowing Next.js to securely optimize external images.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+
+</body>
+</html>

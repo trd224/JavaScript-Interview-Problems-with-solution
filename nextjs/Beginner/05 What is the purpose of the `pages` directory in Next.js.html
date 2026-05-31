@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pages Directory, Pages Router and App Router in Next.js</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+
+body{
+    background:#0f172a;
+    color:#e2e8f0;
+    font-family:Arial, Helvetica, sans-serif;
+    line-height:1.8;
+    padding:40px 20px;
+}
+
+.container{
+    max-width:1000px;
+    margin:auto;
+    background:#111827;
+    padding:40px;
+    border-radius:16px;
+    box-shadow:0 0 30px rgba(0,0,0,.45);
+}
+
+h1{color:#38bdf8;font-size:36px;margin-bottom:20px}
+h2{color:#a78bfa;margin-top:35px;margin-bottom:10px}
+h3{color:#fbbf24;margin-top:25px;margin-bottom:10px}
+
+p{color:#d1d5db;margin-bottom:15px}
+ul,ol{margin-left:25px;margin-bottom:15px}
+li{margin-bottom:8px}
+
+.section-divider{
+    margin:50px 0;
+    border:0;
+    border-top:2px solid #334155;
+}
+
+.feature{
+    background:#1e293b;
+    border-left:5px solid #38bdf8;
+    padding:15px;
+    border-radius:8px;
+    margin:15px 0;
+}
+
+.code-block{
+    margin:20px 0;
+    border:1px solid #334155;
+    border-radius:12px;
+    overflow:hidden;
+}
+
+.code-title{
+    background:#1e293b;
+    color:#93c5fd;
+    padding:12px 16px;
+    font-size:14px;
+    font-weight:bold;
+    border-bottom:1px solid #334155;
+}
+
+pre[class*="language-"]{
+    margin:0!important;
+    border-radius:0!important;
+    font-size:15px;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+    margin-top:20px;
+}
+
+th{
+    background:#1e293b;
+    color:#38bdf8;
+    text-align:left;
+    padding:14px;
+}
+
+td{
+    border-top:1px solid #334155;
+    padding:14px;
+    color:#e5e7eb;
+}
+
+.summary{
+    margin-top:30px;
+    background:#082f49;
+    border-left:5px solid #38bdf8;
+    padding:20px;
+    border-radius:10px;
+}
+
+.summary strong{color:#38bdf8}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>What is the Purpose of the <code>pages</code> Directory in Next.js?</h1>
+
+<p>
+The <strong>pages</strong> directory is used for creating routes in traditional Next.js applications.
+</p>
+
+<div class="feature">
+Every file inside the <strong>pages</strong> directory automatically becomes a route in your application.
+</div>
+
+<h2>Why is the pages Directory Important?</h2>
+
+<p>
+Instead of manually configuring routes using React Router, Next.js automatically creates routes based on the files inside the pages folder.
+</p>
+
+<p>
+This feature is called <strong>File-Based Routing</strong>.
+</p>
+
+<h2>Basic Example</h2>
+
+<div class="code-block">
+<div class="code-title">Pages Router Structure</div>
+<pre><code class="language-text">pages/
+├── index.js
+├── about.js
+└── contact.js
+</code></pre>
+</div>
+
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Route</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>pages/index.js</td>
+<td>/</td>
+</tr>
+<tr>
+<td>pages/about.js</td>
+<td>/about</td>
+</tr>
+<tr>
+<td>pages/contact.js</td>
+<td>/contact</td>
+</tr>
+</tbody>
+</table>
+
+<h2>Home Page Example</h2>
+
+<div class="code-block">
+<div class="code-title">pages/index.js</div>
+<pre><code class="language-jsx">export default function Home() {
+
+  return (
+    &lt;h1&gt;Home Page&lt;/h1&gt;
+  );
+
+}
+</code></pre>
+</div>
+
+<h2>Nested Routes</h2>
+
+<div class="code-block">
+<div class="code-title">Nested Route Example</div>
+<pre><code class="language-text">pages/
+└── blog/
+    └── index.js
+</code></pre>
+</div>
+
+<p>This creates the route:</p>
+
+<div class="code-block">
+<div class="code-title">Generated Route</div>
+<pre><code class="language-text">/blog
+</code></pre>
+</div>
+
+<h2>Dynamic Routes</h2>
+
+<div class="code-block">
+<div class="code-title">Dynamic Route File</div>
+<pre><code class="language-text">pages/
+└── products/
+    └── [id].js
+</code></pre>
+</div>
+
+<p>This route can handle:</p>
+
+<div class="code-block">
+<div class="code-title">Example URLs</div>
+<pre><code class="language-text">/products/1
+/products/2
+/products/100
+</code></pre>
+</div>
+
+<div class="code-block">
+<div class="code-title">pages/products/[id].js</div>
+<pre><code class="language-jsx">import { useRouter } from 'next/router';
+
+export default function Product() {
+
+  const router = useRouter();
+
+  return (
+    &lt;h1&gt;Product ID: {router.query.id}&lt;/h1&gt;
+  );
+
+}
+</code></pre>
+</div>
+
+<h2>API Routes in pages/api</h2>
+
+<p>
+The pages directory can also contain backend API routes.
+</p>
+
+<div class="code-block">
+<div class="code-title">API Route Structure</div>
+<pre><code class="language-text">pages/
+└── api/
+    └── users.js
+</code></pre>
+</div>
+
+<div class="code-block">
+<div class="code-title">pages/api/users.js</div>
+<pre><code class="language-javascript">export default function handler(req, res) {
+
+  res.status(200).json({
+    users: []
+  });
+
+}
+</code></pre>
+</div>
+
+<h2>Special Files Inside pages</h2>
+
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>_app.js</td>
+<td>Custom App component</td>
+</tr>
+<tr>
+<td>_document.js</td>
+<td>Customize HTML document structure</td>
+</tr>
+<tr>
+<td>_error.js</td>
+<td>Custom error page</td>
+</tr>
+<tr>
+<td>404.js</td>
+<td>Custom 404 page</td>
+</tr>
+<tr>
+<td>500.js</td>
+<td>Custom 500 page</td>
+</tr>
+</tbody>
+</table>
+
+<div class="summary">
+<strong>One-Line Definition:</strong><br>
+The <code>pages</code> directory in Next.js is used to create application routes automatically, where each file becomes a URL route and <code>pages/api</code> can be used for API endpoints.
+</div>
+
+<hr class="section-divider">
+
+<h1>Pages Router vs App Router in Next.js</h1>
+
+<p>
+Next.js supports two routing systems:
+</p>
+
+<ul>
+<li><strong>Pages Router</strong> - older routing system</li>
+<li><strong>App Router</strong> - newer routing system introduced in Next.js 13</li>
+</ul>
+
+<div class="feature">
+The App Router is recommended for new Next.js projects, but many existing projects still use the Pages Router.
+</div>
+
+<h2>1. Pages Router</h2>
+
+<p>
+Pages Router uses the <strong>pages</strong> directory. Every file inside the pages folder becomes a route.
+</p>
+
+<div class="code-block">
+<div class="code-title">Pages Router Structure</div>
+<pre><code class="language-text">pages/
+├── index.js
+├── about.js
+└── contact.js
+</code></pre>
+</div>
+
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Route</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>pages/index.js</td>
+<td>/</td>
+</tr>
+<tr>
+<td>pages/about.js</td>
+<td>/about</td>
+</tr>
+<tr>
+<td>pages/contact.js</td>
+<td>/contact</td>
+</tr>
+</tbody>
+</table>
+
+<div class="code-block">
+<div class="code-title">pages/about.js</div>
+<pre><code class="language-jsx">export default function About() {
+
+  return (
+    &lt;h1&gt;About Page&lt;/h1&gt;
+  );
+
+}
+</code></pre>
+</div>
+
+<h2>2. App Router</h2>
+
+<p>
+App Router uses the <strong>app</strong> directory. Each route is represented by a folder containing a <strong>page.js</strong> file.
+</p>
+
+<div class="code-block">
+<div class="code-title">App Router Structure</div>
+<pre><code class="language-text">app/
+├── page.js
+├── about/
+│   └── page.js
+└── contact/
+    └── page.js
+</code></pre>
+</div>
+
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Route</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>app/page.js</td>
+<td>/</td>
+</tr>
+<tr>
+<td>app/about/page.js</td>
+<td>/about</td>
+</tr>
+<tr>
+<td>app/contact/page.js</td>
+<td>/contact</td>
+</tr>
+</tbody>
+</table>
+
+<div class="code-block">
+<div class="code-title">app/about/page.js</div>
+<pre><code class="language-jsx">export default function About() {
+
+  return (
+    &lt;h1&gt;About Page&lt;/h1&gt;
+  );
+
+}
+</code></pre>
+</div>
+
+<h2>Main Differences</h2>
+
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>Pages Router</th>
+<th>App Router</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Folder Name</td>
+<td>pages</td>
+<td>app</td>
+</tr>
+<tr>
+<td>Routing Style</td>
+<td>File-based routing</td>
+<td>Folder-based routing</td>
+</tr>
+<tr>
+<td>Page File</td>
+<td>about.js</td>
+<td>about/page.js</td>
+</tr>
+<tr>
+<td>Home Page</td>
+<td>pages/index.js</td>
+<td>app/page.js</td>
+</tr>
+<tr>
+<td>Layouts</td>
+<td>Custom _app.js</td>
+<td>layout.js</td>
+</tr>
+<tr>
+<td>Router Hook</td>
+<td>next/router</td>
+<td>next/navigation</td>
+</tr>
+<tr>
+<td>Server Components</td>
+<td>No</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>Loading UI</td>
+<td>Manual</td>
+<td>loading.js</td>
+</tr>
+<tr>
+<td>Error UI</td>
+<td>Manual</td>
+<td>error.js</td>
+</tr>
+<tr>
+<td>Recommended for New Projects</td>
+<td>No</td>
+<td>Yes</td>
+</tr>
+</tbody>
+</table>
+
+<h2>Very Important Difference</h2>
+
+<table>
+<thead>
+<tr>
+<th>Router Type</th>
+<th>Correct Folder Structure</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Pages Router</td>
+<td><code>pages/about.js</code></td>
+</tr>
+<tr>
+<td>App Router</td>
+<td><code>app/about/page.js</code></td>
+</tr>
+</tbody>
+</table>
+
+<h2>Which One Should You Learn?</h2>
+
+<p>
+You should learn both because older projects may use Pages Router, while new Next.js projects mostly use App Router.
+</p>
+
+<ul>
+<li>Use <strong>Pages Router</strong> when working on older Next.js projects.</li>
+<li>Use <strong>App Router</strong> for new modern Next.js projects.</li>
+<li>In interviews, questions can come from both routing systems.</li>
+</ul>
+
+<div class="summary">
+<strong>One-Line Definition:</strong><br>
+Pages Router uses the <code>pages</code> directory where each file becomes a route, while App Router uses the <code>app</code> directory where each route is represented by a folder containing a <code>page.js</code> file and supports modern features like Server Components, layouts, loading UI, and error UI.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+
+</body>
+</html>

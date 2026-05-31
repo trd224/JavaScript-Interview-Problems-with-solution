@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How do you Access Query Parameters in Next.js?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+}
+
+body{
+  background:#0f172a;
+  color:#e2e8f0;
+  font-family:Arial,sans-serif;
+  line-height:1.8;
+  padding:40px 20px;
+}
+
+.container{
+  max-width:1000px;
+  margin:auto;
+  background:#111827;
+  padding:40px;
+  border-radius:16px;
+}
+
+h1{
+  color:#38bdf8;
+  margin-bottom:20px;
+}
+
+h2{
+  color:#a78bfa;
+  margin-top:30px;
+  margin-bottom:10px;
+}
+
+p{
+  margin-bottom:15px;
+}
+
+.feature{
+  background:#1e293b;
+  border-left:5px solid #38bdf8;
+  padding:15px;
+  border-radius:8px;
+  margin:20px 0;
+}
+
+.code-title{
+  background:#1e293b;
+  color:#93c5fd;
+  padding:10px;
+  font-weight:bold;
+}
+
+pre[class*="language-"]{
+  margin:0!important;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:20px;
+}
+
+th{
+  background:#1e293b;
+  color:#38bdf8;
+  text-align:left;
+  padding:12px;
+}
+
+td{
+  padding:12px;
+  border-top:1px solid #334155;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>How do you Access Query Parameters in Next.js?</h1>
+
+<p>
+Query parameters are values passed in the URL after a question mark (<code>?</code>).
+</p>
+
+<div class="feature">
+Query parameters allow us to pass additional data through the URL without changing the route structure.
+</div>
+
+<h2>Example URL</h2>
+
+<div class="code-title">URL</div>
+
+<pre><code class="language-text">/products?id=100&category=mobile</code></pre>
+
+<p>
+Here:
+</p>
+
+<table>
+<tr>
+<th>Parameter</th>
+<th>Value</th>
+</tr>
+
+<tr>
+<td>id</td>
+<td>100</td>
+</tr>
+
+<tr>
+<td>category</td>
+<td>mobile</td>
+</tr>
+</table>
+
+<h2>Pages Router Method</h2>
+
+<p>
+In the Pages Router, query parameters are accessed using <code>router.query</code>.
+</p>
+
+<div class="code-title">pages/products.js</div>
+
+<pre><code class="language-jsx">import { useRouter } from 'next/router';
+
+export default function Products() {
+
+  const router = useRouter();
+
+  return (
+    &lt;&gt;
+      &lt;h2&gt;ID: {router.query.id}&lt;/h2&gt;
+      &lt;h2&gt;Category: {router.query.category}&lt;/h2&gt;
+    &lt;/&gt;
+  );
+
+}</code></pre>
+
+<p>
+URL:
+</p>
+
+<pre><code class="language-text">/products?id=100&category=mobile</code></pre>
+
+<p>
+Output:
+</p>
+
+<pre><code class="language-text">ID: 100
+Category: mobile</code></pre>
+
+<h2>App Router Method</h2>
+
+<p>
+In the App Router, <code>router.query</code> does not exist.
+</p>
+
+<p>
+Instead, we use <code>useSearchParams()</code>.
+</p>
+
+<div class="code-title">app/products/page.js</div>
+
+<pre><code class="language-jsx">'use client';
+
+import { useSearchParams } from 'next/navigation';
+
+export default function Products() {
+
+  const searchParams = useSearchParams();
+
+  const id = searchParams.get('id');
+  const category = searchParams.get('category');
+
+  return (
+    &lt;&gt;
+      &lt;h2&gt;ID: {id}&lt;/h2&gt;
+      &lt;h2&gt;Category: {category}&lt;/h2&gt;
+    &lt;/&gt;
+  );
+
+}</code></pre>
+
+<p>
+URL:
+</p>
+
+<pre><code class="language-text">/products?id=100&category=mobile</code></pre>
+
+<p>
+Output:
+</p>
+
+<pre><code class="language-text">ID: 100
+Category: mobile</code></pre>
+
+<h2>Reading a Single Parameter</h2>
+
+<div class="code-title">App Router</div>
+
+<pre><code class="language-jsx">const searchParams = useSearchParams();
+
+const id = searchParams.get('id');
+
+console.log(id);</code></pre>
+
+<p>
+URL:
+</p>
+
+<pre><code class="language-text">/products?id=100</code></pre>
+
+<p>
+Output:
+</p>
+
+<pre><code class="language-text">100</code></pre>
+
+<h2>Reading Multiple Parameters</h2>
+
+<div class="code-title">App Router</div>
+
+<pre><code class="language-jsx">const searchParams = useSearchParams();
+
+const id = searchParams.get('id');
+const page = searchParams.get('page');
+const sort = searchParams.get('sort');</code></pre>
+
+<p>
+URL:
+</p>
+
+<pre><code class="language-text">/products?id=100&page=2&sort=price</code></pre>
+
+<p>
+Output:
+</p>
+
+<pre><code class="language-text">id   = 100
+page = 2
+sort = price</code></pre>
+
+<h2>Checking if a Query Parameter Exists</h2>
+
+<div class="code-title">App Router</div>
+
+<pre><code class="language-jsx">const searchParams = useSearchParams();
+
+const id = searchParams.get('id');
+
+if (id) {
+
+  console.log('Parameter Found');
+
+}</code></pre>
+
+
+
+<h2>Getting All Query Parameters</h2>
+
+<div class="code-title">App Router</div>
+
+<pre><code class="language-jsx">const searchParams = useSearchParams();
+
+console.log(searchParams.toString());</code></pre>
+
+<p>
+URL:
+</p>
+
+<pre><code class="language-text">/products?id=100&page=2</code></pre>
+
+<p>
+Output:
+</p>
+
+<pre><code class="language-text">id=100&page=2</code></pre>
+
+<h2>Pages Router vs App Router</h2>
+
+<table>
+<tr>
+<th>Feature</th>
+<th>Pages Router</th>
+<th>App Router</th>
+</tr>
+
+<tr>
+<td>Hook</td>
+<td>useRouter()</td>
+<td>useSearchParams()</td>
+</tr>
+
+<tr>
+<td>Access Query</td>
+<td>router.query</td>
+<td>searchParams.get()</td>
+</tr>
+
+<tr>
+<td>Import</td>
+<td>next/router</td>
+<td>next/navigation</td>
+</tr>
+
+<tr>
+<td>Requires 'use client'</td>
+<td>No</td>
+<td>Yes</td>
+</tr>
+</table>
+
+<h2>Query Parameters vs Dynamic Route Parameters</h2>
+
+<table>
+<tr>
+<th>Type</th>
+<th>Example URL</th>
+<th>Access Method</th>
+</tr>
+
+<tr>
+<td>Query Parameter</td>
+<td>/products?id=100</td>
+<td>searchParams.get('id')</td>
+</tr>
+
+<tr>
+<td>Dynamic Route Parameter</td>
+<td>/products/100</td>
+<td>params.id</td>
+</tr>
+</table>
+
+<div class="feature">
+<strong>Important:</strong><br>
+Query parameters come after <code>?</code>, while dynamic route parameters are part of the URL path.
+</div>
+
+<h2>Real-World Example</h2>
+
+<p>
+Suppose our application supports filtering products.
+</p>
+
+<div class="code-title">URL</div>
+
+<pre><code class="language-text">/products?category=mobile&sort=price&page=2</code></pre>
+
+<p>
+We can access all filter values using:
+</p>
+
+<div class="code-title">App Router</div>
+
+<pre><code class="language-jsx">const searchParams = useSearchParams();
+
+const category = searchParams.get('category');
+const sort = searchParams.get('sort');
+const page = searchParams.get('page');</code></pre>
+
+<div class="feature">
+<strong>One-Line Definition:</strong><br>
+In Next.js, query parameters are accessed using <code>router.query</code> in the Pages Router and <code>useSearchParams()</code> in the App Router.
+</div>
+
+</div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+
+</body>
+</html>

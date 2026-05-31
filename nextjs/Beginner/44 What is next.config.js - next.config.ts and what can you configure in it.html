@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>What is next.config.js / next.config.ts and what can you configure in it?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+}
+
+body{
+  background:#0f172a;
+  color:#e2e8f0;
+  font-family:Arial,sans-serif;
+  line-height:1.8;
+  padding:40px 20px;
+}
+
+.container{
+  max-width:1000px;
+  margin:auto;
+  background:#111827;
+  padding:40px;
+  border-radius:16px;
+}
+
+h1{
+  color:#38bdf8;
+  margin-bottom:20px;
+}
+
+h2{
+  color:#a78bfa;
+  margin-top:30px;
+  margin-bottom:10px;
+}
+
+h3{
+  color:#fbbf24;
+  margin-top:25px;
+  margin-bottom:10px;
+}
+
+p{
+  margin-bottom:15px;
+}
+
+ul{
+  margin-left:20px;
+}
+
+li{
+  margin-bottom:8px;
+}
+
+.feature{
+  background:#1e293b;
+  border-left:5px solid #38bdf8;
+  padding:15px;
+  border-radius:8px;
+  margin:20px 0;
+}
+
+.code-title{
+  background:#1e293b;
+  color:#93c5fd;
+  padding:10px;
+  font-weight:bold;
+}
+
+pre[class*="language-"]{
+  margin:0!important;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:20px;
+}
+
+th{
+  background:#1e293b;
+  color:#38bdf8;
+  text-align:left;
+  padding:12px;
+}
+
+td{
+  padding:12px;
+  border-top:1px solid #334155;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>What is next.config.js / next.config.ts and what can you configure in it?</h1>
+
+<p>
+<code>next.config.js</code> or <code>next.config.ts</code> is the main configuration file for a Next.js application.
+</p>
+
+<div class="feature">
+It allows us to customize how Next.js builds, serves, optimizes, and runs our application.
+</div>
+
+<h2>Why Do We Need next.config?</h2>
+
+<p>
+By default, Next.js works with sensible defaults.
+</p>
+
+<p>
+However, sometimes we need to customize behavior such as:
+</p>
+
+<ul>
+<li>Remote image domains</li>
+<li>Redirects</li>
+<li>Rewrites</li>
+<li>Environment variables</li>
+<li>Webpack configuration</li>
+<li>Headers</li>
+<li>Build settings</li>
+<li>Output configuration</li>
+</ul>
+
+<p>
+These settings are configured in <code>next.config.js</code> or <code>next.config.ts</code>.
+</p>
+
+<h2>Project Structure</h2>
+
+<div class="code-title">Example</div>
+
+<pre><code class="language-text">my-app/
+
+├── app/
+├── public/
+├── package.json
+├── next.config.js
+└── tsconfig.json
+</code></pre>
+
+<h2>Basic Example</h2>
+
+<div class="code-title">next.config.js</div>
+
+<pre><code class="language-js">/** @type {import('next').NextConfig} */
+
+const nextConfig = {};
+
+module.exports = nextConfig;</code></pre>
+
+<h2>TypeScript Version</h2>
+
+<div class="code-title">next.config.ts</div>
+
+<pre><code class="language-ts">import type {
+  NextConfig
+} from 'next';
+
+const nextConfig: NextConfig = {};
+
+export default nextConfig;</code></pre>
+
+<p>
+Both files serve the same purpose.
+</p>
+
+<p>
+The TypeScript version provides type safety and IntelliSense.
+</p>
+
+<h2>Configure Remote Image Domains</h2>
+
+<div class="code-title">Example</div>
+
+<pre><code class="language-js">const nextConfig = {
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'images.example.com'
+      }
+    ]
+  }
+};
+
+module.exports = nextConfig;</code></pre>
+
+<p>
+This allows <code>next/image</code> to optimize images from external domains.
+</p>
+
+<h2>Configure Redirects</h2>
+
+<div class="code-title">Example</div>
+
+<pre><code class="language-js">const nextConfig = {
+
+  async redirects() {
+
+    return [
+      {
+        source: '/old-page',
+        destination: '/new-page',
+        permanent: true
+      }
+    ];
+
+  }
+
+};
+
+module.exports = nextConfig;</code></pre>
+
+<p>
+Visitors to <code>/old-page</code> are redirected to <code>/new-page</code>.
+</p>
+
+<h2>Configure Rewrites</h2>
+
+<div class="code-title">Example</div>
+
+<pre><code class="language-js">const nextConfig = {
+
+  async rewrites() {
+
+    return [
+      {
+        source: '/api/users',
+        destination: 'https://api.example.com/users'
+      }
+    ];
+
+  }
+
+};
+
+module.exports = nextConfig;</code></pre>
+
+<p>
+The browser sees:
+</p>
+
+<pre><code class="language-text">/api/users</code></pre>
+
+<p>
+But the request actually goes to:
+</p>
+
+<pre><code class="language-text">https://api.example.com/users</code></pre>
+
+<h2>Configure HTTP Headers</h2>
+
+<div class="code-title">Example</div>
+
+<pre><code class="language-js">const nextConfig = {
+
+  async headers() {
+
+    return [
+      {
+        source: '/(.*)',
+        headers: [
+          {
+            key: 'X-App',
+            value: 'NextJS'
+          }
+        ]
+      }
+    ];
+
+  }
+
+};
+
+module.exports = nextConfig;</code></pre>
+
+<h2>Environment Variables</h2>
+
+<div class="code-title">Example</div>
+
+<pre><code class="language-js">const nextConfig = {
+  env: {
+    API_URL: 'https://api.example.com'
+  }
+};
+
+module.exports = nextConfig;</code></pre>
+
+<p>
+Usage:
+</p>
+
+<div class="code-title">Component</div>
+
+<pre><code class="language-jsx">console.log(
+  process.env.API_URL
+);</code></pre>
+
+<h2>Custom Webpack Configuration</h2>
+
+<div class="code-title">Example</div>
+
+<pre><code class="language-js">const nextConfig = {
+
+  webpack(config) {
+
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      '@': __dirname
+    };
+
+    return config;
+
+  }
+
+};
+
+module.exports = nextConfig;</code></pre>
+
+<p>
+This allows:
+</p>
+
+<pre><code class="language-jsx">import Header from '@/components/Header';</code></pre>
+
+<h2>Standalone Deployment Output</h2>
+
+<div class="code-title">Example</div>
+
+<pre><code class="language-js">const nextConfig = {
+  output: 'standalone'
+};
+
+module.exports = nextConfig;</code></pre>
+
+<p>
+Useful for Docker deployments because Next.js generates a minimal production build.
+</p>
+
+<h2>Enable React Strict Mode</h2>
+
+<div class="code-title">Example</div>
+
+<pre><code class="language-js">const nextConfig = {
+  reactStrictMode: true
+};
+
+module.exports = nextConfig;</code></pre>
+
+<p>
+Helps detect potential React issues during development.
+</p>
+
+<h2>What Happens Internally?</h2>
+
+<div class="code-title">Flow</div>
+
+<pre><code class="language-text">npm run dev
+      │
+      ▼
+Read next.config.js
+      │
+      ▼
+Apply Configuration
+      │
+      ▼
+Start Next.js Server
+</code></pre>
+
+<p>
+Next.js reads the configuration during startup.
+</p>
+
+<h2>Important Note</h2>
+
+<div class="feature">
+Whenever we change next.config.js or next.config.ts, we must restart the development server because configuration files are loaded only during startup.
+</div>
+
+<h2>Common Configuration Options</h2>
+
+<table>
+<tr>
+<th>Option</th>
+<th>Purpose</th>
+</tr>
+
+<tr>
+<td>images</td>
+<td>Configure image optimization</td>
+</tr>
+
+<tr>
+<td>redirects()</td>
+<td>Create redirects</td>
+</tr>
+
+<tr>
+<td>rewrites()</td>
+<td>Rewrite routes</td>
+</tr>
+
+<tr>
+<td>headers()</td>
+<td>Add HTTP headers</td>
+</tr>
+
+<tr>
+<td>env</td>
+<td>Define environment variables</td>
+</tr>
+
+<tr>
+<td>webpack()</td>
+<td>Customize Webpack</td>
+</tr>
+
+<tr>
+<td>output</td>
+<td>Configure build output</td>
+</tr>
+
+<tr>
+<td>reactStrictMode</td>
+<td>Enable React Strict Mode</td>
+</tr>
+</table>
+
+<h2>Real-World Example</h2>
+
+<div class="code-title">next.config.js</div>
+
+<pre><code class="language-js">const nextConfig = {
+
+  reactStrictMode: true,
+
+  output: 'standalone',
+
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'cdn.example.com'
+      }
+    ]
+  }
+
+};
+
+module.exports = nextConfig;</code></pre>
+
+<p>
+This configuration:
+</p>
+
+<ul>
+<li>Enables React Strict Mode.</li>
+<li>Allows external image optimization.</li>
+<li>Creates a standalone production build.</li>
+</ul>
+
+<h2>next.config.js vs next.config.ts</h2>
+
+<table>
+<tr>
+<th>Feature</th>
+<th>next.config.js</th>
+<th>next.config.ts</th>
+</tr>
+
+<tr>
+<td>JavaScript</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+
+<tr>
+<td>Type Safety</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+
+<tr>
+<td>IntelliSense</td>
+<td>Limited</td>
+<td>Better</td>
+</tr>
+
+<tr>
+<td>Functionality</td>
+<td>Same</td>
+<td>Same</td>
+</tr>
+</table>
+
+<h2>Interview Tip</h2>
+
+<div class="feature">
+A common misconception is that next.config.js runs in the browser. In reality, it runs only during the build and server startup process and is never sent to the client.
+</div>
+
+<div class="feature">
+<strong>One-Line Definition:</strong><br>
+<code>next.config.js</code> or <code>next.config.ts</code> is the central Next.js configuration file that allows us to customize features such as images, redirects, rewrites, headers, environment variables, build output, and Webpack behavior.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+
+</body>
+</html>

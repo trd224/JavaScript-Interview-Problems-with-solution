@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How does the next/image component improve performance over a plain img?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+}
+
+body{
+  background:#0f172a;
+  color:#e2e8f0;
+  font-family:Arial,sans-serif;
+  line-height:1.8;
+  padding:40px 20px;
+}
+
+.container{
+  max-width:1000px;
+  margin:auto;
+  background:#111827;
+  padding:40px;
+  border-radius:16px;
+}
+
+h1{
+  color:#38bdf8;
+  margin-bottom:20px;
+}
+
+h2{
+  color:#a78bfa;
+  margin-top:30px;
+  margin-bottom:10px;
+}
+
+h3{
+  color:#fbbf24;
+  margin-top:25px;
+  margin-bottom:10px;
+}
+
+p{
+  margin-bottom:15px;
+}
+
+ul{
+  margin-left:20px;
+}
+
+li{
+  margin-bottom:8px;
+}
+
+.feature{
+  background:#1e293b;
+  border-left:5px solid #38bdf8;
+  padding:15px;
+  border-radius:8px;
+  margin:20px 0;
+}
+
+.code-title{
+  background:#1e293b;
+  color:#93c5fd;
+  padding:10px;
+  font-weight:bold;
+}
+
+pre[class*="language-"]{
+  margin:0!important;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:20px;
+}
+
+th{
+  background:#1e293b;
+  color:#38bdf8;
+  text-align:left;
+  padding:12px;
+}
+
+td{
+  padding:12px;
+  border-top:1px solid #334155;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>How does the next/image component improve performance over a plain &lt;img&gt;?</h1>
+
+<p>
+The <code>next/image</code> component is a built-in Next.js component that automatically optimizes images for better performance, faster loading, and improved Core Web Vitals.
+</p>
+
+<div class="feature">
+Unlike a normal <code>&lt;img&gt;</code> tag, <code>next/image</code> automatically resizes, compresses, lazy loads, and serves modern image formats when possible.
+</div>
+
+<h2>Plain img Example</h2>
+
+<div class="code-title">Regular HTML Image</div>
+
+<pre><code class="language-html">&lt;img
+  src="/product.jpg"
+  alt="Product"
+/&gt;</code></pre>
+
+<p>
+The browser downloads exactly the image file that exists on the server.
+</p>
+
+<p>
+No optimization happens automatically.
+</p>
+
+<h2>next/image Example</h2>
+
+<div class="code-title">Next.js Image Component</div>
+
+<pre><code class="language-jsx">import Image from 'next/image';
+
+export default function Product() {
+
+  return (
+    &lt;Image
+      src="/product.jpg"
+      alt="Product"
+      width={500}
+      height={300}
+    /&gt;
+  );
+
+}</code></pre>
+
+<p>
+Next.js automatically optimizes the image before sending it to the browser.
+</p>
+
+<h2>Why Do We Need Image Optimization?</h2>
+
+<p>
+Suppose our original image is:
+</p>
+
+<div class="code-title">Original Image</div>
+
+<pre><code class="language-text">4000 × 3000 Pixels
+5 MB
+</code></pre>
+
+<p>
+But our page displays it at:
+</p>
+
+<div class="code-title">Displayed Size</div>
+
+<pre><code class="language-text">400 × 300 Pixels
+</code></pre>
+
+<p>
+Using a normal img:
+</p>
+
+<pre><code class="language-text">Download Full 5 MB Image
+</code></pre>
+
+<p>
+Most of those pixels are never used.
+</p>
+
+<p>
+This wastes bandwidth and slows page loading.
+</p>
+
+<h2>Automatic Image Resizing</h2>
+
+<p>
+The Image component generates properly sized images.
+</p>
+
+<div class="code-title">What Happens Internally</div>
+
+<pre><code class="language-text">Original Image
+4000x3000
+
+      │
+      ▼
+
+Next.js Creates
+
+500x375
+1000x750
+1500x1125
+
+      │
+      ▼
+
+Browser Downloads
+Only Required Size
+</code></pre>
+
+<h2>Automatic Lazy Loading</h2>
+
+<p>
+Images below the viewport are not loaded immediately.
+</p>
+
+<div class="code-title">Normal img</div>
+
+<pre><code class="language-text">Page Opens
+      │
+      ▼
+Download All Images
+</code></pre>
+
+<div class="code-title">next/image</div>
+
+<pre><code class="language-text">Page Opens
+      │
+      ▼
+Download Visible Images
+
+User Scrolls
+      │
+      ▼
+Download Remaining Images
+</code></pre>
+
+<p>
+This significantly improves initial page load performance.
+</p>
+
+<h2>Modern Image Formats</h2>
+
+<p>
+Next.js can automatically serve newer formats such as:
+</p>
+
+<ul>
+<li>WebP</li>
+<li>AVIF</li>
+</ul>
+
+<div class="code-title">Flow</div>
+
+<pre><code class="language-text">Original JPG
+      │
+      ▼
+Next.js Optimization
+      │
+      ▼
+WebP / AVIF
+      │
+      ▼
+Smaller File Size
+</code></pre>
+
+<h2>Preventing Layout Shift</h2>
+
+<p>
+One of the biggest benefits of next/image is preventing layout shifts.
+</p>
+
+<h3>Without Width and Height</h3>
+
+<div class="code-title">Plain img</div>
+
+<pre><code class="language-html">&lt;img
+  src="/banner.jpg"
+  alt="Banner"
+/&gt;</code></pre>
+
+<p>
+The browser does not know the image size initially.
+</p>
+
+<p>
+When the image loads:
+</p>
+
+<pre><code class="language-text">Content Moves Down
+Layout Shifts
+</code></pre>
+
+<h3>With next/image</h3>
+
+<div class="code-title">Image Component</div>
+
+<pre><code class="language-jsx">&lt;Image
+  src="/banner.jpg"
+  alt="Banner"
+  width={1200}
+  height={500}
+/&gt;</code></pre>
+
+<p>
+The browser reserves space before loading the image.
+</p>
+
+<p>
+No layout shift occurs.
+</p>
+
+<h2>Responsive Images</h2>
+
+<div class="code-title">Responsive Example</div>
+
+<pre><code class="language-jsx">&lt;Image
+  src="/hero.jpg"
+  alt="Hero"
+  fill
+  sizes="100vw"
+/&gt;</code></pre>
+
+<p>
+Next.js automatically serves different image sizes for:
+</p>
+
+<pre><code class="language-text">Mobile
+Tablet
+Desktop
+</code></pre>
+
+<h2>Priority Loading</h2>
+
+<p>
+Important images can be loaded immediately.
+</p>
+
+<div class="code-title">Hero Image</div>
+
+<pre><code class="language-jsx">&lt;Image
+  src="/hero.jpg"
+  alt="Hero"
+  width={1200}
+  height={600}
+  priority
+/&gt;</code></pre>
+
+<p>
+This is useful for:
+</p>
+
+<ul>
+<li>Hero Images</li>
+<li>Above-the-fold Content</li>
+<li>Landing Pages</li>
+</ul>
+
+<h2>What Happens Internally?</h2>
+
+<div class="code-title">Plain img</div>
+
+<pre><code class="language-text">Browser
+   │
+   ▼
+Download Original Image
+   │
+   ▼
+Display Image
+</code></pre>
+
+<div class="code-title">next/image</div>
+
+<pre><code class="language-text">Browser
+   │
+   ▼
+Request Image
+   │
+   ▼
+Next.js Image Optimizer
+   │
+   ├── Resize
+   ├── Compress
+   ├── Convert Format
+   └── Cache
+   │
+   ▼
+Send Optimized Image
+</code></pre>
+
+<h2>next/image vs img</h2>
+
+<table>
+<tr>
+<th>Feature</th>
+<th>next/image</th>
+<th>img</th>
+</tr>
+
+<tr>
+<td>Automatic Optimization</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+
+<tr>
+<td>Lazy Loading</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+
+<tr>
+<td>Responsive Images</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+
+<tr>
+<td>WebP / AVIF</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+
+<tr>
+<td>Prevent Layout Shift</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+
+<tr>
+<td>Priority Loading</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+</table>
+
+<h2>When Should We Use next/image?</h2>
+
+<ul>
+<li>Product Images</li>
+<li>Blog Images</li>
+<li>Hero Banners</li>
+<li>Gallery Images</li>
+<li>Marketing Websites</li>
+</ul>
+
+<h2>When Might We Use img?</h2>
+
+<ul>
+<li>Very small icons.</li>
+<li>External content where optimization is unnecessary.</li>
+<li>Special edge cases requiring raw image behavior.</li>
+</ul>
+
+<h2>Interview Tip</h2>
+
+<div class="feature">
+A common misconception is that next/image is just a React wrapper around img. In reality, it includes automatic resizing, compression, lazy loading, responsive image generation, caching, and modern format conversion.
+</div>
+
+<div class="feature">
+<strong>One-Line Definition:</strong><br>
+The <code>next/image</code> component improves performance by automatically optimizing images through resizing, compression, lazy loading, responsive image generation, caching, and layout shift prevention, whereas a plain <code>&lt;img&gt;</code> tag does none of these automatically.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>What is Server-Side Rendering (SSR) in Next.js?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+}
+
+body{
+  background:#0f172a;
+  color:#e2e8f0;
+  font-family:Arial,sans-serif;
+  line-height:1.8;
+  padding:40px 20px;
+}
+
+.container{
+  max-width:1000px;
+  margin:auto;
+  background:#111827;
+  padding:40px;
+  border-radius:16px;
+  box-shadow:0 0 30px rgba(0,0,0,.4);
+}
+
+h1{
+  color:#38bdf8;
+  margin-bottom:20px;
+}
+
+h2{
+  color:#a78bfa;
+  margin-top:30px;
+  margin-bottom:10px;
+}
+
+h3{
+  color:#fbbf24;
+  margin-top:25px;
+  margin-bottom:10px;
+}
+
+p{
+  margin-bottom:15px;
+}
+
+ul{
+  margin-left:20px;
+}
+
+li{
+  margin-bottom:8px;
+}
+
+.feature{
+  background:#1e293b;
+  border-left:5px solid #38bdf8;
+  padding:15px;
+  border-radius:8px;
+  margin:20px 0;
+}
+
+.code-title{
+  background:#1e293b;
+  color:#93c5fd;
+  padding:10px;
+  font-weight:bold;
+  border-top-left-radius:8px;
+  border-top-right-radius:8px;
+}
+
+pre[class*="language-"]{
+  margin:0!important;
+  border-bottom-left-radius:8px;
+  border-bottom-right-radius:8px;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:20px;
+}
+
+th{
+  background:#1e293b;
+  color:#38bdf8;
+  text-align:left;
+  padding:12px;
+}
+
+td{
+  padding:12px;
+  border-top:1px solid #334155;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>What is Server-Side Rendering (SSR) in Next.js?</h1>
+
+<p>
+Server-Side Rendering (SSR) is a rendering technique where Next.js generates the HTML for a page on the server for every request before sending it to the browser.
+</p>
+
+<div class="feature">
+SSR allows us to fetch fresh data on every request and send a fully rendered HTML page to the browser.
+</div>
+
+<h2>Why Do We Need SSR?</h2>
+
+<p>
+Some pages require the latest data every time a user visits them.
+</p>
+
+Examples:
+
+<ul>
+  <li>Stock Market Prices</li>
+  <li>Weather Data</li>
+  <li>Live Dashboard</li>
+  <li>News Websites</li>
+  <li>E-commerce Product Inventory</li>
+</ul>
+
+<p>
+For such pages, generating HTML at build time is not enough because the data changes frequently.
+</p>
+
+<h2>How SSR Works</h2>
+
+<div class="code-title">SSR Flow</div>
+
+<pre><code class="language-text">User Requests Page
+        │
+        ▼
+Next.js Server
+        │
+        ▼
+Fetch Latest Data
+        │
+        ▼
+Generate HTML
+        │
+        ▼
+Send HTML To Browser
+        │
+        ▼
+Hydration Happens
+</code></pre>
+
+<h2>Real Example</h2>
+
+<p>
+Suppose our application displays the current Bitcoin price.
+</p>
+
+<div class="code-title">User Opens</div>
+
+<pre><code class="language-text">/bitcoin-price</code></pre>
+
+<p>
+Next.js performs:
+</p>
+
+<div class="code-title">Server</div>
+
+<pre><code class="language-text">1. Fetch Latest Bitcoin Price
+2. Generate HTML
+3. Send HTML To Browser
+</code></pre>
+
+<p>
+Every user gets the latest data.
+</p>
+
+<h2>SSR in the Pages Router</h2>
+
+<p>
+In the Pages Router, SSR is implemented using <code>getServerSideProps()</code>.
+</p>
+
+<div class="code-title">pages/products.js</div>
+
+<pre><code class="language-jsx">export async function getServerSideProps() {
+
+  const res = await fetch(
+    'https://api.example.com/products'
+  );
+
+  const products = await res.json();
+
+  return {
+    props: { products }
+  };
+
+}
+
+export default function Products({ products }) {
+
+  return (
+    &lt;h1&gt;
+      Total Products: {products.length}
+    &lt;/h1&gt;
+  );
+
+}</code></pre>
+
+<h2>What Happens Internally?</h2>
+
+<div class="code-title">Request Flow</div>
+
+<pre><code class="language-text">Request #1
+      │
+      ▼
+getServerSideProps()
+      │
+      ▼
+Fresh Data
+      │
+      ▼
+HTML Generated
+
+Request #2
+      │
+      ▼
+getServerSideProps()
+      │
+      ▼
+Fresh Data Again
+      │
+      ▼
+New HTML Generated
+</code></pre>
+
+<p>
+The function runs for every request.
+</p>
+
+<h2>SSR in the App Router</h2>
+
+<p>
+The App Router does not use <code>getServerSideProps()</code>.
+</p>
+
+<p>
+Instead, Server Components can directly fetch data.
+</p>
+
+<div class="code-title">app/products/page.js</div>
+
+<pre><code class="language-jsx">async function getProducts() {
+
+  const res = await fetch(
+    'https://api.example.com/products',
+    { cache: 'no-store' }
+  );
+
+  return res.json();
+
+}
+
+export default async function Products() {
+
+  const products = await getProducts();
+
+  return (
+    &lt;h1&gt;
+      Total Products: {products.length}
+    &lt;/h1&gt;
+  );
+
+}</code></pre>
+
+<h2>Why cache: 'no-store'?</h2>
+
+<p>
+The <code>cache: 'no-store'</code> option tells Next.js:
+</p>
+
+<div class="code-title">Meaning</div>
+
+<pre><code class="language-text">Do Not Cache
+
+Fetch Fresh Data
+For Every Request
+</code></pre>
+
+<p>
+This behavior is equivalent to SSR.
+</p>
+
+<h2>SSR vs CSR</h2>
+
+<table>
+<tr>
+<th>Feature</th>
+<th>SSR</th>
+<th>CSR</th>
+</tr>
+
+<tr>
+<td>HTML Generated</td>
+<td>Server</td>
+<td>Browser</td>
+</tr>
+
+<tr>
+<td>Initial Load</td>
+<td>Fast</td>
+<td>Usually Slower</td>
+</tr>
+
+<tr>
+<td>SEO</td>
+<td>Excellent</td>
+<td>Limited</td>
+</tr>
+
+<tr>
+<td>Fresh Data</td>
+<td>Every Request</td>
+<td>Client Fetches Data</td>
+</tr>
+</table>
+
+<h2>SSR vs SSG</h2>
+
+<table>
+<tr>
+<th>Feature</th>
+<th>SSR</th>
+<th>SSG</th>
+</tr>
+
+<tr>
+<td>HTML Generation Time</td>
+<td>Every Request</td>
+<td>Build Time</td>
+</tr>
+
+<tr>
+<td>Performance</td>
+<td>Slower</td>
+<td>Faster</td>
+</tr>
+
+<tr>
+<td>Fresh Data</td>
+<td>Always</td>
+<td>Only At Build Time</td>
+</tr>
+
+<tr>
+<td>Server Required</td>
+<td>Yes</td>
+<td>No</td>
+</tr>
+</table>
+
+<h2>Advantages of SSR</h2>
+
+<ul>
+  <li>Always fresh data.</li>
+  <li>Excellent SEO.</li>
+  <li>Better social media previews.</li>
+  <li>Faster first content display.</li>
+  <li>Works well for dynamic content.</li>
+</ul>
+
+<h2>Disadvantages of SSR</h2>
+
+<ul>
+  <li>Runs on every request.</li>
+  <li>Higher server load.</li>
+  <li>Slower than SSG.</li>
+  <li>Requires server resources.</li>
+</ul>
+
+<h2>When Should We Use SSR?</h2>
+
+<ul>
+  <li>Frequently changing data.</li>
+  <li>User-specific dashboards.</li>
+  <li>Live statistics.</li>
+  <li>Stock prices.</li>
+  <li>Weather information.</li>
+  <li>Real-time inventory.</li>
+</ul>
+
+<h2>Interview Tip</h2>
+
+<div class="feature">
+A common misconception is that SSR means rendering on the server once. In reality, SSR generates fresh HTML on the server for every incoming request.
+</div>
+
+<div class="feature">
+<strong>One-Line Definition:</strong><br>
+Server-Side Rendering (SSR) is a rendering technique in Next.js where the server generates fresh HTML for every request before sending it to the browser.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+
+</body>
+</html>

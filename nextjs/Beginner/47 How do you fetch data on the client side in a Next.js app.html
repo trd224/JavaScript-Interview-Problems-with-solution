@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How do you fetch data on the client side in a Next.js app?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+
+body{
+  background:#0f172a;
+  color:#e2e8f0;
+  font-family:Arial,sans-serif;
+  line-height:1.8;
+  padding:40px 20px;
+}
+
+.container{
+  max-width:1000px;
+  margin:auto;
+  background:#111827;
+  padding:40px;
+  border-radius:16px;
+}
+
+h1{color:#38bdf8;margin-bottom:20px}
+h2{color:#a78bfa;margin-top:30px;margin-bottom:10px}
+h3{color:#fbbf24;margin-top:25px;margin-bottom:10px}
+
+p{margin-bottom:15px}
+ul{margin-left:20px}
+li{margin-bottom:8px}
+
+.feature{
+  background:#1e293b;
+  border-left:5px solid #38bdf8;
+  padding:15px;
+  border-radius:8px;
+  margin:20px 0;
+}
+
+.code-title{
+  background:#1e293b;
+  color:#93c5fd;
+  padding:10px;
+  font-weight:bold;
+}
+
+pre[class*="language-"]{margin:0!important}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:20px;
+}
+
+th{
+  background:#1e293b;
+  color:#38bdf8;
+  text-align:left;
+  padding:12px;
+}
+
+td{
+  padding:12px;
+  border-top:1px solid #334155;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>How do you fetch data on the client side in a Next.js app?</h1>
+
+<p>
+Client-side data fetching means fetching data in the browser after the page has loaded.
+</p>
+
+<div class="feature">
+In Next.js, we fetch data on the client side by using a Client Component with <code>'use client'</code>, then calling an API inside <code>useEffect()</code> or using a library like SWR or React Query.
+</div>
+
+<h2>When Do We Use Client-Side Fetching?</h2>
+
+<p>
+Client-side fetching is useful when data depends on browser interaction or user-specific state.
+</p>
+
+<ul>
+<li>Dashboard data</li>
+<li>User profile data</li>
+<li>Search results</li>
+<li>Filters</li>
+<li>Pagination</li>
+<li>Live updates</li>
+<li>Data after button click</li>
+</ul>
+
+<h2>Basic Client-Side Fetching</h2>
+
+<p>
+In the App Router, we must use <code>'use client'</code> because <code>useEffect()</code> runs only in the browser.
+</p>
+
+<div class="code-title">app/users/page.js</div>
+
+<pre><code class="language-jsx">'use client';
+
+import { useEffect, useState } from 'react';
+
+export default function UsersPage() {
+
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchUsers() {
+      const res = await fetch('/api/users');
+      const data = await res.json();
+
+      setUsers(data);
+      setLoading(false);
+    }
+
+    fetchUsers();
+  }, []);
+
+  if (loading) {
+    return &lt;h2&gt;Loading...&lt;/h2&gt;;
+  }
+
+  return (
+    &lt;div&gt;
+      &lt;h1&gt;Users&lt;/h1&gt;
+
+      {users.map(user =&gt; (
+        &lt;p key={user.id}&gt;{user.name}&lt;/p&gt;
+      ))}
+    &lt;/div&gt;
+  );
+
+}</code></pre>
+
+<h2>What Happens Internally?</h2>
+
+<div class="code-title">Client-Side Fetching Flow</div>
+
+<pre><code class="language-text">Page Loads
+    │
+    ▼
+React Component Renders
+    │
+    ▼
+useEffect Runs In Browser
+    │
+    ▼
+API Request Sent
+    │
+    ▼
+Data Received
+    │
+    ▼
+State Updates
+    │
+    ▼
+UI Re-renders
+</code></pre>
+
+<h2>Fetching Data After Button Click</h2>
+
+<p>
+Sometimes we do not want to fetch data immediately. We may fetch data only after a user action.
+</p>
+
+<div class="code-title">Button Click Fetch</div>
+
+<pre><code class="language-jsx">'use client';
+
+import { useState } from 'react';
+
+export default function ProductsPage() {
+
+  const [products, setProducts] = useState([]);
+
+  const loadProducts = async () => {
+    const res = await fetch('/api/products');
+    const data = await res.json();
+
+    setProducts(data);
+  };
+
+  return (
+    &lt;div&gt;
+      &lt;button onClick={loadProducts}&gt;Load Products&lt;/button&gt;
+
+      {products.map(product =&gt; (
+        &lt;p key={product.id}&gt;{product.name}&lt;/p&gt;
+      ))}
+    &lt;/div&gt;
+  );
+
+}</code></pre>
+
+<h2>Using SWR</h2>
+
+<p>
+SWR is a popular data fetching library from Vercel.
+</p>
+
+<p>
+It handles caching, loading states, revalidation, and refetching automatically.
+</p>
+
+<div class="code-title">Install SWR</div>
+
+<pre><code class="language-bash">npm install swr</code></pre>
+
+<div class="code-title">SWR Example</div>
+
+<pre><code class="language-jsx">'use client';
+
+import useSWR from 'swr';
+
+const fetcher = url =&gt; fetch(url).then(res =&gt; res.json());
+
+export default function UsersPage() {
+
+  const { data, error, isLoading } = useSWR('/api/users', fetcher);
+
+  if (isLoading) {
+    return &lt;h2&gt;Loading...&lt;/h2&gt;;
+  }
+
+  if (error) {
+    return &lt;h2&gt;Failed to load users&lt;/h2&gt;;
+  }
+
+  return (
+    &lt;div&gt;
+      {data.map(user =&gt; (
+        &lt;p key={user.id}&gt;{user.name}&lt;/p&gt;
+      ))}
+    &lt;/div&gt;
+  );
+
+}</code></pre>
+
+<h2>Why Use SWR?</h2>
+
+<table>
+<tr>
+<th>Feature</th>
+<th>useEffect + fetch</th>
+<th>SWR</th>
+</tr>
+
+<tr>
+<td>Manual Loading State</td>
+<td>Required</td>
+<td>Built-in</td>
+</tr>
+
+<tr>
+<td>Error Handling</td>
+<td>Manual</td>
+<td>Built-in</td>
+</tr>
+
+<tr>
+<td>Caching</td>
+<td>Manual</td>
+<td>Built-in</td>
+</tr>
+
+<tr>
+<td>Revalidation</td>
+<td>Manual</td>
+<td>Built-in</td>
+</tr>
+
+<tr>
+<td>Best For</td>
+<td>Simple cases</td>
+<td>Real applications</td>
+</tr>
+</table>
+
+<h2>Client-Side Fetching in Pages Router</h2>
+
+<p>
+In the Pages Router, client-side fetching is also done using <code>useEffect()</code>.
+</p>
+
+<div class="code-title">pages/users.js</div>
+
+<pre><code class="language-jsx">import { useEffect, useState } from 'react';
+
+export default function UsersPage() {
+
+  const [users, setUsers] = useState([]);
+
+  useEffect(() => {
+    async function fetchUsers() {
+      const res = await fetch('/api/users');
+      const data = await res.json();
+
+      setUsers(data);
+    }
+
+    fetchUsers();
+  }, []);
+
+  return (
+    &lt;div&gt;
+      {users.map(user =&gt; (
+        &lt;p key={user.id}&gt;{user.name}&lt;/p&gt;
+      ))}
+    &lt;/div&gt;
+  );
+
+}</code></pre>
+
+<h2>Client-Side Fetching vs Server-Side Fetching</h2>
+
+<table>
+<tr>
+<th>Feature</th>
+<th>Client-Side Fetching</th>
+<th>Server-Side Fetching</th>
+</tr>
+
+<tr>
+<td>Where Data Fetches</td>
+<td>Browser</td>
+<td>Server</td>
+</tr>
+
+<tr>
+<td>SEO</td>
+<td>Weaker</td>
+<td>Better</td>
+</tr>
+
+<tr>
+<td>Initial HTML</td>
+<td>May not include data</td>
+<td>Includes data</td>
+</tr>
+
+<tr>
+<td>Best For</td>
+<td>Interactive/user-specific data</td>
+<td>SEO/fresh server-rendered data</td>
+</tr>
+
+<tr>
+<td>Loading State</td>
+<td>Usually needed</td>
+<td>Often not needed initially</td>
+</tr>
+</table>
+
+<h2>When Should We Choose Client-Side Fetching?</h2>
+
+<ul>
+<li>When data is not important for SEO.</li>
+<li>When data depends on user interaction.</li>
+<li>When data is private or user-specific.</li>
+<li>When we need live updates.</li>
+<li>When fetching should happen after the page loads.</li>
+</ul>
+
+<h2>When Should We Avoid Client-Side Fetching?</h2>
+
+<ul>
+<li>SEO-focused pages</li>
+<li>Blogs</li>
+<li>Marketing pages</li>
+<li>Product pages that need search engine indexing</li>
+<li>Pages where content should be visible immediately in HTML</li>
+</ul>
+
+<h2>Important Note</h2>
+
+<div class="feature">
+Client-side fetching means users may initially see a loading state because the data is fetched after JavaScript runs in the browser.
+</div>
+
+<h2>Interview Tip</h2>
+
+<div class="feature">
+A common misconception is that all data fetching in Next.js should happen on the server. In reality, client-side fetching is still useful for interactive, user-specific, and frequently changing data.
+</div>
+
+<div class="feature">
+<strong>One-Line Definition:</strong><br>
+Client-side data fetching in Next.js means fetching data in the browser using a Client Component with <code>useEffect()</code>, <code>fetch()</code>, or a library like SWR, usually for interactive or user-specific data.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>What is the connection() API introduced in Next.js 15?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+}
+
+body{
+  background:#0f172a;
+  color:#e2e8f0;
+  font-family:Arial,sans-serif;
+  line-height:1.8;
+  padding:40px 20px;
+}
+
+.container{
+  max-width:1000px;
+  margin:auto;
+  background:#111827;
+  padding:40px;
+  border-radius:16px;
+}
+
+h1{color:#38bdf8;margin-bottom:20px}
+h2{color:#a78bfa;margin-top:30px;margin-bottom:10px}
+h3{color:#fbbf24;margin-top:25px;margin-bottom:10px}
+
+p{margin-bottom:15px}
+
+ul{
+  margin-left:20px;
+}
+
+li{
+  margin-bottom:8px;
+}
+
+.feature{
+  background:#1e293b;
+  border-left:5px solid #38bdf8;
+  padding:15px;
+  border-radius:8px;
+  margin:20px 0;
+}
+
+.code-title{
+  background:#1e293b;
+  color:#93c5fd;
+  padding:10px;
+  font-weight:bold;
+}
+
+pre[class*="language-"]{
+  margin:0!important;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:20px;
+}
+
+th{
+  background:#1e293b;
+  color:#38bdf8;
+  text-align:left;
+  padding:12px;
+}
+
+td{
+  padding:12px;
+  border-top:1px solid #334155;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>What is the connection() API introduced in Next.js 15?</h1>
+
+<p>
+The <code>connection()</code> API is a new Next.js 15 function that allows us to explicitly wait for an incoming request before rendering a page.
+</p>
+
+<div class="feature">
+The primary purpose of <code>connection()</code> is to tell Next.js that this page must be rendered dynamically at request time and cannot be prerendered ahead of time.
+</div>
+
+<h2>Why Was connection() Introduced?</h2>
+
+<p>
+Sometimes a page depends on request-specific information such as:
+</p>
+
+<ul>
+<li>Cookies</li>
+<li>Headers</li>
+<li>User Session</li>
+<li>Request Metadata</li>
+<li>Random Values</li>
+<li>Current Time</li>
+</ul>
+
+<p>
+Next.js cannot prerender such pages during build time because the request does not exist yet.
+</p>
+
+<h2>Before Next.js 15</h2>
+
+<p>
+We commonly used:
+</p>
+
+<div class="code-title">Old Approach</div>
+
+<pre><code class="language-jsx">export const dynamic = 'force-dynamic';</code></pre>
+
+<p>
+to force dynamic rendering.
+</p>
+
+<h2>Next.js 15 Approach</h2>
+
+<div class="code-title">connection()</div>
+
+<pre><code class="language-jsx">import { connection } from 'next/server';
+
+export default async function Page() {
+
+  await connection();
+
+  return <h1>Dynamic Page</h1>;
+
+}</code></pre>
+
+<p>
+This tells Next.js:
+</p>
+
+<pre><code class="language-text">Wait For Request
+      │
+      ▼
+Render Page
+</code></pre>
+
+<h2>What Happens Internally?</h2>
+
+<div class="code-title">Without connection()</div>
+
+<pre><code class="language-text">Build Time
+    │
+    ▼
+Generate HTML
+    │
+    ▼
+Cache Page
+    │
+    ▼
+Serve Cached HTML
+</code></pre>
+
+<div class="code-title">With connection()</div>
+
+<pre><code class="language-text">User Request
+    │
+    ▼
+await connection()
+    │
+    ▼
+Request Available
+    │
+    ▼
+Render Page
+    │
+    ▼
+Send HTML
+</code></pre>
+
+<h2>Real Example</h2>
+
+<p>
+Suppose we want to display the current time.
+</p>
+
+<div class="code-title">Example</div>
+
+<pre><code class="language-jsx">import { connection } from 'next/server';
+
+export default async function Page() {
+
+  await connection();
+
+  const now = new Date();
+
+  return &lt;h1&gt;{now.toLocaleTimeString()}&lt;/h1&gt;;
+
+}</code></pre>
+
+<p>
+Every request gets a fresh time value.
+</p>
+
+<h2>Why Is connection() Needed Here?</h2>
+
+<p>
+Without it, Next.js might try to prerender:
+</p>
+
+<div class="code-title">Build Time</div>
+
+<pre><code class="language-text">10:00 AM
+</code></pre>
+
+<p>
+Then every user would see:
+</p>
+
+<pre><code class="language-text">10:00 AM
+</code></pre>
+
+<p>
+even hours later.
+</p>
+
+<h2>Using Request-Specific Data</h2>
+
+<div class="code-title">Cookie Example</div>
+
+<pre><code class="language-jsx">import { connection } from 'next/server';
+import { cookies } from 'next/headers';
+
+export default async function Page() {
+
+  await connection();
+
+  const token = (await cookies()).get('token')?.value;
+
+  return &lt;h1&gt;{token}&lt;/h1&gt;;
+
+}</code></pre>
+
+<p>
+This page depends on the current request's cookies.
+</p>
+
+<h2>connection() vs force-dynamic</h2>
+
+<table>
+<tr>
+<th>Feature</th>
+<th>connection()</th>
+<th>force-dynamic</th>
+</tr>
+
+<tr>
+<td>Explicit Request Wait</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+
+<tr>
+<td>Dynamic Rendering</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+
+<tr>
+<td>Recommended in Next.js 15</td>
+<td>✅</td>
+<td>Less Preferred</td>
+</tr>
+
+<tr>
+<td>More Expressive</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+</table>
+
+<h2>How Does connection() Relate to PPR?</h2>
+
+<p>
+Partial Prerendering (PPR) allows part of a page to be prerendered and part to wait for request-time data.
+</p>
+
+<div class="code-title">PPR Flow</div>
+
+<pre><code class="language-text">Static Content
+      │
+      ▼
+Prerendered
+
+Dynamic Content
+      │
+      ▼
+await connection()
+      │
+      ▼
+Rendered Per Request
+</code></pre>
+
+<p>
+This helps Next.js determine which parts depend on the request.
+</p>
+
+<h2>When Should We Use connection()?</h2>
+
+<ul>
+<li>Current time display.</li>
+<li>Random values.</li>
+<li>User-specific pages.</li>
+<li>Cookie-based rendering.</li>
+<li>Header-based rendering.</li>
+<li>Request-dependent content.</li>
+</ul>
+
+<h2>When Should We Avoid connection()?</h2>
+
+<ul>
+<li>Static pages.</li>
+<li>Blogs.</li>
+<li>Marketing pages.</li>
+<li>Documentation pages.</li>
+<li>Pages that can be prerendered.</li>
+</ul>
+
+<h2>Important Note</h2>
+
+<div class="feature">
+Calling <code>await connection()</code> opts the route into request-time rendering because the page now explicitly depends on an incoming request.
+</div>
+
+<h2>Interview Tip</h2>
+
+<div class="feature">
+A common misconception is that connection() fetches data. In reality, connection() does not fetch anything—it simply waits for an incoming request and tells Next.js that rendering should happen at request time.
+</div>
+
+<div class="feature">
+<strong>One-Line Definition:</strong><br>
+The <code>connection()</code> API in Next.js 15 explicitly waits for an incoming request and marks a route as request-time dynamic, preventing prerendering when content depends on request-specific information.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>What are CSS Modules and how do you use them in Next.js?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+}
+
+body{
+  background:#0f172a;
+  color:#e2e8f0;
+  font-family:Arial,sans-serif;
+  line-height:1.8;
+  padding:40px 20px;
+}
+
+.container{
+  max-width:1000px;
+  margin:auto;
+  background:#111827;
+  padding:40px;
+  border-radius:16px;
+}
+
+h1{
+  color:#38bdf8;
+  margin-bottom:20px;
+}
+
+h2{
+  color:#a78bfa;
+  margin-top:30px;
+  margin-bottom:10px;
+}
+
+h3{
+  color:#fbbf24;
+  margin-top:25px;
+  margin-bottom:10px;
+}
+
+p{
+  margin-bottom:15px;
+}
+
+ul{
+  margin-left:20px;
+}
+
+li{
+  margin-bottom:8px;
+}
+
+.feature{
+  background:#1e293b;
+  border-left:5px solid #38bdf8;
+  padding:15px;
+  border-radius:8px;
+  margin:20px 0;
+}
+
+.code-title{
+  background:#1e293b;
+  color:#93c5fd;
+  padding:10px;
+  font-weight:bold;
+}
+
+pre[class*="language-"]{
+  margin:0!important;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:20px;
+}
+
+th{
+  background:#1e293b;
+  color:#38bdf8;
+  text-align:left;
+  padding:12px;
+}
+
+td{
+  padding:12px;
+  border-top:1px solid #334155;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>What are CSS Modules and how do you use them in Next.js?</h1>
+
+<p>
+CSS Modules are CSS files whose styles are scoped locally to a specific component.
+</p>
+
+<div class="feature">
+CSS Modules allow us to write component-specific CSS without worrying about class name conflicts in our application.
+</div>
+
+<h2>Why Do We Need CSS Modules?</h2>
+
+<p>
+Suppose we have two components:
+</p>
+
+<div class="code-title">Header.css</div>
+
+<pre><code class="language-css">.title {
+  color: blue;
+}</code></pre>
+
+<div class="code-title">Footer.css</div>
+
+<pre><code class="language-css">.title {
+  color: red;
+}</code></pre>
+
+<p>
+Both files use the same class name:
+</p>
+
+<pre><code class="language-text">title
+</code></pre>
+
+<p>
+This can cause style conflicts when using normal CSS.
+</p>
+
+<h2>How CSS Modules Solve This</h2>
+
+<p>
+Next.js automatically generates unique class names.
+</p>
+
+<div class="code-title">Generated Internally</div>
+
+<pre><code class="language-text">title
+      │
+      ▼
+
+Header_title__a12bc
+
+title
+      │
+      ▼
+
+Footer_title__x78yz
+</code></pre>
+
+<p>
+Now both classes are unique and cannot conflict.
+</p>
+
+<h2>Creating a CSS Module</h2>
+
+<p>
+CSS Module files must end with <code>.module.css</code>.
+</p>
+
+<div class="code-title">Button.module.css</div>
+
+<pre><code class="language-css">.button {
+  background: blue;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+}</code></pre>
+
+<h2>Using a CSS Module</h2>
+
+<div class="code-title">Button.js</div>
+
+<pre><code class="language-jsx">import styles from './Button.module.css';
+
+export default function Button() {
+
+  return (
+    &lt;button className={styles.button}&gt;
+      Click Me
+    &lt;/button&gt;
+  );
+
+}</code></pre>
+
+<h2>Project Structure</h2>
+
+<div class="code-title">Example</div>
+
+<pre><code class="language-text">components/
+├── Button.js
+└── Button.module.css
+</code></pre>
+
+<h2>What Happens Internally?</h2>
+
+<div class="code-title">Flow</div>
+
+<pre><code class="language-text">Button.module.css
+        │
+        ▼
+Import styles Object
+        │
+        ▼
+styles.button
+        │
+        ▼
+Generated Class Name
+
+Button_button__a1b2c
+</code></pre>
+
+<h2>Example with Multiple Classes</h2>
+
+<div class="code-title">Card.module.css</div>
+
+<pre><code class="language-css">.card {
+  padding: 20px;
+  border: 1px solid gray;
+}
+
+.title {
+  color: blue;
+}</code></pre>
+
+<div class="code-title">Card.js</div>
+
+<pre><code class="language-jsx">import styles from './Card.module.css';
+
+export default function Card() {
+
+  return (
+    &lt;div className={styles.card}&gt;
+      &lt;h2 className={styles.title}&gt;
+        Product
+      &lt;/h2&gt;
+    &lt;/div&gt;
+  );
+
+}</code></pre>
+
+<h2>Using Multiple Module Classes</h2>
+
+<div class="code-title">Button.module.css</div>
+
+<pre><code class="language-css">.button {
+  padding: 10px;
+}
+
+.primary {
+  background: blue;
+}</code></pre>
+
+<div class="code-title">Button.js</div>
+
+<pre><code class="language-jsx">import styles from './Button.module.css';
+
+export default function Button() {
+
+  return (
+    &lt;button
+      className={`${styles.button} ${styles.primary}`}
+    &gt;
+      Save
+    &lt;/button&gt;
+  );
+
+}</code></pre>
+
+<h2>Pages Router Example</h2>
+
+<div class="code-title">pages/index.js</div>
+
+<pre><code class="language-jsx">import styles from '../styles/Home.module.css';
+
+export default function Home() {
+
+  return (
+    &lt;h1 className={styles.title}&gt;
+      Home Page
+    &lt;/h1&gt;
+  );
+
+}</code></pre>
+
+<h2>App Router Example</h2>
+
+<div class="code-title">app/page.js</div>
+
+<pre><code class="language-jsx">import styles from './page.module.css';
+
+export default function Home() {
+
+  return (
+    &lt;h1 className={styles.title}&gt;
+      Home Page
+    &lt;/h1&gt;
+  );
+
+}</code></pre>
+
+<div class="code-title">app/page.module.css</div>
+
+<pre><code class="language-css">.title {
+  color: blue;
+}</code></pre>
+
+<h2>CSS Modules vs Global CSS</h2>
+
+<table>
+<tr>
+<th>Feature</th>
+<th>CSS Modules</th>
+<th>Global CSS</th>
+</tr>
+
+<tr>
+<td>Scope</td>
+<td>Single Component</td>
+<td>Entire Application</td>
+</tr>
+
+<tr>
+<td>Class Name Conflicts</td>
+<td>No</td>
+<td>Possible</td>
+</tr>
+
+<tr>
+<td>Import Location</td>
+<td>Any Component</td>
+<td>Root Files Only</td>
+</tr>
+
+<tr>
+<td>Best For</td>
+<td>Component Styles</td>
+<td>App-Wide Styles</td>
+</tr>
+</table>
+
+<h2>Real-World Example</h2>
+
+<p>
+Suppose our application contains:
+</p>
+
+<div class="code-title">Components</div>
+
+<pre><code class="language-text">Navbar
+Sidebar
+ProductCard
+Footer
+</code></pre>
+
+<p>
+Each component can have its own CSS Module:
+</p>
+
+<div class="code-title">Structure</div>
+
+<pre><code class="language-text">Navbar.module.css
+Sidebar.module.css
+ProductCard.module.css
+Footer.module.css
+</code></pre>
+
+<p>
+This keeps styles isolated and easy to maintain.
+</p>
+
+<h2>Advantages of CSS Modules</h2>
+
+<ul>
+<li>No class name collisions.</li>
+<li>Component-level styling.</li>
+<li>Easy maintenance.</li>
+<li>Automatic unique class generation.</li>
+<li>Works in both Pages Router and App Router.</li>
+</ul>
+
+<h2>Important Note</h2>
+
+<div class="feature">
+A common misconception is that CSS Modules are global. In reality, CSS Modules are locally scoped to the component that imports them.
+</div>
+
+<h2>Interview Tip</h2>
+
+<div class="feature">
+When we write <code>styles.button</code>, Next.js automatically maps it to a unique generated class name behind the scenes.
+</div>
+
+<div class="feature">
+<strong>One-Line Definition:</strong><br>
+CSS Modules are locally scoped CSS files that allow us to create component-specific styles without class name conflicts by using files that end with <code>.module.css</code>.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+
+</body>
+</html>

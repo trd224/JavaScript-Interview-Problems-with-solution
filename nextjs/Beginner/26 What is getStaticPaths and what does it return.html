@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>What is getStaticPaths and What Does It Return?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+}
+
+body{
+  background:#0f172a;
+  color:#e2e8f0;
+  font-family:Arial,sans-serif;
+  line-height:1.8;
+  padding:40px 20px;
+}
+
+.container{
+  max-width:1000px;
+  margin:auto;
+  background:#111827;
+  padding:40px;
+  border-radius:16px;
+  box-shadow:0 0 30px rgba(0,0,0,.4);
+}
+
+h1{
+  color:#38bdf8;
+  margin-bottom:20px;
+}
+
+h2{
+  color:#a78bfa;
+  margin-top:30px;
+  margin-bottom:10px;
+}
+
+h3{
+  color:#fbbf24;
+  margin-top:25px;
+  margin-bottom:10px;
+}
+
+p{
+  margin-bottom:15px;
+}
+
+ul{
+  margin-left:20px;
+}
+
+li{
+  margin-bottom:8px;
+}
+
+.feature{
+  background:#1e293b;
+  border-left:5px solid #38bdf8;
+  padding:15px;
+  border-radius:8px;
+  margin:20px 0;
+}
+
+.code-title{
+  background:#1e293b;
+  color:#93c5fd;
+  padding:10px;
+  font-weight:bold;
+  border-top-left-radius:8px;
+  border-top-right-radius:8px;
+}
+
+pre[class*="language-"]{
+  margin:0!important;
+  border-bottom-left-radius:8px;
+  border-bottom-right-radius:8px;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:20px;
+}
+
+th{
+  background:#1e293b;
+  color:#38bdf8;
+  text-align:left;
+  padding:12px;
+}
+
+td{
+  padding:12px;
+  border-top:1px solid #334155;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>What is getStaticPaths and What Does It Return?</h1>
+
+<p>
+<code>getStaticPaths()</code> is a special Next.js function used with dynamic routes in the Pages Router to tell Next.js which pages should be generated at build time.
+</p>
+
+<div class="feature">
+<code>getStaticPaths()</code> runs during the build process and returns a list of dynamic route parameters that Next.js should pre-generate.
+</div>
+
+<h2>Why Do We Need getStaticPaths()?</h2>
+
+<p>
+Suppose our application has dynamic product pages.
+</p>
+
+<div class="code-title">Dynamic Route</div>
+
+<pre><code class="language-text">pages/products/[id].js</code></pre>
+
+<p>
+Next.js does not know which product IDs exist.
+</p>
+
+<p>
+We must tell Next.js which pages should be generated.
+</p>
+
+<h2>Example Problem</h2>
+
+<p>
+Suppose our database contains:
+</p>
+
+<div class="code-title">Products</div>
+
+<pre><code class="language-text">Product 1
+Product 2
+Product 3
+</code></pre>
+
+<p>
+We want these pages:
+</p>
+
+<div class="code-title">Generated Routes</div>
+
+<pre><code class="language-text">/products/1
+/products/2
+/products/3
+</code></pre>
+
+<p>
+This is exactly what <code>getStaticPaths()</code> provides.
+</p>
+
+<h2>Basic Example</h2>
+
+<div class="code-title">pages/products/[id].js</div>
+
+<pre><code class="language-jsx">export async function getStaticPaths() {
+
+  return {
+    paths: [
+      { params: { id: '1' } },
+      { params: { id: '2' } },
+      { params: { id: '3' } }
+    ],
+    fallback: false
+  };
+
+}</code></pre>
+
+<h2>What Does It Return?</h2>
+
+<p>
+<code>getStaticPaths()</code> returns an object containing:
+</p>
+
+<div class="code-title">Return Structure</div>
+
+<pre><code class="language-jsx">return {
+  paths: [],
+  fallback: false
+};</code></pre>
+
+<table>
+<tr>
+<th>Property</th>
+<th>Purpose</th>
+</tr>
+
+<tr>
+<td>paths</td>
+<td>List of dynamic pages to generate</td>
+</tr>
+
+<tr>
+<td>fallback</td>
+<td>Controls behavior for non-generated pages</td>
+</tr>
+</table>
+
+<h2>Understanding paths</h2>
+
+<div class="code-title">Example</div>
+
+<pre><code class="language-jsx">paths: [
+  { params: { id: '1' } },
+  { params: { id: '2' } },
+  { params: { id: '3' } }
+]</code></pre>
+
+<p>
+Next.js generates:
+</p>
+
+<div class="code-title">Generated Pages</div>
+
+<pre><code class="language-text">/products/1
+/products/2
+/products/3
+</code></pre>
+
+<h2>What Happens Internally?</h2>
+
+<div class="code-title">Build Process</div>
+
+<pre><code class="language-text">npm run build
+      │
+      ▼
+getStaticPaths()
+      │
+      ▼
+Get IDs
+      │
+      ▼
+1, 2, 3
+      │
+      ▼
+Generate Pages
+
+/products/1
+/products/2
+/products/3
+</code></pre>
+
+<p>
+After deployment, these pages already exist as static HTML files.
+</p>
+
+<h2>Using getStaticProps with getStaticPaths</h2>
+
+<div class="code-title">Complete Example</div>
+
+<pre><code class="language-jsx">export async function getStaticPaths() {
+
+  return {
+    paths: [
+      { params: { id: '1' } },
+      { params: { id: '2' } }
+    ],
+    fallback: false
+  };
+
+}
+
+export async function getStaticProps({ params }) {
+
+  return {
+    props: {
+      id: params.id
+    }
+  };
+
+}
+
+export default function Product({ id }) {
+
+  return &lt;h1&gt;Product {id}&lt;/h1&gt;;
+
+}</code></pre>
+
+<h2>Build Flow</h2>
+
+<div class="code-title">Generation Process</div>
+
+<pre><code class="language-text">getStaticPaths()
+       │
+       ▼
+Returns IDs
+
+1
+2
+
+       │
+       ▼
+getStaticProps()
+Runs For ID 1
+
+       │
+       ▼
+Generate /products/1
+
+       │
+       ▼
+getStaticProps()
+Runs For ID 2
+
+       │
+       ▼
+Generate /products/2
+</code></pre>
+
+<h2>Understanding fallback</h2>
+
+<h3>fallback: false</h3>
+
+<div class="code-title">Example</div>
+
+<pre><code class="language-jsx">return {
+  paths: [
+    { params: { id: '1' } }
+  ],
+  fallback: false
+};</code></pre>
+
+<p>
+Generated:
+</p>
+
+<pre><code class="language-text">/products/1
+</code></pre>
+
+<p>
+Request:
+</p>
+
+<pre><code class="language-text">/products/2
+</code></pre>
+
+<p>
+Result:
+</p>
+
+<pre><code class="language-text">404 Page
+</code></pre>
+
+<h3>fallback: true</h3>
+
+<div class="code-title">Example</div>
+
+<pre><code class="language-jsx">return {
+  paths: [
+    { params: { id: '1' } }
+  ],
+  fallback: true
+};</code></pre>
+
+<p>
+If users visit:
+</p>
+
+<pre><code class="language-text">/products/2
+</code></pre>
+
+<p>
+Next.js generates it on demand.
+</p>
+
+<h3>fallback: 'blocking'</h3>
+
+<div class="code-title">Example</div>
+
+<pre><code class="language-jsx">return {
+  paths: [
+    { params: { id: '1' } }
+  ],
+  fallback: 'blocking'
+};</code></pre>
+
+<p>
+Next.js waits for page generation before sending the response.
+</p>
+
+<h2>getStaticPaths vs getStaticProps</h2>
+
+<table>
+<tr>
+<th>Feature</th>
+<th>getStaticPaths</th>
+<th>getStaticProps</th>
+</tr>
+
+<tr>
+<td>Purpose</td>
+<td>Provides Route Parameters</td>
+<td>Provides Page Data</td>
+</tr>
+
+<tr>
+<td>Used For</td>
+<td>Dynamic Routes</td>
+<td>Static Generation</td>
+</tr>
+
+<tr>
+<td>Runs</td>
+<td>Build Time</td>
+<td>Build Time</td>
+</tr>
+
+<tr>
+<td>Returns</td>
+<td>paths + fallback</td>
+<td>props</td>
+</tr>
+</table>
+
+<h2>Important Limitations</h2>
+
+<ul>
+<li>Only works in the Pages Router.</li>
+<li>Only used with dynamic routes.</li>
+<li>Runs only during build.</li>
+<li>Usually used together with getStaticProps().</li>
+</ul>
+
+<h2>App Router Equivalent</h2>
+
+<p>
+The App Router does not use <code>getStaticPaths()</code>.
+</p>
+
+<p>
+Instead, it uses <code>generateStaticParams()</code>.
+</p>
+
+<div class="code-title">App Router</div>
+
+<pre><code class="language-jsx">export async function generateStaticParams() {
+
+  return [
+    { id: '1' },
+    { id: '2' },
+    { id: '3' }
+  ];
+
+}</code></pre>
+
+<p>
+This serves the same purpose as getStaticPaths().
+</p>
+
+<h2>Interview Tip</h2>
+
+<div class="feature">
+A common misconception is that getStaticPaths() fetches page data. In reality, it only provides route parameters. The actual page data is usually fetched inside getStaticProps().
+</div>
+
+<div class="feature">
+<strong>One-Line Definition:</strong><br>
+<code>getStaticPaths()</code> is a Pages Router function that returns a list of dynamic route parameters and tells Next.js which pages should be statically generated during the build process.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+
+</body>
+</html>

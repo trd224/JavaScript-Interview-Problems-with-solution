@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>What is the redirect() Function in the App Router?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+}
+
+body{
+  background:#0f172a;
+  color:#e2e8f0;
+  font-family:Arial,sans-serif;
+  line-height:1.8;
+  padding:40px 20px;
+}
+
+.container{
+  max-width:1000px;
+  margin:auto;
+  background:#111827;
+  padding:40px;
+  border-radius:16px;
+  box-shadow:0 0 30px rgba(0,0,0,.4);
+}
+
+h1{
+  color:#38bdf8;
+  margin-bottom:20px;
+}
+
+h2{
+  color:#a78bfa;
+  margin-top:30px;
+  margin-bottom:10px;
+}
+
+h3{
+  color:#fbbf24;
+  margin-top:25px;
+  margin-bottom:10px;
+}
+
+p{
+  margin-bottom:15px;
+}
+
+ul{
+  margin-left:20px;
+}
+
+li{
+  margin-bottom:8px;
+}
+
+.feature{
+  background:#1e293b;
+  border-left:5px solid #38bdf8;
+  padding:15px;
+  border-radius:8px;
+  margin:20px 0;
+}
+
+.code-title{
+  background:#1e293b;
+  color:#93c5fd;
+  padding:10px;
+  font-weight:bold;
+  border-top-left-radius:8px;
+  border-top-right-radius:8px;
+}
+
+pre[class*="language-"]{
+  margin:0!important;
+  border-bottom-left-radius:8px;
+  border-bottom-right-radius:8px;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:20px;
+}
+
+th{
+  background:#1e293b;
+  color:#38bdf8;
+  text-align:left;
+  padding:12px;
+}
+
+td{
+  padding:12px;
+  border-top:1px solid #334155;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>What is the redirect() Function in the App Router?</h1>
+
+<p>
+The <code>redirect()</code> function is used in the Next.js App Router to immediately redirect users from one route to another.
+</p>
+
+<div class="feature">
+The <code>redirect()</code> function stops the current rendering process and sends the user to a different route.
+</div>
+
+<h2>Importing redirect()</h2>
+
+<div class="code-title">Import</div>
+
+<pre><code class="language-jsx">import { redirect } from 'next/navigation';</code></pre>
+
+<h2>Basic Example</h2>
+
+<div class="code-title">Redirect to Login Page</div>
+
+<pre><code class="language-jsx">import { redirect } from 'next/navigation';
+
+export default function Dashboard() {
+
+  redirect('/login');
+
+}</code></pre>
+
+<p>
+Result:
+</p>
+
+<pre><code class="language-text">Current Route
+      ↓
+/dashboard
+
+Redirected To
+      ↓
+/login
+</code></pre>
+
+<h2>Why Do We Use redirect()?</h2>
+
+<p>
+We often need to prevent users from accessing certain pages.
+</p>
+
+Examples:
+
+<ul>
+  <li>User is not logged in.</li>
+  <li>User does not have permission.</li>
+  <li>Required data does not exist.</li>
+  <li>A page has moved to a new location.</li>
+</ul>
+
+<h2>Authentication Example</h2>
+
+<div class="code-title">Protected Route</div>
+
+<pre><code class="language-jsx">import { redirect } from 'next/navigation';
+
+export default async function Dashboard() {
+
+  const user = null;
+
+  if (!user) {
+    redirect('/login');
+  }
+
+  return &lt;h1&gt;Dashboard&lt;/h1&gt;;
+
+}</code></pre>
+
+<p>
+Flow:
+</p>
+
+<pre><code class="language-text">User Opens Dashboard
+          │
+          ▼
+Check Authentication
+          │
+          ▼
+User Not Logged In
+          │
+          ▼
+redirect('/login')
+          │
+          ▼
+Login Page
+</code></pre>
+
+<h2>Redirect Based on Data</h2>
+
+<div class="code-title">Product Example</div>
+
+<pre><code class="language-jsx">import { redirect } from 'next/navigation';
+
+export default async function Product() {
+
+  const product = null;
+
+  if (!product) {
+    redirect('/products');
+  }
+
+  return &lt;h1&gt;Product Details&lt;/h1&gt;;
+
+}</code></pre>
+
+<p>
+If the product does not exist, users are redirected to the products page.
+</p>
+
+<h2>What Happens Internally?</h2>
+
+<div class="code-title">Flow</div>
+
+<pre><code class="language-text">Page Starts Rendering
+         │
+         ▼
+redirect('/login')
+         │
+         ▼
+Rendering Stops
+         │
+         ▼
+Redirect Response Sent
+         │
+         ▼
+Browser Navigates
+</code></pre>
+
+<h2>redirect() vs router.push()</h2>
+
+<table>
+<tr>
+<th>Feature</th>
+<th>redirect()</th>
+<th>router.push()</th>
+</tr>
+
+<tr>
+<td>Import</td>
+<td>next/navigation</td>
+<td>useRouter()</td>
+</tr>
+
+<tr>
+<td>Works in Server Components</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+
+<tr>
+<td>Works in Client Components</td>
+<td>Limited</td>
+<td>✅</td>
+</tr>
+
+<tr>
+<td>Stops Rendering</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+
+<tr>
+<td>Used During Rendering</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+</table>
+
+<h2>Server Component Example</h2>
+
+<div class="code-title">Server Component</div>
+
+<pre><code class="language-jsx">import { redirect } from 'next/navigation';
+
+export default async function Page() {
+
+  const isLoggedIn = false;
+
+  if (!isLoggedIn) {
+    redirect('/login');
+  }
+
+  return &lt;h1&gt;Welcome&lt;/h1&gt;;
+
+}</code></pre>
+
+<p>
+This works because Server Components can use <code>redirect()</code>.
+</p>
+
+<h2>Client Component Navigation</h2>
+
+<p>
+For button clicks and user actions, we normally use <code>router.push()</code>.
+</p>
+
+<div class="code-title">Client Component</div>
+
+<pre><code class="language-jsx">'use client';
+
+import { useRouter } from 'next/navigation';
+
+export default function Home() {
+
+  const router = useRouter();
+
+  return (
+    &lt;button onClick={() =&gt; router.push('/about')}&gt;
+      Go To About
+    &lt;/button&gt;
+  );
+
+}</code></pre>
+
+<h2>redirect() vs notFound()</h2>
+
+<table>
+<tr>
+<th>Function</th>
+<th>Purpose</th>
+</tr>
+
+<tr>
+<td>redirect()</td>
+<td>Send user to another page</td>
+</tr>
+
+<tr>
+<td>notFound()</td>
+<td>Show 404 page</td>
+</tr>
+</table>
+
+<div class="code-title">Redirect</div>
+
+<pre><code class="language-jsx">redirect('/login');</code></pre>
+
+<div class="code-title">404 Page</div>
+
+<pre><code class="language-jsx">notFound();</code></pre>
+
+<h2>Common Use Cases</h2>
+
+<ul>
+  <li>Authentication checks.</li>
+  <li>Authorization checks.</li>
+  <li>Redirecting old URLs.</li>
+  <li>Handling missing data.</li>
+  <li>Multi-step workflows.</li>
+</ul>
+
+<div class="feature">
+<strong>One-Line Definition:</strong><br>
+The <code>redirect()</code> function in the Next.js App Router immediately stops rendering and redirects users to another route, commonly used for authentication, authorization, and conditional navigation.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+
+</body>
+</html>

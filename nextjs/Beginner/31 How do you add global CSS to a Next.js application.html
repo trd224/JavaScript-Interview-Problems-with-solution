@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How do you add global CSS to a Next.js application?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+}
+
+body{
+  background:#0f172a;
+  color:#e2e8f0;
+  font-family:Arial,sans-serif;
+  line-height:1.8;
+  padding:40px 20px;
+}
+
+.container{
+  max-width:1000px;
+  margin:auto;
+  background:#111827;
+  padding:40px;
+  border-radius:16px;
+}
+
+h1{
+  color:#38bdf8;
+  margin-bottom:20px;
+}
+
+h2{
+  color:#a78bfa;
+  margin-top:30px;
+  margin-bottom:10px;
+}
+
+h3{
+  color:#fbbf24;
+  margin-top:25px;
+  margin-bottom:10px;
+}
+
+p{
+  margin-bottom:15px;
+}
+
+ul{
+  margin-left:20px;
+}
+
+li{
+  margin-bottom:8px;
+}
+
+.feature{
+  background:#1e293b;
+  border-left:5px solid #38bdf8;
+  padding:15px;
+  border-radius:8px;
+  margin:20px 0;
+}
+
+.code-title{
+  background:#1e293b;
+  color:#93c5fd;
+  padding:10px;
+  font-weight:bold;
+}
+
+pre[class*="language-"]{
+  margin:0!important;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:20px;
+}
+
+th{
+  background:#1e293b;
+  color:#38bdf8;
+  text-align:left;
+  padding:12px;
+}
+
+td{
+  padding:12px;
+  border-top:1px solid #334155;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>How do you add global CSS to a Next.js application?</h1>
+
+<p>
+Global CSS is CSS that applies to the entire application instead of a single component.
+</p>
+
+<div class="feature">
+Global CSS allows us to define styles such as fonts, resets, colors, layouts, and utility classes that can be used throughout our application.
+</div>
+
+<h2>Why Do We Need Global CSS?</h2>
+
+<p>
+Some styles should be available everywhere.
+</p>
+
+Examples:
+
+<ul>
+<li>Font Family</li>
+<li>CSS Reset</li>
+<li>Body Background</li>
+<li>Text Colors</li>
+<li>Global Utility Classes</li>
+</ul>
+
+<h2>Pages Router</h2>
+
+<p>
+In the Pages Router, global CSS is imported inside <code>pages/_app.js</code>.
+</p>
+
+<h3>Step 1: Create Global CSS File</h3>
+
+<div class="code-title">styles/globals.css</div>
+
+<pre><code class="language-css">body {
+  font-family: Arial, sans-serif;
+  background: #f5f5f5;
+}
+
+h1 {
+  color: blue;
+}</code></pre>
+
+<h3>Step 2: Import Global CSS</h3>
+
+<div class="code-title">pages/_app.js</div>
+
+<pre><code class="language-jsx">import '../styles/globals.css';
+
+export default function MyApp({
+  Component,
+  pageProps
+}) {
+
+  return (
+    &lt;Component {...pageProps} /&gt;
+  );
+
+}</code></pre>
+
+<h3>Project Structure</h3>
+
+<div class="code-title">Pages Router</div>
+
+<pre><code class="language-text">pages/
+├── _app.js
+├── index.js
+
+styles/
+└── globals.css
+</code></pre>
+
+<h2>App Router</h2>
+
+<p>
+In the App Router, global CSS is imported inside <code>app/layout.js</code>.
+</p>
+
+<h3>Step 1: Create Global CSS File</h3>
+
+<div class="code-title">app/globals.css</div>
+
+<pre><code class="language-css">body {
+  font-family: Arial, sans-serif;
+  background: #f5f5f5;
+}
+
+h1 {
+  color: blue;
+}</code></pre>
+
+<h3>Step 2: Import Global CSS</h3>
+
+<div class="code-title">app/layout.js</div>
+
+<pre><code class="language-jsx">import './globals.css';
+
+export default function RootLayout({
+  children
+}) {
+
+  return (
+    &lt;html lang="en"&gt;
+      &lt;body&gt;
+        {children}
+      &lt;/body&gt;
+    &lt;/html&gt;
+  );
+
+}</code></pre>
+
+<h3>Project Structure</h3>
+
+<div class="code-title">App Router</div>
+
+<pre><code class="language-text">app/
+├── layout.js
+├── page.js
+└── globals.css
+</code></pre>
+
+<h2>What Happens Internally?</h2>
+
+<div class="code-title">Pages Router</div>
+
+<pre><code class="language-text">globals.css
+      │
+      ▼
+Imported In _app.js
+      │
+      ▼
+Available To All Pages
+</code></pre>
+
+<div class="code-title">App Router</div>
+
+<pre><code class="language-text">globals.css
+      │
+      ▼
+Imported In layout.js
+      │
+      ▼
+Available To Entire App
+</code></pre>
+
+<h2>Can We Import Global CSS Anywhere?</h2>
+
+<p>
+No.
+</p>
+
+<p>
+Global CSS can only be imported in special root files.
+</p>
+
+<table>
+<tr>
+<th>Router</th>
+<th>Import Location</th>
+</tr>
+
+<tr>
+<td>Pages Router</td>
+<td>pages/_app.js</td>
+</tr>
+
+<tr>
+<td>App Router</td>
+<td>app/layout.js</td>
+</tr>
+</table>
+
+<h3>Incorrect Example</h3>
+
+<div class="code-title">components/Header.js</div>
+
+<pre><code class="language-jsx">import './globals.css';</code></pre>
+
+<p>
+This will cause a build error.
+</p>
+
+<h2>Global CSS vs CSS Modules</h2>
+
+<table>
+<tr>
+<th>Feature</th>
+<th>Global CSS</th>
+<th>CSS Modules</th>
+</tr>
+
+<tr>
+<td>Scope</td>
+<td>Entire Application</td>
+<td>Single Component</td>
+</tr>
+
+<tr>
+<td>Class Name Collision</td>
+<td>Possible</td>
+<td>Prevented</td>
+</tr>
+
+<tr>
+<td>Use Case</td>
+<td>Global Styles</td>
+<td>Component Styles</td>
+</tr>
+</table>
+
+<h2>Real Example</h2>
+
+<div class="code-title">app/globals.css</div>
+
+<pre><code class="language-css">body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+}
+
+.container {
+  max-width: 1200px;
+  margin: auto;
+}</code></pre>
+
+<div class="code-title">app/page.js</div>
+
+<pre><code class="language-jsx">export default function Home() {
+
+  return (
+    &lt;div className="container"&gt;
+      &lt;h1&gt;Home Page&lt;/h1&gt;
+    &lt;/div&gt;
+  );
+
+}</code></pre>
+
+<p>
+The <code>container</code> class is available because it was defined globally.
+</p>
+
+<h2>Interview Tip</h2>
+
+<div class="feature">
+A common misconception is that global CSS can be imported into any component. In reality, Next.js only allows global CSS imports in <code>pages/_app.js</code> (Pages Router) or <code>app/layout.js</code> (App Router).
+</div>
+
+<div class="feature">
+<strong>One-Line Definition:</strong><br>
+Global CSS in Next.js is added by creating a global stylesheet and importing it in <code>pages/_app.js</code> (Pages Router) or <code>app/layout.js</code> (App Router), making the styles available throughout our application.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How do you import and use SVG files as React components in Next.js?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+}
+
+body{
+  background:#0f172a;
+  color:#e2e8f0;
+  font-family:Arial,sans-serif;
+  line-height:1.8;
+  padding:40px 20px;
+}
+
+.container{
+  max-width:1000px;
+  margin:auto;
+  background:#111827;
+  padding:40px;
+  border-radius:16px;
+}
+
+h1{
+  color:#38bdf8;
+  margin-bottom:20px;
+}
+
+h2{
+  color:#a78bfa;
+  margin-top:30px;
+  margin-bottom:10px;
+}
+
+h3{
+  color:#fbbf24;
+  margin-top:25px;
+  margin-bottom:10px;
+}
+
+p{
+  margin-bottom:15px;
+}
+
+ul{
+  margin-left:20px;
+}
+
+li{
+  margin-bottom:8px;
+}
+
+.feature{
+  background:#1e293b;
+  border-left:5px solid #38bdf8;
+  padding:15px;
+  border-radius:8px;
+  margin:20px 0;
+}
+
+.code-title{
+  background:#1e293b;
+  color:#93c5fd;
+  padding:10px;
+  font-weight:bold;
+}
+
+pre[class*="language-"]{
+  margin:0!important;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:20px;
+}
+
+th{
+  background:#1e293b;
+  color:#38bdf8;
+  text-align:left;
+  padding:12px;
+}
+
+td{
+  padding:12px;
+  border-top:1px solid #334155;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>How do you import and use SVG files as React components in Next.js?</h1>
+
+<p>
+SVG files can be used in Next.js in multiple ways, but to use an SVG as a React component we typically use <code>SVGR</code>.
+</p>
+
+<div class="feature">
+Using SVG as a React component allows us to pass props, apply CSS classes, change colors, control width and height, and reuse SVGs like normal React components.
+</div>
+
+<h2>Method 1: Use SVG from the public Folder</h2>
+
+<p>
+The simplest method is storing SVG files in the public folder.
+</p>
+
+<div class="code-title">Project Structure</div>
+
+<pre><code class="language-text">public/
+└── logo.svg
+</code></pre>
+
+<div class="code-title">Usage</div>
+
+<pre><code class="language-jsx">export default function Home() {
+
+  return (
+    &lt;img
+      src="/logo.svg"
+      alt="Logo"
+    /&gt;
+  );
+
+}</code></pre>
+
+<p>
+This works, but the SVG behaves like a normal image.
+</p>
+
+<p>
+We cannot easily change SVG properties using React props.
+</p>
+
+<h2>Method 2: Use next/image</h2>
+
+<div class="code-title">Example</div>
+
+<pre><code class="language-jsx">import Image from 'next/image';
+
+export default function Home() {
+
+  return (
+    &lt;Image
+      src="/logo.svg"
+      alt="Logo"
+      width={100}
+      height={100}
+    /&gt;
+  );
+
+}</code></pre>
+
+<p>
+This is useful when SVG behaves like a static image.
+</p>
+
+<h2>Method 3: Import SVG as a React Component (Recommended)</h2>
+
+<p>
+To use SVG files as React components, we need SVGR.
+</p>
+
+<h3>Step 1: Install SVGR</h3>
+
+<div class="code-title">Terminal</div>
+
+<pre><code class="language-bash">npm install -D @svgr/webpack</code></pre>
+
+<h3>Step 2: Configure next.config.js</h3>
+
+<div class="code-title">next.config.js</div>
+
+<pre><code class="language-js">const nextConfig = {
+
+  webpack(config) {
+
+    config.module.rules.push({
+      test: /\.svg$/i,
+      issuer: /\.[jt]sx?$/,
+      use: ['@svgr/webpack']
+    });
+
+    return config;
+
+  }
+
+};
+
+module.exports = nextConfig;</code></pre>
+
+<h3>Step 3: Create SVG File</h3>
+
+<div class="code-title">assets/logo.svg</div>
+
+<pre><code class="language-html">&lt;svg
+  xmlns="http://www.w3.org/2000/svg"
+  viewBox="0 0 100 100"
+&gt;
+  &lt;circle
+    cx="50"
+    cy="50"
+    r="40"
+    fill="green"
+  /&gt;
+&lt;/svg&gt;</code></pre>
+
+<h3>Step 4: Import SVG as Component</h3>
+
+<div class="code-title">app/page.js</div>
+
+<pre><code class="language-jsx">import Logo from '../assets/logo.svg';
+
+export default function Home() {
+
+  return (
+    &lt;Logo /&gt;
+  );
+
+}</code></pre>
+
+<h2>What Happens Internally?</h2>
+
+<div class="code-title">Flow</div>
+
+<pre><code class="language-text">logo.svg
+     │
+     ▼
+SVGR Loader
+     │
+     ▼
+React Component
+     │
+     ▼
+&lt;Logo /&gt;
+</code></pre>
+
+<h2>Passing Props to SVG Components</h2>
+
+<div class="code-title">Example</div>
+
+<pre><code class="language-jsx">import Logo from '../assets/logo.svg';
+
+export default function Home() {
+
+  return (
+    &lt;Logo
+      width={200}
+      height={200}
+    /&gt;
+  );
+
+}</code></pre>
+
+<h2>Applying CSS Classes</h2>
+
+<div class="code-title">Example</div>
+
+<pre><code class="language-jsx">import Logo from '../assets/logo.svg';
+
+export default function Home() {
+
+  return (
+    &lt;Logo className="logo" /&gt;
+  );
+
+}</code></pre>
+
+<div class="code-title">CSS</div>
+
+<pre><code class="language-css">.logo {
+  width: 200px;
+  height: 200px;
+}</code></pre>
+
+<h2>Changing SVG Color</h2>
+
+<p>
+If the SVG uses <code>currentColor</code>, we can control its color through CSS.
+</p>
+
+<div class="code-title">SVG</div>
+
+<pre><code class="language-html">&lt;svg&gt;
+  &lt;path
+    fill="currentColor"
+  /&gt;
+&lt;/svg&gt;</code></pre>
+
+<div class="code-title">Usage</div>
+
+<pre><code class="language-jsx">&lt;Logo
+  style={{
+    color: 'red'
+  }}
+/&gt;</code></pre>
+
+<h2>Project Structure</h2>
+
+<div class="code-title">Example</div>
+
+<pre><code class="language-text">app/
+├── page.js
+
+assets/
+└── logo.svg
+
+next.config.js
+</code></pre>
+
+<h2>SVG Component vs SVG Image</h2>
+
+<table>
+<tr>
+<th>Feature</th>
+<th>SVG Component</th>
+<th>SVG Image</th>
+</tr>
+
+<tr>
+<td>Use React Props</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+
+<tr>
+<td>Apply Dynamic Styles</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+
+<tr>
+<td>Change Color Easily</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+
+<tr>
+<td>Use Event Handlers</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+
+<tr>
+<td>Simple Setup</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+</table>
+
+<h2>Real-World Example</h2>
+
+<p>
+Suppose our application contains:
+</p>
+
+<div class="code-title">Icons</div>
+
+<pre><code class="language-text">Home Icon
+Profile Icon
+Settings Icon
+Logout Icon
+</code></pre>
+
+<p>
+Importing them as React components allows us to:
+</p>
+
+<ul>
+<li>Resize icons using props.</li>
+<li>Change colors dynamically.</li>
+<li>Add click events.</li>
+<li>Reuse icons across the application.</li>
+</ul>
+
+<h2>App Router and Pages Router</h2>
+
+<p>
+SVG component support works the same in both routers because it is configured through Webpack.
+</p>
+
+<table>
+<tr>
+<th>Router</th>
+<th>SVG Component Support</th>
+</tr>
+
+<tr>
+<td>Pages Router</td>
+<td>✅</td>
+</tr>
+
+<tr>
+<td>App Router</td>
+<td>✅</td>
+</tr>
+</table>
+
+<h2>Important Note</h2>
+
+<div class="feature">
+A common misconception is that SVG files can be imported as React components by default. In reality, Next.js requires SVGR configuration before SVG files can be imported and used as React components.
+</div>
+
+<h2>Interview Tip</h2>
+
+<div class="feature">
+If an SVG only needs to be displayed, storing it in the public folder is usually enough. If we need dynamic colors, props, event handlers, or reusable icons, importing it as a React component using SVGR is the better approach.
+</div>
+
+<div class="feature">
+<strong>One-Line Definition:</strong><br>
+SVG files can be used as React components in Next.js by configuring SVGR, allowing us to import SVG files and use them like normal React components with props, styles, and event handlers.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+
+</body>
+</html>
