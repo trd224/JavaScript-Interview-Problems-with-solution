@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Next.js Rendering Scenarios</title>
+
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css" rel="stylesheet">
+
+  <style>
+    * { box-sizing: border-box; }
+
+    body{
+  margin:0;
+  background:#0b1120;
+  color:#e2e8f0;
+  font-family:'Segoe UI',sans-serif;
+}
+
+.wrapper{
+  max-width:1000px;
+  margin:auto;
+  padding:40px 20px;
+}
+
+h1{
+  color:#60a5fa;
+  font-size:40px;
+  text-align:center;
+  margin-bottom:40px;
+}
+
+h2{
+  color:#facc15;
+  margin-bottom:20px;
+  font-size:28px;
+}
+
+.card{
+  background:#111827;
+  border:1px solid #1f2937;
+  border-radius:18px;
+  padding:30px;
+  margin-bottom:35px;
+  box-shadow:
+    0 10px 30px rgba(0,0,0,.35),
+    0 0 0 1px rgba(255,255,255,.03);
+}
+
+pre[class*="language-"]{
+  border-radius:14px;
+  margin:20px 0;
+  font-size:14px;
+}
+
+.result{
+  margin-top:20px;
+  background:#052e16;
+  border-left:5px solid #22c55e;
+  color:#dcfce7;
+  padding:18px;
+  border-radius:12px;
+  white-space:pre-line;
+}
+
+.rule{
+  background:#111827;
+  border:1px solid #1f2937;
+  border-radius:18px;
+  padding:30px;
+  margin-top:40px;
+}
+
+.rule h2{
+  color:#22c55e;
+}
+  </style>
+</head>
+
+<body>
+  <div class="wrapper">
+    <h1>Next.js Rendering Scenarios with Examples</h1>
+
+    <div class="card">
+      <h2>1. (SSG Page) SSG Page + Static Server Component </h2>
+
+<pre><code class="language-tsx">// app/page.tsx
+import About from './About';
+
+export default function Page() {
+  return &lt;About /&gt;;
+}</code></pre>
+
+<pre><code class="language-tsx">// app/About.tsx
+export default function About() {
+  return &lt;h1&gt;About Us&lt;/h1&gt;;
+}</code></pre>
+
+      <div class="result">Result: Pure SSG
+Hydration: No
+HTML Generated: Build Time
+Regenerated: Never
+View Source: Shows Content
+SEO: Excellent</div>
+    </div>
+
+    <div class="card">
+  <h2>2. SSG Page (API Data)</h2>
+
+<pre><code class="language-tsx">// app/page.tsx
+import ProductList from './ProductList';
+
+export default async function Page() {
+  const products = await fetch(
+    'https://api.example.com/products'
+  ).then(res =&gt; res.json());
+
+  return &lt;ProductList products={products} /&gt;;
+}</code></pre>
+
+<pre><code class="language-tsx">// app/ProductList.tsx
+export default function ProductList({ products }) {
+  return (
+    &lt;ul&gt;
+      {products.map(product =&gt; (
+        &lt;li key={product.id}&gt;
+          {product.name}
+        &lt;/li&gt;
+      ))}
+    &lt;/ul&gt;
+  );
+}</code></pre>
+
+  <div class="result">Result: SSG
+Hydration: No
+HTML Generated: Build Time
+Regenerated: Never
+View Source: Shows Products
+SEO: Excellent
+Note: Products are fetched only during build time.</div>
+</div>
+
+    <div class="card">
+      <h2>3. SSG Page + Client Component</h2>
+
+<pre><code class="language-tsx">// app/page.tsx
+import ThemeSwitcher from './ThemeSwitcher';
+
+export default function Page() {
+  return &lt;ThemeSwitcher /&gt;;
+}</code></pre>
+
+<pre><code class="language-tsx">// app/ThemeSwitcher.tsx
+'use client';
+
+import { useState } from 'react';
+
+export default function ThemeSwitcher() {
+  const [dark, setDark] = useState(false);
+
+  return &lt;button onClick={() =&gt; setDark(!dark)}&gt;Toggle Theme&lt;/button&gt;;
+}</code></pre>
+
+      <div class="result">Result: SSG + Hydration
+Hydration: Yes
+HTML Generated: Build Time
+Regenerated: Never
+View Source: Shows Initial HTML
+SEO: Good</div>
+    </div>
+
+   
+
+    <div class="card">
+      <h2>4. SSG Page + Client Component + API Fetch</h2>
+
+<pre><code class="language-tsx">// app/page.tsx
+import RecentlyViewed from './RecentlyViewed';
+
+export default function Page() {
+  return &lt;RecentlyViewed /&gt;;
+}</code></pre>
+
+<pre><code class="language-tsx">// app/RecentlyViewed.tsx
+'use client';
+
+import { useEffect, useState } from 'react';
+
+export default function RecentlyViewed() {
+  const [products, setProducts] = useState([]);
+
+  useEffect(() =&gt; {
+    fetch('/api/recently-viewed')
+      .then(res =&gt; res.json())
+      .then(setProducts);
+  }, []);
+
+  return products.map(product =&gt; &lt;p key={product.id}&gt;{product.name}&lt;/p&gt;);
+}</code></pre>
+
+      <div class="result">Result: SSG + Hydration
+Hydration: Yes
+HTML Generated: Build Time
+API Call: Browser
+Regenerated: Never
+View Source: Does NOT show fetched products
+SEO: Poor for fetched products</div>
+    </div>
+
+    <div class="card">
+      <h2>5. SSG → SSR (cookies)</h2>
+
+<pre><code class="language-tsx">// app/page.tsx
+import UserName from './UserName';
+
+export default function Page() {
+  return &lt;UserName /&gt;;
+}</code></pre>
+
+<pre><code class="language-tsx">// app/UserName.tsx
+import { cookies } from 'next/headers';
+
+export default async function UserName() {
+  const cookieStore = await cookies();
+  const name = cookieStore.get('name')?.value;
+
+  return &lt;h1&gt;Hello {name}&lt;/h1&gt;;
+}</code></pre>
+
+      <div class="result">Result: SSR / Dynamic
+Hydration: No
+HTML Generated: Request Time
+Build Time Generation: Not Possible
+View Source: Shows User Name
+SEO: Good</div>
+    </div>
+
+    <div class="card">
+      <h2>6. SSG → SSR (headers)</h2>
+
+<pre><code class="language-tsx">// app/page.tsx
+import UserAgent from './UserAgent';
+
+export default function Page() {
+  return &lt;UserAgent /&gt;;
+}</code></pre>
+
+<pre><code class="language-tsx">// app/UserAgent.tsx
+import { headers } from 'next/headers';
+
+export default async function UserAgent() {
+  const headerList = await headers();
+  const userAgent = headerList.get('user-agent');
+
+  return &lt;p&gt;{userAgent}&lt;/p&gt;;
+}</code></pre>
+
+      <div class="result">Result: SSR / Dynamic
+Hydration: No
+HTML Generated: Request Time
+Build Time Generation: Not Possible
+View Source: Shows User Agent
+SEO: Good</div>
+    </div>
+
+    <div class="card">
+      <h2>7. SSG → SSR (connection)</h2>
+
+<pre><code class="language-tsx">// app/page.tsx
+import CurrentTime from './CurrentTime';
+
+export default function Page() {
+  return &lt;CurrentTime /&gt;;
+}</code></pre>
+
+<pre><code class="language-tsx">// app/CurrentTime.tsx
+import { connection } from 'next/server';
+
+export default async function CurrentTime() {
+  await connection();
+
+  return &lt;p&gt;{new Date().toISOString()}&lt;/p&gt;;
+}</code></pre>
+
+      <div class="result">Result: SSR / Dynamic
+Hydration: No
+HTML Generated: Request Time
+Build Time Generation: Not Possible
+View Source: Shows Current Time
+SEO: Good</div>
+<div>Note: Without connection, Next.js may prerender this page as SSG, so the time can become fixed at build time.</div>
+
+<div class="result">Next.js may decide:
+This page has no cookies()
+No headers()
+No searchParams
+No request data
+
+I can prerender it. (SSG)</div>
+    </div>
+ <div class="card">
+      <h2>8. ISR Page (API Data)</h2>
+
+<pre><code class="language-tsx">// app/page.tsx
+import ProductList from './ProductList';
+
+export default async function Page() {
+  const products = await fetch('https://api.example.com/products', {
+    next: { revalidate: 60 }
+  }).then(res =&gt; res.json());
+
+  return &lt;ProductList products={products} /&gt;;
+}</code></pre>
+
+<pre><code class="language-tsx">// app/ProductList.tsx
+export default function ProductList({ products }) {
+  return (
+    &lt;ul&gt;
+      {products.map(product =&gt; &lt;li key={product.id}&gt;{product.name}&lt;/li&gt;)}
+    &lt;/ul&gt;
+  );
+}</code></pre>
+
+      <div class="result">Result: ISR
+Hydration: No
+HTML Generated: Build Time
+Regenerated: Every 60 seconds
+View Source: Shows Products
+SEO: Excellent</div>
+    </div>
+    <div class="card">
+      <h2>9. ISR Page (Static Content)</h2>
+
+<pre><code class="language-tsx">// app/page.tsx
+import Categories from './Categories';
+
+export const revalidate = 60;
+
+export default function Page() {
+  return &lt;Categories /&gt;;
+}</code></pre>
+
+<pre><code class="language-tsx">// app/Categories.tsx
+export default function Categories() {
+  return &lt;h2&gt;Top Categories&lt;/h2&gt;;
+}</code></pre>
+
+      <div class="result">Result: ISR
+Hydration: No
+HTML Generated: Build Time
+Regenerated: Every 60 seconds
+View Source: Shows Categories
+SEO: Excellent</div>
+        <div  class="result">Categories is a server component because every component is a Server Component by default</div>
+    </div>
+
+    <div class="card">
+      <h2>10. ISR Page + Client Component</h2>
+
+<pre><code class="language-tsx">// app/page.tsx
+import WishlistButton from './WishlistButton';
+
+export const revalidate = 60;
+
+export default function Page() {
+  return &lt;WishlistButton /&gt;;
+}</code></pre>
+
+<pre><code class="language-tsx">// app/WishlistButton.tsx
+'use client';
+
+export default function WishlistButton() {
+  return &lt;button onClick={() =&gt; alert('Added')}&gt;Add Wishlist&lt;/button&gt;;
+}</code></pre>
+
+      <div class="result">Result: ISR + Hydration
+Hydration: Yes
+HTML Generated: Build Time
+Regenerated: Every 60 seconds
+View Source: Shows Initial Button HTML
+SEO: Good</div>
+    </div>
+
+    <div class="card">
+      <h2>11. ISR Page +  Client Component + API Fetch</h2>
+
+<pre><code class="language-tsx">// app/page.tsx
+import CartCount from './CartCount';
+
+export const revalidate = 60;
+
+export default function Page() {
+  return &lt;CartCount /&gt;;
+}</code></pre>
+
+<pre><code class="language-tsx">// app/CartCount.tsx
+'use client';
+
+import { useEffect, useState } from 'react';
+
+export default function CartCount() {
+  const [count, setCount] = useState(0);
+
+  useEffect(() =&gt; {
+    fetch('/api/cart-count')
+      .then(res =&gt; res.json())
+      .then(data =&gt; setCount(data.count));
+  }, []);
+
+  return &lt;span&gt;Cart: {count}&lt;/span&gt;;
+}</code></pre>
+
+      <div class="result">Result: ISR + Hydration
+Hydration: Yes
+HTML Generated: Build Time
+Regenerated: Every 60 seconds
+API Call: Browser
+View Source: Shows Initial Cart Count, not fetched count
+SEO: Poor for fetched cart data</div>
+    </div>
+
+    <div class="card">
+      <h2>12. ISR → SSR (cookies)</h2>
+
+<pre><code class="language-tsx">// app/page.tsx
+import PersonalizedProducts from './PersonalizedProducts';
+
+export const revalidate = 60;
+
+export default function Page() {
+  return &lt;PersonalizedProducts /&gt;;
+}</code></pre>
+
+<pre><code class="language-tsx">// app/PersonalizedProducts.tsx
+import { cookies } from 'next/headers';
+
+export default async function PersonalizedProducts() {
+  const cookieStore = await cookies();
+  const userId = cookieStore.get('userId')?.value;
+  const products = await getProducts(userId);
+
+  return products.map(product =&gt; &lt;p key={product.id}&gt;{product.name}&lt;/p&gt;);
+}</code></pre>
+
+      <div class="result">Result: SSR / Dynamic
+Hydration: No
+HTML Generated: Request Time
+ISR Lost: Yes
+Build Time Generation: Not Possible
+View Source: Shows Personalized Products
+SEO: Good</div>
+    </div>
+
+    <div class="card">
+      <h2>13. ISR → SSR (headers)</h2>
+
+<pre><code class="language-tsx">// app/page.tsx
+import UserContent from './UserContent';
+
+export const revalidate = 60;
+
+export default function Page() {
+  return &lt;UserContent /&gt;;
+}</code></pre>
+
+<pre><code class="language-tsx">// app/UserContent.tsx
+import { headers } from 'next/headers';
+
+export default async function UserContent() {
+  const headerList = await headers();
+  const country = headerList.get('x-country');
+
+  return &lt;p&gt;Country: {country}&lt;/p&gt;;
+}</code></pre>
+
+      <div class="result">Result: SSR / Dynamic
+Hydration: No
+HTML Generated: Request Time
+ISR Lost: Yes
+Build Time Generation: Not Possible
+View Source: Shows Header-Based Content
+SEO: Good</div>
+    </div>
+
+    <div class="card">
+      <h2>14. SSR Page</h2>
+
+<pre><code class="language-tsx">// app/dashboard/page.tsx
+import DashboardLayout from './DashboardLayout';
+
+export const dynamic = 'force-dynamic';
+
+export default function Page() {
+  return &lt;DashboardLayout /&gt;;
+}</code></pre>
+
+<pre><code class="language-tsx">// app/dashboard/DashboardLayout.tsx
+export default function DashboardLayout() {
+  return &lt;h1&gt;Dashboard Layout&lt;/h1&gt;;
+}</code></pre>
+
+      <div class="result">Result: SSR
+Hydration: No
+HTML Generated: Request Time
+View Source: Shows Dashboard Layout
+SEO: Good</div>
+    </div>
+
+    <div class="card">
+      <h2>15. SSR Page + Client Component</h2>
+
+<pre><code class="language-tsx">// app/dashboard/page.tsx
+import SearchFilter from './SearchFilter';
+
+export const dynamic = 'force-dynamic';
+
+export default function Page() {
+  return &lt;SearchFilter /&gt;;
+}</code></pre>
+
+<pre><code class="language-tsx">// app/dashboard/SearchFilter.tsx
+'use client';
+
+import { useState } from 'react';
+
+export default function SearchFilter() {
+  const [search, setSearch] = useState('');
+
+  return &lt;input value={search} onChange={e =&gt; setSearch(e.target.value)} /&gt;;
+}</code></pre>
+
+      <div class="result">Result: SSR + Hydration
+Hydration: Yes
+HTML Generated: Request Time
+View Source: Shows Initial Input HTML
+SEO: Good</div>
+    </div>
+
+    <div class="card">
+      <h2>16. SSR Page +  Client Component + API Fetch</h2>
+
+<pre><code class="language-tsx">// app/dashboard/page.tsx
+import Notifications from './Notifications';
+
+export const dynamic = 'force-dynamic';
+
+export default function Page() {
+  return &lt;Notifications /&gt;;
+}</code></pre>
+
+<pre><code class="language-tsx">// app/dashboard/Notifications.tsx
+'use client';
+
+import { useEffect, useState } from 'react';
+
+export default function Notifications() {
+  const [items, setItems] = useState([]);
+
+  useEffect(() =&gt; {
+    fetch('/api/notifications')
+      .then(res =&gt; res.json())
+      .then(setItems);
+  }, []);
+
+  return items.map(item =&gt; &lt;p key={item.id}&gt;{item.message}&lt;/p&gt;);
+}</code></pre>
+
+      <div class="result">Result: SSR + Hydration
+Hydration: Yes
+HTML Generated: Request Time
+API Call: Browser
+View Source: Does NOT show fetched notifications
+SEO: Poor for fetched notifications</div>
+    </div>
+
+    
+
+    <div class="rule">
+      <h2>Super Simple Rule</h2>
+      <div class="result">Server Component = No Hydration
+Client Component = Hydration
+
+Static data = SSG
+Public changing data = ISR
+cookies / headers / connection = SSR
+Client API fetch = Data comes after hydration</div>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-tsx.min.js"></script>
+</body>
+</html>
