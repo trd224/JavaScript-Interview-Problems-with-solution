@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How do you add Open Graph and Twitter card tags in the App Router?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+
+body{
+  background:#0f172a;
+  color:#e2e8f0;
+  font-family:Arial,sans-serif;
+  line-height:1.8;
+  padding:40px 20px;
+}
+
+.container{
+  max-width:1000px;
+  margin:auto;
+  background:#111827;
+  padding:40px;
+  border-radius:16px;
+}
+
+h1{color:#38bdf8;margin-bottom:20px}
+h2{color:#a78bfa;margin-top:30px;margin-bottom:10px}
+
+p{margin-bottom:15px}
+
+ul{margin-left:20px}
+li{margin-bottom:8px}
+
+.feature{
+  background:#1e293b;
+  border-left:5px solid #38bdf8;
+  padding:15px;
+  border-radius:8px;
+  margin:20px 0;
+}
+
+.code-title{
+  background:#1e293b;
+  color:#93c5fd;
+  padding:12px;
+  font-weight:bold;
+}
+
+pre[class*="language-"]{
+  margin:0!important;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:20px;
+}
+
+th{
+  background:#1e293b;
+  color:#38bdf8;
+  text-align:left;
+  padding:12px;
+}
+
+td{
+  padding:12px;
+  border-top:1px solid #334155;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>How do you add Open Graph and Twitter card tags in the App Router?</h1>
+
+<p>
+In the App Router, Open Graph and Twitter Card tags are added using the <code>metadata</code> export or <code>generateMetadata()</code>.
+</p>
+
+<div class="feature">
+Next.js automatically generates the required meta tags from the <code>openGraph</code> and <code>twitter</code> properties inside the Metadata API.
+</div>
+
+<h2>Why Use Open Graph and Twitter Cards?</h2>
+
+<p>
+These tags control how links appear when shared on social media platforms.
+</p>
+
+<ul>
+<li>Facebook</li>
+<li>LinkedIn</li>
+<li>WhatsApp</li>
+<li>X (Twitter)</li>
+<li>Telegram</li>
+<li>Discord</li>
+</ul>
+
+<h2>Basic Open Graph Example</h2>
+
+<div class="code-title">app/about/page.js</div>
+
+<pre><code class="language-js">export const metadata = {
+  title: 'About Us',
+  description: 'Learn more about our company.',
+
+  openGraph: {
+    title: 'About Us',
+    description: 'Learn more about our company.',
+    url: 'https://example.com/about',
+    siteName: 'My Website',
+    images: [
+      {
+        url: 'https://example.com/og-image.jpg',
+        width: 1200,
+        height: 630
+      }
+    ],
+    locale: 'en_US',
+    type: 'website'
+  }
+};
+
+export default function About() {
+  return &lt;h1&gt;About Page&lt;/h1&gt;;
+}</code></pre>
+
+<h2>Generated Open Graph Tags</h2>
+
+<div class="code-title">HTML Output</div>
+
+<pre><code class="language-html">&lt;meta property="og:title" content="About Us" /&gt;
+&lt;meta property="og:description" content="Learn more about our company." /&gt;
+&lt;meta property="og:url" content="https://example.com/about" /&gt;
+&lt;meta property="og:site_name" content="My Website" /&gt;
+&lt;meta property="og:type" content="website" /&gt;
+&lt;meta property="og:image" content="https://example.com/og-image.jpg" /&gt;</code></pre>
+
+<h2>Twitter Card Example</h2>
+
+<div class="code-title">app/about/page.js</div>
+
+<pre><code class="language-js">export const metadata = {
+  title: 'About Us',
+  description: 'Learn more about our company.',
+
+  twitter: {
+    card: 'summary_large_image',
+    title: 'About Us',
+    description: 'Learn more about our company.',
+    images: ['https://example.com/twitter-image.jpg']
+  }
+};</code></pre>
+
+<h2>Generated Twitter Tags</h2>
+
+<div class="code-title">HTML Output</div>
+
+<pre><code class="language-html">&lt;meta name="twitter:card" content="summary_large_image" /&gt;
+&lt;meta name="twitter:title" content="About Us" /&gt;
+&lt;meta name="twitter:description" content="Learn more about our company." /&gt;
+&lt;meta name="twitter:image" content="https://example.com/twitter-image.jpg" /&gt;</code></pre>
+
+<h2>Complete Example</h2>
+
+<div class="code-title">app/about/page.js</div>
+
+<pre><code class="language-js">export const metadata = {
+  title: 'About Us',
+  description: 'Learn more about our company.',
+
+  openGraph: {
+    title: 'About Us',
+    description: 'Learn more about our company.',
+    url: 'https://example.com/about',
+    siteName: 'My Website',
+    images: [
+      {
+        url: 'https://example.com/og-image.jpg',
+        width: 1200,
+        height: 630
+      }
+    ],
+    locale: 'en_US',
+    type: 'website'
+  },
+
+  twitter: {
+    card: 'summary_large_image',
+    title: 'About Us',
+    description: 'Learn more about our company.',
+    images: ['https://example.com/twitter-image.jpg']
+  }
+};
+
+export default function About() {
+  return &lt;h1&gt;About Page&lt;/h1&gt;;
+}</code></pre>
+
+<h2>Dynamic Open Graph Example</h2>
+
+<p>
+When metadata depends on fetched data, use <code>generateMetadata()</code>.
+</p>
+
+<div class="code-title">app/products/[id]/page.js</div>
+
+<pre><code class="language-js">async function getProduct(id) {
+  const res = await fetch(`https://dummyjson.com/products/${id}`);
+  return res.json();
+}
+
+export async function generateMetadata({ params }) {
+
+  const { id } = await params;
+
+  const product = await getProduct(id);
+
+  return {
+    title: product.title,
+    description: product.description,
+
+    openGraph: {
+      title: product.title,
+      description: product.description,
+      images: [product.thumbnail]
+    },
+
+    twitter: {
+      card: 'summary_large_image',
+      title: product.title,
+      description: product.description,
+      images: [product.thumbnail]
+    }
+  };
+
+}
+
+export default async function Page({ params }) {
+
+  const { id } = await params;
+
+  const product = await getProduct(id);
+
+  return (
+    &lt;div&gt;
+      &lt;h1&gt;{product.title}&lt;/h1&gt;
+      &lt;p&gt;{product.description}&lt;/p&gt;
+    &lt;/div&gt;
+  );
+
+}</code></pre>
+
+<h2>How It Works</h2>
+
+<div class="code-title">Flow</div>
+
+<pre><code class="language-text">Request
+   │
+   ▼
+Product Page
+   │
+   ▼
+generateMetadata()
+   │
+   ▼
+Fetch Product
+   │
+   ▼
+Generate Open Graph
+and Twitter Tags
+   │
+   ▼
+Render Page</code></pre>
+
+<h2>Common Twitter Card Types</h2>
+
+<table>
+
+<tr>
+<th>Card Type</th>
+<th>Description</th>
+</tr>
+
+<tr>
+<td>summary</td>
+<td>Small image card</td>
+</tr>
+
+<tr>
+<td>summary_large_image</td>
+<td>Large image preview card</td>
+</tr>
+
+<tr>
+<td>player</td>
+<td>Video or audio player card</td>
+</tr>
+
+<tr>
+<td>app</td>
+<td>Mobile app card</td>
+</tr>
+
+</table>
+
+<h2>Recommended Open Graph Image Size</h2>
+
+<div class="code-title">Recommended Size</div>
+
+<pre><code class="language-text">Width  = 1200px
+Height = 630px
+
+Aspect Ratio = 1.91 : 1</code></pre>
+
+<h2>Important Note</h2>
+
+<div class="feature">
+Open Graph tags are primarily used by Facebook, LinkedIn, WhatsApp, Telegram, and Discord, while Twitter Card tags are used by X (Twitter).
+</div>
+
+<h2>Interview Tip</h2>
+
+<div class="feature">
+In the App Router, Open Graph and Twitter Card tags are configured using the <code>openGraph</code> and <code>twitter</code> properties inside the Metadata API. Next.js automatically converts them into the appropriate meta tags.
+</div>
+
+<div class="feature">
+<strong>One-Line Definition:</strong><br>
+Open Graph and Twitter Card tags are added in the App Router through the Metadata API using the <code>openGraph</code> and <code>twitter</code> properties, allowing social platforms to display rich link previews.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+
+</body>
+</html>

@@ -298,8 +298,35 @@ No request data
 
 I can prerender it. (SSG)</div>
     </div>
- <div class="card">
-      <h2>8. ISR Page (API Data)</h2>
+ 
+    <div class="card">
+      <h2>8. ISR Page (Static Content)</h2>
+
+<pre><code class="language-tsx">// app/page.tsx
+import Categories from './Categories';
+
+export const revalidate = 60;
+
+export default function Page() {
+  return &lt;Categories /&gt;;
+}</code></pre>
+
+<pre><code class="language-tsx">// app/Categories.tsx
+export default function Categories() {
+  return &lt;h2&gt;Top Categories&lt;/h2&gt;;
+}</code></pre>
+
+      <div class="result">Result: ISR
+Hydration: No
+HTML Generated: Build Time
+Regenerated: Every 60 seconds
+View Source: Shows Categories
+SEO: Excellent</div>
+        <div  class="result">Categories is a server component because every component is a Server Component by default</div>
+    </div>
+
+    <div class="card">
+      <h2>9. ISR Page (API Data)</h2>
 
 <pre><code class="language-tsx">// app/page.tsx
 import ProductList from './ProductList';
@@ -327,31 +354,6 @@ HTML Generated: Build Time
 Regenerated: Every 60 seconds
 View Source: Shows Products
 SEO: Excellent</div>
-    </div>
-    <div class="card">
-      <h2>9. ISR Page (Static Content)</h2>
-
-<pre><code class="language-tsx">// app/page.tsx
-import Categories from './Categories';
-
-export const revalidate = 60;
-
-export default function Page() {
-  return &lt;Categories /&gt;;
-}</code></pre>
-
-<pre><code class="language-tsx">// app/Categories.tsx
-export default function Categories() {
-  return &lt;h2&gt;Top Categories&lt;/h2&gt;;
-}</code></pre>
-
-      <div class="result">Result: ISR
-Hydration: No
-HTML Generated: Build Time
-Regenerated: Every 60 seconds
-View Source: Shows Categories
-SEO: Excellent</div>
-        <div  class="result">Categories is a server component because every component is a Server Component by default</div>
     </div>
 
     <div class="card">
@@ -417,6 +419,7 @@ Regenerated: Every 60 seconds
 API Call: Browser
 View Source: Shows Initial Cart Count, not fetched count
 SEO: Poor for fetched cart data</div>
+<div class="result">ISR is ineffective here because the actual cart data is fetched on the client after hydration, so regenerating the page HTML provides no meaningful benefit.</div>
     </div>
 
     <div class="card">

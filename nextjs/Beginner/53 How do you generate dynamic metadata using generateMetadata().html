@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How do you generate dynamic metadata using generateMetadata()?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+
+body{
+  background:#0f172a;
+  color:#e2e8f0;
+  font-family:Arial,sans-serif;
+  line-height:1.8;
+  padding:40px 20px;
+}
+
+.container{
+  max-width:1000px;
+  margin:auto;
+  background:#111827;
+  padding:40px;
+  border-radius:16px;
+}
+
+h1{color:#38bdf8;margin-bottom:20px}
+h2{color:#a78bfa;margin-top:30px;margin-bottom:10px}
+
+p{margin-bottom:15px}
+
+ul{margin-left:20px}
+li{margin-bottom:8px}
+
+.feature{
+  background:#1e293b;
+  border-left:5px solid #38bdf8;
+  padding:15px;
+  border-radius:8px;
+  margin:20px 0;
+}
+
+.code-title{
+  background:#1e293b;
+  color:#93c5fd;
+  padding:12px;
+  font-weight:bold;
+}
+
+pre[class*="language-"]{
+  margin:0!important;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:20px;
+}
+
+th{
+  background:#1e293b;
+  color:#38bdf8;
+  text-align:left;
+  padding:12px;
+}
+
+td{
+  padding:12px;
+  border-top:1px solid #334155;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>How do you generate dynamic metadata using generateMetadata()?</h1>
+
+<p>
+The <code>generateMetadata()</code> function is used when metadata depends on dynamic data such as products, blog posts, user profiles, CMS content, or database records.
+</p>
+
+<div class="feature">
+Unlike the static <code>metadata</code> export, <code>generateMetadata()</code> can fetch data and generate metadata dynamically for each page.
+</div>
+
+<h2>Why Use generateMetadata()?</h2>
+
+<p>
+Sometimes metadata cannot be known ahead of time because it depends on the current route or fetched data.
+</p>
+
+<p>
+For example:
+</p>
+
+<ul>
+<li>Product Detail Pages</li>
+<li>Blog Detail Pages</li>
+<li>User Profile Pages</li>
+<li>CMS Content</li>
+<li>Database Records</li>
+</ul>
+
+<h2>Complete Example</h2>
+
+<div class="code-title">app/products/[id]/page.js</div>
+
+<pre><code class="language-js">async function getProduct(id) {
+  const res = await fetch(`https://dummyjson.com/products/${id}`);
+  return res.json();
+}
+
+export async function generateMetadata({ params }) {
+  const { id } = await params;
+
+  const product = await getProduct(id);
+
+  return {
+    title: product.title,
+    description: product.description
+  };
+}
+
+export default async function Page({ params }) {
+  const { id } = await params;
+
+  const product = await getProduct(id);
+
+  return (
+    &lt;div&gt;
+      &lt;h1&gt;{product.title}&lt;/h1&gt;
+      &lt;p&gt;{product.description}&lt;/p&gt;
+      &lt;p&gt;Price: ${product.price}&lt;/p&gt;
+    &lt;/div&gt;
+  );
+}</code></pre>
+
+<h2>How It Works</h2>
+
+<div class="code-title">Execution Flow</div>
+
+<pre><code class="language-text">Request
+   │
+   ▼
+/products/1
+   │
+   ▼
+generateMetadata()
+   │
+   ▼
+Fetch Product
+   │
+   ▼
+Create Metadata
+   │
+   ▼
+Page()
+   │
+   ▼
+Render HTML</code></pre>
+
+<h2>Generated HTML Head</h2>
+
+<div class="code-title">Output</div>
+
+<pre><code class="language-html">&lt;head&gt;
+  &lt;title&gt;iPhone 15&lt;/title&gt;
+
+  &lt;meta
+    name="description"
+    content="Latest Apple smartphone"
+  /&gt;
+&lt;/head&gt;</code></pre>
+
+<h2>Do We Really Fetch Data Twice?</h2>
+
+<p>
+At first glance, it appears that <code>getProduct()</code> is called twice.
+</p>
+
+<div class="code-title">Calls</div>
+
+<pre><code class="language-text">generateMetadata()
+      │
+      ▼
+getProduct()
+
+Page()
+      │
+      ▼
+getProduct()</code></pre>
+
+<p>
+However, Next.js automatically deduplicates identical fetch requests.
+</p>
+
+<div class="feature">
+Although the code calls <code>getProduct()</code> twice, Next.js usually performs only one network request when both fetch calls are identical.
+</div>
+
+<div class="code-title">Actual Behavior</div>
+
+<pre><code class="language-text">Code Calls    = 2
+
+Network Calls = 1</code></pre>
+
+<h2>When Will It Fetch Twice?</h2>
+
+<p>
+If the requests are different, deduplication cannot occur.
+</p>
+
+<div class="code-title">Different Fetch Options</div>
+
+<pre><code class="language-js">fetch(`/products/${id}`);
+
+fetch(`/products/${id}`, {
+  cache: 'no-store'
+});</code></pre>
+
+<div class="code-title">Different URLs</div>
+
+<pre><code class="language-js">fetch(`/products/${id}`);
+
+fetch(`/products/${id}?details=true`);</code></pre>
+
+<h2>generateMetadata() vs metadata</h2>
+
+<table>
+
+<tr>
+<th>Feature</th>
+<th>metadata</th>
+<th>generateMetadata()</th>
+</tr>
+
+<tr>
+<td>Static Metadata</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+
+<tr>
+<td>Dynamic Metadata</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+
+<tr>
+<td>Can Fetch Data</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+
+<tr>
+<td>SEO Support</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+
+</table>
+
+<h2>When Should We Use generateMetadata()?</h2>
+
+<ul>
+<li>Product detail pages.</li>
+<li>Blog detail pages.</li>
+<li>User profile pages.</li>
+<li>CMS-driven pages.</li>
+<li>Database-driven pages.</li>
+<li>Any route where metadata depends on fetched data.</li>
+</ul>
+
+<h2>Interview Tip</h2>
+
+<div class="feature">
+The <code>generateMetadata()</code> function runs before the page is rendered and allows us to fetch data and dynamically generate SEO metadata such as title and description.
+</div>
+
+<div class="feature">
+<strong>One-Line Definition:</strong><br>
+<code>generateMetadata()</code> is an App Router function that dynamically generates page metadata by fetching data before the page is rendered.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+
+</body>
+</html>

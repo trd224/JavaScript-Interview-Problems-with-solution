@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How do you configure robots.txt in Next.js?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+
+body{
+  background:#0f172a;
+  color:#e2e8f0;
+  font-family:Arial,sans-serif;
+  line-height:1.8;
+  padding:40px 20px;
+}
+
+.container{
+  max-width:1000px;
+  margin:auto;
+  background:#111827;
+  padding:40px;
+  border-radius:16px;
+}
+
+h1{color:#38bdf8;margin-bottom:20px}
+h2{color:#a78bfa;margin-top:30px;margin-bottom:10px}
+
+p{margin-bottom:15px}
+
+ul{margin-left:20px}
+li{margin-bottom:8px}
+
+.feature{
+  background:#1e293b;
+  border-left:5px solid #38bdf8;
+  padding:15px;
+  border-radius:8px;
+  margin:20px 0;
+}
+
+.code-title{
+  background:#1e293b;
+  color:#93c5fd;
+  padding:12px;
+  font-weight:bold;
+}
+
+pre[class*="language-"]{margin:0!important}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:20px;
+}
+
+th{
+  background:#1e293b;
+  color:#38bdf8;
+  text-align:left;
+  padding:12px;
+}
+
+td{
+  padding:12px;
+  border-top:1px solid #334155;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>How do you configure robots.txt in Next.js?</h1>
+
+<p>
+In Next.js App Router, we configure <code>robots.txt</code> by creating a special <code>robots.js</code> file inside the <code>app</code> folder.
+</p>
+
+<div class="feature">
+Next.js automatically converts the return value of <code>app/robots.js</code> into a valid <code>robots.txt</code> file.
+</div>
+
+<h2>What is robots.txt?</h2>
+
+<p>
+The <code>robots.txt</code> file tells search engine crawlers which pages or paths they are allowed or not allowed to crawl.
+</p>
+
+<div class="code-title">Example robots.txt</div>
+
+<pre><code class="language-text">User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /dashboard
+
+Sitemap: https://example.com/sitemap.xml</code></pre>
+
+<h2>Basic App Router Example</h2>
+
+<div class="code-title">app/robots.js</div>
+
+<pre><code class="language-js">export default function robots() {
+  return {
+    rules: {
+      userAgent: '*',
+      allow: '/',
+      disallow: ['/admin', '/dashboard']
+    },
+    sitemap: 'https://example.com/sitemap.xml'
+  };
+}</code></pre>
+
+<h2>Generated robots.txt</h2>
+
+<div class="code-title">Output</div>
+
+<pre><code class="language-text">User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /dashboard
+
+Sitemap: https://example.com/sitemap.xml</code></pre>
+
+<h2>Project Structure</h2>
+
+<div class="code-title">App Router File Convention</div>
+
+<pre><code class="language-text">app
+├── page.js
+├── layout.js
+├── sitemap.js
+├── robots.js
+└── admin
+    └── page.js</code></pre>
+
+<h2>Allow All Crawlers</h2>
+
+<div class="code-title">app/robots.js</div>
+
+<pre><code class="language-js">export default function robots() {
+  return {
+    rules: {
+      userAgent: '*',
+      allow: '/'
+    },
+    sitemap: 'https://example.com/sitemap.xml'
+  };
+}</code></pre>
+
+<h2>Block All Crawlers</h2>
+
+<div class="code-title">app/robots.js</div>
+
+<pre><code class="language-js">export default function robots() {
+  return {
+    rules: {
+      userAgent: '*',
+      disallow: '/'
+    }
+  };
+}</code></pre>
+
+<h2>Block Private Routes</h2>
+
+<p>
+We usually block private or user-specific routes from crawling.
+</p>
+
+<div class="code-title">app/robots.js</div>
+
+<pre><code class="language-js">export default function robots() {
+  return {
+    rules: {
+      userAgent: '*',
+      allow: '/',
+      disallow: ['/admin', '/dashboard', '/profile', '/checkout']
+    },
+    sitemap: 'https://example.com/sitemap.xml'
+  };
+}</code></pre>
+
+<h2>Multiple Rules Example</h2>
+
+<p>
+We can also define different rules for different crawlers.
+</p>
+
+<div class="code-title">app/robots.js</div>
+
+<pre><code class="language-js">export default function robots() {
+  return {
+    rules: [
+      {
+        userAgent: 'Googlebot',
+        allow: '/',
+        disallow: ['/private']
+      },
+      {
+        userAgent: '*',
+        allow: '/',
+        disallow: ['/admin']
+      }
+    ],
+    sitemap: 'https://example.com/sitemap.xml'
+  };
+}</code></pre>
+
+<h2>Using Environment Variable</h2>
+
+<p>
+In real projects, we should avoid hardcoding the domain and use an environment variable.
+</p>
+
+<div class="code-title">.env.local</div>
+
+<pre><code class="language-text">NEXT_PUBLIC_SITE_URL=https://example.com</code></pre>
+
+<div class="code-title">app/robots.js</div>
+
+<pre><code class="language-js">export default function robots() {
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL;
+
+  return {
+    rules: {
+      userAgent: '*',
+      allow: '/',
+      disallow: ['/admin', '/dashboard']
+    },
+    sitemap: `${baseUrl}/sitemap.xml`
+  };
+}</code></pre>
+
+<h2>Pages Router Alternative</h2>
+
+<p>
+In the Pages Router, we commonly place a static <code>robots.txt</code> file inside the <code>public</code> folder.
+</p>
+
+<div class="code-title">public/robots.txt</div>
+
+<pre><code class="language-text">User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /dashboard
+
+Sitemap: https://example.com/sitemap.xml</code></pre>
+
+<h2>robots.js vs public/robots.txt</h2>
+
+<table>
+<tr>
+<th>Method</th>
+<th>Use Case</th>
+</tr>
+
+<tr>
+<td><code>app/robots.js</code></td>
+<td>Best for App Router and dynamic configuration</td>
+</tr>
+
+<tr>
+<td><code>public/robots.txt</code></td>
+<td>Simple static robots.txt file</td>
+</tr>
+</table>
+
+<h2>Important Note</h2>
+
+<div class="feature">
+<code>robots.txt</code> controls crawling, not security. Do not use it to protect private data. Private pages must still be protected with authentication and authorization.
+</div>
+
+<h2>Interview Tip</h2>
+
+<div class="feature">
+In the App Router, we create <code>app/robots.js</code> and return crawler rules. Next.js automatically generates the <code>/robots.txt</code> route from it.
+</div>
+
+<div class="feature">
+<strong>One-Line Definition:</strong><br>
+In Next.js, <code>robots.txt</code> is configured using <code>app/robots.js</code> in the App Router or <code>public/robots.txt</code> for a static file, and it tells search engines which routes they can or cannot crawl.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+
+</body>
+</html>

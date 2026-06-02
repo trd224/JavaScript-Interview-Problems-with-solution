@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>What is the metadata export in the App Router?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+
+body{
+  background:#0f172a;
+  color:#e2e8f0;
+  font-family:Arial,sans-serif;
+  line-height:1.8;
+  padding:40px 20px;
+}
+
+.container{
+  max-width:1000px;
+  margin:auto;
+  background:#111827;
+  padding:40px;
+  border-radius:16px;
+}
+
+h1{color:#38bdf8;margin-bottom:20px}
+h2{color:#a78bfa;margin-top:30px;margin-bottom:10px}
+
+p{margin-bottom:15px}
+
+ul{margin-left:20px}
+li{margin-bottom:8px}
+
+.feature{
+  background:#1e293b;
+  border-left:5px solid #38bdf8;
+  padding:15px;
+  border-radius:8px;
+  margin:20px 0;
+}
+
+.code-title{
+  background:#1e293b;
+  color:#93c5fd;
+  padding:12px;
+  font-weight:bold;
+}
+
+pre[class*="language-"]{
+  margin:0!important;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:20px;
+}
+
+th{
+  background:#1e293b;
+  color:#38bdf8;
+  text-align:left;
+  padding:12px;
+}
+
+td{
+  padding:12px;
+  border-top:1px solid #334155;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>What is the metadata export in the App Router?</h1>
+
+<p>
+The <code>metadata</code> export is a special App Router feature that allows us to define page metadata such as title, description, Open Graph tags, Twitter cards, icons, and other SEO-related information without using the <code>Head</code> component.
+</p>
+
+<div class="feature">
+The <code>metadata</code> export automatically generates HTML head tags and is the recommended way to manage SEO metadata in the App Router.
+</div>
+
+<h2>Static Metadata Example</h2>
+
+<p>
+Use <code>metadata</code> when metadata is known in advance and does not depend on fetched data.
+</p>
+
+<div class="code-title">app/about/page.js</div>
+
+<pre><code class="language-js">export const metadata = {
+  title: 'About Us',
+  description: 'Learn more about our company.'
+};
+
+export default function About() {
+  return &lt;h1&gt;About Page&lt;/h1&gt;;
+}</code></pre>
+
+<h2>Generated HTML</h2>
+
+<div class="code-title">HTML Output</div>
+
+<pre><code class="language-html">&lt;head&gt;
+  &lt;title&gt;About Us&lt;/title&gt;
+  &lt;meta name="description" content="Learn more about our company." /&gt;
+&lt;/head&gt;</code></pre>
+
+<h2>Layout Metadata Example</h2>
+
+<p>
+Metadata can also be defined inside <code>layout.js</code>. This metadata is inherited by all child pages unless a page overrides it.
+</p>
+
+<div class="code-title">app/layout.js</div>
+
+<pre><code class="language-js">export const metadata = {
+  title: 'My Website',
+  description: 'Welcome to my website'
+};
+
+export default function RootLayout({ children }) {
+  return (
+    &lt;html lang="en"&gt;
+      &lt;body&gt;{children}&lt;/body&gt;
+    &lt;/html&gt;
+  );
+}</code></pre>
+
+<h2>Inheritance Flow</h2>
+
+<div class="code-title">Project Structure</div>
+
+<pre><code class="language-text">app
+├── layout.js
+├── page.js
+├── about
+│   └── page.js
+└── products
+    └── page.js</code></pre>
+
+<p>
+All pages automatically inherit metadata from <code>layout.js</code> unless they define their own metadata.
+</p>
+
+<div class="code-title">Metadata Flow</div>
+
+<pre><code class="language-text">layout.js
+    │
+    ▼
+Global Metadata
+    │
+    ▼
+Inherited By All Pages</code></pre>
+
+<h2>Open Graph Example</h2>
+
+<div class="code-title">Open Graph Metadata</div>
+
+<pre><code class="language-js">export const metadata = {
+  title: 'About Us',
+  description: 'Learn more about our company.',
+  openGraph: {
+    title: 'About Us',
+    description: 'Learn more about our company.',
+    type: 'website'
+  }
+};</code></pre>
+
+<p>
+This automatically generates Open Graph tags used by Facebook, LinkedIn, WhatsApp, and other social media platforms.
+</p>
+
+<h2>Dynamic Metadata Example</h2>
+
+<p>
+When metadata depends on API data, database data, or CMS content, we use <code>generateMetadata()</code>.
+</p>
+
+<div class="code-title">app/products/[id]/page.js</div>
+
+<pre><code class="language-js">async function getProduct(id) {
+  const res = await fetch(`https://dummyjson.com/products/${id}`);
+  return res.json();
+}
+
+export async function generateMetadata({ params }) {
+  const { id } = await params;
+  const product = await getProduct(id);
+
+  return {
+    title: product.title,
+    description: product.description
+  };
+}
+
+export default async function Page({ params }) {
+  const { id } = await params;
+  const product = await getProduct(id);
+
+  return (
+    &lt;div&gt;
+      &lt;h1&gt;{product.title}&lt;/h1&gt;
+      &lt;p&gt;{product.description}&lt;/p&gt;
+      &lt;p&gt;Price: ${product.price}&lt;/p&gt;
+    &lt;/div&gt;
+  );
+}</code></pre>
+
+<h2>Do We Really Fetch Data Twice?</h2>
+
+<p>
+At first glance, it looks like <code>getProduct()</code> is called twice:
+</p>
+
+<ul>
+<li>Once inside <code>generateMetadata()</code>.</li>
+<li>Once inside the page component.</li>
+</ul>
+
+<div class="code-title">Example</div>
+
+<pre><code class="language-js">export async function generateMetadata({ params }) {
+  const { id } = await params;
+
+  const product = await getProduct(id);
+
+  return {
+    title: product.title,
+    description: product.description
+  };
+}
+
+export default async function Page({ params }) {
+  const { id } = await params;
+
+  const product = await getProduct(id);
+
+  return (
+    &lt;div&gt;
+      &lt;h1&gt;{product.title}&lt;/h1&gt;
+    &lt;/div&gt;
+  );
+}</code></pre>
+
+<p>
+This appears to call <code>getProduct()</code> twice, but Next.js automatically deduplicates identical fetch requests.
+</p>
+
+<div class="code-title">What Happens Internally?</div>
+
+<pre><code class="language-text">generateMetadata()
+        │
+        ▼
+fetch(/products/1)
+        │
+        ▼
+Cache Result
+        │
+        ▼
+Page()
+        │
+        ▼
+fetch(/products/1)
+        │
+        ▼
+Return Cached Result</code></pre>
+
+<div class="feature">
+Although the code calls <code>getProduct()</code> twice, Next.js usually performs only one network request when both fetch calls are identical.
+</div>
+
+<div class="code-title">Summary</div>
+
+<pre><code class="language-text">Code Calls    = 2
+
+Network Calls = 1</code></pre>
+
+<h2>When Will It Fetch Twice?</h2>
+
+<p>
+If the requests are different, Next.js cannot deduplicate them.
+</p>
+
+<div class="code-title">Different Fetch Options</div>
+
+<pre><code class="language-js">fetch(`/products/${id}`);
+
+fetch(`/products/${id}`, {
+  cache: 'no-store'
+});</code></pre>
+
+<div class="code-title">Different URLs</div>
+
+<pre><code class="language-js">fetch(`/products/${id}`);
+
+fetch(`/products/${id}?details=true`);</code></pre>
+
+<div class="feature">
+Deduplication works only when the requests are identical.
+</div>
+
+<h2>How generateMetadata() Works</h2>
+
+<div class="code-title">Execution Flow</div>
+
+<pre><code class="language-text">Request
+   │
+   ▼
+/products/1
+   │
+   ▼
+generateMetadata()
+   │
+   ▼
+Fetch Product
+   │
+   ▼
+Create Metadata
+   │
+   ▼
+Page()
+   │
+   ▼
+Render Product HTML</code></pre>
+
+<h2>Generated Metadata</h2>
+
+<div class="code-title">Generated Head Tags</div>
+
+<pre><code class="language-html">&lt;head&gt;
+  &lt;title&gt;iPhone 15&lt;/title&gt;
+  &lt;meta name="description" content="Latest Apple smartphone" /&gt;
+&lt;/head&gt;</code></pre>
+
+<h2>Important Note</h2>
+
+<div class="feature">
+Although <code>getProduct()</code> appears to be called twice, once by <code>generateMetadata()</code> and once by <code>Page()</code>, Next.js automatically deduplicates identical fetch requests, so only one network request is typically made.
+</div>
+
+<h2>metadata vs generateMetadata()</h2>
+
+<table>
+<tr>
+<th>Feature</th>
+<th>metadata</th>
+<th>generateMetadata()</th>
+</tr>
+
+<tr>
+<td>Static Metadata</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+
+<tr>
+<td>Dynamic Metadata</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+
+<tr>
+<td>Fetch Data</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+
+<tr>
+<td>Works In Layout</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+
+<tr>
+<td>SEO Support</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+</table>
+
+<h2>When to Use metadata?</h2>
+
+<ul>
+<li>Home pages.</li>
+<li>About pages.</li>
+<li>Contact pages.</li>
+<li>Documentation pages.</li>
+<li>Marketing pages.</li>
+<li>Static SEO content.</li>
+</ul>
+
+<h2>When to Use generateMetadata()?</h2>
+
+<ul>
+<li>Product pages.</li>
+<li>Blog detail pages.</li>
+<li>User profile pages.</li>
+<li>CMS-driven pages.</li>
+<li>Database-driven pages.</li>
+<li>Any page whose metadata depends on fetched data.</li>
+</ul>
+
+<h2>Interview Tip</h2>
+
+<div class="feature">
+In the Pages Router we use <code>Head</code> from <code>next/head</code>. In the App Router we use <code>metadata</code> for static metadata and <code>generateMetadata()</code> for dynamic metadata.
+</div>
+
+<div class="feature">
+<strong>One-Line Definition:</strong><br>
+The <code>metadata</code> export is a special App Router feature that declaratively defines SEO and HTML head metadata, while <code>generateMetadata()</code> dynamically generates metadata using fetched data.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+
+</body>
+</html>

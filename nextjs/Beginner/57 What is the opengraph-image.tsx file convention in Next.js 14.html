@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>What is the opengraph-image.tsx file convention in Next.js 14?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+
+body{
+  background:#0f172a;
+  color:#e2e8f0;
+  font-family:Arial,sans-serif;
+  line-height:1.8;
+  padding:40px 20px;
+}
+
+.container{
+  max-width:1000px;
+  margin:auto;
+  background:#111827;
+  padding:40px;
+  border-radius:16px;
+}
+
+h1{color:#38bdf8;margin-bottom:20px}
+h2{color:#a78bfa;margin-top:30px;margin-bottom:10px}
+
+p{margin-bottom:15px}
+
+ul{margin-left:20px}
+li{margin-bottom:8px}
+
+.feature{
+  background:#1e293b;
+  border-left:5px solid #38bdf8;
+  padding:15px;
+  border-radius:8px;
+  margin:20px 0;
+}
+
+.code-title{
+  background:#1e293b;
+  color:#93c5fd;
+  padding:12px;
+  font-weight:bold;
+}
+
+pre[class*="language-"]{
+  margin:0!important;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:20px;
+}
+
+th{
+  background:#1e293b;
+  color:#38bdf8;
+  text-align:left;
+  padding:12px;
+}
+
+td{
+  padding:12px;
+  border-top:1px solid #334155;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>What is the opengraph-image.tsx File Convention in Next.js 14?</h1>
+
+<p>
+The <code>opengraph-image.tsx</code> file convention allows us to dynamically generate Open Graph images for pages in the App Router.
+</p>
+
+<div class="feature">
+Instead of creating image files manually, Next.js can generate Open Graph images on demand using React and the <code>ImageResponse</code> API.
+</div>
+
+<h2>Why Do We Need Open Graph Images?</h2>
+
+<p>
+When a page is shared on social media, platforms display a preview card.
+</p>
+
+<ul>
+<li>Facebook</li>
+<li>LinkedIn</li>
+<li>WhatsApp</li>
+<li>Telegram</li>
+<li>Discord</li>
+<li>X (Twitter)</li>
+</ul>
+
+<p>
+The Open Graph image is the large preview image shown in those cards.
+</p>
+
+<h2>Without opengraph-image.tsx</h2>
+
+<div class="code-title">metadata</div>
+
+<pre><code class="language-js">export const metadata = {
+  openGraph: {
+    images: [
+      'https://example.com/og-image.jpg'
+    ]
+  }
+};</code></pre>
+
+<p>
+We must manually create and manage image files.
+</p>
+
+<h2>With opengraph-image.tsx</h2>
+
+<div class="code-title">app/opengraph-image.tsx</div>
+
+<pre><code class="language-jsx">import { ImageResponse } from 'next/og';
+
+export const size = {
+  width: 1200,
+  height: 630
+};
+
+export const contentType = 'image/png';
+
+export default function Image() {
+
+  return new ImageResponse(
+    (
+      &lt;div
+        style={{
+          fontSize: 80,
+          background: 'black',
+          color: 'white',
+          width: '100%',
+          height: '100%',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center'
+        }}
+      &gt;
+        My Website
+      &lt;/div&gt;
+    )
+  );
+
+}</code></pre>
+
+<h2>Generated Result</h2>
+
+<div class="code-title">Output</div>
+
+<pre><code class="language-text">1200 × 630 PNG Image
+
+┌─────────────────────────┐
+│                         │
+│      My Website         │
+│                         │
+└─────────────────────────┘</code></pre>
+
+<h2>File Location</h2>
+
+<div class="code-title">Project Structure</div>
+
+<pre><code class="language-text">app
+├── layout.js
+├── page.js
+├── opengraph-image.tsx
+└── products
+    ├── [id]
+    │   ├── page.js
+    │   └── opengraph-image.tsx</code></pre>
+
+<p>
+Each route can have its own Open Graph image.
+</p>
+
+<h2>Route-Specific Open Graph Images</h2>
+
+<p>
+For example:
+</p>
+
+<div class="code-title">app/products/[id]/opengraph-image.tsx</div>
+
+<pre><code class="language-jsx">import { ImageResponse } from 'next/og';
+
+export default async function Image({
+  params
+}) {
+
+  const { id } = await params;
+
+  const product = await fetch(
+    `https://dummyjson.com/products/${id}`
+  ).then(res => res.json());
+
+  return new ImageResponse(
+    (
+      &lt;div
+        style={{
+          width: '100%',
+          height: '100%',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          fontSize: 70
+        }}
+      &gt;
+        {product.title}
+      &lt;/div&gt;
+    )
+  );
+
+}</code></pre>
+
+<p>
+Each product page can generate a unique social sharing image.
+</p>
+
+<h2>How It Works</h2>
+
+<div class="code-title">Flow</div>
+
+<pre><code class="language-text">User Shares URL
+        │
+        ▼
+Social Platform
+        │
+        ▼
+Requests Open Graph Image
+        │
+        ▼
+opengraph-image.tsx
+        │
+        ▼
+ImageResponse()
+        │
+        ▼
+Generated PNG Image</code></pre>
+
+<h2>Default Open Graph Image Size</h2>
+
+<div class="code-title">Recommended Size</div>
+
+<pre><code class="language-text">Width  = 1200px
+Height = 630px
+
+Aspect Ratio = 1.91 : 1</code></pre>
+
+<h2>Exported Configuration</h2>
+
+<div class="code-title">Optional Exports</div>
+
+<pre><code class="language-js">export const size = {
+  width: 1200,
+  height: 630
+};
+
+export const contentType = 'image/png';</code></pre>
+
+<h2>opengraph-image.tsx vs Static Image</h2>
+
+<table>
+
+<tr>
+<th>Feature</th>
+<th>Static Image</th>
+<th>opengraph-image.tsx</th>
+</tr>
+
+<tr>
+<td>Dynamic Content</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+
+<tr>
+<td>React Support</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+
+<tr>
+<td>Route-Specific Images</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+
+<tr>
+<td>Automatic Generation</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+
+</table>
+
+<h2>Important Note</h2>
+
+<div class="feature">
+The <code>opengraph-image.tsx</code> file automatically becomes the Open Graph image for its route. No manual image creation is required.
+</div>
+
+<h2>Interview Tip</h2>
+
+<div class="feature">
+The <code>opengraph-image.tsx</code> convention uses the <code>ImageResponse</code> API from <code>next/og</code> to dynamically generate Open Graph images using React components.
+</div>
+
+<div class="feature">
+<strong>One-Line Definition:</strong><br>
+The <code>opengraph-image.tsx</code> file convention in Next.js 14 dynamically generates Open Graph images for a route using React and the <code>ImageResponse</code> API.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+
+</body>
+</html>

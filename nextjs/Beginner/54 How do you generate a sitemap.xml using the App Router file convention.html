@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How do you generate a sitemap.xml using the App Router file convention?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+
+body{
+  background:#0f172a;
+  color:#e2e8f0;
+  font-family:Arial,sans-serif;
+  line-height:1.8;
+  padding:40px 20px;
+}
+
+.container{
+  max-width:1000px;
+  margin:auto;
+  background:#111827;
+  padding:40px;
+  border-radius:16px;
+}
+
+h1{color:#38bdf8;margin-bottom:20px}
+h2{color:#a78bfa;margin-top:30px;margin-bottom:10px}
+
+p{margin-bottom:15px}
+
+ul{margin-left:20px}
+li{margin-bottom:8px}
+
+.feature{
+  background:#1e293b;
+  border-left:5px solid #38bdf8;
+  padding:15px;
+  border-radius:8px;
+  margin:20px 0;
+}
+
+.code-title{
+  background:#1e293b;
+  color:#93c5fd;
+  padding:12px;
+  font-weight:bold;
+}
+
+pre[class*="language-"]{
+  margin:0!important;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:20px;
+}
+
+th{
+  background:#1e293b;
+  color:#38bdf8;
+  text-align:left;
+  padding:12px;
+}
+
+td{
+  padding:12px;
+  border-top:1px solid #334155;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>How do you generate a sitemap.xml using the App Router file convention?</h1>
+
+<p>
+In the App Router, we create a special <code>sitemap.js</code> (or <code>sitemap.ts</code>) file. Next.js automatically generates a <code>sitemap.xml</code> file from the data returned by this file.
+</p>
+
+<div class="feature">
+The <code>sitemap.js</code> file is a built-in App Router file convention used to generate SEO-friendly sitemap.xml files.
+</div>
+
+<h2>What is a Sitemap?</h2>
+
+<p>
+A sitemap helps search engines discover and index pages on our website.
+</p>
+
+<p>
+Common search engines that use sitemaps:
+</p>
+
+<ul>
+<li>Google</li>
+<li>Bing</li>
+<li>Yahoo</li>
+<li>DuckDuckGo</li>
+</ul>
+
+<h2>Basic Sitemap Example</h2>
+
+<div class="code-title">app/sitemap.js</div>
+
+<pre><code class="language-js">export default function sitemap() {
+  return [
+    {
+      url: 'https://example.com',
+      lastModified: new Date()
+    },
+    {
+      url: 'https://example.com/about',
+      lastModified: new Date()
+    },
+    {
+      url: 'https://example.com/contact',
+      lastModified: new Date()
+    }
+  ];
+}</code></pre>
+
+<h2>Generated sitemap.xml</h2>
+
+<div class="code-title">Output</div>
+
+<pre><code class="language-xml">&lt;urlset&gt;
+
+  &lt;url&gt;
+    &lt;loc&gt;https://example.com&lt;/loc&gt;
+  &lt;/url&gt;
+
+  &lt;url&gt;
+    &lt;loc&gt;https://example.com/about&lt;/loc&gt;
+  &lt;/url&gt;
+
+  &lt;url&gt;
+    &lt;loc&gt;https://example.com/contact&lt;/loc&gt;
+  &lt;/url&gt;
+
+&lt;/urlset&gt;</code></pre>
+
+<h2>Dynamic Sitemap Example</h2>
+
+<p>
+For dynamic routes such as blog posts or products, we can fetch data and generate sitemap entries dynamically.
+</p>
+
+<div class="code-title">app/sitemap.js</div>
+
+<pre><code class="language-js">async function getProducts() {
+  const res = await fetch(
+    'https://dummyjson.com/products'
+  );
+
+  const data = await res.json();
+
+  return data.products;
+}
+
+export default async function sitemap() {
+
+  const products = await getProducts();
+
+  const productUrls = products.map(product => ({
+    url: `https://example.com/products/${product.id}`,
+    lastModified: new Date()
+  }));
+
+  return [
+    {
+      url: 'https://example.com',
+      lastModified: new Date()
+    },
+
+    ...productUrls
+  ];
+
+}</code></pre>
+
+<h2>How It Works</h2>
+
+<div class="code-title">Flow</div>
+
+<pre><code class="language-text">Request
+   │
+   ▼
+/sitemap.xml
+   │
+   ▼
+sitemap()
+   │
+   ▼
+Fetch Data
+   │
+   ▼
+Generate URLs
+   │
+   ▼
+Return Sitemap XML</code></pre>
+
+<h2>Additional Properties</h2>
+
+<p>
+Each sitemap entry can include additional SEO information.
+</p>
+
+<div class="code-title">Example</div>
+
+<pre><code class="language-js">export default function sitemap() {
+  return [
+    {
+      url: 'https://example.com',
+      lastModified: new Date(),
+      changeFrequency: 'daily',
+      priority: 1
+    }
+  ];
+}</code></pre>
+
+<h2>Generated XML</h2>
+
+<div class="code-title">Output</div>
+
+<pre><code class="language-xml">&lt;url&gt;
+  &lt;loc&gt;https://example.com&lt;/loc&gt;
+  &lt;lastmod&gt;2026-06-02&lt;/lastmod&gt;
+  &lt;changefreq&gt;daily&lt;/changefreq&gt;
+  &lt;priority&gt;1.0&lt;/priority&gt;
+&lt;/url&gt;</code></pre>
+
+<h2>File Location</h2>
+
+<div class="code-title">Project Structure</div>
+
+<pre><code class="language-text">app
+├── page.js
+├── layout.js
+├── sitemap.js
+├── robots.js
+└── products
+    └── [id]
+        └── page.js</code></pre>
+
+<h2>When is sitemap.xml Generated?</h2>
+
+<table>
+
+<tr>
+<th>Scenario</th>
+<th>Behavior</th>
+</tr>
+
+<tr>
+<td>Static Sitemap</td>
+<td>Generated Automatically</td>
+</tr>
+
+<tr>
+<td>Dynamic Sitemap</td>
+<td>Generated From Fetched Data</td>
+</tr>
+
+<tr>
+<td>App Router</td>
+<td>Uses sitemap.js</td>
+</tr>
+
+<tr>
+<td>Pages Router</td>
+<td>Manual Implementation Required</td>
+</tr>
+
+</table>
+
+<h2>Why Use sitemap.js?</h2>
+
+<ul>
+<li>Better SEO.</li>
+<li>Automatic XML generation.</li>
+<li>Supports dynamic routes.</li>
+<li>Built into Next.js.</li>
+<li>No custom API route required.</li>
+</ul>
+
+<h2>Interview Tip</h2>
+
+<div class="feature">
+In the App Router, creating a <code>sitemap.js</code> file automatically generates a <code>sitemap.xml</code> endpoint. The function returns an array of URLs, and Next.js converts it into valid XML.
+</div>
+
+<div class="feature">
+<strong>One-Line Definition:</strong><br>
+The App Router generates <code>sitemap.xml</code> by using a special <code>sitemap.js</code> file that returns an array of sitemap entries, which Next.js automatically converts into XML.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+
+</body>
+</html>

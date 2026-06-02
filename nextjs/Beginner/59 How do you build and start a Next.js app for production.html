@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How do you build and start a Next.js app for production?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+
+body{
+  background:#0f172a;
+  color:#e2e8f0;
+  font-family:Arial,sans-serif;
+  line-height:1.8;
+  padding:40px 20px;
+}
+
+.container{
+  max-width:1000px;
+  margin:auto;
+  background:#111827;
+  padding:40px;
+  border-radius:16px;
+}
+
+h1{color:#38bdf8;margin-bottom:20px}
+h2{color:#a78bfa;margin-top:30px;margin-bottom:10px}
+
+p{margin-bottom:15px}
+
+ul{margin-left:20px}
+li{margin-bottom:8px}
+
+.feature{
+  background:#1e293b;
+  border-left:5px solid #38bdf8;
+  padding:15px;
+  border-radius:8px;
+  margin:20px 0;
+}
+
+.code-title{
+  background:#1e293b;
+  color:#93c5fd;
+  padding:12px;
+  font-weight:bold;
+}
+
+pre[class*="language-"]{margin:0!important}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:20px;
+}
+
+th{
+  background:#1e293b;
+  color:#38bdf8;
+  text-align:left;
+  padding:12px;
+}
+
+td{
+  padding:12px;
+  border-top:1px solid #334155;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>How do you build and start a Next.js app for production?</h1>
+
+<p>
+To run a Next.js app in production, we first build the application using <code>npm run build</code>, then start the optimized production server using <code>npm start</code>.
+</p>
+
+<div class="feature">
+The build command creates an optimized production version of our Next.js application, and the start command runs that production build.
+</div>
+
+<h2>Step 1: Install Dependencies</h2>
+
+<div class="code-title">Terminal</div>
+
+<pre><code class="language-bash">npm install</code></pre>
+
+<p>
+This installs all dependencies from <code>package.json</code>.
+</p>
+
+<h2>Step 2: Build the Application</h2>
+
+<div class="code-title">Terminal</div>
+
+<pre><code class="language-bash">npm run build</code></pre>
+
+<p>
+This creates an optimized production build inside the <code>.next</code> folder.
+</p>
+
+<h2>Step 3: Start the Production Server</h2>
+
+<div class="code-title">Terminal</div>
+
+<pre><code class="language-bash">npm start</code></pre>
+
+<p>
+This starts the Next.js production server.
+</p>
+
+<h2>package.json Scripts</h2>
+
+<div class="code-title">package.json</div>
+
+<pre><code class="language-json">{
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start"
+  }
+}</code></pre>
+
+<h2>Production Flow</h2>
+
+<div class="code-title">Flow</div>
+
+<pre><code class="language-text">Source Code
+    │
+    ▼
+npm install
+    │
+    ▼
+npm run build
+    │
+    ▼
+.next Folder Created
+    │
+    ▼
+npm start
+    │
+    ▼
+Production Server Runs</code></pre>
+
+<h2>What Happens During npm run build?</h2>
+
+<ul>
+<li>Next.js compiles our application.</li>
+<li>JavaScript and CSS are optimized.</li>
+<li>Static pages are generated.</li>
+<li>Server-rendered pages are prepared.</li>
+<li>Route information is created.</li>
+<li>Production assets are generated.</li>
+</ul>
+
+<h2>Default Production Port</h2>
+
+<p>
+By default, <code>next start</code> runs the app on port <code>3000</code>.
+</p>
+
+<div class="code-title">Output</div>
+
+<pre><code class="language-text">Local: http://localhost:3000</code></pre>
+
+<h2>Run on a Custom Port</h2>
+
+<div class="code-title">Terminal</div>
+
+<pre><code class="language-bash">npm start -- -p 4000</code></pre>
+
+<p>
+This starts the production server on port <code>4000</code>.
+</p>
+
+<h2>Alternative Command</h2>
+
+<div class="code-title">Terminal</div>
+
+<pre><code class="language-bash">npx next start -p 4000</code></pre>
+
+<h2>Using Environment Variables</h2>
+
+<p>
+Production environment variables should be available before building and starting the app.
+</p>
+
+<div class="code-title">.env.production</div>
+
+<pre><code class="language-text">NEXT_PUBLIC_API_URL=https://api.example.com
+DATABASE_URL=mongodb://localhost:27017/mydb</code></pre>
+
+<div class="feature">
+Variables used in the browser with <code>NEXT_PUBLIC_</code> are included during build time, so rebuild the app after changing them.
+</div>
+
+<h2>Development vs Production</h2>
+
+<table>
+<tr>
+<th>Command</th>
+<th>Purpose</th>
+</tr>
+
+<tr>
+<td><code>npm run dev</code></td>
+<td>Runs development server with hot reload</td>
+</tr>
+
+<tr>
+<td><code>npm run build</code></td>
+<td>Creates optimized production build</td>
+</tr>
+
+<tr>
+<td><code>npm start</code></td>
+<td>Runs the production build</td>
+</tr>
+</table>
+
+<h2>Common Production Commands</h2>
+
+<div class="code-title">Commands</div>
+
+<pre><code class="language-bash">npm install
+npm run build
+npm start</code></pre>
+
+<h2>Using PM2 in Production</h2>
+
+<p>
+On a real server, we often use a process manager like <code>PM2</code> to keep the Next.js app running.
+</p>
+
+<div class="code-title">Install PM2</div>
+
+<pre><code class="language-bash">npm install -g pm2</code></pre>
+
+<div class="code-title">Start Next.js with PM2</div>
+
+<pre><code class="language-bash">pm2 start npm --name "next-app" -- start</code></pre>
+
+<div class="code-title">Useful PM2 Commands</div>
+
+<pre><code class="language-bash">pm2 status
+pm2 logs next-app
+pm2 restart next-app
+pm2 save</code></pre>
+
+<h2>Important Note</h2>
+
+<div class="feature">
+<code>next start</code> should be used only after running <code>next build</code>. It does not build the app automatically.
+</div>
+
+<h2>Interview Tip</h2>
+
+<div class="feature">
+In production, we run <code>npm run build</code> to create an optimized build and then run <code>npm start</code> to start the production server.
+</div>
+
+<div class="feature">
+<strong>One-Line Definition:</strong><br>
+A Next.js app is built for production using <code>npm run build</code> and started using <code>npm start</code>, which runs the optimized production build from the <code>.next</code> folder.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js"></script>
+
+</body>
+</html>
