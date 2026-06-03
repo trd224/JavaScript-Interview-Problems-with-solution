@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>What is the error.js file and what is its Error Boundary contract?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+}
+
+body{
+  background:#0f172a;
+  color:#e2e8f0;
+  font-family:Arial,sans-serif;
+  line-height:1.8;
+  padding:40px 20px;
+}
+
+.container{
+  max-width:1000px;
+  margin:auto;
+  background:#111827;
+  padding:40px;
+  border-radius:16px;
+}
+
+h1{color:#38bdf8;margin-bottom:20px}
+h2{color:#a78bfa;margin-top:30px;margin-bottom:10px}
+h3{color:#fbbf24;margin-top:25px;margin-bottom:10px}
+
+p{margin-bottom:15px}
+
+ul{
+  margin-left:20px;
+}
+
+li{
+  margin-bottom:8px;
+}
+
+.feature{
+  background:#1e293b;
+  border-left:5px solid #38bdf8;
+  padding:15px;
+  border-radius:8px;
+  margin:20px 0;
+}
+
+.code-title{
+  background:#1e293b;
+  color:#93c5fd;
+  padding:10px;
+  font-weight:bold;
+}
+
+pre[class*="language-"]{
+  margin:0!important;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:20px;
+}
+
+th{
+  background:#1e293b;
+  color:#38bdf8;
+  text-align:left;
+  padding:12px;
+}
+
+td{
+  padding:12px;
+  border-top:1px solid #334155;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>What is the error.js file and what is its Error Boundary contract?</h1>
+
+<p>
+The <code>error.js</code> file is a special App Router file that automatically creates a React Error Boundary for a route segment and displays a fallback UI when an error occurs.
+</p>
+
+<div class="feature">
+In simple words, <code>error.js</code> is the error version of <code>loading.js</code>. Instead of showing loading UI, it shows error UI.
+</div>
+
+<h2>Why Do We Need error.js?</h2>
+
+<p>
+Sometimes pages fail because of:
+</p>
+
+<ul>
+<li>Database Errors</li>
+<li>API Errors</li>
+<li>Server Component Errors</li>
+<li>Unexpected Exceptions</li>
+<li>Runtime Errors</li>
+</ul>
+
+<p>
+Without an Error Boundary, the entire route could crash.
+</p>
+
+<p>
+With <code>error.js</code>, Next.js catches the error and displays a fallback UI instead.
+</p>
+
+<h2>Basic Example</h2>
+
+<div class="code-title">Folder Structure</div>
+
+<pre><code class="language-text">app/
+│
+├── dashboard/
+│   ├── page.tsx
+│   └── error.tsx
+</code></pre>
+
+<div class="code-title">page.tsx</div>
+
+<pre><code class="language-jsx">export default function Page() {
+
+  throw new Error(
+    'Database Connection Failed'
+  );
+
+}</code></pre>
+
+<div class="code-title">error.tsx</div>
+
+<pre><code class="language-jsx">'use client';
+
+export default function Error() {
+
+  return (
+    &lt;h2&gt;
+      Something Went Wrong
+    &lt;/h2&gt;
+  );
+
+}</code></pre>
+
+<h2>What Happens?</h2>
+
+<div class="code-title">Flow</div>
+
+<pre><code class="language-text">User Request
+      │
+      ▼
+Page Starts Rendering
+      │
+      ▼
+Error Occurs
+      │
+      ▼
+error.js Rendered
+      │
+      ▼
+User Sees Error UI
+</code></pre>
+
+<p>
+The route does not crash completely.
+</p>
+
+<h2>How Does React Error Boundary Fit In?</h2>
+
+<p>
+Internally, Next.js automatically wraps the route segment in a React Error Boundary.
+</p>
+
+<div class="code-title">Conceptual Implementation</div>
+
+<pre><code class="language-jsx">&lt;ErrorBoundary
+  fallback={&lt;Error /&gt;}
+&gt;
+  &lt;Page /&gt;
+&lt;/ErrorBoundary&gt;</code></pre>
+
+<p>
+Next.js creates this Error Boundary automatically.
+</p>
+
+<div class="feature">
+Just like loading.js automatically creates Suspense, error.js automatically creates an Error Boundary.
+</div>
+
+<h2>Error Boundary Contract</h2>
+
+<p>
+The Error Component must follow a specific contract.
+</p>
+
+<div class="code-title">Required Signature</div>
+
+<pre><code class="language-jsx">'use client';
+
+export default function Error({
+  error,
+  reset
+}) {
+
+  return (
+    &lt;div&gt;
+      Error
+    &lt;/div&gt;
+  );
+
+}</code></pre>
+
+<h2>Why Must error.js Be a Client Component?</h2>
+
+<p>
+The error component receives:
+</p>
+
+<ul>
+<li>error</li>
+<li>reset()</li>
+</ul>
+
+<p>
+and handles user interaction.
+</p>
+
+<p>
+Therefore it must start with:
+</p>
+
+<div class="code-title">Required</div>
+
+<pre><code class="language-jsx">'use client';</code></pre>
+
+<h2>The error Parameter</h2>
+
+<div class="code-title">error Object</div>
+
+<pre><code class="language-jsx">'use client';
+
+export default function Error({
+  error
+}) {
+
+  return (
+    &lt;p&gt;
+      {error.message}
+    &lt;/p&gt;
+  );
+
+}</code></pre>
+
+<p>
+The error object contains information about the exception that occurred.
+</p>
+
+<h2>The reset Function</h2>
+
+<p>
+The reset function retries rendering the route segment.
+</p>
+
+<div class="code-title">Retry Example</div>
+
+<pre><code class="language-jsx">'use client';
+
+export default function Error({
+  error,
+  reset
+}) {
+
+  return (
+    &lt;&gt;
+      &lt;p&gt;
+        {error.message}
+      &lt;/p&gt;
+
+      &lt;button
+        onClick={() =&gt; reset()}
+      &gt;
+        Try Again
+      &lt;/button&gt;
+    &lt;/&gt;
+  );
+
+}</code></pre>
+
+<p>
+When the user clicks the button:
+</p>
+
+<pre><code class="language-text">reset()
+     │
+     ▼
+Render Route Again
+</code></pre>
+
+<h2>Real Example</h2>
+
+<div class="code-title">page.tsx</div>
+
+<pre><code class="language-jsx">let count = 0;
+
+export default function Page() {
+
+  count++;
+
+  if (count &lt; 2) {
+
+    throw new Error(
+      'Temporary Error'
+    );
+
+  }
+
+  return &lt;h1&gt;Success&lt;/h1&gt;;
+
+}</code></pre>
+
+<div class="code-title">error.tsx</div>
+
+<pre><code class="language-jsx">'use client';
+
+export default function Error({
+  error,
+  reset
+}) {
+
+  return (
+    &lt;button
+      onClick={() =&gt; reset()}
+    &gt;
+      Retry
+    &lt;/button&gt;
+  );
+
+}</code></pre>
+
+<p>
+First render fails.
+</p>
+
+<p>
+After clicking Retry:
+</p>
+
+<pre><code class="language-text">reset()
+     │
+     ▼
+Render Again
+     │
+     ▼
+Success
+</code></pre>
+
+<h2>Error Scope</h2>
+
+<p>
+Like loading.js, error.js only affects its route segment.
+</p>
+
+<div class="code-title">Folder Structure</div>
+
+<pre><code class="language-text">app/
+│
+├── dashboard/
+│   ├── error.tsx
+│   ├── page.tsx
+│   │
+│   └── settings/
+│       └── page.tsx
+</code></pre>
+
+<p>
+If an error occurs inside dashboard:
+</p>
+
+<pre><code class="language-text">Dashboard Error Boundary
+      │
+      ▼
+Handles Error
+</code></pre>
+
+<p>
+The rest of the application continues working.
+</p>
+
+<h2>How error.js Works With Layouts</h2>
+
+<div class="code-title">Hierarchy</div>
+
+<pre><code class="language-text">Layout
+   │
+   ▼
+Error Boundary
+   │
+   ▼
+Page
+</code></pre>
+
+<p>
+If the page crashes:
+</p>
+
+<pre><code class="language-text">Layout Remains Mounted
+Error UI Replaces Page
+</code></pre>
+
+<p>
+The Header, Footer, and Sidebar remain visible.
+</p>
+
+<h2>loading.js vs error.js</h2>
+
+<table>
+<tr>
+<th>loading.js</th>
+<th>error.js</th>
+</tr>
+
+<tr>
+<td>Handles Waiting</td>
+<td>Handles Failures</td>
+</tr>
+
+<tr>
+<td>Creates Suspense Boundary</td>
+<td>Creates Error Boundary</td>
+</tr>
+
+<tr>
+<td>Shows Loading UI</td>
+<td>Shows Error UI</td>
+</tr>
+
+<tr>
+<td>During Rendering Delay</td>
+<td>During Rendering Failure</td>
+</tr>
+</table>
+
+<h2>loading.js + error.js Together</h2>
+
+<div class="code-title">Route Flow</div>
+
+<pre><code class="language-text">User Request
+      │
+      ▼
+Show loading.js
+      │
+      ▼
+Page Rendering
+      │
+      ├── Success
+      │      ▼
+      │   Show Page
+      │
+      └── Error
+             ▼
+        Show error.js
+</code></pre>
+
+<h2>Easy Memory Trick</h2>
+
+<div class="code-title">Remember</div>
+
+<pre><code class="language-text">layout.js
+   = Shared UI
+
+template.js
+   = Fresh Wrapper
+
+loading.js
+   = Waiting UI
+
+error.js
+   = Failure UI
+
+page.js
+   = Actual Content
+</code></pre>
+
+<h2>Complete App Router Flow</h2>
+
+<div class="code-title">Rendering Flow</div>
+
+<pre><code class="language-text">Layout
+   │
+   ▼
+Loading Boundary
+   │
+   ▼
+Error Boundary
+   │
+   ▼
+Page
+</code></pre>
+
+<div class="feature">
+<strong>Error Boundary Contract:</strong><br>
+The <code>error.js</code> file must be a Client Component and receives two props: <code>error</code> (the thrown error) and <code>reset()</code> (a function that retries rendering the route segment).
+</div>
+
+<div class="feature">
+<strong>One-Line Definition:</strong><br>
+The <code>error.js</code> file automatically creates a React Error Boundary for a route segment and displays fallback UI when rendering fails, while providing <code>error</code> and <code>reset()</code> through its Error Boundary contract.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+
+</body>
+</html>

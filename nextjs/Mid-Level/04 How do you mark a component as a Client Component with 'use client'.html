@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How do you mark a component as a Client Component with 'use client'?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+}
+
+body{
+  background:#0f172a;
+  color:#e2e8f0;
+  font-family:Arial,sans-serif;
+  line-height:1.8;
+  padding:40px 20px;
+}
+
+.container{
+  max-width:1000px;
+  margin:auto;
+  background:#111827;
+  padding:40px;
+  border-radius:16px;
+}
+
+h1{color:#38bdf8;margin-bottom:20px}
+h2{color:#a78bfa;margin-top:30px;margin-bottom:10px}
+h3{color:#fbbf24;margin-top:25px;margin-bottom:10px}
+
+p{margin-bottom:15px}
+
+ul{
+  margin-left:20px;
+}
+
+li{
+  margin-bottom:8px;
+}
+
+.feature{
+  background:#1e293b;
+  border-left:5px solid #38bdf8;
+  padding:15px;
+  border-radius:8px;
+  margin:20px 0;
+}
+
+.code-title{
+  background:#1e293b;
+  color:#93c5fd;
+  padding:10px;
+  font-weight:bold;
+}
+
+pre[class*="language-"]{
+  margin:0!important;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:20px;
+}
+
+th{
+  background:#1e293b;
+  color:#38bdf8;
+  text-align:left;
+  padding:12px;
+}
+
+td{
+  padding:12px;
+  border-top:1px solid #334155;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>How do you mark a component as a Client Component with 'use client'?</h1>
+
+<p>
+The <code>'use client'</code> directive is used at the top of a file to mark a component as a Client Component in the Next.js App Router.
+</p>
+
+<div class="feature">
+The primary purpose of <code>'use client'</code> is to enable browser-side interactivity such as React hooks, event handlers, browser APIs, and client-side state management.
+</div>
+
+<h2>Why Is 'use client' Needed?</h2>
+
+<p>
+By default, all components in the App Router are Server Components.
+</p>
+
+<p>
+Server Components cannot use:
+</p>
+
+<ul>
+<li>useState()</li>
+<li>useEffect()</li>
+<li>useRef()</li>
+<li>Event Handlers</li>
+<li>Browser APIs</li>
+<li>Client-side Libraries</li>
+</ul>
+
+<p>
+When we need any of these features, we must mark the component as a Client Component.
+</p>
+
+<h2>Basic Example</h2>
+
+<div class="code-title">Client Component</div>
+
+<pre><code class="language-jsx">'use client';
+
+export default function Counter() {
+
+  return &lt;h1&gt;Client Component&lt;/h1&gt;;
+
+}</code></pre>
+
+<p>
+The directive must be placed at the top of the file before imports and other code.
+</p>
+
+<h2>Using useState()</h2>
+
+<div class="code-title">Counter Example</div>
+
+<pre><code class="language-jsx">'use client';
+
+import { useState } from 'react';
+
+export default function Counter() {
+
+  const [count, setCount] = useState(0);
+
+  return (
+    &lt;button
+      onClick={() =&gt; setCount(count + 1)}
+    &gt;
+      Count: {count}
+    &lt;/button&gt;
+  );
+
+}</code></pre>
+
+<p>
+This component requires <code>'use client'</code> because it uses <code>useState()</code> and a click event.
+</p>
+
+<h2>Using useEffect()</h2>
+
+<div class="code-title">Effect Example</div>
+
+<pre><code class="language-jsx">'use client';
+
+import { useEffect } from 'react';
+
+export default function Page() {
+
+  useEffect(() =&gt; {
+
+    console.log('Component Mounted');
+
+  }, []);
+
+  return &lt;h1&gt;Hello World&lt;/h1&gt;;
+
+}</code></pre>
+
+<p>
+The <code>useEffect()</code> hook runs in the browser, so it requires a Client Component.
+</p>
+
+<h2>Using Browser APIs</h2>
+
+<div class="code-title">Window Example</div>
+
+<pre><code class="language-jsx">'use client';
+
+export default function Page() {
+
+  const width = window.innerWidth;
+
+  return &lt;h1&gt;Width: {width}&lt;/h1&gt;;
+
+}</code></pre>
+
+<p>
+Browser objects such as <code>window</code>, <code>document</code>, and <code>localStorage</code> are only available in Client Components.
+</p>
+
+<h2>What Happens Internally?</h2>
+
+<div class="code-title">Server Component</div>
+
+<pre><code class="language-text">Server
+   │
+   ▼
+Render HTML
+   │
+   ▼
+Send HTML
+</code></pre>
+
+<div class="code-title">Client Component</div>
+
+<pre><code class="language-text">Server
+   │
+   ▼
+Generate Initial HTML
+   │
+   ▼
+Send HTML + JavaScript
+   │
+   ▼
+Browser Downloads JS
+   │
+   ▼
+Hydration
+   │
+   ▼
+Interactive Component
+</code></pre>
+
+<h2>Server Component vs Client Component</h2>
+
+<table>
+<tr>
+<th>Feature</th>
+<th>Server Component</th>
+<th>Client Component</th>
+</tr>
+
+<tr>
+<td>Default in App Router</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+
+<tr>
+<td>useState()</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+
+<tr>
+<td>useEffect()</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+
+<tr>
+<td>useRef()</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+
+<tr>
+<td>Event Handlers</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+
+<tr>
+<td>Browser APIs</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+
+<tr>
+<td>Database Access</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+
+<tr>
+<td>Smaller JS Bundle</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+</table>
+
+<h2>Correct Placement</h2>
+
+<div class="code-title">Correct</div>
+
+<pre><code class="language-jsx">'use client';
+
+import { useState } from 'react';
+
+export default function Page() {
+
+  return &lt;h1&gt;Hello&lt;/h1&gt;;
+
+}</code></pre>
+
+<div class="code-title">Incorrect</div>
+
+<pre><code class="language-jsx">import { useState } from 'react';
+
+'use client';
+
+export default function Page() {
+
+  return &lt;h1&gt;Hello&lt;/h1&gt;;
+
+}</code></pre>
+
+<p>
+The directive must always be the first statement in the file.
+</p>
+
+<h2>What Gets Sent To The Browser?</h2>
+
+<p>
+When a component is marked with <code>'use client'</code>, Next.js sends:
+</p>
+
+<ul>
+<li>Rendered HTML</li>
+<li>Component JavaScript</li>
+<li>React Runtime Code</li>
+<li>Hydration Instructions</li>
+</ul>
+
+<p>
+This allows React to take control of the component after the page loads.
+</p>
+
+<h2>When Should We Use 'use client'?</h2>
+
+<ul>
+<li>Forms.</li>
+<li>Buttons with click handlers.</li>
+<li>Interactive UI.</li>
+<li>State management.</li>
+<li>Animations.</li>
+<li>Browser APIs.</li>
+<li>Third-party client-side libraries.</li>
+</ul>
+
+<h2>When Should We Avoid 'use client'?</h2>
+
+<ul>
+<li>Static content.</li>
+<li>Database queries.</li>
+<li>Server-side data fetching.</li>
+<li>SEO-focused pages.</li>
+<li>Components without interactivity.</li>
+</ul>
+
+<h2>Important Note</h2>
+
+<div class="feature">
+A common misconception is that Client Components render only in the browser. In reality, Next.js still generates their initial HTML on the server, then sends JavaScript to the browser for hydration and interactivity.
+</div>
+
+<h2>Interview Tip</h2>
+
+<div class="feature">
+Adding <code>'use client'</code> does not disable server rendering. It simply tells Next.js to include the component's JavaScript in the browser bundle and enable client-side React features.
+</div>
+
+<div class="feature">
+<strong>One-Line Definition:</strong><br>
+The <code>'use client'</code> directive marks a component as a Client Component, allowing us to use React hooks, event handlers, browser APIs, and other interactive features in the browser.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+
+</body>
+</html>

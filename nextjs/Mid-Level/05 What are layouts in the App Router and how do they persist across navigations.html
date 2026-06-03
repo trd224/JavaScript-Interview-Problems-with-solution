@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>What are layouts in the App Router and how do they persist across navigations?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+}
+
+body{
+  background:#0f172a;
+  color:#e2e8f0;
+  font-family:Arial,sans-serif;
+  line-height:1.8;
+  padding:40px 20px;
+}
+
+.container{
+  max-width:1000px;
+  margin:auto;
+  background:#111827;
+  padding:40px;
+  border-radius:16px;
+}
+
+h1{color:#38bdf8;margin-bottom:20px}
+h2{color:#a78bfa;margin-top:30px;margin-bottom:10px}
+h3{color:#fbbf24;margin-top:25px;margin-bottom:10px}
+
+p{margin-bottom:15px}
+
+ul{
+  margin-left:20px;
+}
+
+li{
+  margin-bottom:8px;
+}
+
+.feature{
+  background:#1e293b;
+  border-left:5px solid #38bdf8;
+  padding:15px;
+  border-radius:8px;
+  margin:20px 0;
+}
+
+.code-title{
+  background:#1e293b;
+  color:#93c5fd;
+  padding:10px;
+  font-weight:bold;
+}
+
+pre[class*="language-"]{
+  margin:0!important;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:20px;
+}
+
+th{
+  background:#1e293b;
+  color:#38bdf8;
+  text-align:left;
+  padding:12px;
+}
+
+td{
+  padding:12px;
+  border-top:1px solid #334155;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>What are layouts in the App Router and how do they persist across navigations?</h1>
+
+<p>
+Layouts are special components in the Next.js App Router that wrap pages and other layouts. They allow us to share UI such as headers, sidebars, navigation menus, and footers across multiple routes.
+</p>
+
+<div class="feature">
+The primary purpose of a layout is to provide a shared UI structure that remains mounted while navigating between pages inside the same layout segment.
+</div>
+
+<h2>Why Do We Need Layouts?</h2>
+
+<p>
+Many applications have UI elements that appear on every page.
+</p>
+
+<ul>
+<li>Header</li>
+<li>Navigation Menu</li>
+<li>Sidebar</li>
+<li>Footer</li>
+<li>Dashboard Shell</li>
+</ul>
+
+<p>
+Instead of repeating this code in every page, we place it inside a layout.
+</p>
+
+<h2>Basic Layout Example</h2>
+
+<div class="code-title">app/layout.tsx</div>
+
+<pre><code class="language-jsx">export default function RootLayout({
+  children
+}) {
+
+  return (
+    &lt;html&gt;
+      &lt;body&gt;
+        &lt;Header /&gt;
+
+        {children}
+
+        &lt;Footer /&gt;
+      &lt;/body&gt;
+    &lt;/html&gt;
+  );
+
+}</code></pre>
+
+<p>
+The <code>{children}</code> prop represents the current page being rendered.
+</p>
+
+<h2>Page Example</h2>
+
+<div class="code-title">app/page.tsx</div>
+
+<pre><code class="language-jsx">export default function Home() {
+
+  return &lt;h1&gt;Home Page&lt;/h1&gt;;
+
+}</code></pre>
+
+<h2>Rendered Output</h2>
+
+<pre><code class="language-html">&lt;Header /&gt;
+
+&lt;h1&gt;Home Page&lt;/h1&gt;
+
+&lt;Footer /&gt;</code></pre>
+
+<h2>Folder Structure</h2>
+
+<div class="code-title">App Router Structure</div>
+
+<pre><code class="language-text">app/
+│
+├── layout.tsx
+├── page.tsx
+│
+├── dashboard/
+│   ├── layout.tsx
+│   ├── page.tsx
+│   └── settings/
+│       └── page.tsx
+</code></pre>
+
+<p>
+Each route segment can have its own layout.
+</p>
+
+<h2>Nested Layout Example</h2>
+
+<div class="code-title">app/dashboard/layout.tsx</div>
+
+<pre><code class="language-jsx">export default function DashboardLayout({
+  children
+}) {
+
+  return (
+    &lt;&gt;
+      &lt;Sidebar /&gt;
+
+      {children}
+    &lt;/&gt;
+  );
+
+}</code></pre>
+
+<p>
+All dashboard pages automatically receive the sidebar.
+</p>
+
+<h2>How Do Layouts Persist Across Navigations?</h2>
+
+<p>
+When navigating between pages that share the same layout, Next.js does not unmount and recreate that layout.
+</p>
+
+<div class="code-title">Navigation Example</div>
+
+<pre><code class="language-text">/dashboard
+      │
+      ▼
+/dashboard/settings
+</code></pre>
+
+<p>
+Both routes use the same dashboard layout.
+</p>
+
+<div class="code-title">What Happens?</div>
+
+<pre><code class="language-text">Sidebar Layout
+      │
+      ├── Dashboard Page
+      │
+Navigate
+      │
+      ▼
+Sidebar Layout
+      │
+      └── Settings Page
+</code></pre>
+
+<p>
+Only the page content changes. The layout remains mounted.
+</p>
+
+<h2>Without Layout Persistence</h2>
+
+<div class="code-title">Traditional Behavior</div>
+
+<pre><code class="language-text">Navigate
+   │
+   ▼
+Destroy Header
+Destroy Sidebar
+Destroy Footer
+   │
+   ▼
+Create Everything Again
+</code></pre>
+
+<p>
+This causes unnecessary re-rendering and loss of UI state.
+</p>
+
+<h2>With Layout Persistence</h2>
+
+<div class="code-title">App Router Behavior</div>
+
+<pre><code class="language-text">Navigate
+   │
+   ▼
+Keep Layout Mounted
+   │
+   ▼
+Replace Page Content Only
+</code></pre>
+
+<p>
+This makes navigation faster and preserves layout state.
+</p>
+
+<h2>Real Example</h2>
+
+<p>
+Suppose the sidebar contains a search box.
+</p>
+
+<div class="code-title">Sidebar</div>
+
+<pre><code class="language-jsx">'use client';
+
+import { useState } from 'react';
+
+export default function Sidebar() {
+
+  const [search, setSearch] = useState('');
+
+  return (
+    &lt;input
+      value={search}
+      onChange={e =&gt; setSearch(e.target.value)}
+    /&gt;
+  );
+
+}</code></pre>
+
+<p>
+When navigating between dashboard pages, the sidebar stays mounted and the search value remains intact.
+</p>
+
+<h2>What Happens Internally?</h2>
+
+<div class="code-title">Navigation Flow</div>
+
+<pre><code class="language-text">Current Layout
+      │
+      ▼
+User Navigates
+      │
+      ▼
+Reuse Existing Layout
+      │
+      ▼
+Load New Page
+      │
+      ▼
+Update Children
+</code></pre>
+
+<h2>Layout vs Page</h2>
+
+<table>
+<tr>
+<th>Feature</th>
+<th>Layout</th>
+<th>Page</th>
+</tr>
+
+<tr>
+<td>Shared UI</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+
+<tr>
+<td>Receives children</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+
+<tr>
+<td>Persists Across Navigation</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+
+<tr>
+<td>Route Content</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+
+<tr>
+<td>Can Be Nested</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+</table>
+
+<h2>When Should We Use Layouts?</h2>
+
+<ul>
+<li>Headers.</li>
+<li>Footers.</li>
+<li>Navigation Bars.</li>
+<li>Sidebars.</li>
+<li>Dashboard Shells.</li>
+<li>Shared Route UI.</li>
+</ul>
+
+<h2>Important Note</h2>
+
+<div class="feature">
+Layouts persist only when navigating between routes that share the same layout segment. Navigating to a route with a different layout causes the old layout to unmount and the new layout to mount.
+</div>
+
+<h2>Interview Tip</h2>
+
+<div class="feature">
+A common misconception is that layouts re-render on every navigation. In reality, shared layouts remain mounted and only the page content inside the layout is replaced.
+</div>
+
+<div class="feature">
+<strong>One-Line Definition:</strong><br>
+Layouts in the App Router are shared UI wrappers that persist across navigations, allowing Next.js to reuse the layout and update only the page content inside it.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+
+</body>
+</html>

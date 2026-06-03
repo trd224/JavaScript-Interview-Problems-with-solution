@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How does loading.js work with React Suspense?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+}
+
+body{
+  background:#0f172a;
+  color:#e2e8f0;
+  font-family:Arial,sans-serif;
+  line-height:1.8;
+  padding:40px 20px;
+}
+
+.container{
+  max-width:1000px;
+  margin:auto;
+  background:#111827;
+  padding:40px;
+  border-radius:16px;
+}
+
+h1{color:#38bdf8;margin-bottom:20px}
+h2{color:#a78bfa;margin-top:30px;margin-bottom:10px}
+h3{color:#fbbf24;margin-top:25px;margin-bottom:10px}
+
+p{margin-bottom:15px}
+
+ul{
+  margin-left:20px;
+}
+
+li{
+  margin-bottom:8px;
+}
+
+.feature{
+  background:#1e293b;
+  border-left:5px solid #38bdf8;
+  padding:15px;
+  border-radius:8px;
+  margin:20px 0;
+}
+
+.code-title{
+  background:#1e293b;
+  color:#93c5fd;
+  padding:10px;
+  font-weight:bold;
+}
+
+pre[class*="language-"]{
+  margin:0!important;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:20px;
+}
+
+th{
+  background:#1e293b;
+  color:#38bdf8;
+  text-align:left;
+  padding:12px;
+}
+
+td{
+  padding:12px;
+  border-top:1px solid #334155;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>How does loading.js work with React Suspense?</h1>
+
+<p>
+The <code>loading.js</code> file is a special App Router file that automatically creates a React Suspense boundary around a route segment and displays a loading UI while that segment is being rendered.
+</p>
+
+<div class="feature">
+In simple words, <code>loading.js</code> is Next.js's automatic Suspense fallback for a route.
+</div>
+
+<h2>Why Do We Need loading.js?</h2>
+
+<p>
+Sometimes a page takes time to render because it is waiting for:
+</p>
+
+<ul>
+<li>Database Queries</li>
+<li>API Requests</li>
+<li>Server Components</li>
+<li>Dynamic Data</li>
+</ul>
+
+<p>
+Instead of showing a blank screen, we can show a loading UI.
+</p>
+
+<h2>Basic Example</h2>
+
+<div class="code-title">Folder Structure</div>
+
+<pre><code class="language-text">app/
+│
+├── dashboard/
+│   ├── page.tsx
+│   └── loading.tsx
+</code></pre>
+
+<div class="code-title">loading.tsx</div>
+
+<pre><code class="language-jsx">export default function Loading() {
+
+  return &lt;h2&gt;Loading Dashboard...&lt;/h2&gt;;
+
+}</code></pre>
+
+<div class="code-title">page.tsx</div>
+
+<pre><code class="language-jsx">export default async function Page() {
+
+  await new Promise(resolve =>
+    setTimeout(resolve, 3000)
+  );
+
+  return &lt;h1&gt;Dashboard&lt;/h1&gt;;
+
+}</code></pre>
+
+<h2>What Happens?</h2>
+
+<div class="code-title">Flow</div>
+
+<pre><code class="language-text">User Opens Route
+        │
+        ▼
+Page Starts Rendering
+        │
+        ▼
+Page Is Slow
+        │
+        ▼
+Show loading.js
+        │
+        ▼
+Page Ready
+        │
+        ▼
+Replace Loading UI
+</code></pre>
+
+<p>
+The user sees the loading UI while the page is rendering.
+</p>
+
+<h2>How Does Suspense Fit In?</h2>
+
+<p>
+Internally, Next.js automatically wraps the route in a Suspense boundary.
+</p>
+
+<div class="code-title">Conceptual Implementation</div>
+
+<pre><code class="language-jsx">&lt;Suspense
+  fallback={&lt;Loading /&gt;}
+&gt;
+  &lt;Page /&gt;
+&lt;/Suspense&gt;</code></pre>
+
+<p>
+Next.js creates this Suspense boundary automatically.
+</p>
+
+<div class="feature">
+You do not manually write Suspense when using loading.js. Next.js creates it for you.
+</div>
+
+<h2>Equivalent Manual Suspense</h2>
+
+<div class="code-title">Without loading.js</div>
+
+<pre><code class="language-jsx">import { Suspense } from 'react';
+
+export default function Dashboard() {
+
+  return (
+    &lt;Suspense
+      fallback={
+        &lt;h2&gt;Loading...&lt;/h2&gt;
+      }
+    &gt;
+      &lt;UserStats /&gt;
+    &lt;/Suspense&gt;
+  );
+
+}</code></pre>
+
+<p>
+This is very similar to what loading.js does automatically.
+</p>
+
+<h2>Important Difference</h2>
+
+<p>
+The scope is different.
+</p>
+
+<table>
+<tr>
+<th>loading.js</th>
+<th>Suspense</th>
+</tr>
+
+<tr>
+<td>Entire Route Segment</td>
+<td>Specific Component</td>
+</tr>
+
+<tr>
+<td>Automatic</td>
+<td>Manual</td>
+</tr>
+
+<tr>
+<td>File-Based</td>
+<td>Component-Based</td>
+</tr>
+
+<tr>
+<td>Created by Next.js</td>
+<td>Created by Developer</td>
+</tr>
+</table>
+
+<h2>Route-Level Example</h2>
+
+<div class="code-title">Folder Structure</div>
+
+<pre><code class="language-text">app/
+│
+├── dashboard/
+│   ├── page.tsx
+│   └── loading.tsx
+</code></pre>
+
+<p>
+User visits:
+</p>
+
+<pre><code class="language-text">/dashboard
+</code></pre>
+
+<p>
+If the dashboard route is slow:
+</p>
+
+<pre><code class="language-text">Show loading.js
+      ↓
+Dashboard Ready
+      ↓
+Replace Loading UI
+</code></pre>
+
+<h2>Component-Level Example</h2>
+
+<div class="code-title">page.tsx</div>
+
+<pre><code class="language-jsx">import { Suspense } from 'react';
+import UserStats from './UserStats';
+
+export default function Dashboard() {
+
+  return (
+    &lt;&gt;
+      &lt;Header /&gt;
+
+      &lt;Suspense
+        fallback={
+          &lt;h2&gt;Loading Stats...&lt;/h2&gt;
+        }
+      &gt;
+        &lt;UserStats /&gt;
+      &lt;/Suspense&gt;
+
+      &lt;Footer /&gt;
+    &lt;/&gt;
+  );
+
+}</code></pre>
+
+<p>
+Now only the UserStats section shows a loading state.
+</p>
+
+<div class="code-title">Result</div>
+
+<pre><code class="language-text">Header Appears
+Footer Appears
+
+Loading Stats...
+
+UserStats Arrives Later
+</code></pre>
+
+<p>
+This is more granular than loading.js.
+</p>
+
+<h2>loading.js and PPR</h2>
+
+<p>
+When using Partial Prerendering (PPR), loading.js often acts as the fallback content for dynamic sections.
+</p>
+
+<div class="code-title">PPR Flow</div>
+
+<pre><code class="language-text">Static Shell
+      │
+      ▼
+Show Loading UI
+      │
+      ▼
+Dynamic Content Ready
+      │
+      ▼
+Replace Loading UI
+</code></pre>
+
+<p>
+This helps users see content immediately instead of waiting for the entire page.
+</p>
+
+<h2>loading.js vs Template vs Layout</h2>
+
+<table>
+<tr>
+<th>File</th>
+<th>Purpose</th>
+</tr>
+
+<tr>
+<td>layout.js</td>
+<td>Persistent Shared UI</td>
+</tr>
+
+<tr>
+<td>template.js</td>
+<td>Remount Shared Wrapper</td>
+</tr>
+
+<tr>
+<td>loading.js</td>
+<td>Loading Fallback UI</td>
+</tr>
+</table>
+
+<h2>Real World Example</h2>
+
+<div class="code-title">Dashboard Route</div>
+
+<pre><code class="language-text">layout.js
+    │
+    ▼
+Header
+Sidebar
+
+loading.js
+    │
+    ▼
+Loading Dashboard...
+
+page.js
+    │
+    ▼
+Actual Dashboard
+</code></pre>
+
+<p>
+While dashboard data is loading, the user sees the loading UI.
+</p>
+
+<h2>Easy Memory Trick</h2>
+
+<div class="code-title">Remember</div>
+
+<pre><code class="language-text">layout.js
+   = Shared UI
+
+template.js
+   = Fresh Wrapper
+
+loading.js
+   = Loading Screen
+
+page.js
+   = Actual Content
+</code></pre>
+
+<h2>Complete Flow</h2>
+
+<div class="code-title">App Router Rendering</div>
+
+<pre><code class="language-text">User Request
+      │
+      ▼
+Layout Rendered
+      │
+      ▼
+Show loading.js
+      │
+      ▼
+Page Rendering
+      │
+      ▼
+Page Ready
+      │
+      ▼
+Replace Loading UI
+</code></pre>
+
+<div class="feature">
+<strong>One-Line Definition:</strong><br>
+The <code>loading.js</code> file automatically creates a React Suspense fallback for a route segment and displays loading UI while the page or route content is being rendered.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>What are Route Groups (folder) and when do you use them?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+}
+
+body{
+  background:#0f172a;
+  color:#e2e8f0;
+  font-family:Arial,sans-serif;
+  line-height:1.8;
+  padding:40px 20px;
+}
+
+.container{
+  max-width:1000px;
+  margin:auto;
+  background:#111827;
+  padding:40px;
+  border-radius:16px;
+}
+
+h1{color:#38bdf8;margin-bottom:20px}
+h2{color:#a78bfa;margin-top:30px;margin-bottom:10px}
+h3{color:#fbbf24;margin-top:25px;margin-bottom:10px}
+
+p{margin-bottom:15px}
+
+ul{
+  margin-left:20px;
+}
+
+li{
+  margin-bottom:8px;
+}
+
+.feature{
+  background:#1e293b;
+  border-left:5px solid #38bdf8;
+  padding:15px;
+  border-radius:8px;
+  margin:20px 0;
+}
+
+.code-title{
+  background:#1e293b;
+  color:#93c5fd;
+  padding:10px;
+  font-weight:bold;
+}
+
+pre[class*="language-"]{
+  margin:0!important;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:20px;
+}
+
+th{
+  background:#1e293b;
+  color:#38bdf8;
+  text-align:left;
+  padding:12px;
+}
+
+td{
+  padding:12px;
+  border-top:1px solid #334155;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>What are Route Groups (folder) and when do you use them?</h1>
+
+<p>
+Route Groups are special folders in the Next.js App Router that allow us to organize routes without affecting the URL structure.
+</p>
+
+<div class="feature">
+A Route Group is created by wrapping a folder name in parentheses <code>()</code>.
+</div>
+
+<h2>Basic Syntax</h2>
+
+<div class="code-title">Route Group Folder</div>
+
+<pre><code class="language-text">(marketing)
+(auth)
+(dashboard)
+</code></pre>
+
+<p>
+The folder name is used only for organization and layout purposes.
+</p>
+
+<h2>Why Do We Need Route Groups?</h2>
+
+<p>
+Sometimes we want:
+</p>
+
+<ul>
+<li>Different layouts for different sections.</li>
+<li>Better folder organization.</li>
+<li>Separate application areas.</li>
+<li>Shared layouts for specific routes.</li>
+<li>Cleaner project structure.</li>
+</ul>
+
+<p>
+Without Route Groups, all routes would need to share the same folder hierarchy.
+</p>
+
+<h2>Basic Example</h2>
+
+<div class="code-title">Folder Structure</div>
+
+<pre><code class="language-text">app/
+│
+├── (marketing)/
+│   ├── page.tsx
+│   └── about/
+│       └── page.tsx
+│
+├── (dashboard)/
+│   ├── users/
+│   │   └── page.tsx
+│   │
+│   └── reports/
+│       └── page.tsx
+</code></pre>
+
+<h2>Generated URLs</h2>
+
+<div class="code-title">URLs</div>
+
+<pre><code class="language-text">/                  ← page.tsx
+/about             ← about/page.tsx
+
+/users             ← users/page.tsx
+/reports           ← reports/page.tsx
+</code></pre>
+
+<p>
+Notice that:
+</p>
+
+<pre><code class="language-text">(marketing)
+(dashboard)
+</code></pre>
+
+<p>
+do not appear in the URL.
+</p>
+
+<div class="feature">
+Route Group names never become part of the route URL.
+</div>
+
+<h2>Without Route Groups</h2>
+
+<div class="code-title">Folder Structure</div>
+
+<pre><code class="language-text">app/
+│
+├── marketing/
+│   └── about/
+│       └── page.tsx
+</code></pre>
+
+<p>
+Generated URL:
+</p>
+
+<pre><code class="language-text">/marketing/about
+</code></pre>
+
+<h2>With Route Groups</h2>
+
+<div class="code-title">Folder Structure</div>
+
+<pre><code class="language-text">app/
+│
+├── (marketing)/
+│   └── about/
+│       └── page.tsx
+</code></pre>
+
+<p>
+Generated URL:
+</p>
+
+<pre><code class="language-text">/about
+</code></pre>
+
+<p>
+The Route Group disappears from the URL.
+</p>
+
+<h2>Most Common Use Case: Different Layouts</h2>
+
+<p>
+Suppose we want:
+</p>
+
+<ul>
+<li>Marketing pages → Marketing Layout</li>
+<li>Dashboard pages → Dashboard Layout</li>
+</ul>
+
+<div class="code-title">Folder Structure</div>
+
+<pre><code class="language-text">app/
+│
+├── (marketing)/
+│   ├── layout.tsx
+│   ├── page.tsx
+│   └── about/
+│       └── page.tsx
+│
+├── (dashboard)/
+│   ├── layout.tsx
+│   ├── users/
+│   │   └── page.tsx
+│   │
+│   └── reports/
+│       └── page.tsx
+</code></pre>
+
+<h2>Marketing Layout</h2>
+
+<div class="code-title">(marketing)/layout.tsx</div>
+
+<pre><code class="language-jsx">export default function Layout({
+  children
+}) {
+
+  return (
+    &lt;&gt;
+      &lt;MarketingHeader /&gt;
+
+      {children}
+
+      &lt;MarketingFooter /&gt;
+    &lt;/&gt;
+  );
+
+}</code></pre>
+
+<h2>Dashboard Layout</h2>
+
+<div class="code-title">(dashboard)/layout.tsx</div>
+
+<pre><code class="language-jsx">export default function Layout({
+  children
+}) {
+
+  return (
+    &lt;&gt;
+      &lt;Sidebar /&gt;
+
+      {children}
+    &lt;/&gt;
+  );
+
+}</code></pre>
+
+<p>
+Now different sections of the application have completely different layouts.
+</p>
+
+<h2>How Rendering Works</h2>
+
+<p>
+User visits:
+</p>
+
+<pre><code class="language-text">/about
+</code></pre>
+
+<p>
+Next.js builds:
+</p>
+
+<pre><code class="language-text">Root Layout
+      │
+      ▼
+Marketing Layout
+      │
+      ▼
+About Page
+</code></pre>
+
+<p>
+User visits:
+</p>
+
+<pre><code class="language-text">/users
+</code></pre>
+
+<p>
+Next.js builds:
+</p>
+
+<pre><code class="language-text">Root Layout
+      │
+      ▼
+Dashboard Layout
+      │
+      ▼
+Users Page
+</code></pre>
+
+<p>
+Different layouts are used even though the Route Group name is not in the URL.
+</p>
+
+<h2>Route Groups and Layout Persistence</h2>
+
+<p>
+Remember:
+</p>
+
+<pre><code class="language-text">Root Layout
+   Always Persists
+
+Nested Layout
+   Persists
+
+Template
+   Recreated
+
+Page
+   Recreated
+</code></pre>
+
+<p>
+A Route Group simply decides which layout tree Next.js should use.
+</p>
+
+<div class="feature">
+Route Groups do not change layout behavior. They only help organize and separate route trees.
+</div>
+
+<h2>Real World Example</h2>
+
+<div class="code-title">Application Structure</div>
+
+<pre><code class="language-text">app/
+│
+├── (public)/
+│   ├── layout.tsx
+│   ├── page.tsx
+│   ├── about/
+│   └── contact/
+│
+├── (auth)/
+│   ├── layout.tsx
+│   ├── login/
+│   └── register/
+│
+├── (dashboard)/
+│   ├── layout.tsx
+│   ├── users/
+│   ├── reports/
+│   └── settings/
+</code></pre>
+
+<p>
+This keeps the application organized while keeping URLs clean.
+</p>
+
+<h2>Route Groups vs Normal Folders</h2>
+
+<table>
+<tr>
+<th>Feature</th>
+<th>Normal Folder</th>
+<th>Route Group</th>
+</tr>
+
+<tr>
+<td>Appears In URL</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+
+<tr>
+<td>Can Have Layout</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+
+<tr>
+<td>Organizes Routes</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+
+<tr>
+<td>Used For Layout Separation</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+</table>
+
+<h2>Easy Memory Trick</h2>
+
+<div class="code-title">Remember</div>
+
+<pre><code class="language-text">users/
+   → URL becomes /users
+
+(users)/
+   → URL does NOT change
+</code></pre>
+
+<h2>When Should We Use Route Groups?</h2>
+
+<ul>
+<li>Different layouts for different sections.</li>
+<li>Marketing pages.</li>
+<li>Authentication pages.</li>
+<li>Dashboard pages.</li>
+<li>Large application organization.</li>
+<li>Separating route trees without changing URLs.</li>
+</ul>
+
+<h2>When Should We Avoid Route Groups?</h2>
+
+<ul>
+<li>Simple applications.</li>
+<li>When normal folders are sufficient.</li>
+<li>When URL structure should reflect folder structure.</li>
+</ul>
+
+<h2>Complete Flow</h2>
+
+<div class="code-title">Route Resolution</div>
+
+<pre><code class="language-text">(dashboard)
+      │
+      ▼
+Ignored In URL
+      │
+      ▼
+Used For Layout Selection
+      │
+      ▼
+Render Route
+</code></pre>
+
+<div class="feature">
+<strong>One-Line Definition:</strong><br>
+Route Groups are folders wrapped in parentheses that help organize routes and create separate layout trees without affecting the URL structure.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+
+</body>
+</html>

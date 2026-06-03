@@ -1,0 +1,1481 @@
+<!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>What is a template.js file and how is it different from a layout?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+}
+
+body{
+  background:#0f172a;
+  color:#e2e8f0;
+  font-family:Arial,sans-serif;
+  line-height:1.8;
+  padding:40px 20px;
+}
+
+.container{
+  max-width:1000px;
+  margin:auto;
+  background:#111827;
+  padding:40px;
+  border-radius:16px;
+}
+
+h1{color:#38bdf8;margin-bottom:20px}
+h2{color:#a78bfa;margin-top:30px;margin-bottom:10px}
+h3{color:#fbbf24;margin-top:25px;margin-bottom:10px}
+
+p{margin-bottom:15px}
+
+ul{
+  margin-left:20px;
+}
+
+li{
+  margin-bottom:8px;
+}
+
+.feature{
+  background:#1e293b;
+  border-left:5px solid #38bdf8;
+  padding:15px;
+  border-radius:8px;
+  margin:20px 0;
+}
+
+.code-title{
+  background:#1e293b;
+  color:#93c5fd;
+  padding:10px;
+  font-weight:bold;
+}
+
+pre[class*="language-"]{
+  margin:0!important;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:20px;
+}
+
+th{
+  background:#1e293b;
+  color:#38bdf8;
+  text-align:left;
+  padding:12px;
+}
+
+td{
+  padding:12px;
+  border-top:1px solid #334155;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>What is a template.js file and how is it different from a layout?</h1>
+
+<p>
+A <code>template.js</code> file is a special App Router component that wraps pages and layouts similarly to a layout, but unlike a layout, it creates a new component instance on every navigation.
+</p>
+
+<div class="feature">
+The primary purpose of <code>template.js</code> is to force remounting and reset component state whenever the user navigates to a different route within that segment.
+</div>
+
+<h2>Why Was template.js Introduced?</h2>
+
+<p>
+Layouts persist across navigations, which is usually desirable for performance.
+</p>
+
+<p>
+However, sometimes we want:
+</p>
+
+<ul>
+<li>State Reset</li>
+<li>Fresh useEffect Execution</li>
+<li>Page Transition Animations</li>
+<li>New Component Instance</li>
+<li>Route-specific Initialization</li>
+</ul>
+
+<p>
+This is where <code>template.js</code> becomes useful.
+</p>
+
+<h2>Layout Example</h2>
+
+<div class="code-title">app/dashboard/layout.tsx</div>
+
+<pre><code class="language-jsx">export default function Layout({
+  children
+}) {
+
+  return (
+    &lt;div&gt;
+      &lt;Sidebar /&gt;
+      {children}
+    &lt;/div&gt;
+  );
+
+}</code></pre>
+
+<p>
+This layout stays mounted while navigating between dashboard pages.
+</p>
+
+<h2>Template Example</h2>
+
+<div class="code-title">app/dashboard/template.tsx</div>
+
+<pre><code class="language-jsx">export default function Template({
+  children
+}) {
+
+  return (
+    &lt;div&gt;
+      {children}
+    &lt;/div&gt;
+  );
+
+}</code></pre>
+
+<p>
+This template is recreated every time navigation occurs within its route segment.
+</p>
+
+<h2>Folder Structure</h2>
+
+<div class="code-title">App Router Structure</div>
+
+<pre><code class="language-text">app/
+│
+├── layout.tsx
+│
+├── dashboard/
+│   ├── layout.tsx
+│   ├── template.tsx
+│   ├── page.tsx
+│   │
+│   └── settings/
+│       └── page.tsx
+</code></pre>
+
+<h2>How Layout Behaves</h2>
+
+<div class="code-title">Navigation</div>
+
+<pre><code class="language-text">/dashboard
+      │
+      ▼
+/dashboard/settings
+</code></pre>
+
+<p>
+With a layout:
+</p>
+
+<pre><code class="language-text">Sidebar Mounted
+      │
+Navigate
+      ▼
+Sidebar Still Mounted
+</code></pre>
+
+<p>
+The layout remains alive.
+</p>
+
+<h2>How Template Behaves</h2>
+
+<div class="code-title">Navigation</div>
+
+<pre><code class="language-text">/dashboard
+      │
+      ▼
+/dashboard/settings
+</code></pre>
+
+<p>
+With a template:
+</p>
+
+<pre><code class="language-text">Template Mounted
+      │
+Navigate
+      ▼
+Template Unmounted
+      │
+      ▼
+Template Mounted Again
+</code></pre>
+
+<p>
+A completely new instance is created.
+</p>
+
+<h2>Real Example Using useEffect()</h2>
+
+<div class="code-title">Client Component</div>
+
+<pre><code class="language-jsx">'use client';
+
+import { useEffect } from 'react';
+
+export default function Dashboard() {
+
+  useEffect(() =&gt; {
+
+    console.log('Mounted');
+
+  }, []);
+
+  return &lt;h1&gt;Dashboard&lt;/h1&gt;;
+
+}</code></pre>
+
+<p>
+If this component is wrapped by a layout, the effect may not run again during navigation.
+</p>
+
+<p>
+If it is wrapped by a template, the component is recreated and the effect runs again.
+</p>
+
+<h2>What Happens Internally?</h2>
+
+<div class="code-title">Layout Flow</div>
+
+<pre><code class="language-text">Navigate
+    │
+    ▼
+Reuse Existing Layout
+    │
+    ▼
+Replace Page Content
+</code></pre>
+
+<div class="code-title">Template Flow</div>
+
+<pre><code class="language-text">Navigate
+    │
+    ▼
+Destroy Template
+    │
+    ▼
+Create New Template
+    │
+    ▼
+Render Page
+</code></pre>
+
+<h2>Page Transition Example</h2>
+
+<p>
+Templates are commonly used with animation libraries.
+</p>
+
+<div class="code-title">Animation Wrapper</div>
+
+<pre><code class="language-jsx">export default function Template({
+  children
+}) {
+
+  return (
+    &lt;div className="fade-in"&gt;
+      {children}
+    &lt;/div&gt;
+  );
+
+}</code></pre>
+
+<p>
+Every navigation creates a fresh animation.
+</p>
+
+<h2>Layout vs Template</h2>
+
+<table>
+<tr>
+<th>Feature</th>
+<th>Layout</th>
+<th>Template</th>
+</tr>
+
+<tr>
+<td>Wraps Pages</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+
+<tr>
+<td>Persists Across Navigation</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+
+<tr>
+<td>Remounts On Navigation</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+
+<tr>
+<td>Preserves State</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+
+<tr>
+<td>Runs useEffect Again</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+
+<tr>
+<td>Good For Animations</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+</table>
+
+<h2>When Should We Use Layouts?</h2>
+
+<ul>
+<li>Headers.</li>
+<li>Footers.</li>
+<li>Sidebars.</li>
+<li>Navigation Menus.</li>
+<li>Persistent State.</li>
+<li>Shared UI.</li>
+</ul>
+
+<h2>When Should We Use Templates?</h2>
+
+<ul>
+<li>Page Transition Animations.</li>
+<li>Resetting State.</li>
+<li>Re-running Effects.</li>
+<li>Fresh Component Instances.</li>
+<li>Route-specific Initialization.</li>
+</ul>
+
+<h2>Important Note</h2>
+
+<div class="feature">
+A template behaves similarly to a layout visually, but it receives a unique key for each navigation, causing React to unmount the old instance and mount a new one.
+</div>
+
+<h2>Interview Tip</h2>
+
+<div class="feature">
+A common misconception is that templates and layouts are identical. The key difference is that layouts persist across navigations, while templates remount on every navigation.
+</div>
+
+<div class="feature">
+<strong>One-Line Definition:</strong><br>
+A <code>template.js</code> file is a route wrapper that behaves like a layout but remounts on every navigation, allowing state resets, effect re-execution, and page transition animations.
+</div>
+
+<h2>Simple Example (Most Important)</h2>
+
+<p>
+The easiest way to understand the difference is by looking at component state.
+</p>
+
+<div class="code-title">Sidebar Component</div>
+
+<pre><code class="language-jsx">'use client';
+
+import { useState } from 'react';
+
+export default function Sidebar() {
+
+  const [count, setCount] = useState(0);
+
+  return (
+    &lt;button
+      onClick={() =&gt; setCount(count + 1)}
+    &gt;
+      Count: {count}
+    &lt;/button&gt;
+  );
+
+}</code></pre>
+
+<p>
+Suppose the user clicks the button several times.
+</p>
+
+<div class="code-title">Current State</div>
+
+<pre><code class="language-text">Count = 5
+</code></pre>
+
+<h2>Using Layout</h2>
+
+<p>
+A layout remains mounted while navigating between routes.
+</p>
+
+<div class="code-title">Navigation</div>
+
+<pre><code class="language-text">/dashboard
+      │
+      ▼
+/dashboard/settings
+</code></pre>
+
+<div class="code-title">Result</div>
+
+<pre><code class="language-text">Count = 5
+</code></pre>
+
+<p>
+The state remains because the layout was never destroyed.
+</p>
+
+<div class="feature">
+Layout persists across navigation, so React reuses the existing component instance and preserves state.
+</div>
+
+<h2>Using Template</h2>
+
+<p>
+A template is destroyed and recreated on every navigation.
+</p>
+
+<div class="code-title">Navigation</div>
+
+<pre><code class="language-text">/dashboard
+      │
+      ▼
+/dashboard/settings
+</code></pre>
+
+<div class="code-title">Result</div>
+
+<pre><code class="language-text">Count = 0
+</code></pre>
+
+<p>
+The state resets because React creates a completely new component instance.
+</p>
+
+<div class="feature">
+Template remounts on every navigation, so all state is reset and effects run again.
+</div>
+
+<h2>Easy Memory Trick</h2>
+
+<div class="code-title">Remember</div>
+
+<pre><code class="language-text">Layout
+  = Keep Existing Component
+
+Template
+  = Create New Component
+</code></pre>
+
+<p>
+If you want to preserve state, use a layout.
+</p>
+
+<p>
+If you want a fresh start on every navigation, use a template.
+</p>
+
+<h2>Where Do html and body Tags Go?</h2>
+
+<p>
+A common question is whether a template can replace the Root Layout.
+</p>
+
+<p>
+The answer is no.
+</p>
+
+<div class="feature">
+The Root Layout is always required, even if we use a template. Only the Root Layout can define the application's <code>html</code> and <code>body</code> tags.
+</div>
+
+<h2>Root Layout Example</h2>
+
+<div class="code-title">app/layout.tsx</div>
+
+<pre><code class="language-jsx">export default function RootLayout({
+  children
+}) {
+
+  return (
+    &lt;html lang="en"&gt;
+      &lt;body&gt;
+        {children}
+      &lt;/body&gt;
+    &lt;/html&gt;
+  );
+
+}</code></pre>
+
+<h2>Template Example</h2>
+
+<div class="code-title">app/template.tsx</div>
+
+<pre><code class="language-jsx">export default function Template({
+  children
+}) {
+
+  return (
+    &lt;&gt;
+      {children}
+    &lt;/&gt;
+  );
+
+}</code></pre>
+
+<p>
+A template wraps content but cannot define the application's html or body tags.
+</p>
+
+<h2>Rendering Order</h2>
+
+<div class="code-title">Hierarchy</div>
+
+<pre><code class="language-text">Root Layout
+      │
+      ▼
+Template
+      │
+      ▼
+Page
+</code></pre>
+
+<p>
+The Root Layout is created first, then the template, and finally the page.
+</p>
+
+<h2>Easy Rule</h2>
+
+<div class="code-title">Remember</div>
+
+<pre><code class="language-text">layout.tsx
+    → Creates HTML Document
+    → Contains html and body
+    → Persists
+
+template.tsx
+    → Wraps Content
+    → Remounts
+    → Cannot contain html and body
+</code></pre>
+
+<div class="feature">
+Always place <code>html</code> and <code>body</code> inside the Root Layout (<code>app/layout.tsx</code>). A template only wraps content and is recreated on every navigation.
+</div>
+
+<h2>Should Header and Footer Be Inside Template?</h2>
+
+<p>
+Technically yes, but in most real-world applications the answer is no.
+</p>
+
+<h2>Recommended Approach</h2>
+
+<div class="code-title">layout.tsx</div>
+
+<pre><code class="language-jsx">export default function Layout({
+  children
+}) {
+
+  return (
+    &lt;&gt;
+      &lt;Header /&gt;
+
+      {children}
+
+      &lt;Footer /&gt;
+    &lt;/&gt;
+  );
+
+}</code></pre>
+
+<p>
+The Header and Footer persist across navigations.
+</p>
+
+<div class="code-title">Navigation</div>
+
+<pre><code class="language-text">/dashboard
+      │
+      ▼
+/dashboard/settings
+</code></pre>
+
+<div class="code-title">Result</div>
+
+<pre><code class="language-text">Header Stays Mounted
+Footer Stays Mounted
+
+Only Page Content Changes
+</code></pre>
+
+<div class="feature">
+This is the most common and recommended pattern because it preserves state and improves performance.
+</div>
+
+<h2>Using Header and Footer Inside Template</h2>
+
+<div class="code-title">template.tsx</div>
+
+<pre><code class="language-jsx">export default function Template({
+  children
+}) {
+
+  return (
+    &lt;&gt;
+      &lt;Header /&gt;
+
+      {children}
+
+      &lt;Footer /&gt;
+    &lt;/&gt;
+  );
+
+}</code></pre>
+
+<div class="code-title">Result</div>
+
+<pre><code class="language-text">Old Header Destroyed
+Old Footer Destroyed
+
+New Header Created
+New Footer Created
+</code></pre>
+
+<p>
+Every navigation creates new Header and Footer instances.
+</p>
+
+<div class="feature">
+Use this only when you intentionally want the Header or Footer to reset on every navigation.
+</div>
+
+<h2>Real World Rule</h2>
+
+<div class="code-title">Remember</div>
+
+<pre><code class="language-text">Header     → Layout
+Footer     → Layout
+Sidebar    → Layout
+
+Animation Wrapper → Template
+Reset Form State  → Template
+Run useEffect Again → Template
+</code></pre>
+
+<div class="feature">
+<strong>Updated One-Line Definition:</strong><br>
+A <code>template.js</code> file behaves like a layout but remounts on every navigation, while the Root Layout creates the application's html/body structure and persistent UI such as headers and footers.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+
+</body>
+</html> -->
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>What is a template.js file and how is it different from a layout?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+}
+
+body{
+  background:#0f172a;
+  color:#e2e8f0;
+  font-family:Arial,sans-serif;
+  line-height:1.8;
+  padding:40px 20px;
+}
+
+.container{
+  max-width:1000px;
+  margin:auto;
+  background:#111827;
+  padding:40px;
+  border-radius:16px;
+}
+
+h1{color:#38bdf8;margin-bottom:20px}
+h2{color:#a78bfa;margin-top:30px;margin-bottom:10px}
+h3{color:#fbbf24;margin-top:25px;margin-bottom:10px}
+
+p{margin-bottom:15px}
+
+ul{
+  margin-left:20px;
+}
+
+li{
+  margin-bottom:8px;
+}
+
+.feature{
+  background:#1e293b;
+  border-left:5px solid #38bdf8;
+  padding:15px;
+  border-radius:8px;
+  margin:20px 0;
+}
+
+.code-title{
+  background:#1e293b;
+  color:#93c5fd;
+  padding:10px;
+  font-weight:bold;
+}
+
+pre[class*="language-"]{
+  margin:0!important;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:20px;
+}
+
+th{
+  background:#1e293b;
+  color:#38bdf8;
+  text-align:left;
+  padding:12px;
+}
+
+td{
+  padding:12px;
+  border-top:1px solid #334155;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>What is a template.js file and how is it different from a layout?</h1>
+
+<p>
+A <code>template.js</code> file is a special file in the Next.js App Router that works like a wrapper around a page, but unlike a layout, it is recreated on every navigation.
+</p>
+
+<div class="feature">
+In simple words, <code>layout.js</code> keeps the same wrapper during navigation, but <code>template.js</code> creates a fresh wrapper every time the route changes.
+</div>
+
+<h2>Basic Difference</h2>
+
+<table>
+<tr>
+<th>Layout</th>
+<th>Template</th>
+</tr>
+
+<tr>
+<td>Persists across navigation</td>
+<td>Remounts on navigation</td>
+</tr>
+
+<tr>
+<td>Preserves state</td>
+<td>Resets state</td>
+</tr>
+
+<tr>
+<td>Good for Header, Footer, Sidebar</td>
+<td>Good for animations, reset state, re-running effects</td>
+</tr>
+
+<tr>
+<td>Same component instance is reused</td>
+<td>New component instance is created</td>
+</tr>
+</table>
+
+<h2>Important Flow</h2>
+
+<p>
+In the App Router, the rendering flow is:
+</p>
+
+<div class="code-title">Hierarchy</div>
+
+<pre><code class="language-text">Root Layout
+      │
+      ▼
+Nested Layout
+      │
+      ▼
+Template
+      │
+      ▼
+Page
+</code></pre>
+
+<div class="feature">
+The Root Layout and Nested Layout persist, but the Template and Page are recreated during navigation.
+</div>
+
+<h2>Without Template</h2>
+
+<div class="code-title">Folder Structure</div>
+
+<pre><code class="language-text">app/
+│
+├── layout.tsx
+│
+├── dashboard/
+│   ├── layout.tsx
+│   ├── page.tsx
+│   └── settings/
+│       └── page.tsx
+</code></pre>
+
+<p>
+When the user opens <code>/dashboard</code>, Next.js builds:
+</p>
+
+<div class="code-title">/dashboard</div>
+
+<pre><code class="language-text">Root Layout
+      │
+      ▼
+Dashboard Layout
+      │
+      ▼
+Dashboard Page
+</code></pre>
+
+<p>
+When the user navigates to <code>/dashboard/settings</code>, Next.js builds:
+</p>
+
+<div class="code-title">/dashboard/settings</div>
+
+<pre><code class="language-text">Root Layout
+      │
+      ▼
+Dashboard Layout
+      │
+      ▼
+Settings Page
+</code></pre>
+
+<p>
+Notice what happened:
+</p>
+
+<pre><code class="language-text">Root Layout       → Same
+Dashboard Layout  → Same
+Page              → Changed
+</code></pre>
+
+<div class="feature">
+Without template, only the page changes. The layouts remain mounted.
+</div>
+
+<h2>With Template</h2>
+
+<div class="code-title">Folder Structure</div>
+
+<pre><code class="language-text">app/
+│
+├── layout.tsx
+│
+├── dashboard/
+│   ├── layout.tsx
+│   ├── template.tsx
+│   ├── page.tsx
+│   └── settings/
+│       └── page.tsx
+</code></pre>
+
+<p>
+When the user opens <code>/dashboard</code>, Next.js builds:
+</p>
+
+<div class="code-title">/dashboard</div>
+
+<pre><code class="language-text">Root Layout
+      │
+      ▼
+Dashboard Layout
+      │
+      ▼
+Template #1
+      │
+      ▼
+Dashboard Page
+</code></pre>
+
+<p>
+When the user navigates to <code>/dashboard/settings</code>, Next.js builds:
+</p>
+
+<div class="code-title">/dashboard/settings</div>
+
+<pre><code class="language-text">Root Layout
+      │
+      ▼
+Dashboard Layout
+      │
+      ▼
+Template #2
+      │
+      ▼
+Settings Page
+</code></pre>
+
+<p>
+Notice what happened:
+</p>
+
+<pre><code class="language-text">Root Layout       → Same
+Dashboard Layout  → Same
+Template #1       → Destroyed
+Template #2       → Created
+Page              → Changed
+</code></pre>
+
+<div class="feature">
+With template, the page changes and the template wrapper is also recreated.
+</div>
+
+<h2>Main Confusion: Page Already Remounts, Then Why Need Template?</h2>
+
+<p>
+Yes, the page already remounts during navigation.
+</p>
+
+<div class="code-title">Page Behavior</div>
+
+<pre><code class="language-text">Page
+  → Always recreated on navigation
+</code></pre>
+
+<p>
+So the question is:
+</p>
+
+<div class="feature">
+If page already remounts, why do we need template.js?
+</div>
+
+<p>
+The answer is:
+</p>
+
+<div class="code-title">Answer</div>
+
+<pre><code class="language-text">Page remounts itself.
+
+Template remounts the wrapper around the page.
+</code></pre>
+
+<p>
+So <code>template.js</code> is useful when we want something around the page to also restart.
+</p>
+
+<h2>Example: Animation Wrapper</h2>
+
+<p>
+Suppose we have an animation wrapper around pages.
+</p>
+
+<div class="code-title">Animation Wrapper</div>
+
+<pre><code class="language-jsx">export default function AnimationWrapper({
+  children
+}) {
+
+  return (
+    &lt;div className="fade-in"&gt;
+      {children}
+    &lt;/div&gt;
+  );
+
+}</code></pre>
+
+<h3>If We Put Animation Wrapper Inside Layout</h3>
+
+<div class="code-title">dashboard/layout.tsx</div>
+
+<pre><code class="language-jsx">export default function Layout({
+  children
+}) {
+
+  return (
+    &lt;&gt;
+      &lt;Sidebar /&gt;
+
+      &lt;AnimationWrapper&gt;
+        {children}
+      &lt;/AnimationWrapper&gt;
+    &lt;/&gt;
+  );
+
+}</code></pre>
+
+<p>
+When navigating:
+</p>
+
+<pre><code class="language-text">/dashboard
+      ↓
+/dashboard/settings
+</code></pre>
+
+<p>
+The animation wrapper stays alive because layout persists.
+</p>
+
+<div class="code-title">Result</div>
+
+<pre><code class="language-text">AnimationWrapper stays mounted
+Animation runs once
+Animation does not restart on every navigation
+</code></pre>
+
+<h3>If We Put Animation Wrapper Inside Template</h3>
+
+<div class="code-title">dashboard/template.tsx</div>
+
+<pre><code class="language-jsx">export default function Template({
+  children
+}) {
+
+  return (
+    &lt;AnimationWrapper&gt;
+      {children}
+    &lt;/AnimationWrapper&gt;
+  );
+
+}</code></pre>
+
+<p>
+When navigating:
+</p>
+
+<pre><code class="language-text">/dashboard
+      ↓
+/dashboard/settings
+</code></pre>
+
+<p>
+The old template is destroyed and a new template is created.
+</p>
+
+<div class="code-title">Result</div>
+
+<pre><code class="language-text">Old AnimationWrapper destroyed
+New AnimationWrapper created
+Animation starts again
+</code></pre>
+
+<div class="feature">
+This is one of the main reasons to use <code>template.js</code>: page transition animations.
+</div>
+
+<h2>Example: Reset State</h2>
+
+<p>
+Suppose our wrapper has state.
+</p>
+
+<div class="code-title">dashboard/template.tsx</div>
+
+<pre><code class="language-jsx">'use client';
+
+import { useState } from 'react';
+
+export default function Template({
+  children
+}) {
+
+  const [step, setStep] = useState(1);
+
+  return (
+    &lt;&gt;
+      &lt;h2&gt;Step {step}&lt;/h2&gt;
+
+      &lt;button onClick={() =&gt; setStep(step + 1)}&gt;
+        Next Step
+      &lt;/button&gt;
+
+      {children}
+    &lt;/&gt;
+  );
+
+}</code></pre>
+
+<p>
+User opens:
+</p>
+
+<pre><code class="language-text">/product/1
+</code></pre>
+
+<p>
+Then user changes the step:
+</p>
+
+<pre><code class="language-text">Step = 5
+</code></pre>
+
+<p>
+Now user navigates:
+</p>
+
+<pre><code class="language-text">/product/2
+</code></pre>
+
+<p>
+Because template remounts, the state resets:
+</p>
+
+<pre><code class="language-text">Step = 1
+</code></pre>
+
+<div class="feature">
+Template is useful when we want wrapper state to reset automatically on route change.
+</div>
+
+<h2>useEffect Example</h2>
+
+<p>
+The <code>useEffect</code> example helps us see whether a component mounted again or not.
+</p>
+
+<div class="code-title">Client Component</div>
+
+<pre><code class="language-jsx">'use client';
+
+import { useEffect } from 'react';
+
+export default function Template({
+  children
+}) {
+
+  useEffect(() =&gt; {
+
+    console.log('Template Mounted');
+
+  }, []);
+
+  return children;
+
+}</code></pre>
+
+<p>
+The empty dependency array means this effect runs only when the component mounts.
+</p>
+
+<div class="code-title">When Using Layout</div>
+
+<pre><code class="language-text">Open /dashboard
+
+Layout Mounted
+Dashboard Page Mounted
+
+Navigate to /dashboard/settings
+
+Settings Page Mounted
+Layout Mounted does not run again
+</code></pre>
+
+<div class="code-title">When Using Template</div>
+
+<pre><code class="language-text">Open /dashboard
+
+Template Mounted
+Dashboard Page Mounted
+
+Navigate to /dashboard/settings
+
+Template Mounted
+Settings Page Mounted
+</code></pre>
+
+<div class="feature">
+With template, <code>useEffect</code> runs again because the template component is recreated on navigation.
+</div>
+
+<h2>Where Do html and body Tags Go?</h2>
+
+<p>
+A template cannot replace the Root Layout.
+</p>
+
+<div class="feature">
+The <code>html</code> and <code>body</code> tags always belong inside the Root Layout, not inside <code>template.js</code>.
+</div>
+
+<div class="code-title">app/layout.tsx</div>
+
+<pre><code class="language-jsx">export default function RootLayout({
+  children
+}) {
+
+  return (
+    &lt;html lang="en"&gt;
+      &lt;body&gt;
+        {children}
+      &lt;/body&gt;
+    &lt;/html&gt;
+  );
+
+}</code></pre>
+
+<div class="code-title">app/template.tsx</div>
+
+<pre><code class="language-jsx">export default function Template({
+  children
+}) {
+
+  return (
+    &lt;&gt;
+      {children}
+    &lt;/&gt;
+  );
+
+}</code></pre>
+
+<p>
+The template only wraps content. It does not create the HTML document.
+</p>
+
+<h2>Should Header and Footer Be Inside Template?</h2>
+
+<p>
+Technically, we can put Header and Footer inside template, but usually we should not.
+</p>
+
+<h3>Recommended: Header and Footer Inside Layout</h3>
+
+<div class="code-title">layout.tsx</div>
+
+<pre><code class="language-jsx">export default function Layout({
+  children
+}) {
+
+  return (
+    &lt;&gt;
+      &lt;Header /&gt;
+
+      {children}
+
+      &lt;Footer /&gt;
+    &lt;/&gt;
+  );
+
+}</code></pre>
+
+<p>
+This keeps Header and Footer mounted across navigations.
+</p>
+
+<div class="code-title">Result</div>
+
+<pre><code class="language-text">Header stays mounted
+Footer stays mounted
+Only page content changes
+</code></pre>
+
+<h3>Not Recommended Usually: Header and Footer Inside Template</h3>
+
+<div class="code-title">template.tsx</div>
+
+<pre><code class="language-jsx">export default function Template({
+  children
+}) {
+
+  return (
+    &lt;&gt;
+      &lt;Header /&gt;
+
+      {children}
+
+      &lt;Footer /&gt;
+    &lt;/&gt;
+  );
+
+}</code></pre>
+
+<div class="code-title">Result</div>
+
+<pre><code class="language-text">Old Header destroyed
+Old Footer destroyed
+
+New Header created
+New Footer created
+</code></pre>
+
+<p>
+This is only useful if we intentionally want Header or Footer to reset on every navigation.
+</p>
+
+<h2>Real World Rule</h2>
+
+<div class="code-title">Use Layout For</div>
+
+<pre><code class="language-text">Header
+Footer
+Sidebar
+Navbar
+Persistent UI
+Shared State
+</code></pre>
+
+<div class="code-title">Use Template For</div>
+
+<pre><code class="language-text">Page transition animation
+Resetting wrapper state
+Re-running useEffect
+Fresh wrapper instance
+Route-specific initialization
+</code></pre>
+
+<h2>Final Comparison</h2>
+
+<table>
+<tr>
+<th>Feature</th>
+<th>Layout</th>
+<th>Template</th>
+</tr>
+
+<tr>
+<td>Wraps pages</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+
+<tr>
+<td>Persists across navigation</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+
+<tr>
+<td>Remounts on navigation</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+
+<tr>
+<td>Preserves state</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+
+<tr>
+<td>Runs useEffect again</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+
+<tr>
+<td>Good for Header/Footer/Sidebar</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+
+<tr>
+<td>Good for animations</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+
+<tr>
+<td>Good for reset behavior</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+</table>
+
+<h2>Easy Memory Trick</h2>
+
+<div class="code-title">Remember</div>
+
+<pre><code class="language-text">Layout
+  = Keep Existing Wrapper
+
+Template
+  = Create New Wrapper
+
+Page
+  = Always Recreated
+</code></pre>
+
+<h2>Complete Flow Summary</h2>
+
+<div class="code-title">App Router Flow</div>
+
+<pre><code class="language-text">Root Layout
+   Always persists
+   Contains html and body
+
+Nested Layout
+   Persists
+   Good for Header, Footer, Sidebar
+
+Template
+   Recreated on navigation
+   Good for animation and reset
+
+Page
+   Recreated on navigation
+   Contains actual route content
+</code></pre>
+
+<div class="feature">
+<strong>One-Line Definition:</strong><br>
+A <code>template.js</code> file is a route wrapper that behaves like a layout but remounts on every navigation, allowing shared wrappers to reset state, rerun effects, and restart animations, while layouts persist across navigations.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+
+</body>
+</html>

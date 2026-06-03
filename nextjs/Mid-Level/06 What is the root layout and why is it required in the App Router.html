@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>What is the root layout and why is it required in the App Router?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+}
+
+body{
+  background:#0f172a;
+  color:#e2e8f0;
+  font-family:Arial,sans-serif;
+  line-height:1.8;
+  padding:40px 20px;
+}
+
+.container{
+  max-width:1000px;
+  margin:auto;
+  background:#111827;
+  padding:40px;
+  border-radius:16px;
+}
+
+h1{color:#38bdf8;margin-bottom:20px}
+h2{color:#a78bfa;margin-top:30px;margin-bottom:10px}
+h3{color:#fbbf24;margin-top:25px;margin-bottom:10px}
+
+p{margin-bottom:15px}
+
+ul{
+  margin-left:20px;
+}
+
+li{
+  margin-bottom:8px;
+}
+
+.feature{
+  background:#1e293b;
+  border-left:5px solid #38bdf8;
+  padding:15px;
+  border-radius:8px;
+  margin:20px 0;
+}
+
+.code-title{
+  background:#1e293b;
+  color:#93c5fd;
+  padding:10px;
+  font-weight:bold;
+}
+
+pre[class*="language-"]{
+  margin:0!important;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:20px;
+}
+
+th{
+  background:#1e293b;
+  color:#38bdf8;
+  text-align:left;
+  padding:12px;
+}
+
+td{
+  padding:12px;
+  border-top:1px solid #334155;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>What is the root layout and why is it required in the App Router?</h1>
+
+<p>
+The Root Layout is the top-level layout of a Next.js App Router application. It is defined in <code>app/layout.tsx</code> and wraps every page and layout in the application.
+</p>
+
+<div class="feature">
+The primary purpose of the Root Layout is to provide the application's global HTML structure and shared UI that should exist across the entire application.
+</div>
+
+<h2>Why Is the Root Layout Required?</h2>
+
+<p>
+Every App Router application must have exactly one Root Layout because Next.js needs a top-level component to define:
+</p>
+
+<ul>
+<li>HTML Structure</li>
+<li>Body Element</li>
+<li>Global UI</li>
+<li>Shared Providers</li>
+<li>Fonts</li>
+<li>Application Shell</li>
+</ul>
+
+<p>
+Without a Root Layout, Next.js would not know how to construct the application's HTML document.
+</p>
+
+<h2>Basic Root Layout Example</h2>
+
+<div class="code-title">app/layout.tsx</div>
+
+<pre><code class="language-jsx">export default function RootLayout({
+  children
+}) {
+
+  return (
+    &lt;html lang="en"&gt;
+      &lt;body&gt;
+        {children}
+      &lt;/body&gt;
+    &lt;/html&gt;
+  );
+
+}</code></pre>
+
+<p>
+This is the minimum required Root Layout.
+</p>
+
+<h2>Why Must It Contain html and body?</h2>
+
+<p>
+The Root Layout is responsible for generating the application's document structure.
+</p>
+
+<div class="code-title">Required Structure</div>
+
+<pre><code class="language-html">&lt;html lang="en"&gt;
+  &lt;body&gt;
+    Application Content
+  &lt;/body&gt;
+&lt;/html&gt;</code></pre>
+
+<p>
+Unlike nested layouts, the Root Layout must contain both the <code>html</code> and <code>body</code> tags.
+</p>
+
+<h2>Folder Structure</h2>
+
+<div class="code-title">App Router</div>
+
+<pre><code class="language-text">app/
+│
+├── layout.tsx
+├── page.tsx
+│
+├── dashboard/
+│   ├── layout.tsx
+│   └── page.tsx
+</code></pre>
+
+<p>
+The Root Layout sits at the top of the layout hierarchy.
+</p>
+
+<h2>Rendering Hierarchy</h2>
+
+<div class="code-title">Hierarchy</div>
+
+<pre><code class="language-text">Root Layout
+      │
+      ▼
+Nested Layout
+      │
+      ▼
+Page
+</code></pre>
+
+<p>
+Every page is rendered inside the Root Layout.
+</p>
+
+<h2>Adding Global UI</h2>
+
+<div class="code-title">Root Layout Example</div>
+
+<pre><code class="language-jsx">import Header from './Header';
+import Footer from './Footer';
+
+export default function RootLayout({
+  children
+}) {
+
+  return (
+    &lt;html lang="en"&gt;
+      &lt;body&gt;
+
+        &lt;Header /&gt;
+
+        {children}
+
+        &lt;Footer /&gt;
+
+      &lt;/body&gt;
+    &lt;/html&gt;
+  );
+
+}</code></pre>
+
+<p>
+The Header and Footer automatically appear on every page.
+</p>
+
+<h2>Using Providers</h2>
+
+<p>
+The Root Layout is commonly used for global providers.
+</p>
+
+<div class="code-title">Theme Provider</div>
+
+<pre><code class="language-jsx">import ThemeProvider from './ThemeProvider';
+
+export default function RootLayout({
+  children
+}) {
+
+  return (
+    &lt;html lang="en"&gt;
+      &lt;body&gt;
+
+        &lt;ThemeProvider&gt;
+          {children}
+        &lt;/ThemeProvider&gt;
+
+      &lt;/body&gt;
+    &lt;/html&gt;
+  );
+
+}</code></pre>
+
+<p>
+This makes the provider available throughout the application.
+</p>
+
+<h2>What Happens Internally?</h2>
+
+<div class="code-title">Request Flow</div>
+
+<pre><code class="language-text">User Request
+      │
+      ▼
+Root Layout
+      │
+      ▼
+Nested Layouts
+      │
+      ▼
+Page
+      │
+      ▼
+Generate HTML
+</code></pre>
+
+<h2>Root Layout vs Nested Layout</h2>
+
+<table>
+<tr>
+<th>Feature</th>
+<th>Root Layout</th>
+<th>Nested Layout</th>
+</tr>
+
+<tr>
+<td>Required</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+
+<tr>
+<td>Contains html Tag</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+
+<tr>
+<td>Contains body Tag</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+
+<tr>
+<td>Global Application Wrapper</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+
+<tr>
+<td>Can Be Nested</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+
+<tr>
+<td>Wraps Entire App</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+</table>
+
+<h2>What Happens If We Remove It?</h2>
+
+<p>
+Next.js will fail to build the application because every App Router project must have a Root Layout.
+</p>
+
+<div class="code-title">Build Error Conceptually</div>
+
+<pre><code class="language-text">app/layout.tsx Missing
+
+      │
+      ▼
+
+Build Failed
+</code></pre>
+
+<h2>How Does It Persist Across Navigations?</h2>
+
+<p>
+The Root Layout remains mounted while users navigate between pages.
+</p>
+
+<div class="code-title">Navigation</div>
+
+<pre><code class="language-text">Home Page
+    │
+Navigate
+    ▼
+About Page
+    │
+Navigate
+    ▼
+Contact Page
+</code></pre>
+
+<p>
+The Root Layout is reused and only the page content changes.
+</p>
+
+<h2>When Should We Use the Root Layout?</h2>
+
+<ul>
+<li>Global Header.</li>
+<li>Global Footer.</li>
+<li>Theme Providers.</li>
+<li>Authentication Providers.</li>
+<li>Font Configuration.</li>
+<li>Application-wide UI.</li>
+</ul>
+
+<h2>Important Note</h2>
+
+<div class="feature">
+There can be only one Root Layout in an App Router application, and it must define the application's html and body elements.
+</div>
+
+<h2>Interview Tip</h2>
+
+<div class="feature">
+A common misconception is that the Root Layout is just another layout. In reality, it is a mandatory top-level layout that creates the application's HTML document structure and wraps every route.
+</div>
+
+<div class="feature">
+<strong>One-Line Definition:</strong><br>
+The Root Layout is the mandatory top-level layout in the App Router that defines the application's html and body structure and wraps every page and layout in the application.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>What are Intercepting Routes and what UX problem do they solve?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+}
+
+body{
+  background:#0f172a;
+  color:#e2e8f0;
+  font-family:Arial,sans-serif;
+  line-height:1.8;
+  padding:40px 20px;
+}
+
+.container{
+  max-width:1000px;
+  margin:auto;
+  background:#111827;
+  padding:40px;
+  border-radius:16px;
+}
+
+h1{color:#38bdf8;margin-bottom:20px}
+h2{color:#a78bfa;margin-top:30px;margin-bottom:10px}
+h3{color:#fbbf24;margin-top:25px;margin-bottom:10px}
+
+p{margin-bottom:15px}
+
+ul{
+  margin-left:20px;
+}
+
+li{
+  margin-bottom:8px;
+}
+
+.feature{
+  background:#1e293b;
+  border-left:5px solid #38bdf8;
+  padding:15px;
+  border-radius:8px;
+  margin:20px 0;
+}
+
+.code-title{
+  background:#1e293b;
+  color:#93c5fd;
+  padding:10px;
+  font-weight:bold;
+}
+
+pre[class*="language-"]{
+  margin:0!important;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:20px;
+}
+
+th{
+  background:#1e293b;
+  color:#38bdf8;
+  text-align:left;
+  padding:12px;
+}
+
+td{
+  padding:12px;
+  border-top:1px solid #334155;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>What are Intercepting Routes and what UX problem do they solve?</h1>
+
+<p>
+Intercepting Routes are a Next.js App Router feature that allows us to load one route inside another route's UI instead of performing a full page navigation.
+</p>
+
+<div class="feature">
+Intercepting Routes are primarily used to show a route as a modal, drawer, popup, or overlay while keeping the current page visible underneath.
+</div>
+
+<h2>The UX Problem</h2>
+
+<p>
+Suppose we have an Instagram-style gallery.
+</p>
+
+<div class="code-title">Gallery Page</div>
+
+<pre><code class="language-text">/photos
+</code></pre>
+
+<p>
+User sees:
+</p>
+
+<pre><code class="language-text">Photo 1
+Photo 2
+Photo 3
+Photo 4
+</code></pre>
+
+<p>
+User clicks:
+</p>
+
+<pre><code class="language-text">Photo 3
+</code></pre>
+
+<h2>Without Intercepting Routes</h2>
+
+<div class="code-title">Normal Navigation</div>
+
+<pre><code class="language-text">/photos
+     │
+     ▼
+/photos/3
+</code></pre>
+
+<p>
+What happens?
+</p>
+
+<pre><code class="language-text">Gallery Page Disappears
+
+Photo Detail Page Appears
+</code></pre>
+
+<p>
+Now the user loses:
+</p>
+
+<ul>
+<li>Scroll Position</li>
+<li>Gallery Context</li>
+<li>Current UI State</li>
+</ul>
+
+<p>
+When the user presses Back:
+</p>
+
+<pre><code class="language-text">Reload Gallery
+Find Previous Position Again
+</code></pre>
+
+<div class="feature">
+This creates a poor user experience because the user leaves the gallery completely.
+</div>
+
+<h2>With Intercepting Routes</h2>
+
+<div class="code-title">Intercept Navigation</div>
+
+<pre><code class="language-text">/photos
+     │
+Click Photo
+     │
+     ▼
+Intercept /photos/3
+</code></pre>
+
+<p>
+Instead of replacing the page:
+</p>
+
+<pre><code class="language-text">Gallery Stays Visible
+
+Modal Opens
+
+Photo Details Appear
+</code></pre>
+
+<p>
+User sees:
+</p>
+
+<pre><code class="language-text">Gallery Page
+
+┌──────────────┐
+│ Photo Detail │
+└──────────────┘
+</code></pre>
+
+<p>
+The gallery remains in the background.
+</p>
+
+<h2>Why Is This Better?</h2>
+
+<div class="code-title">Close Modal</div>
+
+<pre><code class="language-text">User Clicks Close
+       │
+       ▼
+Return To Gallery
+</code></pre>
+
+<p>
+Because the gallery never disappeared:
+</p>
+
+<ul>
+<li>Scroll Position Remains</li>
+<li>State Remains</li>
+<li>Filters Remain</li>
+<li>Search Remains</li>
+</ul>
+
+<h2>Real World Examples</h2>
+
+<ul>
+<li>Instagram Photo Modal.</li>
+<li>Twitter/X Tweet Modal.</li>
+<li>Facebook Post Preview.</li>
+<li>E-Commerce Product Quick View.</li>
+<li>Email Preview Modal.</li>
+</ul>
+
+<h2>Folder Structure</h2>
+
+<p>
+Suppose we have:
+</p>
+
+<div class="code-title">Normal Routes</div>
+
+<pre><code class="language-text">app/
+│
+├── photos/
+│   ├── page.tsx
+│   │
+│   └── [id]/
+│       └── page.tsx
+</code></pre>
+
+<p>
+URLs:
+</p>
+
+<pre><code class="language-text">/photos
+/photos/1
+/photos/2
+/photos/3
+</code></pre>
+
+<h2>Adding Intercepting Route</h2>
+
+<div class="code-title">Folder Structure</div>
+
+<pre><code class="language-text">app/
+│
+├── photos/
+│   ├── page.tsx
+│   │
+│   ├── [id]/
+│   │   └── page.tsx
+│   │
+│   └── (.)[id]/
+│       └── page.tsx
+</code></pre>
+
+<p>
+Notice:
+</p>
+
+<pre><code class="language-text">(.)[id]
+</code></pre>
+
+<p>
+This is an intercepting route.
+</p>
+
+<h2>What Does (.) Mean?</h2>
+
+<div class="code-title">Intercept Current Level</div>
+
+<pre><code class="language-text">(.)segment
+</code></pre>
+
+<p>
+Meaning:
+</p>
+
+<pre><code class="language-text">Intercept Route
+At Current Level
+</code></pre>
+
+<h2>Intercepting Route Rendering</h2>
+
+<p>
+When user navigates inside the app:
+</p>
+
+<pre><code class="language-text">/photos
+     │
+     ▼
+Click Photo 3
+</code></pre>
+
+<p>
+Next.js loads:
+</p>
+
+<pre><code class="language-text">(.)[id]/page.tsx
+</code></pre>
+
+<p>
+instead of:
+</p>
+
+<pre><code class="language-text">[id]/page.tsx
+</code></pre>
+
+<p>
+The result is a modal experience.
+</p>
+
+<h2>Direct URL Access</h2>
+
+<p>
+Suppose user directly opens:
+</p>
+
+<pre><code class="language-text">https://site.com/photos/3
+</code></pre>
+
+<p>
+Now there is no gallery page underneath.
+</p>
+
+<p>
+Next.js automatically renders:
+</p>
+
+<pre><code class="language-text">[id]/page.tsx
+</code></pre>
+
+<p>
+Result:
+</p>
+
+<pre><code class="language-text">Full Photo Detail Page
+</code></pre>
+
+<div class="feature">
+Intercepting Routes provide a modal experience during navigation but still support direct URL access.
+</div>
+
+<h2>Why Is This Powerful?</h2>
+
+<p>
+We get:
+</p>
+
+<ul>
+<li>Shareable URLs.</li>
+<li>Modal UX.</li>
+<li>No State Loss.</li>
+<li>No Scroll Loss.</li>
+<li>Deep Linking.</li>
+<li>Browser Back Support.</li>
+</ul>
+
+<h2>How It Works With Parallel Routes</h2>
+
+<p>
+Intercepting Routes are commonly used together with Parallel Routes.
+</p>
+
+<div class="code-title">Example</div>
+
+<pre><code class="language-text">@modal
+   │
+   └── (.)photo
+</code></pre>
+
+<p>
+The modal becomes a slot.
+</p>
+
+<div class="code-title">Layout</div>
+
+<pre><code class="language-text">Page Content
+
++ Modal Slot
+</code></pre>
+
+<p>
+This is how many modern applications implement modal routing.
+</p>
+
+<h2>Intercepting Route Syntax</h2>
+
+<table>
+<tr>
+<th>Syntax</th>
+<th>Meaning</th>
+</tr>
+
+<tr>
+<td>(.)segment</td>
+<td>Current Level</td>
+</tr>
+
+<tr>
+<td>(..)segment</td>
+<td>One Level Up</td>
+</tr>
+
+<tr>
+<td>(..)(..)segment</td>
+<td>Two Levels Up</td>
+</tr>
+
+<tr>
+<td>(...)segment</td>
+<td>Root Level</td>
+</tr>
+</table>
+
+<h2>Intercepting Routes vs Normal Navigation</h2>
+
+<table>
+<tr>
+<th>Feature</th>
+<th>Normal Route</th>
+<th>Intercepting Route</th>
+</tr>
+
+<tr>
+<td>Page Replaced</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+
+<tr>
+<td>Background UI Preserved</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+
+<tr>
+<td>Scroll Preserved</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+
+<tr>
+<td>Modal UX</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+
+<tr>
+<td>Direct URL Support</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+</table>
+
+<h2>Easy Memory Trick</h2>
+
+<div class="code-title">Remember</div>
+
+<pre><code class="language-text">Normal Route
+   = Replace Page
+
+Intercepting Route
+   = Overlay Route
+</code></pre>
+
+<h2>Complete Flow</h2>
+
+<div class="code-title">Instagram Style Flow</div>
+
+<pre><code class="language-text">Gallery Page
+      │
+      ▼
+Click Photo
+      │
+      ▼
+Open Modal
+      │
+      ▼
+Background Stays Visible
+      │
+      ▼
+Close Modal
+      │
+      ▼
+Return Instantly
+</code></pre>
+
+<div class="feature">
+<strong>UX Problem Solved:</strong><br>
+Intercepting Routes solve the problem of losing page context, scroll position, and UI state when navigating to detail pages by displaying the destination route as an overlay instead of replacing the current page.
+</div>
+
+<div class="feature">
+<strong>One-Line Definition:</strong><br>
+Intercepting Routes allow one route to be rendered inside another route's UI (typically as a modal) so users can view route content without leaving the current page, while still preserving shareable URLs and browser navigation.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+
+</body>
+</html>
