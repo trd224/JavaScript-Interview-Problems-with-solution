@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>What is the Difference Between Server Components and Client Components?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+
+body{
+  background:#0f172a;
+  color:#e2e8f0;
+  font-family:Arial,sans-serif;
+  line-height:1.8;
+  padding:40px 20px;
+}
+
+.container{
+  max-width:1000px;
+  margin:auto;
+  background:#111827;
+  padding:40px;
+  border-radius:16px;
+}
+
+h1{color:#38bdf8;margin-bottom:20px}
+h2{color:#a78bfa;margin-top:30px;margin-bottom:10px}
+
+p{margin-bottom:15px}
+
+ul{margin-left:20px}
+li{margin-bottom:8px}
+
+.feature{
+  background:#1e293b;
+  border-left:5px solid #38bdf8;
+  padding:15px;
+  border-radius:8px;
+  margin:20px 0;
+}
+
+.code-title{
+  background:#1e293b;
+  color:#93c5fd;
+  padding:12px;
+  font-weight:bold;
+}
+
+pre[class*="language-"]{
+  margin:0!important;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:20px;
+}
+
+th{
+  background:#1e293b;
+  color:#38bdf8;
+  text-align:left;
+  padding:12px;
+}
+
+td{
+  padding:12px;
+  border-top:1px solid #334155;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>What is the Difference Between Server Components and Client Components?</h1>
+
+<p>
+Server Components run only on the server and do not send their component JavaScript to the browser, while Client Components run in the browser and support interactivity such as state, effects, and event handlers.
+</p>
+
+<div class="feature">
+In the App Router, components are Server Components by default. A component becomes a Client Component only when we add the <code>'use client'</code> directive.
+</div>
+
+<h2>Server Component Example</h2>
+
+<div class="code-title">app/page.js</div>
+
+<pre><code class="language-js">export default async function Page() {
+
+  const products =
+    await fetch(
+      'https://dummyjson.com/products'
+    ).then(res => res.json());
+
+  return (
+    &lt;ul&gt;
+      {products.products.map(product => (
+        &lt;li key={product.id}&gt;
+          {product.title}
+        &lt;/li&gt;
+      ))}
+    &lt;/ul&gt;
+  );
+
+}</code></pre>
+
+<p>
+This is a Server Component because there is no <code>'use client'</code>.
+</p>
+
+<h2>Server Component Rendering Flow</h2>
+
+<div class="code-title">Flow</div>
+
+<pre><code class="language-text">Request
+   │
+   ▼
+Server Executes Component
+   │
+   ▼
+Fetch Data
+   │
+   ▼
+Generate HTML
+   │
+   ▼
+Send HTML To Browser</code></pre>
+
+<div class="code-title">Execution</div>
+
+<pre><code class="language-text">Server  ✅
+Browser ❌</code></pre>
+
+<h2>Client Component Example</h2>
+
+<div class="code-title">app/Counter.js</div>
+
+<pre><code class="language-js">'use client';
+
+import { useState } from 'react';
+
+export default function Counter() {
+
+  const [count, setCount] = useState(0);
+
+  return (
+    &lt;button
+      onClick={() => setCount(count + 1)}
+    &gt;
+      {count}
+    &lt;/button&gt;
+  );
+
+}</code></pre>
+
+<p>
+This is a Client Component because it contains the <code>'use client'</code> directive.
+</p>
+
+<h2>Client Component Rendering Flow</h2>
+
+<div class="code-title">Flow</div>
+
+<pre><code class="language-text">Request
+   │
+   ▼
+Server Pre-renders HTML
+   │
+   ▼
+Send HTML
++
+Counter.js
++
+React.js
+   │
+   ▼
+Hydration
+   │
+   ▼
+Browser Executes Component</code></pre>
+
+<div class="code-title">Execution</div>
+
+<pre><code class="language-text">Server  ✅
+Browser ✅</code></pre>
+
+<h2>What Can Server Components Do?</h2>
+
+<div class="code-title">Allowed</div>
+
+<pre><code class="language-js">await fetch(...)
+
+await cookies()
+
+await headers()
+
+await database.query(...)</code></pre>
+
+<ul>
+<li>Fetch data directly.</li>
+<li>Access databases.</li>
+<li>Access cookies.</li>
+<li>Access request headers.</li>
+<li>Keep secrets on the server.</li>
+</ul>
+
+<h2>What Server Components Cannot Do?</h2>
+
+<div class="code-title">Not Allowed</div>
+
+<pre><code class="language-js">useState()
+
+useEffect()
+
+onClick={...}
+
+window.localStorage</code></pre>
+
+<p>
+Server Components cannot use browser APIs or React client hooks.
+</p>
+
+<h2>What Can Client Components Do?</h2>
+
+<ul>
+<li>useState</li>
+<li>useEffect</li>
+<li>useRef</li>
+<li>Event handlers</li>
+<li>Browser APIs</li>
+<li>Animations</li>
+<li>Forms</li>
+</ul>
+
+<div class="code-title">Example</div>
+
+<pre><code class="language-js">'use client';
+
+import { useState } from 'react';
+
+export default function Login() {
+
+  const [email, setEmail] = useState('');
+
+  return (
+    &lt;input
+      value={email}
+      onChange={e => setEmail(e.target.value)}
+    /&gt;
+  );
+
+}</code></pre>
+
+<h2>Mixing Server and Client Components</h2>
+
+<div class="code-title">app/page.js</div>
+
+<pre><code class="language-js">import Counter from './Counter';
+
+export default function Page() {
+
+  return (
+    &lt;&gt;
+      &lt;h1&gt;Dashboard&lt;/h1&gt;
+      &lt;Counter /&gt;
+    &lt;/&gt;
+  );
+
+}</code></pre>
+
+<div class="code-title">app/Counter.js</div>
+
+<pre><code class="language-js">'use client';
+
+import { useState } from 'react';
+
+export default function Counter() {
+
+  const [count, setCount] = useState(0);
+
+  return (
+    &lt;button
+      onClick={() => setCount(count + 1)}
+    &gt;
+      {count}
+    &lt;/button&gt;
+  );
+
+}</code></pre>
+
+<p>
+Here:
+</p>
+
+<div class="code-title">Component Types</div>
+
+<pre><code class="language-text">Page      → Server Component
+
+Counter   → Client Component</code></pre>
+
+<h2>Why Use Server Components?</h2>
+
+<p>
+Because they reduce the amount of JavaScript sent to the browser.
+</p>
+
+<div class="code-title">Without Server Components</div>
+
+<pre><code class="language-text">Header.js
+Sidebar.js
+Products.js
+Footer.js
+
+↓ Sent To Browser</code></pre>
+
+<div class="code-title">With Server Components</div>
+
+<pre><code class="language-text">Header.js   ❌
+Sidebar.js  ❌
+Products.js ❌
+Footer.js   ❌
+
+Only HTML Sent</code></pre>
+
+<p>
+This improves performance and reduces bundle size.
+</p>
+
+<h2>Real-World Example</h2>
+
+<div class="code-title">E-Commerce Product Page</div>
+
+<pre><code class="language-text">Header
+Product Details
+Description
+Reviews
+
+Server Components
+
+Add To Cart
+Quantity Selector
+
+Client Components</code></pre>
+
+<p>
+Only interactive parts need browser JavaScript.
+</p>
+
+<h2>Server Component vs Client Component</h2>
+
+<table>
+
+<tr>
+<th>Feature</th>
+<th>Server Component</th>
+<th>Client Component</th>
+</tr>
+
+<tr>
+<td>Runs On Server</td>
+<td>✅</td>
+<td>✅ (pre-render)</td>
+</tr>
+
+<tr>
+<td>Runs In Browser</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+
+<tr>
+<td>useState</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+
+<tr>
+<td>useEffect</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+
+<tr>
+<td>Event Handlers</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+
+<tr>
+<td>Database Access</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+
+<tr>
+<td>cookies()</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+
+<tr>
+<td>headers()</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+
+<tr>
+<td>Bundle Size</td>
+<td>Smaller</td>
+<td>Larger</td>
+</tr>
+
+</table>
+
+<h2>The Most Important Difference</h2>
+
+<div class="code-title">Server Component</div>
+
+<pre><code class="language-text">Component Executes
+Only On Server</code></pre>
+
+<div class="code-title">Client Component</div>
+
+<pre><code class="language-text">Component Executes
+On Server And Browser</code></pre>
+
+<h2>Memory Trick</h2>
+
+<div class="code-title">Server Component</div>
+
+<pre><code class="language-text">Data
+Content
+SEO
+Database
+Server Logic</code></pre>
+
+<div class="code-title">Client Component</div>
+
+<pre><code class="language-text">Clicks
+Forms
+State
+Effects
+Animations</code></pre>
+
+<h2>Interview Tip</h2>
+
+<div class="feature">
+Server Components are used for rendering content and fetching data on the server, while Client Components are used for browser interactivity such as state management, effects, and event handlers.
+</div>
+
+<div class="feature">
+<strong>One-Line Definition:</strong><br>
+Server Components execute only on the server and do not send component JavaScript to the browser, while Client Components execute in the browser and support interactivity using React hooks and event handlers.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+
+</body>
+</html>

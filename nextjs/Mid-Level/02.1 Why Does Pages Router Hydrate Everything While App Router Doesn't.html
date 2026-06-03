@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Why Does Pages Router Hydrate Everything While App Router Doesn't?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+
+body{
+  background:#0f172a;
+  color:#e2e8f0;
+  font-family:Arial,sans-serif;
+  line-height:1.8;
+  padding:40px 20px;
+}
+
+.container{
+  max-width:1000px;
+  margin:auto;
+  background:#111827;
+  padding:40px;
+  border-radius:16px;
+}
+
+h1{color:#38bdf8;margin-bottom:20px}
+h2{color:#a78bfa;margin-top:30px;margin-bottom:10px}
+
+p{margin-bottom:15px}
+
+ul{margin-left:20px}
+li{margin-bottom:8px}
+
+.feature{
+  background:#1e293b;
+  border-left:5px solid #38bdf8;
+  padding:15px;
+  border-radius:8px;
+  margin:20px 0;
+}
+
+.code-title{
+  background:#1e293b;
+  color:#93c5fd;
+  padding:12px;
+  font-weight:bold;
+}
+
+pre[class*="language-"]{
+  margin:0!important;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:20px;
+}
+
+th{
+  background:#1e293b;
+  color:#38bdf8;
+  text-align:left;
+  padding:12px;
+}
+
+td{
+  padding:12px;
+  border-top:1px solid #334155;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>Why Does Pages Router Hydrate Everything While App Router Doesn't?</h1>
+
+<p>
+The main difference is that the <strong>Pages Router</strong> was built around full-page hydration, while the <strong>App Router</strong> uses React Server Components to avoid sending unnecessary JavaScript to the browser.
+</p>
+
+<div class="feature">
+Pages Router renders HTML on the server, but then still sends page JavaScript and React JavaScript to the browser so React can hydrate the whole page.
+</div>
+
+<h2>Step 1: What Happens in Pages Router?</h2>
+
+<p>
+In the Pages Router, even if the server already sends HTML, the browser still receives the page JavaScript and React JavaScript.
+</p>
+
+<div class="code-title">pages/index.js</div>
+
+<pre><code class="language-js">export default function Page() {
+  return &lt;h1&gt;Hello&lt;/h1&gt;;
+}</code></pre>
+
+<h2>Pages Router Rendering Flow</h2>
+
+<div class="code-title">Flow</div>
+
+<pre><code class="language-text">Request
+   │
+   ▼
+Server Runs Page()
+   │
+   ▼
+Generate HTML
+   │
+   ▼
+Send HTML
+   +
+Send page.js
+   +
+Send react.js
+   │
+   ▼
+Browser Downloads JavaScript
+   │
+   ▼
+Hydration
+   │
+   ▼
+Browser Runs Page() Again</code></pre>
+
+<p>
+So in the Pages Router, the component runs on the server first and then runs again in the browser during hydration.
+</p>
+
+<div class="code-title">Result</div>
+
+<pre><code class="language-text">Page() runs on Server  ✅
+Page() runs on Browser ✅</code></pre>
+
+<h2>Why Does Pages Router Send page.js and react.js?</h2>
+
+<p>
+Because the Pages Router architecture assumes that every page is a React application that must be hydrated in the browser.
+</p>
+
+<div class="feature">
+It does not matter whether the current page is interactive or not. Pages Router was designed to hydrate the whole page.
+</div>
+
+<h2>What Is Hydration?</h2>
+
+<p>
+Hydration means React attaches browser-side JavaScript behavior to the HTML that was already generated on the server.
+</p>
+
+<div class="code-title">Server HTML</div>
+
+<pre><code class="language-html">&lt;button&gt;Click Me&lt;/button&gt;</code></pre>
+
+<p>
+This HTML is visible, but it does not know anything about React state or click handlers.
+</p>
+
+<div class="code-title">React Component</div>
+
+<pre><code class="language-js">export default function Button() {
+  return (
+    &lt;button onClick={() => alert('Hello')}&gt;
+      Click Me
+    &lt;/button&gt;
+  );
+}</code></pre>
+
+<p>
+The browser needs JavaScript to attach the <code>onClick</code> behavior.
+</p>
+
+<div class="code-title">Hydration Flow</div>
+
+<pre><code class="language-text">HTML Already Visible
+      │
+      ▼
+Download React.js
+      │
+      ▼
+Download page.js
+      │
+      ▼
+React Connects Events
+      │
+      ▼
+Button Becomes Interactive</code></pre>
+
+<h2>But What If There Is No Interaction?</h2>
+
+<p>
+This is the exact problem.
+</p>
+
+<div class="code-title">Static Page</div>
+
+<pre><code class="language-js">export default function Product() {
+  return &lt;h1&gt;iPhone 15&lt;/h1&gt;;
+}</code></pre>
+
+<p>
+This page has no:
+</p>
+
+<div class="code-title">No Browser Features</div>
+
+<pre><code class="language-text">useState
+useEffect
+onClick
+window
+localStorage</code></pre>
+
+<p>
+Still, Pages Router sends:
+</p>
+
+<div class="code-title">Sent To Browser</div>
+
+<pre><code class="language-text">HTML
++
+Product.js
++
+React.js</code></pre>
+
+<p>
+Why? Because Pages Router follows one fixed rule:
+</p>
+
+<div class="code-title">Pages Router Rule</div>
+
+<pre><code class="language-text">Every Page
+   │
+   ▼
+Hydrate Everything</code></pre>
+
+<h2>Why Was Pages Router Built Like This?</h2>
+
+<p>
+Pages Router was built before React Server Components existed.
+</p>
+
+<p>
+At that time, React had only one main server rendering model:
+</p>
+
+<div class="code-title">Old React Model</div>
+
+<pre><code class="language-text">Server Generates HTML
+      │
+      ▼
+Browser Hydrates Entire React App</code></pre>
+
+<p>
+So React's older assumption was:
+</p>
+
+<div class="code-title">Old Assumption</div>
+
+<pre><code class="language-text">Any Page Might Become Interactive
+        │
+        ▼
+Send JavaScript For The Whole Page</code></pre>
+
+<h2>Example of Interactive Page</h2>
+
+<div class="code-title">Counter Component</div>
+
+<pre><code class="language-js">import { useState } from 'react';
+
+export default function Counter() {
+  const [count, setCount] = useState(0);
+
+  return (
+    &lt;button onClick={() => setCount(count + 1)}&gt;
+      {count}
+    &lt;/button&gt;
+  );
+}</code></pre>
+
+<p>
+For this page, the browser definitely needs JavaScript.
+</p>
+
+<div class="code-title">Without JavaScript</div>
+
+<pre><code class="language-text">Server Sends:
+&lt;button&gt;0&lt;/button&gt;
+
+User Clicks Button
+      │
+      ▼
+Nothing Happens ❌</code></pre>
+
+<div class="code-title">With JavaScript</div>
+
+<pre><code class="language-text">Server Sends HTML
+      +
+Browser Gets React.js
+      +
+Browser Gets Counter.js
+      │
+      ▼
+Click Updates Count ✅</code></pre>
+
+<h2>The Problem With Pages Router</h2>
+
+<p>
+The problem is that Pages Router sends JavaScript even when the page does not need browser interaction.
+</p>
+
+<div class="code-title">Static Content Example</div>
+
+<pre><code class="language-js">export default function BlogPost() {
+  return (
+    &lt;article&gt;
+      &lt;h1&gt;Next.js Guide&lt;/h1&gt;
+      &lt;p&gt;This is a static blog article.&lt;/p&gt;
+    &lt;/article&gt;
+  );
+}</code></pre>
+
+<p>
+This content is readable HTML. It does not need React in the browser.
+</p>
+
+<div class="code-title">But Pages Router Still Sends</div>
+
+<pre><code class="language-text">BlogPost.js
+React.js
+Next.js Runtime</code></pre>
+
+<h2>Step 2: What Changed in App Router?</h2>
+
+<p>
+The App Router uses React Server Components.
+</p>
+
+<div class="feature">
+React Server Components allow components to execute only on the server and not send their component JavaScript to the browser.
+</div>
+
+<div class="code-title">app/page.js</div>
+
+<pre><code class="language-js">export default function Page() {
+  return &lt;h1&gt;Hello&lt;/h1&gt;;
+}</code></pre>
+
+<p>
+In the App Router, this component is a Server Component by default because there is no <code>'use client'</code>.
+</p>
+
+<h2>App Router Server Component Flow</h2>
+
+<div class="code-title">Flow</div>
+
+<pre><code class="language-text">Request
+   │
+   ▼
+Server Runs Page()
+   │
+   ▼
+Generate HTML
+   │
+   ▼
+Send HTML
+   │
+   ▼
+Browser Displays HTML
+
+No page.js for this component
+No hydration for this component</code></pre>
+
+<div class="code-title">Result</div>
+
+<pre><code class="language-text">Page() runs on Server  ✅
+Page() runs on Browser ❌</code></pre>
+
+<h2>App Router Rule</h2>
+
+<p>
+App Router follows a smarter rule:
+</p>
+
+<div class="code-title">App Router Rule</div>
+
+<pre><code class="language-text">Need Browser Features?
+      │
+ ┌────┴────┐
+ │         │
+No        Yes
+ │         │
+ ▼         ▼
+HTML     Send JS
+Only</code></pre>
+
+<h2>Server Component Example</h2>
+
+<div class="code-title">app/products/page.js</div>
+
+<pre><code class="language-js">export default async function Products() {
+  const res = await fetch('https://dummyjson.com/products');
+  const data = await res.json();
+
+  return (
+    &lt;ul&gt;
+      {data.products.map(product => (
+        &lt;li key={product.id}&gt;{product.title}&lt;/li&gt;
+      ))}
+    &lt;/ul&gt;
+  );
+}</code></pre>
+
+<p>
+This component fetches data and renders HTML on the server.
+</p>
+
+<div class="code-title">Sent To Browser</div>
+
+<pre><code class="language-text">HTML Output Only
+
+No Products.js
+No React hydration for Products component</code></pre>
+
+<h2>Client Component Example</h2>
+
+<p>
+If our component needs browser interaction, we mark it with <code>'use client'</code>.
+</p>
+
+<div class="code-title">app/Counter.js</div>
+
+<pre><code class="language-js">'use client';
+
+import { useState } from 'react';
+
+export default function Counter() {
+  const [count, setCount] = useState(0);
+
+  return (
+    &lt;button onClick={() => setCount(count + 1)}&gt;
+      {count}
+    &lt;/button&gt;
+  );
+}</code></pre>
+
+<p>
+Now Next.js sends JavaScript for this component because it needs browser features.
+</p>
+
+<div class="code-title">Sent To Browser</div>
+
+<pre><code class="language-text">Counter.js
+React.js
+Required Client JavaScript</code></pre>
+
+<h2>Mixing Server and Client Components</h2>
+
+<div class="code-title">app/page.js</div>
+
+<pre><code class="language-js">import Counter from './Counter';
+
+export default function Page() {
+  return (
+    &lt;&gt;
+      &lt;h1&gt;Product Page&lt;/h1&gt;
+      &lt;p&gt;This content is server-rendered.&lt;/p&gt;
+      &lt;Counter /&gt;
+    &lt;/&gt;
+  );
+}</code></pre>
+
+<div class="code-title">app/Counter.js</div>
+
+<pre><code class="language-js">'use client';
+
+import { useState } from 'react';
+
+export default function Counter() {
+  const [count, setCount] = useState(0);
+
+  return (
+    &lt;button onClick={() => setCount(count + 1)}&gt;
+      {count}
+    &lt;/button&gt;
+  );
+}</code></pre>
+
+<p>
+In this example:
+</p>
+
+<table>
+<tr>
+<th>Part</th>
+<th>Type</th>
+<th>Sent As JS?</th>
+</tr>
+
+<tr>
+<td>Product Page Text</td>
+<td>Server Component</td>
+<td>❌ No</td>
+</tr>
+
+<tr>
+<td>Counter Button</td>
+<td>Client Component</td>
+<td>✅ Yes</td>
+</tr>
+</table>
+
+<h2>Pages Router vs App Router Rendering Difference</h2>
+
+<table>
+<tr>
+<th>Question</th>
+<th>Pages Router</th>
+<th>App Router</th>
+</tr>
+
+<tr>
+<td>Does server generate HTML?</td>
+<td>✅ Yes</td>
+<td>✅ Yes</td>
+</tr>
+
+<tr>
+<td>Does browser receive component JS?</td>
+<td>✅ Yes, for the page</td>
+<td>Only for Client Components</td>
+</tr>
+
+<tr>
+<td>Does browser hydrate everything?</td>
+<td>✅ Yes</td>
+<td>❌ No</td>
+</tr>
+
+<tr>
+<td>Can component stay server-only?</td>
+<td>❌ No</td>
+<td>✅ Yes</td>
+</tr>
+
+<tr>
+<td>Supports React Server Components?</td>
+<td>❌ No</td>
+<td>✅ Yes</td>
+</tr>
+</table>
+
+<h2>Execution Difference</h2>
+
+<div class="code-title">Pages Router</div>
+
+<pre><code class="language-text">Component Executes On Server
+      │
+      ▼
+HTML Generated
+      │
+      ▼
+Component JS Sent To Browser
+      │
+      ▼
+Component Executes Again In Browser</code></pre>
+
+<div class="code-title">App Router Server Component</div>
+
+<pre><code class="language-text">Component Executes On Server
+      │
+      ▼
+HTML Generated
+      │
+      ▼
+No Component JS Sent
+      │
+      ▼
+Component Does Not Execute In Browser</code></pre>
+
+<h2>Why React Does Not Need Control in App Router?</h2>
+
+<p>
+React does not need browser control for components that have no browser behavior.
+</p>
+
+<p>
+For example:
+</p>
+
+<div class="code-title">Server-Only Content</div>
+
+<pre><code class="language-text">Header
+Footer
+Blog Content
+Product Details
+Article Content
+FAQ Section</code></pre>
+
+<p>
+These components usually only display data. They do not need:
+</p>
+
+<div class="code-title">Browser Features</div>
+
+<pre><code class="language-text">useState
+useEffect
+onClick
+window
+localStorage</code></pre>
+
+<p>
+So App Router keeps them on the server and avoids sending their JavaScript.
+</p>
+
+<h2>Simple Memory Trick</h2>
+
+<div class="code-title">Pages Router</div>
+
+<pre><code class="language-text">HTML + JS for whole page</code></pre>
+
+<div class="code-title">App Router</div>
+
+<pre><code class="language-text">HTML for server parts
+JS only for interactive parts</code></pre>
+
+<h2>Final Comparison</h2>
+
+<table>
+<tr>
+<th>Component Type</th>
+<th>Server</th>
+<th>Browser</th>
+</tr>
+
+<tr>
+<td>Pages Router Page</td>
+<td>✅ Runs</td>
+<td>✅ Runs Again</td>
+</tr>
+
+<tr>
+<td>App Router Server Component</td>
+<td>✅ Runs</td>
+<td>❌ Does Not Run</td>
+</tr>
+
+<tr>
+<td>App Router Client Component</td>
+<td>✅ Pre-rendered</td>
+<td>✅ Hydrated</td>
+</tr>
+</table>
+
+<h2>Interview Tip</h2>
+
+<div class="feature">
+Pages Router was built before React Server Components, so it hydrates the entire page in the browser. App Router uses React Server Components, so non-interactive components can stay on the server and only interactive Client Components are hydrated.
+</div>
+
+<div class="feature">
+<strong>One-Line Definition:</strong><br>
+Pages Router sends HTML plus JavaScript for the whole page because it hydrates every page, while App Router sends JavaScript only for Client Components and keeps Server Components on the server.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>What is next export and when was it removed?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+
+body{
+  background:#0f172a;
+  color:#e2e8f0;
+  font-family:Arial,sans-serif;
+  line-height:1.8;
+  padding:40px 20px;
+}
+
+.container{
+  max-width:1000px;
+  margin:auto;
+  background:#111827;
+  padding:40px;
+  border-radius:16px;
+}
+
+h1{color:#38bdf8;margin-bottom:20px}
+h2{color:#a78bfa;margin-top:30px;margin-bottom:10px}
+
+p{margin-bottom:15px}
+
+ul{margin-left:20px}
+li{margin-bottom:8px}
+
+.feature{
+  background:#1e293b;
+  border-left:5px solid #38bdf8;
+  padding:15px;
+  border-radius:8px;
+  margin:20px 0;
+}
+
+.code-title{
+  background:#1e293b;
+  color:#93c5fd;
+  padding:12px;
+  font-weight:bold;
+}
+
+pre[class*="language-"]{
+  margin:0!important;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:20px;
+}
+
+th{
+  background:#1e293b;
+  color:#38bdf8;
+  text-align:left;
+  padding:12px;
+}
+
+td{
+  padding:12px;
+  border-top:1px solid #334155;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>What is next export and when was it removed?</h1>
+
+<p>
+<code>next export</code> was a Next.js command used to generate a fully static website consisting of HTML, CSS, and JavaScript files that could be hosted on any static hosting service.
+</p>
+
+<div class="feature">
+The <code>next export</code> command was deprecated in Next.js 13 and removed in Next.js 14. It was replaced by the <code>output: 'export'</code> configuration.
+</div>
+
+<h2>What Did next export Do?</h2>
+
+<p>
+It converted a Next.js application into static files.
+</p>
+
+<div class="code-title">Old Commands</div>
+
+<pre><code class="language-bash">npm run build
+
+next export</code></pre>
+
+<p>
+or
+</p>
+
+<pre><code class="language-bash">next build
+next export</code></pre>
+
+<h2>Generated Output</h2>
+
+<div class="code-title">Output Folder</div>
+
+<pre><code class="language-text">out
+├── index.html
+├── about
+│   └── index.html
+├── products
+│   └── index.html
+└── _next</code></pre>
+
+<p>
+The generated files could be hosted on any static web server.
+</p>
+
+<h2>How next export Worked</h2>
+
+<div class="code-title">Flow</div>
+
+<pre><code class="language-text">Next.js App
+      │
+      ▼
+next build
+      │
+      ▼
+next export
+      │
+      ▼
+Generate Static HTML
+      │
+      ▼
+out Folder
+      │
+      ▼
+Deploy Anywhere</code></pre>
+
+<h2>Example</h2>
+
+<div class="code-title">pages/about.js</div>
+
+<pre><code class="language-js">export default function About() {
+  return &lt;h1&gt;About Page&lt;/h1&gt;;
+}</code></pre>
+
+<p>
+After export:
+</p>
+
+<div class="code-title">Generated File</div>
+
+<pre><code class="language-text">out/about/index.html</code></pre>
+
+<h2>Limitations of next export</h2>
+
+<p>
+Since everything became static files, many Next.js features could not work.
+</p>
+
+<table>
+
+<tr>
+<th>Feature</th>
+<th>Supported?</th>
+</tr>
+
+<tr>
+<td>SSG</td>
+<td>✅</td>
+</tr>
+
+<tr>
+<td>Static Assets</td>
+<td>✅</td>
+</tr>
+
+<tr>
+<td>SSR</td>
+<td>❌</td>
+</tr>
+
+<tr>
+<td>ISR</td>
+<td>❌</td>
+</tr>
+
+<tr>
+<td>API Routes</td>
+<td>❌</td>
+</tr>
+
+<tr>
+<td>Middleware</td>
+<td>❌</td>
+</tr>
+
+<tr>
+<td>Server Actions</td>
+<td>❌</td>
+</tr>
+
+</table>
+
+<h2>Why Was next export Removed?</h2>
+
+<p>
+The App Router introduced a new static export system that made the separate <code>next export</code> command unnecessary.
+</p>
+
+<div class="feature">
+Instead of running a separate export command, Next.js now uses the <code>output: 'export'</code> option in <code>next.config.js</code>.
+</div>
+
+<h2>Modern Replacement</h2>
+
+<div class="code-title">next.config.js</div>
+
+<pre><code class="language-js">const nextConfig = {
+  output: 'export'
+};
+
+module.exports = nextConfig;</code></pre>
+
+<h2>Build Command</h2>
+
+<div class="code-title">Terminal</div>
+
+<pre><code class="language-bash">npm run build</code></pre>
+
+<p>
+No separate export command is needed.
+</p>
+
+<h2>Generated Output</h2>
+
+<div class="code-title">Output Folder</div>
+
+<pre><code class="language-text">out
+├── index.html
+├── about
+│   └── index.html
+└── _next</code></pre>
+
+<h2>Old vs New</h2>
+
+<table>
+
+<tr>
+<th>Before Next.js 14</th>
+<th>Next.js 14+</th>
+</tr>
+
+<tr>
+<td>next build</td>
+<td>npm run build</td>
+</tr>
+
+<tr>
+<td>next export</td>
+<td>output: 'export'</td>
+</tr>
+
+<tr>
+<td>Two-step process</td>
+<td>One-step process</td>
+</tr>
+
+</table>
+
+<h2>When Should We Use output: 'export'?</h2>
+
+<ul>
+<li>Static websites.</li>
+<li>Documentation sites.</li>
+<li>Portfolio websites.</li>
+<li>Landing pages.</li>
+<li>Sites hosted on static hosting providers.</li>
+</ul>
+
+<h2>When Should We Not Use It?</h2>
+
+<ul>
+<li>SSR applications.</li>
+<li>ISR applications.</li>
+<li>API Routes.</li>
+<li>Server Actions.</li>
+<li>Middleware.</li>
+<li>Authentication requiring server rendering.</li>
+</ul>
+
+<h2>Real-World Example</h2>
+
+<div class="code-title">Static Hosting</div>
+
+<pre><code class="language-text">Next.js App
+      │
+      ▼
+output: 'export'
+      │
+      ▼
+npm run build
+      │
+      ▼
+out Folder
+      │
+      ▼
+Upload To Netlify
+GitHub Pages
+Static Hosting</code></pre>
+
+<h2>Timeline</h2>
+
+<table>
+
+<tr>
+<th>Version</th>
+<th>Status</th>
+</tr>
+
+<tr>
+<td>Next.js 12</td>
+<td>✅ Supported</td>
+</tr>
+
+<tr>
+<td>Next.js 13</td>
+<td>⚠️ Deprecated</td>
+</tr>
+
+<tr>
+<td>Next.js 14</td>
+<td>❌ Removed</td>
+</tr>
+
+</table>
+
+<h2>Important Note</h2>
+
+<div class="feature">
+If you see old tutorials using <code>next export</code>, the modern equivalent is setting <code>output: 'export'</code> in <code>next.config.js</code> and running a normal production build.
+</div>
+
+<h2>Interview Tip</h2>
+
+<div class="feature">
+The <code>next export</code> command generated a fully static version of a Next.js application. It was removed in Next.js 14 and replaced by the <code>output: 'export'</code> configuration option.
+</div>
+
+<div class="feature">
+<strong>One-Line Definition:</strong><br>
+<code>next export</code> was a command that generated static HTML files from a Next.js application, and it was removed in Next.js 14 in favor of <code>output: 'export'</code>.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+
+</body>
+</html>

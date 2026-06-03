@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>What is the .next Folder and What Does It Contain?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+
+body{
+  background:#0f172a;
+  color:#e2e8f0;
+  font-family:Arial,sans-serif;
+  line-height:1.8;
+  padding:40px 20px;
+}
+
+.container{
+  max-width:1000px;
+  margin:auto;
+  background:#111827;
+  padding:40px;
+  border-radius:16px;
+}
+
+h1{color:#38bdf8;margin-bottom:20px}
+h2{color:#a78bfa;margin-top:30px;margin-bottom:10px}
+
+p{margin-bottom:15px}
+
+ul{margin-left:20px}
+li{margin-bottom:8px}
+
+.feature{
+  background:#1e293b;
+  border-left:5px solid #38bdf8;
+  padding:15px;
+  border-radius:8px;
+  margin:20px 0;
+}
+
+.code-title{
+  background:#1e293b;
+  color:#93c5fd;
+  padding:12px;
+  font-weight:bold;
+}
+
+pre[class*="language-"]{
+  margin:0!important;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:20px;
+}
+
+th{
+  background:#1e293b;
+  color:#38bdf8;
+  text-align:left;
+  padding:12px;
+}
+
+td{
+  padding:12px;
+  border-top:1px solid #334155;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>What is the .next Folder and What Does It Contain?</h1>
+
+<p>
+The <code>.next</code> folder is the build output directory created by Next.js. It contains compiled application code, generated pages, cached files, server bundles, and other assets required to run the application.
+</p>
+
+<div class="feature">
+The <code>.next</code> folder is automatically generated when we run <code>npm run dev</code> or <code>npm run build</code>.
+</div>
+
+<h2>When is the .next Folder Created?</h2>
+
+<div class="code-title">Commands</div>
+
+<pre><code class="language-bash">npm run dev
+
+npm run build</code></pre>
+
+<p>
+After running either command, Next.js creates the <code>.next</code> directory automatically.
+</p>
+
+<h2>Example Project Structure</h2>
+
+<div class="code-title">After Build</div>
+
+<pre><code class="language-text">my-app
+├── app
+├── public
+├── node_modules
+├── package.json
+├── next.config.js
+└── .next</code></pre>
+
+<h2>Typical .next Structure</h2>
+
+<div class="code-title">.next Folder</div>
+
+<pre><code class="language-text">.next
+├── cache
+├── server
+├── static
+├── traces
+├── build-manifest.json
+├── prerender-manifest.json
+├── routes-manifest.json
+└── BUILD_ID</code></pre>
+
+<h2>cache Folder</h2>
+
+<p>
+Stores cached compilation data to speed up future builds and development server startup.
+</p>
+
+<div class="code-title">Example</div>
+
+<pre><code class="language-text">.next
+└── cache</code></pre>
+
+<p>
+Deleting it is safe because Next.js can recreate it.
+</p>
+
+<h2>server Folder</h2>
+
+<p>
+Contains server-side code used for SSR, Route Handlers, Server Components, and API routes.
+</p>
+
+<div class="code-title">Example</div>
+
+<pre><code class="language-text">.next
+└── server
+    ├── app
+    ├── pages
+    └── chunks</code></pre>
+
+<h2>static Folder</h2>
+
+<p>
+Contains optimized JavaScript, CSS, and static assets sent to the browser.
+</p>
+
+<div class="code-title">Example</div>
+
+<pre><code class="language-text">.next
+└── static
+    ├── chunks
+    ├── css
+    └── media</code></pre>
+
+<h2>BUILD_ID File</h2>
+
+<p>
+Contains a unique identifier for the current build.
+</p>
+
+<div class="code-title">Example</div>
+
+<pre><code class="language-text">BUILD_ID
+
+3KjD8LpRr6Qh2xY</code></pre>
+
+<p>
+Next.js uses this value to identify a specific deployment build.
+</p>
+
+<h2>build-manifest.json</h2>
+
+<p>
+Maps routes to their generated JavaScript and CSS files.
+</p>
+
+<div class="code-title">Example</div>
+
+<pre><code class="language-json">{
+  "/": [
+    "static/chunks/home.js"
+  ]
+}</code></pre>
+
+<h2>prerender-manifest.json</h2>
+
+<p>
+Contains information about SSG and ISR pages.
+</p>
+
+<div class="code-title">Example</div>
+
+<pre><code class="language-json">{
+  "/blog": {
+    "initialRevalidateSeconds": 60
+  }
+}</code></pre>
+
+<h2>routes-manifest.json</h2>
+
+<p>
+Contains route information used by Next.js.
+</p>
+
+<div class="code-title">Example</div>
+
+<pre><code class="language-json">{
+  "dynamicRoutes": [],
+  "staticRoutes": []
+}</code></pre>
+
+<h2>What Happens During Build?</h2>
+
+<div class="code-title">Flow</div>
+
+<pre><code class="language-text">Source Code
+      │
+      ▼
+next build
+      │
+      ▼
+Compile React
+      │
+      ▼
+Generate HTML
+      │
+      ▼
+Generate JS Bundles
+      │
+      ▼
+Create .next Folder</code></pre>
+
+<h2>Can We Delete the .next Folder?</h2>
+
+<p>
+Yes.
+</p>
+
+<div class="code-title">Delete Folder</div>
+
+<pre><code class="language-bash">rm -rf .next</code></pre>
+
+<p>
+or on Windows:
+</p>
+
+<pre><code class="language-bash">rmdir /s /q .next</code></pre>
+
+<p>
+The folder will be recreated automatically the next time we run:
+</p>
+
+<pre><code class="language-bash">npm run dev
+
+or
+
+npm run build</code></pre>
+
+<h2>Should We Commit .next to Git?</h2>
+
+<p>
+No.
+</p>
+
+<div class="code-title">.gitignore</div>
+
+<pre><code class="language-text">.next</code></pre>
+
+<p>
+Since the folder is generated automatically, it should not be stored in Git.
+</p>
+
+<h2>.next in Development vs Production</h2>
+
+<table>
+
+<tr>
+<th>Mode</th>
+<th>Purpose</th>
+</tr>
+
+<tr>
+<td>Development</td>
+<td>Stores compilation cache and dev assets</td>
+</tr>
+
+<tr>
+<td>Production</td>
+<td>Stores optimized build output</td>
+</tr>
+
+</table>
+
+<h2>Real-World Example</h2>
+
+<div class="code-title">Production Deployment</div>
+
+<pre><code class="language-text">npm install
+      │
+      ▼
+npm run build
+      │
+      ▼
+.next Created
+      │
+      ▼
+npm start
+      │
+      ▼
+Production Server Uses .next</code></pre>
+
+<h2>Important Note</h2>
+
+<div class="feature">
+The <code>.next</code> folder is the most important build output directory in Next.js. The production server runs directly from the files generated inside this folder.
+</div>
+
+<h2>Interview Tip</h2>
+
+<div class="feature">
+The <code>.next</code> folder contains the compiled output of a Next.js application, including server bundles, static assets, generated pages, build manifests, and cache files used during development and production.
+</div>
+
+<div class="feature">
+<strong>One-Line Definition:</strong><br>
+The <code>.next</code> folder is the build output directory generated by Next.js that contains everything needed to run the application, including compiled code, server bundles, static assets, and build metadata.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+
+</body>
+</html>

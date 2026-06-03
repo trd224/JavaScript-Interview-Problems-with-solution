@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>What does next build output and how do you read the route table it prints?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+
+body{
+  background:#0f172a;
+  color:#e2e8f0;
+  font-family:Arial,sans-serif;
+  line-height:1.8;
+  padding:40px 20px;
+}
+
+.container{
+  max-width:1000px;
+  margin:auto;
+  background:#111827;
+  padding:40px;
+  border-radius:16px;
+}
+
+h1{color:#38bdf8;margin-bottom:20px}
+h2{color:#a78bfa;margin-top:30px;margin-bottom:10px}
+
+p{margin-bottom:15px}
+
+ul{margin-left:20px}
+li{margin-bottom:8px}
+
+.feature{
+  background:#1e293b;
+  border-left:5px solid #38bdf8;
+  padding:15px;
+  border-radius:8px;
+  margin:20px 0;
+}
+
+.code-title{
+  background:#1e293b;
+  color:#93c5fd;
+  padding:12px;
+  font-weight:bold;
+}
+
+pre[class*="language-"]{
+  margin:0!important;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:20px;
+}
+
+th{
+  background:#1e293b;
+  color:#38bdf8;
+  text-align:left;
+  padding:12px;
+}
+
+td{
+  padding:12px;
+  border-top:1px solid #334155;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>What does next build output and how do you read the route table it prints?</h1>
+
+<p>
+When we run <code>next build</code>, Next.js compiles the application, analyzes every route, generates optimized assets, and prints a route table showing how each route will be rendered in production.
+</p>
+
+<div class="feature">
+The route table is one of the most important parts of the build output because it tells us whether a route is Static, Dynamic, ISR, or a Route Handler.
+</div>
+
+<h2>Build Command</h2>
+
+<div class="code-title">Terminal</div>
+
+<pre><code class="language-bash">npm run build</code></pre>
+
+<p>
+or
+</p>
+
+<pre><code class="language-bash">next build</code></pre>
+
+<h2>What Happens During Build?</h2>
+
+<div class="code-title">Build Process</div>
+
+<pre><code class="language-text">Source Code
+      │
+      ▼
+Compile Application
+      │
+      ▼
+Analyze Routes
+      │
+      ▼
+Generate Static Pages
+      │
+      ▼
+Create Server Bundles
+      │
+      ▼
+Create .next Folder
+      │
+      ▼
+Print Route Table</code></pre>
+
+<h2>Example Build Output</h2>
+
+<div class="code-title">Terminal Output</div>
+
+<pre><code class="language-text">Route (app)                     Size     First Load JS
+
+○ /                             150 B         98 kB
+○ /about                        180 B         98 kB
+● /blog/[slug]                  200 B        101 kB
+ƒ /products/[id]                250 B        103 kB
+ƒ /api/users                    0 B            0 B
+
++ First Load JS shared by all             98 kB</code></pre>
+
+<h2>Route Symbols</h2>
+
+<p>
+The symbol at the beginning of each route tells us how Next.js will render that route.
+</p>
+
+<table>
+
+<tr>
+<th>Symbol</th>
+<th>Meaning</th>
+</tr>
+
+<tr>
+<td>○</td>
+<td>Static Route (SSG)</td>
+</tr>
+
+<tr>
+<td>●</td>
+<td>SSG with generateStaticParams()</td>
+</tr>
+
+<tr>
+<td>ƒ</td>
+<td>Dynamic Route (SSR)</td>
+</tr>
+
+</table>
+
+<h2>○ Static Route</h2>
+
+<div class="code-title">Example</div>
+
+<pre><code class="language-js">export default function About() {
+  return &lt;h1&gt;About&lt;/h1&gt;;
+}</code></pre>
+
+<div class="code-title">Build Output</div>
+
+<pre><code class="language-text">○ /about</code></pre>
+
+<p>
+This means the page is generated during build time and served as static HTML.
+</p>
+
+<h2>● Static Dynamic Route</h2>
+
+<div class="code-title">app/blog/[slug]/page.js</div>
+
+<pre><code class="language-js">export async function generateStaticParams() {
+
+  return [
+    { slug: 'nextjs' },
+    { slug: 'react' }
+  ];
+
+}</code></pre>
+
+<div class="code-title">Build Output</div>
+
+<pre><code class="language-text">● /blog/[slug]</code></pre>
+
+<p>
+Next.js generates static pages for all values returned by <code>generateStaticParams()</code>.
+</p>
+
+<h2>ƒ Dynamic Route</h2>
+
+<div class="code-title">app/products/[id]/page.js</div>
+
+<pre><code class="language-js">export default async function Page({
+  params
+}) {
+
+  const { id } = await params;
+
+  const product = await fetch(
+    `https://api.example.com/products/${id}`
+  ).then(res => res.json());
+
+  return &lt;h1&gt;{product.title}&lt;/h1&gt;;
+
+}</code></pre>
+
+<div class="code-title">Build Output</div>
+
+<pre><code class="language-text">ƒ /products/[id]</code></pre>
+
+<p>
+This route is rendered dynamically on each request.
+</p>
+
+<h2>Route Handler Example</h2>
+
+<div class="code-title">app/api/users/route.js</div>
+
+<pre><code class="language-js">export async function GET() {
+
+  return Response.json({
+    users: []
+  });
+
+}</code></pre>
+
+<div class="code-title">Build Output</div>
+
+<pre><code class="language-text">ƒ /api/users</code></pre>
+
+<p>
+Route Handlers also appear as dynamic functions.
+</p>
+
+<h2>Understanding the Size Column</h2>
+
+<div class="code-title">Example</div>
+
+<pre><code class="language-text">○ /about      180 B</code></pre>
+
+<p>
+This represents the size of the route-specific JavaScript.
+</p>
+
+<h2>Understanding First Load JS</h2>
+
+<div class="code-title">Example</div>
+
+<pre><code class="language-text">○ /about      180 B      98 kB</code></pre>
+
+<p>
+The First Load JS value includes:
+</p>
+
+<ul>
+<li>Route JavaScript.</li>
+<li>Shared React runtime.</li>
+<li>Shared Next.js runtime.</li>
+<li>Shared framework code.</li>
+</ul>
+
+<h2>Shared Bundle</h2>
+
+<div class="code-title">Example</div>
+
+<pre><code class="language-text">+ First Load JS shared by all
+  98 kB</code></pre>
+
+<p>
+This bundle is downloaded by every route.
+</p>
+
+<h2>Real Build Output Example</h2>
+
+<div class="code-title">Example</div>
+
+<pre><code class="language-text">Route (app)                     Size     First Load JS
+
+○ /                             150 B         98 kB
+○ /about                        180 B         98 kB
+○ /contact                      170 B         98 kB
+ƒ /dashboard                    220 B        102 kB
+ƒ /products/[id]                250 B        103 kB
+
++ First Load JS shared by all             98 kB</code></pre>
+
+<h2>How to Read This Table</h2>
+
+<div class="code-title">Analysis</div>
+
+<pre><code class="language-text">/            → Static Page
+/about       → Static Page
+/contact     → Static Page
+
+/dashboard   → Dynamic SSR
+/products    → Dynamic SSR
+
+Shared JS    → 98 kB</code></pre>
+
+<h2>What Should We Look For?</h2>
+
+<ul>
+<li>Unexpected SSR routes.</li>
+<li>Large First Load JS sizes.</li>
+<li>Routes that should be static but became dynamic.</li>
+<li>Large shared bundles.</li>
+</ul>
+
+<h2>Example of Unexpected Dynamic Route</h2>
+
+<div class="code-title">Code</div>
+
+<pre><code class="language-js">import { cookies } from 'next/headers';
+
+export default async function Page() {
+
+  const cookieStore = await cookies();
+
+  return &lt;h1&gt;Dashboard&lt;/h1&gt;;
+
+}</code></pre>
+
+<div class="code-title">Build Output</div>
+
+<pre><code class="language-text">ƒ /dashboard</code></pre>
+
+<p>
+Using <code>cookies()</code> makes the page dynamic.
+</p>
+
+<h2>Route Table Summary</h2>
+
+<table>
+
+<tr>
+<th>Symbol</th>
+<th>Meaning</th>
+</tr>
+
+<tr>
+<td>○</td>
+<td>Static Route (SSG)</td>
+</tr>
+
+<tr>
+<td>●</td>
+<td>Static Dynamic Route (generateStaticParams)</td>
+</tr>
+
+<tr>
+<td>ƒ</td>
+<td>Dynamic Route (SSR)</td>
+</tr>
+
+</table>
+
+<h2>Important Note</h2>
+
+<div class="feature">
+The route table is the easiest way to verify whether Next.js is generating routes as Static (SSG) or Dynamic (SSR). Many performance issues can be discovered simply by inspecting this table after a build.
+</div>
+
+<h2>Interview Tip</h2>
+
+<div class="feature">
+After running <code>next build</code>, always inspect the route table. It shows how each route will be rendered, its bundle size, and the amount of JavaScript downloaded by users.
+</div>
+
+<div class="feature">
+<strong>One-Line Definition:</strong><br>
+The <code>next build</code> route table shows each route's rendering strategy (SSG or SSR), route size, and first-load JavaScript size, helping us understand how the application will behave in production.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+
+</body>
+</html>

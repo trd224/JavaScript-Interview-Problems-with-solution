@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>What is metadataBase and why is it important for Open Graph URLs?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+
+body{
+  background:#0f172a;
+  color:#e2e8f0;
+  font-family:Arial,sans-serif;
+  line-height:1.8;
+  padding:40px 20px;
+}
+
+.container{
+  max-width:1000px;
+  margin:auto;
+  background:#111827;
+  padding:40px;
+  border-radius:16px;
+}
+
+h1{color:#38bdf8;margin-bottom:20px}
+h2{color:#a78bfa;margin-top:30px;margin-bottom:10px}
+
+p{margin-bottom:15px}
+
+ul{margin-left:20px}
+li{margin-bottom:8px}
+
+.feature{
+  background:#1e293b;
+  border-left:5px solid #38bdf8;
+  padding:15px;
+  border-radius:8px;
+  margin:20px 0;
+}
+
+.code-title{
+  background:#1e293b;
+  color:#93c5fd;
+  padding:12px;
+  font-weight:bold;
+}
+
+pre[class*="language-"]{
+  margin:0!important;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:20px;
+}
+
+th{
+  background:#1e293b;
+  color:#38bdf8;
+  text-align:left;
+  padding:12px;
+}
+
+td{
+  padding:12px;
+  border-top:1px solid #334155;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>What is metadataBase and why is it important for Open Graph URLs?</h1>
+
+<p>
+<code>metadataBase</code> is a Metadata API property that defines the base URL for all relative metadata URLs such as Open Graph images, canonical URLs, Twitter images, and alternates.
+</p>
+
+<div class="feature">
+Without <code>metadataBase</code>, relative URLs like <code>/og-image.jpg</code> cannot be converted into complete URLs such as <code>https://example.com/og-image.jpg</code>.
+</div>
+
+<h2>Why Do We Need metadataBase?</h2>
+
+<p>
+Social media platforms and search engines require absolute URLs.
+</p>
+
+<div class="code-title">Invalid Open Graph URL</div>
+
+<pre><code class="language-js">openGraph: {
+  images: ['/og-image.jpg']
+}</code></pre>
+
+<p>
+This only contains a relative path.
+</p>
+
+<div class="code-title">Result</div>
+
+<pre><code class="language-text">/og-image.jpg</code></pre>
+
+<p>
+Facebook, LinkedIn, WhatsApp, and Twitter cannot reliably use this path because the domain is missing.
+</p>
+
+<h2>Using metadataBase</h2>
+
+<div class="code-title">app/layout.js</div>
+
+<pre><code class="language-js">export const metadata = {
+
+  metadataBase: new URL('https://example.com'),
+
+  openGraph: {
+    images: ['/og-image.jpg']
+  }
+
+};
+
+export default function RootLayout({
+  children
+}) {
+  return (
+    &lt;html&gt;
+      &lt;body&gt;{children}&lt;/body&gt;
+    &lt;/html&gt;
+  );
+}</code></pre>
+
+<h2>Generated Open Graph URL</h2>
+
+<div class="code-title">Result</div>
+
+<pre><code class="language-text">https://example.com/og-image.jpg</code></pre>
+
+<h2>How It Works</h2>
+
+<div class="code-title">Flow</div>
+
+<pre><code class="language-text">metadataBase
+      │
+      ▼
+https://example.com
+      │
+      ▼
+Relative URL
+/og-image.jpg
+      │
+      ▼
+Combine
+      │
+      ▼
+https://example.com/og-image.jpg</code></pre>
+
+<h2>Open Graph Example</h2>
+
+<div class="code-title">app/layout.js</div>
+
+<pre><code class="language-js">export const metadata = {
+
+  metadataBase: new URL('https://example.com'),
+
+  openGraph: {
+    title: 'My Website',
+    description: 'Welcome',
+    images: ['/og-image.jpg']
+  }
+
+};</code></pre>
+
+<h2>Generated Tags</h2>
+
+<div class="code-title">HTML Output</div>
+
+<pre><code class="language-html">&lt;meta
+  property="og:image"
+  content="https://example.com/og-image.jpg"
+/&gt;</code></pre>
+
+<h2>Twitter Example</h2>
+
+<div class="code-title">app/layout.js</div>
+
+<pre><code class="language-js">export const metadata = {
+
+  metadataBase: new URL('https://example.com'),
+
+  twitter: {
+    card: 'summary_large_image',
+    images: ['/twitter-image.jpg']
+  }
+
+};</code></pre>
+
+<h2>Generated URL</h2>
+
+<div class="code-title">Result</div>
+
+<pre><code class="language-text">https://example.com/twitter-image.jpg</code></pre>
+
+<h2>Canonical URL Example</h2>
+
+<div class="code-title">app/layout.js</div>
+
+<pre><code class="language-js">export const metadata = {
+
+  metadataBase: new URL('https://example.com'),
+
+  alternates: {
+    canonical: '/'
+  }
+
+};</code></pre>
+
+<h2>Generated Canonical URL</h2>
+
+<div class="code-title">Output</div>
+
+<pre><code class="language-html">&lt;link
+  rel="canonical"
+  href="https://example.com"
+/&gt;</code></pre>
+
+<h2>Dynamic Product Example</h2>
+
+<div class="code-title">app/products/[id]/page.js</div>
+
+<pre><code class="language-js">export async function generateMetadata({
+  params
+}) {
+
+  const { id } = await params;
+
+  return {
+    title: `Product ${id}`,
+
+    openGraph: {
+      images: [`/products/${id}.jpg`]
+    }
+  };
+
+}</code></pre>
+
+<div class="code-title">app/layout.js</div>
+
+<pre><code class="language-js">export const metadata = {
+  metadataBase: new URL(
+    'https://example.com'
+  )
+};</code></pre>
+
+<h2>Generated URL</h2>
+
+<div class="code-title">Result</div>
+
+<pre><code class="language-text">https://example.com/products/1.jpg</code></pre>
+
+<h2>Using Environment Variables</h2>
+
+<div class="code-title">app/layout.js</div>
+
+<pre><code class="language-js">export const metadata = {
+
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_SITE_URL
+  )
+
+};</code></pre>
+
+<div class="code-title">.env.production</div>
+
+<pre><code class="language-text">NEXT_PUBLIC_SITE_URL=https://example.com</code></pre>
+
+<p>
+This makes the application portable between environments.
+</p>
+
+<h2>Without metadataBase vs With metadataBase</h2>
+
+<table>
+
+<tr>
+<th>Configuration</th>
+<th>Generated URL</th>
+</tr>
+
+<tr>
+<td>/og-image.jpg</td>
+<td>❌ Relative URL</td>
+</tr>
+
+<tr>
+<td>metadataBase + /og-image.jpg</td>
+<td>✅ Absolute URL</td>
+</tr>
+
+</table>
+
+<h2>Real-World Example</h2>
+
+<div class="code-title">Metadata</div>
+
+<pre><code class="language-js">export const metadata = {
+
+  metadataBase: new URL(
+    'https://amazon.com'
+  ),
+
+  openGraph: {
+    images: ['/iphone.jpg']
+  }
+
+};</code></pre>
+
+<div class="code-title">Generated URL</div>
+
+<pre><code class="language-text">https://amazon.com/iphone.jpg</code></pre>
+
+<h2>Important Note</h2>
+
+<div class="feature">
+Open Graph images, Twitter images, canonical links, and alternate URLs should generally be absolute URLs. <code>metadataBase</code> allows us to use simple relative paths while Next.js automatically generates complete URLs.
+</div>
+
+<h2>Interview Tip</h2>
+
+<div class="feature">
+<code>metadataBase</code> is commonly placed in the root layout because all child pages inherit it, allowing relative Open Graph and canonical URLs to be converted into fully qualified URLs automatically.
+</div>
+
+<div class="feature">
+<strong>One-Line Definition:</strong><br>
+<code>metadataBase</code> defines the site's base URL and allows Next.js to automatically convert relative Open Graph, Twitter, and canonical URLs into absolute URLs required by search engines and social platforms.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+
+</body>
+</html>

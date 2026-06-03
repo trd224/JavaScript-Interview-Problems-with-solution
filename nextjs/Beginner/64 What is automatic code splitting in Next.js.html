@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>What is Automatic Code Splitting in Next.js?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+
+body{
+  background:#0f172a;
+  color:#e2e8f0;
+  font-family:Arial,sans-serif;
+  line-height:1.8;
+  padding:40px 20px;
+}
+
+.container{
+  max-width:1000px;
+  margin:auto;
+  background:#111827;
+  padding:40px;
+  border-radius:16px;
+}
+
+h1{color:#38bdf8;margin-bottom:20px}
+h2{color:#a78bfa;margin-top:30px;margin-bottom:10px}
+
+p{margin-bottom:15px}
+
+ul{margin-left:20px}
+li{margin-bottom:8px}
+
+.feature{
+  background:#1e293b;
+  border-left:5px solid #38bdf8;
+  padding:15px;
+  border-radius:8px;
+  margin:20px 0;
+}
+
+.code-title{
+  background:#1e293b;
+  color:#93c5fd;
+  padding:12px;
+  font-weight:bold;
+}
+
+pre[class*="language-"]{
+  margin:0!important;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:20px;
+}
+
+th{
+  background:#1e293b;
+  color:#38bdf8;
+  text-align:left;
+  padding:12px;
+}
+
+td{
+  padding:12px;
+  border-top:1px solid #334155;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>What is Automatic Code Splitting in Next.js?</h1>
+
+<p>
+Automatic Code Splitting is a Next.js optimization that automatically splits JavaScript into smaller chunks so users download only the code needed for the current page.
+</p>
+
+<div class="feature">
+Instead of sending the entire application bundle to the browser, Next.js sends only the JavaScript required for the requested route.
+</div>
+
+<h2>Why Do We Need Code Splitting?</h2>
+
+<p>
+Imagine an application with many pages:
+</p>
+
+<div class="code-title">Project Structure</div>
+
+<pre><code class="language-text">app
+├── page.js
+├── about
+│   └── page.js
+├── products
+│   └── page.js
+├── dashboard
+│   └── page.js
+└── settings
+    └── page.js</code></pre>
+
+<p>
+If all page code were bundled together, every user would download JavaScript for every page, even pages they never visit.
+</p>
+
+<h2>Without Code Splitting</h2>
+
+<div class="code-title">Single Bundle</div>
+
+<pre><code class="language-text">Home Code
+About Code
+Products Code
+Dashboard Code
+Settings Code
+      │
+      ▼
+One Large Bundle
+      │
+      ▼
+Download Everything</code></pre>
+
+<p>
+Even users visiting only the Home page must download code for all pages.
+</p>
+
+<h2>With Automatic Code Splitting</h2>
+
+<div class="code-title">Route-Based Splitting</div>
+
+<pre><code class="language-text">Home Route
+    │
+    ▼
+Download Home Chunk
+
+About Route
+    │
+    ▼
+Download About Chunk
+
+Products Route
+    │
+    ▼
+Download Products Chunk</code></pre>
+
+<p>
+Users download only the JavaScript needed for the current page.
+</p>
+
+<h2>Example</h2>
+
+<div class="code-title">app/page.js</div>
+
+<pre><code class="language-js">export default function Home() {
+  return &lt;h1&gt;Home Page&lt;/h1&gt;;
+}</code></pre>
+
+<div class="code-title">app/about/page.js</div>
+
+<pre><code class="language-js">export default function About() {
+  return &lt;h1&gt;About Page&lt;/h1&gt;;
+}</code></pre>
+
+<p>
+When a user visits:
+</p>
+
+<pre><code class="language-text">/</code></pre>
+
+<p>
+Next.js sends only the Home page JavaScript.
+</p>
+
+<p>
+When a user visits:
+</p>
+
+<pre><code class="language-text">/about</code></pre>
+
+<p>
+Next.js sends only the About page JavaScript.
+</p>
+
+<h2>Build Output Concept</h2>
+
+<div class="code-title">Generated Chunks</div>
+
+<pre><code class="language-text">.next
+└── static
+    └── chunks
+        ├── home.js
+        ├── about.js
+        ├── products.js
+        └── dashboard.js</code></pre>
+
+<p>
+Each route gets its own JavaScript chunk.
+</p>
+
+<h2>How It Works</h2>
+
+<div class="code-title">Flow</div>
+
+<pre><code class="language-text">User Visits /about
+        │
+        ▼
+Next.js Detects Route
+        │
+        ▼
+Load About Chunk
+        │
+        ▼
+Do Not Load
+Home/Dashboard Chunks
+        │
+        ▼
+Faster Page Load</code></pre>
+
+<h2>Automatic Route Splitting</h2>
+
+<p>
+No configuration is required.
+</p>
+
+<div class="code-title">Example</div>
+
+<pre><code class="language-js">app/page.js
+app/about/page.js
+app/products/page.js</code></pre>
+
+<p>
+Next.js automatically creates separate bundles for these routes.
+</p>
+
+<h2>Dynamic Imports for Additional Splitting</h2>
+
+<p>
+We can split large components even further using dynamic imports.
+</p>
+
+<div class="code-title">Example</div>
+
+<pre><code class="language-js">import dynamic from 'next/dynamic';
+
+const Chart = dynamic(() =>
+  import('./Chart')
+);
+
+export default function Dashboard() {
+  return &lt;Chart /&gt;;
+}</code></pre>
+
+<p>
+The Chart component is loaded only when needed.
+</p>
+
+<h2>Benefits of Automatic Code Splitting</h2>
+
+<ul>
+<li>Smaller JavaScript bundles.</li>
+<li>Faster initial page load.</li>
+<li>Better performance.</li>
+<li>Reduced bandwidth usage.</li>
+<li>Improved user experience.</li>
+<li>No manual configuration required.</li>
+</ul>
+
+<h2>Automatic Code Splitting vs Traditional SPA</h2>
+
+<table>
+
+<tr>
+<th>Feature</th>
+<th>Next.js</th>
+<th>Traditional SPA</th>
+</tr>
+
+<tr>
+<td>Route-Based Splitting</td>
+<td>✅ Automatic</td>
+<td>⚠️ Manual Setup</td>
+</tr>
+
+<tr>
+<td>Smaller Initial Bundle</td>
+<td>✅</td>
+<td>❌ Often Large</td>
+</tr>
+
+<tr>
+<td>Performance</td>
+<td>✅ Better</td>
+<td>⚠️ Depends</td>
+</tr>
+
+<tr>
+<td>Configuration</td>
+<td>None</td>
+<td>Usually Required</td>
+</tr>
+
+</table>
+
+<h2>Real-World Example</h2>
+
+<div class="code-title">E-Commerce Website</div>
+
+<pre><code class="language-text">Home Page
+    │
+    ▼
+Download Home Code
+
+Product Page
+    │
+    ▼
+Download Product Code
+
+Admin Dashboard
+    │
+    ▼
+Download Dashboard Code</code></pre>
+
+<p>
+Customers visiting the Home page do not download Dashboard code.
+</p>
+
+<h2>Important Note</h2>
+
+<div class="feature">
+Automatic code splitting happens at the route level by default. Every page gets its own JavaScript bundle automatically.
+</div>
+
+<h2>Interview Tip</h2>
+
+<div class="feature">
+One of the biggest performance benefits of Next.js is automatic route-based code splitting, where users download only the code required for the page they visit.
+</div>
+
+<div class="feature">
+<strong>One-Line Definition:</strong><br>
+Automatic code splitting is a Next.js optimization that automatically creates separate JavaScript bundles for routes so users download only the code needed for the current page.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+
+</body>
+</html>

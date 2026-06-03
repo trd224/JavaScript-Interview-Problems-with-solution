@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>What are React Server Components (RSC) and how does Next.js leverage them?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+
+body{
+  background:#0f172a;
+  color:#e2e8f0;
+  font-family:Arial,sans-serif;
+  line-height:1.8;
+  padding:40px 20px;
+}
+
+.container{
+  max-width:1000px;
+  margin:auto;
+  background:#111827;
+  padding:40px;
+  border-radius:16px;
+}
+
+h1{color:#38bdf8;margin-bottom:20px}
+h2{color:#a78bfa;margin-top:30px;margin-bottom:10px}
+
+p{margin-bottom:15px}
+
+ul{margin-left:20px}
+li{margin-bottom:8px}
+
+.feature{
+  background:#1e293b;
+  border-left:5px solid #38bdf8;
+  padding:15px;
+  border-radius:8px;
+  margin:20px 0;
+}
+
+.code-title{
+  background:#1e293b;
+  color:#93c5fd;
+  padding:12px;
+  font-weight:bold;
+}
+
+pre[class*="language-"]{
+  margin:0!important;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:20px;
+}
+
+th{
+  background:#1e293b;
+  color:#38bdf8;
+  text-align:left;
+  padding:12px;
+}
+
+td{
+  padding:12px;
+  border-top:1px solid #334155;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>What are React Server Components (RSC) and how does Next.js leverage them?</h1>
+
+<p>
+React Server Components (RSC) are React components that execute on the server instead of the browser. They can fetch data, access backend resources, and generate UI without sending their JavaScript code to the client.
+</p>
+
+<div class="feature">
+In the App Router, all components are React Server Components by default unless we add the <code>'use client'</code> directive.
+</div>
+
+<h2>Why Were Server Components Introduced?</h2>
+
+<p>
+Traditional React applications send component JavaScript to the browser.
+</p>
+
+<div class="code-title">Traditional React</div>
+
+<pre><code class="language-text">Server
+   │
+   ▼
+Send HTML + JavaScript
+   │
+   ▼
+Browser Downloads JS
+   │
+   ▼
+Hydration
+   │
+   ▼
+Interactive UI</code></pre>
+
+<p>
+Large applications can send a lot of JavaScript to the browser.
+</p>
+
+<p>
+React Server Components reduce the amount of JavaScript sent to users.
+</p>
+
+<h2>Server Component Example</h2>
+
+<div class="code-title">app/products/page.js</div>
+
+<pre><code class="language-js">export default async function Page() {
+
+  const products =
+    await fetch(
+      'https://dummyjson.com/products'
+    ).then(res => res.json());
+
+  return (
+    &lt;ul&gt;
+      {products.products.map(product => (
+        &lt;li key={product.id}&gt;
+          {product.title}
+        &lt;/li&gt;
+      ))}
+    &lt;/ul&gt;
+  );
+
+}</code></pre>
+
+<p>
+This component runs on the server.
+</p>
+
+<p>
+No JavaScript for this component is sent to the browser.
+</p>
+
+<h2>Client Component Example</h2>
+
+<div class="code-title">app/components/Counter.js</div>
+
+<pre><code class="language-js">'use client';
+
+import { useState } from 'react';
+
+export default function Counter() {
+
+  const [count, setCount] = useState(0);
+
+  return (
+    &lt;button
+      onClick={() => setCount(count + 1)}
+    &gt;
+      {count}
+    &lt;/button&gt;
+  );
+
+}</code></pre>
+
+<p>
+This component runs in the browser because it uses:
+</p>
+
+<ul>
+<li>useState</li>
+<li>useEffect</li>
+<li>Event handlers</li>
+<li>Browser APIs</li>
+</ul>
+
+<h2>Server Component Rules</h2>
+
+<div class="code-title">Allowed</div>
+
+<pre><code class="language-js">await fetch(...)
+
+await database.query(...)
+
+await cookies()
+
+await headers()</code></pre>
+
+<div class="code-title">Not Allowed</div>
+
+<pre><code class="language-js">useState()
+
+useEffect()
+
+onClick={...}
+
+window.localStorage</code></pre>
+
+<p>
+Server Components cannot use browser-only features.
+</p>
+
+<h2>How Next.js Leverages RSC</h2>
+
+<p>
+Next.js App Router is built around React Server Components.
+</p>
+
+<div class="code-title">app/page.js</div>
+
+<pre><code class="language-js">export default function Page() {
+  return &lt;h1&gt;Home Page&lt;/h1&gt;;
+}</code></pre>
+
+<p>
+Even this simple component is a Server Component because there is no <code>'use client'</code>.
+</p>
+
+<h2>Mixing Server and Client Components</h2>
+
+<div class="code-title">app/page.js</div>
+
+<pre><code class="language-js">import Counter from './Counter';
+
+export default function Page() {
+
+  return (
+    &lt;&gt;
+      &lt;h1&gt;Dashboard&lt;/h1&gt;
+      &lt;Counter /&gt;
+    &lt;/&gt;
+  );
+
+}</code></pre>
+
+<div class="code-title">app/Counter.js</div>
+
+<pre><code class="language-js">'use client';
+
+import { useState } from 'react';
+
+export default function Counter() {
+
+  const [count, setCount] = useState(0);
+
+  return (
+    &lt;button
+      onClick={() => setCount(count + 1)}
+    &gt;
+      {count}
+    &lt;/button&gt;
+  );
+
+}</code></pre>
+
+<p>
+Here:
+</p>
+
+<ul>
+<li>Page → Server Component.</li>
+<li>Counter → Client Component.</li>
+</ul>
+
+<h2>Rendering Flow</h2>
+
+<div class="code-title">Flow</div>
+
+<pre><code class="language-text">Request
+   │
+   ▼
+Server Component Executes
+   │
+   ▼
+Fetch Data
+   │
+   ▼
+Generate HTML
+   │
+   ▼
+Send HTML To Browser
+   │
+   ▼
+Hydrate Client Components Only</code></pre>
+
+<h2>Biggest Advantage</h2>
+
+<p>
+Only Client Components are hydrated.
+</p>
+
+<div class="code-title">Without RSC</div>
+
+<pre><code class="language-text">Header JS
+Sidebar JS
+Products JS
+Footer JS
+Counter JS
+
+Download Everything</code></pre>
+
+<div class="code-title">With RSC</div>
+
+<pre><code class="language-text">Header (Server)
+Sidebar (Server)
+Products (Server)
+Footer (Server)
+
+Counter (Client)
+
+Download Only Counter JS</code></pre>
+
+<h2>Benefits of RSC</h2>
+
+<ul>
+<li>Smaller JavaScript bundles.</li>
+<li>Faster page loads.</li>
+<li>Direct server-side data fetching.</li>
+<li>Reduced hydration cost.</li>
+<li>Better performance.</li>
+<li>Improved SEO.</li>
+</ul>
+
+<h2>Pages Router vs App Router</h2>
+
+<table>
+
+<tr>
+<th>Feature</th>
+<th>Pages Router</th>
+<th>App Router</th>
+</tr>
+
+<tr>
+<td>React Server Components</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+
+<tr>
+<td>Server Data Fetching</td>
+<td>getServerSideProps</td>
+<td>Direct fetch()</td>
+</tr>
+
+<tr>
+<td>Client Components</td>
+<td>All Components</td>
+<td>Only use client Components</td>
+</tr>
+
+<tr>
+<td>JavaScript Sent To Browser</td>
+<td>More</td>
+<td>Less</td>
+</tr>
+
+</table>
+
+<h2>Important Note</h2>
+
+<div class="feature">
+React Server Components are not the same as SSR. SSR determines where HTML is generated, while RSC determines where the React component executes.
+</div>
+
+<div class="code-title">Difference</div>
+
+<pre><code class="language-text">SSR
+=
+Where HTML Is Generated
+
+RSC
+=
+Where React Component Runs</code></pre>
+
+<h2>Real-World Example</h2>
+
+<div class="code-title">E-Commerce Product Page</div>
+
+<pre><code class="language-text">Product Details
+Reviews
+Images
+Description
+
+Server Components
+
+Add To Cart Button
+
+Client Component</code></pre>
+
+<p>
+Most of the page remains on the server while only interactive parts run in the browser.
+</p>
+
+<h2>Interview Tip</h2>
+
+<div class="feature">
+The App Router uses React Server Components by default. A component becomes a Client Component only when we add the <code>'use client'</code> directive.
+</div>
+
+<div class="feature">
+<strong>One-Line Definition:</strong><br>
+React Server Components (RSC) are React components that execute on the server and send rendered UI instead of component JavaScript to the browser, and Next.js App Router uses them by default to reduce bundle size and improve performance.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+</body>
+</html>

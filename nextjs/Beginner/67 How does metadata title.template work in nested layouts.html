@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How does metadata title.template work in nested layouts?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+
+body{
+  background:#0f172a;
+  color:#e2e8f0;
+  font-family:Arial,sans-serif;
+  line-height:1.8;
+  padding:40px 20px;
+}
+
+.container{
+  max-width:1000px;
+  margin:auto;
+  background:#111827;
+  padding:40px;
+  border-radius:16px;
+}
+
+h1{color:#38bdf8;margin-bottom:20px}
+h2{color:#a78bfa;margin-top:30px;margin-bottom:10px}
+
+p{margin-bottom:15px}
+
+ul{margin-left:20px}
+li{margin-bottom:8px}
+
+.feature{
+  background:#1e293b;
+  border-left:5px solid #38bdf8;
+  padding:15px;
+  border-radius:8px;
+  margin:20px 0;
+}
+
+.code-title{
+  background:#1e293b;
+  color:#93c5fd;
+  padding:12px;
+  font-weight:bold;
+}
+
+pre[class*="language-"]{
+  margin:0!important;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:20px;
+}
+
+th{
+  background:#1e293b;
+  color:#38bdf8;
+  text-align:left;
+  padding:12px;
+}
+
+td{
+  padding:12px;
+  border-top:1px solid #334155;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>How does metadata title.template work in nested layouts?</h1>
+
+<p>
+The <code>title.template</code> property allows a layout to define a title pattern that is automatically applied to all child pages and nested layouts.
+</p>
+
+<div class="feature">
+<title.template> acts like a wrapper around child page titles. The <code>%s</code> placeholder is replaced with the child page's title.
+</div>
+
+<h2>Basic Example</h2>
+
+<div class="code-title">app/layout.js</div>
+
+<pre><code class="language-js">export const metadata = {
+  title: {
+    template: '%s | My Website',
+    default: 'My Website'
+  }
+};
+
+export default function RootLayout({ children }) {
+  return (
+    &lt;html&gt;
+      &lt;body&gt;{children}&lt;/body&gt;
+    &lt;/html&gt;
+  );
+}</code></pre>
+
+<div class="code-title">app/about/page.js</div>
+
+<pre><code class="language-js">export const metadata = {
+  title: 'About'
+};
+
+export default function About() {
+  return &lt;h1&gt;About&lt;/h1&gt;;
+}</code></pre>
+
+<h2>Generated Title</h2>
+
+<div class="code-title">Result</div>
+
+<pre><code class="language-html">&lt;title&gt;About | My Website&lt;/title&gt;</code></pre>
+
+<h2>How %s Works</h2>
+
+<div class="code-title">Template</div>
+
+<pre><code class="language-text">%s | My Website</code></pre>
+
+<div class="code-title">Page Title</div>
+
+<pre><code class="language-text">About</code></pre>
+
+<div class="code-title">Final Title</div>
+
+<pre><code class="language-text">About | My Website</code></pre>
+
+<h2>Using default Title</h2>
+
+<p>
+If a page does not define its own title, Next.js uses the <code>default</code> value.
+</p>
+
+<div class="code-title">app/layout.js</div>
+
+<pre><code class="language-js">export const metadata = {
+  title: {
+    template: '%s | My Website',
+    default: 'My Website'
+  }
+};</code></pre>
+
+<div class="code-title">app/contact/page.js</div>
+
+<pre><code class="language-js">export default function Contact() {
+  return &lt;h1&gt;Contact&lt;/h1&gt;;
+}</code></pre>
+
+<div class="code-title">Generated Title</div>
+
+<pre><code class="language-html">&lt;title&gt;My Website&lt;/title&gt;</code></pre>
+
+<h2>Nested Layout Example</h2>
+
+<div class="code-title">Project Structure</div>
+
+<pre><code class="language-text">app
+├── layout.js
+├── page.js
+└── dashboard
+    ├── layout.js
+    ├── page.js
+    └── settings
+        └── page.js</code></pre>
+
+<h2>Root Layout</h2>
+
+<div class="code-title">app/layout.js</div>
+
+<pre><code class="language-js">export const metadata = {
+  title: {
+    template: '%s | My Website',
+    default: 'My Website'
+  }
+};</code></pre>
+
+<h2>Dashboard Layout</h2>
+
+<div class="code-title">app/dashboard/layout.js</div>
+
+<pre><code class="language-js">export const metadata = {
+  title: {
+    template: '%s | Dashboard',
+    default: 'Dashboard'
+  }
+};
+
+export default function DashboardLayout({
+  children
+}) {
+  return children;
+}</code></pre>
+
+<h2>Dashboard Page</h2>
+
+<div class="code-title">app/dashboard/page.js</div>
+
+<pre><code class="language-js">export const metadata = {
+  title: 'Home'
+};
+
+export default function DashboardPage() {
+  return &lt;h1&gt;Dashboard&lt;/h1&gt;;
+}</code></pre>
+
+<h2>Generated Title</h2>
+
+<div class="code-title">Result</div>
+
+<pre><code class="language-html">&lt;title&gt;Home | Dashboard&lt;/title&gt;</code></pre>
+
+<h2>Important Rule</h2>
+
+<div class="feature">
+The nearest layout's <code>title.template</code> wins.
+</div>
+
+<p>
+In the previous example:
+</p>
+
+<div class="code-title">Hierarchy</div>
+
+<pre><code class="language-text">Root Layout
+     │
+     ▼
+Dashboard Layout
+     │
+     ▼
+Dashboard Page</code></pre>
+
+<p>
+The Dashboard layout overrides the Root layout template.
+</p>
+
+<h2>Nested Layout Resolution</h2>
+
+<div class="code-title">Example</div>
+
+<pre><code class="language-text">Root Template:
+%s | My Website
+
+Dashboard Template:
+%s | Dashboard
+
+Page Title:
+Home</code></pre>
+
+<div class="code-title">Result</div>
+
+<pre><code class="language-text">Home | Dashboard</code></pre>
+
+<p>
+NOT:
+</p>
+
+<pre><code class="language-text">Home | Dashboard | My Website</code></pre>
+
+<h2>Multiple Nested Layouts</h2>
+
+<div class="code-title">Project Structure</div>
+
+<pre><code class="language-text">app
+└── dashboard
+    └── settings
+        ├── layout.js
+        └── page.js</code></pre>
+
+<div class="code-title">app/dashboard/settings/layout.js</div>
+
+<pre><code class="language-js">export const metadata = {
+  title: {
+    template: '%s | Settings',
+    default: 'Settings'
+  }
+};</code></pre>
+
+<div class="code-title">app/dashboard/settings/page.js</div>
+
+<pre><code class="language-js">export const metadata = {
+  title: 'Profile'
+};
+
+export default function Page() {
+  return &lt;h1&gt;Profile&lt;/h1&gt;;
+}</code></pre>
+
+<div class="code-title">Generated Title</div>
+
+<pre><code class="language-html">&lt;title&gt;Profile | Settings&lt;/title&gt;</code></pre>
+
+<h2>How Title Resolution Works</h2>
+
+<div class="code-title">Flow</div>
+
+<pre><code class="language-text">Page Title
+     │
+     ▼
+Find Nearest Layout
+     │
+     ▼
+Apply title.template
+     │
+     ▼
+Generate Final Title</code></pre>
+
+<h2>title.template vs title.default</h2>
+
+<table>
+
+<tr>
+<th>Property</th>
+<th>Purpose</th>
+</tr>
+
+<tr>
+<td>template</td>
+<td>Formats child page titles</td>
+</tr>
+
+<tr>
+<td>default</td>
+<td>Used when child page has no title</td>
+</tr>
+
+</table>
+
+<h2>Real-World Example</h2>
+
+<div class="code-title">Root Layout</div>
+
+<pre><code class="language-js">title: {
+  template: '%s | Amazon',
+  default: 'Amazon'
+}</code></pre>
+
+<div class="code-title">Product Page</div>
+
+<pre><code class="language-js">title: 'iPhone 15'</code></pre>
+
+<div class="code-title">Generated Title</div>
+
+<pre><code class="language-html">&lt;title&gt;iPhone 15 | Amazon&lt;/title&gt;</code></pre>
+
+<h2>Important Note</h2>
+
+<div class="feature">
+<title.template> only affects child routes. The layout's own title comes from <code>title.default</code>.
+</div>
+
+<h2>Interview Tip</h2>
+
+<div class="feature">
+In nested layouts, Next.js uses the closest parent layout's <code>title.template</code> when generating the final page title.
+</div>
+
+<div class="feature">
+<strong>One-Line Definition:</strong><br>
+<code>metadata.title.template</code> defines a title format for child pages, and in nested layouts the nearest parent layout's template is applied to the page title.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+
+</body>
+</html>

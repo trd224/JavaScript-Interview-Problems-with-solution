@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How do you add and configure ESLint in a Next.js project?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+
+body{
+  background:#0f172a;
+  color:#e2e8f0;
+  font-family:Arial,sans-serif;
+  line-height:1.8;
+  padding:40px 20px;
+}
+
+.container{
+  max-width:1000px;
+  margin:auto;
+  background:#111827;
+  padding:40px;
+  border-radius:16px;
+}
+
+h1{color:#38bdf8;margin-bottom:20px}
+h2{color:#a78bfa;margin-top:30px;margin-bottom:10px}
+
+p{margin-bottom:15px}
+
+ul{margin-left:20px}
+li{margin-bottom:8px}
+
+.feature{
+  background:#1e293b;
+  border-left:5px solid #38bdf8;
+  padding:15px;
+  border-radius:8px;
+  margin:20px 0;
+}
+
+.code-title{
+  background:#1e293b;
+  color:#93c5fd;
+  padding:12px;
+  font-weight:bold;
+}
+
+pre[class*="language-"]{
+  margin:0!important;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:20px;
+}
+
+th{
+  background:#1e293b;
+  color:#38bdf8;
+  text-align:left;
+  padding:12px;
+}
+
+td{
+  padding:12px;
+  border-top:1px solid #334155;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>How do you add and configure ESLint in a Next.js project?</h1>
+
+<p>
+ESLint is used in a Next.js project to find code issues, enforce coding rules, and improve code quality during development.
+</p>
+
+<div class="feature">
+Next.js supports ESLint out of the box, and we can configure it using an ESLint configuration file such as <code>eslint.config.mjs</code>.
+</div>
+
+<h2>What is ESLint?</h2>
+
+<p>
+ESLint is a linting tool that checks JavaScript, TypeScript, React, and Next.js code for mistakes and style issues.
+</p>
+
+<h2>Install ESLint Packages</h2>
+
+<div class="code-title">Terminal</div>
+
+<pre><code class="language-bash">npm install -D eslint eslint-config-next</code></pre>
+
+<h2>Create ESLint Config File</h2>
+
+<div class="code-title">eslint.config.mjs</div>
+
+<pre><code class="language-js">import next from 'eslint-config-next';
+
+export default [
+  ...next
+];</code></pre>
+
+<h2>Alternative Config for CommonJS Projects</h2>
+
+<div class="code-title">.eslintrc.json</div>
+
+<pre><code class="language-json">{
+  "extends": "next/core-web-vitals"
+}</code></pre>
+
+<div class="feature">
+In newer ESLint versions, <code>eslint.config.mjs</code> is the modern flat config style. Older projects commonly use <code>.eslintrc.json</code>.
+</div>
+
+<h2>Add Lint Script</h2>
+
+<div class="code-title">package.json</div>
+
+<pre><code class="language-json">{
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint ."
+  }
+}</code></pre>
+
+<h2>Run ESLint</h2>
+
+<div class="code-title">Terminal</div>
+
+<pre><code class="language-bash">npm run lint</code></pre>
+
+<p>
+This checks our project files and reports linting errors or warnings.
+</p>
+
+<h2>Example ESLint Warning</h2>
+
+<div class="code-title">Bad Code</div>
+
+<pre><code class="language-js">export default function Page() {
+  const name = 'Rizwan';
+
+  return &lt;h1&gt;Hello&lt;/h1&gt;;
+}</code></pre>
+
+<p>
+Here, <code>name</code> is declared but not used, so ESLint can show a warning.
+</p>
+
+<div class="code-title">Possible Warning</div>
+
+<pre><code class="language-text">'name' is assigned a value but never used.</code></pre>
+
+<h2>Correct Code</h2>
+
+<div class="code-title">app/page.js</div>
+
+<pre><code class="language-js">export default function Page() {
+  const name = 'Rizwan';
+
+  return &lt;h1&gt;Hello {name}&lt;/h1&gt;;
+}</code></pre>
+
+<h2>Next.js ESLint Rules</h2>
+
+<p>
+The <code>eslint-config-next</code> package includes rules for:
+</p>
+
+<ul>
+<li>React best practices.</li>
+<li>Next.js best practices.</li>
+<li>Accessibility issues.</li>
+<li>Image optimization issues.</li>
+<li>Link usage issues.</li>
+<li>Core Web Vitals related rules.</li>
+</ul>
+
+<h2>Example: Next.js Link Rule</h2>
+
+<div class="code-title">Bad Code</div>
+
+<pre><code class="language-js">export default function Page() {
+  return &lt;a href="/about"&gt;About&lt;/a&gt;;
+}</code></pre>
+
+<p>
+For internal navigation in Next.js, we should use <code>Link</code>.
+</p>
+
+<div class="code-title">Correct Code</div>
+
+<pre><code class="language-js">import Link from 'next/link';
+
+export default function Page() {
+  return &lt;Link href="/about"&gt;About&lt;/Link&gt;;
+}</code></pre>
+
+<h2>Example: Image Rule</h2>
+
+<div class="code-title">Bad Code</div>
+
+<pre><code class="language-js">export default function Page() {
+  return &lt;img src="/logo.png" alt="Logo" /&gt;;
+}</code></pre>
+
+<p>
+Next.js recommends using the <code>Image</code> component for image optimization.
+</p>
+
+<div class="code-title">Correct Code</div>
+
+<pre><code class="language-js">import Image from 'next/image';
+
+export default function Page() {
+  return &lt;Image src="/logo.png" alt="Logo" width={200} height={100} /&gt;;
+}</code></pre>
+
+<h2>Custom ESLint Rules</h2>
+
+<p>
+We can also add our own rules.
+</p>
+
+<div class="code-title">eslint.config.mjs</div>
+
+<pre><code class="language-js">import next from 'eslint-config-next';
+
+export default [
+  ...next,
+  {
+    rules: {
+      'no-console': 'warn',
+      'no-unused-vars': 'warn'
+    }
+  }
+];</code></pre>
+
+<h2>Ignore Files</h2>
+
+<p>
+We can ignore generated folders like <code>.next</code> and <code>node_modules</code>.
+</p>
+
+<div class="code-title">eslint.config.mjs</div>
+
+<pre><code class="language-js">import next from 'eslint-config-next';
+
+export default [
+  {
+    ignores: ['.next/**', 'node_modules/**', 'out/**']
+  },
+  ...next
+];</code></pre>
+
+<h2>ESLint with TypeScript</h2>
+
+<p>
+For TypeScript projects, ESLint can check <code>.ts</code> and <code>.tsx</code> files also.
+</p>
+
+<div class="code-title">Example Files</div>
+
+<pre><code class="language-text">app/page.tsx
+app/layout.tsx
+components/Header.tsx</code></pre>
+
+<h2>Old Next.js Command</h2>
+
+<p>
+In older Next.js projects, we commonly used:
+</p>
+
+<div class="code-title">Terminal</div>
+
+<pre><code class="language-bash">next lint</code></pre>
+
+<p>
+In newer projects, using the normal ESLint command is preferred:
+</p>
+
+<div class="code-title">Terminal</div>
+
+<pre><code class="language-bash">eslint .</code></pre>
+
+<h2>ESLint Flow</h2>
+
+<div class="code-title">Flow</div>
+
+<pre><code class="language-text">Write Code
+    │
+    ▼
+Run npm run lint
+    │
+    ▼
+ESLint Checks Rules
+    │
+    ▼
+Show Errors / Warnings
+    │
+    ▼
+Fix Code Quality Issues</code></pre>
+
+<h2>ESLint vs Prettier</h2>
+
+<table>
+<tr>
+<th>Tool</th>
+<th>Purpose</th>
+</tr>
+
+<tr>
+<td>ESLint</td>
+<td>Finds code problems and enforces rules</td>
+</tr>
+
+<tr>
+<td>Prettier</td>
+<td>Formats code style automatically</td>
+</tr>
+</table>
+
+<h2>Common Commands</h2>
+
+<div class="code-title">Terminal</div>
+
+<pre><code class="language-bash">npm run lint
+
+npx eslint .
+
+npx eslint . --fix</code></pre>
+
+<h2>Important Note</h2>
+
+<div class="feature">
+ESLint helps catch problems before production. It does not replace testing, but it improves code quality and prevents common mistakes.
+</div>
+
+<h2>Interview Tip</h2>
+
+<div class="feature">
+In a Next.js project, ESLint is configured using <code>eslint-config-next</code>. We add a lint script such as <code>eslint .</code> and run it to check code quality, React rules, and Next.js best practices.
+</div>
+
+<div class="feature">
+<strong>One-Line Definition:</strong><br>
+ESLint in Next.js is used to detect code issues and enforce best practices, and it can be configured with <code>eslint-config-next</code> and run using a script like <code>npm run lint</code>.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+
+</body>
+</html>

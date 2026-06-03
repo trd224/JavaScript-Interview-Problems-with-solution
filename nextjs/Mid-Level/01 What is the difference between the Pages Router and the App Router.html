@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>What is the Difference Between the Pages Router and the App Router?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+
+body{
+  background:#0f172a;
+  color:#e2e8f0;
+  font-family:Arial,sans-serif;
+  line-height:1.8;
+  padding:40px 20px;
+}
+
+.container{
+  max-width:1000px;
+  margin:auto;
+  background:#111827;
+  padding:40px;
+  border-radius:16px;
+}
+
+h1{color:#38bdf8;margin-bottom:20px}
+h2{color:#a78bfa;margin-top:30px;margin-bottom:10px}
+
+p{margin-bottom:15px}
+
+ul{margin-left:20px}
+li{margin-bottom:8px}
+
+.feature{
+  background:#1e293b;
+  border-left:5px solid #38bdf8;
+  padding:15px;
+  border-radius:8px;
+  margin:20px 0;
+}
+
+.code-title{
+  background:#1e293b;
+  color:#93c5fd;
+  padding:12px;
+  font-weight:bold;
+}
+
+pre[class*="language-"]{
+  margin:0!important;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:20px;
+}
+
+th{
+  background:#1e293b;
+  color:#38bdf8;
+  text-align:left;
+  padding:12px;
+}
+
+td{
+  padding:12px;
+  border-top:1px solid #334155;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>What is the Difference Between the Pages Router and the App Router?</h1>
+
+<p>
+The Pages Router and App Router are two routing systems in Next.js. The Pages Router uses the <code>pages</code> directory and traditional data-fetching methods, while the App Router uses the <code>app</code> directory and introduces Server Components, nested layouts, streaming, and the Metadata API.
+</p>
+
+<div class="feature">
+The App Router is the modern routing system introduced in Next.js 13 and is now the recommended approach for new applications.
+</div>
+
+<h2>Pages Router</h2>
+
+<p>
+The Pages Router uses the <code>pages</code> folder to create routes.
+</p>
+
+<div class="code-title">Project Structure</div>
+
+<pre><code class="language-text">pages
+├── index.js
+├── about.js
+└── products
+    └── [id].js</code></pre>
+
+<div class="code-title">pages/about.js</div>
+
+<pre><code class="language-js">export default function About() {
+  return &lt;h1&gt;About Page&lt;/h1&gt;;
+}</code></pre>
+
+<p>
+This creates:
+</p>
+
+<pre><code class="language-text">/about</code></pre>
+
+<h2>App Router</h2>
+
+<p>
+The App Router uses the <code>app</code> folder.
+</p>
+
+<div class="code-title">Project Structure</div>
+
+<pre><code class="language-text">app
+├── page.js
+├── about
+│   └── page.js
+└── products
+    └── [id]
+        └── page.js</code></pre>
+
+<div class="code-title">app/about/page.js</div>
+
+<pre><code class="language-js">export default function About() {
+  return &lt;h1&gt;About Page&lt;/h1&gt;;
+}</code></pre>
+
+<p>
+This also creates:
+</p>
+
+<pre><code class="language-text">/about</code></pre>
+
+<h2>Data Fetching</h2>
+
+<h3>Pages Router</h3>
+
+<div class="code-title">pages/products.js</div>
+
+<pre><code class="language-js">export async function getServerSideProps() {
+
+  const products =
+    await fetch('https://api.example.com/products')
+      .then(res => res.json());
+
+  return {
+    props: {
+      products
+    }
+  };
+
+}
+
+export default function Products({
+  products
+}) {
+
+  return (
+    &lt;div&gt;
+      {products.length}
+    &lt;/div&gt;
+  );
+
+}</code></pre>
+
+<h3>App Router</h3>
+
+<div class="code-title">app/products/page.js</div>
+
+<pre><code class="language-js">export default async function Page() {
+
+  const products =
+    await fetch('https://api.example.com/products')
+      .then(res => res.json());
+
+  return (
+    &lt;div&gt;
+      {products.length}
+    &lt;/div&gt;
+  );
+
+}</code></pre>
+
+<p>
+No <code>getServerSideProps()</code> is required.
+</p>
+
+<h2>Layouts</h2>
+
+<h3>Pages Router</h3>
+
+<p>
+Uses a shared layout pattern manually.
+</p>
+
+<div class="code-title">pages/_app.js</div>
+
+<pre><code class="language-js">export default function App({
+  Component,
+  pageProps
+}) {
+
+  return (
+    &lt;Layout&gt;
+      &lt;Component {...pageProps} /&gt;
+    &lt;/Layout&gt;
+  );
+
+}</code></pre>
+
+<h3>App Router</h3>
+
+<p>
+Has built-in nested layouts.
+</p>
+
+<div class="code-title">app/layout.js</div>
+
+<pre><code class="language-js">export default function RootLayout({
+  children
+}) {
+
+  return (
+    &lt;html&gt;
+      &lt;body&gt;
+        {children}
+      &lt;/body&gt;
+    &lt;/html&gt;
+  );
+
+}</code></pre>
+
+<h2>Metadata</h2>
+
+<h3>Pages Router</h3>
+
+<div class="code-title">pages/about.js</div>
+
+<pre><code class="language-js">import Head from 'next/head';
+
+export default function About() {
+
+  return (
+    &lt;&gt;
+      &lt;Head&gt;
+        &lt;title&gt;About&lt;/title&gt;
+      &lt;/Head&gt;
+
+      &lt;h1&gt;About&lt;/h1&gt;
+    &lt;/&gt;
+  );
+
+}</code></pre>
+
+<h3>App Router</h3>
+
+<div class="code-title">app/about/page.js</div>
+
+<pre><code class="language-js">export const metadata = {
+  title: 'About'
+};
+
+export default function About() {
+  return &lt;h1&gt;About&lt;/h1&gt;;
+}</code></pre>
+
+<h2>Loading UI</h2>
+
+<h3>Pages Router</h3>
+
+<p>
+Manual loading state management is required.
+</p>
+
+<h3>App Router</h3>
+
+<div class="code-title">app/loading.js</div>
+
+<pre><code class="language-js">export default function Loading() {
+  return &lt;p&gt;Loading...&lt;/p&gt;;
+}</code></pre>
+
+<p>
+Automatic loading UI support.
+</p>
+
+<h2>Error Handling</h2>
+
+<h3>Pages Router</h3>
+
+<p>
+Requires custom error handling.
+</p>
+
+<h3>App Router</h3>
+
+<div class="code-title">app/error.js</div>
+
+<pre><code class="language-js">'use client';
+
+export default function Error({
+  error
+}) {
+
+  return (
+    &lt;h1&gt;
+      Something went wrong
+    &lt;/h1&gt;
+  );
+
+}</code></pre>
+
+<h2>Server Components</h2>
+
+<h3>Pages Router</h3>
+
+<pre><code class="language-text">❌ Not Supported</code></pre>
+
+<h3>App Router</h3>
+
+<pre><code class="language-text">✅ Supported By Default</code></pre>
+
+<div class="code-title">Server Component</div>
+
+<pre><code class="language-js">export default async function Page() {
+
+  const data =
+    await fetch('https://api.example.com');
+
+  return &lt;h1&gt;Hello&lt;/h1&gt;;
+
+}</code></pre>
+
+<h2>Streaming</h2>
+
+<h3>Pages Router</h3>
+
+<pre><code class="language-text">❌ Not Supported</code></pre>
+
+<h3>App Router</h3>
+
+<pre><code class="language-text">✅ Supported</code></pre>
+
+<div class="code-title">Example</div>
+
+<pre><code class="language-js">import { Suspense } from 'react';
+
+export default function Page() {
+
+  return (
+    &lt;Suspense fallback="Loading..."&gt;
+      &lt;Products /&gt;
+    &lt;/Suspense&gt;
+  );
+
+}</code></pre>
+
+<h2>Route Handlers</h2>
+
+<h3>Pages Router</h3>
+
+<div class="code-title">pages/api/users.js</div>
+
+<pre><code class="language-js">export default function handler(
+  req,
+  res
+) {
+
+  res.json({
+    users: []
+  });
+
+}</code></pre>
+
+<h3>App Router</h3>
+
+<div class="code-title">app/api/users/route.js</div>
+
+<pre><code class="language-js">export async function GET() {
+
+  return Response.json({
+    users: []
+  });
+
+}</code></pre>
+
+<h2>Rendering Features</h2>
+
+<table>
+
+<tr>
+<th>Feature</th>
+<th>Pages Router</th>
+<th>App Router</th>
+</tr>
+
+<tr>
+<td>SSG</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+
+<tr>
+<td>SSR</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+
+<tr>
+<td>ISR</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+
+<tr>
+<td>Server Components</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+
+<tr>
+<td>Streaming</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+
+<tr>
+<td>Nested Layouts</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+
+<tr>
+<td>Metadata API</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+
+<tr>
+<td>Route Handlers</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+
+</table>
+
+<h2>When to Use Each?</h2>
+
+<table>
+
+<tr>
+<th>Scenario</th>
+<th>Recommended</th>
+</tr>
+
+<tr>
+<td>Existing Older Project</td>
+<td>Pages Router</td>
+</tr>
+
+<tr>
+<td>New Project</td>
+<td>App Router</td>
+</tr>
+
+<tr>
+<td>Server Components</td>
+<td>App Router</td>
+</tr>
+
+<tr>
+<td>Streaming</td>
+<td>App Router</td>
+</tr>
+
+<tr>
+<td>Modern Next.js Features</td>
+<td>App Router</td>
+</tr>
+
+</table>
+
+<h2>Evolution</h2>
+
+<div class="code-title">Timeline</div>
+
+<pre><code class="language-text">Next.js 1 - 12
+      │
+      ▼
+Pages Router
+
+Next.js 13+
+      │
+      ▼
+App Router
+
+Next.js 15
+      │
+      ▼
+App Router Recommended</code></pre>
+
+<h2>Important Note</h2>
+
+<div class="feature">
+Both routers can coexist in the same project. Next.js allows gradual migration from the Pages Router to the App Router.
+</div>
+
+<h2>Interview Tip</h2>
+
+<div class="feature">
+The biggest differences are that the App Router provides Server Components, nested layouts, streaming, Route Handlers, and the Metadata API, while the Pages Router relies on getServerSideProps, getStaticProps, and the Head component.
+</div>
+
+<div class="feature">
+<strong>One-Line Definition:</strong><br>
+The Pages Router is the traditional routing system based on the <code>pages</code> directory, while the App Router is the modern routing system based on the <code>app</code> directory that adds Server Components, nested layouts, streaming, and the Metadata API.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+
+</body>
+</html>
