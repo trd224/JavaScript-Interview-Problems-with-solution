@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>use cache vs unstable_cache in Next.js 15</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0f172a;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.8;padding:40px 20px}
+.container{max-width:1000px;margin:auto;background:#111827;padding:40px;border-radius:16px}
+h1{color:#38bdf8;margin-bottom:20px}
+h2{color:#a78bfa;margin-top:30px;margin-bottom:10px}
+h3{color:#fbbf24;margin-top:25px;margin-bottom:10px}
+p{margin-bottom:15px}
+ul{margin-left:20px}
+li{margin-bottom:8px}
+.feature{background:#1e293b;border-left:5px solid #38bdf8;padding:15px;border-radius:8px;margin:20px 0}
+.code-title{background:#1e293b;color:#93c5fd;padding:10px;font-weight:bold}
+pre[class*="language-"]{margin:0!important}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+th{background:#1e293b;color:#38bdf8;text-align:left;padding:12px}
+td{padding:12px;border-top:1px solid #334155}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>What is the use cache directive introduced in Next.js 15 and how does it differ from unstable_cache?</h1>
+
+<p>
+Next.js 15 introduced the <code>'use cache'</code> directive as a simpler and more modern way to cache Server Components and async functions.
+</p>
+
+<div class="feature">
+Think of <code>'use cache'</code> as the future replacement for many <code>unstable_cache()</code> use cases.
+</div>
+
+<hr>
+
+<h2>The Old Way: unstable_cache()</h2>
+
+<p>
+Before Next.js 15, if we wanted to cache a database query, we wrote:
+</p>
+
+<div class="code-title">unstable_cache Example</div>
+
+<pre><code class="language-tsx">import { unstable_cache } from 'next/cache';
+
+const getProducts = unstable_cache(
+  async () => {
+    return db.product.findMany();
+  },
+  ['products'],
+  { revalidate: 60 }
+);</code></pre>
+
+<p>
+This works, but the syntax is quite verbose.
+</p>
+
+<hr>
+
+<h2>The New Way: use cache</h2>
+
+<p>
+Next.js 15 allows us to write:
+</p>
+
+<div class="code-title">use cache Example</div>
+
+<pre><code class="language-tsx">async function getProducts() {
+  'use cache';
+
+  return db.product.findMany();
+}</code></pre>
+
+<p>
+Much simpler.
+</p>
+
+<div class="feature">
+Instead of wrapping functions with <code>unstable_cache()</code>, we place <code>'use cache'</code> inside the function body.
+</div>
+
+<hr>
+
+<h2>Server Component Example</h2>
+
+<div class="code-title">Products Page</div>
+
+<pre><code class="language-tsx">async function getProducts() {
+  'use cache';
+
+  return db.product.findMany();
+}
+
+export default async function ProductsPage() {
+  const products = await getProducts();
+
+  return &lt;h1&gt;Products&lt;/h1&gt;;
+}</code></pre>
+
+<p>
+Now Next.js can cache the result of <code>getProducts()</code>.
+</p>
+
+<hr>
+
+<h2>What Problem Does It Solve?</h2>
+
+<p>
+Suppose:
+</p>
+
+<div class="code-title">Database Query</div>
+
+<pre><code class="language-tsx">await db.product.findMany();</code></pre>
+
+<p>
+Without caching:
+</p>
+
+<pre><code class="language-text">Request 1
+    ↓
+Database Query
+
+Request 2
+    ↓
+Database Query
+
+Request 3
+    ↓
+Database Query
+</code></pre>
+
+<p>
+Database gets hit every time.
+</p>
+
+<hr>
+
+<p>
+With:
+</p>
+
+<div class="code-title">Cached Function</div>
+
+<pre><code class="language-tsx">async function getProducts() {
+  'use cache';
+
+  return db.product.findMany();
+}</code></pre>
+
+<p>
+Next.js can reuse cached results.
+</p>
+
+<hr>
+
+<h2>How Is It Different From React.cache?</h2>
+
+<p>
+Many developers confuse these two.
+</p>
+
+<div class="code-title">React.cache()</div>
+
+<pre><code class="language-tsx">import { cache } from 'react';
+
+export const getProducts = cache(async () => {
+  return db.product.findMany();
+});</code></pre>
+
+<p>
+Lifetime:
+</p>
+
+<pre><code class="language-text">Current Request Only
+</code></pre>
+
+<hr>
+
+<div class="code-title">use cache</div>
+
+<pre><code class="language-tsx">async function getProducts() {
+  'use cache';
+
+  return db.product.findMany();
+}</code></pre>
+
+<p>
+Lifetime:
+</p>
+
+<pre><code class="language-text">Across Requests
+</code></pre>
+
+<div class="feature">
+React.cache() = request memoization.<br>
+use cache = persistent Next.js cache.
+</div>
+
+<hr>
+
+<h2>How Is It Different From unstable_cache()?</h2>
+
+<p>
+Both create persistent cache entries.
+</p>
+
+<p>
+The main difference is syntax and future direction.
+</p>
+
+<div class="code-title">unstable_cache</div>
+
+<pre><code class="language-tsx">const getProducts = unstable_cache(
+  async () => {
+    return db.product.findMany();
+  },
+  ['products'],
+  { revalidate: 60 }
+);</code></pre>
+
+<hr>
+
+<div class="code-title">use cache</div>
+
+<pre><code class="language-tsx">async function getProducts() {
+  'use cache';
+
+  return db.product.findMany();
+}</code></pre>
+
+<p>
+The second version is much easier to read.
+</p>
+
+<hr>
+
+<h2>Real World Example</h2>
+
+<p>
+Suppose we have:
+</p>
+
+<pre><code class="language-text">50,000 Products
+</code></pre>
+
+<p>
+Fetching all products is expensive.
+</p>
+
+<div class="code-title">Cached Query</div>
+
+<pre><code class="language-tsx">async function getProducts() {
+  'use cache';
+
+  return db.product.findMany();
+}</code></pre>
+
+<p>
+Now:
+</p>
+
+<pre><code class="language-text">First Request
+      ↓
+Database Query
+      ↓
+Cache Result
+
+
+Second Request
+      ↓
+Use Cache
+
+
+Third Request
+      ↓
+Use Cache
+</code></pre>
+
+<hr>
+
+<h2>Using Cache Tags</h2>
+
+<p>
+use cache can work with cache tags.
+</p>
+
+<div class="code-title">Tagged Function</div>
+
+<pre><code class="language-tsx">import { cacheTag } from 'next/cache';
+
+async function getProducts() {
+  'use cache';
+
+  cacheTag('products');
+
+  return db.product.findMany();
+}</code></pre>
+
+<p>
+Now we can invalidate:
+</p>
+
+<div class="code-title">Revalidate Tag</div>
+
+<pre><code class="language-ts">import { revalidateTag } from 'next/cache';
+
+revalidateTag('products', 'max');</code></pre>
+
+<hr>
+
+<h2>Using Cache Lifetime</h2>
+
+<div class="code-title">Example</div>
+
+<pre><code class="language-tsx">import { cacheLife } from 'next/cache';
+
+async function getProducts() {
+  'use cache';
+
+  cacheLife('minutes');
+
+  return db.product.findMany();
+}</code></pre>
+
+<p>
+This controls how long the cached value remains valid.
+</p>
+
+<hr>
+
+<h2>Visual Comparison</h2>
+
+<table>
+<tr>
+<th>Feature</th>
+<th>React.cache</th>
+<th>unstable_cache</th>
+<th>use cache</th>
+</tr>
+
+<tr>
+<td>Request Memoization</td>
+<td>✅</td>
+<td>❌</td>
+<td>❌</td>
+</tr>
+
+<tr>
+<td>Persistent Cache</td>
+<td>❌</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+
+<tr>
+<td>Across Requests</td>
+<td>❌</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+
+<tr>
+<td>Tags</td>
+<td>❌</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+
+<tr>
+<td>Revalidation</td>
+<td>❌</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+
+<tr>
+<td>Simple Syntax</td>
+<td>✅</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+
+<tr>
+<td>Future Direction</td>
+<td>Memoization</td>
+<td>Legacy Style</td>
+<td>Recommended</td>
+</tr>
+</table>
+
+<hr>
+
+<h2>When Should We Use use cache?</h2>
+
+<ul>
+<li>Database queries.</li>
+<li>CMS data.</li>
+<li>Expensive computations.</li>
+<li>Third-party SDK calls.</li>
+<li>Server-side helper functions.</li>
+</ul>
+
+<p>
+Basically anywhere we previously considered:
+</p>
+
+<pre><code class="language-tsx">unstable_cache(...)</code></pre>
+
+<hr>
+
+<h2>Easy Memory Trick</h2>
+
+<div class="code-title">Remember</div>
+
+<pre><code class="language-text">React.cache()
+      ↓
+Current Request Only
+
+
+unstable_cache()
+      ↓
+Persistent Cache
+(Old API)
+
+
+'use cache'
+      ↓
+Persistent Cache
+(New API)
+</code></pre>
+
+<div class="feature">
+<strong>One-Line Definition:</strong><br>
+<code>'use cache'</code> is a Next.js 15 caching directive that creates persistent server-side cache entries for functions and Server Components, providing a simpler and more modern alternative to <code>unstable_cache()</code>.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-tsx.min.js"></script>
+
+</body>
+</html>

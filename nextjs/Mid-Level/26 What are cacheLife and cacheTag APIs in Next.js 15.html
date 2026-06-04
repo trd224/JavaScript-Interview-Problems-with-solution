@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>What are cacheLife and cacheTag APIs in Next.js 15?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0f172a;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.8;padding:40px 20px}
+.container{max-width:1000px;margin:auto;background:#111827;padding:40px;border-radius:16px}
+h1{color:#38bdf8;margin-bottom:20px}
+h2{color:#a78bfa;margin-top:30px;margin-bottom:10px}
+h3{color:#fbbf24;margin-top:25px;margin-bottom:10px}
+p{margin-bottom:15px}
+ul{margin-left:20px}
+li{margin-bottom:8px}
+.feature{background:#1e293b;border-left:5px solid #38bdf8;padding:15px;border-radius:8px;margin:20px 0}
+.code-title{background:#1e293b;color:#93c5fd;padding:10px;font-weight:bold}
+pre[class*="language-"]{margin:0!important}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+th{background:#1e293b;color:#38bdf8;text-align:left;padding:12px}
+td{padding:12px;border-top:1px solid #334155}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>What are cacheLife and cacheTag APIs in Next.js 15?</h1>
+
+<p>
+When using the new <code>'use cache'</code> directive, Next.js provides two helper APIs:
+</p>
+
+<ul>
+<li><code>cacheLife()</code> → Controls how long cached data lives.</li>
+<li><code>cacheTag()</code> → Assigns tags to cached data for later invalidation.</li>
+</ul>
+
+<div class="feature">
+Think of it like this:
+<br><br>
+<strong>cacheLife = When should cache expire?</strong>
+<br>
+<strong>cacheTag = Which cache should be cleared?</strong>
+</div>
+
+<p>
+Both APIs are designed to work together with the <code>'use cache'</code> directive. :contentReference[oaicite:0]{index=0}
+</p>
+
+<hr>
+
+<h2>1. cacheLife()</h2>
+
+<p>
+<code>cacheLife()</code> controls the lifetime of a cached function or component. :contentReference[oaicite:1]{index=1}
+</p>
+
+<div class="code-title">Basic Example</div>
+
+<pre><code class="language-tsx">import { cacheLife } from 'next/cache';
+
+async function getProducts() {
+  'use cache';
+
+  cacheLife('hours');
+
+  return db.product.findMany();
+}</code></pre>
+
+<p>
+Meaning:
+</p>
+
+<pre><code class="language-text">First Request
+      ↓
+Query Database
+      ↓
+Store In Cache
+
+Next Requests
+      ↓
+Use Cache
+
+After Cache Life Ends
+      ↓
+Generate Fresh Data
+</code></pre>
+
+<hr>
+
+<h2>What Problem Does cacheLife Solve?</h2>
+
+<p>
+Suppose we have:
+</p>
+
+<div class="code-title">Database Query</div>
+
+<pre><code class="language-tsx">return db.product.findMany();</code></pre>
+
+<p>
+Without caching:
+</p>
+
+<pre><code class="language-text">Request 1
+   ↓
+Database Query
+
+Request 2
+   ↓
+Database Query
+
+Request 3
+   ↓
+Database Query
+</code></pre>
+
+<p>
+With:
+</p>
+
+<div class="code-title">cacheLife()</div>
+
+<pre><code class="language-tsx">cacheLife('hours');</code></pre>
+
+<p>
+The query result can be reused instead of hitting the database every time. :contentReference[oaicite:2]{index=2}
+</p>
+
+<hr>
+
+<h2>2. cacheTag()</h2>
+
+<p>
+<code>cacheTag()</code> attaches one or more tags to cached data. Later, we can clear that cache using <code>revalidateTag()</code>. :contentReference[oaicite:3]{index=3}
+</p>
+
+<div class="code-title">Basic Example</div>
+
+<pre><code class="language-tsx">import { cacheTag } from 'next/cache';
+
+async function getProducts() {
+  'use cache';
+
+  cacheTag('products');
+
+  return db.product.findMany();
+}</code></pre>
+
+<p>
+Now this cached data belongs to:
+</p>
+
+<pre><code class="language-text">products
+</code></pre>
+
+<p>
+tag.
+</p>
+
+<hr>
+
+<h2>Clearing Tagged Cache</h2>
+
+<div class="code-title">Revalidate</div>
+
+<pre><code class="language-ts">import { revalidateTag } from 'next/cache';
+
+revalidateTag('products', 'max');</code></pre>
+
+<p>
+Flow:
+</p>
+
+<pre><code class="language-text">Product Updated
+      ↓
+revalidateTag('products')
+      ↓
+Products Cache Cleared
+      ↓
+Next Request Gets Fresh Data
+</code></pre>
+
+<hr>
+
+<h2>Real World Example</h2>
+
+<p>
+Suppose we have an e-commerce site.
+</p>
+
+<div class="code-title">Products Function</div>
+
+<pre><code class="language-tsx">import { cacheLife, cacheTag } from 'next/cache';
+
+async function getProducts() {
+  'use cache';
+
+  cacheLife('hours');
+
+  cacheTag('products');
+
+  return db.product.findMany();
+}</code></pre>
+
+<p>
+Here:
+</p>
+
+<table>
+<tr>
+<th>API</th>
+<th>Purpose</th>
+</tr>
+
+<tr>
+<td>cacheLife('hours')</td>
+<td>How long cache stays valid</td>
+</tr>
+
+<tr>
+<td>cacheTag('products')</td>
+<td>Identifies the cache entry</td>
+</tr>
+</table>
+
+<hr>
+
+<h2>Admin Updates Product</h2>
+
+<p>
+Admin changes:
+</p>
+
+<div class="code-title">Database</div>
+
+<pre><code class="language-json">{
+  "price": 120
+}</code></pre>
+
+<p>
+Backend then triggers:
+</p>
+
+<div class="code-title">Invalidate Cache</div>
+
+<pre><code class="language-ts">revalidateTag('products', 'max');</code></pre>
+
+<p>
+Result:
+</p>
+
+<pre><code class="language-text">Old Products Cache
+       ↓
+Deleted
+
+Next Request
+       ↓
+Fresh Database Query
+       ↓
+New Cache Created
+</code></pre>
+
+<hr>
+
+<h2>How cacheLife and cacheTag Work Together</h2>
+
+<div class="code-title">Combined Example</div>
+
+<pre><code class="language-tsx">import { cacheLife, cacheTag } from 'next/cache';
+
+async function getProducts() {
+  'use cache';
+
+  cacheLife('hours');
+
+  cacheTag('products');
+
+  return db.product.findMany();
+}</code></pre>
+
+<p>
+Meaning:
+</p>
+
+<pre><code class="language-text">products
+   ↓
+Cache Entry
+
+cacheLife
+   ↓
+How Long It Lives
+
+cacheTag
+   ↓
+How To Find It Later
+
+revalidateTag
+   ↓
+How To Clear It
+</code></pre>
+
+<hr>
+
+<h2>Comparison</h2>
+
+<table>
+<tr>
+<th>Feature</th>
+<th>cacheLife()</th>
+<th>cacheTag()</th>
+</tr>
+
+<tr>
+<td>Controls Expiration</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+
+<tr>
+<td>Assigns Cache Name</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+
+<tr>
+<td>Used With use cache</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+
+<tr>
+<td>Works With revalidateTag()</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+
+<tr>
+<td>Controls Cache Lifetime</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+</table>
+
+<hr>
+
+<h2>Easy Memory Trick</h2>
+
+<div class="code-title">Remember</div>
+
+<pre><code class="language-text">cacheLife()
+      ↓
+How Long?
+
+
+cacheTag()
+      ↓
+Which Cache?
+
+
+revalidateTag()
+      ↓
+Clear Which Cache?
+</code></pre>
+
+<div class="feature">
+<strong>One-Line Definition:</strong><br>
+<code>cacheLife()</code> controls how long a <code>'use cache'</code> entry remains valid, while <code>cacheTag()</code> labels cached data so it can be selectively invalidated later using <code>revalidateTag()</code>. :contentReference[oaicite:4]{index=4}
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-tsx.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+
+</body>
+</html>

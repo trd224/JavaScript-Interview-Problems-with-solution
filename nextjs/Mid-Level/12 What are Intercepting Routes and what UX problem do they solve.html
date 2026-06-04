@@ -289,6 +289,186 @@ Notice:
 This is an intercepting route.
 </p>
 
+<h2>Why Do We Need Both [id] and (.)[id]?</h2>
+
+<p>
+A very common question is:
+</p>
+
+<div class="code-title">Folder Structure</div>
+
+<pre><code class="language-text">photos/
+│
+├── [id]/
+│   └── page.tsx
+
+└── (.)[id]/
+    └── page.tsx
+</code></pre>
+
+<p>
+Why do we need both folders?
+</p>
+
+<p>
+The answer is that they serve different purposes.
+</p>
+
+<h2>[id] = Full Page Version</h2>
+
+<div class="code-title">Normal Route</div>
+
+<pre><code class="language-text">photos/
+└── [id]/
+    └── page.tsx
+</code></pre>
+
+<p>
+This route handles:
+</p>
+
+<pre><code class="language-text">/photos/1
+/photos/2
+/photos/3
+</code></pre>
+
+<p>
+when the user:
+</p>
+
+<ul>
+<li>Opens the URL directly.</li>
+<li>Refreshes the page.</li>
+<li>Shares the URL with someone.</li>
+<li>Bookmarks the URL.</li>
+</ul>
+
+<div class="code-title">Example</div>
+
+<pre><code class="language-text">https://site.com/photos/3
+</code></pre>
+
+<p>
+There is no gallery page underneath, so Next.js must render a complete page.
+</p>
+
+<div class="code-title">Result</div>
+
+<pre><code class="language-text">Full Photo Detail Page
+</code></pre>
+
+<h2>(.)[id] = Modal Version</h2>
+
+<div class="code-title">Intercepting Route</div>
+
+<pre><code class="language-text">photos/
+└── (.)[id]/
+    └── page.tsx
+</code></pre>
+
+<p>
+This route handles navigation that starts from inside the application.
+</p>
+
+<div class="code-title">Flow</div>
+
+<pre><code class="language-text">/photos
+     │
+Click Photo
+     │
+     ▼
+(.)[id]
+</code></pre>
+
+<p>
+Instead of replacing the gallery page, Next.js opens the photo inside a modal.
+</p>
+
+<div class="code-title">Result</div>
+
+<pre><code class="language-text">Gallery Page
+
+┌──────────────┐
+│ Photo Detail │
+└──────────────┘
+</code></pre>
+
+<h2>Visual Comparison</h2>
+
+<h3>Internal Navigation</h3>
+
+<div class="code-title">Inside The App</div>
+
+<pre><code class="language-text">/photos
+    │
+Click Photo
+    │
+    ▼
+(.)[id]
+    │
+    ▼
+Modal Opens
+</code></pre>
+
+<h3>Direct URL Access</h3>
+
+<div class="code-title">Direct Link</div>
+
+<pre><code class="language-text">/photos/3
+    │
+    ▼
+[id]
+    │
+    ▼
+Full Page Opens
+</code></pre>
+
+<h2>Can We Use Only (.)[id]?</h2>
+
+<div class="code-title">Short Answer</div>
+
+<pre><code class="language-text">No
+</code></pre>
+
+<p>
+If someone directly visits:
+</p>
+
+<pre><code class="language-text">/photos/3
+</code></pre>
+
+<p>
+Next.js needs a real page to render.
+</p>
+
+<p>
+Without:
+</p>
+
+<pre><code class="language-text">[id]/page.tsx
+</code></pre>
+
+<p>
+there would be no standalone page for the route.
+</p>
+
+<h2>Easy Rule</h2>
+
+<div class="code-title">Remember</div>
+
+<pre><code class="language-text">[id]
+   = Real Page
+
+(.)[id]
+   = Modal Version Of Same Page
+</code></pre>
+
+<div class="feature">
+Most Intercepting Route implementations contain both folders because one provides the full-page experience and the other provides the modal experience for the same URL.
+</div>
+
+
+
 <h2>What Does (.) Mean?</h2>
 
 <div class="code-title">Intercept Current Level</div>

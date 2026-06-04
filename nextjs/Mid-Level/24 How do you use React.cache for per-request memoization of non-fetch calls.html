@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>React.cache for Per-Request Memoization</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0f172a;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.8;padding:40px 20px}
+.container{max-width:1000px;margin:auto;background:#111827;padding:40px;border-radius:16px}
+h1{color:#38bdf8;margin-bottom:20px}
+h2{color:#a78bfa;margin-top:30px;margin-bottom:10px}
+h3{color:#fbbf24;margin-top:25px;margin-bottom:10px}
+p{margin-bottom:15px}
+.feature{background:#1e293b;border-left:5px solid #38bdf8;padding:15px;border-radius:8px;margin:20px 0}
+.code-title{background:#1e293b;color:#93c5fd;padding:10px;font-weight:bold}
+pre[class*="language-"]{margin:0!important}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+th{background:#1e293b;color:#38bdf8;text-align:left;padding:12px}
+td{padding:12px;border-top:1px solid #334155}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>How do you use React.cache for per-request memoization of non-fetch calls?</h1>
+
+<p>
+<code>React.cache()</code> is used to memoize the result of a function during a single server request.
+</p>
+
+<div class="feature">
+In simple words, <code>React.cache()</code> prevents the same non-fetch function from running again and again during the same render request.
+</div>
+
+<h2>Why Do We Need React.cache?</h2>
+
+<p>
+Next.js automatically deduplicates identical <code>fetch()</code> calls, but it does not automatically memoize custom functions like database queries, Prisma calls, MongoDB calls, or session functions.
+</p>
+
+<div class="code-title">Fetch Deduplication Works Automatically</div>
+
+<pre><code class="language-tsx">await fetch('https://api.myshop.com/user');
+await fetch('https://api.myshop.com/user');
+await fetch('https://api.myshop.com/user');</code></pre>
+
+<p>
+Next.js can make only one request for the same fetch call during one render.
+</p>
+
+<div class="code-title">But Non-Fetch Calls Are Different</div>
+
+<pre><code class="language-tsx">await getUser();
+await getUser();
+await getUser();</code></pre>
+
+<p>
+Without <code>React.cache()</code>, this custom function can run multiple times.
+</p>
+
+<h2>Basic Example Without React.cache</h2>
+
+<div class="code-title">lib/user.ts</div>
+
+<pre><code class="language-tsx">export async function getUser() {
+  console.log('Database query running...');
+  return db.user.findFirst();
+}</code></pre>
+
+<div class="code-title">Header.tsx</div>
+
+<pre><code class="language-tsx">import { getUser } from './lib/user';
+
+export default async function Header() {
+  const user = await getUser();
+  return &lt;h1&gt;Hello {user.name}&lt;/h1&gt;;
+}</code></pre>
+
+<div class="code-title">Sidebar.tsx</div>
+
+<pre><code class="language-tsx">import { getUser } from './lib/user';
+
+export default async function Sidebar() {
+  const user = await getUser();
+  return &lt;p&gt;{user.email}&lt;/p&gt;;
+}</code></pre>
+
+<div class="code-title">Profile.tsx</div>
+
+<pre><code class="language-tsx">import { getUser } from './lib/user';
+
+export default async function Profile() {
+  const user = await getUser();
+  return &lt;p&gt;{user.role}&lt;/p&gt;;
+}</code></pre>
+
+<p>
+If all three components render in the same request, <code>getUser()</code> can run three times.
+</p>
+
+<div class="code-title">Without cache()</div>
+
+<pre><code class="language-text">Header calls getUser()
+        ↓
+Database query
+
+
+Sidebar calls getUser()
+        ↓
+Database query
+
+
+Profile calls getUser()
+        ↓
+Database query
+</code></pre>
+
+<h2>Using React.cache</h2>
+
+<div class="code-title">lib/user.ts</div>
+
+<pre><code class="language-tsx">import { cache } from 'react';
+
+export const getUser = cache(async () =&gt; {
+  console.log('Database query running...');
+  return db.user.findFirst();
+});</code></pre>
+
+<p>
+Now, during the same server request, repeated calls to <code>getUser()</code> reuse the first result.
+</p>
+
+<div class="code-title">With cache()</div>
+
+<pre><code class="language-text">Header calls getUser()
+        ↓
+Database query runs once
+
+
+Sidebar calls getUser()
+        ↓
+Reuses cached result
+
+
+Profile calls getUser()
+        ↓
+Reuses cached result
+</code></pre>
+
+<h2>Full Page Example</h2>
+
+<div class="code-title">app/dashboard/page.tsx</div>
+
+<pre><code class="language-tsx">import Header from './Header';
+import Sidebar from './Sidebar';
+import Profile from './Profile';
+
+export default function DashboardPage() {
+  return (
+    &lt;&gt;
+      &lt;Header /&gt;
+      &lt;Sidebar /&gt;
+      &lt;Profile /&gt;
+    &lt;/&gt;
+  );
+}</code></pre>
+
+<p>
+All components can call <code>getUser()</code>, but the database query runs only once per request.
+</p>
+
+<h2>Important: Per-Request Memoization</h2>
+
+<p>
+<code>React.cache()</code> does not cache forever.
+</p>
+
+<div class="feature">
+React invalidates memoized cache for each new server request. Each request gets its own cache scope.
+</div>
+
+<div class="code-title">Request Flow</div>
+
+<pre><code class="language-text">Request 1
+   ↓
+getUser() runs once
+   ↓
+Other calls reuse result
+
+
+Request 2
+   ↓
+getUser() runs once again
+   ↓
+Other calls reuse result
+
+
+Request 3
+   ↓
+getUser() runs once again
+   ↓
+Other calls reuse result
+</code></pre>
+
+<p>
+So <code>React.cache()</code> is not long-term caching like <code>unstable_cache()</code> or <code>fetch(..., { next: { revalidate } })</code>.
+</p>
+
+<h2>Example With Arguments</h2>
+
+<p>
+<code>React.cache()</code> memoizes based on function arguments.
+</p>
+
+<div class="code-title">lib/product.ts</div>
+
+<pre><code class="language-tsx">import { cache } from 'react';
+
+export const getProduct = cache(async (id: string) =&gt; {
+  console.log('Product query running:', id);
+  return db.product.findUnique({ where: { id } });
+});</code></pre>
+
+<div class="code-title">Usage</div>
+
+<pre><code class="language-tsx">await getProduct('1');
+await getProduct('1');
+await getProduct('2');</code></pre>
+
+<div class="code-title">Result</div>
+
+<pre><code class="language-text">getProduct('1') → runs once
+getProduct('1') → reuses result
+getProduct('2') → runs separately
+</code></pre>
+
+<h2>When Should We Use React.cache?</h2>
+
+<ul>
+<li>Same database query is used in multiple Server Components.</li>
+<li>Same session check is needed in layout, page, and components.</li>
+<li>Same custom async function may run multiple times in one request.</li>
+<li>We want request-level memoization, not long-term caching.</li>
+</ul>
+
+<h2>Session Example</h2>
+
+<div class="code-title">lib/session.ts</div>
+
+<pre><code class="language-tsx">import { cache } from 'react';
+import { cookies } from 'next/headers';
+
+export const getSession = cache(async () =&gt; {
+  const token = (await cookies()).get('token')?.value;
+  if (!token) return null;
+
+  return verifyToken(token);
+});</code></pre>
+
+<div class="code-title">Usage In Multiple Components</div>
+
+<pre><code class="language-tsx">const session = await getSession();</code></pre>
+
+<p>
+Now layout, page, and child components can call <code>getSession()</code> without repeating the same verification work during the same request.
+</p>
+
+<h2>React.cache vs Fetch Memoization vs unstable_cache</h2>
+
+<table>
+<tr>
+<th>Feature</th>
+<th>React.cache</th>
+<th>Fetch Memoization</th>
+<th>unstable_cache</th>
+</tr>
+
+<tr>
+<td>Works With fetch()</td>
+<td>Possible, but usually not needed</td>
+<td>✅ Automatic</td>
+<td>Possible</td>
+</tr>
+
+<tr>
+<td>Works With DB Queries</td>
+<td>✅</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+
+<tr>
+<td>Lifetime</td>
+<td>One request</td>
+<td>One render/request</td>
+<td>Across requests</td>
+</tr>
+
+<tr>
+<td>Good For Session Checks</td>
+<td>✅</td>
+<td>❌</td>
+<td>Sometimes</td>
+</tr>
+
+<tr>
+<td>Long-Term Cache</td>
+<td>❌</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+
+<tr>
+<td>Manual Revalidation</td>
+<td>❌</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+</table>
+
+<h2>When Not To Use React.cache?</h2>
+
+<ul>
+<li>When using normal <code>fetch()</code>; Next.js already memoizes identical fetch requests.</li>
+<li>When we need persistent cache across users or requests.</li>
+<li>When data should be shared for minutes or hours.</li>
+<li>When we need tag-based revalidation.</li>
+</ul>
+
+<h2>Easy Memory Trick</h2>
+
+<div class="code-title">Remember</div>
+
+<pre><code class="language-text">fetch()
+   ↓
+Next.js deduplicates automatically
+
+
+custom function / DB query / session check
+   ↓
+Use React.cache()
+
+
+Need long-term cache
+   ↓
+Use unstable_cache()
+</code></pre>
+
+<div class="feature">
+<strong>One-Line Definition:</strong><br>
+<code>React.cache()</code> memoizes non-fetch function results during a single server request, so repeated calls with the same arguments reuse the same result instead of running the function again.
+</div>
+
+<p>
+React documentation notes that cached functions are invalidated for each server request, and Next.js documentation also describes React.cache as scoped to the current request only.
+</p>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-tsx.min.js"></script>
+
+</body>
+</html>

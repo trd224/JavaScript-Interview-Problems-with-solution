@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>On-Demand Revalidation in Next.js</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0f172a;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.8;padding:40px 20px}
+.container{max-width:1000px;margin:auto;background:#111827;padding:40px;border-radius:16px}
+h1{color:#38bdf8;margin-bottom:20px}
+h2{color:#a78bfa;margin-top:30px;margin-bottom:10px}
+h3{color:#fbbf24;margin-top:25px;margin-bottom:10px}
+p{margin-bottom:15px}
+ul{margin-left:20px}
+li{margin-bottom:8px}
+.feature{background:#1e293b;border-left:5px solid #38bdf8;padding:15px;border-radius:8px;margin:20px 0}
+.code-title{background:#1e293b;color:#93c5fd;padding:10px;font-weight:bold}
+pre[class*="language-"]{margin:0!important}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+th{background:#1e293b;color:#38bdf8;text-align:left;padding:12px}
+td{padding:12px;border-top:1px solid #334155}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>What is on-demand revalidation and how do we trigger it via an API route?</h1>
+
+<p>
+On-demand revalidation means manually clearing cached data when something changes, instead of waiting for <code>revalidate: 60</code>, <code>revalidate: 3600</code>, or another time-based interval.
+</p>
+
+<div class="feature">
+In simple words, on-demand revalidation lets us refresh cached pages or cached data immediately after an event, such as product update, blog publish, CMS webhook, or admin action.
+</div>
+
+<h2>Problem Without On-Demand Revalidation</h2>
+
+<p>
+Suppose our product page uses ISR.
+</p>
+
+<div class="code-title">app/products/page.tsx</div>
+
+<pre><code class="language-tsx">export default async function ProductsPage() {
+  const res = await fetch('https://api.example.com/products', { next: { revalidate: 3600 } });
+  const products = await res.json();
+
+  return &lt;h1&gt;Products&lt;/h1&gt;;
+}</code></pre>
+
+<p>
+This means cached data can remain old for 1 hour.
+</p>
+
+<div class="code-title">Problem</div>
+
+<pre><code class="language-text">Product Updated Now
+        ↓
+Cache Still Valid For 1 Hour
+        ↓
+User May See Old Data
+</code></pre>
+
+<h2>Solution: On-Demand Revalidation</h2>
+
+<p>
+When product data changes, we manually tell Next.js:
+</p>
+
+<div class="code-title">Meaning</div>
+
+<pre><code class="language-text">Clear Cache Now
+        ↓
+Next Request Gets Fresh Data
+</code></pre>
+
+<p>
+This is called on-demand revalidation.
+</p>
+
+<h2>Two Main Functions</h2>
+
+<table>
+<tr>
+<th>Function</th>
+<th>Purpose</th>
+</tr>
+
+<tr>
+<td>revalidatePath()</td>
+<td>Refresh a specific page or route path</td>
+</tr>
+
+<tr>
+<td>revalidateTag()</td>
+<td>Refresh all cached fetches using a specific tag</td>
+</tr>
+</table>
+
+<h2>1. Revalidate By Path</h2>
+
+<p>
+Use <code>revalidatePath()</code> when we want to refresh a specific route.
+</p>
+
+<div class="code-title">Example</div>
+
+<pre><code class="language-ts">revalidatePath('/products');</code></pre>
+
+<p>
+This tells Next.js to invalidate the cache for the <code>/products</code> page.
+</p>
+
+<h2>API Route Example</h2>
+
+<div class="code-title">app/api/revalidate/route.ts</div>
+
+<pre><code class="language-ts">import { revalidatePath } from 'next/cache';
+import { NextRequest } from 'next/server';
+
+export async function POST(request: NextRequest) {
+  const secret = request.headers.get('x-revalidate-secret');
+
+  if (secret !== process.env.REVALIDATE_SECRET) {
+    return Response.json({ message: 'Invalid secret' }, { status: 401 });
+  }
+
+  revalidatePath('/products');
+
+  return Response.json({ revalidated: true, path: '/products' });
+}</code></pre>
+
+<h2>How To Trigger This API Route</h2>
+
+<div class="code-title">POST Request</div>
+
+<pre><code class="language-ts">await fetch('https://example.com/api/revalidate', {
+  method: 'POST',
+  headers: { 'x-revalidate-secret': 'my-secret-key' }
+});</code></pre>
+
+<h2>Flow</h2>
+
+<div class="code-title">On-Demand Revalidation Flow</div>
+
+<pre><code class="language-text">Admin Updates Product
+        ↓
+Call /api/revalidate
+        ↓
+Check Secret Key
+        ↓
+revalidatePath('/products')
+        ↓
+Products Cache Invalidated
+        ↓
+Next User Gets Fresh Data
+</code></pre>
+
+<h2>2. Revalidate By Tag</h2>
+
+<p>
+Use <code>revalidateTag()</code> when multiple pages use the same cached data.
+</p>
+
+<div class="code-title">Tagged Fetch</div>
+
+<pre><code class="language-tsx">export default async function ProductsPage() {
+  const res = await fetch('https://api.example.com/products', { next: { tags: ['products'] } });
+  const products = await res.json();
+
+  return &lt;h1&gt;Products&lt;/h1&gt;;
+}</code></pre>
+
+<p>
+Now this fetch is connected to the <code>products</code> tag.
+</p>
+
+<h2>API Route Using revalidateTag()</h2>
+
+<div class="code-title">app/api/revalidate-products/route.ts</div>
+
+<pre><code class="language-ts">import { revalidateTag } from 'next/cache';
+import { NextRequest } from 'next/server';
+
+export async function POST(request: NextRequest) {
+  const secret = request.headers.get('x-revalidate-secret');
+
+  if (secret !== process.env.REVALIDATE_SECRET) {
+    return Response.json({ message: 'Invalid secret' }, { status: 401 });
+  }
+
+  revalidateTag('products', 'max');
+
+  return Response.json({ revalidated: true, tag: 'products' });
+}</code></pre>
+
+<h2>When To Use Path vs Tag?</h2>
+
+<table>
+<tr>
+<th>Use Case</th>
+<th>Best Choice</th>
+</tr>
+
+<tr>
+<td>Refresh one page</td>
+<td>revalidatePath('/products')</td>
+</tr>
+
+<tr>
+<td>Refresh many pages using same data</td>
+<td>revalidateTag('products', 'max')</td>
+</tr>
+
+<tr>
+<td>CMS updated one blog page</td>
+<td>revalidatePath('/blog/my-post')</td>
+</tr>
+
+<tr>
+<td>Product data used on home, products, cart</td>
+<td>revalidateTag('products', 'max')</td>
+</tr>
+</table>
+
+<h2>Real World Example</h2>
+
+<p>
+Suppose an admin changes a product price.
+</p>
+
+<div class="code-title">Before Update</div>
+
+<pre><code class="language-json">{
+  "price": 100
+}</code></pre>
+
+<div class="code-title">After Update</div>
+
+<pre><code class="language-json">{
+  "price": 120
+}</code></pre>
+
+<p>
+Without on-demand revalidation, users may still see old cached price.
+</p>
+
+<div class="code-title">Without Revalidation</div>
+
+<pre><code class="language-text">Database Price = 120
+Cache Price    = 100
+User Sees      = 100
+</code></pre>
+
+<p>
+With on-demand revalidation:
+</p>
+
+<div class="code-title">With Revalidation</div>
+
+<pre><code class="language-text">Product Updated
+        ↓
+API Route Called
+        ↓
+Cache Invalidated
+        ↓
+Next User Sees 120
+</code></pre>
+
+<h2>Environment Variable</h2>
+
+<div class="code-title">.env.local</div>
+
+<pre><code class="language-text">REVALIDATE_SECRET=my-secret-key</code></pre>
+
+<p>
+The secret prevents anyone from publicly calling our revalidation API.
+</p>
+
+<h2>Complete Example</h2>
+
+<div class="code-title">app/products/page.tsx</div>
+
+<pre><code class="language-tsx">export default async function ProductsPage() {
+  const res = await fetch('https://api.example.com/products', { next: { tags: ['products'] } });
+  const products = await res.json();
+
+  return &lt;h1&gt;Products&lt;/h1&gt;;
+}</code></pre>
+
+<div class="code-title">app/api/revalidate-products/route.ts</div>
+
+<pre><code class="language-ts">import { revalidateTag } from 'next/cache';
+import { NextRequest } from 'next/server';
+
+export async function POST(request: NextRequest) {
+  const secret = request.headers.get('x-revalidate-secret');
+
+  if (secret !== process.env.REVALIDATE_SECRET) {
+    return Response.json({ message: 'Invalid secret' }, { status: 401 });
+  }
+
+  revalidateTag('products', 'max');
+
+  return Response.json({ revalidated: true });
+}</code></pre>
+
+<div class="code-title">Trigger API</div>
+
+<pre><code class="language-ts">await fetch('/api/revalidate-products', {
+  method: 'POST',
+  headers: { 'x-revalidate-secret': 'my-secret-key' }
+});</code></pre>
+
+<h2>Important Note</h2>
+
+<div class="feature">
+On-demand revalidation does not mean the browser automatically refreshes instantly. It invalidates the server cache, so the next request or navigation gets fresh data.
+</div>
+
+<h2>Easy Memory Trick</h2>
+
+<div class="code-title">Remember</div>
+
+<pre><code class="language-text">revalidatePath()
+        ↓
+Refresh One Route
+
+
+revalidateTag()
+        ↓
+Refresh All Data With Same Tag
+</code></pre>
+
+<div class="feature">
+<strong>One-Line Definition:</strong><br>
+On-demand revalidation means manually invalidating cached pages or cached data using <code>revalidatePath()</code> or <code>revalidateTag()</code>, usually from a Route Handler API after data changes.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-tsx.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+
+</body>
+</html>

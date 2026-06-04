@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>cacheLife vs cacheRevalidate in Next.js 15</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0f172a;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.8;padding:40px 20px}
+.container{max-width:1000px;margin:auto;background:#111827;padding:40px;border-radius:16px}
+h1{color:#38bdf8;margin-bottom:20px}
+h2{color:#a78bfa;margin-top:30px;margin-bottom:10px}
+h3{color:#fbbf24;margin-top:25px;margin-bottom:10px}
+p{margin-bottom:15px}
+ul{margin-left:20px}
+li{margin-bottom:8px}
+.feature{background:#1e293b;border-left:5px solid #38bdf8;padding:15px;border-radius:8px;margin:20px 0}
+.warning{background:#1e293b;border-left:5px solid #fbbf24;padding:15px;border-radius:8px;margin:20px 0}
+.code-title{background:#1e293b;color:#93c5fd;padding:10px;font-weight:bold}
+pre[class*="language-"]{margin:0!important}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+th{background:#1e293b;color:#38bdf8;text-align:left;padding:12px}
+td{padding:12px;border-top:1px solid #334155}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>Difference Between cacheLife and cacheRevalidate in Next.js 15</h1>
+
+<p>
+In Next.js 15, both <code>cacheLife()</code> and <code>cacheRevalidate()</code> are used with the <code>'use cache'</code> directive, but they are not exactly the same.
+</p>
+
+<div class="feature">
+<strong>Simple meaning:</strong><br>
+<code>cacheRevalidate()</code> controls when cache should refresh.<br>
+<code>cacheLife()</code> controls the full cache lifecycle: Fresh, Stale, and Expire.
+</div>
+
+<hr>
+
+<h2>Basic use cache Example</h2>
+
+<div class="code-title">Cached Function</div>
+
+<pre><code class="language-tsx">import { cacheLife } from 'next/cache';
+
+async function getProducts() {
+  'use cache';
+
+  cacheLife('hours');
+
+  return db.product.findMany();
+}</code></pre>
+
+<p>
+Here, Next.js stores the result of <code>getProducts()</code> in cache.
+</p>
+
+<hr>
+
+<h2>What is cacheRevalidate?</h2>
+
+<p>
+<code>cacheRevalidate()</code> tells Next.js when cached data should become stale and refresh.
+</p>
+
+<div class="code-title">cacheRevalidate Example</div>
+
+<pre><code class="language-tsx">import { cacheRevalidate } from 'next/cache';
+
+async function getProducts() {
+  'use cache';
+
+  cacheRevalidate({ seconds: 3600 });
+
+  return db.product.findMany();
+}</code></pre>
+
+<p>
+This means:
+</p>
+
+<pre><code class="language-text">Cache is fresh for 1 hour.
+
+After 1 hour:
+Cache becomes stale.
+Old cache can still be returned.
+Refresh happens in background.
+</code></pre>
+
+<hr>
+
+<h2>cacheRevalidate Timeline</h2>
+
+<pre><code class="language-text">10:00 Cache created
+      Data = ₹100
+
+10:30 Request
+      ↓
+      Fresh cache returned
+      User sees ₹100
+
+11:00 Revalidate time reached
+
+11:05 Request
+      ↓
+      User gets OLD cache ₹100 immediately
+      ↓
+      Background DB/API fetch starts
+      ↓
+      DB has latest data ₹120
+      ↓
+      Cache updated to ₹120
+
+11:06 Request
+      ↓
+      User gets NEW cache ₹120
+</code></pre>
+
+<div class="feature">
+In <code>cacheRevalidate()</code>, old cache is still allowed after revalidate time. It refreshes in background.
+</div>
+
+<hr>
+
+<h2>What is Expire in cacheLife?</h2>
+
+<p>
+<code>cacheLife()</code> gives one extra important stage: <strong>Expire</strong>.
+</p>
+
+<div class="code-title">cacheLife Example</div>
+
+<pre><code class="language-tsx">import { cacheLife } from 'next/cache';
+
+async function getProducts() {
+  'use cache';
+
+  cacheLife('hours');
+
+  return db.product.findMany();
+}</code></pre>
+
+<p>
+Conceptually, cacheLife creates this flow:
+</p>
+
+<pre><code class="language-text">Fresh → Stale → Expired
+</code></pre>
+
+<hr>
+
+<h2>cacheLife Timeline</h2>
+
+<pre><code class="language-text">10:00 Cache created
+      Data = ₹100
+
+10:30 Request
+      ↓
+      Fresh cache returned
+      User sees ₹100
+
+11:00 Fresh time finished
+
+11:05 Request
+      ↓
+      User gets OLD cache ₹100 immediately
+      ↓
+      Background DB/API fetch starts
+      ↓
+      DB has latest data ₹120
+      ↓
+      Cache updated to ₹120
+
+11:06 Request
+      ↓
+      User gets NEW cache ₹120
+</code></pre>
+
+<p>
+Until this point, <code>cacheLife()</code> looks similar to <code>cacheRevalidate()</code>.
+</p>
+
+<hr>
+
+<h2>The Real Difference Appears at Expire</h2>
+
+<pre><code class="language-text">24:00 Cache expired completely
+
+24:05 Request
+      ↓
+      OLD cache is NOT allowed
+      ↓
+      Must fetch DB/API first
+      ↓
+      DB has latest data ₹150
+      ↓
+      New cache created
+      ↓
+      User gets ₹150
+</code></pre>
+
+<div class="warning">
+<strong>Important:</strong><br>
+After cache expires, old cache cannot be returned to the user. Next.js must fetch fresh data first.
+</div>
+
+<hr>
+
+<h2>Main Difference</h2>
+
+<h3>cacheRevalidate</h3>
+
+<pre><code class="language-text">Revalidate time reached
+      ↓
+Old cache is still allowed
+      ↓
+User gets old data immediately
+      ↓
+Refresh happens in background
+</code></pre>
+
+<h3>cacheLife Expire</h3>
+
+<pre><code class="language-text">Expire time reached
+      ↓
+Old cache is NOT allowed
+      ↓
+User must wait
+      ↓
+Fresh DB/API data is fetched
+      ↓
+New cache is created
+</code></pre>
+
+<hr>
+
+<h2>Example with Slow DB</h2>
+
+<p>
+Suppose the database takes 5 seconds.
+</p>
+
+<h3>cacheRevalidate</h3>
+
+<pre><code class="language-text">11:05 Request
+      ↓
+      User gets OLD cache immediately
+      Response time = almost 0 second
+      ↓
+      DB fetch runs in background for 5 seconds
+      ↓
+      Cache updated
+</code></pre>
+
+<h3>cacheLife Expire</h3>
+
+<pre><code class="language-text">24:05 Request
+      ↓
+      Old cache is expired
+      ↓
+      User waits 5 seconds
+      ↓
+      DB fetch completes
+      ↓
+      New cache created
+      ↓
+      User gets response
+</code></pre>
+
+<hr>
+
+<h2>Visual Comparison</h2>
+
+<table>
+<tr>
+<th>Point</th>
+<th>cacheRevalidate</th>
+<th>cacheLife Expire</th>
+</tr>
+
+<tr>
+<td>Old cache after time finished</td>
+<td>Allowed</td>
+<td>Not allowed</td>
+</tr>
+
+<tr>
+<td>User waits for DB/API?</td>
+<td>No</td>
+<td>Yes</td>
+</tr>
+
+<tr>
+<td>Refresh type</td>
+<td>Background refresh</td>
+<td>Blocking refresh</td>
+</tr>
+
+<tr>
+<td>Response speed</td>
+<td>Fast</td>
+<td>Depends on DB/API speed</td>
+</tr>
+
+<tr>
+<td>Purpose</td>
+<td>Refresh cache after time</td>
+<td>Stop trusting old cache after expiry</td>
+</tr>
+</table>
+
+<hr>
+
+<h2>Why Use cacheLife?</h2>
+
+<p>
+We use <code>cacheLife()</code> when we want more control than only revalidation.
+</p>
+
+<ul>
+<li>How long cache should be fresh.</li>
+<li>How long stale cache can still be used.</li>
+<li>When old cache must be completely rejected.</li>
+</ul>
+
+<div class="feature">
+<code>cacheRevalidate()</code> answers: <strong>When should cache refresh?</strong><br>
+<code>cacheLife()</code> answers: <strong>When should cache refresh, and when should old cache completely expire?</strong>
+</div>
+
+<hr>
+
+<h2>Easy Memory Trick</h2>
+
+<pre><code class="language-text">cacheRevalidate
+      ↓
+Old cache allowed
+Refresh in background
+
+
+cacheLife Expire
+      ↓
+Old cache not allowed
+Fetch fresh data first
+</code></pre>
+
+<hr>
+
+<h2>Final One-Line Definition</h2>
+
+<div class="feature">
+<strong>cacheRevalidate</strong> means old cache can still be served while Next.js refreshes it in the background, but <strong>cacheLife expire</strong> means old cache is no longer trusted and Next.js must fetch fresh data before returning the response.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-tsx.min.js"></script>
+
+</body>
+</html>

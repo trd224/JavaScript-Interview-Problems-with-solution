@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>What is Request Deduplication (Memoization) in Next.js Fetch Calls?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0f172a;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.8;padding:40px 20px}
+.container{max-width:1000px;margin:auto;background:#111827;padding:40px;border-radius:16px}
+h1{color:#38bdf8;margin-bottom:20px}
+h2{color:#a78bfa;margin-top:30px;margin-bottom:10px}
+h3{color:#fbbf24;margin-top:25px;margin-bottom:10px}
+p{margin-bottom:15px}
+.feature{background:#1e293b;border-left:5px solid #38bdf8;padding:15px;border-radius:8px;margin:20px 0}
+.code-title{background:#1e293b;color:#93c5fd;padding:10px;font-weight:bold}
+pre[class*="language-"]{margin:0!important}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+th{background:#1e293b;color:#38bdf8;text-align:left;padding:12px}
+td{padding:12px;border-top:1px solid #334155}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>What is Request Deduplication (Memoization) in Next.js Fetch Calls?</h1>
+
+<p>
+Request Deduplication means that if multiple Server Components make the same <code>fetch()</code> request during a single render, Next.js automatically performs only one network request and shares the result with all components.
+</p>
+
+<div class="feature">
+Request Deduplication = Multiple identical fetch calls → One network request.
+</div>
+
+<hr>
+
+<h2>The Problem Without Deduplication</h2>
+
+<p>
+Suppose three components need the same user data.
+</p>
+
+<div class="code-title">Header.tsx</div>
+
+<pre><code class="language-tsx">export default async function Header() {
+  const user = await fetch('https://api.myshop.com/user').then(res => res.json());
+
+  return &lt;h1&gt;{user.name}&lt;/h1&gt;;
+}</code></pre>
+
+<div class="code-title">Sidebar.tsx</div>
+
+<pre><code class="language-tsx">export default async function Sidebar() {
+  const user = await fetch('https://api.myshop.com/user').then(res => res.json());
+
+  return &lt;p&gt;{user.email}&lt;/p&gt;;
+}</code></pre>
+
+<div class="code-title">Profile.tsx</div>
+
+<pre><code class="language-tsx">export default async function Profile() {
+  const user = await fetch('https://api.myshop.com/user').then(res => res.json());
+
+  return &lt;p&gt;{user.role}&lt;/p&gt;;
+}</code></pre>
+
+<p>
+Without deduplication:
+</p>
+
+<pre><code class="language-text">Header
+   ↓
+API Call
+
+Sidebar
+   ↓
+API Call
+
+Profile
+   ↓
+API Call
+</code></pre>
+
+<p>
+Result:
+</p>
+
+<pre><code class="language-text">3 Network Requests
+</code></pre>
+
+<hr>
+
+<h2>What Next.js Does</h2>
+
+<p>
+Next.js notices that all fetch calls are identical:
+</p>
+
+<div class="code-title">Same URL</div>
+
+<pre><code class="language-tsx">fetch('https://api.myshop.com/user')
+
+fetch('https://api.myshop.com/user')
+
+fetch('https://api.myshop.com/user')</code></pre>
+
+<p>
+So Next.js performs:
+</p>
+
+<pre><code class="language-text">1 Network Request
+       ↓
+Result Shared
+       ↓
+Header
+Sidebar
+Profile
+</code></pre>
+
+<div class="feature">
+This is called Request Deduplication (Memoization).
+</div>
+
+<hr>
+
+<h2>Real Example</h2>
+
+<div class="code-title">Page</div>
+
+<pre><code class="language-tsx">import Header from './Header';
+import Sidebar from './Sidebar';
+import Profile from './Profile';
+
+export default function Page() {
+  return (
+    &lt;&gt;
+      &lt;Header /&gt;
+      &lt;Sidebar /&gt;
+      &lt;Profile /&gt;
+    &lt;/&gt;
+  );
+}</code></pre>
+
+<p>
+All three components call:
+</p>
+
+<div class="code-title">Identical Fetch</div>
+
+<pre><code class="language-tsx">await fetch('https://api.myshop.com/user');</code></pre>
+
+<p>
+Next.js internally does:
+</p>
+
+<pre><code class="language-text">First Fetch
+      ↓
+Call API
+
+Second Fetch
+      ↓
+Reuse Result
+
+Third Fetch
+      ↓
+Reuse Result
+</code></pre>
+
+<hr>
+
+<h2>Important Rule</h2>
+
+<p>
+Deduplication only works for identical requests.
+</p>
+
+<div class="code-title">Deduplicated</div>
+
+<pre><code class="language-tsx">fetch('https://api.myshop.com/user')
+
+fetch('https://api.myshop.com/user')
+
+fetch('https://api.myshop.com/user')</code></pre>
+
+<p>
+Result:
+</p>
+
+<pre><code class="language-text">1 Network Request
+</code></pre>
+
+<hr>
+
+<div class="code-title">Not Deduplicated</div>
+
+<pre><code class="language-tsx">fetch('https://api.myshop.com/user')
+
+fetch('https://api.myshop.com/user/1')
+
+fetch('https://api.myshop.com/user/2')</code></pre>
+
+<p>
+Result:
+</p>
+
+<pre><code class="language-text">3 Network Requests
+</code></pre>
+
+<hr>
+
+<h2>How Is It Different From Cache?</h2>
+
+<p>
+Many developers confuse memoization with caching.
+</p>
+
+<table>
+<tr>
+<th>Feature</th>
+<th>Memoization</th>
+<th>Cache</th>
+</tr>
+
+<tr>
+<td>Purpose</td>
+<td>Avoid duplicate requests in same render</td>
+<td>Reuse data across requests</td>
+</tr>
+
+<tr>
+<td>Lifetime</td>
+<td>Current request only</td>
+<td>Multiple requests</td>
+</tr>
+
+<tr>
+<td>Uses Data Cache</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+
+<tr>
+<td>Network Calls Saved</td>
+<td>Same render</td>
+<td>Future renders</td>
+</tr>
+</table>
+
+<hr>
+
+<h2>Example Timeline</h2>
+
+<div class="code-title">Memoization</div>
+
+<pre><code class="language-text">Request #1
+
+Header
+Sidebar
+Profile
+      ↓
+One API Call
+
+
+Request #2
+
+Header
+Sidebar
+Profile
+      ↓
+One API Call Again
+</code></pre>
+
+<p>
+Memoization resets on every new request.
+</p>
+
+<hr>
+
+<div class="code-title">Caching</div>
+
+<pre><code class="language-text">Request #1
+      ↓
+API Call
+      ↓
+Store In Cache
+
+
+Request #2
+      ↓
+Use Cache
+
+
+Request #3
+      ↓
+Use Cache
+</code></pre>
+
+<p>
+Cache survives across requests.
+</p>
+
+<hr>
+
+<h2>Memoization + Cache Together</h2>
+
+<p>
+In Next.js both can work together.
+</p>
+
+<div class="code-title">Example</div>
+
+<pre><code class="language-tsx">const res = await fetch('https://api.myshop.com/products', {
+  next: { revalidate: 60 }
+});</code></pre>
+
+<p>
+During one render:
+</p>
+
+<pre><code class="language-text">Deduplication
+      ↓
+One Network Request
+</code></pre>
+
+<p>
+Across future requests:
+</p>
+
+<pre><code class="language-text">Cache
+      ↓
+Reuse Data For 60 Seconds
+</code></pre>
+
+<hr>
+
+<h2>Real Interview Question</h2>
+
+<div class="code-title">Question</div>
+
+<pre><code class="language-text">Header, Sidebar and Profile
+all call the same fetch URL.
+
+How many API calls occur?
+</code></pre>
+
+<div class="code-title">Answer</div>
+
+<pre><code class="language-text">One API Call
+</code></pre>
+
+<p>
+Because Next.js deduplicates identical fetch requests.
+</p>
+
+<hr>
+
+<h2>Visual Flow</h2>
+
+<div class="code-title">Request Deduplication</div>
+
+<pre><code class="language-text">Header
+   ↓
+fetch('/user')
+
+Sidebar
+   ↓
+fetch('/user')
+
+Profile
+   ↓
+fetch('/user')
+
+        ↓
+
+Next.js
+
+        ↓
+
+One Network Request
+
+        ↓
+
+Shared Result
+</code></pre>
+
+<hr>
+
+<h2>Easy Memory Trick</h2>
+
+<div class="code-title">Remember</div>
+
+<pre><code class="language-text">Memoization
+      ↓
+Same Render
+      ↓
+One API Call
+
+
+Caching
+      ↓
+Future Requests
+      ↓
+Reuse Data
+</code></pre>
+
+<div class="feature">
+<strong>One-Line Definition:</strong><br>
+Request Deduplication (Memoization) is a Next.js optimization that automatically combines identical fetch requests made during the same render into a single network request and shares the result with all components.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-tsx.min.js"></script>
+
+</body>
+</html>

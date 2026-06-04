@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>What are forbidden() and unauthorized() in Next.js 15?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0f172a;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.8;padding:40px 20px}
+.container{max-width:1000px;margin:auto;background:#111827;padding:40px;border-radius:16px}
+h1{color:#38bdf8;margin-bottom:20px}
+h2{color:#a78bfa;margin-top:30px;margin-bottom:10px}
+h3{color:#fbbf24;margin-top:25px;margin-bottom:10px}
+p{margin-bottom:15px}
+ul{margin-left:20px}
+li{margin-bottom:8px}
+.feature{background:#1e293b;border-left:5px solid #38bdf8;padding:15px;border-radius:8px;margin:20px 0}
+.code-title{background:#1e293b;color:#93c5fd;padding:10px;font-weight:bold}
+pre[class*="language-"]{margin:0!important}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+th{background:#1e293b;color:#38bdf8;text-align:left;padding:12px}
+td{padding:12px;border-top:1px solid #334155}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>What are the new forbidden() and unauthorized() functions added in Next.js 15?</h1>
+
+<p>
+Next.js 15 introduced <code>unauthorized()</code> and <code>forbidden()</code>, which work similarly to <code>notFound()</code>.
+</p>
+
+<div class="feature">
+Instead of manually returning error pages, we can call <code>unauthorized()</code> or <code>forbidden()</code> and Next.js automatically stops rendering and displays a 401 or 403 page. :contentReference[oaicite:0]{index=0}
+</div>
+
+<h2>Why Were These Added?</h2>
+
+<p>
+Before Next.js 15, developers usually did something like:
+</p>
+
+<div class="code-title">Old Way</div>
+
+<pre><code class="language-tsx">if (!session) {
+  return &lt;LoginPage /&gt;;
+}
+
+if (session.role !== 'admin') {
+  return &lt;AccessDenied /&gt;;
+}</code></pre>
+
+<p>
+Now we can use built-in auth interrupts:
+</p>
+
+<div class="code-title">New Way</div>
+
+<pre><code class="language-tsx">if (!session) {
+  unauthorized();
+}
+
+if (session.role !== 'admin') {
+  forbidden();
+}</code></pre>
+
+<p>
+This makes authentication and authorization handling much cleaner. :contentReference[oaicite:1]{index=1}
+</p>
+
+<hr>
+
+<h2>unauthorized()</h2>
+
+<p>
+<code>unauthorized()</code> is used when the user is not authenticated.
+</p>
+
+<div class="feature">
+401 = User is not logged in.
+</div>
+
+<h3>Example</h3>
+
+<div class="code-title">app/dashboard/page.tsx</div>
+
+<pre><code class="language-tsx">import { unauthorized } from 'next/navigation';
+
+export default async function DashboardPage() {
+
+  const session = await verifySession();
+
+  if (!session) {
+    unauthorized();
+  }
+
+  return &lt;h1&gt;Dashboard&lt;/h1&gt;;
+
+}</code></pre>
+
+<h3>What Happens?</h3>
+
+<div class="code-title">Flow</div>
+
+<pre><code class="language-text">User Requests Dashboard
+           │
+           ▼
+No Session Found
+           │
+           ▼
+unauthorized()
+           │
+           ▼
+401 Page Rendered
+</code></pre>
+
+<p>
+Next.js stops rendering the page and shows the <code>unauthorized.js</code> UI. :contentReference[oaicite:2]{index=2}
+</p>
+
+<hr>
+
+<h2>forbidden()</h2>
+
+<p>
+<code>forbidden()</code> is used when the user is authenticated but lacks permission.
+</p>
+
+<div class="feature">
+403 = User is logged in but does not have access.
+</div>
+
+<h3>Example</h3>
+
+<div class="code-title">app/admin/page.tsx</div>
+
+<pre><code class="language-tsx">import { forbidden } from 'next/navigation';
+
+export default async function AdminPage() {
+
+  const session = await verifySession();
+
+  if (session.role !== 'admin') {
+    forbidden();
+  }
+
+  return &lt;h1&gt;Admin Panel&lt;/h1&gt;;
+
+}</code></pre>
+
+<h3>What Happens?</h3>
+
+<div class="code-title">Flow</div>
+
+<pre><code class="language-text">User Requests Admin Page
+           │
+           ▼
+User Logged In
+           │
+           ▼
+Role = User
+           │
+           ▼
+forbidden()
+           │
+           ▼
+403 Page Rendered
+</code></pre>
+
+<p>
+Next.js stops rendering and displays the <code>forbidden.js</code> UI. :contentReference[oaicite:3]{index=3}
+</p>
+
+<hr>
+
+<h2>401 vs 403</h2>
+
+<table>
+<tr>
+<th>Status</th>
+<th>Meaning</th>
+<th>Function</th>
+</tr>
+
+<tr>
+<td>401</td>
+<td>User is not logged in</td>
+<td>unauthorized()</td>
+</tr>
+
+<tr>
+<td>403</td>
+<td>User is logged in but lacks permission</td>
+<td>forbidden()</td>
+</tr>
+</table>
+
+<h2>Real World Example</h2>
+
+<div class="code-title">Scenario</div>
+
+<pre><code class="language-text">Admin Dashboard
+</code></pre>
+
+<p>
+Case 1:
+</p>
+
+<pre><code class="language-text">User Not Logged In
+      ↓
+unauthorized()
+      ↓
+401 Login Page
+</code></pre>
+
+<p>
+Case 2:
+</p>
+
+<pre><code class="language-text">User Logged In
+But Not Admin
+      ↓
+forbidden()
+      ↓
+403 Access Denied Page
+</code></pre>
+
+<hr>
+
+<h2>Custom unauthorized.js Page</h2>
+
+<div class="code-title">app/unauthorized.tsx</div>
+
+<pre><code class="language-tsx">export default function Unauthorized() {
+
+  return (
+    &lt;div&gt;
+      &lt;h2&gt;Please Login&lt;/h2&gt;
+      &lt;p&gt;You must be logged in to access this page.&lt;/p&gt;
+    &lt;/div&gt;
+  );
+
+}</code></pre>
+
+<p>
+Whenever <code>unauthorized()</code> is called, this page is rendered. :contentReference[oaicite:4]{index=4}
+</p>
+
+<hr>
+
+<h2>Custom forbidden.js Page</h2>
+
+<div class="code-title">app/forbidden.tsx</div>
+
+<pre><code class="language-tsx">export default function Forbidden() {
+
+  return (
+    &lt;div&gt;
+      &lt;h2&gt;Access Denied&lt;/h2&gt;
+      &lt;p&gt;You do not have permission to access this page.&lt;/p&gt;
+    &lt;/div&gt;
+  );
+
+}</code></pre>
+
+<p>
+Whenever <code>forbidden()</code> is called, this page is rendered. :contentReference[oaicite:5]{index=5}
+</p>
+
+<hr>
+
+<h2>How Are They Similar to notFound()?</h2>
+
+<table>
+<tr>
+<th>Function</th>
+<th>Status Code</th>
+<th>Purpose</th>
+</tr>
+
+<tr>
+<td>notFound()</td>
+<td>404</td>
+<td>Page does not exist</td>
+</tr>
+
+<tr>
+<td>unauthorized()</td>
+<td>401</td>
+<td>User not authenticated</td>
+</tr>
+
+<tr>
+<td>forbidden()</td>
+<td>403</td>
+<td>User lacks permission</td>
+</tr>
+</table>
+
+<p>
+All three functions immediately stop rendering and let Next.js display a special page. :contentReference[oaicite:6]{index=6}
+</p>
+
+<hr>
+
+<h2>Configuration Required</h2>
+
+<p>
+To use these APIs, Next.js currently requires the experimental <code>authInterrupts</code> option. :contentReference[oaicite:7]{index=7}
+</p>
+
+<div class="code-title">next.config.ts</div>
+
+<pre><code class="language-ts">import type { NextConfig } from 'next';
+
+const nextConfig: NextConfig = {
+  experimental: {
+    authInterrupts: true
+  }
+};
+
+export default nextConfig;</code></pre>
+
+<hr>
+
+<h2>Easy Memory Trick</h2>
+
+<div class="code-title">Remember</div>
+
+<pre><code class="language-text">Not Logged In
+      ↓
+unauthorized()
+      ↓
+401
+
+
+Logged In But No Permission
+      ↓
+forbidden()
+      ↓
+403
+</code></pre>
+
+<div class="feature">
+<strong>One-Line Definition:</strong><br>
+<code>unauthorized()</code> renders a 401 page when a user is not authenticated, while <code>forbidden()</code> renders a 403 page when a user is authenticated but lacks permission. :contentReference[oaicite:8]{index=8}
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-tsx.min.js"></script>
+
+</body>
+</html>

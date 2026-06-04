@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>useSelectedLayoutSegment and useSelectedLayoutSegments</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0f172a;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.8;padding:40px 20px}
+.container{max-width:1000px;margin:auto;background:#111827;padding:40px;border-radius:16px}
+h1{color:#38bdf8;margin-bottom:20px}
+h2{color:#a78bfa;margin-top:30px;margin-bottom:10px}
+h3{color:#fbbf24;margin-top:25px;margin-bottom:10px}
+p{margin-bottom:15px}
+ul{margin-left:20px}
+li{margin-bottom:8px}
+.feature{background:#1e293b;border-left:5px solid #38bdf8;padding:15px;border-radius:8px;margin:20px 0}
+.code-title{background:#1e293b;color:#93c5fd;padding:10px;font-weight:bold}
+pre[class*="language-"]{margin:0!important}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+th{background:#1e293b;color:#38bdf8;text-align:left;padding:12px}
+td{padding:12px;border-top:1px solid #334155}
+.active-demo{color:#38bdf8;font-weight:bold}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>How do you use useSelectedLayoutSegment and useSelectedLayoutSegments?</h1>
+
+<p>
+<code>useSelectedLayoutSegment()</code> and <code>useSelectedLayoutSegments()</code> are Next.js App Router hooks that allow us to read the active route segment below the current layout.
+</p>
+
+<div class="feature">
+These hooks are mainly used for active sidebar links, tabs, breadcrumbs, and dashboard navigation.
+</div>
+
+<h2>1. useSelectedLayoutSegment()</h2>
+
+<p>
+<code>useSelectedLayoutSegment()</code> returns only the first active child segment below the current layout.
+</p>
+
+<div class="code-title">Folder Structure</div>
+
+<pre><code class="language-text">app/
+└── dashboard/
+    ├── layout.tsx
+    ├── users/
+    │   └── page.tsx
+    ├── reports/
+    │   └── page.tsx
+    └── settings/
+        └── page.tsx</code></pre>
+
+<div class="code-title">dashboard/layout.tsx</div>
+
+<pre><code class="language-tsx">import Sidebar from './Sidebar';
+
+export default function DashboardLayout({ children }) {
+  return (
+    &lt;div&gt;
+      &lt;Sidebar /&gt;
+      &lt;main&gt;{children}&lt;/main&gt;
+    &lt;/div&gt;
+  );
+}</code></pre>
+
+<div class="code-title">dashboard/Sidebar.tsx</div>
+
+<pre><code class="language-tsx">'use client';
+
+import Link from 'next/link';
+import { useSelectedLayoutSegment } from 'next/navigation';
+
+export default function Sidebar() {
+  const segment = useSelectedLayoutSegment();
+
+  return (
+    &lt;nav&gt;
+      &lt;Link className={segment === 'users' ? 'active' : ''} href="/dashboard/users"&gt;Users&lt;/Link&gt;
+      &lt;Link className={segment === 'reports' ? 'active' : ''} href="/dashboard/reports"&gt;Reports&lt;/Link&gt;
+      &lt;Link className={segment === 'settings' ? 'active' : ''} href="/dashboard/settings"&gt;Settings&lt;/Link&gt;
+    &lt;/nav&gt;
+  );
+}</code></pre>
+
+<h3>Current URL</h3>
+
+<div class="code-title">URL</div>
+
+<pre><code class="language-text">/dashboard/reports</code></pre>
+
+<h3>Returned Value</h3>
+
+<div class="code-title">Result</div>
+
+<pre><code class="language-js">segment = 'reports'</code></pre>
+
+<h3>Final Sidebar UI</h3>
+
+<div class="code-title">Output</div>
+
+<pre><code class="language-text">Users
+► Reports
+Settings</code></pre>
+
+<p>
+Because the active child route below <code>dashboard/layout.tsx</code> is <code>reports</code>, the Reports link gets the <code>active</code> class.
+</p>
+
+<h2>2. useSelectedLayoutSegments()</h2>
+
+<p>
+<code>useSelectedLayoutSegments()</code> returns all active segments below the current layout as an array.
+</p>
+
+<div class="code-title">Folder Structure</div>
+
+<pre><code class="language-text">app/
+└── dashboard/
+    ├── layout.tsx
+    └── reports/
+        └── monthly/
+            └── sales/
+                └── page.tsx</code></pre>
+
+<div class="code-title">dashboard/Breadcrumbs.tsx</div>
+
+<pre><code class="language-tsx">'use client';
+
+import { useSelectedLayoutSegments } from 'next/navigation';
+
+export default function Breadcrumbs() {
+  const segments = useSelectedLayoutSegments();
+
+  return (
+    &lt;div&gt;
+      {segments.map(segment =&gt; (
+        &lt;span key={segment}&gt;{segment} / &lt;/span&gt;
+      ))}
+    &lt;/div&gt;
+  );
+}</code></pre>
+
+<h3>Current URL</h3>
+
+<div class="code-title">URL</div>
+
+<pre><code class="language-text">/dashboard/reports/monthly/sales</code></pre>
+
+<h3>Returned Value</h3>
+
+<div class="code-title">Result</div>
+
+<pre><code class="language-js">segments = ['reports', 'monthly', 'sales']</code></pre>
+
+<h3>Final Breadcrumb UI</h3>
+
+<div class="code-title">Output</div>
+
+<pre><code class="language-text">reports / monthly / sales /</code></pre>
+
+<h2>Main Difference</h2>
+
+<table>
+<tr>
+<th>Hook</th>
+<th>Returns</th>
+<th>Example URL</th>
+<th>Result</th>
+</tr>
+
+<tr>
+<td>useSelectedLayoutSegment()</td>
+<td>First active child segment</td>
+<td>/dashboard/reports/monthly/sales</td>
+<td>reports</td>
+</tr>
+
+<tr>
+<td>useSelectedLayoutSegments()</td>
+<td>All active child segments</td>
+<td>/dashboard/reports/monthly/sales</td>
+<td>['reports', 'monthly', 'sales']</td>
+</tr>
+</table>
+
+<h2>Important Point</h2>
+
+<div class="feature">
+Both hooks work relative to the layout where they are used. If they are used inside <code>dashboard/layout.tsx</code>, they read only the route segments below <code>/dashboard</code>.
+</div>
+
+<h2>Easy Memory Trick</h2>
+
+<div class="code-title">Remember</div>
+
+<pre><code class="language-text">useSelectedLayoutSegment()
+→ one segment
+
+useSelectedLayoutSegments()
+→ all segments</code></pre>
+
+<div class="feature">
+<strong>One-Line Definition:</strong><br>
+<code>useSelectedLayoutSegment()</code> returns the first active child route segment below a layout, while <code>useSelectedLayoutSegments()</code> returns all active child route segments below that layout.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-tsx.min.js"></script>
+
+</body>
+</html>

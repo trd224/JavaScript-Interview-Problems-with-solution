@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Async Data Fetching Inside Server Components</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0f172a;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.8;padding:40px 20px}
+.container{max-width:1000px;margin:auto;background:#111827;padding:40px;border-radius:16px}
+h1{color:#38bdf8;margin-bottom:20px}
+h2{color:#a78bfa;margin-top:30px;margin-bottom:10px}
+h3{color:#fbbf24;margin-top:25px;margin-bottom:10px}
+p{margin-bottom:15px}
+ul{margin-left:20px}
+li{margin-bottom:8px}
+.feature{background:#1e293b;border-left:5px solid #38bdf8;padding:15px;border-radius:8px;margin:20px 0}
+.code-title{background:#1e293b;color:#93c5fd;padding:10px;font-weight:bold}
+pre[class*="language-"]{margin:0!important}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+th{background:#1e293b;color:#38bdf8;text-align:left;padding:12px}
+td{padding:12px;border-top:1px solid #334155}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>How does async data fetching work directly inside Server Components?</h1>
+
+<p>
+In the Next.js App Router, Server Components can be async functions. This allows us to fetch data directly inside the component before returning JSX.
+</p>
+
+<div class="feature">
+Server Components run on the server, so we can use <code>async</code> and <code>await</code> directly inside them to fetch API data, database data, or session data before HTML is sent to the browser.
+</div>
+
+<h2>Basic Example</h2>
+
+<div class="code-title">app/products/page.tsx</div>
+
+<pre><code class="language-tsx">export default async function ProductsPage() {
+  const res = await fetch('https://api.example.com/products');
+  const products = await res.json();
+
+  return (
+    &lt;div&gt;
+      &lt;h1&gt;Products&lt;/h1&gt;
+      {products.map(product =&gt; &lt;p key={product.id}&gt;{product.name}&lt;/p&gt;)}
+    &lt;/div&gt;
+  );
+}</code></pre>
+
+<p>
+Here, <code>ProductsPage</code> is a Server Component because it does not use <code>'use client'</code>.
+</p>
+
+<h2>What Happens Internally?</h2>
+
+<div class="code-title">Flow</div>
+
+<pre><code class="language-text">User requests /products
+        ↓
+Server runs ProductsPage()
+        ↓
+fetch() waits for product data
+        ↓
+Server creates HTML with products
+        ↓
+Browser receives ready HTML
+</code></pre>
+
+<h2>No useEffect Needed</h2>
+
+<p>
+In Client Components, we usually fetch data with <code>useEffect()</code>.
+</p>
+
+<div class="code-title">Client Component Style</div>
+
+<pre><code class="language-tsx">'use client';
+
+import { useEffect, useState } from 'react';
+
+export default function ProductsPage() {
+  const [products, setProducts] = useState([]);
+
+  useEffect(() =&gt; {
+    fetch('/api/products').then(res =&gt; res.json()).then(data =&gt; setProducts(data));
+  }, []);
+
+  return &lt;div&gt;{products.map(product =&gt; &lt;p key={product.id}&gt;{product.name}&lt;/p&gt;)}</code></pre>
+
+<p>
+But in Server Components, we can fetch before rendering, so the browser does not need to wait for JavaScript to load the data.
+</p>
+
+<h2>Server Component Style</h2>
+
+<div class="code-title">Better App Router Pattern</div>
+
+<pre><code class="language-tsx">export default async function ProductsPage() {
+  const res = await fetch('https://api.example.com/products');
+  const products = await res.json();
+
+  return &lt;div&gt;{products.map(product =&gt; &lt;p key={product.id}&gt;{product.name}&lt;/p&gt;)}</code></pre>
+
+<div class="feature">
+The data is fetched on the server, and the browser receives HTML that already contains the product list.
+</div>
+
+<h2>Fetching From A Database</h2>
+
+<p>
+Because Server Components run on the server, we can also call a database directly.
+</p>
+
+<div class="code-title">app/users/page.tsx</div>
+
+<pre><code class="language-tsx">import { db } from '@/lib/db';
+
+export default async function UsersPage() {
+  const users = await db.user.findMany();
+
+  return (
+    &lt;div&gt;
+      &lt;h1&gt;Users&lt;/h1&gt;
+      {users.map(user =&gt; &lt;p key={user.id}&gt;{user.name}&lt;/p&gt;)}
+    &lt;/div&gt;
+  );
+}</code></pre>
+
+<p>
+This is safe because database credentials and server logic are not sent to the browser.
+</p>
+
+<h2>Passing Data To A Client Component</h2>
+
+<p>
+A common pattern is to fetch data in a Server Component, then pass it to a Client Component for interactivity.
+</p>
+
+<div class="code-title">app/products/page.tsx</div>
+
+<pre><code class="language-tsx">import ProductList from './ProductList';
+
+export default async function ProductsPage() {
+  const res = await fetch('https://api.example.com/products');
+  const products = await res.json();
+
+  return &lt;ProductList products={products} /&gt;;
+}</code></pre>
+
+<div class="code-title">app/products/ProductList.tsx</div>
+
+<pre><code class="language-tsx">'use client';
+
+export default function ProductList({ products }) {
+  return (
+    &lt;div&gt;
+      {products.map(product =&gt; &lt;button key={product.id}&gt;{product.name}&lt;/button&gt;)}
+    &lt;/div&gt;
+  );
+}</code></pre>
+
+<p>
+The Server Component fetches the data. The Client Component handles browser interaction.
+</p>
+
+<h2>Important: Async Component Means Server Component</h2>
+
+<p>
+This is valid:
+</p>
+
+<div class="code-title">Server Component</div>
+
+<pre><code class="language-tsx">export default async function Page() {
+  const data = await getData();
+  return &lt;h1&gt;{data.title}&lt;/h1&gt;;
+}</code></pre>
+
+<p>
+But this is not the normal Client Component pattern:
+</p>
+
+<div class="code-title">Wrong Client Component Pattern</div>
+
+<pre><code class="language-tsx">'use client';
+
+export default async function Page() {
+  const data = await getData();
+  return &lt;h1&gt;{data.title}&lt;/h1&gt;;
+}</code></pre>
+
+<div class="feature">
+Client Components use <code>useEffect()</code>, event handlers, and state. Server Components can be async and fetch data before rendering.
+</div>
+
+<h2>Static, Dynamic, and Cached Data</h2>
+
+<table>
+<tr>
+<th>Data Type</th>
+<th>Example</th>
+<th>Behavior</th>
+</tr>
+
+<tr>
+<td>Static Data</td>
+<td>Blog content</td>
+<td>Can be cached/prerendered</td>
+</tr>
+
+<tr>
+<td>Dynamic Data</td>
+<td>User session, cookies, request data</td>
+<td>Rendered at request time</td>
+</tr>
+
+<tr>
+<td>Revalidated Data</td>
+<td>Product list every 60 seconds</td>
+<td>Updated after revalidation</td>
+</tr>
+</table>
+
+<h2>Example With Revalidation</h2>
+
+<div class="code-title">ISR-style Fetch</div>
+
+<pre><code class="language-tsx">export default async function ProductsPage() {
+  const res = await fetch('https://api.example.com/products', { next: { revalidate: 60 } });
+  const products = await res.json();
+
+  return &lt;div&gt;{products.map(product =&gt; &lt;p key={product.id}&gt;{product.name}&lt;/p&gt;)}</code></pre>
+
+<p>
+This tells Next.js to reuse cached data and refresh it after 60 seconds.
+</p>
+
+<h2>Example With Fresh Data Every Request</h2>
+
+<div class="code-title">Dynamic Fetch</div>
+
+<pre><code class="language-tsx">export default async function DashboardPage() {
+  const res = await fetch('https://api.example.com/stats', { cache: 'no-store' });
+  const stats = await res.json();
+
+  return &lt;h1&gt;Total Users: {stats.totalUsers}&lt;/h1&gt;;
+}</code></pre>
+
+<p>
+This fetch runs fresh for every request.
+</p>
+
+<h2>Slow Data and Suspense</h2>
+
+<p>
+If a Server Component is slow, it can block rendering until the data is ready.
+</p>
+
+<div class="code-title">Slow Component</div>
+
+<pre><code class="language-tsx">export default async function UserStats() {
+  const stats = await getSlowStats();
+  return &lt;h2&gt;Users: {stats.users}&lt;/h2&gt;;
+}</code></pre>
+
+<p>
+We can wrap it in Suspense to show a fallback while it loads.
+</p>
+
+<div class="code-title">page.tsx</div>
+
+<pre><code class="language-tsx">import { Suspense } from 'react';
+import UserStats from './UserStats';
+
+export default function Page() {
+  return (
+    &lt;&gt;
+      &lt;h1&gt;Dashboard&lt;/h1&gt;
+      &lt;Suspense fallback={&lt;p&gt;Loading stats...&lt;/p&gt;}&gt;
+        &lt;UserStats /&gt;
+      &lt;/Suspense&gt;
+    &lt;/&gt;
+  );
+}</code></pre>
+
+<div class="feature">
+Suspense allows the rest of the page to render while the slow Server Component finishes loading.
+</div>
+
+<h2>Server Component vs Client Component Fetching</h2>
+
+<table>
+<tr>
+<th>Feature</th>
+<th>Server Component</th>
+<th>Client Component</th>
+</tr>
+
+<tr>
+<td>Can be async</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+
+<tr>
+<td>Can query database directly</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+
+<tr>
+<td>Can use useEffect</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+
+<tr>
+<td>Can use browser APIs</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+
+<tr>
+<td>Data available in initial HTML</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+
+<tr>
+<td>Requires client JS for fetching</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+</table>
+
+<h2>Easy Memory Trick</h2>
+
+<div class="code-title">Remember</div>
+
+<pre><code class="language-text">Server Component
+→ fetch before HTML is sent
+
+Client Component
+→ fetch after JavaScript runs in browser
+</code></pre>
+
+<div class="feature">
+<strong>One-Line Definition:</strong><br>
+Async data fetching inside Server Components means the component runs on the server, waits for data using <code>await</code>, renders HTML with that data, and then sends the ready HTML to the browser.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-tsx.min.js"></script>
+
+</body>
+</html>

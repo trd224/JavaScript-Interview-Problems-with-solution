@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>What is the forbidden.js / unauthorized.js Convention in Next.js 15?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0f172a;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.8;padding:40px 20px}
+.container{max-width:1000px;margin:auto;background:#111827;padding:40px;border-radius:16px}
+h1{color:#38bdf8;margin-bottom:20px}
+h2{color:#a78bfa;margin-top:30px;margin-bottom:10px}
+h3{color:#fbbf24;margin-top:25px;margin-bottom:10px}
+p{margin-bottom:15px}
+ul{margin-left:20px}
+li{margin-bottom:8px}
+.feature{background:#1e293b;border-left:5px solid #38bdf8;padding:15px;border-radius:8px;margin:20px 0}
+.code-title{background:#1e293b;color:#93c5fd;padding:10px;font-weight:bold}
+pre[class*="language-"]{margin:0!important}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+th{background:#1e293b;color:#38bdf8;text-align:left;padding:12px}
+td{padding:12px;border-top:1px solid #334155}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>What is the forbidden.js / unauthorized.js Convention in Next.js 15?</h1>
+
+<p>
+Next.js 15 introduced two new special files:
+</p>
+
+<pre><code class="language-text">forbidden.tsx
+
+unauthorized.tsx
+</code></pre>
+
+<p>
+These files are similar to:
+</p>
+
+<pre><code class="language-text">not-found.tsx
+
+error.tsx
+
+loading.tsx
+</code></pre>
+
+<p>
+They provide custom UI for authentication and authorization failures.
+</p>
+
+<div class="feature">
+When <code>unauthorized()</code> or <code>forbidden()</code> is called, Next.js automatically renders <code>unauthorized.tsx</code> or <code>forbidden.tsx</code>.
+</div>
+
+<hr>
+
+<h2>Why Were These Files Added?</h2>
+
+<p>
+Before Next.js 15, developers typically wrote:
+</p>
+
+<div class="code-title">Old Approach</div>
+
+<pre><code class="language-tsx">if (!session) {
+  return &lt;LoginPage /&gt;;
+}
+
+if (session.role !== 'admin') {
+  return &lt;AccessDenied /&gt;;
+}</code></pre>
+
+<p>
+Now Next.js provides dedicated authentication interruption APIs.
+</p>
+
+<div class="code-title">New Approach</div>
+
+<pre><code class="language-tsx">if (!session) {
+  unauthorized();
+}
+
+if (session.role !== 'admin') {
+  forbidden();
+}</code></pre>
+
+<p>
+Next.js automatically renders the correct page.
+</p>
+
+<hr>
+
+<h2>What is unauthorized.tsx?</h2>
+
+<p>
+This file is shown when:
+</p>
+
+<pre><code class="language-text">unauthorized()
+</code></pre>
+
+<p>
+is called.
+</p>
+
+<div class="feature">
+401 Unauthorized = User is not logged in.
+</div>
+
+<h3>Folder Structure</h3>
+
+<div class="code-title">App Router</div>
+
+<pre><code class="language-text">app/
+├── unauthorized.tsx
+├── dashboard/
+│   └── page.tsx
+</code></pre>
+
+<h3>dashboard/page.tsx</h3>
+
+<div class="code-title">Protected Page</div>
+
+<pre><code class="language-tsx">import { unauthorized } from 'next/navigation';
+
+export default async function DashboardPage() {
+
+  const session = await verifySession();
+
+  if (!session) {
+    unauthorized();
+  }
+
+  return &lt;h1&gt;Dashboard&lt;/h1&gt;;
+
+}</code></pre>
+
+<h3>unauthorized.tsx</h3>
+
+<div class="code-title">Custom 401 Page</div>
+
+<pre><code class="language-tsx">export default function Unauthorized() {
+
+  return (
+    &lt;div&gt;
+      &lt;h1&gt;401&lt;/h1&gt;
+      &lt;p&gt;Please login to continue.&lt;/p&gt;
+    &lt;/div&gt;
+  );
+
+}</code></pre>
+
+<h3>Flow</h3>
+
+<div class="code-title">What Happens?</div>
+
+<pre><code class="language-text">User Opens /dashboard
+           │
+           ▼
+verifySession()
+           │
+           ▼
+No Session Found
+           │
+           ▼
+unauthorized()
+           │
+           ▼
+unauthorized.tsx Rendered
+</code></pre>
+
+<hr>
+
+<h2>What is forbidden.tsx?</h2>
+
+<p>
+This file is shown when:
+</p>
+
+<pre><code class="language-text">forbidden()
+</code></pre>
+
+<p>
+is called.
+</p>
+
+<div class="feature">
+403 Forbidden = User is logged in but does not have permission.
+</div>
+
+<h3>Folder Structure</h3>
+
+<div class="code-title">App Router</div>
+
+<pre><code class="language-text">app/
+├── forbidden.tsx
+├── admin/
+│   └── page.tsx
+</code></pre>
+
+<h3>admin/page.tsx</h3>
+
+<div class="code-title">Admin Page</div>
+
+<pre><code class="language-tsx">import { forbidden } from 'next/navigation';
+
+export default async function AdminPage() {
+
+  const session = await verifySession();
+
+  if (session.role !== 'admin') {
+    forbidden();
+  }
+
+  return &lt;h1&gt;Admin Panel&lt;/h1&gt;;
+
+}</code></pre>
+
+<h3>forbidden.tsx</h3>
+
+<div class="code-title">Custom 403 Page</div>
+
+<pre><code class="language-tsx">export default function Forbidden() {
+
+  return (
+    &lt;div&gt;
+      &lt;h1&gt;403&lt;/h1&gt;
+      &lt;p&gt;Access denied.&lt;/p&gt;
+    &lt;/div&gt;
+  );
+
+}</code></pre>
+
+<h3>Flow</h3>
+
+<div class="code-title">What Happens?</div>
+
+<pre><code class="language-text">User Opens /admin
+           │
+           ▼
+verifySession()
+           │
+           ▼
+User Logged In
+           │
+           ▼
+Role = user
+           │
+           ▼
+forbidden()
+           │
+           ▼
+forbidden.tsx Rendered
+</code></pre>
+
+<hr>
+
+<h2>Difference Between unauthorized.tsx and forbidden.tsx</h2>
+
+<table>
+<tr>
+<th>File</th>
+<th>Status</th>
+<th>Meaning</th>
+</tr>
+
+<tr>
+<td>unauthorized.tsx</td>
+<td>401</td>
+<td>User is not logged in</td>
+</tr>
+
+<tr>
+<td>forbidden.tsx</td>
+<td>403</td>
+<td>User lacks permission</td>
+</tr>
+</table>
+
+<hr>
+
+<h2>How Are They Similar to not-found.tsx?</h2>
+
+<p>
+Next.js now has special UI files for common situations:
+</p>
+
+<table>
+<tr>
+<th>Function</th>
+<th>File Rendered</th>
+<th>Status</th>
+</tr>
+
+<tr>
+<td>notFound()</td>
+<td>not-found.tsx</td>
+<td>404</td>
+</tr>
+
+<tr>
+<td>unauthorized()</td>
+<td>unauthorized.tsx</td>
+<td>401</td>
+</tr>
+
+<tr>
+<td>forbidden()</td>
+<td>forbidden.tsx</td>
+<td>403</td>
+</tr>
+</table>
+
+<h2>Visual Comparison</h2>
+
+<div class="code-title">Route Interrupts</div>
+
+<pre><code class="language-text">Page Not Found
+      │
+      ▼
+notFound()
+      │
+      ▼
+not-found.tsx
+
+
+User Not Logged In
+      │
+      ▼
+unauthorized()
+      │
+      ▼
+unauthorized.tsx
+
+
+User Logged In
+But No Permission
+      │
+      ▼
+forbidden()
+      │
+      ▼
+forbidden.tsx
+</code></pre>
+
+<hr>
+
+<h2>Do These Files Need 'use client'?</h2>
+
+<p>
+No.
+</p>
+
+<p>
+Like most App Router pages, they are Server Components by default.
+</p>
+
+<div class="code-title">Server Component</div>
+
+<pre><code class="language-tsx">export default function Unauthorized() {
+  return &lt;h1&gt;Please Login&lt;/h1&gt;;
+}</code></pre>
+
+<p>
+Add <code>'use client'</code> only if browser features are required.
+</p>
+
+<hr>
+
+<h2>Important Configuration</h2>
+
+<p>
+To use these features, enable auth interrupts.
+</p>
+
+<div class="code-title">next.config.ts</div>
+
+<pre><code class="language-ts">import type { NextConfig } from 'next';
+
+const nextConfig: NextConfig = {
+  experimental: {
+    authInterrupts: true
+  }
+};
+
+export default nextConfig;</code></pre>
+
+<hr>
+
+<h2>Easy Memory Trick</h2>
+
+<div class="code-title">Remember</div>
+
+<pre><code class="language-text">Not Logged In
+      ↓
+unauthorized()
+      ↓
+unauthorized.tsx
+      ↓
+401
+
+
+Logged In But No Permission
+      ↓
+forbidden()
+      ↓
+forbidden.tsx
+      ↓
+403
+</code></pre>
+
+<div class="feature">
+<strong>One-Line Definition:</strong><br>
+<code>unauthorized.tsx</code> and <code>forbidden.tsx</code> are special App Router files that automatically render custom 401 and 403 pages when <code>unauthorized()</code> or <code>forbidden()</code> is called.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-tsx.min.js"></script>
+
+</body>
+</html>

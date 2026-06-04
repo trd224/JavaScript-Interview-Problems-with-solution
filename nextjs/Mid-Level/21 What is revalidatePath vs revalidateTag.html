@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>What is revalidatePath vs revalidateTag?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0f172a;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.8;padding:40px 20px}
+.container{max-width:1000px;margin:auto;background:#111827;padding:40px;border-radius:16px}
+h1{color:#38bdf8;margin-bottom:20px}
+h2{color:#a78bfa;margin-top:30px;margin-bottom:10px}
+h3{color:#fbbf24;margin-top:25px;margin-bottom:10px}
+p{margin-bottom:15px}
+.feature{background:#1e293b;border-left:5px solid #38bdf8;padding:15px;border-radius:8px;margin:20px 0}
+.code-title{background:#1e293b;color:#93c5fd;padding:10px;font-weight:bold}
+pre[class*="language-"]{margin:0!important}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+th{background:#1e293b;color:#38bdf8;text-align:left;padding:12px}
+td{padding:12px;border-top:1px solid #334155}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>What is revalidatePath vs revalidateTag?</h1>
+
+<p>
+Both <code>revalidatePath()</code> and <code>revalidateTag()</code> are used for on-demand revalidation in Next.js.
+</p>
+
+<div class="feature">
+The main difference is:
+<br><br>
+<strong>revalidatePath()</strong> refreshes a specific route.
+<br>
+<strong>revalidateTag()</strong> refreshes cached data associated with a tag.
+</div>
+
+<hr>
+
+<h2>revalidatePath()</h2>
+
+<p>
+Used when we want to invalidate a specific page or route.
+</p>
+
+<div class="code-title">Example</div>
+
+<pre><code class="language-ts">revalidatePath('/products');</code></pre>
+
+<p>
+This tells Next.js:
+</p>
+
+<pre><code class="language-text">Clear Cache For
+
+/products
+</code></pre>
+
+<h3>Flow</h3>
+
+<pre><code class="language-text">Product Updated
+       ↓
+revalidatePath('/products')
+       ↓
+Products Page Cache Cleared
+       ↓
+Next Visit Regenerates Page
+</code></pre>
+
+<hr>
+
+<h2>Real Example</h2>
+
+<div class="code-title">Product Page</div>
+
+<pre><code class="language-tsx">export default async function ProductsPage() {
+  const res = await fetch('https://api.myshop.com/products');
+  const products = await res.json();
+
+  return &lt;h1&gt;Products&lt;/h1&gt;;
+}</code></pre>
+
+<p>
+After product update:
+</p>
+
+<div class="code-title">API Route</div>
+
+<pre><code class="language-ts">import { revalidatePath } from 'next/cache';
+
+revalidatePath('/products');</code></pre>
+
+<p>
+Only the <code>/products</code> page is refreshed.
+</p>
+
+<hr>
+
+<h2>Problem With revalidatePath()</h2>
+
+<p>
+Suppose product data appears on multiple pages:
+</p>
+
+<pre><code class="language-text">/products
+
+/home
+
+/cart
+
+/search
+</code></pre>
+
+<p>
+If we only run:
+</p>
+
+<pre><code class="language-ts">revalidatePath('/products');</code></pre>
+
+<p>
+Then:
+</p>
+
+<pre><code class="language-text">/products      ✅ Updated
+
+/home          ❌ Old Data
+
+/cart          ❌ Old Data
+
+/search        ❌ Old Data
+</code></pre>
+
+<div class="feature">
+revalidatePath() only affects the specified route.
+</div>
+
+<hr>
+
+<h2>revalidateTag()</h2>
+
+<p>
+Used when multiple pages share the same cached data.
+</p>
+
+<h3>Step 1: Tag Fetches</h3>
+
+<div class="code-title">Products Page</div>
+
+<pre><code class="language-tsx">const res = await fetch('https://api.myshop.com/products', {
+  next: { tags: ['products'] }
+});</code></pre>
+
+<p>
+Now this fetch belongs to:
+</p>
+
+<pre><code class="language-text">products
+</code></pre>
+
+<p>
+tag.
+</p>
+
+<hr>
+
+<h3>Step 2: Revalidate Tag</h3>
+
+<div class="code-title">API Route</div>
+
+<pre><code class="language-ts">import { revalidateTag } from 'next/cache';
+
+revalidateTag('products', 'max');</code></pre>
+
+<h3>Flow</h3>
+
+<pre><code class="language-text">Product Updated
+       ↓
+revalidateTag('products')
+       ↓
+All Product Cache Cleared
+       ↓
+Next Requests Get Fresh Data
+</code></pre>
+
+<hr>
+
+<h2>Real World Example</h2>
+
+<p>
+Product data is used in:
+</p>
+
+<pre><code class="language-text">Home Page
+
+Products Page
+
+Cart Page
+
+Search Page
+</code></pre>
+
+<p>
+All pages fetch using:
+</p>
+
+<div class="code-title">Tagged Fetch</div>
+
+<pre><code class="language-tsx">await fetch('https://api.myshop.com/products', {
+  next: { tags: ['products'] }
+});</code></pre>
+
+<p>
+After update:
+</p>
+
+<div class="code-title">Revalidate</div>
+
+<pre><code class="language-ts">revalidateTag('products', 'max');</code></pre>
+
+<p>
+Result:
+</p>
+
+<pre><code class="language-text">Home Page      ✅ Updated
+
+Products Page  ✅ Updated
+
+Cart Page      ✅ Updated
+
+Search Page    ✅ Updated
+</code></pre>
+
+<div class="feature">
+One tag refreshes every page using that data.
+</div>
+
+<hr>
+
+<h2>Visual Comparison</h2>
+
+<h3>revalidatePath()</h3>
+
+<pre><code class="language-text">Product Updated
+       ↓
+revalidatePath('/products')
+       ↓
+Only /products Refreshed
+</code></pre>
+
+<h3>revalidateTag()</h3>
+
+<pre><code class="language-text">Product Updated
+       ↓
+revalidateTag('products')
+       ↓
+Every Fetch Using
+products Tag Refreshed
+</code></pre>
+
+<hr>
+
+<h2>Complete Example</h2>
+
+<h3>Home Page</h3>
+
+<div class="code-title">app/page.tsx</div>
+
+<pre><code class="language-tsx">const res = await fetch('https://api.myshop.com/products', {
+  next: { tags: ['products'] }
+});</code></pre>
+
+<h3>Products Page</h3>
+
+<div class="code-title">app/products/page.tsx</div>
+
+<pre><code class="language-tsx">const res = await fetch('https://api.myshop.com/products', {
+  next: { tags: ['products'] }
+});</code></pre>
+
+<h3>Cart Page</h3>
+
+<div class="code-title">app/cart/page.tsx</div>
+
+<pre><code class="language-tsx">const res = await fetch('https://api.myshop.com/products', {
+  next: { tags: ['products'] }
+});</code></pre>
+
+<h3>After Product Update</h3>
+
+<div class="code-title">Revalidation</div>
+
+<pre><code class="language-ts">revalidateTag('products', 'max');</code></pre>
+
+<p>
+All three pages automatically get fresh data.
+</p>
+
+<hr>
+
+<h2>When To Use Which?</h2>
+
+<table>
+<tr>
+<th>Situation</th>
+<th>Best Choice</th>
+</tr>
+
+<tr>
+<td>Refresh one page</td>
+<td>revalidatePath()</td>
+</tr>
+
+<tr>
+<td>Refresh many pages using same data</td>
+<td>revalidateTag()</td>
+</tr>
+
+<tr>
+<td>Blog post updated</td>
+<td>revalidatePath('/blog/post-1')</td>
+</tr>
+
+<tr>
+<td>Product data updated</td>
+<td>revalidateTag('products')</td>
+</tr>
+
+<tr>
+<td>User profile page updated</td>
+<td>revalidatePath('/profile')</td>
+</tr>
+
+<tr>
+<td>Shared catalog data updated</td>
+<td>revalidateTag('catalog')</td>
+</tr>
+</table>
+
+<hr>
+
+<h2>Most Important Interview Question</h2>
+
+<div class="code-title">Question</div>
+
+<pre><code class="language-text">Product Data Appears On
+
+Home
+Products
+Cart
+Search
+
+What Should We Use?
+</code></pre>
+
+<div class="code-title">Answer</div>
+
+<pre><code class="language-text">revalidateTag('products')
+</code></pre>
+
+<p>
+Because one product update affects multiple pages.
+</p>
+
+<hr>
+
+<h2>Easy Memory Trick</h2>
+
+<div class="code-title">Remember</div>
+
+<pre><code class="language-text">revalidatePath()
+        ↓
+Refresh One Route
+
+
+revalidateTag()
+        ↓
+Refresh Shared Data
+Across Many Routes
+</code></pre>
+
+<div class="feature">
+<strong>One-Line Definition:</strong><br>
+<code>revalidatePath()</code> invalidates a specific route's cache, while <code>revalidateTag()</code> invalidates all cached fetches associated with a specific tag, regardless of which pages use them.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-tsx.min.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>cache: 'force-cache' vs cache: 'no-store'</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0f172a;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.8;padding:40px 20px}
+.container{max-width:1000px;margin:auto;background:#111827;padding:40px;border-radius:16px}
+h1{color:#38bdf8;margin-bottom:20px}
+h2{color:#a78bfa;margin-top:30px;margin-bottom:10px}
+h3{color:#fbbf24;margin-top:25px;margin-bottom:10px}
+p{margin-bottom:15px}
+.feature{background:#1e293b;border-left:5px solid #38bdf8;padding:15px;border-radius:8px;margin:20px 0}
+.code-title{background:#1e293b;color:#93c5fd;padding:10px;font-weight:bold}
+pre[class*="language-"]{margin:0!important}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+th{background:#1e293b;color:#38bdf8;text-align:left;padding:12px}
+td{padding:12px;border-top:1px solid #334155}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>What is the difference between cache: 'force-cache' and cache: 'no-store'?</h1>
+
+<p>
+These are two caching modes provided by the Next.js extended fetch API.
+</p>
+
+<div class="feature">
+<code>force-cache</code> tells Next.js to reuse cached data, while <code>no-store</code> tells Next.js to fetch fresh data on every request.
+</div>
+
+<hr>
+
+<h2>cache: 'force-cache'</h2>
+
+<p>
+Next.js fetches the data once and stores it in the Data Cache.
+</p>
+
+<div class="code-title">Example</div>
+
+<pre><code class="language-ts">const res = await fetch('https://api.example.com/products', {
+  cache: 'force-cache'
+});
+
+const products = await res.json();</code></pre>
+
+<h3>Flow</h3>
+
+<pre><code class="language-text">First Request
+      ↓
+Fetch API Called
+      ↓
+Data Stored In Cache
+
+
+Second Request
+      ↓
+Use Cached Data
+
+
+Third Request
+      ↓
+Use Cached Data
+</code></pre>
+
+<h3>Result</h3>
+
+<pre><code class="language-text">Same Data Returned
+Without Calling API Again
+</code></pre>
+
+<div class="feature">
+This is similar to SSG behavior because cached data is reused.
+</div>
+
+<hr>
+
+<h2>cache: 'no-store'</h2>
+
+<p>
+Next.js skips the cache completely.
+</p>
+
+<div class="code-title">Example</div>
+
+<pre><code class="language-ts">const res = await fetch('https://api.example.com/products', {
+  cache: 'no-store'
+});
+
+const products = await res.json();</code></pre>
+
+<h3>Flow</h3>
+
+<pre><code class="language-text">Request 1
+     ↓
+Call API
+
+
+Request 2
+     ↓
+Call API Again
+
+
+Request 3
+     ↓
+Call API Again
+</code></pre>
+
+<h3>Result</h3>
+
+<pre><code class="language-text">Fresh Data
+Every Request
+</code></pre>
+
+<div class="feature">
+This makes the route dynamic and behaves like SSR.
+</div>
+
+<hr>
+
+<h2>Real World Example</h2>
+
+<h3>Product Catalog</h3>
+
+<p>
+Products rarely change.
+</p>
+
+<div class="code-title">Good Candidate For force-cache</div>
+
+<pre><code class="language-ts">const res = await fetch('/api/products', {
+  cache: 'force-cache'
+});</code></pre>
+
+<p>
+Users can safely see cached data.
+</p>
+
+<hr>
+
+<h3>User Dashboard</h3>
+
+<p>
+Data changes constantly.
+</p>
+
+<div class="code-title">Good Candidate For no-store</div>
+
+<pre><code class="language-ts">const res = await fetch('/api/dashboard', {
+  cache: 'no-store'
+});</code></pre>
+
+<p>
+Every user should receive fresh data.
+</p>
+
+<hr>
+
+<h2>The Biggest Difference</h2>
+
+<p>
+Suppose the API currently returns:
+</p>
+
+<div class="code-title">API Response</div>
+
+<pre><code class="language-json">{
+  "price": 100
+}</code></pre>
+
+<p>
+Now the database price changes:
+</p>
+
+<div class="code-title">New Database Value</div>
+
+<pre><code class="language-json">{
+  "price": 120
+}</code></pre>
+
+<h3>Using force-cache</h3>
+
+<pre><code class="language-text">Database Price
+      ↓
+120
+
+Cache Still Contains
+      ↓
+100
+
+User Sees
+      ↓
+100
+</code></pre>
+
+<p>
+Until cache is cleared or revalidated.
+</p>
+
+<hr>
+
+<h3>Using no-store</h3>
+
+<pre><code class="language-text">Database Price
+      ↓
+120
+
+Request Arrives
+      ↓
+API Called Again
+      ↓
+User Sees
+      ↓
+120
+</code></pre>
+
+<p>
+Fresh data is always returned.
+</p>
+
+<hr>
+
+<h2>What Happens To Rendering?</h2>
+
+<h3>force-cache</h3>
+
+<div class="code-title">Example</div>
+
+<pre><code class="language-ts">export default async function ProductsPage() {
+
+  const res = await fetch('/api/products', {
+    cache: 'force-cache'
+  });
+
+  return &lt;h1&gt;Products&lt;/h1&gt;;
+
+}</code></pre>
+
+<p>
+Next.js can cache the result and treat the page like static content.
+</p>
+
+<h3>Result</h3>
+
+<pre><code class="language-text">SSG Style Rendering
+</code></pre>
+
+<hr>
+
+<h3>no-store</h3>
+
+<div class="code-title">Example</div>
+
+<pre><code class="language-ts">export default async function DashboardPage() {
+
+  const res = await fetch('/api/dashboard', {
+    cache: 'no-store'
+  });
+
+  return &lt;h1&gt;Dashboard&lt;/h1&gt;;
+
+}</code></pre>
+
+<h3>Result</h3>
+
+<pre><code class="language-text">SSR Style Rendering
+
+Fetch Runs
+Every Request
+</code></pre>
+
+<hr>
+
+<h2>Comparison Table</h2>
+
+<table>
+<tr>
+<th>Feature</th>
+<th>force-cache</th>
+<th>no-store</th>
+</tr>
+
+<tr>
+<td>Uses Cache</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+
+<tr>
+<td>Fresh Data Every Request</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+
+<tr>
+<td>Can Become Static</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+
+<tr>
+<td>SSR Style Rendering</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+
+<tr>
+<td>Good For Product Lists</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+
+<tr>
+<td>Good For User Dashboard</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+</table>
+
+<hr>
+
+<h2>Common Interview Question</h2>
+
+<div class="code-title">Question</div>
+
+<pre><code class="language-text">Price Changed In Database
+
+What Happens?
+</code></pre>
+
+<h3>force-cache</h3>
+
+<pre><code class="language-text">User May See Old Price
+Until Cache Refreshes
+</code></pre>
+
+<h3>no-store</h3>
+
+<pre><code class="language-text">User Always Sees
+Latest Price
+</code></pre>
+
+<hr>
+
+<h2>Easy Memory Trick</h2>
+
+<div class="code-title">Remember</div>
+
+<pre><code class="language-text">force-cache
+      ↓
+Reuse Old Data
+
+
+no-store
+      ↓
+Always Fetch New Data
+</code></pre>
+
+<div class="feature">
+<strong>One-Line Definition:</strong><br>
+<code>cache: 'force-cache'</code> reuses cached data and behaves like static rendering, while <code>cache: 'no-store'</code> bypasses the cache and fetches fresh data on every request, resulting in dynamic SSR rendering.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js"></script>
+
+</body>
+</html>

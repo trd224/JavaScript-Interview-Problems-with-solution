@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Next.js On-Demand Revalidation with .NET Backend</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0f172a;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.8;padding:40px 20px}
+.container{max-width:1000px;margin:auto;background:#111827;padding:40px;border-radius:16px}
+h1{color:#38bdf8;margin-bottom:20px}
+h2{color:#a78bfa;margin-top:30px;margin-bottom:10px}
+h3{color:#fbbf24;margin-top:25px;margin-bottom:10px}
+p{margin-bottom:15px}
+ul{margin-left:20px}
+li{margin-bottom:8px}
+.feature{background:#1e293b;border-left:5px solid #38bdf8;padding:15px;border-radius:8px;margin:20px 0}
+.code-title{background:#1e293b;color:#93c5fd;padding:10px;font-weight:bold}
+pre[class*="language-"]{margin:0!important}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+th{background:#1e293b;color:#38bdf8;text-align:left;padding:12px}
+td{padding:12px;border-top:1px solid #334155}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>How does Next.js on-demand revalidation work with another backend like .NET or Java?</h1>
+
+<p>
+In a real-world project, we can use Next.js as our frontend and use another backend like .NET, Java, PHP, or Node.js for business logic and database work.
+</p>
+
+<div class="feature">
+Next.js is not only frontend. In the App Router, Next.js also has a small server layer for Server Components, SSR, caching, and revalidation.
+</div>
+
+<h2>Real Architecture</h2>
+
+<div class="code-title">Production Setup</div>
+
+<pre><code class="language-text">https://myshop.com
+      ↓
+Next.js App
+
+
+https://api.myshop.com
+      ↓
+.NET Backend</code></pre>
+
+<p>
+Here:
+</p>
+
+<ul>
+<li><code>https://myshop.com</code> is our Next.js website.</li>
+<li><code>https://api.myshop.com</code> is our .NET backend API.</li>
+</ul>
+
+<h2>Normal User Flow</h2>
+
+<div class="code-title">User Opens Product Page</div>
+
+<pre><code class="language-text">Browser
+   ↓
+https://myshop.com/products
+   ↓
+Next.js Product Page
+   ↓
+https://api.myshop.com/products
+   ↓
+.NET Backend
+   ↓
+Database</code></pre>
+
+<h2>Next.js Product Page</h2>
+
+<div class="code-title">app/products/page.tsx</div>
+
+<pre><code class="language-tsx">export default async function ProductsPage() {
+  const res = await fetch('https://api.myshop.com/products', { next: { tags: ['products'] } });
+  const products = await res.json();
+
+  return &lt;div&gt;{products.map(product =&gt; &lt;p key={product.id}&gt;{product.name} - ₹{product.price}&lt;/p&gt;)}&lt;/div&gt;;
+}</code></pre>
+
+<p>
+Next.js fetches product data from the .NET backend and stores it in the Next.js Data Cache using the tag <code>products</code>.
+</p>
+
+<div class="feature">
+The product data is coming from .NET, but the cache belongs to Next.js.
+</div>
+
+<h2>Why Cache Problem Happens?</h2>
+
+<p>
+Suppose the product price is:
+</p>
+
+<div class="code-title">Old Price</div>
+
+<pre><code class="language-json">{
+  "name": "Shoes",
+  "price": 100
+}</code></pre>
+
+<p>
+Next.js caches this data.
+</p>
+
+<p>
+Now admin changes the price in the .NET backend:
+</p>
+
+<div class="code-title">New Price In Database</div>
+
+<pre><code class="language-json">{
+  "name": "Shoes",
+  "price": 120
+}</code></pre>
+
+<p>
+But Next.js cache may still have the old price:
+</p>
+
+<div class="code-title">Next.js Cache</div>
+
+<pre><code class="language-json">{
+  "name": "Shoes",
+  "price": 100
+}</code></pre>
+
+<div class="feature">
+So the database has fresh data, but Next.js may still show old cached data until the cache is cleared.
+</div>
+
+<h2>Solution: On-Demand Revalidation</h2>
+
+<p>
+After the .NET backend updates the product, it makes a backend-to-backend HTTP call to Next.js.
+</p>
+
+<div class="code-title">Backend To Backend Call</div>
+
+<pre><code class="language-text">.NET Backend
+     ↓
+POST https://myshop.com/api/revalidate-products
+     ↓
+Next.js API Route
+     ↓
+revalidateTag('products')
+     ↓
+Next.js Cache Cleared</code></pre>
+
+<h2>Important Point</h2>
+
+<div class="feature">
+<code>https://myshop.com/api/revalidate-products</code> belongs to Next.js only if <code>myshop.com</code> is hosted by Next.js. It is different from <code>https://api.myshop.com</code>, which belongs to .NET.
+</div>
+
+<h2>Correct Domain Separation</h2>
+
+<table>
+<tr>
+<th>URL</th>
+<th>Technology</th>
+<th>Purpose</th>
+</tr>
+
+<tr>
+<td>https://myshop.com</td>
+<td>Next.js</td>
+<td>Frontend, SSR, Server Components, Cache</td>
+</tr>
+
+<tr>
+<td>https://myshop.com/api/revalidate-products</td>
+<td>Next.js</td>
+<td>Small revalidation API</td>
+</tr>
+
+<tr>
+<td>https://api.myshop.com/products</td>
+<td>.NET</td>
+<td>Main backend API</td>
+</tr>
+
+<tr>
+<td>Database</td>
+<td>SQL Server / MongoDB</td>
+<td>Actual data storage</td>
+</tr>
+</table>
+
+<h2>Next.js Revalidate API Route</h2>
+
+<div class="code-title">app/api/revalidate-products/route.ts</div>
+
+<pre><code class="language-ts">import { revalidateTag } from 'next/cache';
+
+export async function POST(request: Request) {
+  const secret = request.headers.get('x-revalidate-secret');
+
+  if (secret !== process.env.REVALIDATE_SECRET) {
+    return Response.json({ message: 'Invalid secret' }, { status: 401 });
+  }
+
+  revalidateTag('products', 'max');
+
+  return Response.json({ revalidated: true, tag: 'products' });
+}</code></pre>
+
+<p>
+This API route exists only to clear the Next.js cache.
+</p>
+
+<h2>.NET Backend Calls Next.js API</h2>
+
+<div class="code-title">.NET Example</div>
+
+<pre><code class="language-csharp">using var client = new HttpClient();
+
+client.DefaultRequestHeaders.Add("x-revalidate-secret", "my-secret-key");
+
+await client.PostAsync("https://myshop.com/api/revalidate-products", null);</code></pre>
+
+<p>
+This is a normal HTTP request from one backend to another backend.
+</p>
+
+<h2>Full Real-World Flow</h2>
+
+<div class="code-title">Complete Flow</div>
+
+<pre><code class="language-text">1. User opens https://myshop.com/products
+        ↓
+2. Next.js fetches products from https://api.myshop.com/products
+        ↓
+3. .NET backend reads products from database
+        ↓
+4. Next.js caches product data with tag "products"
+        ↓
+5. User sees product price = 100
+
+
+6. Admin updates product price in admin panel
+        ↓
+7. .NET backend updates database price from 100 to 120
+        ↓
+8. .NET backend sends POST request to https://myshop.com/api/revalidate-products
+        ↓
+9. Next.js runs revalidateTag('products')
+        ↓
+10. Next.js clears products cache
+        ↓
+11. Next user opens products page
+        ↓
+12. Next.js fetches fresh data from .NET backend
+        ↓
+13. User sees product price = 120</code></pre>
+
+<h2>Why .NET Cannot Directly Run revalidateTag()</h2>
+
+<p>
+Because <code>revalidateTag()</code> is a Next.js function.
+</p>
+
+<div class="code-title">Runtime Difference</div>
+
+<pre><code class="language-text">.NET Backend
+   Can update database
+   Can run C# code
+   Cannot run revalidateTag()
+
+
+Next.js Server
+   Can render Server Components
+   Can manage Next.js cache
+   Can run revalidateTag()</code></pre>
+
+<div class="feature">
+The cache belongs to Next.js, so only Next.js can clear it.
+</div>
+
+<h2>Why This Is Not Two Main Backends</h2>
+
+<p>
+The .NET backend is still the main backend.
+</p>
+
+<div class="code-title">Responsibility</div>
+
+<pre><code class="language-text">.NET Backend
+   → Business logic
+   → Product update
+   → Database
+   → Authentication APIs
+   → Payment APIs
+
+
+Next.js Server
+   → Frontend rendering
+   → Server Components
+   → Data Cache
+   → Revalidation API</code></pre>
+
+<p>
+The Next.js API route is just a small helper endpoint for cache clearing.
+</p>
+
+<h2>If /api Already Belongs To .NET</h2>
+
+<p>
+If your domain is configured like this:
+</p>
+
+<div class="code-title">Problem Setup</div>
+
+<pre><code class="language-text">https://myshop.com/api/products
+      ↓
+.NET Backend</code></pre>
+
+<p>
+Then this URL:
+</p>
+
+<pre><code class="language-text">https://myshop.com/api/revalidate-products</code></pre>
+
+<p>
+will also go to .NET, not Next.js.
+</p>
+
+<h3>Solution</h3>
+
+<p>
+Use a separate route for Next.js revalidation:
+</p>
+
+<div class="code-title">Possible Next.js Revalidate URLs</div>
+
+<pre><code class="language-text">https://myshop.com/internal/revalidate-products
+
+https://myshop.com/next-revalidate/products
+
+https://frontend.myshop.com/api/revalidate-products</code></pre>
+
+<p>
+The important thing is that the URL must reach the Next.js server, not the .NET server.
+</p>
+
+<h2>Final Architecture Diagram</h2>
+
+<div class="code-title">Final Setup</div>
+
+<pre><code class="language-text">Browser
+   ↓
+https://myshop.com
+   ↓
+Next.js App
+   ↓
+fetch('https://api.myshop.com/products')
+   ↓
+.NET Backend
+   ↓
+Database
+
+
+Admin Updates Product
+   ↓
+.NET Backend
+   ↓
+Database Updated
+   ↓
+POST https://myshop.com/api/revalidate-products
+   ↓
+Next.js Revalidate API
+   ↓
+revalidateTag('products')
+   ↓
+Next.js Cache Cleared</code></pre>
+
+<h2>Easy Memory Trick</h2>
+
+<div class="code-title">Remember</div>
+
+<pre><code class="language-text">Data update
+   ↓
+.NET / Java backend
+
+
+Page render and cache
+   ↓
+Next.js
+
+
+Cache clear
+   ↓
+Next.js revalidate API
+
+
+Backend-to-backend call
+   ↓
+.NET calls Next.js URL</code></pre>
+
+<div class="feature">
+<strong>One-Line Definition:</strong><br>
+When using Next.js with a .NET or Java backend, the main backend updates the database, then sends a backend-to-backend HTTP request to a small Next.js revalidation endpoint so Next.js can clear its own cache.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-tsx.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-csharp.min.js"></script>
+
+</body>
+</html>

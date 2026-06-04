@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>What does next: { revalidate: N } do in a fetch call?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0f172a;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.8;padding:40px 20px}
+.container{max-width:1000px;margin:auto;background:#111827;padding:40px;border-radius:16px}
+h1{color:#38bdf8;margin-bottom:20px}
+h2{color:#a78bfa;margin-top:30px;margin-bottom:10px}
+h3{color:#fbbf24;margin-top:25px;margin-bottom:10px}
+p{margin-bottom:15px}
+.feature{background:#1e293b;border-left:5px solid #38bdf8;padding:15px;border-radius:8px;margin:20px 0}
+.code-title{background:#1e293b;color:#93c5fd;padding:10px;font-weight:bold}
+pre[class*="language-"]{margin:0!important}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+th{background:#1e293b;color:#38bdf8;text-align:left;padding:12px}
+td{padding:12px;border-top:1px solid #334155}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>What does next: { revalidate: N } do in a fetch call?</h1>
+
+<p>
+The <code>next.revalidate</code> option tells Next.js how long fetched data should stay in cache before being refreshed.
+</p>
+
+<div class="feature">
+<code>next: { revalidate: N }</code> enables ISR (Incremental Static Regeneration). Data is cached and automatically refreshed after <strong>N seconds</strong>.
+</div>
+
+<h2>Basic Example</h2>
+
+<div class="code-title">Products Page</div>
+
+<pre><code class="language-tsx">export default async function ProductsPage() {
+  const res = await fetch('https://api.example.com/products', { next: { revalidate: 60 } });
+  const products = await res.json();
+
+  return &lt;h1&gt;Products&lt;/h1&gt;;
+}</code></pre>
+
+<p>
+This means:
+</p>
+
+<pre><code class="language-text">Cache Product Data
+        ↓
+Keep Cache For 60 Seconds
+        ↓
+Refresh Cache Automatically
+</code></pre>
+
+<h2>How It Works</h2>
+
+<div class="code-title">Timeline</div>
+
+<pre><code class="language-text">0 Seconds
+    ↓
+Fetch API
+    ↓
+Save Data In Cache
+
+30 Seconds
+    ↓
+Use Cached Data
+
+50 Seconds
+    ↓
+Use Cached Data
+
+60 Seconds
+    ↓
+Cache Becomes Stale
+
+Next Request
+    ↓
+Fetch New Data
+    ↓
+Update Cache
+</code></pre>
+
+<h2>Real Example</h2>
+
+<p>
+Suppose the API initially returns:
+</p>
+
+<div class="code-title">Initial API Response</div>
+
+<pre><code class="language-json">{
+  "price": 100
+}</code></pre>
+
+<p>
+After 30 seconds the database changes:
+</p>
+
+<div class="code-title">Database Update</div>
+
+<pre><code class="language-json">{
+  "price": 120
+}</code></pre>
+
+<h3>User Visits At 45 Seconds</h3>
+
+<div class="code-title">Result</div>
+
+<pre><code class="language-text">Price = 100
+</code></pre>
+
+<p>
+Because the cache is still valid.
+</p>
+
+<h3>User Visits At 61 Seconds</h3>
+
+<div class="code-title">Result</div>
+
+<pre><code class="language-text">Price = 120
+</code></pre>
+
+<p>
+Because Next.js regenerates the cache after it becomes stale.
+</p>
+
+<h2>Visual Comparison</h2>
+
+<table>
+<tr>
+<th>Option</th>
+<th>Behavior</th>
+<th>Rendering Type</th>
+</tr>
+
+<tr>
+<td>cache: 'force-cache'</td>
+<td>Cache Forever</td>
+<td>SSG</td>
+</tr>
+
+<tr>
+<td>next: { revalidate: 60 }</td>
+<td>Refresh Every 60 Seconds</td>
+<td>ISR</td>
+</tr>
+
+<tr>
+<td>cache: 'no-store'</td>
+<td>Fetch Every Request</td>
+<td>SSR</td>
+</tr>
+</table>
+
+<h2>Difference From force-cache</h2>
+
+<div class="code-title">force-cache</div>
+
+<pre><code class="language-tsx">const res = await fetch(url, { cache: 'force-cache' });</code></pre>
+
+<p>
+Data remains cached indefinitely until a rebuild or manual revalidation occurs.
+</p>
+
+<h2>Difference From no-store</h2>
+
+<div class="code-title">no-store</div>
+
+<pre><code class="language-tsx">const res = await fetch(url, { cache: 'no-store' });</code></pre>
+
+<p>
+Data is fetched again on every request.
+</p>
+
+<h2>Most Important Interview Question</h2>
+
+<div class="code-title">Question</div>
+
+<pre><code class="language-text">Database Changed At 30 Seconds
+
+revalidate = 60
+
+What Will User See At 45 Seconds?
+</code></pre>
+
+<div class="code-title">Answer</div>
+
+<pre><code class="language-text">Old Cached Data
+</code></pre>
+
+<p>
+Because the cache has not expired.
+</p>
+
+<div class="code-title">Question</div>
+
+<pre><code class="language-text">Database Changed At 30 Seconds
+
+revalidate = 60
+
+What Will User See At 61 Seconds?
+</code></pre>
+
+<div class="code-title">Answer</div>
+
+<pre><code class="language-text">Fresh Data
+</code></pre>
+
+<p>
+Because the cache is regenerated after becoming stale.
+</p>
+
+<h2>Easy Memory Trick</h2>
+
+<div class="code-title">Remember</div>
+
+<pre><code class="language-text">force-cache
+      ↓
+Static Forever
+
+
+revalidate: 60
+      ↓
+Static + Auto Refresh
+
+
+no-store
+      ↓
+Always Dynamic
+</code></pre>
+
+<div class="feature">
+<strong>One-Line Definition:</strong><br>
+<code>next: { revalidate: N }</code> tells Next.js to cache fetched data and automatically refresh it after <strong>N seconds</strong>, enabling ISR (Incremental Static Regeneration).
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-tsx.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+
+</body>
+</html>

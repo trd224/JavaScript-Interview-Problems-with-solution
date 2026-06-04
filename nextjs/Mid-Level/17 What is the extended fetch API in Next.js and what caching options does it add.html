@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>What is the Extended fetch API in Next.js?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0f172a;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.8;padding:40px 20px}
+.container{max-width:1000px;margin:auto;background:#111827;padding:40px;border-radius:16px}
+h1{color:#38bdf8;margin-bottom:20px}
+h2{color:#a78bfa;margin-top:30px;margin-bottom:10px}
+h3{color:#fbbf24;margin-top:25px;margin-bottom:10px}
+p{margin-bottom:15px}
+ul{margin-left:20px}
+li{margin-bottom:8px}
+.feature{background:#1e293b;border-left:5px solid #38bdf8;padding:15px;border-radius:8px;margin:20px 0}
+.code-title{background:#1e293b;color:#93c5fd;padding:10px;font-weight:bold}
+pre[class*="language-"]{margin:0!important}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+th{background:#1e293b;color:#38bdf8;text-align:left;padding:12px}
+td{padding:12px;border-top:1px solid #334155}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>What is the Extended fetch API in Next.js and what caching options does it add?</h1>
+
+<p>
+Next.js extends the standard JavaScript <code>fetch()</code> API by adding built-in caching, revalidation, deduplication, and data cache controls.
+</p>
+
+<div class="feature">
+The browser's fetch API only downloads data. Next.js fetch can also control how long data is cached and when it should be refreshed.
+</div>
+
+<hr>
+
+<h2>Normal JavaScript fetch()</h2>
+
+<p>
+In plain React or Node.js:
+</p>
+
+<div class="code-title">Standard Fetch</div>
+
+<pre><code class="language-ts">const res = await fetch('https://api.example.com/products');
+const products = await res.json();</code></pre>
+
+<p>
+This simply requests data.
+</p>
+
+<p>
+There is no built-in:
+</p>
+
+<ul>
+<li>ISR</li>
+<li>Data Cache</li>
+<li>Automatic Revalidation</li>
+<li>Cache Tags</li>
+</ul>
+
+<hr>
+
+<h2>Next.js Extended fetch()</h2>
+
+<p>
+Next.js adds additional options:
+</p>
+
+<div class="code-title">Extended Fetch</div>
+
+<pre><code class="language-ts">const res = await fetch('https://api.example.com/products', {
+  cache: 'force-cache',
+  next: {
+    revalidate: 60,
+    tags: ['products']
+  }
+});</code></pre>
+
+<p>
+These options do not exist in the normal browser fetch API.
+</p>
+
+<hr>
+
+<h2>1. cache: 'force-cache'</h2>
+
+<p>
+This tells Next.js to cache the result.
+</p>
+
+<div class="code-title">Example</div>
+
+<pre><code class="language-ts">const res = await fetch('https://api.example.com/products', {
+  cache: 'force-cache'
+});</code></pre>
+
+<h3>Flow</h3>
+
+<pre><code class="language-text">First Request
+      ↓
+Fetch API
+      ↓
+Save In Cache
+
+Second Request
+      ↓
+Read From Cache
+</code></pre>
+
+<p>
+Good for:
+</p>
+
+<ul>
+<li>Blog Posts</li>
+<li>Documentation</li>
+<li>Static Content</li>
+</ul>
+
+<div class="feature">
+This is similar to SSG-style caching.
+</div>
+
+<hr>
+
+<h2>2. cache: 'no-store'</h2>
+
+<p>
+This disables caching completely.
+</p>
+
+<div class="code-title">Example</div>
+
+<pre><code class="language-ts">const res = await fetch('https://api.example.com/stats', {
+  cache: 'no-store'
+});</code></pre>
+
+<h3>Flow</h3>
+
+<pre><code class="language-text">Request
+   ↓
+Fetch API
+   ↓
+Return Data
+
+Next Request
+   ↓
+Fetch Again
+</code></pre>
+
+<p>
+Every request gets fresh data.
+</p>
+
+<p>
+Good for:
+</p>
+
+<ul>
+<li>User Dashboard</li>
+<li>Live Statistics</li>
+<li>Stock Prices</li>
+<li>User Session Data</li>
+</ul>
+
+<div class="feature">
+This makes the route dynamic (SSR).
+</div>
+
+<hr>
+
+<h2>3. next.revalidate</h2>
+
+<p>
+This enables ISR-style revalidation.
+</p>
+
+<div class="code-title">Example</div>
+
+<pre><code class="language-ts">const res = await fetch('https://api.example.com/products', {
+  next: {
+    revalidate: 60
+  }
+});</code></pre>
+
+<p>
+Meaning:
+</p>
+
+<pre><code class="language-text">Cache Data
+      ↓
+Keep For 60 Seconds
+      ↓
+Refresh On Next Request
+</code></pre>
+
+<h3>Timeline</h3>
+
+<pre><code class="language-text">0 sec
+   ↓
+Fetch Product Data
+
+30 sec
+   ↓
+Use Cache
+
+60 sec
+   ↓
+Cache Expired
+
+61 sec
+   ↓
+Fetch New Data
+</code></pre>
+
+<p>
+Good for:
+</p>
+
+<ul>
+<li>Product Catalog</li>
+<li>News Articles</li>
+<li>Public Content</li>
+</ul>
+
+<div class="feature">
+This is the most common ISR pattern in the App Router.
+</div>
+
+<hr>
+
+<h2>4. next.tags</h2>
+
+<p>
+Allows data to be grouped using tags.
+</p>
+
+<div class="code-title">Example</div>
+
+<pre><code class="language-ts">const res = await fetch('https://api.example.com/products', {
+  next: {
+    tags: ['products']
+  }
+});</code></pre>
+
+<p>
+Now this cache belongs to:
+</p>
+
+<pre><code class="language-text">products
+</code></pre>
+
+<p>
+tag.
+</p>
+
+<hr>
+
+<h2>Revalidating By Tag</h2>
+
+<p>
+Suppose an admin updates a product.
+</p>
+
+<div class="code-title">Server Action</div>
+
+<pre><code class="language-ts">import { revalidateTag } from 'next/cache';
+
+await updateProduct();
+
+revalidateTag('products');</code></pre>
+
+<h3>Flow</h3>
+
+<pre><code class="language-text">Product Updated
+       ↓
+revalidateTag('products')
+       ↓
+Products Cache Cleared
+       ↓
+Next Request Gets Fresh Data
+</code></pre>
+
+<div class="feature">
+Instead of waiting 60 seconds, we can refresh immediately.
+</div>
+
+<hr>
+
+<h2>5. Request Deduplication</h2>
+
+<p>
+Next.js automatically deduplicates identical fetch requests.
+</p>
+
+<div class="code-title">Example</div>
+
+<pre><code class="language-ts">const users1 = fetch('https://api.example.com/users');
+const users2 = fetch('https://api.example.com/users');
+const users3 = fetch('https://api.example.com/users');</code></pre>
+
+<p>
+Next.js performs:
+</p>
+
+<pre><code class="language-text">1 Network Request
+</code></pre>
+
+<p>
+instead of:
+</p>
+
+<pre><code class="language-text">3 Network Requests
+</code></pre>
+
+<p>
+This improves performance automatically.
+</p>
+
+<hr>
+
+<h2>Real World Examples</h2>
+
+<h3>Product Catalog</h3>
+
+<div class="code-title">ISR</div>
+
+<pre><code class="language-ts">await fetch(url, {
+  next: {
+    revalidate: 60
+  }
+});</code></pre>
+
+<p>
+Products update every minute.
+</p>
+
+<h3>User Dashboard</h3>
+
+<div class="code-title">SSR</div>
+
+<pre><code class="language-ts">await fetch(url, {
+  cache: 'no-store'
+});</code></pre>
+
+<p>
+Fresh data every request.
+</p>
+
+<h3>Blog Posts</h3>
+
+<div class="code-title">Static Cache</div>
+
+<pre><code class="language-ts">await fetch(url, {
+  cache: 'force-cache'
+});</code></pre>
+
+<p>
+Cache forever until rebuild or revalidation.
+</p>
+
+<hr>
+
+<h2>Most Common Fetch Options</h2>
+
+<table>
+<tr>
+<th>Option</th>
+<th>Behavior</th>
+<th>Rendering</th>
+</tr>
+
+<tr>
+<td>cache: 'force-cache'</td>
+<td>Use Cache</td>
+<td>SSG</td>
+</tr>
+
+<tr>
+<td>cache: 'no-store'</td>
+<td>Fresh Every Request</td>
+<td>SSR</td>
+</tr>
+
+<tr>
+<td>next: { revalidate: 60 }</td>
+<td>Cache For 60 Seconds</td>
+<td>ISR</td>
+</tr>
+
+<tr>
+<td>next: { tags: ['products'] }</td>
+<td>Tag-Based Cache</td>
+<td>ISR</td>
+</tr>
+</table>
+
+<hr>
+
+<h2>Visual Comparison</h2>
+
+<div class="code-title">Three Main Modes</div>
+
+<pre><code class="language-text">force-cache
+      ↓
+Use Cached Data
+
+
+no-store
+      ↓
+Always Fetch New Data
+
+
+revalidate: 60
+      ↓
+Use Cache
+      ↓
+Refresh Every 60 Seconds
+</code></pre>
+
+<hr>
+
+<h2>Easy Memory Trick</h2>
+
+<div class="code-title">Remember</div>
+
+<pre><code class="language-text">force-cache
+      ↓
+SSG
+
+
+revalidate
+      ↓
+ISR
+
+
+no-store
+      ↓
+SSR
+</code></pre>
+
+<div class="feature">
+<strong>One-Line Definition:</strong><br>
+Next.js extends the standard <code>fetch()</code> API by adding caching, ISR revalidation, cache tags, and request deduplication, allowing us to control when data is cached and refreshed.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js"></script>
+
+</body>
+</html>

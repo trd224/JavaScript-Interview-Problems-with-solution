@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>What is unstable_cache and when would you use it over fetch caching?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0f172a;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.8;padding:40px 20px}
+.container{max-width:1000px;margin:auto;background:#111827;padding:40px;border-radius:16px}
+h1{color:#38bdf8;margin-bottom:20px}
+h2{color:#a78bfa;margin-top:30px;margin-bottom:10px}
+h3{color:#fbbf24;margin-top:25px;margin-bottom:10px}
+p{margin-bottom:15px}
+.feature{background:#1e293b;border-left:5px solid #38bdf8;padding:15px;border-radius:8px;margin:20px 0}
+.code-title{background:#1e293b;color:#93c5fd;padding:10px;font-weight:bold}
+pre[class*="language-"]{margin:0!important}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+th{background:#1e293b;color:#38bdf8;text-align:left;padding:12px}
+td{padding:12px;border-top:1px solid #334155}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>What is unstable_cache and when would you use it over fetch caching?</h1>
+
+<p>
+<code>unstable_cache()</code> is a Next.js API that allows us to cache the result of any async function, not just <code>fetch()</code> requests.
+</p>
+
+<div class="feature">
+<strong>fetch caching</strong> caches API requests.<br>
+<strong>unstable_cache</strong> caches custom server-side functions such as database queries, expensive calculations, CMS SDK calls, and third-party libraries.
+</div>
+
+<hr>
+
+<h2>The Problem With fetch Caching</h2>
+
+<p>
+Next.js caching works automatically when using:
+</p>
+
+<div class="code-title">Fetch Caching</div>
+
+<pre><code class="language-tsx">const res = await fetch('https://api.myshop.com/products', {
+  next: { revalidate: 60 }
+});
+
+const products = await res.json();</code></pre>
+
+<p>
+This is great because Next.js can cache the HTTP request.
+</p>
+
+<p>
+But what if there is no fetch?
+</p>
+
+<hr>
+
+<h2>Example: Database Query</h2>
+
+<div class="code-title">Direct Database Access</div>
+
+<pre><code class="language-tsx">import { db } from '@/lib/db';
+
+export default async function ProductsPage() {
+  const products = await db.product.findMany();
+
+  return &lt;h1&gt;Products&lt;/h1&gt;;
+}</code></pre>
+
+<p>
+There is no <code>fetch()</code> here.
+</p>
+
+<p>
+So:
+</p>
+
+<pre><code class="language-text">No HTTP Request
+
+No Fetch Cache
+
+Database Runs Every Request
+</code></pre>
+
+<div class="feature">
+This is where <code>unstable_cache()</code> becomes useful.
+</div>
+
+<hr>
+
+<h2>Basic unstable_cache Example</h2>
+
+<div class="code-title">Cached Database Query</div>
+
+<pre><code class="language-tsx">import { unstable_cache } from 'next/cache';
+import { db } from '@/lib/db';
+
+const getProducts = unstable_cache(
+  async () =&gt; {
+    return db.product.findMany();
+  },
+  ['products'],
+  { revalidate: 60 }
+);
+
+export default async function ProductsPage() {
+  const products = await getProducts();
+
+  return &lt;h1&gt;Products&lt;/h1&gt;;
+}</code></pre>
+
+<p>
+Now:
+</p>
+
+<pre><code class="language-text">First Request
+      ↓
+Query Database
+      ↓
+Save Result In Cache
+
+Second Request
+      ↓
+Use Cache
+
+60 Seconds Later
+      ↓
+Refresh Cache
+</code></pre>
+
+<hr>
+
+<h2>Why Not Use fetch?</h2>
+
+<p>
+Sometimes data comes from:
+</p>
+
+<ul>
+<li>Prisma</li>
+<li>MongoDB Driver</li>
+<li>Mongoose</li>
+<li>Redis</li>
+<li>Firebase SDK</li>
+<li>Stripe SDK</li>
+<li>CMS SDK</li>
+</ul>
+
+<p>
+These do not use HTTP fetch requests.
+</p>
+
+<div class="feature">
+<code>unstable_cache()</code> allows us to cache any async function regardless of where the data comes from.
+</div>
+
+<hr>
+
+<h2>Real World Example</h2>
+
+<p>
+Suppose we have:
+</p>
+
+<div class="code-title">Database</div>
+
+<pre><code class="language-text">Products Table
+   ↓
+50,000 Products
+</code></pre>
+
+<p>
+Every request executes:
+</p>
+
+<div class="code-title">Expensive Query</div>
+
+<pre><code class="language-tsx">const products = await db.product.findMany();</code></pre>
+
+<p>
+Without caching:
+</p>
+
+<pre><code class="language-text">User 1
+   ↓
+Database Query
+
+User 2
+   ↓
+Database Query
+
+User 3
+   ↓
+Database Query
+</code></pre>
+
+<p>
+Database gets hit every time.
+</p>
+
+<hr>
+
+<h3>With unstable_cache</h3>
+
+<div class="code-title">Cached Query</div>
+
+<pre><code class="language-tsx">const getProducts = unstable_cache(
+  async () =&gt; db.product.findMany(),
+  ['products'],
+  { revalidate: 60 }
+);</code></pre>
+
+<p>
+Now:
+</p>
+
+<pre><code class="language-text">User 1
+   ↓
+Database Query
+   ↓
+Cache Result
+
+User 2
+   ↓
+Use Cache
+
+User 3
+   ↓
+Use Cache
+</code></pre>
+
+<hr>
+
+<h2>Using Tags</h2>
+
+<p>
+Just like fetch caching, unstable_cache can use tags.
+</p>
+
+<div class="code-title">Tagged Cache</div>
+
+<pre><code class="language-tsx">const getProducts = unstable_cache(
+  async () =&gt; db.product.findMany(),
+  ['products'],
+  {
+    tags: ['products'],
+    revalidate: 60
+  }
+);</code></pre>
+
+<p>
+Now we can clear the cache:
+</p>
+
+<div class="code-title">On-Demand Revalidation</div>
+
+<pre><code class="language-ts">import { revalidateTag } from 'next/cache';
+
+revalidateTag('products', 'max');</code></pre>
+
+<hr>
+
+<h2>Fetch Cache vs unstable_cache</h2>
+
+<table>
+<tr>
+<th>Feature</th>
+<th>fetch Cache</th>
+<th>unstable_cache</th>
+</tr>
+
+<tr>
+<td>Caches HTTP Requests</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+
+<tr>
+<td>Caches Database Queries</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+
+<tr>
+<td>Caches Custom Functions</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+
+<tr>
+<td>Supports Revalidation</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+
+<tr>
+<td>Supports Tags</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+
+<tr>
+<td>Works With Prisma</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+
+<tr>
+<td>Works With MongoDB Driver</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+</table>
+
+<hr>
+
+<h2>When To Use fetch Cache?</h2>
+
+<div class="code-title">Use fetch Cache</div>
+
+<pre><code class="language-tsx">const res = await fetch('https://api.myshop.com/products', {
+  next: { revalidate: 60 }
+});</code></pre>
+
+<p>
+When data comes from:
+</p>
+
+<ul>
+<li>REST APIs</li>
+<li>External Services</li>
+<li>Backend APIs</li>
+</ul>
+
+<hr>
+
+<h2>When To Use unstable_cache?</h2>
+
+<div class="code-title">Use unstable_cache</div>
+
+<pre><code class="language-tsx">const users = await db.user.findMany();</code></pre>
+
+<p>
+When data comes from:
+</p>
+
+<ul>
+<li>Prisma</li>
+<li>MongoDB</li>
+<li>Redis</li>
+<li>Firebase SDK</li>
+<li>Custom Server Functions</li>
+<li>Expensive Computations</li>
+</ul>
+
+<hr>
+
+<h2>Real Interview Scenario</h2>
+
+<div class="code-title">Question</div>
+
+<pre><code class="language-text">You Fetch Products Using Prisma
+
+Which Cache Should You Use?
+</code></pre>
+
+<div class="code-title">Answer</div>
+
+<pre><code class="language-text">unstable_cache()
+</code></pre>
+
+<p>
+Because Prisma does not use fetch().
+</p>
+
+<hr>
+
+<div class="code-title">Question</div>
+
+<pre><code class="language-text">You Fetch Products From
+
+https://api.myshop.com/products
+
+Which Cache Should You Use?
+</code></pre>
+
+<div class="code-title">Answer</div>
+
+<pre><code class="language-text">fetch(..., {
+  next: { revalidate: 60 }
+})
+</code></pre>
+
+<p>
+Because it is an HTTP request.
+</p>
+
+<hr>
+
+<h2>Easy Memory Trick</h2>
+
+<div class="code-title">Remember</div>
+
+<pre><code class="language-text">HTTP Request
+      ↓
+fetch Cache
+
+
+Database Query
+      ↓
+unstable_cache
+
+
+Custom Function
+      ↓
+unstable_cache
+</code></pre>
+
+<div class="feature">
+<strong>One-Line Definition:</strong><br>
+<code>unstable_cache()</code> is used to cache the result of custom async functions such as database queries and expensive server-side operations, while fetch caching is used specifically for HTTP requests made with <code>fetch()</code>.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-tsx.min.js"></script>
+
+</body>
+</html>
