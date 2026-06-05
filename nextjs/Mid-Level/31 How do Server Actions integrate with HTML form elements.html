@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How do Server Actions integrate with HTML form elements?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0f172a;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.8;padding:40px 20px}
+.container{max-width:1000px;margin:auto;background:#111827;padding:40px;border-radius:16px}
+h1{color:#38bdf8;margin-bottom:20px}
+h2{color:#a78bfa;margin-top:30px;margin-bottom:10px}
+h3{color:#fbbf24;margin-top:25px;margin-bottom:10px}
+p{margin-bottom:15px}
+ul{margin-left:20px}
+li{margin-bottom:8px}
+.feature{background:#1e293b;border-left:5px solid #38bdf8;padding:15px;border-radius:8px;margin:20px 0}
+.code-title{background:#1e293b;color:#93c5fd;padding:10px;font-weight:bold}
+pre[class*="language-"]{margin:0!important}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+th{background:#1e293b;color:#38bdf8;text-align:left;padding:12px}
+td{padding:12px;border-top:1px solid #334155}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>How do Server Actions integrate with HTML &lt;form&gt; elements?</h1>
+
+<p>
+Server Actions integrate directly with HTML forms using the form's <code>action</code> attribute.
+</p>
+
+<div class="feature">
+<strong>Simple Meaning:</strong><br>
+Instead of submitting a form to an API endpoint, we can submit it directly to a Server Action.
+</div>
+
+<hr>
+
+<h2>Traditional HTML Form</h2>
+
+<p>
+Before Server Actions, forms were submitted to a URL.
+</p>
+
+<div class="code-title">Traditional Form</div>
+
+<pre><code class="language-html">&lt;form action="/api/users" method="POST"&gt;
+
+  &lt;input name="name" /&gt;
+
+  &lt;button&gt;Save&lt;/button&gt;
+
+&lt;/form&gt;</code></pre>
+
+<p>
+Flow:
+</p>
+
+<pre><code class="language-text">Form Submit
+      ↓
+/api/users
+      ↓
+API Route
+      ↓
+Database
+      ↓
+Response
+</code></pre>
+
+<hr>
+
+<h2>Server Actions Form</h2>
+
+<p>
+With Server Actions, the <code>action</code> attribute receives a function instead of a URL.
+</p>
+
+<div class="code-title">Server Action</div>
+
+<pre><code class="language-ts">'use server';
+
+export async function createUser(
+  formData: FormData
+) {
+
+  console.log(
+    formData.get('name')
+  );
+
+}</code></pre>
+
+<div class="code-title">Form</div>
+
+<pre><code class="language-tsx">import { createUser } from './actions';
+
+export default function Page() {
+
+  return (
+    &lt;form action={createUser}&gt;
+
+      &lt;input
+        name="name"
+        placeholder="Enter Name"
+      /&gt;
+
+      &lt;button&gt;
+        Save
+      &lt;/button&gt;
+
+    &lt;/form&gt;
+  );
+
+}</code></pre>
+
+<p>
+Flow:
+</p>
+
+<pre><code class="language-text">Submit Form
+      ↓
+Server Action
+      ↓
+Database
+      ↓
+Response
+</code></pre>
+
+<p>
+No API route is required.
+</p>
+
+<hr>
+
+<h2>How Does formData Work?</h2>
+
+<p>
+When the form is submitted, Next.js automatically collects all form fields and passes them to the Server Action as a <code>FormData</code> object.
+</p>
+
+<div class="code-title">Form</div>
+
+<pre><code class="language-html">&lt;input name="name" /&gt;
+&lt;input name="email" /&gt;</code></pre>
+
+<div class="code-title">Server Action</div>
+
+<pre><code class="language-ts">'use server';
+
+export async function createUser(
+  formData: FormData
+) {
+
+  const name = formData.get('name');
+
+  const email = formData.get('email');
+
+}</code></pre>
+
+<p>
+Values are automatically available inside <code>formData</code>.
+</p>
+
+<hr>
+
+<h2>Real World Example</h2>
+
+<div class="code-title">Server Action</div>
+
+<pre><code class="language-ts">'use server';
+
+export async function addProduct(
+  formData: FormData
+) {
+
+  await db.product.create({
+    data: {
+      name: formData.get('name'),
+      price: Number(
+        formData.get('price')
+      )
+    }
+  });
+
+}</code></pre>
+
+<div class="code-title">Form</div>
+
+<pre><code class="language-tsx">&lt;form action={addProduct}&gt;
+
+  &lt;input
+    name="name"
+    placeholder="Product Name"
+  /&gt;
+
+  &lt;input
+    name="price"
+    placeholder="Price"
+  /&gt;
+
+  &lt;button&gt;
+    Add Product
+  &lt;/button&gt;
+
+&lt;/form&gt;</code></pre>
+
+<p>
+Flow:
+</p>
+
+<pre><code class="language-text">Submit Product Form
+         ↓
+Server Action
+         ↓
+Insert Into Database
+         ↓
+Success
+</code></pre>
+
+<hr>
+
+<h2>What Happens Internally?</h2>
+
+<p>
+Next.js automatically creates an internal request behind the scenes.
+</p>
+
+<div class="code-title">Internal Flow</div>
+
+<pre><code class="language-text">Browser
+    ↓
+Submit Form
+    ↓
+Next.js Internal Request
+    ↓
+Server Action
+    ↓
+Database
+    ↓
+Response
+</code></pre>
+
+<p>
+We do not need:
+</p>
+
+<ul>
+<li>fetch()</li>
+<li>API Route</li>
+<li>JSON.stringify()</li>
+<li>req.json()</li>
+</ul>
+
+<hr>
+
+<h2>Form + Revalidation</h2>
+
+<p>
+Server Actions often refresh cached pages after data changes.
+</p>
+
+<div class="code-title">Example</div>
+
+<pre><code class="language-ts">'use server';
+
+import { revalidatePath } from 'next/cache';
+
+export async function addProduct(
+  formData: FormData
+) {
+
+  await db.product.create({
+    data: {
+      name: formData.get('name')
+    }
+  });
+
+  revalidatePath('/products');
+
+}</code></pre>
+
+<p>
+Flow:
+</p>
+
+<pre><code class="language-text">Submit Form
+      ↓
+Insert Product
+      ↓
+revalidatePath()
+      ↓
+Cache Cleared
+      ↓
+Fresh Data
+</code></pre>
+
+<hr>
+
+<h2>Server Action Form vs Traditional Form</h2>
+
+<table>
+<tr>
+<th>Feature</th>
+<th>Traditional Form</th>
+<th>Server Action Form</th>
+</tr>
+
+<tr>
+<td>API Route Needed</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+
+<tr>
+<td>fetch() Needed</td>
+<td>Often Yes</td>
+<td>❌</td>
+</tr>
+
+<tr>
+<td>FormData Handling</td>
+<td>Manual</td>
+<td>Automatic</td>
+</tr>
+
+<tr>
+<td>Database Access</td>
+<td>Via API Route</td>
+<td>Direct</td>
+</tr>
+
+<tr>
+<td>Less Boilerplate</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+</table>
+
+<hr>
+
+<h2>Easy Memory Trick</h2>
+
+<div class="code-title">Remember</div>
+
+<pre><code class="language-text">Traditional Form
+        ↓
+API Route
+
+
+Server Action Form
+        ↓
+Server Action
+</code></pre>
+
+<div class="feature">
+<strong>One-Line Definition:</strong><br>
+Server Actions integrate with HTML forms by allowing a Server Action function to be assigned directly to the form's <code>action</code> attribute, eliminating the need for separate API routes.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-tsx.min.js"></script>
+
+</body>
+</html>

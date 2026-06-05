@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>What is the 'use server' directive and where can you place it?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0f172a;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.8;padding:40px 20px}
+.container{max-width:1000px;margin:auto;background:#111827;padding:40px;border-radius:16px}
+h1{color:#38bdf8;margin-bottom:20px}
+h2{color:#a78bfa;margin-top:30px;margin-bottom:10px}
+h3{color:#fbbf24;margin-top:25px;margin-bottom:10px}
+p{margin-bottom:15px}
+ul{margin-left:20px}
+li{margin-bottom:8px}
+.feature{background:#1e293b;border-left:5px solid #38bdf8;padding:15px;border-radius:8px;margin:20px 0}
+.code-title{background:#1e293b;color:#93c5fd;padding:10px;font-weight:bold}
+pre[class*="language-"]{margin:0!important}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+th{background:#1e293b;color:#38bdf8;text-align:left;padding:12px}
+td{padding:12px;border-top:1px solid #334155}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>What is the 'use server' directive and where can you place it?</h1>
+
+<p>
+<code>'use server'</code> is a Next.js directive that marks a function or file to run only on the server.
+</p>
+
+<div class="feature">
+<strong>Simple Meaning:</strong><br>
+<code>'use server'</code> tells Next.js, "This code must execute on the server and never in the browser."
+</div>
+
+<hr>
+
+<h2>Why Do We Need 'use server'?</h2>
+
+<p>
+Some code should never be sent to the browser.
+</p>
+
+Examples:
+</p>
+
+<ul>
+<li>Database queries</li>
+<li>Secret API keys</li>
+<li>Password hashing</li>
+<li>File system access</li>
+<li>Server-side business logic</li>
+</ul>
+
+<div class="code-title">Example</div>
+
+<pre><code class="language-ts">await db.user.create({
+  data: {
+    name: 'Rizwan'
+  }
+});</code></pre>
+
+<p>
+The browser cannot access the database directly, so this code must run on the server.
+</p>
+
+<hr>
+
+<h2>Function-Level use server</h2>
+
+<p>
+We can place <code>'use server'</code> inside an individual function.
+</p>
+
+<div class="code-title">Example</div>
+
+<pre><code class="language-tsx">export default function Page() {
+
+  async function createUser(formData: FormData) {
+    'use server';
+
+    await db.user.create({
+      data: {
+        name: formData.get('name')
+      }
+    });
+  }
+
+  return (
+    &lt;form action={createUser}&gt;
+      &lt;input name="name" /&gt;
+      &lt;button&gt;Save&lt;/button&gt;
+    &lt;/form&gt;
+  );
+
+}</code></pre>
+
+<p>
+Only the <code>createUser()</code> function runs on the server.
+</p>
+
+<hr>
+
+<h2>File-Level use server</h2>
+
+<p>
+We can place <code>'use server'</code> at the top of a file.
+</p>
+
+<div class="code-title">actions.ts</div>
+
+<pre><code class="language-ts">'use server';
+
+export async function createUser() {
+
+  await db.user.create({
+    data: {
+      name: 'Rizwan'
+    }
+  });
+
+}
+
+export async function deleteUser(id: string) {
+
+  await db.user.delete({
+    where: { id }
+  });
+
+}</code></pre>
+
+<p>
+Now every exported function in this file becomes a Server Action.
+</p>
+
+<hr>
+
+<h2>How Next.js Treats It</h2>
+
+<div class="code-title">Flow</div>
+
+<pre><code class="language-text">Client Component
+       ↓
+Calls Server Action
+       ↓
+Next.js Internal Request
+       ↓
+Server
+       ↓
+Execute Function
+       ↓
+Return Result
+</code></pre>
+
+<p>
+The browser never executes the server code directly.
+</p>
+
+<hr>
+
+<h2>Using use server with Forms</h2>
+
+<div class="code-title">Server Action</div>
+
+<pre><code class="language-ts">export async function createUser(
+  formData: FormData
+) {
+  'use server';
+
+  await db.user.create({
+    data: {
+      name: formData.get('name')
+    }
+  });
+}</code></pre>
+
+<div class="code-title">Form</div>
+
+<pre><code class="language-tsx">&lt;form action={createUser}&gt;
+  &lt;input name="name" /&gt;
+  &lt;button&gt;Save&lt;/button&gt;
+&lt;/form&gt;</code></pre>
+
+<p>
+When the form is submitted:
+</p>
+
+<pre><code class="language-text">Submit Form
+      ↓
+Server Action
+      ↓
+Database
+      ↓
+Response
+</code></pre>
+
+<hr>
+
+<h2>Using use server from a Client Component</h2>
+
+<div class="code-title">actions.ts</div>
+
+<pre><code class="language-ts">'use server';
+
+export async function createUser() {
+
+  await db.user.create({
+    data: {
+      name: 'Rizwan'
+    }
+  });
+
+}</code></pre>
+
+<div class="code-title">Client Component</div>
+
+<pre><code class="language-tsx">'use client';
+
+import { createUser } from './actions';
+
+export default function Button() {
+
+  return (
+    &lt;button
+      onClick={() =&gt; createUser()}
+    &gt;
+      Create User
+    &lt;/button&gt;
+  );
+
+}</code></pre>
+
+<p>
+Although the button runs in the browser, the action executes on the server.
+</p>
+
+<hr>
+
+<h2>Where Can We Place use server?</h2>
+
+<table>
+<tr>
+<th>Location</th>
+<th>Allowed?</th>
+</tr>
+
+<tr>
+<td>Inside a Function</td>
+<td>✅ Yes</td>
+</tr>
+
+<tr>
+<td>Top of actions.ts File</td>
+<td>✅ Yes</td>
+</tr>
+
+<tr>
+<td>Inside Client Component File</td>
+<td>❌ No</td>
+</tr>
+
+<tr>
+<td>Inside Event Handler</td>
+<td>❌ No</td>
+</tr>
+
+<tr>
+<td>Inside useEffect()</td>
+<td>❌ No</td>
+</tr>
+</table>
+
+<hr>
+
+<h2>use server vs use client</h2>
+
+<table>
+<tr>
+<th>Feature</th>
+<th>use server</th>
+<th>use client</th>
+</tr>
+
+<tr>
+<td>Runs on Server</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+
+<tr>
+<td>Runs in Browser</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+
+<tr>
+<td>Database Access</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+
+<tr>
+<td>Access Secret Keys</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+
+<tr>
+<td>useState/useEffect</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+</table>
+
+<hr>
+
+<h2>Easy Memory Trick</h2>
+
+<div class="code-title">Remember</div>
+
+<pre><code class="language-text">use server
+      ↓
+Backend Code
+
+
+use client
+      ↓
+Browser Code
+</code></pre>
+
+<div class="feature">
+<strong>One-Line Definition:</strong><br>
+<code>'use server'</code> is a Next.js directive that marks functions or files to execute only on the server, allowing secure access to databases, secrets, and backend logic.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-tsx.min.js"></script>
+
+</body>
+</html>

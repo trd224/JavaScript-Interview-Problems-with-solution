@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How does next/after allow post-response work in Next.js 15?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0f172a;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.8;padding:40px 20px}
+.container{max-width:1000px;margin:auto;background:#111827;padding:40px;border-radius:16px}
+h1{color:#38bdf8;margin-bottom:20px}
+h2{color:#a78bfa;margin-top:30px;margin-bottom:10px}
+h3{color:#fbbf24;margin-top:25px;margin-bottom:10px}
+p{margin-bottom:15px}
+ul{margin-left:20px}
+li{margin-bottom:8px}
+.feature{background:#1e293b;border-left:5px solid #38bdf8;padding:15px;border-radius:8px;margin:20px 0}
+.code-title{background:#1e293b;color:#93c5fd;padding:10px;font-weight:bold}
+pre[class*="language-"]{margin:0!important}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+th{background:#1e293b;color:#38bdf8;text-align:left;padding:12px}
+td{padding:12px;border-top:1px solid #334155}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>How does next/after allow post-response work in Next.js 15?</h1>
+
+<p>
+<code>after()</code> allows us to run code after Next.js has finished sending the response to the browser.
+</p>
+
+<div class="feature">
+<strong>Simple meaning:</strong><br>
+Response first, background work after that.
+</div>
+
+<hr>
+
+<h2>1. Without after()</h2>
+
+<p>
+Without <code>after()</code>, if we run logging, analytics, or audit code before returning the UI, the user has to wait.
+</p>
+
+<div class="code-title">Without after()</div>
+
+<pre><code class="language-tsx">export default async function Page() {
+
+  await saveAnalytics();
+
+  return &lt;h1&gt;Products&lt;/h1&gt;;
+
+}</code></pre>
+
+<p>
+Flow:
+</p>
+
+<pre><code class="language-text">Request
+   ↓
+saveAnalytics()
+   ↓
+Render Page
+   ↓
+Send Response
+</code></pre>
+
+<p>
+Here, the page response is delayed because <code>saveAnalytics()</code> runs before the response.
+</p>
+
+<hr>
+
+<h2>2. With after()</h2>
+
+<p>
+With <code>after()</code>, we can schedule non-critical work after the response is finished.
+</p>
+
+<div class="code-title">With after()</div>
+
+<pre><code class="language-tsx">import { after } from 'next/server';
+
+export default function Page() {
+
+  after(async () =&gt; {
+    await saveAnalytics();
+  });
+
+  return &lt;h1&gt;Products&lt;/h1&gt;;
+
+}</code></pre>
+
+<p>
+Flow:
+</p>
+
+<pre><code class="language-text">Request
+   ↓
+Render Page
+   ↓
+Send Response
+   ↓
+saveAnalytics()
+</code></pre>
+
+<div class="feature">
+Now the user gets the page first, and analytics work runs after the response.
+</div>
+
+<hr>
+
+<h2>Real World Example</h2>
+
+<p>
+Suppose our product page needs to save a page-view record.
+</p>
+
+<div class="code-title">Product Page Visit Tracking</div>
+
+<pre><code class="language-tsx">import { after } from 'next/server';
+
+export default async function ProductPage() {
+
+  const products = await getProducts();
+
+  after(async () =&gt; {
+    await db.pageViews.create({
+      page: '/products',
+      viewedAt: new Date()
+    });
+  });
+
+  return &lt;ProductList products={products} /&gt;;
+
+}</code></pre>
+
+<p>
+Here:
+</p>
+
+<table>
+<tr>
+<th>Work</th>
+<th>When It Happens</th>
+</tr>
+
+<tr>
+<td>Get products</td>
+<td>Before response, because UI needs products</td>
+</tr>
+
+<tr>
+<td>Render product page</td>
+<td>Before response</td>
+</tr>
+
+<tr>
+<td>Save page view</td>
+<td>After response</td>
+</tr>
+</table>
+
+<hr>
+
+<h2>Common Use Cases</h2>
+
+<ul>
+<li>Analytics tracking</li>
+<li>Logging</li>
+<li>Audit records</li>
+<li>Sending webhooks</li>
+<li>Updating counters</li>
+<li>Background notifications</li>
+</ul>
+
+<hr>
+
+<h2>Important Point</h2>
+
+<p>
+<code>after()</code> does not make a page dynamic by itself.
+</p>
+
+<div class="code-title">Static Page With after()</div>
+
+<pre><code class="language-tsx">import { after } from 'next/server';
+
+export default function Page() {
+
+  after(() =&gt; {
+    console.log('Logged after response');
+  });
+
+  return &lt;h1&gt;Static Page&lt;/h1&gt;;
+
+}</code></pre>
+
+<p>
+This page can still be static. Using <code>after()</code> only schedules post-response work.
+</p>
+
+<hr>
+
+<h2>Where Can We Use after()?</h2>
+
+<table>
+<tr>
+<th>Place</th>
+<th>Can Use after()?</th>
+</tr>
+
+<tr>
+<td>Server Components</td>
+<td>✅ Yes</td>
+</tr>
+
+<tr>
+<td>Server Actions / Server Functions</td>
+<td>✅ Yes</td>
+</tr>
+
+<tr>
+<td>Route Handlers</td>
+<td>✅ Yes</td>
+</tr>
+
+<tr>
+<td>Client Components</td>
+<td>❌ No</td>
+</tr>
+</table>
+
+<hr>
+
+<h2>Easy Memory Trick</h2>
+
+<div class="code-title">Remember</div>
+
+<pre><code class="language-text">Normal Code
+     ↓
+Runs before response
+
+
+after()
+     ↓
+Runs after response
+</code></pre>
+
+<div class="feature">
+<strong>One-Line Definition:</strong><br>
+<code>after()</code> is a Next.js API that allows us to execute non-critical work after the response is sent, without delaying page rendering.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-tsx.min.js"></script>
+
+</body>
+</html>

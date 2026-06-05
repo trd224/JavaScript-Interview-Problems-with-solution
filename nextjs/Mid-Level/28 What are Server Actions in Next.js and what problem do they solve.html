@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>What are Server Actions in Next.js and what problem do they solve?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0f172a;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.8;padding:40px 20px}
+.container{max-width:1000px;margin:auto;background:#111827;padding:40px;border-radius:16px}
+h1{color:#38bdf8;margin-bottom:20px}
+h2{color:#a78bfa;margin-top:30px;margin-bottom:10px}
+h3{color:#fbbf24;margin-top:25px;margin-bottom:10px}
+p{margin-bottom:15px}
+ul{margin-left:20px}
+li{margin-bottom:8px}
+.feature{background:#1e293b;border-left:5px solid #38bdf8;padding:15px;border-radius:8px;margin:20px 0}
+.code-title{background:#1e293b;color:#93c5fd;padding:10px;font-weight:bold}
+pre[class*="language-"]{margin:0!important}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+th{background:#1e293b;color:#38bdf8;text-align:left;padding:12px}
+td{padding:12px;border-top:1px solid #334155}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>What are Server Actions in Next.js and what problem do they solve?</h1>
+
+<p>
+Server Actions are server-side functions that can be called directly from forms, Server Components, and Client Components without creating separate API routes.
+</p>
+
+<div class="feature">
+<strong>Simple Meaning:</strong><br>
+Server Actions allow us to execute backend code directly from our Next.js components.
+</div>
+
+<hr>
+
+<h2>What Problem Did Server Actions Solve?</h2>
+
+<p>
+Before Server Actions, every form submission usually required an API route.
+</p>
+
+<div class="code-title">Traditional Flow</div>
+
+<pre><code class="language-text">User Clicks Save
+       ↓
+Client Component
+       ↓
+fetch('/api/users')
+       ↓
+API Route
+       ↓
+Database
+       ↓
+Response
+       ↓
+Update UI
+</code></pre>
+
+<p>
+Even a simple database insert required multiple files and extra boilerplate code.
+</p>
+
+<hr>
+
+<h2>Without Server Actions</h2>
+
+<div class="code-title">API Route</div>
+
+<pre><code class="language-ts">// app/api/users/route.ts
+
+export async function POST(req: Request) {
+
+  const data = await req.json();
+
+  await db.user.create({
+    data
+  });
+
+  return Response.json({
+    success: true
+  });
+
+}</code></pre>
+
+<div class="code-title">Client Component</div>
+
+<pre><code class="language-tsx">'use client';
+
+export default function UserForm() {
+
+  async function saveUser() {
+
+    await fetch('/api/users', {
+      method: 'POST',
+      body: JSON.stringify({
+        name: 'Rizwan'
+      })
+    });
+
+  }
+
+  return (
+    &lt;button onClick={saveUser}&gt;
+      Save User
+    &lt;/button&gt;
+  );
+
+}</code></pre>
+
+<p>
+We need:
+</p>
+
+<ul>
+<li>Form</li>
+<li>API Route</li>
+<li>fetch()</li>
+<li>Request Parsing</li>
+<li>Response Handling</li>
+</ul>
+
+<hr>
+
+<h2>With Server Actions</h2>
+
+<div class="code-title">Server Action</div>
+
+<pre><code class="language-ts">// app/actions.ts
+
+'use server';
+
+export async function createUser(formData: FormData) {
+
+  await db.user.create({
+    data: {
+      name: formData.get('name')
+    }
+  });
+
+}</code></pre>
+
+<div class="code-title">Page</div>
+
+<pre><code class="language-tsx">import { createUser } from './actions';
+
+export default function Page() {
+
+  return (
+    &lt;form action={createUser}&gt;
+
+      &lt;input
+        name="name"
+        placeholder="Enter Name"
+      /&gt;
+
+      &lt;button type="submit"&gt;
+        Save User
+      &lt;/button&gt;
+
+    &lt;/form&gt;
+  );
+
+}</code></pre>
+
+<p>
+Flow:
+</p>
+
+<pre><code class="language-text">User Clicks Save
+       ↓
+Server Action
+       ↓
+Database
+       ↓
+Updated UI
+</code></pre>
+
+<p>
+No API route required.
+</p>
+
+<hr>
+
+<h2>Understanding "use server"</h2>
+
+<p>
+The <code>'use server'</code> directive tells Next.js that this function must execute on the server.
+</p>
+
+<div class="code-title">Example</div>
+
+<pre><code class="language-ts">'use server';
+
+export async function deleteUser(id: string) {
+
+  await db.user.delete({
+    where: { id }
+  });
+
+}</code></pre>
+
+<p>
+The browser cannot execute this function directly. Next.js automatically sends a request to the server and runs it there.
+</p>
+
+<hr>
+
+<h2>Real World Example</h2>
+
+<p>
+Suppose we have an Admin Panel where products can be added.
+</p>
+
+<div class="code-title">Server Action</div>
+
+<pre><code class="language-ts">'use server';
+
+export async function addProduct(formData: FormData) {
+
+  await db.product.create({
+    data: {
+      name: formData.get('name'),
+      price: Number(formData.get('price'))
+    }
+  });
+
+}</code></pre>
+
+<div class="code-title">Form</div>
+
+<pre><code class="language-tsx">&lt;form action={addProduct}&gt;
+
+  &lt;input name="name" /&gt;
+
+  &lt;input name="price" /&gt;
+
+  &lt;button&gt;
+    Add Product
+  &lt;/button&gt;
+
+&lt;/form&gt;</code></pre>
+
+<p>
+Flow:
+</p>
+
+<pre><code class="language-text">Submit Form
+      ↓
+Server Action
+      ↓
+Database Insert
+      ↓
+Success
+</code></pre>
+
+<hr>
+
+<h2>Server Actions + Revalidation</h2>
+
+<p>
+Server Actions are commonly used with cache revalidation.
+</p>
+
+<div class="code-title">Example</div>
+
+<pre><code class="language-ts">'use server';
+
+import { revalidatePath } from 'next/cache';
+
+export async function addProduct(formData: FormData) {
+
+  await db.product.create({
+    data: {
+      name: formData.get('name')
+    }
+  });
+
+  revalidatePath('/products');
+
+}</code></pre>
+
+<p>
+Flow:
+</p>
+
+<pre><code class="language-text">Add Product
+      ↓
+Database Updated
+      ↓
+revalidatePath('/products')
+      ↓
+Products Cache Cleared
+      ↓
+Next Request Gets Fresh Data
+</code></pre>
+
+<hr>
+
+<h2>Can Client Components Use Server Actions?</h2>
+
+<p>
+Yes.
+</p>
+
+<div class="code-title">Client Component Example</div>
+
+<pre><code class="language-tsx">'use client';
+
+import { createUser } from './actions';
+
+export default function Button() {
+
+  return (
+    &lt;button
+      onClick={() =&gt; createUser()}
+    &gt;
+      Create User
+    &lt;/button&gt;
+  );
+
+}</code></pre>
+
+<p>
+Although the button is in a Client Component, the action still runs on the server.
+</p>
+
+<hr>
+
+<h2>When Should We Use Server Actions?</h2>
+
+<table>
+<tr>
+<th>Use Case</th>
+<th>Use Server Action?</th>
+</tr>
+
+<tr>
+<td>Create User</td>
+<td>✅ Yes</td>
+</tr>
+
+<tr>
+<td>Update Profile</td>
+<td>✅ Yes</td>
+</tr>
+
+<tr>
+<td>Delete Product</td>
+<td>✅ Yes</td>
+</tr>
+
+<tr>
+<td>Submit Contact Form</td>
+<td>✅ Yes</td>
+</tr>
+
+<tr>
+<td>Change Password</td>
+<td>✅ Yes</td>
+</tr>
+</table>
+
+<hr>
+
+<h2>When Should We Use API Routes Instead?</h2>
+
+<p>
+Use API Routes when external systems need access.
+</p>
+
+<div class="code-title">Example</div>
+
+<pre><code class="language-text">Android App
+      ↓
+API Route
+      ↓
+Database
+
+
+Third-Party Service
+      ↓
+API Route
+      ↓
+Database
+</code></pre>
+
+<p>
+Server Actions are mainly for communication between our Next.js frontend and backend.
+</p>
+
+<hr>
+
+<h2>Server Components vs Server Actions</h2>
+
+<table>
+<tr>
+<th>Feature</th>
+<th>Server Component</th>
+<th>Server Action</th>
+</tr>
+
+<tr>
+<td>Main Purpose</td>
+<td>Read Data</td>
+<td>Write Data</td>
+</tr>
+
+<tr>
+<td>Database Query</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+
+<tr>
+<td>Create Record</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+
+<tr>
+<td>Update Record</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+
+<tr>
+<td>Delete Record</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+</table>
+
+<hr>
+
+<h2>Easy Memory Trick</h2>
+
+<div class="code-title">Remember</div>
+
+<pre><code class="language-text">Server Component
+       ↓
+Read Data
+
+
+Server Action
+       ↓
+Write Data
+</code></pre>
+
+<div class="feature">
+<strong>One-Line Definition:</strong><br>
+Server Actions are server-side functions that allow us to perform create, update, and delete operations directly from Next.js components without creating separate API routes.
+</div>
+
+<hr>
+
+<h2>Server Actions vs Separate Backend (.NET, Java, Node)</h2>
+
+<p>
+Server Actions provide the biggest benefit when Next.js itself owns the backend logic and talks directly to the database.
+</p>
+
+<div class="code-title">Ideal Server Actions Architecture</div>
+
+<pre><code class="language-text">Next.js Frontend
+       ↓
+Server Action
+       ↓
+Database
+</code></pre>
+
+<p>
+In this setup, we can directly create, update, or delete database records without creating API routes.
+</p>
+
+<div class="feature">
+<strong>Best Use Case:</strong><br>
+Next.js Frontend + Next.js Backend + Database
+</div>
+
+<h3>What If We Already Have a Separate Backend?</h3>
+
+<p>
+Many real-world applications use a separate backend such as .NET, Java, Node.js, Spring Boot, Laravel, etc.
+</p>
+
+<div class="code-title">Separate Backend Architecture</div>
+
+<pre><code class="language-text">Next.js Frontend
+       ↓
+.NET API
+       ↓
+Database
+</code></pre>
+
+<p>
+In this case, the business logic already exists inside the backend API.
+</p>
+
+<p>
+Therefore, we usually call the backend directly using <code>fetch()</code>.
+</p>
+
+<div class="code-title">Example</div>
+
+<pre><code class="language-ts">const products = await fetch(
+  'https://api.company.com/products'
+);</code></pre>
+
+<p>
+or
+</p>
+
+<pre><code class="language-ts">await fetch(
+  'https://api.company.com/users',
+  {
+    method: 'POST'
+  }
+);</code></pre>
+
+<h3>Can Server Actions Still Be Used?</h3>
+
+<p>
+Yes.
+</p>
+
+<p>
+A Server Action can act as a middle layer between Next.js and the backend API.
+</p>
+
+<div class="code-title">Architecture</div>
+
+<pre><code class="language-text">Browser
+    ↓
+Server Action
+    ↓
+.NET API
+    ↓
+Database
+</code></pre>
+
+<div class="code-title">Example</div>
+
+<pre><code class="language-ts">'use server';
+
+export async function createUser(formData: FormData) {
+
+  await fetch(
+    'https://api.company.com/users',
+    {
+      method: 'POST',
+      body: JSON.stringify({
+        name: formData.get('name')
+      })
+    }
+  );
+
+}</code></pre>
+
+<p>
+Here the Server Action does not access the database directly. Instead, it forwards the request to the backend API.
+</p>
+
+<h3>For Projects Like Aadhaar Authentication</h3>
+
+<div class="code-title">Typical Architecture</div>
+
+<pre><code class="language-text">Angular / Next.js
+        ↓
+.NET API
+        ↓
+Database
+</code></pre>
+
+<p>
+In such projects, it is usually simpler to call the backend API directly rather than introducing Server Actions.
+</p>
+
+<table>
+<tr>
+<th>Architecture</th>
+<th>Recommended Approach</th>
+</tr>
+
+<tr>
+<td>Next.js + Database</td>
+<td>✅ Server Actions</td>
+</tr>
+
+<tr>
+<td>Next.js + .NET Backend</td>
+<td>✅ Direct API Calls</td>
+</tr>
+
+<tr>
+<td>Next.js + Java Backend</td>
+<td>✅ Direct API Calls</td>
+</tr>
+
+<tr>
+<td>Next.js + Node Backend</td>
+<td>✅ Direct API Calls</td>
+</tr>
+</table>
+
+<div class="feature">
+<strong>Easy Rule:</strong><br>
+If Next.js owns the database, Server Actions are usually the best choice.<br><br>
+If a separate backend already exists, direct API calls are usually simpler and more common.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-tsx.min.js"></script>
+
+</body>
+</html>

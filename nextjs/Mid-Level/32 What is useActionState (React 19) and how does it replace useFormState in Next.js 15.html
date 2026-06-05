@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>What is useActionState (React 19) and how does it replace useFormState in Next.js 15?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0f172a;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.8;padding:40px 20px}
+.container{max-width:1000px;margin:auto;background:#111827;padding:40px;border-radius:16px}
+h1{color:#38bdf8;margin-bottom:20px}
+h2{color:#a78bfa;margin-top:30px;margin-bottom:10px}
+h3{color:#fbbf24;margin-top:25px;margin-bottom:10px}
+p{margin-bottom:15px}
+ul{margin-left:20px}
+li{margin-bottom:8px}
+.feature{background:#1e293b;border-left:5px solid #38bdf8;padding:15px;border-radius:8px;margin:20px 0}
+.code-title{background:#1e293b;color:#93c5fd;padding:10px;font-weight:bold}
+pre[class*="language-"]{margin:0!important}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+th{background:#1e293b;color:#38bdf8;text-align:left;padding:12px}
+td{padding:12px;border-top:1px solid #334155}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>What is useActionState (React 19) and how does it replace useFormState in Next.js 15?</h1>
+
+<p>
+<code>useActionState()</code> is a React 19 hook that manages state returned from Server Actions.
+</p>
+
+<div class="feature">
+<strong>Simple Meaning:</strong><br>
+<code>useActionState()</code> allows us to receive success messages, validation errors, and other state updates directly from a Server Action.
+</div>
+
+<hr>
+
+<h2>Why Was useFormState Replaced?</h2>
+
+<p>
+Before React 19, Next.js used <code>useFormState()</code> from React DOM.
+</p>
+
+<div class="code-title">Old API</div>
+
+<pre><code class="language-tsx">import { useFormState } from 'react-dom';</code></pre>
+
+<p>
+React 19 introduced a more general solution called <code>useActionState()</code>.
+</p>
+
+<div class="code-title">New API</div>
+
+<pre><code class="language-tsx">import { useActionState } from 'react';</code></pre>
+
+<p>
+As a result, Next.js 15 uses <code>useActionState()</code> instead of <code>useFormState()</code>.
+</p>
+
+<hr>
+
+<h2>What Problem Does useActionState Solve?</h2>
+
+<p>
+Suppose a form submits data and the Server Action returns a success or error message.
+</p>
+
+<div class="code-title">Without useActionState</div>
+
+<pre><code class="language-text">Submit Form
+      ↓
+Server Action
+      ↓
+Success/Error
+      ↓
+Manually Manage State
+</code></pre>
+
+<p>
+We would need extra state variables and custom handling.
+</p>
+
+<p>
+With <code>useActionState()</code>:
+</p>
+
+<pre><code class="language-text">Submit Form
+      ↓
+Server Action
+      ↓
+Return State
+      ↓
+UI Updates Automatically
+</code></pre>
+
+<hr>
+
+<h2>Basic Example</h2>
+
+<div class="code-title">Server Action</div>
+
+<pre><code class="language-ts">'use server';
+
+export async function createUser(
+  previousState: string,
+  formData: FormData
+) {
+
+  const name = formData.get('name');
+
+  if (!name) {
+    return 'Name is required';
+  }
+
+  return 'User created successfully';
+
+}</code></pre>
+
+<div class="code-title">Client Component</div>
+
+<pre><code class="language-tsx">'use client';
+
+import { useActionState }
+from 'react';
+
+import { createUser }
+from './actions';
+
+export default function Form() {
+
+  const [
+    message,
+    formAction
+  ] = useActionState(
+    createUser,
+    ''
+  );
+
+  return (
+    &lt;form action={formAction}&gt;
+
+      &lt;input name="name" /&gt;
+
+      &lt;button&gt;
+        Save
+      &lt;/button&gt;
+
+      &lt;p&gt;{message}&lt;/p&gt;
+
+    &lt;/form&gt;
+  );
+
+}</code></pre>
+
+<hr>
+
+<h2>Understanding the Parameters</h2>
+
+<div class="code-title">Syntax</div>
+
+<pre><code class="language-tsx">const [
+  state,
+  formAction
+] = useActionState(
+  action,
+  initialState
+);</code></pre>
+
+<table>
+<tr>
+<th>Value</th>
+<th>Description</th>
+</tr>
+
+<tr>
+<td>state</td>
+<td>Current state returned from action</td>
+</tr>
+
+<tr>
+<td>formAction</td>
+<td>Action attached to form</td>
+</tr>
+
+<tr>
+<td>action</td>
+<td>Server Action function</td>
+</tr>
+
+<tr>
+<td>initialState</td>
+<td>Starting value</td>
+</tr>
+</table>
+
+<hr>
+
+<h2>How State Flows</h2>
+
+<div class="code-title">Flow</div>
+
+<pre><code class="language-text">User Submits Form
+          ↓
+Server Action Executes
+          ↓
+Returns State
+          ↓
+useActionState Receives State
+          ↓
+Component Re-renders
+          ↓
+UI Updated
+</code></pre>
+
+<hr>
+
+<h2>Real World Validation Example</h2>
+
+<div class="code-title">Server Action</div>
+
+<pre><code class="language-ts">'use server';
+
+export async function register(
+  previousState: any,
+  formData: FormData
+) {
+
+  const email =
+    formData.get('email');
+
+  if (!email) {
+
+    return {
+      success: false,
+      error: 'Email is required'
+    };
+
+  }
+
+  return {
+    success: true,
+    error: null
+  };
+
+}</code></pre>
+
+<div class="code-title">Client Component</div>
+
+<pre><code class="language-tsx">'use client';
+
+import { useActionState }
+from 'react';
+
+const [
+  state,
+  formAction
+] = useActionState(
+  register,
+  {
+    success: false,
+    error: null
+  }
+);
+
+return (
+  &lt;form action={formAction}&gt;
+
+    &lt;input
+      name="email"
+    /&gt;
+
+    &lt;button&gt;
+      Register
+    &lt;/button&gt;
+
+    {state.error && (
+      &lt;p&gt;
+        {state.error}
+      &lt;/p&gt;
+    )}
+
+  &lt;/form&gt;
+);</code></pre>
+
+<hr>
+
+<h2>useFormState vs useActionState</h2>
+
+<table>
+<tr>
+<th>Feature</th>
+<th>useFormState</th>
+<th>useActionState</th>
+</tr>
+
+<tr>
+<td>Library</td>
+<td>react-dom</td>
+<td>react</td>
+</tr>
+
+<tr>
+<td>React Version</td>
+<td>React 18</td>
+<td>React 19</td>
+</tr>
+
+<tr>
+<td>Status</td>
+<td>Older API</td>
+<td>Recommended</td>
+</tr>
+
+<tr>
+<td>Works with Server Actions</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+
+<tr>
+<td>Used in Next.js 15</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+</table>
+
+<hr>
+
+<h2>Relationship with useFormStatus()</h2>
+
+<p>
+These hooks solve different problems.
+</p>
+
+<table>
+<tr>
+<th>Hook</th>
+<th>Purpose</th>
+</tr>
+
+<tr>
+<td>useActionState()</td>
+<td>Manage returned state</td>
+</tr>
+
+<tr>
+<td>useFormStatus()</td>
+<td>Track pending/loading state</td>
+</tr>
+</table>
+
+<hr>
+
+<h2>Easy Memory Trick</h2>
+
+<div class="code-title">Remember</div>
+
+<pre><code class="language-text">useActionState()
+        ↓
+Returns Data
+
+
+useFormStatus()
+        ↓
+Returns Loading Status
+</code></pre>
+
+<div class="feature">
+<strong>One-Line Definition:</strong><br>
+<code>useActionState()</code> is a React 19 hook that manages state returned from Server Actions and replaces the older <code>useFormState()</code> API used in earlier Next.js versions.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-tsx.min.js"></script>
+
+</body>
+</html>
