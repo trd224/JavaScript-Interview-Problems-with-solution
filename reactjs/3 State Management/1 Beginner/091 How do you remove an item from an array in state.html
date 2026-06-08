@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>091 - Removing Item from Array in React State</title>
+
+  <style>
+
+    body{
+      margin:0;
+      padding:0;
+      background:#000814;
+      color:#e2e8f0;
+      font-family:Arial, sans-serif;
+      line-height:1.7;
+    }
+
+    .container{
+      max-width:1000px;
+      margin:40px auto;
+      background:#020617;
+      padding:40px;
+      border-radius:18px;
+      border:1px solid #0f172a;
+      box-shadow:0 0 40px rgba(0,0,0,0.95);
+    }
+
+    h1{
+      color:#f8fafc;
+      margin-bottom:30px;
+      font-size:34px;
+    }
+
+    h2{
+      color:#c084fc;
+      margin-top:35px;
+      margin-bottom:15px;
+      font-size:26px;
+    }
+
+    p{
+      color:#cbd5e1;
+    }
+
+    ul{
+      padding-left:24px;
+    }
+
+    li{
+      margin-bottom:10px;
+      color:#cbd5e1;
+    }
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      margin-top:20px;
+    }
+
+    table th,
+    table td{
+      border:1px solid #1e293b;
+      padding:14px;
+      text-align:left;
+      vertical-align:top;
+    }
+
+    table th{
+      background:#0f172a;
+      color:#38bdf8;
+    }
+
+    table td{
+      background:#020617;
+      color:#d1d5db;
+    }
+
+    .highlight{
+      background:#0f172a;
+      padding:18px;
+      border-left:5px solid #38bdf8;
+      border-radius:10px;
+      margin-top:15px;
+      color:#e5e7eb;
+    }
+
+    .flow{
+      background:#020617;
+      border:1px solid #1e293b;
+      padding:20px;
+      border-radius:10px;
+      margin-top:15px;
+      color:#e2e8f0;
+      line-height:2;
+      text-align:center;
+      font-size:18px;
+    }
+
+    pre{
+      background:#000000;
+      padding:22px;
+      border-radius:12px;
+      overflow-x:auto;
+      border:1px solid #0f172a;
+    }
+
+    code{
+      font-family:Consolas, monospace;
+      font-size:15px;
+    }
+
+    .keyword{
+      color:#c084fc;
+    }
+
+    .function{
+      color:#38bdf8;
+    }
+
+    .string{
+      color:#facc15;
+    }
+
+    .tag{
+      color:#f472b6;
+    }
+
+    .comment{
+      color:#94a3b8;
+    }
+
+    .output{
+      color:#4ade80;
+    }
+
+    .warning{
+      color:#fb7185;
+    }
+
+  
+
+    /* Fixed Previous / Next buttons */
+    .fixed-page-nav-spacer{height:110px;}
+    .fixed-page-nav{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);width:calc(100% - 32px);max-width:1180px;display:flex;justify-content:space-between;gap:16px;z-index:9999;pointer-events:none;}
+    .fixed-page-nav a,.fixed-page-nav span{width:52px;height:52px;display:flex;align-items:center;justify-content:center;text-align:center;text-decoration:none;background:#38bdf8;color:#020617;border-radius:50%;font-size:28px;font-weight:700;line-height:1;box-shadow:0 10px 30px rgba(0,0,0,0.45);pointer-events:auto;}
+    .fixed-page-nav span{background:#334155;color:#94a3b8;cursor:not-allowed;}
+    @media(max-width:600px){.fixed-page-nav{bottom:14px;width:calc(100% - 20px);}.fixed-page-nav a,.fixed-page-nav span{width:46px;height:46px;font-size:24px;}}
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+
+    <h1>091. How do you remove an item from an array in state?</h1>
+
+    <h2>One-Line Definition</h2>
+
+    <div class="highlight">
+      In React, items are removed from an array in state immutably using methods like filter().
+    </div>
+
+    <h2>Basic Array State</h2>
+
+    <pre><code><span class="keyword">const</span> [users, setUsers] = useState([
+
+  <span class="string">'Rizwan'</span>,
+  <span class="string">'Aman'</span>,
+  <span class="string">'Rahul'</span>
+
+]);</code></pre>
+
+    <h2>Wrong Way</h2>
+
+    <pre><code><span class="comment">// Wrong</span>
+
+users.splice(1, 1);
+
+setUsers(users);</code></pre>
+
+    <h2>Why This Is Wrong</h2>
+
+    <ul>
+      <li>Mutates original array</li>
+      <li>Reference remains same</li>
+      <li>React may not detect update</li>
+      <li>UI may not re-render correctly</li>
+    </ul>
+
+    <h2>Correct Way Using filter()</h2>
+
+    <pre><code>setUsers(
+
+  users.filter((user) => user !== <span class="string">'Aman'</span>)
+
+);</code></pre>
+
+    <h2>What filter() Does</h2>
+
+    <p>
+      filter() creates a new array containing only items that match the condition.
+    </p>
+
+    <h2>Result</h2>
+
+    <pre class="output"><code>[
+  'Rizwan',
+  'Rahul'
+]</code></pre>
+
+    <h2>Main Flow</h2>
+
+    <div class="flow">
+      Old Array
+      <br>
+      ↓
+      <br>
+      filter() Creates New Array
+      <br>
+      ↓
+      <br>
+      Item Removed
+      <br>
+      ↓
+      <br>
+      New Array Reference
+      <br>
+      ↓
+      <br>
+      React Re-Renders
+    </div>
+
+    <h2>Real Example</h2>
+
+    <pre><code><span class="keyword">import</span> { useState } from <span class="string">'react'</span>;
+
+<span class="keyword">function</span> <span class="function">App</span>() {
+
+  <span class="keyword">const</span> [users, setUsers] = useState([
+
+    <span class="string">'Rizwan'</span>,
+    <span class="string">'Aman'</span>,
+    <span class="string">'Rahul'</span>
+
+  ]);
+
+  <span class="keyword">const</span> removeUser = () => {
+
+    setUsers(
+
+      users.filter((user) => user !== <span class="string">'Aman'</span>)
+
+    );
+
+  };
+
+  <span class="keyword">return</span> (
+
+    <span class="tag">&lt;div&gt;</span>
+
+      <span class="tag">&lt;button</span> onClick={removeUser}<span class="tag">&gt;</span>
+        Remove Aman
+      <span class="tag">&lt;/button&gt;</span>
+
+      <span class="tag">&lt;ul&gt;</span>
+
+        {users.map((user) => (
+          <span class="tag">&lt;li&gt;</span>{user}<span class="tag">&lt;/li&gt;</span>
+        ))}
+
+      <span class="tag">&lt;/ul&gt;</span>
+
+    <span class="tag">&lt;/div&gt;</span>
+
+  );
+
+}</code></pre>
+
+    <h2>Output Before Click</h2>
+
+    <pre class="output"><code>
+Rizwan
+Aman
+Rahul
+</code></pre>
+
+    <h2>Output After Click</h2>
+
+    <pre class="output"><code>
+Rizwan
+Rahul
+</code></pre>
+
+    <h2>Removing Item by ID</h2>
+
+    <pre><code>setUsers(
+
+  users.filter((user) => user.id !== 2)
+
+);</code></pre>
+
+    <h2>Why ID Removal Is Better</h2>
+
+    <ul>
+      <li>More reliable</li>
+      <li>Works with duplicate names</li>
+      <li>Common in real projects</li>
+    </ul>
+
+    <h2>Functional Update Version</h2>
+
+    <p>
+      Recommended when update depends on previous state.
+    </p>
+
+    <pre><code>setUsers((prevUsers) => (
+
+  prevUsers.filter((user) => user.id !== 2)
+
+));</code></pre>
+
+    <h2>Why Functional Updates Are Better</h2>
+
+    <ul>
+      <li>Uses latest state</li>
+      <li>Avoids stale state issues</li>
+      <li>Safer for async updates</li>
+    </ul>
+
+    <h2>Why React Requires Immutable Updates</h2>
+
+    <div class="highlight">
+      React uses reference comparison, so immutable operations like filter() create new array references that React can detect efficiently.
+    </div>
+
+    <h2>Mutable vs Immutable Array Removal</h2>
+
+    <table>
+
+      <tr>
+        <th>Mutable</th>
+        <th>Immutable</th>
+      </tr>
+
+      <tr>
+        <td>splice()</td>
+        <td>filter()</td>
+      </tr>
+
+      <tr>
+        <td>pop()</td>
+        <td>slice()</td>
+      </tr>
+
+      <tr>
+        <td>shift()</td>
+        <td>filter()</td>
+      </tr>
+
+    </table>
+
+    <h2>Real Project Use Cases</h2>
+
+    <table>
+
+      <tr>
+        <th>Feature</th>
+        <th>Remove Operation</th>
+      </tr>
+
+      <tr>
+        <td>Todo app</td>
+        <td>Delete task</td>
+      </tr>
+
+      <tr>
+        <td>Shopping cart</td>
+        <td>Remove product</td>
+      </tr>
+
+      <tr>
+        <td>Notification panel</td>
+        <td>Dismiss alert</td>
+      </tr>
+
+      <tr>
+        <td>Chat app</td>
+        <td>Delete message</td>
+      </tr>
+
+      <tr>
+        <td>OTP logs</td>
+        <td>Remove old entries</td>
+      </tr>
+
+    </table>
+
+    <h2>Important Interview Points</h2>
+
+    <ul>
+      <li>Never mutate arrays directly.</li>
+      <li>Use filter() for immutable removal.</li>
+      <li>filter() creates a new array.</li>
+      <li>Functional updates are safer.</li>
+      <li>React relies on new references for detecting changes.</li>
+    </ul>
+
+    <h2>Short Interview Answer</h2>
+
+    <div class="highlight">
+      Items are removed from React state arrays immutably using methods like filter(), which create new arrays without mutating the original array.
+    </div>
+
+    <h2>One-Line Interview Answer</h2>
+
+    <div class="highlight">
+      Remove items from React state arrays immutably using filter().
+    </div>
+
+  </div>
+
+
+  <div class="fixed-page-nav-spacer"></div>
+  <div class="fixed-page-nav">
+    <a href="090%20How%20do%20you%20add%20an%20item%20to%20an%20array%20in%20state.html">←</a>
+    <a href="092%20What%20is%20lifting%20state%20up.html">→</a>
+  </div>
+</body>
+</html>

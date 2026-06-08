@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>132 - Dependency Array in useEffect</title>
+
+  <style>
+
+    body{
+      margin:0;
+      padding:40px 20px;
+      background:#000814;
+      color:#e2e8f0;
+      font-family:Arial,sans-serif;
+      line-height:1.7;
+    }
+
+    .container{
+      max-width:1000px;
+      margin:auto;
+    }
+
+    .card{
+      background:#020617;
+      border:1px solid #1e293b;
+      border-radius:18px;
+      padding:35px;
+      margin-bottom:30px;
+      box-shadow:0 0 25px rgba(0,0,0,0.6);
+    }
+
+    h1{
+      color:#f8fafc;
+      font-size:38px;
+      margin:0;
+    }
+
+    h2{
+      color:#c084fc;
+      margin-top:0;
+      margin-bottom:18px;
+      font-size:28px;
+    }
+
+    h3{
+      color:#38bdf8;
+      margin-top:25px;
+      margin-bottom:12px;
+      font-size:20px;
+    }
+
+    p{
+      color:#cbd5e1;
+    }
+
+    ul{
+      padding-left:24px;
+    }
+
+    li{
+      margin-bottom:10px;
+      color:#cbd5e1;
+    }
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      margin-top:20px;
+    }
+
+    table th,
+    table td{
+      border:1px solid #334155;
+      padding:14px;
+      text-align:left;
+      vertical-align:top;
+    }
+
+    table th{
+      background:#0f172a;
+      color:#38bdf8;
+    }
+
+    table td{
+      color:#d1d5db;
+    }
+
+    .highlight{
+      background:#0f172a;
+      padding:18px;
+      border-left:5px solid #38bdf8;
+      border-radius:10px;
+      color:#e5e7eb;
+    }
+
+    .flow{
+      background:#000000;
+      border:1px solid #334155;
+      padding:20px;
+      border-radius:12px;
+      color:#e2e8f0;
+      line-height:2;
+      text-align:center;
+      font-size:18px;
+    }
+
+    pre{
+      background:#000000;
+      padding:22px;
+      border-radius:12px;
+      overflow-x:auto;
+      border:1px solid #1e293b;
+    }
+
+    code{
+      font-family:Consolas,monospace;
+      font-size:15px;
+    }
+
+    .keyword{
+      color:#c084fc;
+    }
+
+    .function{
+      color:#38bdf8;
+    }
+
+    .string{
+      color:#facc15;
+    }
+
+    .tag{
+      color:#f472b6;
+    }
+
+    .comment{
+      color:#94a3b8;
+    }
+
+    .output{
+      color:#4ade80;
+    }
+
+  
+
+    /* Fixed Previous / Next buttons */
+    .fixed-page-nav-spacer{height:110px;}
+    .fixed-page-nav{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);width:calc(100% - 32px);max-width:1180px;display:flex;justify-content:space-between;gap:16px;z-index:9999;pointer-events:none;}
+    .fixed-page-nav a,.fixed-page-nav span{width:52px;height:52px;display:flex;align-items:center;justify-content:center;text-align:center;text-decoration:none;background:#38bdf8;color:#020617;border-radius:50%;font-size:28px;font-weight:700;line-height:1;box-shadow:0 10px 30px rgba(0,0,0,0.45);pointer-events:auto;}
+    .fixed-page-nav span{background:#334155;color:#94a3b8;cursor:not-allowed;}
+    @media(max-width:600px){.fixed-page-nav{bottom:14px;width:calc(100% - 20px);}.fixed-page-nav a,.fixed-page-nav span{width:46px;height:46px;font-size:24px;}}
+  </style>
+
+</head>
+
+<body>
+
+  <div class="container">
+
+    <section class="card">
+
+      <h1>132. What is the dependency array in useEffect?</h1>
+
+    </section>
+
+    <section class="card">
+
+      <h2>One-Line Definition</h2>
+
+      <div class="highlight">
+        The dependency array controls when a useEffect hook should re-run.
+      </div>
+
+      <h2>Simple Understanding</h2>
+
+      <p>
+        React watches the values inside the dependency array.
+      </p>
+
+      <p>
+        If any dependency changes, the effect runs again.
+      </p>
+
+    </section>
+
+    <section class="card">
+
+      <h2>Main Idea</h2>
+
+      <div class="flow">
+        Dependency Changes
+        <br>
+        ↓
+        <br>
+        React Detects Change
+        <br>
+        ↓
+        <br>
+        useEffect Re-Runs
+      </div>
+
+      <h2>Basic Syntax</h2>
+
+      <pre><code>useEffect(() => {
+
+  <span class="comment">// Side effect</span>
+
+}, [dependencies]);</code></pre>
+
+    </section>
+
+    <section class="card">
+
+      <h2>No Dependency Array</h2>
+
+      <pre><code>useEffect(() => {
+
+  console.log(<span class="string">'Runs After Every Render'</span>);
+
+});</code></pre>
+
+      <h3>What Happens?</h3>
+
+      <ul>
+        <li>Runs after first render</li>
+        <li>Runs after every re-render</li>
+      </ul>
+
+      <h3>Why?</h3>
+
+      <p>
+        No dependency array means React has no restriction for re-running the effect.
+      </p>
+
+    </section>
+
+    <section class="card">
+
+      <h2>Empty Dependency Array</h2>
+
+      <pre><code>useEffect(() => {
+
+  console.log(<span class="string">'Runs Once'</span>);
+
+}, []);</code></pre>
+
+      <h3>What Happens?</h3>
+
+      <div class="highlight">
+        Effect runs only once after the first render.
+      </div>
+
+      <h3>Equivalent Lifecycle</h3>
+
+      <pre><code>componentDidMount()</code></pre>
+
+    </section>
+
+    <section class="card">
+
+      <h2>Dependency Array with Values</h2>
+
+      <pre><code><span class="keyword">import</span> { useEffect, useState } from <span class="string">'react'</span>;
+
+<span class="keyword">function</span> <span class="function">App</span>() {
+
+  <span class="keyword">const</span> [count, setCount] = useState(0);
+
+  useEffect(() => {
+
+    console.log(<span class="string">'Count Changed'</span>);
+
+  }, [count]);
+
+  <span class="keyword">return</span> (
+
+    <span class="tag">&lt;button</span> onClick={() => setCount(count + 1)}<span class="tag">&gt;</span>{count}<span class="tag">&lt;/button&gt;</span>
+
+  );
+
+}</code></pre>
+
+      <h3>What Happens?</h3>
+
+      <ul>
+        <li>Runs after first render</li>
+        <li>Runs whenever count changes</li>
+      </ul>
+
+    </section>
+
+    <section class="card">
+
+      <h2>Multiple Dependencies</h2>
+
+      <pre><code>useEffect(() => {
+
+  console.log(<span class="string">'Runs When name or age Changes'</span>);
+
+}, [name, age]);</code></pre>
+
+      <h3>What Happens?</h3>
+
+      <p>
+        Effect runs if any dependency changes.
+      </p>
+
+    </section>
+
+    <section class="card">
+
+      <h2>How React Checks Dependencies</h2>
+
+      <div class="flow">
+        Previous Dependency Values
+        <br>
+        ↓
+        <br>
+        Current Dependency Values
+        <br>
+        ↓
+        <br>
+        React Compares Them
+        <br>
+        ↓
+        <br>
+        If Changed → Effect Runs
+      </div>
+
+      <h2>Comparison Type</h2>
+
+      <div class="highlight">
+        React uses shallow comparison with Object.is().
+      </div>
+
+    </section>
+
+    <section class="card">
+
+      <h2>Important Problem with Objects and Arrays</h2>
+
+      <pre><code>useEffect(() => {
+
+  console.log(<span class="string">'Runs Again'</span>);
+
+}, [{ name: <span class="string">'Rizwan'</span> }]);</code></pre>
+
+      <h3>What Happens?</h3>
+
+      <div class="highlight">
+        useEffect runs on every render because a new object reference is created each time.
+      </div>
+
+      <h3>Why Problem?</h3>
+
+      <p>
+        Objects and arrays create new references on every render.
+      </p>
+
+      <p>
+        React compares references, not actual object values.
+      </p>
+
+      <pre><code>{ name: <span class="string">'Rizwan'</span> } !== { name: <span class="string">'Rizwan'</span> }</code></pre>
+
+      <h3>Flow</h3>
+
+      <div class="flow">
+        Component Re-Renders
+        <br>
+        ↓
+        <br>
+        New Object Created
+        <br>
+        ↓
+        <br>
+        Previous Reference !== Current Reference
+        <br>
+        ↓
+        <br>
+        useEffect Runs Again
+      </div>
+
+      <h3>Correct Solution Using useMemo</h3>
+
+      <pre><code><span class="keyword">const</span> user = useMemo(() => {
+
+  <span class="keyword">return</span> { name: <span class="string">'Rizwan'</span> };
+
+}, []);
+
+useEffect(() => {
+
+  console.log(<span class="string">'Runs Only Once'</span>);
+
+}, [user]);</code></pre>
+
+      <h3>Important Understanding Example</h3>
+
+      <p>
+        This example is commonly used for learning purposes because it looks correct at first.
+      </p>
+
+      <pre><code><span class="keyword">const</span> user = { name: <span class="string">'Rizwan'</span> };
+
+useEffect(() => {
+
+  console.log(<span class="string">'Runs Only Once'</span>);
+
+}, [user]);</code></pre>
+
+      <h3>Looks Correct But...</h3>
+
+      <div class="highlight">
+        If this object is created inside the component, React creates a new object on every render.
+      </div>
+
+      <h3>Actual Behavior Inside Component</h3>
+
+      <pre><code><span class="keyword">function</span> <span class="function">App</span>() {
+
+  <span class="keyword">const</span> user = { name: <span class="string">'Rizwan'</span> };
+
+  useEffect(() => {
+
+    console.log(<span class="string">'Runs Again'</span>);
+
+  }, [user]);
+
+}</code></pre>
+
+      <h3>Why?</h3>
+
+      <p>
+        The component function runs again on every render, so the object gets recreated with a new memory reference.
+      </p>
+
+      <pre><code>{ name: <span class="string">'Rizwan'</span> } !== { name: <span class="string">'Rizwan'</span> }</code></pre>
+
+      <div class="highlight">
+        This example is useful for understanding why useMemo is needed for stable object references.
+      </div>
+
+    </section>
+
+  </div>
+
+
+  <div class="fixed-page-nav-spacer"></div>
+  <div class="fixed-page-nav">
+    <a href="131%20What%20is%20the%20useEffect%20hook.html">←</a>
+    <a href="133%20What%20is%20the%20cleanup%20function%20in%20useEffect.html">→</a>
+  </div>
+</body>
+</html>

@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>038 - React Fiber</title>
+
+  <style>
+
+    body{
+      margin:0;
+      padding:0;
+      background:#000814;
+      color:#e2e8f0;
+      font-family:Arial, sans-serif;
+      line-height:1.7;
+    }
+
+    .container{
+      max-width:1000px;
+      margin:40px auto;
+      background:#020617;
+      padding:40px;
+      border-radius:18px;
+      border:1px solid #0f172a;
+      box-shadow:0 0 40px rgba(0,0,0,0.95);
+    }
+
+    h1{
+      color:#f8fafc;
+      margin-bottom:30px;
+      font-size:34px;
+    }
+
+    h2{
+      color:#c084fc;
+      margin-top:35px;
+      margin-bottom:15px;
+      font-size:26px;
+    }
+
+    p{
+      color:#cbd5e1;
+    }
+
+    ul{
+      padding-left:24px;
+    }
+
+    li{
+      margin-bottom:10px;
+      color:#cbd5e1;
+    }
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      margin-top:20px;
+    }
+
+    table th,
+    table td{
+      border:1px solid #1e293b;
+      padding:14px;
+      text-align:left;
+      vertical-align:top;
+    }
+
+    table th{
+      background:#0f172a;
+      color:#38bdf8;
+    }
+
+    table td{
+      background:#020617;
+      color:#d1d5db;
+    }
+
+    .highlight{
+      background:#0f172a;
+      padding:18px;
+      border-left:5px solid #38bdf8;
+      border-radius:10px;
+      margin-top:15px;
+      color:#e5e7eb;
+    }
+
+    .flow{
+      background:#020617;
+      border:1px solid #1e293b;
+      padding:20px;
+      border-radius:10px;
+      margin-top:15px;
+      color:#e2e8f0;
+      line-height:2;
+      text-align:center;
+      font-size:18px;
+    }
+
+    pre{
+      background:#000000;
+      padding:22px;
+      border-radius:12px;
+      overflow-x:auto;
+      border:1px solid #0f172a;
+    }
+
+    code{
+      font-family:Consolas, monospace;
+      font-size:15px;
+    }
+
+    .keyword{
+      color:#c084fc;
+    }
+
+    .function{
+      color:#38bdf8;
+    }
+
+    .string{
+      color:#facc15;
+    }
+
+    .tag{
+      color:#f472b6;
+    }
+
+    .comment{
+      color:#94a3b8;
+    }
+
+    .output{
+      color:#4ade80;
+    }
+
+  
+
+    /* Fixed Previous / Next buttons */
+    .fixed-page-nav-spacer{height:110px;}
+    .fixed-page-nav{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);width:calc(100% - 32px);max-width:1180px;display:flex;justify-content:space-between;gap:16px;z-index:9999;pointer-events:none;}
+    .fixed-page-nav a,.fixed-page-nav span{width:52px;height:52px;display:flex;align-items:center;justify-content:center;text-align:center;text-decoration:none;background:#38bdf8;color:#020617;border-radius:50%;font-size:28px;font-weight:700;line-height:1;box-shadow:0 10px 30px rgba(0,0,0,0.45);pointer-events:auto;}
+    .fixed-page-nav span{background:#334155;color:#94a3b8;cursor:not-allowed;}
+    @media(max-width:600px){.fixed-page-nav{bottom:14px;width:calc(100% - 20px);}.fixed-page-nav a,.fixed-page-nav span{width:46px;height:46px;font-size:24px;}}
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+
+    <h1>038. What is React Fiber and why was it rewritten from scratch?</h1>
+
+    <h2>One-Line Definition</h2>
+
+    <div class="highlight">
+      React Fiber is React’s rewritten rendering engine that allows React to pause, prioritize, reuse, and manage rendering work more efficiently.
+    </div>
+
+    <h2>What Was Before Fiber?</h2>
+
+    <p>
+      Before Fiber, React used the old:
+    </p>
+
+    <div class="highlight">
+      Stack Reconciler
+    </div>
+
+    <p>
+      The old system rendered everything synchronously.
+    </p>
+
+    <h2>Problem with Old React Engine</h2>
+
+    <p>
+      Once rendering started:
+    </p>
+
+    <ul>
+      <li>React could not pause rendering</li>
+      <li>React could not prioritize updates</li>
+      <li>Large UI updates could block the browser</li>
+      <li>Animations and interactions could lag</li>
+    </ul>
+
+    <h2>Simple Example of Old Problem</h2>
+
+    <p>
+      Suppose a huge dashboard is rendering.
+    </p>
+
+    <p>
+      Meanwhile the user clicks a button.
+    </p>
+
+    <p>
+      Old React would:
+    </p>
+
+    <div class="highlight">
+      Finish the entire rendering first before handling the button click.
+    </div>
+
+    <p>
+      This caused UI lag and poor responsiveness.
+    </p>
+
+    <h2>Why Fiber Was Created</h2>
+
+    <p>
+      Facebook rewrote React from scratch to support:
+    </p>
+
+    <ul>
+      <li>Smoother UI rendering</li>
+      <li>Interruptible rendering</li>
+      <li>Prioritized updates</li>
+      <li>Concurrent rendering</li>
+      <li>Better animations</li>
+      <li>Improved responsiveness</li>
+    </ul>
+
+    <h2>What Fiber Actually Is</h2>
+
+    <p>
+      Fiber is:
+    </p>
+
+    <div class="highlight">
+      A new reconciliation engine and internal tree structure.
+    </div>
+
+    <p>
+      Each component becomes a Fiber node.
+    </p>
+
+    <h2>Fiber Tree Example</h2>
+
+    <div class="flow">
+      App Fiber
+      <br>
+      ↓
+      <br>
+      Dashboard Fiber
+      <br>
+      ↓
+      <br>
+      Sidebar Fiber
+      <br>
+      ↓
+      <br>
+      Content Fiber
+    </div>
+
+    <h2>Main Features of Fiber</h2>
+
+    <table>
+
+      <tr>
+        <th>Feature</th>
+        <th>Purpose</th>
+      </tr>
+
+      <tr>
+        <td>Pause rendering</td>
+        <td>Prevent browser blocking</td>
+      </tr>
+
+      <tr>
+        <td>Resume rendering</td>
+        <td>Continue work later</td>
+      </tr>
+
+      <tr>
+        <td>Prioritize updates</td>
+        <td>Handle important UI first</td>
+      </tr>
+
+      <tr>
+        <td>Abort rendering</td>
+        <td>Skip outdated work</td>
+      </tr>
+
+      <tr>
+        <td>Concurrent rendering</td>
+        <td>Smoother UI experience</td>
+      </tr>
+
+    </table>
+
+    <h2>Important Concept</h2>
+
+    <div class="highlight">
+      Fiber breaks rendering work into small units.
+    </div>
+
+    <p>
+      This allows React to work incrementally instead of blocking the browser.
+    </p>
+
+    <h2>How Fiber Works</h2>
+
+    <div class="flow">
+      Update Happens
+      <br>
+      ↓
+      <br>
+      React Creates Fiber Work Units
+      <br>
+      ↓
+      <br>
+      React Processes Small Tasks
+      <br>
+      ↓
+      <br>
+      Browser Gets Time to Respond
+      <br>
+      ↓
+      <br>
+      React Continues Remaining Work
+    </div>
+
+    <h2>Why This Is Better</h2>
+
+    <ul>
+      <li>Responsive UI</li>
+      <li>Better animations</li>
+      <li>Smoother scrolling</li>
+      <li>Less browser freezing</li>
+      <li>Efficient large application rendering</li>
+    </ul>
+
+    <h2>Fiber and Concurrent Rendering</h2>
+
+    <p>
+      Modern React features like:
+    </p>
+
+    <ul>
+      <li>Suspense</li>
+      <li>Transitions</li>
+      <li>Concurrent rendering</li>
+      <li>Streaming SSR</li>
+    </ul>
+
+    <p>
+      are possible because of Fiber.
+    </p>
+
+    <h2>Real Project Example</h2>
+
+    <table>
+
+      <tr>
+        <th>Scenario</th>
+        <th>Fiber Benefit</th>
+      </tr>
+
+      <tr>
+        <td>Large dashboard</td>
+        <td>Smooth rendering</td>
+      </tr>
+
+      <tr>
+        <td>Live notifications</td>
+        <td>Priority updates</td>
+      </tr>
+
+      <tr>
+        <td>OTP authentication popup</td>
+        <td>Responsive UI updates</td>
+      </tr>
+
+      <tr>
+        <td>Heavy list rendering</td>
+        <td>Incremental rendering</td>
+      </tr>
+
+    </table>
+
+    <h2>Fiber vs Old Stack Reconciler</h2>
+
+    <table>
+
+      <tr>
+        <th>Old Stack Reconciler</th>
+        <th>React Fiber</th>
+      </tr>
+
+      <tr>
+        <td>Synchronous rendering</td>
+        <td>Interruptible rendering</td>
+      </tr>
+
+      <tr>
+        <td>No prioritization</td>
+        <td>Priority scheduling</td>
+      </tr>
+
+      <tr>
+        <td>Could block browser</td>
+        <td>Better responsiveness</td>
+      </tr>
+
+      <tr>
+        <td>Single large task</td>
+        <td>Small incremental tasks</td>
+      </tr>
+
+      <tr>
+        <td>Limited scalability</td>
+        <td>Optimized for large apps</td>
+      </tr>
+
+    </table>
+
+    <h2>Important Note</h2>
+
+    <div class="highlight">
+      Fiber is completely internal.  
+      Developers usually do not directly interact with Fiber APIs.
+    </div>
+
+    <h2>Important Interview Points</h2>
+
+    <ul>
+      <li>Fiber is React’s rewritten rendering engine.</li>
+      <li>Introduced to solve UI blocking problems.</li>
+      <li>Supports concurrent rendering.</li>
+      <li>Breaks rendering into small tasks.</li>
+      <li>Allows pausing, resuming, and prioritizing updates.</li>
+    </ul>
+
+    <h2>Short Interview Answer</h2>
+
+    <div class="highlight">
+      React Fiber is the rewritten React reconciliation engine designed to support interruptible, prioritized, and concurrent rendering for better UI responsiveness and performance.
+    </div>
+
+    <h2>One-Line Interview Answer</h2>
+
+    <div class="highlight">
+      React Fiber is React’s modern rendering engine that enables efficient, interruptible, and prioritized UI rendering.
+    </div>
+
+  </div>
+
+
+  <div class="fixed-page-nav-spacer"></div>
+  <div class="fixed-page-nav">
+    <a href="037%20What%20is%20the%20significance%20of%20element%20type%20in%20the%20reconciliation%20process.html">←</a>
+    <a href="047%20What%20are%20synthetic%20events%20in%20React.html">→</a>
+  </div>
+</body>
+</html>

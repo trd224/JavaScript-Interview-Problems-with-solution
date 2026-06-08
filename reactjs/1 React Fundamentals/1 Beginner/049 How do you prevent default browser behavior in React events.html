@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>049 - preventDefault in React</title>
+
+  <style>
+
+    body{
+      margin:0;
+      padding:0;
+      background:#000814;
+      color:#e2e8f0;
+      font-family:Arial, sans-serif;
+      line-height:1.7;
+    }
+
+    .container{
+      max-width:1000px;
+      margin:40px auto;
+      background:#020617;
+      padding:40px;
+      border-radius:18px;
+      border:1px solid #0f172a;
+      box-shadow:0 0 40px rgba(0,0,0,0.95);
+    }
+
+    h1{
+      color:#f8fafc;
+      margin-bottom:30px;
+      font-size:34px;
+    }
+
+    h2{
+      color:#c084fc;
+      margin-top:35px;
+      margin-bottom:15px;
+      font-size:26px;
+    }
+
+    p{
+      color:#cbd5e1;
+    }
+
+    ul{
+      padding-left:24px;
+    }
+
+    li{
+      margin-bottom:10px;
+      color:#cbd5e1;
+    }
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      margin-top:20px;
+    }
+
+    table th,
+    table td{
+      border:1px solid #1e293b;
+      padding:14px;
+      text-align:left;
+      vertical-align:top;
+    }
+
+    table th{
+      background:#0f172a;
+      color:#38bdf8;
+    }
+
+    table td{
+      background:#020617;
+      color:#d1d5db;
+    }
+
+    .highlight{
+      background:#0f172a;
+      padding:18px;
+      border-left:5px solid #38bdf8;
+      border-radius:10px;
+      margin-top:15px;
+      color:#e5e7eb;
+    }
+
+    .flow{
+      background:#020617;
+      border:1px solid #1e293b;
+      padding:20px;
+      border-radius:10px;
+      margin-top:15px;
+      color:#e2e8f0;
+      line-height:2;
+      text-align:center;
+      font-size:18px;
+    }
+
+    pre{
+      background:#000000;
+      padding:22px;
+      border-radius:12px;
+      overflow-x:auto;
+      border:1px solid #0f172a;
+    }
+
+    code{
+      font-family:Consolas, monospace;
+      font-size:15px;
+    }
+
+    .keyword{
+      color:#c084fc;
+    }
+
+    .function{
+      color:#38bdf8;
+    }
+
+    .string{
+      color:#facc15;
+    }
+
+    .tag{
+      color:#f472b6;
+    }
+
+    .comment{
+      color:#94a3b8;
+    }
+
+    .output{
+      color:#4ade80;
+    }
+
+  
+
+    /* Fixed Previous / Next buttons */
+    .fixed-page-nav-spacer{height:110px;}
+    .fixed-page-nav{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);width:calc(100% - 32px);max-width:1180px;display:flex;justify-content:space-between;gap:16px;z-index:9999;pointer-events:none;}
+    .fixed-page-nav a,.fixed-page-nav span{width:52px;height:52px;display:flex;align-items:center;justify-content:center;text-align:center;text-decoration:none;background:#38bdf8;color:#020617;border-radius:50%;font-size:28px;font-weight:700;line-height:1;box-shadow:0 10px 30px rgba(0,0,0,0.45);pointer-events:auto;}
+    .fixed-page-nav span{background:#334155;color:#94a3b8;cursor:not-allowed;}
+    @media(max-width:600px){.fixed-page-nav{bottom:14px;width:calc(100% - 20px);}.fixed-page-nav a,.fixed-page-nav span{width:46px;height:46px;font-size:24px;}}
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+
+    <h1>049. How do you prevent default browser behavior in React events?</h1>
+
+    <h2>One-Line Definition</h2>
+
+    <div class="highlight">
+      In React, default browser behavior is prevented using event.preventDefault().
+    </div>
+
+    <h2>What Is Default Browser Behavior?</h2>
+
+    <p>
+      Browsers automatically perform some built-in actions when events occur.
+    </p>
+
+    <h2>Examples</h2>
+
+    <table>
+
+      <tr>
+        <th>Element</th>
+        <th>Default Browser Behavior</th>
+      </tr>
+
+      <tr>
+        <td>form</td>
+        <td>Page reload on submit</td>
+      </tr>
+
+      <tr>
+        <td>a tag</td>
+        <td>Navigate to another page</td>
+      </tr>
+
+      <tr>
+        <td>checkbox</td>
+        <td>Toggle checked state</td>
+      </tr>
+
+      <tr>
+        <td>right click</td>
+        <td>Open context menu</td>
+      </tr>
+
+    </table>
+
+    <h2>How React Prevents Default Behavior</h2>
+
+    <p>
+      React provides:
+    </p>
+
+    <pre><code>event.preventDefault()</code></pre>
+
+    <p>
+      This stops the browser’s default action.
+    </p>
+
+    <h2>Most Common Example - Form Submit</h2>
+
+    <pre><code><span class="keyword">function</span> <span class="function">App</span>() {
+
+  <span class="keyword">const</span> handleSubmit = (event) => {
+
+    event.preventDefault();
+
+    console.log(<span class="string">'Form Submitted'</span>);
+
+  };
+
+  <span class="keyword">return</span> (
+
+    <span class="tag">&lt;form</span> onSubmit={handleSubmit}<span class="tag">&gt;</span>
+
+      <span class="tag">&lt;input</span> type=<span class="string">"text"</span> <span class="tag">/&gt;</span>
+
+      <span class="tag">&lt;button</span><span class="tag">&gt;</span>
+        Submit
+      <span class="tag">&lt;/button&gt;</span>
+
+    <span class="tag">&lt;/form&gt;</span>
+
+  );
+
+}</code></pre>
+
+    <h2>Without preventDefault()</h2>
+
+    <div class="flow">
+      Form Submit
+      <br>
+      ↓
+      <br>
+      Browser Reloads Page
+    </div>
+
+    <h2>With preventDefault()</h2>
+
+    <div class="flow">
+      Form Submit
+      <br>
+      ↓
+      <br>
+      Browser Reload Stopped
+      <br>
+      ↓
+      <br>
+      React Handles Logic
+    </div>
+
+    <h2>Why React Applications Use It</h2>
+
+    <p>
+      React applications are usually:
+    </p>
+
+    <div class="highlight">
+      Single Page Applications (SPA)
+    </div>
+
+    <p>
+      React handles UI updates itself without full page reloads.
+    </p>
+
+    <h2>Anchor Tag Example</h2>
+
+    <pre><code><span class="keyword">function</span> <span class="function">App</span>() {
+
+  <span class="keyword">const</span> handleClick = (event) => {
+
+    event.preventDefault();
+
+    console.log(<span class="string">'Navigation Stopped'</span>);
+
+  };
+
+  <span class="keyword">return</span> (
+
+    <span class="tag">&lt;a</span>
+      href=<span class="string">"https://google.com"</span>
+      onClick={handleClick}
+    <span class="tag">&gt;</span>
+
+      Open Google
+
+    <span class="tag">&lt;/a&gt;</span>
+
+  );
+
+}</code></pre>
+
+    <h2>Output</h2>
+
+    <pre class="output"><code>Navigation Stopped</code></pre>
+
+    <p>
+      Browser will NOT open Google.
+    </p>
+
+    <h2>Important Difference</h2>
+
+    <table>
+
+      <tr>
+        <th>preventDefault()</th>
+        <th>stopPropagation()</th>
+      </tr>
+
+      <tr>
+        <td>Stops browser default behavior</td>
+        <td>Stops event propagation</td>
+      </tr>
+
+      <tr>
+        <td>Prevents reload/navigation</td>
+        <td>Prevents parent handlers</td>
+      </tr>
+
+    </table>
+
+    <h2>Can Both Be Used Together?</h2>
+
+    <p>
+      Yes.
+    </p>
+
+    <pre><code><span class="keyword">const</span> handleClick = (event) => {
+
+  event.preventDefault();
+
+  event.stopPropagation();
+
+};</code></pre>
+
+    <h2>Real Project Use Cases</h2>
+
+    <table>
+
+      <tr>
+        <th>Feature</th>
+        <th>Why preventDefault() Is Used</th>
+      </tr>
+
+      <tr>
+        <td>Login form</td>
+        <td>Prevent page reload</td>
+      </tr>
+
+      <tr>
+        <td>OTP verification</td>
+        <td>Handle API calls manually</td>
+      </tr>
+
+      <tr>
+        <td>Custom routing</td>
+        <td>Prevent full navigation</td>
+      </tr>
+
+      <tr>
+        <td>Popup forms</td>
+        <td>Prevent browser submission</td>
+      </tr>
+
+    </table>
+
+    <h2>Important Point About Synthetic Events</h2>
+
+    <p>
+      React events are SyntheticEvents.
+    </p>
+
+    <p>
+      But preventDefault() works the same way as native browser events.
+    </p>
+
+    <h2>Check If Default Was Prevented</h2>
+
+    <pre><code>event.defaultPrevented</code></pre>
+
+    <h2>Example</h2>
+
+    <pre><code><span class="keyword">const</span> handleClick = (event) => {
+
+  event.preventDefault();
+
+  console.log(event.defaultPrevented);
+
+};</code></pre>
+
+    <h2>Output</h2>
+
+    <pre class="output"><code>true</code></pre>
+
+    <h2>Important Interview Points</h2>
+
+    <ul>
+      <li>preventDefault() stops browser default behavior.</li>
+      <li>Commonly used with forms and links.</li>
+      <li>Very important in SPA applications.</li>
+      <li>Different from stopPropagation().</li>
+      <li>Works with React SyntheticEvents.</li>
+    </ul>
+
+    <h2>Short Interview Answer</h2>
+
+    <div class="highlight">
+      In React, default browser actions like form submission or link navigation are prevented using event.preventDefault(), allowing React to control application behavior manually.
+    </div>
+
+    <h2>One-Line Interview Answer</h2>
+
+    <div class="highlight">
+      React prevents default browser behavior using event.preventDefault().
+    </div>
+
+  </div>
+
+
+  <div class="fixed-page-nav-spacer"></div>
+  <div class="fixed-page-nav">
+    <a href="048%20What%20is%20event%20propagation%20and%20how%20do%20you%20stop%20it%20in%20React.html">←</a>
+    <a href="../2%20Components%20%26%20Props/050%20What%20are%20props%20in%20React.html">→</a>
+  </div>
+</body>
+</html>

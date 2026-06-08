@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>064 - PropTypes in React</title>
+
+  <style>
+
+    body{
+      margin:0;
+      padding:0;
+      background:#000814;
+      color:#e2e8f0;
+      font-family:Arial, sans-serif;
+      line-height:1.7;
+    }
+
+    .container{
+      max-width:1000px;
+      margin:40px auto;
+      background:#020617;
+      padding:40px;
+      border-radius:18px;
+      border:1px solid #0f172a;
+      box-shadow:0 0 40px rgba(0,0,0,0.95);
+    }
+
+    h1{
+      color:#f8fafc;
+      margin-bottom:30px;
+      font-size:34px;
+    }
+
+    h2{
+      color:#c084fc;
+      margin-top:35px;
+      margin-bottom:15px;
+      font-size:26px;
+    }
+
+    p{
+      color:#cbd5e1;
+    }
+
+    ul{
+      padding-left:24px;
+    }
+
+    li{
+      margin-bottom:10px;
+      color:#cbd5e1;
+    }
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      margin-top:20px;
+    }
+
+    table th,
+    table td{
+      border:1px solid #1e293b;
+      padding:14px;
+      text-align:left;
+      vertical-align:top;
+    }
+
+    table th{
+      background:#0f172a;
+      color:#38bdf8;
+    }
+
+    table td{
+      background:#020617;
+      color:#d1d5db;
+    }
+
+    .highlight{
+      background:#0f172a;
+      padding:18px;
+      border-left:5px solid #38bdf8;
+      border-radius:10px;
+      margin-top:15px;
+      color:#e5e7eb;
+    }
+
+    .flow{
+      background:#020617;
+      border:1px solid #1e293b;
+      padding:20px;
+      border-radius:10px;
+      margin-top:15px;
+      color:#e2e8f0;
+      line-height:2;
+      text-align:center;
+      font-size:18px;
+    }
+
+    pre{
+      background:#000000;
+      padding:22px;
+      border-radius:12px;
+      overflow-x:auto;
+      border:1px solid #0f172a;
+    }
+
+    code{
+      font-family:Consolas, monospace;
+      font-size:15px;
+    }
+
+    .keyword{
+      color:#c084fc;
+    }
+
+    .function{
+      color:#38bdf8;
+    }
+
+    .string{
+      color:#facc15;
+    }
+
+    .tag{
+      color:#f472b6;
+    }
+
+    .comment{
+      color:#94a3b8;
+    }
+
+    .warning{
+      color:#fb7185;
+    }
+
+    .output{
+      color:#4ade80;
+    }
+
+  
+
+    /* Fixed Previous / Next buttons */
+    .fixed-page-nav-spacer{height:110px;}
+    .fixed-page-nav{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);width:calc(100% - 32px);max-width:1180px;display:flex;justify-content:space-between;gap:16px;z-index:9999;pointer-events:none;}
+    .fixed-page-nav a,.fixed-page-nav span{width:52px;height:52px;display:flex;align-items:center;justify-content:center;text-align:center;text-decoration:none;background:#38bdf8;color:#020617;border-radius:50%;font-size:28px;font-weight:700;line-height:1;box-shadow:0 10px 30px rgba(0,0,0,0.45);pointer-events:auto;}
+    .fixed-page-nav span{background:#334155;color:#94a3b8;cursor:not-allowed;}
+    @media(max-width:600px){.fixed-page-nav{bottom:14px;width:calc(100% - 20px);}.fixed-page-nav a,.fixed-page-nav span{width:46px;height:46px;font-size:24px;}}
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+
+    <h1>064. What is PropTypes and how do you use it?</h1>
+
+    <h2>One-Line Definition</h2>
+
+    <div class="highlight">
+      PropTypes is a React library used to validate component props and detect incorrect prop types during development.
+    </div>
+
+    <h2>Why PropTypes Is Used</h2>
+
+    <p>
+      Components receive props from parent components.
+    </p>
+
+    <p>
+      Sometimes developers may pass:
+    </p>
+
+    <ul>
+      <li>Wrong data types</li>
+      <li>Missing props</li>
+      <li>Invalid values</li>
+    </ul>
+
+    <p>
+      PropTypes helps detect these problems.
+    </p>
+
+    <h2>Install PropTypes</h2>
+
+    <pre><code>npm install prop-types</code></pre>
+
+    <h2>Basic Example</h2>
+
+    <pre><code><span class="keyword">import</span> PropTypes from <span class="string">'prop-types'</span>;
+
+<span class="keyword">function</span> <span class="function">User</span>({ name, age }) {
+
+  <span class="keyword">return</span> (
+
+    <span class="tag">&lt;div&gt;</span>
+
+      <span class="tag">&lt;h1&gt;</span>{name}<span class="tag">&lt;/h1&gt;</span>
+
+      <span class="tag">&lt;p&gt;</span>{age}<span class="tag">&lt;/p&gt;</span>
+
+    <span class="tag">&lt;/div&gt;</span>
+
+  );
+
+}
+
+User.propTypes = {
+
+  name: PropTypes.string,
+  age: PropTypes.number
+
+};</code></pre>
+
+    <h2>What Happens Here?</h2>
+
+    <table>
+
+      <tr>
+        <th>Prop</th>
+        <th>Expected Type</th>
+      </tr>
+
+      <tr>
+        <td>name</td>
+        <td>string</td>
+      </tr>
+
+      <tr>
+        <td>age</td>
+        <td>number</td>
+      </tr>
+
+    </table>
+
+    <h2>Wrong Usage Example</h2>
+
+    <pre><code><span class="tag">&lt;User</span> name={100} age=<span class="string">"25"</span> <span class="tag">/&gt;</span></code></pre>
+
+    <h2>Console Warning</h2>
+
+    <pre class="warning"><code>
+Warning:
+Invalid prop `name` of type `number`
+supplied to `User`, expected `string`
+</code></pre>
+
+    <h2>Important Note</h2>
+
+    <div class="highlight">
+      PropTypes only show warnings in development mode.  
+      They do NOT stop application execution.
+    </div>
+
+    <h2>Common PropTypes</h2>
+
+    <table>
+
+      <tr>
+        <th>PropType</th>
+        <th>Description</th>
+      </tr>
+
+      <tr>
+        <td>PropTypes.string</td>
+        <td>String value</td>
+      </tr>
+
+      <tr>
+        <td>PropTypes.number</td>
+        <td>Number value</td>
+      </tr>
+
+      <tr>
+        <td>PropTypes.bool</td>
+        <td>Boolean value</td>
+      </tr>
+
+      <tr>
+        <td>PropTypes.array</td>
+        <td>Array value</td>
+      </tr>
+
+      <tr>
+        <td>PropTypes.object</td>
+        <td>Object value</td>
+      </tr>
+
+      <tr>
+        <td>PropTypes.func</td>
+        <td>Function</td>
+      </tr>
+
+      <tr>
+        <td>PropTypes.node</td>
+        <td>Renderable content</td>
+      </tr>
+
+      <tr>
+        <td>PropTypes.element</td>
+        <td>React element</td>
+      </tr>
+
+    </table>
+
+    <h2>Required Props</h2>
+
+    <p>
+      Use:
+    </p>
+
+    <pre><code>.isRequired</code></pre>
+
+    <p>
+      to make props mandatory.
+    </p>
+
+    <h2>Example</h2>
+
+    <pre><code>User.propTypes = {
+
+  name: PropTypes.string.isRequired,
+  age: PropTypes.number.isRequired
+
+};</code></pre>
+
+    <h2>Missing Prop Warning</h2>
+
+    <pre class="warning"><code>
+Warning:
+The prop `name` is marked as required
+but its value is undefined
+</code></pre>
+
+    <h2>Default Props Example</h2>
+
+    <pre><code><span class="keyword">function</span> <span class="function">User</span>({ name }) {
+
+  <span class="keyword">return</span> <span class="tag">&lt;h1&gt;</span>{name}<span class="tag">&lt;/h1&gt;</span>;
+
+}
+
+User.defaultProps = {
+
+  name: <span class="string">'Guest'</span>
+
+};</code></pre>
+
+    <h2>Advanced Object Validation</h2>
+
+    <pre><code>User.propTypes = {
+
+  user: PropTypes.shape({
+
+    name: PropTypes.string,
+    age: PropTypes.number
+
+  })
+
+};</code></pre>
+
+    <h2>Array Validation</h2>
+
+    <pre><code>User.propTypes = {
+
+  users: PropTypes.arrayOf(PropTypes.string)
+
+};</code></pre>
+
+    <h2>Flow Diagram</h2>
+
+    <div class="flow">
+      Parent Sends Props
+      <br>
+      ↓
+      <br>
+      PropTypes Validates Props
+      <br>
+      ↓
+      <br>
+      Invalid Type?
+      <br>
+      ↓
+      <br>
+      Console Warning Appears
+    </div>
+
+    <h2>Why PropTypes Is Helpful</h2>
+
+    <ul>
+      <li>Detects bugs early</li>
+      <li>Improves maintainability</li>
+      <li>Documents component APIs</li>
+      <li>Helps team collaboration</li>
+      <li>Makes debugging easier</li>
+    </ul>
+
+    <h2>PropTypes vs TypeScript</h2>
+
+    <table>
+
+      <tr>
+        <th>PropTypes</th>
+        <th>TypeScript</th>
+      </tr>
+
+      <tr>
+        <td>Runtime validation</td>
+        <td>Compile-time validation</td>
+      </tr>
+
+      <tr>
+        <td>Simple setup</td>
+        <td>Full type system</td>
+      </tr>
+
+      <tr>
+        <td>Development warnings</td>
+        <td>Compilation errors</td>
+      </tr>
+
+      <tr>
+        <td>JavaScript-based</td>
+        <td>Type-safe development</td>
+      </tr>
+
+    </table>
+
+    <h2>Modern React Trend</h2>
+
+    <div class="highlight">
+      Many modern React projects prefer TypeScript instead of PropTypes for stronger type safety.
+    </div>
+
+    <h2>Real Project Use Cases</h2>
+
+    <table>
+
+      <tr>
+        <th>Component</th>
+        <th>Validation Usage</th>
+      </tr>
+
+      <tr>
+        <td>OTP component</td>
+        <td>Validate callback functions</td>
+      </tr>
+
+      <tr>
+        <td>User card</td>
+        <td>Validate user object</td>
+      </tr>
+
+      <tr>
+        <td>Button component</td>
+        <td>Validate event handlers</td>
+      </tr>
+
+      <tr>
+        <td>Dashboard widgets</td>
+        <td>Validate API response data</td>
+      </tr>
+
+    </table>
+
+    <h2>Important Interview Points</h2>
+
+    <ul>
+      <li>PropTypes validates component props.</li>
+      <li>Used only during development.</li>
+      <li>Shows warnings for invalid props.</li>
+      <li>.isRequired makes props mandatory.</li>
+      <li>TypeScript is now more commonly preferred.</li>
+    </ul>
+
+    <h2>Short Interview Answer</h2>
+
+    <div class="highlight">
+      PropTypes is a React validation library used to check component props for correct data types and required values during development.
+    </div>
+
+    <h2>One-Line Interview Answer</h2>
+
+    <div class="highlight">
+      PropTypes validates React component props during development.
+    </div>
+
+  </div>
+
+
+  <div class="fixed-page-nav-spacer"></div>
+  <div class="fixed-page-nav">
+    <a href="063%20How%20do%20you%20pass%20data%20from%20child%20to%20parent%20component.html">←</a>
+    <a href="065%20What%20is%20the%20difference%20between%20a%20container%20and%20a%20presentational%20component.html">→</a>
+  </div>
+</body>
+</html>

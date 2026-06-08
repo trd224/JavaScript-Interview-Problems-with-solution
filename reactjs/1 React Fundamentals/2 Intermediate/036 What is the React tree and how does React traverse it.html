@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>036 - React Tree and Traversal</title>
+
+  <style>
+
+    body{
+      margin:0;
+      padding:0;
+      background:#000814;
+      color:#e2e8f0;
+      font-family:Arial, sans-serif;
+      line-height:1.7;
+    }
+
+    .container{
+      max-width:1000px;
+      margin:40px auto;
+      background:#020617;
+      padding:40px;
+      border-radius:18px;
+      border:1px solid #0f172a;
+      box-shadow:0 0 40px rgba(0,0,0,0.95);
+    }
+
+    h1{
+      color:#f8fafc;
+      margin-bottom:30px;
+      font-size:34px;
+    }
+
+    h2{
+      color:#c084fc;
+      margin-top:35px;
+      margin-bottom:15px;
+      font-size:26px;
+    }
+
+    p{
+      color:#cbd5e1;
+    }
+
+    ul{
+      padding-left:24px;
+    }
+
+    li{
+      margin-bottom:10px;
+      color:#cbd5e1;
+    }
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      margin-top:20px;
+    }
+
+    table th,
+    table td{
+      border:1px solid #1e293b;
+      padding:14px;
+      text-align:left;
+      vertical-align:top;
+    }
+
+    table th{
+      background:#0f172a;
+      color:#38bdf8;
+    }
+
+    table td{
+      background:#020617;
+      color:#d1d5db;
+    }
+
+    .highlight{
+      background:#0f172a;
+      padding:18px;
+      border-left:5px solid #38bdf8;
+      border-radius:10px;
+      margin-top:15px;
+      color:#e5e7eb;
+    }
+
+    .flow{
+      background:#020617;
+      border:1px solid #1e293b;
+      padding:20px;
+      border-radius:10px;
+      margin-top:15px;
+      color:#e2e8f0;
+      line-height:2;
+      font-size:18px;
+    }
+
+    pre{
+      background:#000000;
+      padding:22px;
+      border-radius:12px;
+      overflow-x:auto;
+      border:1px solid #0f172a;
+    }
+
+    code{
+      font-family:Consolas, monospace;
+      font-size:15px;
+    }
+
+    .keyword{
+      color:#c084fc;
+    }
+
+    .function{
+      color:#38bdf8;
+    }
+
+    .string{
+      color:#facc15;
+    }
+
+    .tag{
+      color:#f472b6;
+    }
+
+    .comment{
+      color:#94a3b8;
+    }
+
+    .output{
+      color:#4ade80;
+    }
+
+  
+
+    /* Fixed Previous / Next buttons */
+    .fixed-page-nav-spacer{height:110px;}
+    .fixed-page-nav{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);width:calc(100% - 32px);max-width:1180px;display:flex;justify-content:space-between;gap:16px;z-index:9999;pointer-events:none;}
+    .fixed-page-nav a,.fixed-page-nav span{width:52px;height:52px;display:flex;align-items:center;justify-content:center;text-align:center;text-decoration:none;background:#38bdf8;color:#020617;border-radius:50%;font-size:28px;font-weight:700;line-height:1;box-shadow:0 10px 30px rgba(0,0,0,0.45);pointer-events:auto;}
+    .fixed-page-nav span{background:#334155;color:#94a3b8;cursor:not-allowed;}
+    @media(max-width:600px){.fixed-page-nav{bottom:14px;width:calc(100% - 20px);}.fixed-page-nav a,.fixed-page-nav span{width:46px;height:46px;font-size:24px;}}
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+
+    <h1>036. What is the React tree and how does React traverse it?</h1>
+
+    <h2>One-Line Definition</h2>
+
+    <div class="highlight">
+      The React tree is the hierarchical structure of React components and elements, and React traverses this tree to render, update, and reconcile the UI.
+    </div>
+
+    <h2>What Is the React Tree?</h2>
+
+    <p>
+      Every React application forms a tree structure.
+    </p>
+
+    <p>
+      Components are connected like parent-child relationships.
+    </p>
+
+    <h2>Simple Example</h2>
+
+    <pre><code><span class="keyword">function</span> <span class="function">App</span>() {
+
+  <span class="keyword">return</span> (
+
+    <span class="tag">&lt;div&gt;</span>
+
+      <span class="tag">&lt;Header /&gt;</span>
+
+      <span class="tag">&lt;Main /&gt;</span>
+
+      <span class="tag">&lt;Footer /&gt;</span>
+
+    <span class="tag">&lt;/div&gt;</span>
+
+  );
+
+}</code></pre>
+
+    <h2>React Tree Structure</h2>
+
+    <div class="flow">
+      App
+      <br>
+      ├── Header
+      <br>
+      ├── Main
+      <br>
+      └── Footer
+    </div>
+
+    <p>
+      This hierarchy is called:
+    </p>
+
+    <div class="highlight">
+      React Component Tree
+    </div>
+
+    <h2>More Deep Example</h2>
+
+    <pre><code><span class="keyword">function</span> <span class="function">App</span>() {
+
+  <span class="keyword">return</span> (
+
+    <span class="tag">&lt;Dashboard&gt;</span>
+
+      <span class="tag">&lt;Sidebar /&gt;</span>
+
+      <span class="tag">&lt;Content&gt;</span>
+
+        <span class="tag">&lt;UserList /&gt;</span>
+
+      <span class="tag">&lt;/Content&gt;</span>
+
+    <span class="tag">&lt;/Dashboard&gt;</span>
+
+  );
+
+}</code></pre>
+
+    <h2>Tree Representation</h2>
+
+    <div class="flow">
+      App
+      <br>
+      └── Dashboard
+      <br>
+      &nbsp;&nbsp;&nbsp;&nbsp;├── Sidebar
+      <br>
+      &nbsp;&nbsp;&nbsp;&nbsp;└── Content
+      <br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└── UserList
+    </div>
+
+    <h2>Why React Uses a Tree Structure</h2>
+
+    <ul>
+      <li>Organizes UI hierarchically</li>
+      <li>Makes rendering predictable</li>
+      <li>Supports component reusability</li>
+      <li>Allows efficient updates</li>
+    </ul>
+
+    <h2>What Does Traverse Mean?</h2>
+
+    <p>
+      Traversing means visiting nodes one-by-one inside the tree.
+    </p>
+
+    <p>
+      React traverses the component tree during:
+    </p>
+
+    <ul>
+      <li>Initial rendering</li>
+      <li>Re-rendering</li>
+      <li>Reconciliation</li>
+      <li>Diffing</li>
+    </ul>
+
+    <h2>How React Traverses the Tree</h2>
+
+    <p>
+      React mainly traverses:
+    </p>
+
+    <div class="highlight">
+      Parent → Child → Sibling
+    </div>
+
+    <p>
+      This is similar to:
+    </p>
+
+    <div class="highlight">
+      Depth-First Traversal
+    </div>
+
+    <h2>Traversal Example</h2>
+
+    <div class="flow">
+      App
+      <br>
+      ↓
+      <br>
+      Dashboard
+      <br>
+      ↓
+      <br>
+      Sidebar
+      <br>
+      ↓
+      <br>
+      Content
+      <br>
+      ↓
+      <br>
+      UserList
+    </div>
+
+    <h2>What Happens During Traversal?</h2>
+
+    <table>
+
+      <tr>
+        <th>Step</th>
+        <th>React Action</th>
+      </tr>
+
+      <tr>
+        <td>Visit component</td>
+        <td>Execute component function</td>
+      </tr>
+
+      <tr>
+        <td>Create elements</td>
+        <td>Build Virtual DOM nodes</td>
+      </tr>
+
+      <tr>
+        <td>Move to children</td>
+        <td>Traverse deeper into tree</td>
+      </tr>
+
+      <tr>
+        <td>Compare nodes</td>
+        <td>Diffing process</td>
+      </tr>
+
+      <tr>
+        <td>Update DOM</td>
+        <td>Apply changes efficiently</td>
+      </tr>
+
+    </table>
+
+    <h2>Relationship with Virtual DOM</h2>
+
+    <p>
+      React tree exists inside the Virtual DOM system.
+    </p>
+
+    <p>
+      Each component becomes a node in the Virtual DOM tree.
+    </p>
+
+    <h2>Fiber Tree in Modern React</h2>
+
+    <p>
+      Internally React uses:
+    </p>
+
+    <div class="highlight">
+      Fiber Tree
+    </div>
+
+    <p>
+      Fiber is React’s internal data structure for managing traversal and updates.
+    </p>
+
+    <h2>Why Fiber Was Introduced</h2>
+
+    <ul>
+      <li>Pause rendering work</li>
+      <li>Resume rendering later</li>
+      <li>Prioritize important updates</li>
+      <li>Support concurrent rendering</li>
+    </ul>
+
+    <h2>Real Project Example</h2>
+
+    <table>
+
+      <tr>
+        <th>Feature</th>
+        <th>Tree Traversal Benefit</th>
+      </tr>
+
+      <tr>
+        <td>Authentication portal</td>
+        <td>Efficient popup rendering</td>
+      </tr>
+
+      <tr>
+        <td>Dashboard</td>
+        <td>Partial UI updates</td>
+      </tr>
+
+      <tr>
+        <td>Large tables</td>
+        <td>Optimized rendering</td>
+      </tr>
+
+      <tr>
+        <td>Live notifications</td>
+        <td>Fast re-rendering</td>
+      </tr>
+
+    </table>
+
+    <h2>Important Note</h2>
+
+    <div class="highlight">
+      React does not traverse the real DOM directly for every update.  
+      It traverses the Virtual DOM/Fiber tree first.
+    </div>
+
+    <h2>Important Interview Points</h2>
+
+    <ul>
+      <li>React applications form a component tree.</li>
+      <li>Each component becomes a node in the tree.</li>
+      <li>React traverses the tree during rendering and reconciliation.</li>
+      <li>Traversal is mainly depth-first.</li>
+      <li>Modern React internally uses the Fiber tree.</li>
+    </ul>
+
+    <h2>Short Interview Answer</h2>
+
+    <div class="highlight">
+      The React tree is the hierarchical structure of React components and elements. React traverses this tree, mainly using depth-first traversal, to render, compare, and update the UI efficiently.
+    </div>
+
+    <h2>One-Line Interview Answer</h2>
+
+    <div class="highlight">
+      The React tree is the hierarchy of components, and React traverses it to render and update the UI efficiently.
+    </div>
+
+  </div>
+
+
+  <div class="fixed-page-nav-spacer"></div>
+  <div class="fixed-page-nav">
+    <a href="035%20What%20is%20the%20diffing%20algorithm%20in%20React.html">←</a>
+    <a href="037%20What%20is%20the%20significance%20of%20element%20type%20in%20the%20reconciliation%20process.html">→</a>
+  </div>
+</body>
+</html>

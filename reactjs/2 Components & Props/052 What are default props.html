@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>052 - Default Props in React</title>
+
+  <style>
+
+    body{
+      margin:0;
+      padding:0;
+      background:#000814;
+      color:#e2e8f0;
+      font-family:Arial, sans-serif;
+      line-height:1.7;
+    }
+
+    .container{
+      max-width:1000px;
+      margin:40px auto;
+      background:#020617;
+      padding:40px;
+      border-radius:18px;
+      border:1px solid #0f172a;
+      box-shadow:0 0 40px rgba(0,0,0,0.95);
+    }
+
+    h1{
+      color:#f8fafc;
+      margin-bottom:30px;
+      font-size:34px;
+    }
+
+    h2{
+      color:#c084fc;
+      margin-top:35px;
+      margin-bottom:15px;
+      font-size:26px;
+    }
+
+    p{
+      color:#cbd5e1;
+    }
+
+    ul{
+      padding-left:24px;
+    }
+
+    li{
+      margin-bottom:10px;
+      color:#cbd5e1;
+    }
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      margin-top:20px;
+    }
+
+    table th,
+    table td{
+      border:1px solid #1e293b;
+      padding:14px;
+      text-align:left;
+      vertical-align:top;
+    }
+
+    table th{
+      background:#0f172a;
+      color:#38bdf8;
+    }
+
+    table td{
+      background:#020617;
+      color:#d1d5db;
+    }
+
+    .highlight{
+      background:#0f172a;
+      padding:18px;
+      border-left:5px solid #38bdf8;
+      border-radius:10px;
+      margin-top:15px;
+      color:#e5e7eb;
+    }
+
+    .flow{
+      background:#020617;
+      border:1px solid #1e293b;
+      padding:20px;
+      border-radius:10px;
+      margin-top:15px;
+      color:#e2e8f0;
+      line-height:2;
+      text-align:center;
+      font-size:18px;
+    }
+
+    pre{
+      background:#000000;
+      padding:22px;
+      border-radius:12px;
+      overflow-x:auto;
+      border:1px solid #0f172a;
+    }
+
+    code{
+      font-family:Consolas, monospace;
+      font-size:15px;
+    }
+
+    .keyword{
+      color:#c084fc;
+    }
+
+    .function{
+      color:#38bdf8;
+    }
+
+    .string{
+      color:#facc15;
+    }
+
+    .tag{
+      color:#f472b6;
+    }
+
+    .comment{
+      color:#94a3b8;
+    }
+
+    .output{
+      color:#4ade80;
+    }
+
+  
+
+    /* Fixed Previous / Next buttons */
+    .fixed-page-nav-spacer{height:110px;}
+    .fixed-page-nav{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);width:calc(100% - 32px);max-width:1180px;display:flex;justify-content:space-between;gap:16px;z-index:9999;pointer-events:none;}
+    .fixed-page-nav a,.fixed-page-nav span{width:52px;height:52px;display:flex;align-items:center;justify-content:center;text-align:center;text-decoration:none;background:#38bdf8;color:#020617;border-radius:50%;font-size:28px;font-weight:700;line-height:1;box-shadow:0 10px 30px rgba(0,0,0,0.45);pointer-events:auto;}
+    .fixed-page-nav span{background:#334155;color:#94a3b8;cursor:not-allowed;}
+    @media(max-width:600px){.fixed-page-nav{bottom:14px;width:calc(100% - 20px);}.fixed-page-nav a,.fixed-page-nav span{width:46px;height:46px;font-size:24px;}}
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+
+    <h1>052. What are default props?</h1>
+
+    <h2>One-Line Definition</h2>
+
+    <div class="highlight">
+      Default props are fallback values used when a component does not receive specific props from its parent.
+    </div>
+
+    <h2>Why Default Props Are Used</h2>
+
+    <p>
+      Sometimes parent components may not pass all props.
+    </p>
+
+    <p>
+      Default props provide safe fallback values to avoid undefined data.
+    </p>
+
+    <h2>Basic Example</h2>
+
+    <pre><code><span class="keyword">function</span> <span class="function">User</span>({ name = <span class="string">'Guest'</span> }) {
+
+  <span class="keyword">return</span> (
+
+    <span class="tag">&lt;h1&gt;</span>
+      Hello {name}
+    <span class="tag">&lt;/h1&gt;</span>
+
+  );
+
+}
+
+<span class="keyword">function</span> <span class="function">App</span>() {
+
+  <span class="keyword">return</span> (
+
+    <span class="tag">&lt;User</span> <span class="tag">/&gt;</span>
+
+  );
+
+}</code></pre>
+
+    <h2>Output</h2>
+
+    <pre class="output"><code>Hello Guest</code></pre>
+
+    <h2>How It Works</h2>
+
+    <p>
+      Since no name prop was passed:
+    </p>
+
+    <div class="highlight">
+      React uses the default value "Guest".
+    </div>
+
+    <h2>Flow Diagram</h2>
+
+    <div class="flow">
+      Parent Does Not Pass Prop
+      <br>
+      ↓
+      <br>
+      React Checks Default Value
+      <br>
+      ↓
+      <br>
+      Default Prop Used
+    </div>
+
+    <h2>Modern React Approach</h2>
+
+    <p>
+      Today, default values are commonly handled using:
+    </p>
+
+    <div class="highlight">
+      Destructuring default parameters
+    </div>
+
+    <h2>Example</h2>
+
+    <pre><code><span class="keyword">function</span> <span class="function">Button</span>({
+
+  text = <span class="string">'Click Me'</span>,
+  color = <span class="string">'blue'</span>
+
+}) {
+
+  <span class="keyword">return</span> (
+
+    <span class="tag">&lt;button&gt;</span>
+      {text}
+    <span class="tag">&lt;/button&gt;</span>
+
+  );
+
+}</code></pre>
+
+    <h2>Using Passed Props</h2>
+
+    <pre><code><span class="tag">&lt;Button</span> text=<span class="string">"Save"</span> <span class="tag">/&gt;</span></code></pre>
+
+    <h2>Output</h2>
+
+    <pre class="output"><code>Save</code></pre>
+
+    <p>
+      Passed props override default values.
+    </p>
+
+    <h2>Old defaultProps Syntax</h2>
+
+    <p>
+      Older React versions commonly used:
+    </p>
+
+    <pre><code><span class="keyword">function</span> <span class="function">User</span>(props) {
+
+  <span class="keyword">return</span> (
+
+    <span class="tag">&lt;h1&gt;</span>
+      Hello {props.name}
+    <span class="tag">&lt;/h1&gt;</span>
+
+  );
+
+}
+
+User.defaultProps = {
+
+  name: <span class="string">'Guest'</span>
+
+};</code></pre>
+
+    <h2>Important Note</h2>
+
+    <div class="highlight">
+      Modern React prefers default parameter values instead of defaultProps for functional components.
+    </div>
+
+    <h2>Default Props Only Work When Value Is Undefined</h2>
+
+    <table>
+
+      <tr>
+        <th>Passed Value</th>
+        <th>Result</th>
+      </tr>
+
+      <tr>
+        <td>undefined</td>
+        <td>Default value used</td>
+      </tr>
+
+      <tr>
+        <td>null</td>
+        <td>Default value NOT used</td>
+      </tr>
+
+      <tr>
+        <td>""</td>
+        <td>Default value NOT used</td>
+      </tr>
+
+      <tr>
+        <td>0</td>
+        <td>Default value NOT used</td>
+      </tr>
+
+    </table>
+
+    <h2>Example</h2>
+
+    <pre><code><span class="tag">&lt;User</span> name={undefined} <span class="tag">/&gt;</span>
+
+<span class="comment">// Uses default value</span>
+
+<span class="tag">&lt;User</span> name={null} <span class="tag">/&gt;</span>
+
+<span class="comment">// Does NOT use default value</span></code></pre>
+
+    <h2>Why Default Props Are Useful</h2>
+
+    <ul>
+      <li>Prevent undefined errors</li>
+      <li>Provide fallback UI</li>
+      <li>Improve component reusability</li>
+      <li>Reduce conditional checks</li>
+    </ul>
+
+    <h2>Real Project Use Cases</h2>
+
+    <table>
+
+      <tr>
+        <th>Feature</th>
+        <th>Default Prop Example</th>
+      </tr>
+
+      <tr>
+        <td>User avatar</td>
+        <td>Default profile image</td>
+      </tr>
+
+      <tr>
+        <td>Buttons</td>
+        <td>Default button text</td>
+      </tr>
+
+      <tr>
+        <td>Theme</td>
+        <td>Fallback dark/light mode</td>
+      </tr>
+
+      <tr>
+        <td>Authentication popup</td>
+        <td>Default messages</td>
+      </tr>
+
+    </table>
+
+    <h2>Props vs Default Props</h2>
+
+    <table>
+
+      <tr>
+        <th>Props</th>
+        <th>Default Props</th>
+      </tr>
+
+      <tr>
+        <td>Passed from parent</td>
+        <td>Fallback values</td>
+      </tr>
+
+      <tr>
+        <td>May be undefined</td>
+        <td>Used if prop missing</td>
+      </tr>
+
+      <tr>
+        <td>Dynamic data</td>
+        <td>Safe defaults</td>
+      </tr>
+
+    </table>
+
+    <h2>Important Interview Points</h2>
+
+    <ul>
+      <li>Default props provide fallback values.</li>
+      <li>Used when props are undefined.</li>
+      <li>Modern React prefers default parameters.</li>
+      <li>Passed props override default values.</li>
+      <li>Useful for reusable components.</li>
+    </ul>
+
+    <h2>Short Interview Answer</h2>
+
+    <div class="highlight">
+      Default props are fallback values assigned to component props when the parent component does not provide those props.
+    </div>
+
+    <h2>One-Line Interview Answer</h2>
+
+    <div class="highlight">
+      Default props are fallback values used when React components do not receive specific props.
+    </div>
+
+  </div>
+
+
+  <div class="fixed-page-nav-spacer"></div>
+  <div class="fixed-page-nav">
+    <a href="051%20Can%20you%20modify%20props%20inside%20a%20component.html">←</a>
+    <a href="053%20What%20is%20the%20children%20prop.html">→</a>
+  </div>
+</body>
+</html>

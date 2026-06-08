@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>057 - Conditional Rendering in React</title>
+
+  <style>
+
+    body{
+      margin:0;
+      padding:0;
+      background:#000814;
+      color:#e2e8f0;
+      font-family:Arial, sans-serif;
+      line-height:1.7;
+    }
+
+    .container{
+      max-width:1000px;
+      margin:40px auto;
+      background:#020617;
+      padding:40px;
+      border-radius:18px;
+      border:1px solid #0f172a;
+      box-shadow:0 0 40px rgba(0,0,0,0.95);
+    }
+
+    h1{
+      color:#f8fafc;
+      margin-bottom:30px;
+      font-size:34px;
+    }
+
+    h2{
+      color:#c084fc;
+      margin-top:35px;
+      margin-bottom:15px;
+      font-size:26px;
+    }
+
+    p{
+      color:#cbd5e1;
+    }
+
+    ul{
+      padding-left:24px;
+    }
+
+    li{
+      margin-bottom:10px;
+      color:#cbd5e1;
+    }
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      margin-top:20px;
+    }
+
+    table th,
+    table td{
+      border:1px solid #1e293b;
+      padding:14px;
+      text-align:left;
+      vertical-align:top;
+    }
+
+    table th{
+      background:#0f172a;
+      color:#38bdf8;
+    }
+
+    table td{
+      background:#020617;
+      color:#d1d5db;
+    }
+
+    .highlight{
+      background:#0f172a;
+      padding:18px;
+      border-left:5px solid #38bdf8;
+      border-radius:10px;
+      margin-top:15px;
+      color:#e5e7eb;
+    }
+
+    .flow{
+      background:#020617;
+      border:1px solid #1e293b;
+      padding:20px;
+      border-radius:10px;
+      margin-top:15px;
+      color:#e2e8f0;
+      line-height:2;
+      text-align:center;
+      font-size:18px;
+    }
+
+    pre{
+      background:#000000;
+      padding:22px;
+      border-radius:12px;
+      overflow-x:auto;
+      border:1px solid #0f172a;
+    }
+
+    code{
+      font-family:Consolas, monospace;
+      font-size:15px;
+    }
+
+    .keyword{
+      color:#c084fc;
+    }
+
+    .function{
+      color:#38bdf8;
+    }
+
+    .string{
+      color:#facc15;
+    }
+
+    .tag{
+      color:#f472b6;
+    }
+
+    .comment{
+      color:#94a3b8;
+    }
+
+    .output{
+      color:#4ade80;
+    }
+
+  
+
+    /* Fixed Previous / Next buttons */
+    .fixed-page-nav-spacer{height:110px;}
+    .fixed-page-nav{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);width:calc(100% - 32px);max-width:1180px;display:flex;justify-content:space-between;gap:16px;z-index:9999;pointer-events:none;}
+    .fixed-page-nav a,.fixed-page-nav span{width:52px;height:52px;display:flex;align-items:center;justify-content:center;text-align:center;text-decoration:none;background:#38bdf8;color:#020617;border-radius:50%;font-size:28px;font-weight:700;line-height:1;box-shadow:0 10px 30px rgba(0,0,0,0.45);pointer-events:auto;}
+    .fixed-page-nav span{background:#334155;color:#94a3b8;cursor:not-allowed;}
+    @media(max-width:600px){.fixed-page-nav{bottom:14px;width:calc(100% - 20px);}.fixed-page-nav a,.fixed-page-nav span{width:46px;height:46px;font-size:24px;}}
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+
+    <h1>057. What is conditional rendering in React?</h1>
+
+    <h2>One-Line Definition</h2>
+
+    <div class="highlight">
+      Conditional rendering in React means displaying different UI elements based on conditions.
+    </div>
+
+    <h2>Simple Understanding</h2>
+
+    <p>
+      React can show or hide UI depending on:
+    </p>
+
+    <ul>
+      <li>State</li>
+      <li>Props</li>
+      <li>User actions</li>
+      <li>Conditions</li>
+    </ul>
+
+    <p>
+      This is called:
+    </p>
+
+    <div class="highlight">
+      Conditional Rendering
+    </div>
+
+    <h2>Real-Life Example</h2>
+
+    <p>
+      Suppose:
+    </p>
+
+    <ul>
+      <li>User logged in → Show dashboard</li>
+      <li>User not logged in → Show login page</li>
+    </ul>
+
+    <h2>Flow Diagram</h2>
+
+    <div class="flow">
+      Check Condition
+      <br>
+      ↓
+      <br>
+      True → Render One UI
+      <br>
+      OR
+      <br>
+      False → Render Another UI
+    </div>
+
+    <h2>1. Using if Statement</h2>
+
+    <pre><code><span class="keyword">function</span> <span class="function">App</span>() {
+
+  <span class="keyword">const</span> isLoggedIn = true;
+
+  <span class="keyword">if</span> (isLoggedIn) {
+
+    <span class="keyword">return</span> <span class="tag">&lt;h1&gt;</span>Welcome User<span class="tag">&lt;/h1&gt;</span>;
+
+  }
+
+  <span class="keyword">return</span> <span class="tag">&lt;h1&gt;</span>Please Login<span class="tag">&lt;/h1&gt;</span>;
+
+}</code></pre>
+
+    <h2>Output</h2>
+
+    <pre class="output"><code>Welcome User</code></pre>
+
+    <h2>2. Using Ternary Operator</h2>
+
+    <p>
+      Most commonly used in JSX.
+    </p>
+
+    <pre><code><span class="keyword">function</span> <span class="function">App</span>() {
+
+  <span class="keyword">const</span> isLoggedIn = false;
+
+  <span class="keyword">return</span> (
+
+    <span class="tag">&lt;div&gt;</span>
+
+      {
+
+        isLoggedIn
+          ? <span class="tag">&lt;h1&gt;</span>Dashboard<span class="tag">&lt;/h1&gt;</span>
+          : <span class="tag">&lt;h1&gt;</span>Login<span class="tag">&lt;/h1&gt;</span>
+
+      }
+
+    <span class="tag">&lt;/div&gt;</span>
+
+  );
+
+}</code></pre>
+
+    <h2>Output</h2>
+
+    <pre class="output"><code>Login</code></pre>
+
+    <h2>3. Using Short-Circuit Operator</h2>
+
+    <p>
+      Useful when rendering only if condition is true.
+    </p>
+
+    <pre><code><span class="keyword">function</span> <span class="function">App</span>() {
+
+  <span class="keyword">const</span> isAdmin = true;
+
+  <span class="keyword">return</span> (
+
+    <span class="tag">&lt;div&gt;</span>
+
+      {
+
+        isAdmin && (
+          <span class="tag">&lt;h1&gt;</span>Admin Panel<span class="tag">&lt;/h1&gt;</span>
+        )
+
+      }
+
+    <span class="tag">&lt;/div&gt;</span>
+
+  );
+
+}</code></pre>
+
+    <h2>Output</h2>
+
+    <pre class="output"><code>Admin Panel</code></pre>
+
+    <h2>How && Works</h2>
+
+    <table>
+
+      <tr>
+        <th>Condition</th>
+        <th>Result</th>
+      </tr>
+
+      <tr>
+        <td>true && JSX</td>
+        <td>JSX renders</td>
+      </tr>
+
+      <tr>
+        <td>false && JSX</td>
+        <td>Nothing renders</td>
+      </tr>
+
+    </table>
+
+    <h2>4. Using Variables</h2>
+
+    <pre><code><span class="keyword">function</span> <span class="function">App</span>() {
+
+  <span class="keyword">const</span> isLoading = true;
+
+  <span class="keyword">let</span> content;
+
+  <span class="keyword">if</span> (isLoading) {
+
+    content = <span class="tag">&lt;h1&gt;</span>Loading...<span class="tag">&lt;/h1&gt;</span>;
+
+  } <span class="keyword">else</span> {
+
+    content = <span class="tag">&lt;h1&gt;</span>Data Loaded<span class="tag">&lt;/h1&gt;</span>;
+
+  }
+
+  <span class="keyword">return</span> <span class="tag">&lt;div&gt;</span>{content}<span class="tag">&lt;/div&gt;</span>;
+
+}</code></pre>
+
+    <h2>5. Returning null</h2>
+
+    <p>
+      Returning null means:
+    </p>
+
+    <div class="highlight">
+      Render nothing
+    </div>
+
+    <pre><code><span class="keyword">function</span> <span class="function">Message</span>({ show }) {
+
+  <span class="keyword">if</span> (!show) {
+
+    <span class="keyword">return</span> null;
+
+  }
+
+  <span class="keyword">return</span> <span class="tag">&lt;h1&gt;</span>Hello<span class="tag">&lt;/h1&gt;</span>;
+
+}</code></pre>
+
+    <h2>Why Conditional Rendering Is Important</h2>
+
+    <ul>
+      <li>Dynamic UI</li>
+      <li>User authentication handling</li>
+      <li>Loading states</li>
+      <li>Error handling</li>
+      <li>Permission-based rendering</li>
+    </ul>
+
+    <h2>Real Project Use Cases</h2>
+
+    <table>
+
+      <tr>
+        <th>Feature</th>
+        <th>Conditional Rendering Usage</th>
+      </tr>
+
+      <tr>
+        <td>OTP popup</td>
+        <td>Show after verification</td>
+      </tr>
+
+      <tr>
+        <td>Loader</td>
+        <td>Show during API calls</td>
+      </tr>
+
+      <tr>
+        <td>Error popup</td>
+        <td>Show only on errors</td>
+      </tr>
+
+      <tr>
+        <td>Role-based dashboard</td>
+        <td>Admin/User UI switching</td>
+      </tr>
+
+    </table>
+
+    <h2>Most Commonly Used Methods</h2>
+
+    <table>
+
+      <tr>
+        <th>Method</th>
+        <th>Best Use Case</th>
+      </tr>
+
+      <tr>
+        <td>Ternary Operator</td>
+        <td>Two UI choices</td>
+      </tr>
+
+      <tr>
+        <td>&& Operator</td>
+        <td>Show/hide single UI</td>
+      </tr>
+
+      <tr>
+        <td>if Statement</td>
+        <td>Complex conditions</td>
+      </tr>
+
+      <tr>
+        <td>null</td>
+        <td>Render nothing</td>
+      </tr>
+
+    </table>
+
+    <h2>Important Interview Points</h2>
+
+    <ul>
+      <li>Conditional rendering changes UI based on conditions.</li>
+      <li>Ternary operator is very common in JSX.</li>
+      <li>&& is used for show/hide logic.</li>
+      <li>null means render nothing.</li>
+      <li>Used heavily in dynamic applications.</li>
+    </ul>
+
+    <h2>Short Interview Answer</h2>
+
+    <div class="highlight">
+      Conditional rendering in React is the technique of rendering different UI elements based on conditions using if statements, ternary operators, logical operators, or null rendering.
+    </div>
+
+    <h2>One-Line Interview Answer</h2>
+
+    <div class="highlight">
+      Conditional rendering means showing different UI in React based on conditions.
+    </div>
+
+  </div>
+
+
+  <div class="fixed-page-nav-spacer"></div>
+  <div class="fixed-page-nav">
+    <a href="056%20What%20does%20it%20mean%20for%20a%20component%20to%20be%20pure.html">←</a>
+    <a href="058%20How%20do%20you%20handle%20events%20in%20React.html">→</a>
+  </div>
+</body>
+</html>
