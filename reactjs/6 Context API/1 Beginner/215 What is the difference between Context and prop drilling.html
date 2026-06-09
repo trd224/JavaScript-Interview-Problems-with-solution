@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>215. What is the Difference Between Context and Prop Drilling?</title>
+
+  <style>
+
+    body{
+      margin:0;
+      padding:0;
+      background:#000814;
+      color:#e2e8f0;
+      font-family:Arial,sans-serif;
+      line-height:1.7;
+    }
+
+    .container{
+      max-width:1000px;
+      margin:40px auto;
+      background:#020617;
+      padding:40px;
+      border-radius:18px;
+      border:1px solid #0f172a;
+      box-shadow:0 0 40px rgba(0,0,0,.95);
+    }
+
+    h1{
+      color:#f8fafc;
+      margin-bottom:30px;
+      font-size:34px;
+    }
+
+    h2{
+      color:#c084fc;
+      margin-top:35px;
+      margin-bottom:15px;
+      font-size:26px;
+    }
+
+    p{
+      color:#cbd5e1;
+    }
+
+    ul{
+      padding-left:24px;
+    }
+
+    li{
+      margin-bottom:10px;
+      color:#cbd5e1;
+    }
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      margin-top:20px;
+    }
+
+    table th,
+    table td{
+      border:1px solid #1e293b;
+      padding:14px;
+      text-align:left;
+      vertical-align:top;
+    }
+
+    table th{
+      background:#0f172a;
+      color:#38bdf8;
+    }
+
+    table td{
+      background:#020617;
+      color:#d1d5db;
+    }
+
+    .highlight{
+      background:#0f172a;
+      padding:18px;
+      border-left:5px solid #38bdf8;
+      border-radius:10px;
+      margin-top:15px;
+      color:#e5e7eb;
+    }
+
+    .flow{
+      background:#020617;
+      border:1px solid #1e293b;
+      padding:20px;
+      border-radius:10px;
+      margin-top:15px;
+      color:#e2e8f0;
+      line-height:2;
+      text-align:center;
+      font-size:18px;
+    }
+
+    pre{
+      background:#000;
+      padding:22px;
+      border-radius:12px;
+      overflow-x:auto;
+      border:1px solid #0f172a;
+    }
+
+    code{
+      font-family:Consolas,monospace;
+      font-size:15px;
+    }
+
+    .keyword{
+      color:#c084fc;
+    }
+
+    .function{
+      color:#38bdf8;
+    }
+
+    .string{
+      color:#facc15;
+    }
+
+    .tag{
+      color:#f472b6;
+    }
+
+    .comment{
+      color:#94a3b8;
+    }
+
+    .output{
+      color:#4ade80;
+    }
+
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+
+    <h1>215. What is the Difference Between Context and Prop Drilling?</h1>
+
+    <h2>One-Line Definition</h2>
+
+    <div class="highlight">
+      Prop drilling is the process of passing props through multiple intermediate components, whereas Context allows us to share data directly with descendant components without manually passing props.
+    </div>
+
+    <h2>What is Prop Drilling?</h2>
+
+    <p>
+      Prop drilling occurs when data must travel through several components before reaching the component that actually needs it.
+    </p>
+
+    <div class="flow">
+
+      App
+      <br>
+      ↓
+      <br>
+      Dashboard
+      <br>
+      ↓
+      <br>
+      Sidebar
+      <br>
+      ↓
+      <br>
+      Profile
+
+    </div>
+
+    <p>
+      If Profile needs user data, every component in the chain must receive and pass the prop.
+    </p>
+
+<pre><code><span class="comment">// App.js</span>
+
+<span class="tag">&lt;Dashboard</span> user={user} <span class="tag">/&gt;</span></code></pre>
+
+<pre><code><span class="comment">// Dashboard.js</span>
+
+<span class="tag">&lt;Sidebar</span> user={user} <span class="tag">/&gt;</span></code></pre>
+
+<pre><code><span class="comment">// Sidebar.js</span>
+
+<span class="tag">&lt;Profile</span> user={user} <span class="tag">/&gt;</span></code></pre>
+
+<pre><code><span class="comment">// Profile.js</span>
+
+<span class="tag">&lt;h1&gt;</span>{user}<span class="tag">&lt;/h1&gt;</span></code></pre>
+
+    <h2>Problems with Prop Drilling</h2>
+
+    <ul>
+      <li>Extra code in intermediate components.</li>
+      <li>Difficult to maintain large component trees.</li>
+      <li>Components receive props they do not use.</li>
+      <li>Refactoring becomes harder.</li>
+    </ul>
+
+    <h2>How Context Solves This Problem</h2>
+
+    <p>
+      Context stores shared data in a Provider so descendant components can access it directly.
+    </p>
+
+    <div class="flow">
+
+      Context Provider
+      <br>
+      ↓
+      <br>
+      Shared Data
+      <br>
+      ↓
+      <br>
+      Profile
+      <br>
+      ↓
+      <br>
+      useContext()
+
+    </div>
+
+<pre><code><span class="comment">// App.js</span>
+
+<span class="tag">&lt;UserContext.Provider</span> value={user}<span class="tag">&gt;</span>
+
+  <span class="tag">&lt;Dashboard</span> <span class="tag">/&gt;</span>
+
+<span class="tag">&lt;/UserContext.Provider&gt;</span></code></pre>
+
+<pre><code><span class="comment">// Profile.js</span>
+
+<span class="keyword">const</span> user = useContext(UserContext);
+
+<span class="keyword">return</span> (
+
+  <span class="tag">&lt;h1&gt;</span>{user}<span class="tag">&lt;/h1&gt;</span>
+
+);</code></pre>
+
+    <h2>Flow Comparison</h2>
+
+    <h3 style="color:#38bdf8;">Prop Drilling</h3>
+
+    <div class="flow">
+
+      App
+      <br>
+      ↓ user
+      <br>
+      Dashboard
+      <br>
+      ↓ user
+      <br>
+      Sidebar
+      <br>
+      ↓ user
+      <br>
+      Profile
+
+    </div>
+
+    <h3 style="color:#38bdf8;">Context</h3>
+
+    <div class="flow">
+
+      App
+      <br>
+      ↓
+      <br>
+      UserContext.Provider
+      <br>
+      ↓
+      <br>
+      Dashboard
+      <br>
+      ↓
+      <br>
+      Sidebar
+      <br>
+      ↓
+      <br>
+      Profile
+      <br>
+      ↓
+      <br>
+      useContext(UserContext)
+
+    </div>
+
+    <h2>Context vs Prop Drilling</h2>
+
+    <table>
+
+      <tr>
+        <th>Feature</th>
+        <th>Prop Drilling</th>
+        <th>Context</th>
+      </tr>
+
+      <tr>
+        <td>Data Sharing</td>
+        <td>Through Props</td>
+        <td>Through Context Provider</td>
+      </tr>
+
+      <tr>
+        <td>Intermediate Components</td>
+        <td>Must Pass Data</td>
+        <td>No Need to Pass Data</td>
+      </tr>
+
+      <tr>
+        <td>Code Complexity</td>
+        <td>Higher</td>
+        <td>Lower</td>
+      </tr>
+
+      <tr>
+        <td>Best For</td>
+        <td>Local Data</td>
+        <td>Shared Data</td>
+      </tr>
+
+      <tr>
+        <td>Scalability</td>
+        <td>Poor for Deep Trees</td>
+        <td>Better</td>
+      </tr>
+
+    </table>
+
+    <h2>Should Context Replace Props?</h2>
+
+    <div class="highlight">
+      No.
+      <br><br>
+      Props are still the preferred way to pass data between closely related parent and child components.
+      <br><br>
+      Context should be used when many components across the application need the same data.
+    </div>
+
+    <h2>When to Use Props?</h2>
+
+    <ul>
+      <li>Parent and child are directly connected.</li>
+      <li>Only a few components need the data.</li>
+      <li>Data is local to a feature.</li>
+    </ul>
+
+    <h2>When to Use Context?</h2>
+
+    <ul>
+      <li>User information.</li>
+      <li>Authentication state.</li>
+      <li>Theme settings.</li>
+      <li>Language settings.</li>
+      <li>Global application configuration.</li>
+    </ul>
+
+    <h2>Real Project Example</h2>
+
+    <div class="highlight">
+      In our Aadhaar Authentication application, passing logged-in user details from App → Dashboard → Audit → Report → Header would be prop drilling.
+      <br><br>
+      Using AuthContext allows Header, Audit, Report, and other components to access user information directly through useContext() without passing props through intermediate components.
+    </div>
+
+    <h2>Important Interview Points</h2>
+
+    <ul>
+      <li>Prop drilling is a problem, not a feature.</li>
+      <li>Context API helps solve prop drilling.</li>
+      <li>Props are still useful for local component communication.</li>
+      <li>Context is best for shared application-wide data.</li>
+      <li>Context updates re-render consuming components.</li>
+    </ul>
+
+    <h2>Short Interview Answer</h2>
+
+    <div class="highlight">
+      Prop drilling means passing data through multiple intermediate components using props, while Context allows components to access shared data directly without manually passing props through every level.
+    </div>
+
+    <h2>One-Line Interview Answer</h2>
+
+    <div class="highlight">
+      Prop drilling passes data through many components, whereas Context shares data directly with descendant components.
+    </div>
+
+  </div>
+
+</body>
+</html>

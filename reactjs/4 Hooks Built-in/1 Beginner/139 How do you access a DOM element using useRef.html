@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Access DOM Element using useRef in React</title>
+
+  <style>
+
+    body{
+      margin:0;
+      padding:0;
+      background:#000814;
+      color:#e2e8f0;
+      font-family:Arial, sans-serif;
+      line-height:1.7;
+    }
+
+    .container{
+      max-width:1000px;
+      margin:40px auto;
+      background:#020617;
+      padding:40px;
+      border-radius:18px;
+      border:1px solid #0f172a;
+      box-shadow:0 0 40px rgba(0,0,0,0.95);
+    }
+
+    h1{
+      color:#f8fafc;
+      margin-bottom:30px;
+      font-size:34px;
+    }
+
+    h2{
+      color:#c084fc;
+      margin-top:35px;
+      margin-bottom:15px;
+      font-size:26px;
+    }
+
+    p{
+      color:#cbd5e1;
+    }
+
+    ul{
+      padding-left:24px;
+    }
+
+    li{
+      margin-bottom:10px;
+      color:#cbd5e1;
+    }
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      margin-top:20px;
+    }
+
+    table th,
+    table td{
+      border:1px solid #1e293b;
+      padding:14px;
+      text-align:left;
+      vertical-align:top;
+    }
+
+    table th{
+      background:#0f172a;
+      color:#38bdf8;
+    }
+
+    table td{
+      background:#020617;
+      color:#d1d5db;
+    }
+
+    .highlight{
+      background:#0f172a;
+      padding:18px;
+      border-left:5px solid #38bdf8;
+      border-radius:10px;
+      margin-top:15px;
+      color:#e5e7eb;
+    }
+
+    .flow{
+      background:#020617;
+      border:1px solid #1e293b;
+      padding:20px;
+      border-radius:10px;
+      margin-top:15px;
+      color:#e2e8f0;
+      line-height:2;
+      text-align:center;
+      font-size:18px;
+    }
+
+    pre{
+      background:#000000;
+      padding:22px;
+      border-radius:12px;
+      overflow-x:auto;
+      border:1px solid #0f172a;
+    }
+
+    code{
+      font-family:Consolas, monospace;
+      font-size:15px;
+    }
+
+    .keyword{
+      color:#c084fc;
+    }
+
+    .function{
+      color:#38bdf8;
+    }
+
+    .string{
+      color:#facc15;
+    }
+
+    .tag{
+      color:#f472b6;
+    }
+
+    .comment{
+      color:#94a3b8;
+    }
+
+    .output{
+      color:#4ade80;
+    }
+
+  
+
+    /* Fixed Previous / Next buttons */
+    .fixed-page-nav-spacer{height:110px;}
+    .fixed-page-nav{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);width:calc(100% - 32px);max-width:1180px;display:flex;justify-content:space-between;gap:16px;z-index:9999;pointer-events:none;}
+    .fixed-page-nav a,.fixed-page-nav span{width:52px;height:52px;display:flex;align-items:center;justify-content:center;text-align:center;text-decoration:none;background:#38bdf8;color:#020617;border-radius:50%;font-size:28px;font-weight:700;line-height:1;box-shadow:0 10px 30px rgba(0,0,0,0.45);pointer-events:auto;}
+    .fixed-page-nav span{background:#334155;color:#94a3b8;cursor:not-allowed;}
+    @media(max-width:600px){.fixed-page-nav{bottom:14px;width:calc(100% - 20px);}.fixed-page-nav a,.fixed-page-nav span{width:46px;height:46px;font-size:24px;}}
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+
+    <h1>139. How do you access a DOM element using useRef in React?</h1>
+
+    <h2>One-Line Definition</h2>
+
+    <div class="highlight">
+      <strong>useRef</strong> is a React hook used to directly access and interact with a DOM element without re-rendering the component.
+    </div>
+
+    <h2>Why Is It Used?</h2>
+
+    <p>
+      We use <strong>useRef</strong> when our application needs direct access to a real DOM element.
+    </p>
+
+    <ul>
+      <li>Focus an input field</li>
+      <li>Scroll to an element</li>
+      <li>Play or pause a video</li>
+      <li>Access an element's width or height</li>
+      <li>Modify a DOM element directly</li>
+    </ul>
+
+    <h2>Basic Example</h2>
+
+    <pre><code><span class="keyword">import</span> { useRef } from <span class="string">'react'</span>;
+
+<span class="keyword">function</span> <span class="function">App</span>() {
+  <span class="keyword">const</span> inputRef = useRef(null);
+
+  <span class="keyword">const</span> focusInput = () =&gt; {
+    inputRef.current.focus();
+  };
+
+  <span class="keyword">return</span> (
+    <span class="tag">&lt;&gt;</span>
+      <span class="tag">&lt;input</span> ref={inputRef} type=<span class="string">"text"</span> <span class="tag">/&gt;</span>
+      <span class="tag">&lt;button</span> onClick={focusInput}<span class="tag">&gt;</span>Focus Input<span class="tag">&lt;/button&gt;</span>
+    <span class="tag">&lt;/&gt;</span>
+  );
+}
+
+<span class="keyword">export</span> <span class="keyword">default</span> App;</code></pre>
+
+    <h2>How It Works</h2>
+
+    <p>
+      First, we create a ref object using <strong>useRef(null)</strong>.
+    </p>
+
+    <pre><code><span class="keyword">const</span> inputRef = useRef(null);</code></pre>
+
+    <p>
+      It creates an object like this:
+    </p>
+
+    <pre><code>{
+  current: null
+}</code></pre>
+
+    <p>
+      Then we connect that ref object with the input element.
+    </p>
+
+    <pre><code><span class="tag">&lt;input</span> ref={inputRef} type=<span class="string">"text"</span> <span class="tag">/&gt;</span></code></pre>
+
+    <p>
+      After rendering, React stores the real DOM element inside the <strong>current</strong> property.
+    </p>
+
+    <pre><code>inputRef.current</code></pre>
+
+    <p>
+      Now <strong>inputRef.current</strong> points to the actual input element.
+    </p>
+
+    <pre><code><span class="tag">&lt;input</span> type=<span class="string">"text"</span><span class="tag">&gt;</span></code></pre>
+
+    <h2>Main Flow</h2>
+
+    <div class="flow">
+      useRef(null)
+      <br>
+      ↓
+      <br>
+      Connect with DOM element using ref
+      <br>
+      ↓
+      <br>
+      React stores DOM element in current
+      <br>
+      ↓
+      <br>
+      Access DOM using ref.current
+    </div>
+
+    <h2>Common DOM Methods</h2>
+
+    <pre><code>inputRef.current.focus();
+
+inputRef.current.value = <span class="string">'Hello'</span>;
+
+inputRef.current.scrollIntoView();</code></pre>
+
+    <h2>Real-World Example</h2>
+
+    <p>
+      In our application, we can automatically focus the Aadhaar input when the popup opens.
+    </p>
+
+    <pre><code><span class="keyword">import</span> { useEffect, useRef } from <span class="string">'react'</span>;
+
+<span class="keyword">function</span> <span class="function">AadhaarPopup</span>() {
+  <span class="keyword">const</span> aadhaarRef = useRef(null);
+
+  useEffect(() =&gt; {
+    aadhaarRef.current.focus();
+  }, []);
+
+  <span class="keyword">return</span> <span class="tag">&lt;input</span> ref={aadhaarRef} placeholder=<span class="string">"Enter Aadhaar Number"</span> <span class="tag">/&gt;</span>;
+}
+
+<span class="keyword">export</span> <span class="keyword">default</span> AadhaarPopup;</code></pre>
+
+    <h2>Output</h2>
+
+    <pre class="output"><code>
+Popup Opens
+
+↓
+
+Aadhaar input automatically gets focus
+</code></pre>
+
+    <h2>Important Point</h2>
+
+    <div class="highlight">
+      Updating <strong>ref.current</strong> does not re-render our component, because refs are mainly used for storing mutable values or DOM references.
+    </div>
+
+    <h2>useRef vs useState</h2>
+
+    <table>
+
+      <tr>
+        <th>useRef</th>
+        <th>useState</th>
+      </tr>
+
+      <tr>
+        <td>Stores DOM reference or mutable value</td>
+        <td>Stores UI state</td>
+      </tr>
+
+      <tr>
+        <td>Does not cause re-render</td>
+        <td>Causes re-render</td>
+      </tr>
+
+      <tr>
+        <td>Access value using ref.current</td>
+        <td>Access value directly from state variable</td>
+      </tr>
+
+      <tr>
+        <td>Best for DOM access</td>
+        <td>Best for UI updates</td>
+      </tr>
+
+    </table>
+
+    <h2>Important Interview Points</h2>
+
+    <ul>
+      <li><strong>useRef</strong> returns an object with a <strong>current</strong> property.</li>
+      <li>The DOM element is accessed using <strong>ref.current</strong>.</li>
+      <li>Changing <strong>ref.current</strong> does not re-render the component.</li>
+      <li>It is commonly used for focus, scroll, video control, and DOM measurement.</li>
+    </ul>
+
+    <h2>Short Interview Answer</h2>
+
+    <div class="highlight">
+      We access a DOM element in React by creating a ref with <strong>useRef(null)</strong>, attaching it to the element using the <strong>ref</strong> attribute, and then accessing the element through <strong>ref.current</strong>.
+    </div>
+
+    <h2>One-Line Interview Answer</h2>
+
+    <div class="highlight">
+      <strong>useRef</strong> allows us to get a reference to a DOM element through the <strong>current</strong> property and interact with it directly without causing a component re-render.
+    </div>
+
+  </div>
+
+
+  <div class="fixed-page-nav-spacer"></div>
+  <div class="fixed-page-nav">
+    <a href="../3%20State%20Management/093%20What%20is%20derived%20state.html">←</a>
+    <a href="126%20What%20are%20the%20rules%20of%20hooks.html">→</a>
+  </div>
+</body>
+</html>

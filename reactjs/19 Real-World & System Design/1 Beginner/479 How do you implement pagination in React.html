@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>479. How Do You Implement Pagination in React?</title>
+
+  <style>
+    body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7;}
+    .container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95);}
+    h1{color:#f8fafc;margin-bottom:30px;font-size:34px;}
+    h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px;}
+    h3{color:#38bdf8;margin-top:25px;margin-bottom:10px;}
+    p{color:#cbd5e1;}
+    ul{padding-left:24px;}
+    li{margin-bottom:10px;color:#cbd5e1;}
+    table{width:100%;border-collapse:collapse;margin-top:20px;}
+    table th,table td{border:1px solid #1e293b;padding:14px;text-align:left;}
+    table th{background:#0f172a;color:#38bdf8;}
+    table td{background:#020617;color:#d1d5db;}
+    .highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px;margin-top:15px;}
+    .flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;margin-top:15px;text-align:center;line-height:2;font-size:18px;}
+    pre{background:#000;padding:22px;border-radius:12px;overflow-x:auto;border:1px solid #0f172a;}
+    code{font-family:Consolas,monospace;font-size:15px;}
+    .keyword{color:#c084fc;}
+    .function{color:#38bdf8;}
+    .string{color:#facc15;}
+    .tag{color:#f472b6;}
+    .comment{color:#94a3b8;}
+    .output{color:#4ade80;}
+  </style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <h1>479. How Do You Implement Pagination in React?</h1>
+
+  <h2>One-Line Definition</h2>
+
+  <div class="highlight">
+    Pagination in React means dividing a large list of data into smaller pages and showing only one page of records at a time.
+  </div>
+
+  <h2>Why Do We Use Pagination?</h2>
+
+  <ul>
+    <li>To avoid showing too many records at once.</li>
+    <li>To improve page performance.</li>
+    <li>To make large lists easier to read.</li>
+    <li>To reduce API and UI load.</li>
+  </ul>
+
+  <h2>Pagination Flow</h2>
+
+  <div class="flow">
+    Full Data List
+    <br>
+    ↓
+    <br>
+    Current Page
+    <br>
+    ↓
+    <br>
+    Items Per Page
+    <br>
+    ↓
+    <br>
+    Slice Data
+    <br>
+    ↓
+    <br>
+    Show Current Page Data
+  </div>
+
+  <h2>Basic Pagination Logic</h2>
+
+<pre><code><span class="keyword">const</span> [currentPage, setCurrentPage] = <span class="function">useState</span>(1);
+<span class="keyword">const</span> itemsPerPage = 5;
+
+<span class="keyword">const</span> lastIndex = currentPage * itemsPerPage;
+<span class="keyword">const</span> firstIndex = lastIndex - itemsPerPage;
+
+<span class="keyword">const</span> currentItems = users.slice(firstIndex, lastIndex);</code></pre>
+
+  <h2>Complete React Pagination Example</h2>
+
+<pre><code><span class="keyword">import</span> { useState } <span class="keyword">from</span> <span class="string">'react'</span>;
+
+<span class="keyword">function</span> <span class="function">UserList</span>() {
+  <span class="keyword">const</span> users = [
+    <span class="string">'Rizwan'</span>, <span class="string">'Amit'</span>, <span class="string">'Rahul'</span>, <span class="string">'Sohan'</span>, <span class="string">'Imran'</span>,
+    <span class="string">'Karan'</span>, <span class="string">'Anil'</span>, <span class="string">'Deepak'</span>, <span class="string">'Mohit'</span>, <span class="string">'Ravi'</span>,
+    <span class="string">'Salman'</span>, <span class="string">'Akash'</span>
+  ];
+
+  <span class="keyword">const</span> [currentPage, setCurrentPage] = <span class="function">useState</span>(1);
+  <span class="keyword">const</span> itemsPerPage = 5;
+
+  <span class="keyword">const</span> lastIndex = currentPage * itemsPerPage;
+  <span class="keyword">const</span> firstIndex = lastIndex - itemsPerPage;
+  <span class="keyword">const</span> currentUsers = users.slice(firstIndex, lastIndex);
+
+  <span class="keyword">const</span> totalPages = Math.ceil(users.length / itemsPerPage);
+
+  <span class="keyword">function</span> <span class="function">goToNextPage</span>() {
+    <span class="keyword">if</span> (currentPage &lt; totalPages) <span class="function">setCurrentPage</span>(currentPage + 1);
+  }
+
+  <span class="keyword">function</span> <span class="function">goToPreviousPage</span>() {
+    <span class="keyword">if</span> (currentPage &gt; 1) <span class="function">setCurrentPage</span>(currentPage - 1);
+  }
+
+  <span class="keyword">return</span> (
+    <span class="tag">&lt;div&gt;</span>
+      <span class="tag">&lt;h2&gt;</span>User List<span class="tag">&lt;/h2&gt;</span>
+
+      <span class="tag">&lt;ul&gt;</span>
+        {currentUsers.map((user, index) =&gt; <span class="tag">&lt;li</span> key={index}<span class="tag">&gt;</span>{user}<span class="tag">&lt;/li&gt;</span>)}
+      <span class="tag">&lt;/ul&gt;</span>
+
+      <span class="tag">&lt;button</span> onClick={goToPreviousPage} disabled={currentPage === 1}<span class="tag">&gt;</span>Previous<span class="tag">&lt;/button&gt;</span>
+
+      <span class="tag">&lt;span&gt;</span> Page {currentPage} of {totalPages} <span class="tag">&lt;/span&gt;</span>
+
+      <span class="tag">&lt;button</span> onClick={goToNextPage} disabled={currentPage === totalPages}<span class="tag">&gt;</span>Next<span class="tag">&lt;/button&gt;</span>
+    <span class="tag">&lt;/div&gt;</span>
+  );
+}
+
+<span class="keyword">export default</span> UserList;</code></pre>
+
+  <h2>How the Calculation Works</h2>
+
+  <table>
+    <tr>
+      <th>Formula</th>
+      <th>Meaning</th>
+    </tr>
+    <tr>
+      <td>lastIndex = currentPage * itemsPerPage</td>
+      <td>Finds the ending index of current page</td>
+    </tr>
+    <tr>
+      <td>firstIndex = lastIndex - itemsPerPage</td>
+      <td>Finds the starting index of current page</td>
+    </tr>
+    <tr>
+      <td>slice(firstIndex, lastIndex)</td>
+      <td>Returns only current page records</td>
+    </tr>
+  </table>
+
+  <h2>Example Calculation</h2>
+
+  <div class="highlight">
+    If currentPage = 2 and itemsPerPage = 5:
+    <br><br>
+    lastIndex = 2 × 5 = 10
+    <br>
+    firstIndex = 10 - 5 = 5
+    <br><br>
+    So React shows records from index 5 to index 9.
+  </div>
+
+  <h2>Page Number Buttons Example</h2>
+
+<pre><code><span class="keyword">const</span> pageNumbers = [];
+
+<span class="keyword">for</span> (<span class="keyword">let</span> i = 1; i &lt;= totalPages; i++) {
+  pageNumbers.push(i);
+}
+
+<span class="tag">&lt;div&gt;</span>
+  {pageNumbers.map(page =&gt; (
+    <span class="tag">&lt;button</span> key={page} onClick={() =&gt; <span class="function">setCurrentPage</span>(page)} disabled={currentPage === page}<span class="tag">&gt;</span>
+      {page}
+    <span class="tag">&lt;/button&gt;</span>
+  ))}
+<span class="tag">&lt;/div&gt;</span></code></pre>
+
+  <h2>Client-Side vs Server-Side Pagination</h2>
+
+  <table>
+    <tr>
+      <th>Client-Side Pagination</th>
+      <th>Server-Side Pagination</th>
+    </tr>
+    <tr>
+      <td>All data is already loaded in frontend</td>
+      <td>Only current page data is fetched from API</td>
+    </tr>
+    <tr>
+      <td>Good for small data</td>
+      <td>Good for large data</td>
+    </tr>
+    <tr>
+      <td>Uses slice()</td>
+      <td>Uses API query params like page and limit</td>
+    </tr>
+  </table>
+
+  <h2>Server-Side Pagination API Example</h2>
+
+<pre><code><span class="function">fetch</span>(<span class="string">`/api/users?page=${currentPage}&amp;limit=${itemsPerPage}`</span>)
+  .then(res =&gt; res.json())
+  .then(data =&gt; console.log(data));</code></pre>
+
+  <h2>Real Project Example</h2>
+
+  <div class="highlight">
+    In our Aadhaar Authentication application, pagination can be used for audit lists, authentication logs, department records, user management lists, and report tables so only limited records are shown at a time.
+  </div>
+
+  <h2>Important Interview Points</h2>
+
+  <ul>
+    <li>Pagination divides large data into smaller pages.</li>
+    <li>useState stores the current page number.</li>
+    <li>slice() is used for client-side pagination.</li>
+    <li>Server-side pagination is better for large datasets.</li>
+    <li>Previous and Next buttons update the current page.</li>
+  </ul>
+
+  <h2>Short Interview Answer</h2>
+
+  <div class="highlight">
+    Pagination in React is implemented by storing the current page in state, calculating start and end indexes, slicing the data, and rendering only the current page records.
+  </div>
+
+  <h2>One-Line Interview Answer</h2>
+
+  <div class="highlight">
+    React pagination is implemented by using current page state and displaying only a sliced portion of the data.
+  </div>
+
+</div>
+
+</body>
+</html>

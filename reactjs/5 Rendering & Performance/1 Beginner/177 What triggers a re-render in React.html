@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>177. What Triggers a Re-render in React?</title>
+
+  <style>
+
+    body{
+      margin:0;
+      padding:0;
+      background:#000814;
+      color:#e2e8f0;
+      font-family:Arial,sans-serif;
+      line-height:1.7;
+    }
+
+    .container{
+      max-width:1000px;
+      margin:40px auto;
+      background:#020617;
+      padding:40px;
+      border-radius:18px;
+      border:1px solid #0f172a;
+      box-shadow:0 0 40px rgba(0,0,0,.95);
+    }
+
+    h1{
+      color:#f8fafc;
+      margin-bottom:30px;
+      font-size:34px;
+    }
+
+    h2{
+      color:#c084fc;
+      margin-top:35px;
+      margin-bottom:15px;
+      font-size:26px;
+    }
+
+    p{
+      color:#cbd5e1;
+    }
+
+    ul{
+      padding-left:24px;
+    }
+
+    li{
+      margin-bottom:10px;
+      color:#cbd5e1;
+    }
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      margin-top:20px;
+    }
+
+    table th,
+    table td{
+      border:1px solid #1e293b;
+      padding:14px;
+      text-align:left;
+      vertical-align:top;
+    }
+
+    table th{
+      background:#0f172a;
+      color:#38bdf8;
+    }
+
+    table td{
+      background:#020617;
+      color:#d1d5db;
+    }
+
+    .highlight{
+      background:#0f172a;
+      padding:18px;
+      border-left:5px solid #38bdf8;
+      border-radius:10px;
+      margin-top:15px;
+      color:#e5e7eb;
+    }
+
+    .flow{
+      background:#020617;
+      border:1px solid #1e293b;
+      padding:20px;
+      border-radius:10px;
+      margin-top:15px;
+      color:#e2e8f0;
+      line-height:2;
+      text-align:center;
+      font-size:18px;
+    }
+
+    pre{
+      background:#000;
+      padding:22px;
+      border-radius:12px;
+      overflow-x:auto;
+      border:1px solid #0f172a;
+    }
+
+    code{
+      font-family:Consolas,monospace;
+      font-size:15px;
+    }
+
+    .keyword{
+      color:#c084fc;
+    }
+
+    .function{
+      color:#38bdf8;
+    }
+
+    .string{
+      color:#facc15;
+    }
+
+    .tag{
+      color:#f472b6;
+    }
+
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+
+    <h1>177. What Triggers a Re-render in React?</h1>
+
+    <h2>One-Line Definition</h2>
+
+    <div class="highlight">
+      A React component re-renders whenever React detects that its state, props, context value, or parent render output has changed.
+    </div>
+
+    <h2>What is a Re-render?</h2>
+
+    <p>
+      A re-render means React executes the component function again to calculate the latest UI.
+    </p>
+
+    <div class="flow">
+      Data Changes
+      <br>
+      ↓
+      <br>
+      Component Function Runs Again
+      <br>
+      ↓
+      <br>
+      React Compares Old and New UI
+      <br>
+      ↓
+      <br>
+      DOM Updates If Needed
+    </div>
+
+    <h2>Main Things That Trigger Re-renders</h2>
+
+    <table>
+
+      <tr>
+        <th>Trigger</th>
+        <th>Causes Re-render?</th>
+      </tr>
+
+      <tr>
+        <td>State Change (useState)</td>
+        <td>✅ Yes</td>
+      </tr>
+
+      <tr>
+        <td>Props Change</td>
+        <td>✅ Yes</td>
+      </tr>
+
+      <tr>
+        <td>Context Value Change</td>
+        <td>✅ Yes</td>
+      </tr>
+
+      <tr>
+        <td>Parent Component Re-renders</td>
+        <td>✅ Usually Yes</td>
+      </tr>
+
+      <tr>
+        <td>useRef.current Change</td>
+        <td>❌ No</td>
+      </tr>
+
+    </table>
+
+    <h2>1. State Changes Trigger Re-renders</h2>
+
+<pre><code><span class="keyword">import</span> { useState } <span class="keyword">from</span> <span class="string">'react'</span>;
+
+<span class="keyword">function</span> <span class="function">Counter</span>() {
+
+  <span class="keyword">const</span> [count, setCount] = useState(0);
+
+  <span class="keyword">return</span> (
+    &lt;button onClick={() =&gt; setCount(count + 1)}&gt;
+      {count}
+    &lt;/button&gt;
+  );
+
+}</code></pre>
+
+    <div class="highlight">
+      Calling setCount() changes state and triggers a re-render.
+    </div>
+
+    <h2>2. Props Changes Trigger Re-renders</h2>
+
+<pre><code><span class="keyword">function</span> <span class="function">Parent</span>() {
+
+  <span class="keyword">const</span> [name, setName] = useState('Rizwan');
+
+  <span class="keyword">return</span> &lt;Child name={name} /&gt;;
+
+}
+
+<span class="keyword">function</span> <span class="function">Child</span>({ name }) {
+
+  <span class="keyword">return</span> &lt;h1&gt;{name}&lt;/h1&gt;;
+
+}</code></pre>
+
+    <div class="highlight">
+      When the name prop changes, Child re-renders.
+    </div>
+
+    <h2>3. Context Changes Trigger Re-renders</h2>
+
+<pre><code><span class="keyword">const</span> UserContext = createContext();
+
+<span class="keyword">function</span> <span class="function">Profile</span>() {
+
+  <span class="keyword">const</span> user = useContext(UserContext);
+
+  <span class="keyword">return</span> &lt;h1&gt;{user}&lt;/h1&gt;;
+
+}</code></pre>
+
+    <div class="highlight">
+      If the Provider value changes, all consuming components re-render.
+    </div>
+
+    <h2>4. Parent Re-renders Can Trigger Child Re-renders</h2>
+
+<pre><code><span class="keyword">function</span> <span class="function">Parent</span>() {
+
+  <span class="keyword">const</span> [count, setCount] = useState(0);
+
+  <span class="keyword">return</span> (
+    &lt;&gt;
+      &lt;button onClick={() =&gt; setCount(count + 1)}&gt;
+        Increment
+      &lt;/button&gt;
+
+      &lt;Child /&gt;
+    &lt;/&gt;
+  );
+
+}</code></pre>
+
+    <div class="highlight">
+      When Parent re-renders, Child also re-renders by default.
+    </div>
+
+    <h2>What Does NOT Trigger a Re-render?</h2>
+
+    <table>
+
+      <tr>
+        <th>Action</th>
+        <th>Triggers Re-render?</th>
+      </tr>
+
+      <tr>
+        <td>Changing useRef.current</td>
+        <td>❌ No</td>
+      </tr>
+
+      <tr>
+        <td>Changing Normal Variables</td>
+        <td>❌ No</td>
+      </tr>
+
+      <tr>
+        <td>Console Logs</td>
+        <td>❌ No</td>
+      </tr>
+
+      <tr>
+        <td>API Calls Alone</td>
+        <td>❌ No</td>
+      </tr>
+
+    </table>
+
+    <h2>Example: useRef Does Not Re-render</h2>
+
+<pre><code><span class="keyword">import</span> { useRef } <span class="keyword">from</span> <span class="string">'react'</span>;
+
+<span class="keyword">function</span> <span class="function">Counter</span>() {
+
+  <span class="keyword">const</span> countRef = useRef(0);
+
+  <span class="keyword">const</span> increment = () =&gt; {
+
+    countRef.current++;
+
+  };
+
+  <span class="keyword">return</span> (
+
+    &lt;button onClick={increment}&gt;
+      Increment
+    &lt;/button&gt;
+
+  );
+
+}</code></pre>
+
+    <div class="highlight">
+      countRef.current changes, but React does not re-render the component.
+    </div>
+
+    <h2>Important Note About useEffect</h2>
+
+    <div class="highlight">
+      useEffect itself does not trigger a re-render.
+      <br><br>
+      However, if useEffect updates state using setState(), that state update causes a re-render.
+    </div>
+
+<pre><code>useEffect(() =&gt; {
+
+  setCount(10);
+
+}, []);</code></pre>
+
+    <h2>Real Project Example</h2>
+
+    <div class="highlight">
+      In our Aadhaar Authentication application:
+      <br><br>
+
+      Updating OTP, loader state, authentication response, consent status, or popup visibility using useState causes re-renders because the UI changes.
+      <br><br>
+
+      Updating timer IDs, input references, or SignalR connection references using useRef does not cause re-renders because the UI does not depend on those values.
+    </div>
+
+    <h2>Important Interview Points</h2>
+
+    <ul>
+      <li>State changes trigger re-renders.</li>
+      <li>Props changes trigger re-renders.</li>
+      <li>Context changes trigger re-renders.</li>
+      <li>Parent re-renders usually cause child re-renders.</li>
+      <li>useRef changes do not trigger re-renders.</li>
+      <li>useEffect does not directly trigger re-renders.</li>
+    </ul>
+
+    <h2>Short Interview Answer</h2>
+
+    <div class="highlight">
+      React re-renders a component when its state changes, props change, context value changes, or its parent re-renders. Changes to useRef values do not trigger re-renders.
+    </div>
+
+    <h2>One-Line Interview Answer</h2>
+
+    <div class="highlight">
+      State changes, props changes, context updates, and parent re-renders trigger React re-renders, while useRef changes do not.
+    </div>
+
+  </div>
+
+</body>
+</html>

@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>276. What is an Uncontrolled Component in Forms?</title>
+
+  <style>
+
+    body{
+      margin:0;
+      padding:0;
+      background:#000814;
+      color:#e2e8f0;
+      font-family:Arial,sans-serif;
+      line-height:1.7;
+    }
+
+    .container{
+      max-width:1000px;
+      margin:40px auto;
+      background:#020617;
+      padding:40px;
+      border-radius:18px;
+      border:1px solid #0f172a;
+      box-shadow:0 0 40px rgba(0,0,0,.95);
+    }
+
+    h1{
+      color:#f8fafc;
+      margin-bottom:30px;
+      font-size:34px;
+    }
+
+    h2{
+      color:#c084fc;
+      margin-top:35px;
+      margin-bottom:15px;
+      font-size:26px;
+    }
+
+    p{
+      color:#cbd5e1;
+    }
+
+    ul{
+      padding-left:24px;
+    }
+
+    li{
+      margin-bottom:10px;
+      color:#cbd5e1;
+    }
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      margin-top:20px;
+    }
+
+    table th,
+    table td{
+      border:1px solid #1e293b;
+      padding:14px;
+      text-align:left;
+      vertical-align:top;
+    }
+
+    table th{
+      background:#0f172a;
+      color:#38bdf8;
+    }
+
+    table td{
+      background:#020617;
+      color:#d1d5db;
+    }
+
+    .highlight{
+      background:#0f172a;
+      padding:18px;
+      border-left:5px solid #38bdf8;
+      border-radius:10px;
+      margin-top:15px;
+      color:#e5e7eb;
+    }
+
+    .flow{
+      background:#020617;
+      border:1px solid #1e293b;
+      padding:20px;
+      border-radius:10px;
+      margin-top:15px;
+      color:#e2e8f0;
+      line-height:2;
+      text-align:center;
+      font-size:18px;
+    }
+
+    pre{
+      background:#000;
+      padding:22px;
+      border-radius:12px;
+      overflow-x:auto;
+      border:1px solid #0f172a;
+    }
+
+    code{
+      font-family:Consolas,monospace;
+      font-size:15px;
+    }
+
+    .keyword{color:#c084fc;}
+    .function{color:#38bdf8;}
+    .string{color:#facc15;}
+    .tag{color:#f472b6;}
+    .comment{color:#94a3b8;}
+    .output{color:#4ade80;}
+
+  </style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <h1>276. What is an Uncontrolled Component in Forms?</h1>
+
+  <h2>One-Line Definition</h2>
+
+  <div class="highlight">
+    An uncontrolled component in forms is a form element whose value is managed by the browser DOM instead of React state.
+  </div>
+
+  <h2>What Does "Uncontrolled" Mean?</h2>
+
+  <p>
+    In an uncontrolled form component, React does not store the field value in state.
+  </p>
+
+  <p>
+    The browser keeps the value internally, and we access it only when needed.
+  </p>
+
+  <div class="flow">
+
+    User Types
+    <br>
+    ↓
+    <br>
+    DOM Stores Value
+    <br>
+    ↓
+    <br>
+    React State Not Updated
+    <br>
+    ↓
+    <br>
+    Read Value Using Ref
+
+  </div>
+
+  <h2>Basic Example</h2>
+
+<pre><code><span class="keyword">import</span> { useRef } <span class="keyword">from</span> <span class="string">'react'</span>;
+
+<span class="keyword">function</span> <span class="function">Form</span>() {
+
+  <span class="keyword">const</span> nameRef = <span class="function">useRef</span>(null);
+
+  <span class="keyword">return</span> (
+
+    <span class="tag">&lt;input</span> ref={nameRef} <span class="tag">/&gt;</span>
+
+  );
+
+}</code></pre>
+
+  <h2>How It Works</h2>
+
+<pre><code><span class="keyword">const</span> nameRef = <span class="function">useRef</span>(null);</code></pre>
+
+  <p>
+    React stores a reference to the input element.
+  </p>
+
+<pre><code><span class="tag">&lt;input</span> ref={nameRef} <span class="tag">/&gt;</span></code></pre>
+
+  <p>
+    The browser stores whatever the user types.
+  </p>
+
+<pre><code>nameRef.current.value</code></pre>
+
+  <p>
+    Reads the current value from the DOM.
+  </p>
+
+  <h2>Complete Example</h2>
+
+<pre><code><span class="keyword">import</span> { useRef } <span class="keyword">from</span> <span class="string">'react'</span>;
+
+<span class="keyword">function</span> <span class="function">Form</span>() {
+
+  <span class="keyword">const</span> nameRef = <span class="function">useRef</span>(null);
+
+  <span class="keyword">function</span> <span class="function">handleSubmit</span>() {
+
+    alert(nameRef.current.value);
+
+  }
+
+  <span class="keyword">return</span> (
+
+    <span class="tag">&lt;&gt;</span>
+
+      <span class="tag">&lt;input</span> ref={nameRef} <span class="tag">/&gt;</span>
+
+      <span class="tag">&lt;button</span> onClick={handleSubmit}<span class="tag">&gt;</span>
+
+        Submit
+
+      <span class="tag">&lt;/button&gt;</span>
+
+    <span class="tag">&lt;/&gt;</span>
+
+  );
+
+}</code></pre>
+
+  <h2>What Happens Internally?</h2>
+
+  <div class="flow">
+
+    User Types "Rizwan"
+    <br>
+    ↓
+    <br>
+    Browser Stores Value
+    <br>
+    ↓
+    <br>
+    No State Change
+    <br>
+    ↓
+    <br>
+    No Re-render
+    <br>
+    ↓
+    <br>
+    Submit Button Clicked
+    <br>
+    ↓
+    <br>
+    nameRef.current.value
+
+  </div>
+
+  <h2>Using defaultValue</h2>
+
+<pre><code><span class="tag">&lt;input</span>
+  defaultValue=<span class="string">"Rizwan"</span>
+  ref={nameRef}
+<span class="tag">/&gt;</span></code></pre>
+
+  <div class="highlight">
+    defaultValue sets the initial value of an uncontrolled input.
+  </div>
+
+  <h2>Why Doesn't It Re-render?</h2>
+
+<pre><code><span class="comment">// No useState</span>
+
+<span class="comment">// No setState</span>
+
+<span class="comment">// No React update</span></code></pre>
+
+  <div class="highlight">
+    Since React state is not updated, typing inside an uncontrolled input does not cause component re-renders.
+  </div>
+
+  <h2>Controlled vs Uncontrolled in Forms</h2>
+
+  <table>
+
+    <tr>
+      <th>Controlled Form Field</th>
+      <th>Uncontrolled Form Field</th>
+    </tr>
+
+    <tr>
+      <td>Uses useState</td>
+      <td>Uses useRef</td>
+    </tr>
+
+    <tr>
+      <td>Value stored in React state</td>
+      <td>Value stored in DOM</td>
+    </tr>
+
+    <tr>
+      <td>Re-renders while typing</td>
+      <td>No re-render while typing</td>
+    </tr>
+
+    <tr>
+      <td>Easy validation</td>
+      <td>Need to read DOM value first</td>
+    </tr>
+
+    <tr>
+      <td>React controls input</td>
+      <td>Browser controls input</td>
+    </tr>
+
+  </table>
+
+  <h2>Controlled Form Example</h2>
+
+<pre><code><span class="keyword">const</span> [name, setName] =
+<span class="function">useState</span>(<span class="string">''</span>);
+
+<span class="tag">&lt;input</span>
+  value={name}
+  onChange={e =&gt; <span class="function">setName</span>(e.target.value)}
+<span class="tag">/&gt;</span></code></pre>
+
+  <h2>Uncontrolled Form Example</h2>
+
+<pre><code><span class="keyword">const</span> nameRef =
+<span class="function">useRef</span>(null);
+
+<span class="tag">&lt;input</span>
+  ref={nameRef}
+<span class="tag">/&gt;</span></code></pre>
+
+  <h2>Common Use Cases</h2>
+
+  <ul>
+    <li>Simple forms.</li>
+    <li>Reading values only on submit.</li>
+    <li>File upload fields.</li>
+    <li>Third-party DOM integrations.</li>
+    <li>Performance-sensitive forms.</li>
+  </ul>
+
+  <h2>File Input Example</h2>
+
+<pre><code><span class="keyword">const</span> fileRef =
+<span class="function">useRef</span>(null);
+
+<span class="tag">&lt;input</span>
+  type=<span class="string">"file"</span>
+  ref={fileRef}
+<span class="tag">/&gt;</span></code></pre>
+
+  <div class="highlight">
+    File inputs are typically implemented as uncontrolled components because their value cannot be controlled through React state.
+  </div>
+
+  <h2>Real Project Example</h2>
+
+  <div class="highlight">
+    In our Aadhaar Authentication application, most fields such as Aadhaar Number and OTP are controlled components. However, file upload controls and some third-party integrations may use uncontrolled components with useRef.
+  </div>
+
+  <h2>Important Interview Points</h2>
+
+  <ul>
+    <li>Uncontrolled components use the DOM as the source of truth.</li>
+    <li>They commonly use useRef.</li>
+    <li>Typing does not trigger React re-renders.</li>
+    <li>Values are accessed when needed.</li>
+    <li>File inputs are usually uncontrolled.</li>
+  </ul>
+
+  <h2>Short Interview Answer</h2>
+
+  <div class="highlight">
+    An uncontrolled component in forms is a form field whose value is managed by the DOM and accessed through refs rather than React state.
+  </div>
+
+  <h2>One-Line Interview Answer</h2>
+
+  <div class="highlight">
+    An uncontrolled component in forms stores its value in the DOM instead of React state.
+  </div>
+
+</div>
+
+</body>
+</html>

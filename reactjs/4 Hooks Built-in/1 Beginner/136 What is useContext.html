@@ -323,6 +323,57 @@
     </section>
 
     <section class="card">
+      <h2>Provider Can Be Placed at Any Level</h2>
+
+<div class="highlight">
+  Context data flows from the nearest Provider to all nested children below it. The Provider does not have to be placed in the top parent component.
+</div>
+
+<h3>Mid Child → Nested Child Example</h3>
+
+<pre><code><span class="keyword">import</span> { useState } <span class="keyword">from</span> <span class="string">'react'</span>;
+<span class="keyword">import</span> { UserContext } <span class="keyword">from</span> <span class="string">'./context/UserContext'</span>;
+<span class="keyword">import</span> NestedChild <span class="keyword">from</span> <span class="string">'./NestedChild'</span>;
+
+<span class="keyword">function</span> <span class="function">MidChild</span>() {
+
+  <span class="keyword">const</span> [user] = useState(<span class="string">'Rizwan'</span>);
+
+  <span class="keyword">return</span> (
+
+    <span class="tag">&lt;UserContext.Provider</span> value={user}<span class="tag">&gt;</span>
+
+      <span class="tag">&lt;NestedChild</span> <span class="tag">/&gt;</span>
+
+    <span class="tag">&lt;/UserContext.Provider&gt;</span>
+
+  );
+
+}</code></pre>
+
+<h3>Nested Child Reads Context</h3>
+
+<pre><code><span class="keyword">import</span> { useContext } <span class="keyword">from</span> <span class="string">'react'</span>;
+<span class="keyword">import</span> { UserContext } <span class="keyword">from</span> <span class="string">'./context/UserContext'</span>;
+
+<span class="keyword">function</span> <span class="function">NestedChild</span>() {
+
+  <span class="keyword">const</span> user = useContext(UserContext);
+
+  <span class="keyword">return</span> <span class="tag">&lt;h2&gt;</span>{user}<span class="tag">&lt;/h2&gt;</span>;
+
+}</code></pre>
+
+<h3>Important Point</h3>
+
+<ul>
+  <li>Provider can be placed in App, Parent, Child, or any component.</li>
+  <li>Only components below that Provider can access the Context value.</li>
+  <li>useContext always reads from the nearest matching Provider.</li>
+</ul>
+    </section>
+
+    <section class="card">
 
       <h2>Complete Flow</h2>
 

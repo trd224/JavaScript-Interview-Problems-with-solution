@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>214. How Do You Consume Context with useContext?</title>
+
+  <style>
+
+    body{
+      margin:0;
+      padding:0;
+      background:#000814;
+      color:#e2e8f0;
+      font-family:Arial,sans-serif;
+      line-height:1.7;
+    }
+
+    .container{
+      max-width:1000px;
+      margin:40px auto;
+      background:#020617;
+      padding:40px;
+      border-radius:18px;
+      border:1px solid #0f172a;
+      box-shadow:0 0 40px rgba(0,0,0,.95);
+    }
+
+    h1{
+      color:#f8fafc;
+      margin-bottom:30px;
+      font-size:34px;
+    }
+
+    h2{
+      color:#c084fc;
+      margin-top:35px;
+      margin-bottom:15px;
+      font-size:26px;
+    }
+
+    p{
+      color:#cbd5e1;
+    }
+
+    ul{
+      padding-left:24px;
+    }
+
+    li{
+      margin-bottom:10px;
+      color:#cbd5e1;
+    }
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      margin-top:20px;
+    }
+
+    table th,
+    table td{
+      border:1px solid #1e293b;
+      padding:14px;
+      text-align:left;
+      vertical-align:top;
+    }
+
+    table th{
+      background:#0f172a;
+      color:#38bdf8;
+    }
+
+    table td{
+      background:#020617;
+      color:#d1d5db;
+    }
+
+    .highlight{
+      background:#0f172a;
+      padding:18px;
+      border-left:5px solid #38bdf8;
+      border-radius:10px;
+      margin-top:15px;
+      color:#e5e7eb;
+    }
+
+    .flow{
+      background:#020617;
+      border:1px solid #1e293b;
+      padding:20px;
+      border-radius:10px;
+      margin-top:15px;
+      color:#e2e8f0;
+      line-height:2;
+      text-align:center;
+      font-size:18px;
+    }
+
+    pre{
+      background:#000;
+      padding:22px;
+      border-radius:12px;
+      overflow-x:auto;
+      border:1px solid #0f172a;
+    }
+
+    code{
+      font-family:Consolas,monospace;
+      font-size:15px;
+    }
+
+    .keyword{
+      color:#c084fc;
+    }
+
+    .function{
+      color:#38bdf8;
+    }
+
+    .string{
+      color:#facc15;
+    }
+
+    .tag{
+      color:#f472b6;
+    }
+
+    .comment{
+      color:#94a3b8;
+    }
+
+    .output{
+      color:#4ade80;
+    }
+
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+
+    <h1>214. How Do You Consume Context with useContext?</h1>
+
+    <h2>One-Line Definition</h2>
+
+    <div class="highlight">
+      useContext() is a React hook that allows us to read and use a Context value directly inside a component.
+    </div>
+
+    <h2>Why Do We Need useContext?</h2>
+
+    <p>
+      A Context Provider makes data available to child components.
+    </p>
+
+    <p>
+      To access that shared data, we use the useContext() hook.
+    </p>
+
+    <div class="flow">
+
+      Context Provider
+      <br>
+      ↓
+      <br>
+      Stores Value
+      <br>
+      ↓
+      <br>
+      useContext()
+      <br>
+      ↓
+      <br>
+      Reads Value
+
+    </div>
+
+    <h2>Prerequisite</h2>
+
+    <p>
+      A Context must already exist and be provided by a Provider.
+    </p>
+
+<pre><code><span class="comment">// UserContext.js</span>
+
+<span class="keyword">import</span> { createContext } <span class="keyword">from</span> <span class="string">'react'</span>;
+
+<span class="keyword">export const</span> UserContext = createContext();</code></pre>
+
+<pre><code><span class="comment">// App.js</span>
+
+<span class="tag">&lt;UserContext.Provider</span> value={<span class="string">'Rizwan'</span>}<span class="tag">&gt;</span>
+
+  <span class="tag">&lt;Profile</span> <span class="tag">/&gt;</span>
+
+<span class="tag">&lt;/UserContext.Provider&gt;</span></code></pre>
+
+    <h2>Step 1 - Import useContext</h2>
+
+<pre><code><span class="keyword">import</span> { useContext } <span class="keyword">from</span> <span class="string">'react'</span>;</code></pre>
+
+    <h2>Step 2 - Import the Context</h2>
+
+<pre><code><span class="keyword">import</span> { UserContext } <span class="keyword">from</span> <span class="string">'../context/UserContext'</span>;</code></pre>
+
+    <h2>Step 3 - Consume the Context</h2>
+
+<pre><code><span class="keyword">function</span> <span class="function">Profile</span>() {
+
+  <span class="keyword">const</span> user = useContext(UserContext);
+
+  <span class="keyword">return</span> (
+
+    <span class="tag">&lt;h1&gt;</span>{user}<span class="tag">&lt;/h1&gt;</span>
+
+  );
+
+}</code></pre>
+
+    <h2>What Happens Internally?</h2>
+
+    <div class="flow">
+
+      useContext(UserContext)
+      <br>
+      ↓
+      <br>
+      React Finds Nearest Provider
+      <br>
+      ↓
+      <br>
+      Reads Provider Value
+      <br>
+      ↓
+      <br>
+      Returns Value
+
+    </div>
+
+    <h2>Complete Example</h2>
+
+<pre><code><span class="comment">// context/UserContext.js</span>
+
+<span class="keyword">import</span> { createContext } <span class="keyword">from</span> <span class="string">'react'</span>;
+
+<span class="keyword">export const</span> UserContext = createContext();</code></pre>
+
+<pre><code><span class="comment">// App.js</span>
+
+<span class="keyword">import</span> { UserContext } <span class="keyword">from</span> <span class="string">'./context/UserContext'</span>;
+<span class="keyword">import</span> Profile <span class="keyword">from</span> <span class="string">'./Profile'</span>;
+
+<span class="keyword">function</span> <span class="function">App</span>() {
+
+  <span class="keyword">return</span> (
+
+    <span class="tag">&lt;UserContext.Provider</span> value={<span class="string">'Rizwan'</span>}<span class="tag">&gt;</span>
+
+      <span class="tag">&lt;Profile</span> <span class="tag">/&gt;</span>
+
+    <span class="tag">&lt;/UserContext.Provider&gt;</span>
+
+  );
+
+}</code></pre>
+
+<pre><code><span class="comment">// Profile.js</span>
+
+<span class="keyword">import</span> { useContext } <span class="keyword">from</span> <span class="string">'react'</span>;
+<span class="keyword">import</span> { UserContext } <span class="keyword">from</span> <span class="string">'./context/UserContext'</span>;
+
+<span class="keyword">function</span> <span class="function">Profile</span>() {
+
+  <span class="keyword">const</span> user = useContext(UserContext);
+
+  <span class="keyword">return</span> (
+
+    <span class="tag">&lt;h1&gt;</span>Hello {user}<span class="tag">&lt;/h1&gt;</span>
+
+  );
+
+}
+
+<span class="keyword">export default</span> Profile;</code></pre>
+
+    <h2>Output</h2>
+
+<pre class="output"><code>Hello Rizwan</code></pre>
+
+    <h2>Consuming an Object</h2>
+
+<pre><code><span class="tag">&lt;UserContext.Provider</span>
+
+  value={{
+
+    name: <span class="string">'Rizwan'</span>,
+    role: <span class="string">'Admin'</span>
+
+  }}
+
+<span class="tag">&gt;</span>
+
+  <span class="tag">&lt;Profile</span> <span class="tag">/&gt;</span>
+
+<span class="tag">&lt;/UserContext.Provider&gt;</span></code></pre>
+
+<pre><code><span class="keyword">const</span> user = useContext(UserContext);
+
+<span class="keyword">return</span> (
+
+  <span class="tag">&lt;h1&gt;</span>
+
+    {user.name} - {user.role}
+
+  <span class="tag">&lt;/h1&gt;</span>
+
+);</code></pre>
+
+    <h2>What Happens When Context Changes?</h2>
+
+<pre><code><span class="keyword">setUser</span>(<span class="string">'Ali'</span>);</code></pre>
+
+    <div class="flow">
+
+      Provider Value Changes
+      <br>
+      ↓
+      <br>
+      Context Updates
+      <br>
+      ↓
+      <br>
+      useContext Receives New Value
+      <br>
+      ↓
+      <br>
+      Component Re-renders
+
+    </div>
+
+    <h2>Common Mistake</h2>
+
+<pre><code><span class="comment">// ❌ Provider does not exist</span>
+
+<span class="keyword">const</span> user = useContext(UserContext);</code></pre>
+
+    <div class="highlight">
+      useContext() only works when a matching Provider exists above the component in the component tree.
+    </div>
+
+    <h2>Real Project Example</h2>
+
+    <div class="highlight">
+      In our Aadhaar Authentication application, components such as Header, Dashboard, Audit Forms, and Reports can access logged-in user information, department details, permissions, and theme settings directly using useContext() without receiving props from every intermediate component.
+    </div>
+
+    <h2>Important Interview Points</h2>
+
+    <ul>
+      <li>useContext() is used to consume Context values.</li>
+      <li>React automatically finds the nearest matching Provider.</li>
+      <li>It eliminates the need for prop drilling.</li>
+      <li>Context updates cause consuming components to re-render.</li>
+      <li>useContext() works only inside React components or custom hooks.</li>
+    </ul>
+
+    <h2>Short Interview Answer</h2>
+
+    <div class="highlight">
+      useContext() allows a component to access data from the nearest matching Context Provider without manually passing props through intermediate components.
+    </div>
+
+    <h2>One-Line Interview Answer</h2>
+
+    <div class="highlight">
+      useContext() reads and uses the value stored in a Context Provider.
+    </div>
+
+  </div>
+
+</body>
+</html>

@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>258. How Do You Create a 404 Not Found Page?</title>
+
+  <style>
+
+    body{
+      margin:0;
+      padding:0;
+      background:#000814;
+      color:#e2e8f0;
+      font-family:Arial,sans-serif;
+      line-height:1.7;
+    }
+
+    .container{
+      max-width:1000px;
+      margin:40px auto;
+      background:#020617;
+      padding:40px;
+      border-radius:18px;
+      border:1px solid #0f172a;
+      box-shadow:0 0 40px rgba(0,0,0,.95);
+    }
+
+    h1{
+      color:#f8fafc;
+      margin-bottom:30px;
+      font-size:34px;
+    }
+
+    h2{
+      color:#c084fc;
+      margin-top:35px;
+      margin-bottom:15px;
+      font-size:26px;
+    }
+
+    p{
+      color:#cbd5e1;
+    }
+
+    ul{
+      padding-left:24px;
+    }
+
+    li{
+      margin-bottom:10px;
+      color:#cbd5e1;
+    }
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      margin-top:20px;
+    }
+
+    table th,
+    table td{
+      border:1px solid #1e293b;
+      padding:14px;
+      text-align:left;
+      vertical-align:top;
+    }
+
+    table th{
+      background:#0f172a;
+      color:#38bdf8;
+    }
+
+    table td{
+      background:#020617;
+      color:#d1d5db;
+    }
+
+    .highlight{
+      background:#0f172a;
+      padding:18px;
+      border-left:5px solid #38bdf8;
+      border-radius:10px;
+      margin-top:15px;
+      color:#e5e7eb;
+    }
+
+    .flow{
+      background:#020617;
+      border:1px solid #1e293b;
+      padding:20px;
+      border-radius:10px;
+      margin-top:15px;
+      color:#e2e8f0;
+      line-height:2;
+      text-align:center;
+      font-size:18px;
+    }
+
+    pre{
+      background:#000;
+      padding:22px;
+      border-radius:12px;
+      overflow-x:auto;
+      border:1px solid #0f172a;
+    }
+
+    code{
+      font-family:Consolas,monospace;
+      font-size:15px;
+    }
+
+    .keyword{color:#c084fc;}
+    .function{color:#38bdf8;}
+    .string{color:#facc15;}
+    .tag{color:#f472b6;}
+    .comment{color:#94a3b8;}
+    .output{color:#4ade80;}
+
+  </style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <h1>258. How Do You Create a 404 Not Found Page?</h1>
+
+  <h2>One-Line Definition</h2>
+
+  <div class="highlight">
+    A 404 Not Found page is created by defining a catch-all route that renders a custom component when no route matches the current URL.
+  </div>
+
+  <h2>What Is a 404 Page?</h2>
+
+  <p>
+    A 404 page is shown when a user visits a URL that does not exist in our application.
+  </p>
+
+  <p>
+    Example:
+  </p>
+
+<pre><code><span class="string">/about</span>     ✅ Exists
+
+<span class="string">/contact</span>   ✅ Exists
+
+<span class="string">/xyz</span>       ❌ Does Not Exist
+
+<span class="string">/abc</span>       ❌ Does Not Exist</code></pre>
+
+  <div class="highlight">
+    Instead of showing a blank page, React Router can display a custom "Page Not Found" screen.
+  </div>
+
+  <h2>How React Router Handles 404 Pages</h2>
+
+  <div class="flow">
+
+    User Opens URL
+    <br>
+    ↓
+    <br>
+    React Router Checks Routes
+    <br>
+    ↓
+    <br>
+    Route Found ?
+    <br>
+    ↓
+    <br>
+    Yes → Render Component
+    <br><br>
+    No
+    <br>
+    ↓
+    <br>
+    Render 404 Page
+
+  </div>
+
+  <h2>Step 1 - Create a NotFound Component</h2>
+
+<pre><code><span class="keyword">function</span> <span class="function">NotFound</span>() {
+
+  <span class="keyword">return</span> (
+
+    <span class="tag">&lt;h1&gt;</span>
+
+      404 - Page Not Found
+
+    <span class="tag">&lt;/h1&gt;</span>
+
+  );
+
+}</code></pre>
+
+  <h2>Step 2 - Add a Catch-All Route</h2>
+
+<pre><code><span class="keyword">import</span> { Routes, Route } <span class="keyword">from</span> <span class="string">'react-router-dom'</span>;
+
+<span class="tag">&lt;Routes&gt;</span>
+
+  <span class="tag">&lt;Route</span> path=<span class="string">"/"</span> element={<span class="tag">&lt;Home /&gt;</span>} <span class="tag">/&gt;</span>
+
+  <span class="tag">&lt;Route</span> path=<span class="string">"/about"</span> element={<span class="tag">&lt;About /&gt;</span>} <span class="tag">/&gt;</span>
+
+  <span class="tag">&lt;Route</span> path=<span class="string">"/contact"</span> element={<span class="tag">&lt;Contact /&gt;</span>} <span class="tag">/&gt;</span>
+
+  <span class="tag">&lt;Route</span> path=<span class="string">"*"</span> element={<span class="tag">&lt;NotFound /&gt;</span>} <span class="tag">/&gt;</span>
+
+<span class="tag">&lt;/Routes&gt;</span></code></pre>
+
+  <div class="highlight">
+    The "*" route matches any URL that does not match another route.
+  </div>
+
+  <h2>Why Must the "*" Route Be Last?</h2>
+
+  <div class="highlight">
+    The wildcard route should always be placed at the end because it catches all unmatched URLs.
+  </div>
+
+<pre><code><span class="tag">&lt;Routes&gt;</span>
+
+  <span class="tag">&lt;Route</span> path=<span class="string">"/"</span> element={<span class="tag">&lt;Home /&gt;</span>} <span class="tag">/&gt;</span>
+
+  <span class="tag">&lt;Route</span> path=<span class="string">"/users"</span> element={<span class="tag">&lt;Users /&gt;</span>} <span class="tag">/&gt;</span>
+
+  <span class="tag">&lt;Route</span> path=<span class="string">"*"</span> element={<span class="tag">&lt;NotFound /&gt;</span>} <span class="tag">/&gt;</span>
+
+<span class="tag">&lt;/Routes&gt;</span></code></pre>
+
+  <h2>Complete Example</h2>
+
+<pre><code><span class="keyword">import</span> { BrowserRouter, Routes, Route } <span class="keyword">from</span> <span class="string">'react-router-dom'</span>;
+
+<span class="keyword">function</span> <span class="function">NotFound</span>() {
+
+  <span class="keyword">return</span> (
+
+    <span class="tag">&lt;h1&gt;</span>
+
+      404 - Page Not Found
+
+    <span class="tag">&lt;/h1&gt;</span>
+
+  );
+
+}
+
+<span class="keyword">function</span> <span class="function">App</span>() {
+
+  <span class="keyword">return</span> (
+
+    <span class="tag">&lt;BrowserRouter&gt;</span>
+
+      <span class="tag">&lt;Routes&gt;</span>
+
+        <span class="tag">&lt;Route</span> path=<span class="string">"/"</span> element={<span class="tag">&lt;Home /&gt;</span>} <span class="tag">/&gt;</span>
+
+        <span class="tag">&lt;Route</span> path=<span class="string">"/about"</span> element={<span class="tag">&lt;About /&gt;</span>} <span class="tag">/&gt;</span>
+
+        <span class="tag">&lt;Route</span> path=<span class="string">"/contact"</span> element={<span class="tag">&lt;Contact /&gt;</span>} <span class="tag">/&gt;</span>
+
+        <span class="tag">&lt;Route</span> path=<span class="string">"*"</span> element={<span class="tag">&lt;NotFound /&gt;</span>} <span class="tag">/&gt;</span>
+
+      <span class="tag">&lt;/Routes&gt;</span>
+
+    <span class="tag">&lt;/BrowserRouter&gt;</span>
+
+  );
+
+}</code></pre>
+
+  <h2>Example URLs</h2>
+
+  <table>
+
+    <tr>
+      <th>URL</th>
+      <th>Result</th>
+    </tr>
+
+    <tr>
+      <td>/</td>
+      <td>Home Component</td>
+    </tr>
+
+    <tr>
+      <td>/about</td>
+      <td>About Component</td>
+    </tr>
+
+    <tr>
+      <td>/contact</td>
+      <td>Contact Component</td>
+    </tr>
+
+    <tr>
+      <td>/random-page</td>
+      <td>404 Component</td>
+    </tr>
+
+    <tr>
+      <td>/xyz</td>
+      <td>404 Component</td>
+    </tr>
+
+  </table>
+
+  <h2>Adding a Home Link</h2>
+
+<pre><code><span class="keyword">import</span> { Link } <span class="keyword">from</span> <span class="string">'react-router-dom'</span>;
+
+<span class="keyword">function</span> <span class="function">NotFound</span>() {
+
+  <span class="keyword">return</span> (
+
+    <span class="tag">&lt;&gt;</span>
+
+      <span class="tag">&lt;h1&gt;</span>404 - Page Not Found<span class="tag">&lt;/h1&gt;</span>
+
+      <span class="tag">&lt;Link</span> to=<span class="string">"/"</span><span class="tag">&gt;</span>
+
+        Go Home
+
+      <span class="tag">&lt;/Link&gt;</span>
+
+    <span class="tag">&lt;/&gt;</span>
+
+  );
+
+}</code></pre>
+
+  <h2>Route Matching Flow</h2>
+
+  <div class="flow">
+
+    User Opens
+    <br>
+    /unknown-page
+    <br>
+    ↓
+    <br>
+    React Router Checks Routes
+    <br>
+    ↓
+    <br>
+    No Match Found
+    <br>
+    ↓
+    <br>
+    "*" Route Matches
+    <br>
+    ↓
+    <br>
+    NotFound Component Renders
+
+  </div>
+
+  <h2>Real Project Example</h2>
+
+  <div class="highlight">
+    In our Aadhaar Authentication application, if a user manually enters an invalid URL such as /audit/unknown-page or /invalid-route, a custom 404 page can be displayed with a button that redirects them back to the Dashboard.
+  </div>
+
+  <h2>Important Interview Points</h2>
+
+  <ul>
+    <li>A 404 page handles invalid URLs.</li>
+    <li>React Router v6 uses path="*" for unmatched routes.</li>
+    <li>The wildcard route should be placed after all valid routes.</li>
+    <li>A custom NotFound component is commonly used.</li>
+    <li>We can provide navigation back to the home page.</li>
+  </ul>
+
+  <h2>Short Interview Answer</h2>
+
+  <div class="highlight">
+    A 404 page is created by defining a NotFound component and mapping it to a wildcard route using path="*" in React Router v6.
+  </div>
+
+  <h2>One-Line Interview Answer</h2>
+
+  <div class="highlight">
+    Create a 404 page by defining a wildcard route with path="*" that renders a NotFound component.
+  </div>
+
+</div>
+
+</body>
+</html>

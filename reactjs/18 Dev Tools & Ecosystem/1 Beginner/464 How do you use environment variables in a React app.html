@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>464. How Do You Use Environment Variables in a React App?</title>
+
+  <style>
+
+    body{
+      margin:0;
+      padding:0;
+      background:#000814;
+      color:#e2e8f0;
+      font-family:Arial,sans-serif;
+      line-height:1.7;
+    }
+
+    .container{
+      max-width:1000px;
+      margin:40px auto;
+      background:#020617;
+      padding:40px;
+      border-radius:18px;
+      border:1px solid #0f172a;
+      box-shadow:0 0 40px rgba(0,0,0,.95);
+    }
+
+    h1{
+      color:#f8fafc;
+      margin-bottom:30px;
+      font-size:34px;
+    }
+
+    h2{
+      color:#c084fc;
+      margin-top:35px;
+      margin-bottom:15px;
+      font-size:26px;
+    }
+
+    h3{
+      color:#38bdf8;
+      margin-top:25px;
+      margin-bottom:10px;
+    }
+
+    p{
+      color:#cbd5e1;
+    }
+
+    ul{
+      padding-left:24px;
+    }
+
+    li{
+      margin-bottom:10px;
+      color:#cbd5e1;
+    }
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      margin-top:20px;
+    }
+
+    table th,
+    table td{
+      border:1px solid #1e293b;
+      padding:14px;
+      text-align:left;
+    }
+
+    table th{
+      background:#0f172a;
+      color:#38bdf8;
+    }
+
+    table td{
+      background:#020617;
+      color:#d1d5db;
+    }
+
+    .highlight{
+      background:#0f172a;
+      padding:18px;
+      border-left:5px solid #38bdf8;
+      border-radius:10px;
+      margin-top:15px;
+    }
+
+    .warning{
+      background:#3b0a0a;
+      border-left:5px solid #ef4444;
+      padding:18px;
+      border-radius:10px;
+      margin-top:15px;
+    }
+
+    .flow{
+      background:#020617;
+      border:1px solid #1e293b;
+      padding:20px;
+      border-radius:10px;
+      margin-top:15px;
+      text-align:center;
+      line-height:2;
+      font-size:18px;
+    }
+
+    pre{
+      background:#000;
+      padding:22px;
+      border-radius:12px;
+      overflow-x:auto;
+      border:1px solid #0f172a;
+    }
+
+    code{
+      font-family:Consolas,monospace;
+      font-size:15px;
+    }
+
+    .keyword{color:#c084fc;}
+    .function{color:#38bdf8;}
+    .string{color:#facc15;}
+    .tag{color:#f472b6;}
+    .comment{color:#94a3b8;}
+    .output{color:#4ade80;}
+
+  </style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <h1>464. How Do You Use Environment Variables in a React App?</h1>
+
+  <h2>One-Line Definition</h2>
+
+  <div class="highlight">
+    Environment variables are configuration values stored outside the source code and accessed inside a React application for settings such as API URLs, environment names, and feature flags.
+  </div>
+
+  <h2>Why Do We Use Environment Variables?</h2>
+
+  <p>
+    Different environments usually require different configuration values.
+  </p>
+
+  <table>
+
+    <tr>
+      <th>Environment</th>
+      <th>API URL</th>
+    </tr>
+
+    <tr>
+      <td>Development</td>
+      <td>http://localhost:5000</td>
+    </tr>
+
+    <tr>
+      <td>Testing</td>
+      <td>https://test-api.example.com</td>
+    </tr>
+
+    <tr>
+      <td>Production</td>
+      <td>https://api.example.com</td>
+    </tr>
+
+  </table>
+
+  <div class="highlight">
+    Instead of changing source code for each environment, we store these values in environment variables.
+  </div>
+
+  <h2>How Environment Variables Work</h2>
+
+  <div class="flow">
+
+    .env File
+    <br>
+    ↓
+    <br>
+    Build Process
+    <br>
+    ↓
+    <br>
+    React Application
+    <br>
+    ↓
+    <br>
+    Access Variable
+    <br>
+    ↓
+    <br>
+    Use Configuration Value
+
+  </div>
+
+  <h2>Using Environment Variables in Vite</h2>
+
+  <h3>Create .env File</h3>
+
+<pre><code>VITE_API_URL=https://api.example.com
+
+VITE_APP_NAME=My React App</code></pre>
+
+  <div class="highlight">
+    In Vite, all public environment variables must start with <strong>VITE_</strong>.
+  </div>
+
+  <h3>Access Variable</h3>
+
+<pre><code><span class="keyword">const</span> apiUrl = import.meta.env.VITE_API_URL;
+
+console.log(apiUrl);</code></pre>
+
+  <h3>Output</h3>
+
+<pre class="output"><code>https://api.example.com</code></pre>
+
+  <h2>Using Environment Variables in CRA</h2>
+
+  <h3>Create .env File</h3>
+
+<pre><code>REACT_APP_API_URL=https://api.example.com
+
+REACT_APP_APP_NAME=My React App</code></pre>
+
+  <div class="highlight">
+    In Create React App, all public environment variables must start with <strong>REACT_APP_</strong>.
+  </div>
+
+  <h3>Access Variable</h3>
+
+<pre><code><span class="keyword">const</span> apiUrl = process.env.REACT_APP_API_URL;
+
+console.log(apiUrl);</code></pre>
+
+  <h2>React Example</h2>
+
+<pre><code><span class="keyword">function</span> <span class="function">App</span>() {
+
+  <span class="keyword">const</span> apiUrl = import.meta.env.VITE_API_URL;
+
+  <span class="keyword">return</span> (
+
+    <span class="tag">&lt;h1&gt;</span>
+
+      {apiUrl}
+
+    <span class="tag">&lt;/h1&gt;</span>
+
+  );
+
+}
+
+<span class="keyword">export default</span> App;</code></pre>
+
+  <h2>Multiple Environment Files</h2>
+
+<pre><code>.env
+
+.env.development
+
+.env.test
+
+.env.production</code></pre>
+
+  <h3>Example</h3>
+
+<pre><code><span class="comment"># .env.development</span>
+
+VITE_API_URL=http://localhost:5000</code></pre>
+
+<pre><code><span class="comment"># .env.production</span>
+
+VITE_API_URL=https://api.example.com</code></pre>
+
+  <h2>Using Environment Variables in API Calls</h2>
+
+<pre><code><span class="keyword">const</span> API_URL = import.meta.env.VITE_API_URL;
+
+fetch(`${API_URL}/users`)
+  .then(res =&gt; res.json())
+  .then(data =&gt; console.log(data));</code></pre>
+
+  <h2>Common Built-In Variables (Vite)</h2>
+
+<pre><code>import.meta.env.MODE
+
+import.meta.env.DEV
+
+import.meta.env.PROD
+
+import.meta.env.BASE_URL</code></pre>
+
+  <h3>Example</h3>
+
+<pre><code><span class="keyword">if</span> (import.meta.env.DEV) {
+
+  console.log(<span class="string">'Development Mode'</span>);
+
+}</code></pre>
+
+  <h2>Can We Store Secrets?</h2>
+
+  <div class="warning">
+    ❌ No.
+    <br><br>
+    Environment variables used in React frontend applications are bundled into JavaScript and sent to the browser.
+    <br><br>
+    Users can inspect them through browser developer tools.
+  </div>
+
+  <h3>Do Not Store</h3>
+
+<pre><code>DATABASE_PASSWORD=mysecret
+
+JWT_SECRET=mysecret
+
+STRIPE_SECRET_KEY=xxxxx</code></pre>
+
+  <h3>Safe Examples</h3>
+
+<pre><code>VITE_API_URL=https://api.example.com
+
+VITE_APP_NAME=My App
+
+VITE_ENVIRONMENT=production</code></pre>
+
+  <h2>CRA vs Vite Environment Variables</h2>
+
+  <table>
+
+    <tr>
+      <th>Feature</th>
+      <th>CRA</th>
+      <th>Vite</th>
+    </tr>
+
+    <tr>
+      <td>Prefix</td>
+      <td>REACT_APP_</td>
+      <td>VITE_</td>
+    </tr>
+
+    <tr>
+      <td>Access Method</td>
+      <td>process.env</td>
+      <td>import.meta.env</td>
+    </tr>
+
+    <tr>
+      <td>Recommended Today</td>
+      <td>No</td>
+      <td>Yes</td>
+    </tr>
+
+  </table>
+
+  <h2>Real Project Example</h2>
+
+  <div class="highlight">
+    In our Aadhaar Authentication application, environment variables are used to store values such as API Base URL, SignalR Hub URL, Authentication Service URL, Environment Name, and Feature Flags so the same codebase can run in UAT, Pre-Production, and Production environments.
+  </div>
+
+  <h2>Important Interview Points</h2>
+
+  <ul>
+    <li>Environment variables store configuration values.</li>
+    <li>Vite uses the VITE_ prefix.</li>
+    <li>CRA uses the REACT_APP_ prefix.</li>
+    <li>Frontend environment variables are publicly visible.</li>
+    <li>Never store secrets in frontend environment variables.</li>
+  </ul>
+
+  <h2>Short Interview Answer</h2>
+
+  <div class="highlight">
+    Environment variables allow us to configure React applications without hardcoding values. In Vite they are accessed through import.meta.env, while CRA uses process.env.
+  </div>
+
+  <h2>One-Line Interview Answer</h2>
+
+  <div class="highlight">
+    Environment variables provide configuration values to a React application and are accessed using import.meta.env (Vite) or process.env (CRA).
+  </div>
+
+</div>
+
+</body>
+</html>

@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>329. What is the clsx / classnames Utility?</title>
+
+  <style>
+
+    body{
+      margin:0;
+      padding:0;
+      background:#000814;
+      color:#e2e8f0;
+      font-family:Arial,sans-serif;
+      line-height:1.7;
+    }
+
+    .container{
+      max-width:1000px;
+      margin:40px auto;
+      background:#020617;
+      padding:40px;
+      border-radius:18px;
+      border:1px solid #0f172a;
+      box-shadow:0 0 40px rgba(0,0,0,.95);
+    }
+
+    h1{
+      color:#f8fafc;
+      margin-bottom:30px;
+      font-size:34px;
+    }
+
+    h2{
+      color:#c084fc;
+      margin-top:35px;
+      margin-bottom:15px;
+      font-size:26px;
+    }
+
+    h3{
+      color:#38bdf8;
+      margin-top:25px;
+      margin-bottom:10px;
+    }
+
+    p{
+      color:#cbd5e1;
+    }
+
+    ul{
+      padding-left:24px;
+    }
+
+    li{
+      margin-bottom:10px;
+      color:#cbd5e1;
+    }
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      margin-top:20px;
+    }
+
+    table th,
+    table td{
+      border:1px solid #1e293b;
+      padding:14px;
+      text-align:left;
+    }
+
+    table th{
+      background:#0f172a;
+      color:#38bdf8;
+    }
+
+    table td{
+      background:#020617;
+      color:#d1d5db;
+    }
+
+    .highlight{
+      background:#0f172a;
+      padding:18px;
+      border-left:5px solid #38bdf8;
+      border-radius:10px;
+      margin-top:15px;
+    }
+
+    .flow{
+      background:#020617;
+      border:1px solid #1e293b;
+      padding:20px;
+      border-radius:10px;
+      margin-top:15px;
+      text-align:center;
+      line-height:2;
+      font-size:18px;
+    }
+
+    pre{
+      background:#000;
+      padding:22px;
+      border-radius:12px;
+      overflow-x:auto;
+      border:1px solid #0f172a;
+    }
+
+    code{
+      font-family:Consolas,monospace;
+      font-size:15px;
+    }
+
+    .keyword{color:#c084fc;}
+    .function{color:#38bdf8;}
+    .string{color:#facc15;}
+    .tag{color:#f472b6;}
+    .comment{color:#94a3b8;}
+    .output{color:#4ade80;}
+
+  </style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <h1>329. What is the clsx / classnames Utility?</h1>
+
+  <h2>One-Line Definition</h2>
+
+  <div class="highlight">
+    clsx and classnames are utility libraries used to conditionally combine CSS class names in React components.
+  </div>
+
+  <h2>Why Do We Need clsx or classnames?</h2>
+
+  <p>
+    Without these utilities, conditional class names can become difficult to read and maintain.
+  </p>
+
+  <h3>Without clsx</h3>
+
+<pre><code><span class="tag">&lt;button</span>
+
+  className={
+    isActive
+      ? <span class="string">'btn active'</span>
+      : <span class="string">'btn'</span>
+  }
+
+<span class="tag">&gt;</span>
+
+  Submit
+
+<span class="tag">&lt;/button&gt;</span></code></pre>
+
+  <p>
+    This works, but becomes messy when multiple conditions are involved.
+  </p>
+
+  <h2>Using clsx</h2>
+
+<pre><code><span class="keyword">import</span> clsx <span class="keyword">from</span> <span class="string">'clsx'</span>;
+
+<span class="tag">&lt;button</span>
+
+  className={clsx(
+    <span class="string">'btn'</span>,
+    isActive && <span class="string">'active'</span>
+  )}
+
+<span class="tag">&gt;</span>
+
+  Submit
+
+<span class="tag">&lt;/button&gt;</span></code></pre>
+
+  <div class="highlight">
+    clsx automatically includes only truthy class names.
+  </div>
+
+  <h2>How clsx Works</h2>
+
+  <div class="flow">
+
+    Class Names
+    <br>
+    ↓
+    <br>
+    clsx()
+    <br>
+    ↓
+    <br>
+    Remove False Values
+    <br>
+    ↓
+    <br>
+    Join Remaining Classes
+    <br>
+    ↓
+    <br>
+    Final className String
+
+  </div>
+
+  <h2>Simple Example</h2>
+
+<pre><code><span class="keyword">import</span> clsx <span class="keyword">from</span> <span class="string">'clsx'</span>;
+
+<span class="keyword">const</span> className = clsx(
+  <span class="string">'btn'</span>,
+  <span class="string">'primary'</span>
+);
+
+console.log(className);</code></pre>
+
+<pre class="output"><code>btn primary</code></pre>
+
+  <h2>Conditional Class Example</h2>
+
+<pre><code><span class="keyword">import</span> clsx <span class="keyword">from</span> <span class="string">'clsx'</span>;
+
+<span class="keyword">const</span> className = clsx(
+  <span class="string">'btn'</span>,
+  isActive && <span class="string">'active'</span>
+);</code></pre>
+
+  <h3>If isActive = true</h3>
+
+<pre class="output"><code>btn active</code></pre>
+
+  <h3>If isActive = false</h3>
+
+<pre class="output"><code>btn</code></pre>
+
+  <h2>Multiple Conditions Example</h2>
+
+<pre><code><span class="keyword">import</span> clsx <span class="keyword">from</span> <span class="string">'clsx'</span>;
+
+<span class="tag">&lt;button</span>
+
+  className={clsx(
+    <span class="string">'btn'</span>,
+    isActive && <span class="string">'active'</span>,
+    isDisabled && <span class="string">'disabled'</span>,
+    isLoading && <span class="string">'loading'</span>
+  )}
+
+<span class="tag">&gt;</span>
+
+  Submit
+
+<span class="tag">&lt;/button&gt;</span></code></pre>
+
+  <h2>Object Syntax</h2>
+
+<pre><code><span class="keyword">import</span> clsx <span class="keyword">from</span> <span class="string">'clsx'</span>;
+
+<span class="keyword">const</span> className = clsx({
+  active: isActive,
+  disabled: isDisabled,
+  loading: isLoading
+});</code></pre>
+
+  <h3>Output</h3>
+
+<pre class="output"><code>active disabled</code></pre>
+
+  <h2>Using CSS Modules with clsx</h2>
+
+<pre><code><span class="keyword">import</span> clsx <span class="keyword">from</span> <span class="string">'clsx'</span>;
+
+<span class="keyword">import</span> styles <span class="keyword">from</span> <span class="string">'./Button.module.css'</span>;
+
+<span class="tag">&lt;button</span>
+
+  className={clsx(
+    styles.button,
+    isActive && styles.active
+  )}
+
+<span class="tag">&gt;</span>
+
+  Submit
+
+<span class="tag">&lt;/button&gt;</span></code></pre>
+
+  <h2>Complete React Example</h2>
+
+<pre><code><span class="keyword">import</span> { useState } <span class="keyword">from</span> <span class="string">'react'</span>;
+
+<span class="keyword">import</span> clsx <span class="keyword">from</span> <span class="string">'clsx'</span>;
+
+<span class="keyword">function</span> <span class="function">Button</span>() {
+
+  <span class="keyword">const</span> [isActive, setIsActive] = <span class="function">useState</span>(<span class="keyword">false</span>);
+
+  <span class="keyword">return</span> (
+
+    <span class="tag">&lt;button</span>
+
+      className={clsx(
+        <span class="string">'btn'</span>,
+        isActive && <span class="string">'active'</span>
+      )}
+
+      onClick={() =&gt; <span class="function">setIsActive</span>(!isActive)}
+
+    <span class="tag">&gt;</span>
+
+      Toggle
+
+    <span class="tag">&lt;/button&gt;</span>
+
+  );
+
+}
+
+<span class="keyword">export default</span> Button;</code></pre>
+
+  <h2>clsx vs classnames</h2>
+
+  <table>
+
+    <tr>
+      <th>Feature</th>
+      <th>clsx</th>
+      <th>classnames</th>
+    </tr>
+
+    <tr>
+      <td>Purpose</td>
+      <td>Conditional Classes</td>
+      <td>Conditional Classes</td>
+    </tr>
+
+    <tr>
+      <td>API</td>
+      <td>Almost Same</td>
+      <td>Almost Same</td>
+    </tr>
+
+    <tr>
+      <td>Bundle Size</td>
+      <td>Smaller</td>
+      <td>Larger</td>
+    </tr>
+
+    <tr>
+      <td>Performance</td>
+      <td>Slightly Faster</td>
+      <td>Slightly Slower</td>
+    </tr>
+
+  </table>
+
+  <div class="highlight">
+    Today, many React projects prefer clsx because it is smaller and simpler.
+  </div>
+
+  <h2>Installation</h2>
+
+<pre><code>npm install clsx</code></pre>
+
+<pre><code>npm install classnames</code></pre>
+
+  <h2>Real Project Example</h2>
+
+  <div class="highlight">
+    In our Aadhaar Authentication application, clsx can be used to apply active, disabled, error, loading, selected, and validation classes based on component state without writing long conditional expressions inside className.
+  </div>
+
+  <h2>Important Interview Points</h2>
+
+  <ul>
+    <li>clsx and classnames are used for conditional class names.</li>
+    <li>They simplify className logic.</li>
+    <li>Falsy values are automatically ignored.</li>
+    <li>They work well with CSS Modules.</li>
+    <li>clsx is generally preferred because it has a smaller bundle size.</li>
+  </ul>
+
+  <h2>Short Interview Answer</h2>
+
+  <div class="highlight">
+    clsx and classnames are helper libraries that conditionally combine CSS class names, making React components cleaner and easier to maintain.
+  </div>
+
+  <h2>One-Line Interview Answer</h2>
+
+  <div class="highlight">
+    clsx and classnames are utilities that dynamically build className strings based on conditions.
+  </div>
+
+</div>
+
+</body>
+</html>

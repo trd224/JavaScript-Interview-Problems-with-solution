@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>211. What is the Context API?</title>
+
+  <style>
+
+    body{
+      margin:0;
+      padding:0;
+      background:#000814;
+      color:#e2e8f0;
+      font-family:Arial,sans-serif;
+      line-height:1.7;
+    }
+
+    .container{
+      max-width:1000px;
+      margin:40px auto;
+      background:#020617;
+      padding:40px;
+      border-radius:18px;
+      border:1px solid #0f172a;
+      box-shadow:0 0 40px rgba(0,0,0,.95);
+    }
+
+    h1{
+      color:#f8fafc;
+      margin-bottom:30px;
+      font-size:34px;
+    }
+
+    h2{
+      color:#c084fc;
+      margin-top:35px;
+      margin-bottom:15px;
+      font-size:26px;
+    }
+
+    p{
+      color:#cbd5e1;
+    }
+
+    ul{
+      padding-left:24px;
+    }
+
+    li{
+      margin-bottom:10px;
+      color:#cbd5e1;
+    }
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      margin-top:20px;
+    }
+
+    table th,
+    table td{
+      border:1px solid #1e293b;
+      padding:14px;
+      text-align:left;
+      vertical-align:top;
+    }
+
+    table th{
+      background:#0f172a;
+      color:#38bdf8;
+    }
+
+    table td{
+      background:#020617;
+      color:#d1d5db;
+    }
+
+    .highlight{
+      background:#0f172a;
+      padding:18px;
+      border-left:5px solid #38bdf8;
+      border-radius:10px;
+      margin-top:15px;
+      color:#e5e7eb;
+    }
+
+    .flow{
+      background:#020617;
+      border:1px solid #1e293b;
+      padding:20px;
+      border-radius:10px;
+      margin-top:15px;
+      color:#e2e8f0;
+      line-height:2;
+      text-align:center;
+      font-size:18px;
+    }
+
+    pre{
+      background:#000;
+      padding:22px;
+      border-radius:12px;
+      overflow-x:auto;
+      border:1px solid #0f172a;
+    }
+
+    code{
+      font-family:Consolas,monospace;
+      font-size:15px;
+    }
+
+    .keyword{
+      color:#c084fc;
+    }
+
+    .function{
+      color:#38bdf8;
+    }
+
+    .string{
+      color:#facc15;
+    }
+
+    .tag{
+      color:#f472b6;
+    }
+
+    .comment{
+      color:#94a3b8;
+    }
+
+    .output{
+      color:#4ade80;
+    }
+
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+
+    <h1>211. What is the Context API?</h1>
+
+    <h2>One-Line Definition</h2>
+
+    <div class="highlight">
+      Context API is a built-in React feature that allows us to share data between multiple components without passing props manually through every level of the component tree.
+    </div>
+
+    <h2>Simple Understanding</h2>
+
+    <p>
+      Normally, data flows from parent components to child components using props.
+    </p>
+
+    <p>
+      When many nested components need the same data, passing props through every component becomes difficult.
+    </p>
+
+    <div class="highlight">
+      Context API provides a central place to store shared data so any descendant component can access it directly.
+    </div>
+
+    <h2>Problem Without Context API</h2>
+
+    <div class="flow">
+
+      App
+      <br>
+      ↓
+      <br>
+      Dashboard
+      <br>
+      ↓
+      <br>
+      Sidebar
+      <br>
+      ↓
+      <br>
+      UserProfile
+
+    </div>
+
+    <p>
+      If UserProfile needs user information, every component must receive and forward the prop.
+    </p>
+
+<pre><code><span class="tag">&lt;App</span> user={user} <span class="tag">/&gt;</span>
+
+      ↓
+
+<span class="tag">&lt;Dashboard</span> user={user} <span class="tag">/&gt;</span>
+
+      ↓
+
+<span class="tag">&lt;Sidebar</span> user={user} <span class="tag">/&gt;</span>
+
+      ↓
+
+<span class="tag">&lt;UserProfile</span> user={user} <span class="tag">/&gt;</span></code></pre>
+
+    <h2>This Problem is Called Prop Drilling</h2>
+
+    <div class="highlight">
+      Prop drilling occurs when props must be passed through multiple intermediate components that do not actually use the data.
+    </div>
+
+    <h2>How Context API Solves This Problem</h2>
+
+    <div class="flow">
+
+      Context Provider
+      <br>
+      ↓
+      <br>
+      Stores Shared Data
+      <br>
+      ↓
+      <br>
+      Any Descendant Component
+      <br>
+      ↓
+      <br>
+      Reads Data Directly
+
+    </div>
+
+    <h2>Step 1 - Create Context</h2>
+
+<pre><code><span class="keyword">import</span> { createContext } <span class="keyword">from</span> <span class="string">'react'</span>;
+
+<span class="keyword">export const</span> UserContext = createContext();</code></pre>
+
+    <h2>Step 2 - Provide Context Value</h2>
+
+<pre><code><span class="keyword">import</span> { useState } <span class="keyword">from</span> <span class="string">'react'</span>;
+<span class="keyword">import</span> { UserContext } <span class="keyword">from</span> <span class="string">'./UserContext'</span>;
+<span class="keyword">import</span> Profile <span class="keyword">from</span> <span class="string">'./Profile'</span>;
+
+<span class="keyword">function</span> <span class="function">App</span>() {
+
+  <span class="keyword">const</span> [user] = useState(<span class="string">'Rizwan'</span>);
+
+  <span class="keyword">return</span> (
+
+    <span class="tag">&lt;UserContext.Provider</span> value={user}<span class="tag">&gt;</span>
+
+      <span class="tag">&lt;Profile</span> <span class="tag">/&gt;</span>
+
+    <span class="tag">&lt;/UserContext.Provider&gt;</span>
+
+  );
+
+}
+
+<span class="keyword">export default</span> App;</code></pre>
+
+    <h2>Step 3 - Consume Context Value</h2>
+
+<pre><code><span class="keyword">import</span> { useContext } <span class="keyword">from</span> <span class="string">'react'</span>;
+<span class="keyword">import</span> { UserContext } <span class="keyword">from</span> <span class="string">'../context/UserContext'</span>;
+
+<span class="keyword">function</span> <span class="function">Profile</span>() {
+
+  <span class="keyword">const</span> user = useContext(UserContext);
+
+  <span class="keyword">return</span> (
+
+    <span class="tag">&lt;h1&gt;</span>{user}<span class="tag">&lt;/h1&gt;</span>
+
+  );
+
+}
+
+<span class="keyword">export default</span> Profile;</code></pre>
+
+    <h2>What Happens Internally?</h2>
+
+    <div class="flow">
+
+      Provider
+      <br>
+      ↓
+      <br>
+      Stores Value
+      <br>
+      ↓
+      <br>
+      useContext Reads Value
+      <br>
+      ↓
+      <br>
+      Component Uses Data
+
+    </div>
+
+    <h2>Common Uses of Context API</h2>
+
+    <table>
+
+      <tr>
+        <th>Shared Data</th>
+        <th>Example</th>
+      </tr>
+
+      <tr>
+        <td>User Information</td>
+        <td>Logged-in User</td>
+      </tr>
+
+      <tr>
+        <td>Theme</td>
+        <td>Dark / Light Mode</td>
+      </tr>
+
+      <tr>
+        <td>Language</td>
+        <td>English / Hindi</td>
+      </tr>
+
+      <tr>
+        <td>Authentication</td>
+        <td>JWT Token</td>
+      </tr>
+
+      <tr>
+        <td>Application Settings</td>
+        <td>Global Configuration</td>
+      </tr>
+
+    </table>
+
+    <h2>Context API vs Props</h2>
+
+    <table>
+
+      <tr>
+        <th>Props</th>
+        <th>Context API</th>
+      </tr>
+
+      <tr>
+        <td>Parent to Child</td>
+        <td>Any Descendant Component</td>
+      </tr>
+
+      <tr>
+        <td>Can Cause Prop Drilling</td>
+        <td>Avoids Prop Drilling</td>
+      </tr>
+
+      <tr>
+        <td>Best For Local Data</td>
+        <td>Best For Shared Data</td>
+      </tr>
+
+    </table>
+
+    <h2>Real Project Example</h2>
+
+    <div class="highlight">
+      In our Aadhaar Authentication application, Context API can be used to share logged-in user information, department details, language settings, and theme preferences across multiple components without passing props through every intermediate component.
+    </div>
+
+    <h2>Important Interview Points</h2>
+
+    <ul>
+      <li>Context API is built into React.</li>
+      <li>It helps avoid prop drilling.</li>
+      <li>Context is created using createContext().</li>
+      <li>Data is provided using Provider.</li>
+      <li>Data is consumed using useContext().</li>
+      <li>When context value changes, consuming components re-render.</li>
+    </ul>
+
+    <h2>Short Interview Answer</h2>
+
+    <div class="highlight">
+      Context API is React's built-in mechanism for sharing data between components without manually passing props through every level of the component tree.
+    </div>
+
+    <h2>One-Line Interview Answer</h2>
+
+    <div class="highlight">
+      Context API allows us to share common data across components without prop drilling.
+    </div>
+
+  </div>
+
+</body>
+</html>

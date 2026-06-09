@@ -192,6 +192,61 @@
     </section>
 
     <section class="card">
+      <h2>Do All API Calls Need useEffect?</h2>
+
+<div class="highlight">
+  API calls are side effects, but useEffect is mainly used for API calls that should run automatically after rendering. API calls triggered by user actions such as button clicks or form submissions are usually placed directly inside event handlers, not inside useEffect.
+</div>
+
+<h3>User Action → No useEffect Needed</h3>
+
+<pre><code><span class="keyword">function</span> <span class="function">SaveButton</span>() {
+
+  <span class="keyword">const</span> saveUser = <span class="keyword">async</span> () => {
+
+    <span class="keyword">await</span> fetch(<span class="string">'/api/user'</span>, {
+      method: <span class="string">'POST'</span>
+    });
+
+  };
+
+  <span class="keyword">return</span> (
+    <span class="tag">&lt;button</span> onClick={saveUser}<span class="tag">&gt;</span>
+      Save
+    <span class="tag">&lt;/button&gt;</span>
+  );
+
+}</code></pre>
+
+<p>
+  The API call runs only when the user clicks the button, so useEffect is not needed.
+</p>
+
+<h3>Automatic API Call → useEffect Needed</h3>
+
+<pre><code>useEffect(() => {
+
+  fetch(<span class="string">'/api/users'</span>)
+    .then(res => res.json())
+    .then(data => setUsers(data));
+
+}, []);</code></pre>
+
+<p>
+  The API call runs automatically after the component renders, so useEffect is needed.
+</p>
+
+<h3>Interview Point</h3>
+
+<ul>
+  <li>API calls are side effects.</li>
+  <li>GET requests on page load are commonly placed inside useEffect.</li>
+  <li>POST requests triggered by user actions are usually placed inside event handlers.</li>
+  <li>useEffect is for automatic side effects, not user-triggered actions.</li>
+</ul>
+    </section>
+
+    <section class="card">
 
       <h2>Main Idea</h2>
 

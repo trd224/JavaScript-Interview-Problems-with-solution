@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>326. What are CSS Modules and How Do They Prevent Class Name Conflicts?</title>
+
+  <style>
+
+    body{
+      margin:0;
+      padding:0;
+      background:#000814;
+      color:#e2e8f0;
+      font-family:Arial,sans-serif;
+      line-height:1.7;
+    }
+
+    .container{
+      max-width:1000px;
+      margin:40px auto;
+      background:#020617;
+      padding:40px;
+      border-radius:18px;
+      border:1px solid #0f172a;
+      box-shadow:0 0 40px rgba(0,0,0,.95);
+    }
+
+    h1{
+      color:#f8fafc;
+      margin-bottom:30px;
+      font-size:34px;
+    }
+
+    h2{
+      color:#c084fc;
+      margin-top:35px;
+      margin-bottom:15px;
+      font-size:26px;
+    }
+
+    h3{
+      color:#38bdf8;
+      margin-top:25px;
+      margin-bottom:10px;
+    }
+
+    p{
+      color:#cbd5e1;
+    }
+
+    ul{
+      padding-left:24px;
+    }
+
+    li{
+      margin-bottom:10px;
+      color:#cbd5e1;
+    }
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      margin-top:20px;
+    }
+
+    table th,
+    table td{
+      border:1px solid #1e293b;
+      padding:14px;
+      text-align:left;
+    }
+
+    table th{
+      background:#0f172a;
+      color:#38bdf8;
+    }
+
+    table td{
+      background:#020617;
+      color:#d1d5db;
+    }
+
+    .highlight{
+      background:#0f172a;
+      padding:18px;
+      border-left:5px solid #38bdf8;
+      border-radius:10px;
+      margin-top:15px;
+    }
+
+    .flow{
+      background:#020617;
+      border:1px solid #1e293b;
+      padding:20px;
+      border-radius:10px;
+      margin-top:15px;
+      text-align:center;
+      line-height:2;
+      font-size:18px;
+    }
+
+    pre{
+      background:#000;
+      padding:22px;
+      border-radius:12px;
+      overflow-x:auto;
+      border:1px solid #0f172a;
+    }
+
+    code{
+      font-family:Consolas,monospace;
+      font-size:15px;
+    }
+
+    .keyword{color:#c084fc;}
+    .function{color:#38bdf8;}
+    .string{color:#facc15;}
+    .tag{color:#f472b6;}
+    .comment{color:#94a3b8;}
+    .output{color:#4ade80;}
+
+  </style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <h1>326. What are CSS Modules and How Do They Prevent Class Name Conflicts?</h1>
+
+  <h2>One-Line Definition</h2>
+
+  <div class="highlight">
+    CSS Modules are CSS files that automatically generate unique class names for each component, preventing class name conflicts across the application.
+  </div>
+
+  <h2>What Is the Problem with Normal CSS?</h2>
+
+  <p>
+    Normal CSS is global.
+  </p>
+
+  <p>
+    If two components use the same class name, their styles can overwrite each other.
+  </p>
+
+  <h3>Button.css</h3>
+
+<pre><code><span class="tag">.button</span> {
+
+  background: blue;
+
+  color: white;
+
+}</code></pre>
+
+  <h3>Card.css</h3>
+
+<pre><code><span class="tag">.button</span> {
+
+  background: green;
+
+  color: black;
+
+}</code></pre>
+
+  <div class="highlight">
+    Both files contain a class named <strong>button</strong>. Because CSS is global, one style can override the other.
+  </div>
+
+  <h2>How CSS Modules Solve This Problem</h2>
+
+  <div class="flow">
+
+    Create CSS Module
+    <br>
+    ↓
+    <br>
+    React Build Process
+    <br>
+    ↓
+    <br>
+    Generate Unique Class Name
+    <br>
+    ↓
+    <br>
+    button__x7A92
+    <br>
+    ↓
+    <br>
+    No Class Name Conflict
+
+  </div>
+
+  <h2>Step 1 - Create a CSS Module File</h2>
+
+<pre><code>Button.module.css</code></pre>
+
+  <div class="highlight">
+    CSS Module files must end with <strong>.module.css</strong>.
+  </div>
+
+  <h2>Step 2 - Add CSS Classes</h2>
+
+<pre><code><span class="comment">/* Button.module.css */</span>
+
+<span class="tag">.button</span> {
+
+  background: blue;
+
+  color: white;
+
+  padding: 10px 20px;
+
+  border-radius: 5px;
+
+}</code></pre>
+
+  <h2>Step 3 - Import the CSS Module</h2>
+
+<pre><code><span class="keyword">import</span> styles <span class="keyword">from</span> <span class="string">'./Button.module.css'</span>;</code></pre>
+
+  <h2>Step 4 - Use the Class</h2>
+
+<pre><code><span class="tag">&lt;button</span> className={styles.button}<span class="tag">&gt;</span>
+
+  Click Me
+
+<span class="tag">&lt;/button&gt;</span></code></pre>
+
+  <h2>What React Actually Generates</h2>
+
+  <p>
+    We write:
+  </p>
+
+<pre><code>styles.button</code></pre>
+
+  <p>
+    During build, React generates something similar to:
+  </p>
+
+<pre><code class="output">Button_button__aX93k</code></pre>
+
+  <div class="highlight">
+    React automatically creates a unique class name so that no other component can accidentally use the same style.
+  </div>
+
+  <h2>Real Conflict Example</h2>
+
+  <h3>Without CSS Modules</h3>
+
+<pre><code><span class="comment">/* Button.css */</span>
+
+<span class="tag">.button</span> {
+
+  background: blue;
+
+}</code></pre>
+
+<pre><code><span class="comment">/* Card.css */</span>
+
+<span class="tag">.button</span> {
+
+  background: green;
+
+}</code></pre>
+
+  <div class="highlight">
+    The final color depends on which CSS file loads last.
+  </div>
+
+  <h3>With CSS Modules</h3>
+
+<pre><code class="output">Button_button__aX93k
+
+Card_button__pL82m</code></pre>
+
+  <div class="highlight">
+    Both classes become different, so there is no collision.
+  </div>
+
+  <h2>Complete Example</h2>
+
+  <h3>Button.module.css</h3>
+
+<pre><code><span class="tag">.button</span> {
+
+  background: blue;
+
+  color: white;
+
+  padding: 10px 20px;
+
+}</code></pre>
+
+  <h3>Button.jsx</h3>
+
+<pre><code><span class="keyword">import</span> styles <span class="keyword">from</span> <span class="string">'./Button.module.css'</span>;
+
+<span class="keyword">function</span> <span class="function">Button</span>() {
+
+  <span class="keyword">return</span> (
+
+    <span class="tag">&lt;button</span> className={styles.button}<span class="tag">&gt;</span>
+
+      Click Me
+
+    <span class="tag">&lt;/button&gt;</span>
+
+  );
+
+}
+
+<span class="keyword">export default</span> Button;</code></pre>
+
+  <h2>CSS File vs CSS Module</h2>
+
+  <table>
+
+    <tr>
+      <th>Feature</th>
+      <th>Normal CSS</th>
+      <th>CSS Module</th>
+    </tr>
+
+    <tr>
+      <td>Scope</td>
+      <td>Global</td>
+      <td>Component</td>
+    </tr>
+
+    <tr>
+      <td>Class Name Conflicts</td>
+      <td>Possible</td>
+      <td>Prevented</td>
+    </tr>
+
+    <tr>
+      <td>Import Style</td>
+      <td>import './App.css'</td>
+      <td>import styles from './App.module.css'</td>
+    </tr>
+
+    <tr>
+      <td>Usage</td>
+      <td>className="button"</td>
+      <td>className={styles.button}</td>
+    </tr>
+
+  </table>
+
+  <h2>When Should We Use CSS Modules?</h2>
+
+  <ul>
+    <li>Large React applications.</li>
+    <li>Reusable component libraries.</li>
+    <li>Projects with many developers.</li>
+    <li>Applications where style conflicts must be avoided.</li>
+  </ul>
+
+  <h2>Real Project Example</h2>
+
+  <div class="highlight">
+    In our Aadhaar Authentication application, popup components, authentication forms, loaders, dashboards, and reusable widgets can use CSS Modules to ensure their styles do not affect other parts of the application.
+  </div>
+
+  <h2>Important Interview Points</h2>
+
+  <ul>
+    <li>CSS Modules create locally scoped CSS.</li>
+    <li>Files must end with .module.css.</li>
+    <li>React generates unique class names automatically.</li>
+    <li>Class name collisions are prevented.</li>
+    <li>Classes are accessed through an imported styles object.</li>
+  </ul>
+
+  <h2>Short Interview Answer</h2>
+
+  <div class="highlight">
+    CSS Modules are locally scoped CSS files that automatically generate unique class names, preventing styles from one component from affecting another component.
+  </div>
+
+  <h2>One-Line Interview Answer</h2>
+
+  <div class="highlight">
+    CSS Modules prevent class name conflicts by generating unique, component-scoped class names automatically.
+  </div>
+
+</div>
+
+</body>
+</html>
