@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>100. How do you combine Context + useReducer for global state?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px;margin-bottom:10px}
+p{color:#cbd5e1}
+ul{padding-left:24px}
+li{margin-bottom:10px;color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;margin-top:15px;text-align:center;line-height:2;font-size:18px}
+pre{border-radius:12px;overflow-x:auto}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>100. How do you combine Context + useReducer for global state?</h1>
+
+<h2>One-Line Definition</h2>
+
+<div class="highlight">
+Context + useReducer is a React pattern where Context shares state globally and useReducer manages complex state updates through actions.
+</div>
+
+<h2>Why Combine Context and useReducer?</h2>
+
+<p>
+Context alone only shares data. It does not organize complex update logic.
+</p>
+
+<p>
+useReducer organizes state updates, but by itself the state is local to one component.
+</p>
+
+<div class="highlight">
+Context shares the state globally, and useReducer controls how the state changes.
+</div>
+
+<h2>Simple Flow</h2>
+
+<div class="flow">
+useReducer
+<br>
+↓
+<br>
+Creates state and dispatch
+<br>
+↓
+<br>
+Context Provider
+<br>
+↓
+<br>
+Shares state and dispatch
+<br>
+↓
+<br>
+Any Child Component Can Use Them
+</div>
+
+<h2>When Should We Use This Pattern?</h2>
+
+<ul>
+<li>Authentication state</li>
+<li>Logged-in user details</li>
+<li>Theme state</li>
+<li>Language state</li>
+<li>Cart state</li>
+<li>Application settings</li>
+<li>Small to medium global state management</li>
+</ul>
+
+<h2>Step 1: Create Context and Reducer</h2>
+
+<h3>context/AppContext.jsx</h3>
+
+<pre><code class="language-jsx">import { createContext, useContext, useReducer } from 'react';
+
+const AppContext = createContext();
+
+const initialState = {
+  user: null,
+  theme: 'dark',
+  loading: false,
+  error: ''
+};
+
+function appReducer(state, action) {
+  switch (action.type) {
+    case 'LOGIN_START':
+      return { ...state, loading: true, error: '' };
+
+    case 'LOGIN_SUCCESS':
+      return { ...state, user: action.payload, loading: false };
+
+    case 'LOGIN_ERROR':
+      return { ...state, loading: false, error: action.message };
+
+    case 'LOGOUT':
+      return { ...state, user: null };
+
+    case 'TOGGLE_THEME':
+      return { ...state, theme: state.theme === 'dark' ? 'light' : 'dark' };
+
+    default:
+      return state;
+  }
+}
+
+export function AppProvider({ children }) {
+  const [state, dispatch] = useReducer(appReducer, initialState);
+
+  return (
+    &lt;AppContext.Provider value={{ state, dispatch }}&gt;
+      {children}
+    &lt;/AppContext.Provider&gt;
+  );
+}
+
+export function useAppContext() {
+  return useContext(AppContext);
+}</code></pre>
+
+<h2>What Is Happening Here?</h2>
+
+<table>
+<tr>
+<th>Part</th>
+<th>Purpose</th>
+</tr>
+<tr>
+<td>createContext()</td>
+<td>Creates global context</td>
+</tr>
+<tr>
+<td>initialState</td>
+<td>Stores initial global state</td>
+</tr>
+<tr>
+<td>appReducer()</td>
+<td>Handles actions and returns new state</td>
+</tr>
+<tr>
+<td>useReducer()</td>
+<td>Creates state and dispatch</td>
+</tr>
+<tr>
+<td>AppProvider</td>
+<td>Shares state and dispatch globally</td>
+</tr>
+<tr>
+<td>useAppContext()</td>
+<td>Custom hook to consume global state</td>
+</tr>
+</table>
+
+<h2>Step 2: Wrap App with Provider</h2>
+
+<h3>main.jsx</h3>
+
+<pre><code class="language-jsx">import React from 'react';
+import ReactDOM from 'react-dom/client';
+import App from './App';
+import { AppProvider } from './context/AppContext';
+
+ReactDOM.createRoot(document.getElementById('root')).render(
+  &lt;AppProvider&gt;
+    &lt;App /&gt;
+  &lt;/AppProvider&gt;
+);</code></pre>
+
+<p>
+Now every component inside App can access global state and dispatch.
+</p>
+
+<h2>Step 3: Read Global State in a Component</h2>
+
+<h3>components/Profile.jsx</h3>
+
+<pre><code class="language-jsx">import { useAppContext } from '../context/AppContext';
+
+function Profile() {
+  const { state } = useAppContext();
+
+  return (
+    &lt;div&gt;
+      &lt;h2&gt;Profile&lt;/h2&gt;
+      &lt;p&gt;User: {state.user ? state.user.name : 'Guest'}&lt;/p&gt;
+      &lt;p&gt;Theme: {state.theme}&lt;/p&gt;
+    &lt;/div&gt;
+  );
+}
+
+export default Profile;</code></pre>
+
+<h2>Step 4: Update Global State Using dispatch</h2>
+
+<h3>components/LoginButton.jsx</h3>
+
+<pre><code class="language-jsx">import { useAppContext } from '../context/AppContext';
+
+function LoginButton() {
+  const { state, dispatch } = useAppContext();
+
+  const handleLogin = () => {
+    dispatch({ type: 'LOGIN_START' });
+
+    setTimeout(() => {
+      dispatch({ type: 'LOGIN_SUCCESS', payload: { id: 1, name: 'Rizwan' } });
+    }, 1000);
+  };
+
+  return (
+    &lt;button onClick={handleLogin} disabled={state.loading}&gt;
+      {state.loading ? 'Logging in...' : 'Login'}
+    &lt;/button&gt;
+  );
+}
+
+export default LoginButton;</code></pre>
+
+<h2>Step 5: Toggle Theme from Any Component</h2>
+
+<h3>components/ThemeButton.jsx</h3>
+
+<pre><code class="language-jsx">import { useAppContext } from '../context/AppContext';
+
+function ThemeButton() {
+  const { state, dispatch } = useAppContext();
+
+  return (
+    &lt;button onClick={() =&gt; dispatch({ type: 'TOGGLE_THEME' })}&gt;
+      Current Theme: {state.theme}
+    &lt;/button&gt;
+  );
+}
+
+export default ThemeButton;</code></pre>
+
+<h2>Step 6: Use Components in App</h2>
+
+<h3>App.jsx</h3>
+
+<pre><code class="language-jsx">import Profile from './components/Profile';
+import LoginButton from './components/LoginButton';
+import ThemeButton from './components/ThemeButton';
+
+function App() {
+  return (
+    &lt;div&gt;
+      &lt;Profile /&gt;
+      &lt;LoginButton /&gt;
+      &lt;ThemeButton /&gt;
+    &lt;/div&gt;
+  );
+}
+
+export default App;</code></pre>
+
+<h2>How the Full Flow Works</h2>
+
+<div class="flow">
+User Clicks Login
+<br>
+↓
+<br>
+dispatch({ type: 'LOGIN_START' })
+<br>
+↓
+<br>
+Reducer sets loading true
+<br>
+↓
+<br>
+After API success
+<br>
+↓
+<br>
+dispatch({ type: 'LOGIN_SUCCESS', payload: user })
+<br>
+↓
+<br>
+Reducer stores user
+<br>
+↓
+<br>
+All Components Using Context Re-render
+</div>
+
+<h2>Context Alone vs Context + useReducer</h2>
+
+<table>
+<tr>
+<th>Context Alone</th>
+<th>Context + useReducer</th>
+</tr>
+<tr>
+<td>Shares values</td>
+<td>Shares values and update logic</td>
+</tr>
+<tr>
+<td>Good for simple data</td>
+<td>Good for complex global state</td>
+</tr>
+<tr>
+<td>Update logic can become scattered</td>
+<td>Update logic stays inside reducer</td>
+</tr>
+<tr>
+<td>No action-based flow</td>
+<td>Uses dispatch and actions</td>
+</tr>
+</table>
+
+<h2>Context + useReducer vs Redux</h2>
+
+<table>
+<tr>
+<th>Feature</th>
+<th>Context + useReducer</th>
+<th>Redux</th>
+</tr>
+<tr>
+<td>Built into React</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>Extra package required</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Good for small/medium apps</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Best for very large global state</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>DevTools and middleware</td>
+<td>Limited</td>
+<td>Strong</td>
+</tr>
+</table>
+
+<h2>Real Project Example</h2>
+
+<div class="highlight">
+In our Aadhaar Authentication application, Context + useReducer can manage global data like logged-in user details, department information, selected theme, authentication session, and permissions. Context makes this data available everywhere, while useReducer keeps updates predictable through actions like LOGIN_SUCCESS, LOGOUT, SET_DEPARTMENT, and SET_ERROR.
+</div>
+
+<h2>Important Interview Points</h2>
+
+<ul>
+<li>Context provides global access to state.</li>
+<li>useReducer manages complex state updates.</li>
+<li>The Provider wraps the application.</li>
+<li>Components consume state using useContext or a custom hook.</li>
+<li>Components update state using dispatch.</li>
+<li>This pattern can replace Redux in small to medium apps.</li>
+<li>Redux is still better for large apps with advanced global state needs.</li>
+</ul>
+
+<h2>Short Interview Answer</h2>
+
+<div class="highlight">
+We combine Context and useReducer by creating a context, managing state with useReducer inside a Provider, and passing state and dispatch through the context value. Any child component can then read global state and update it using dispatch.
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+Context shares global state, while useReducer controls how that state changes through actions.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+
+</body>
+</html>

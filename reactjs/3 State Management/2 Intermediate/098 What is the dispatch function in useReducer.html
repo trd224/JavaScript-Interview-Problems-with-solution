@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>098. What is the dispatch function in useReducer?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px;margin-bottom:10px}
+p{color:#cbd5e1}
+ul{padding-left:24px}
+li{margin-bottom:10px;color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;margin-top:15px;text-align:center;line-height:2;font-size:18px}
+pre{border-radius:12px;overflow-x:auto}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>098. What is the dispatch function in useReducer?</h1>
+
+<h2>One-Line Definition</h2>
+
+<div class="highlight">
+dispatch is the function returned by useReducer that sends an action to the reducer so the state can be updated.
+</div>
+
+<h2>Simple Explanation</h2>
+
+<p>
+In useState, we update state using a setter function.
+</p>
+
+<pre><code class="language-jsx">const [count, setCount] = useState(0);
+
+setCount(count + 1);</code></pre>
+
+<p>
+In useReducer, we do not update state directly.
+</p>
+
+<p>
+Instead, we send an action using dispatch.
+</p>
+
+<pre><code class="language-jsx">const [state, dispatch] = useReducer(reducer, initialState);
+
+dispatch({ type: 'INCREMENT' });</code></pre>
+
+<div class="highlight">
+Think of dispatch as a messenger. It sends an action to the reducer and the reducer decides how the state should change.
+</div>
+
+<h2>How dispatch Works</h2>
+
+<div class="flow">
+
+User Action
+<br>
+↓
+<br>
+dispatch(action)
+<br>
+↓
+<br>
+Reducer Receives Action
+<br>
+↓
+<br>
+Returns New State
+<br>
+↓
+<br>
+React Updates State
+<br>
+↓
+<br>
+Component Re-renders
+
+</div>
+
+<h2>Basic Syntax</h2>
+
+<pre><code class="language-jsx">dispatch({
+  type: 'ACTION_NAME'
+});</code></pre>
+
+<p>
+The action object usually contains a type property.
+</p>
+
+<h2>Simple Counter Example</h2>
+
+<pre><code class="language-jsx">const initialState = {
+  count: 0
+};
+
+function reducer(state, action) {
+
+  switch (action.type) {
+
+    case 'INCREMENT':
+      return {
+        count: state.count + 1
+      };
+
+    default:
+      return state;
+
+  }
+
+}
+
+function Counter() {
+
+  const [state, dispatch] =
+    useReducer(reducer, initialState);
+
+  return (
+    &lt;button
+      onClick={() =&gt; dispatch({ type: 'INCREMENT' })}
+    &gt;
+      {state.count}
+    &lt;/button&gt;
+  );
+
+}</code></pre>
+
+<h2>What Happens Internally?</h2>
+
+<p>
+Suppose the current state is:
+</p>
+
+<pre><code class="language-jsx">{ count: 0 }</code></pre>
+
+<p>
+User clicks the button:
+</p>
+
+<pre><code class="language-jsx">dispatch({ type: 'INCREMENT' });</code></pre>
+
+<p>
+React automatically calls:
+</p>
+
+<pre><code class="language-jsx">reducer(
+  { count: 0 },
+  { type: 'INCREMENT' }
+);</code></pre>
+
+<p>
+Reducer returns:
+</p>
+
+<pre><code class="language-jsx">{ count: 1 }</code></pre>
+
+<p>
+React stores the new state and re-renders the component.
+</p>
+
+<h2>dispatch Can Send Additional Data</h2>
+
+<p>
+Actions can contain extra information.
+</p>
+
+<pre><code class="language-jsx">dispatch({
+  type: 'SET_USERNAME',
+  value: 'Rizwan'
+});</code></pre>
+
+<p>
+Reducer receives:
+</p>
+
+<pre><code class="language-jsx">action.type
+action.value</code></pre>
+
+<p>
+And updates the state accordingly.
+</p>
+
+<h2>Reducer Example with Payload</h2>
+
+<pre><code class="language-jsx">function reducer(state, action) {
+
+  switch (action.type) {
+
+    case 'SET_USERNAME':
+      return {
+        ...state,
+        username: action.value
+      };
+
+    default:
+      return state;
+
+  }
+
+}</code></pre>
+
+<h2>Real Form Example</h2>
+
+<pre><code class="language-jsx">const handleChange = event => {
+
+  dispatch({
+    type: 'UPDATE_FIELD',
+    field: event.target.name,
+    value: event.target.value
+  });
+
+};</code></pre>
+
+<p>
+If the user types:
+</p>
+
+<pre><code class="language-text">Rizwan</code></pre>
+
+<p>
+inside:
+</p>
+
+<pre><code class="language-jsx">&lt;input name="firstName" /&gt;</code></pre>
+
+<p>
+dispatch sends:
+</p>
+
+<pre><code class="language-jsx">{
+  type: 'UPDATE_FIELD',
+  field: 'firstName',
+  value: 'Rizwan'
+}</code></pre>
+
+<p>
+Reducer updates:
+</p>
+
+<pre><code class="language-jsx">{
+  firstName: 'Rizwan'
+}</code></pre>
+
+<h2>Common dispatch Actions</h2>
+
+<pre><code class="language-jsx">dispatch({ type: 'INCREMENT' });
+
+dispatch({ type: 'DECREMENT' });
+
+dispatch({ type: 'RESET' });
+
+dispatch({
+  type: 'SET_ERROR',
+  message: 'Invalid Login'
+});
+
+dispatch({
+  type: 'UPDATE_FIELD',
+  field: 'email',
+  value: 'abc@gmail.com'
+});</code></pre>
+
+<h2>dispatch vs Reducer</h2>
+
+<table>
+
+<tr>
+<th>dispatch</th>
+<th>Reducer</th>
+</tr>
+
+<tr>
+<td>Sends action</td>
+<td>Handles action</td>
+</tr>
+
+<tr>
+<td>Called by component</td>
+<td>Called by React</td>
+</tr>
+
+<tr>
+<td>Does not update state directly</td>
+<td>Returns new state</td>
+</tr>
+
+<tr>
+<td>Receives action object</td>
+<td>Receives state and action</td>
+</tr>
+
+</table>
+
+<h2>dispatch vs setState</h2>
+
+<table>
+
+<tr>
+<th>useState</th>
+<th>useReducer</th>
+</tr>
+
+<tr>
+<td>setCount(count + 1)</td>
+<td>dispatch({ type: 'INCREMENT' })</td>
+</tr>
+
+<tr>
+<td>Updates state directly</td>
+<td>Sends action first</td>
+</tr>
+
+<tr>
+<td>No reducer involved</td>
+<td>Reducer decides update</td>
+</tr>
+
+</table>
+
+<h2>Mental Model</h2>
+
+<div class="flow">
+
+dispatch
+<br>
+=
+<br>
+Messenger
+
+<br><br>
+
+Reducer
+<br>
+=
+<br>
+Decision Maker
+
+<br><br>
+
+React
+<br>
+=
+<br>
+State Updater
+
+</div>
+
+<h2>Real Project Example</h2>
+
+<div class="highlight">
+In our Aadhaar Authentication application, dispatch can send actions such as UPDATE_OTP, SET_ERROR, START_LOADING, AUTH_SUCCESS, RESET_FORM, or UPDATE_AADHAAR. The reducer then decides how the authentication state should be updated.
+</div>
+
+<h2>Important Interview Points</h2>
+
+<ul>
+<li>dispatch is returned by useReducer.</li>
+<li>dispatch sends actions to the reducer.</li>
+<li>dispatch does not update state directly.</li>
+<li>Reducer receives the action and returns the new state.</li>
+<li>Actions usually contain a type property.</li>
+<li>Actions may also contain additional data.</li>
+</ul>
+
+<h2>Short Interview Answer</h2>
+
+<div class="highlight">
+dispatch is the function returned by useReducer that sends an action object to the reducer. The reducer processes the action and returns the next state, which React then stores and renders.
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+dispatch sends an action to the reducer so React can calculate and update the next state.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+
+</body>
+</html>

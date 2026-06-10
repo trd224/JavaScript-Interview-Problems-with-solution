@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>073. What are the Advantages and Disadvantages of HOCs?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+
+body{
+  margin:0;
+  padding:0;
+  background:#000814;
+  color:#e2e8f0;
+  font-family:Arial,sans-serif;
+  line-height:1.7;
+}
+
+.container{
+  max-width:1000px;
+  margin:40px auto;
+  background:#020617;
+  padding:40px;
+  border-radius:18px;
+  border:1px solid #0f172a;
+  box-shadow:0 0 40px rgba(0,0,0,.95);
+}
+
+h1{
+  color:#f8fafc;
+  margin-bottom:30px;
+  font-size:34px;
+}
+
+h2{
+  color:#c084fc;
+  margin-top:35px;
+  margin-bottom:15px;
+  font-size:26px;
+}
+
+h3{
+  color:#38bdf8;
+  margin-top:25px;
+  margin-bottom:10px;
+}
+
+p{
+  color:#cbd5e1;
+}
+
+ul{
+  padding-left:24px;
+}
+
+li{
+  margin-bottom:10px;
+  color:#cbd5e1;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:20px;
+}
+
+table th,
+table td{
+  border:1px solid #1e293b;
+  padding:14px;
+  text-align:left;
+}
+
+table th{
+  background:#0f172a;
+  color:#38bdf8;
+}
+
+table td{
+  background:#020617;
+  color:#d1d5db;
+}
+
+.highlight{
+  background:#0f172a;
+  padding:18px;
+  border-left:5px solid #38bdf8;
+  border-radius:10px;
+  margin-top:15px;
+}
+
+.flow{
+  background:#020617;
+  border:1px solid #1e293b;
+  padding:20px;
+  border-radius:10px;
+  margin-top:15px;
+  text-align:center;
+  line-height:2;
+  font-size:18px;
+}
+
+pre{
+  border-radius:12px;
+  overflow-x:auto;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>073. What are the Advantages and Disadvantages of HOCs?</h1>
+
+<h2>One-Line Definition</h2>
+
+<div class="highlight">
+Higher Order Components (HOCs) help us reuse logic by wrapping components, but they can also make applications harder to understand and debug.
+</div>
+
+<h2>Quick Recap: What is an HOC?</h2>
+
+<p>
+A Higher Order Component (HOC) is a function that takes a component and returns a new enhanced component.
+</p>
+
+<pre><code class="language-jsx">function withAuth(Component) {
+
+  return function EnhancedComponent(props) {
+
+    return &lt;Component {...props} /&gt;;
+
+  };
+
+}</code></pre>
+
+<h2>Advantages of HOCs</h2>
+
+<h3>1. Code Reusability</h3>
+
+<p>
+The biggest advantage of HOCs is logic reuse.
+</p>
+
+<div class="flow">
+
+Shared Logic
+<br>
+↓
+<br>
+One HOC
+<br>
+↓
+<br>
+Multiple Components
+
+</div>
+
+<p>
+Instead of repeating authentication, logging, or permissions logic in every component, we write it once inside an HOC.
+</p>
+
+<h3>Example</h3>
+
+<pre><code class="language-jsx">const ProtectedDashboard = withAuth(Dashboard);
+
+const ProtectedProfile = withAuth(Profile);</code></pre>
+
+<h3>2. Separation of Concerns</h3>
+
+<p>
+Business logic stays inside the HOC while UI remains inside the component.
+</p>
+
+<pre><code class="language-jsx">function Profile() {
+
+  return &lt;h2&gt;Profile Page&lt;/h2&gt;;
+
+}</code></pre>
+
+<p>
+Authentication logic is handled separately by the HOC.
+</p>
+
+<h3>3. No Modification of Original Component</h3>
+
+<p>
+The original component remains unchanged.
+</p>
+
+<pre><code class="language-jsx">const EnhancedProfile = withAuth(Profile);</code></pre>
+
+<p>
+The Profile component itself is never modified.
+</p>
+
+<h3>4. Easy to Apply Cross-Cutting Features</h3>
+
+<p>
+HOCs are useful for:
+</p>
+
+<ul>
+<li>Authentication</li>
+<li>Authorization</li>
+<li>Analytics</li>
+<li>Logging</li>
+<li>Error Handling</li>
+<li>Loading States</li>
+</ul>
+
+<h3>5. Widely Used in Older React Libraries</h3>
+
+<p>
+Many popular libraries use HOCs.
+</p>
+
+<pre><code class="language-jsx">connect()(Component)</code></pre>
+
+<p>
+Redux's connect() is a famous HOC example.
+</p>
+
+<h2>Disadvantages of HOCs</h2>
+
+<h3>1. Wrapper Hell</h3>
+
+<p>
+Multiple HOCs can create deeply nested component trees.
+</p>
+
+<pre><code class="language-jsx">export default withRouter(
+  withTheme(
+    withAuth(
+      withLoading(Profile)
+    )
+  )
+);</code></pre>
+
+<div class="highlight">
+This is often called Wrapper Hell.
+</div>
+
+<h3>2. Harder Debugging</h3>
+
+<p>
+React DevTools may show many wrapper components instead of the actual component.
+</p>
+
+<div class="flow">
+
+Profile
+<br>
+↓
+<br>
+withLoading
+<br>
+↓
+<br>
+withAuth
+<br>
+↓
+<br>
+withTheme
+<br>
+↓
+<br>
+React DevTools
+
+</div>
+
+<p>
+Finding bugs becomes harder.
+</p>
+
+<h3>3. Prop Name Collisions</h3>
+
+<p>
+The HOC may inject props that already exist in the wrapped component.
+</p>
+
+<pre><code class="language-jsx">function withUser(Component) {
+
+  return function(props) {
+
+    return (
+      &lt;Component {...props} user="Admin" /&gt;
+    );
+
+  };
+
+}</code></pre>
+
+<p>
+If the component already receives a user prop, conflicts can occur.
+</p>
+
+<h3>4. More Complex Component Trees</h3>
+
+<p>
+Every HOC creates an extra React component.
+</p>
+
+<div class="flow">
+
+Original Component
+<br>
+↓
+<br>
+HOC Wrapper
+<br>
+↓
+<br>
+Rendered Component
+
+</div>
+
+<p>
+This increases complexity and makes the component hierarchy deeper.
+</p>
+
+<h3>5. Less Readable Code</h3>
+
+<p>
+Understanding where data and props come from becomes difficult in large projects.
+</p>
+
+<pre><code class="language-jsx">export default withAuth(
+  withPermissions(
+    withAnalytics(
+      Dashboard
+    )
+  )
+);</code></pre>
+
+<p>
+A new developer may struggle to understand which HOC provides which props.
+</p>
+
+<h3>6. Replaced by Hooks in Modern React</h3>
+
+<p>
+Most HOC use cases are now handled using Custom Hooks.
+</p>
+
+<pre><code class="language-jsx">function Dashboard() {
+
+  const user = useAuth();
+
+  return &lt;h2&gt;Dashboard&lt;/h2&gt;;
+
+}</code></pre>
+
+<p>
+Hooks are usually easier to read and maintain.
+</p>
+
+<h2>Advantages vs Disadvantages</h2>
+
+<table>
+
+<tr>
+<th>Advantages</th>
+<th>Disadvantages</th>
+</tr>
+
+<tr>
+<td>Logic reuse</td>
+<td>Wrapper hell</td>
+</tr>
+
+<tr>
+<td>Separation of concerns</td>
+<td>Harder debugging</td>
+</tr>
+
+<tr>
+<td>No component modification</td>
+<td>Prop collisions</td>
+</tr>
+
+<tr>
+<td>Reusable cross-cutting features</td>
+<td>Complex component trees</td>
+</tr>
+
+<tr>
+<td>Works well with older libraries</td>
+<td>Less readable code</td>
+</tr>
+
+<tr>
+<td>Reusable architecture</td>
+<td>Largely replaced by Hooks</td>
+</tr>
+
+</table>
+
+<h2>HOC vs Custom Hooks</h2>
+
+<table>
+
+<tr>
+<th>Feature</th>
+<th>HOC</th>
+<th>Custom Hook</th>
+</tr>
+
+<tr>
+<td>Logic Sharing</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+
+<tr>
+<td>Wrapper Components</td>
+<td>Required</td>
+<td>Not Required</td>
+</tr>
+
+<tr>
+<td>Readability</td>
+<td>Lower</td>
+<td>Higher</td>
+</tr>
+
+<tr>
+<td>Debugging</td>
+<td>Harder</td>
+<td>Easier</td>
+</tr>
+
+<tr>
+<td>Modern React</td>
+<td>Less Common</td>
+<td>Preferred</td>
+</tr>
+
+</table>
+
+<h2>Real Project Example</h2>
+
+<div class="highlight">
+Before React Hooks, our Aadhaar Authentication application could have used HOCs such as withAuth(), withPermissions(), and withAuditLogs() to share logic across multiple screens. Today, most of these use cases would be implemented using Custom Hooks because they are easier to maintain.
+</div>
+
+<h2>Important Interview Points</h2>
+
+<ul>
+<li>HOCs promote code reuse.</li>
+<li>They separate logic from UI.</li>
+<li>They can create wrapper hell.</li>
+<li>They may cause prop collisions.</li>
+<li>They make debugging harder.</li>
+<li>Custom Hooks are now preferred for logic reuse.</li>
+<li>Redux connect() is a famous HOC example.</li>
+</ul>
+
+<h2>Short Interview Answer</h2>
+
+<div class="highlight">
+The main advantages of HOCs are code reuse, separation of concerns, and reusable cross-cutting features such as authentication and logging. The main disadvantages are wrapper hell, harder debugging, prop collisions, and reduced readability. Modern React applications generally prefer Custom Hooks instead of HOCs.
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+HOCs improve code reuse and separation of concerns, but they can make component trees more complex and harder to debug.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+
+</body>
+</html>

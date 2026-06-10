@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>033 - Reconciliation Process in React</title>
+  <title>036 - Reconciliation Algorithm in React</title>
 
   <style>
 
@@ -126,8 +126,8 @@
       color:#f472b6;
     }
 
-    .variable{
-      color:#4ade80;
+    .comment{
+      color:#94a3b8;
     }
 
     .output{
@@ -149,52 +149,49 @@
 
   <div class="container">
 
-    <h1>033. What is the reconciliation process in React?</h1>
+    <h1>034. What is the reconciliation algorithm in React?</h1>
 
     <h2>One-Line Definition</h2>
 
     <div class="highlight">
-      Reconciliation is the React process of comparing old and new Virtual DOM trees to update only the changed parts in the real DOM.
+      The reconciliation algorithm in React is the diffing algorithm that compares old and new Virtual DOM trees to efficiently update the real DOM.
     </div>
-
-    <h2>Why Reconciliation Is Needed</h2>
-
-    <p>
-      Updating the real DOM directly is slow and expensive.
-    </p>
-
-    <p>
-      React improves performance by updating only the necessary DOM elements instead of reloading the whole page.
-    </p>
 
     <h2>Simple Understanding</h2>
 
     <p>
-      Whenever:
+      Whenever state or props change:
     </p>
 
     <ul>
-      <li>state changes</li>
-      <li>props change</li>
-      <li>component re-renders</li>
+      <li>React creates a new Virtual DOM.</li>
+      <li>React compares it with the previous Virtual DOM.</li>
+      <li>React finds differences.</li>
+      <li>Only changed parts are updated in the real DOM.</li>
     </ul>
 
     <p>
-      React creates a new Virtual DOM and compares it with the previous Virtual DOM.
-    </p>
-
-    <p>
-      This comparison process is called:
+      This comparison system is called:
     </p>
 
     <div class="highlight">
-      Reconciliation
+      Reconciliation Algorithm
     </div>
+
+    <h2>Main Goal of Reconciliation</h2>
+
+    <p>
+      React wants to avoid expensive full DOM updates.
+    </p>
+
+    <p>
+      Instead of replacing the whole UI, React updates only necessary DOM nodes.
+    </p>
 
     <h2>Flow Diagram</h2>
 
     <div class="flow">
-      State Change
+      State/Props Change
       <br>
       ↓
       <br>
@@ -202,15 +199,19 @@
       <br>
       ↓
       <br>
+      Diffing Algorithm Runs
+      <br>
+      ↓
+      <br>
       Compare Old vs New Virtual DOM
       <br>
       ↓
       <br>
-      Find Differences
+      Find Changes
       <br>
       ↓
       <br>
-      Update Only Changed Real DOM Parts
+      Update Only Changed Real DOM Nodes
     </div>
 
     <h2>Example</h2>
@@ -240,7 +241,7 @@
     <table>
 
       <tr>
-        <th>Step</th>
+        <th>Action</th>
         <th>React Behavior</th>
       </tr>
 
@@ -255,8 +256,8 @@
       </tr>
 
       <tr>
-        <td>Comparison happens</td>
-        <td>Old vs new Virtual DOM</td>
+        <td>Diffing starts</td>
+        <td>Old vs new Virtual DOM compared</td>
       </tr>
 
       <tr>
@@ -265,75 +266,17 @@
       </tr>
 
       <tr>
-        <td>Real DOM updated</td>
+        <td>DOM updated</td>
         <td>Only h1 updated</td>
       </tr>
 
     </table>
 
-    <h2>Important Point</h2>
-
-    <div class="highlight">
-      React does NOT replace the entire DOM during re-rendering.
-    </div>
+    <h2>Important Rule 1 - Different Element Types</h2>
 
     <p>
-      React updates only the changed elements.
+      If element types are different, React destroys the old tree and creates a new one.
     </p>
-
-    <h2>What Algorithm React Uses?</h2>
-
-    <p>
-      React uses a fast comparison algorithm called:
-    </p>
-
-    <div class="highlight">
-      Diffing Algorithm
-    </div>
-
-    <h2>Diffing Algorithm Rules</h2>
-
-    <table>
-
-      <tr>
-        <th>Rule</th>
-        <th>Behavior</th>
-      </tr>
-
-      <tr>
-        <td>Different element types</td>
-        <td>Destroy old tree and create new tree</td>
-      </tr>
-
-      <tr>
-        <td>Same element type</td>
-        <td>Update only changed attributes</td>
-      </tr>
-
-      <tr>
-        <td>List rendering</td>
-        <td>Uses key prop for optimization</td>
-      </tr>
-
-    </table>
-
-    <h2>Example of Same Element Type</h2>
-
-    <pre><code><span class="comment">// Old</span>
-
-<span class="tag">&lt;h1</span> className=<span class="string">"red"</span><span class="tag">&gt;</span>Hello<span class="tag">&lt;/h1&gt;</span>
-
-<span class="comment">// New</span>
-
-<span class="tag">&lt;h1</span> className=<span class="string">"blue"</span><span class="tag">&gt;</span>Hello<span class="tag">&lt;/h1&gt;</span></code></pre>
-
-    <p>
-      React only updates:
-    </p>
-
-    <pre class="output"><code>className</code></pre>
-
-    <h2>Example of Different Element Type</h2>
 
     <pre><code><span class="comment">// Old</span>
 
@@ -344,13 +287,33 @@
 <span class="tag">&lt;p&gt;</span>Hello<span class="tag">&lt;/p&gt;</span></code></pre>
 
     <p>
-      React destroys old h1 and creates new p element.
+      React removes h1 and creates p.
     </p>
 
-    <h2>Role of Keys in Reconciliation</h2>
+    <h2>Important Rule 2 - Same Element Types</h2>
 
     <p>
-      Keys help React identify changed list items efficiently.
+      If element types are the same, React updates only changed attributes.
+    </p>
+
+    <pre><code><span class="comment">// Old</span>
+
+<span class="tag">&lt;h1</span> className=<span class="string">"red"</span><span class="tag">&gt;</span>Hello<span class="tag">&lt;/h1&gt;</span>
+
+<span class="comment">// New</span>
+
+<span class="tag">&lt;h1</span> className=<span class="string">"blue"</span><span class="tag">&gt;</span>Hello<span class="tag">&lt;/h1&gt;</span></code></pre>
+
+    <p>
+      React updates only:
+    </p>
+
+    <pre class="output"><code>className</code></pre>
+
+    <h2>Important Rule 3 - List Reconciliation</h2>
+
+    <p>
+      React uses keys to identify changed list items.
     </p>
 
     <pre><code>users.map(user => (
@@ -359,21 +322,56 @@
   <span class="tag">&lt;/li&gt;</span>
 ));</code></pre>
 
+    <h2>Why Keys Are Important</h2>
+
+    <ul>
+      <li>Faster list updates</li>
+      <li>Correct item tracking</li>
+      <li>Better performance</li>
+      <li>Prevents UI bugs</li>
+    </ul>
+
     <h2>Without Keys Problem</h2>
 
+    <p>
+      React may unnecessarily re-render list items.
+    </p>
+
+    <h2>Why React’s Algorithm Is Fast</h2>
+
+    <p>
+      A complete DOM comparison would be very slow.
+    </p>
+
+    <p>
+      React uses optimized assumptions:
+    </p>
+
     <ul>
-      <li>Incorrect DOM updates</li>
-      <li>Poor performance</li>
-      <li>UI bugs in lists</li>
+      <li>Different element types produce different trees.</li>
+      <li>Keys identify stable list items.</li>
     </ul>
 
-    <h2>Why Reconciliation Is Fast</h2>
+    <h2>Complexity Advantage</h2>
 
-    <ul>
-      <li>Virtual DOM comparison is lightweight</li>
-      <li>Only changed nodes are updated</li>
-      <li>Minimizes expensive real DOM operations</li>
-    </ul>
+    <table>
+
+      <tr>
+        <th>Approach</th>
+        <th>Complexity</th>
+      </tr>
+
+      <tr>
+        <td>Traditional tree diffing</td>
+        <td>O(n³)</td>
+      </tr>
+
+      <tr>
+        <td>React diffing algorithm</td>
+        <td>O(n)</td>
+      </tr>
+
+    </table>
 
     <h2>Real Project Use Cases</h2>
 
@@ -381,27 +379,27 @@
 
       <tr>
         <th>Feature</th>
-        <th>Reconciliation Benefit</th>
-      </tr>
-
-      <tr>
-        <td>Live dashboards</td>
-        <td>Efficient updates</td>
+        <th>Benefit</th>
       </tr>
 
       <tr>
         <td>Chat applications</td>
-        <td>Fast UI rendering</td>
+        <td>Fast message updates</td>
+      </tr>
+
+      <tr>
+        <td>Dashboards</td>
+        <td>Efficient data refresh</td>
       </tr>
 
       <tr>
         <td>OTP forms</td>
-        <td>Minimal input updates</td>
+        <td>Minimal DOM changes</td>
       </tr>
 
       <tr>
         <td>Large tables</td>
-        <td>Optimized list rendering</td>
+        <td>Optimized rendering</td>
       </tr>
 
     </table>
@@ -409,23 +407,23 @@
     <h2>Important Interview Points</h2>
 
     <ul>
-      <li>Reconciliation compares old and new Virtual DOM.</li>
-      <li>React uses the diffing algorithm.</li>
-      <li>Only changed DOM parts are updated.</li>
-      <li>Keys help optimize list reconciliation.</li>
-      <li>Improves React application performance.</li>
+      <li>React uses a diffing algorithm for reconciliation.</li>
+      <li>Compares old and new Virtual DOM trees.</li>
+      <li>Updates only changed real DOM nodes.</li>
+      <li>Keys optimize list reconciliation.</li>
+      <li>React’s diffing complexity is O(n).</li>
     </ul>
 
     <h2>Short Interview Answer</h2>
 
     <div class="highlight">
-      Reconciliation is React’s process of comparing old and new Virtual DOM trees to efficiently update only the changed parts in the real DOM.
+      The reconciliation algorithm is React’s diffing process that compares old and new Virtual DOM trees to efficiently update only changed parts of the real DOM.
     </div>
 
     <h2>One-Line Interview Answer</h2>
 
     <div class="highlight">
-      Reconciliation is React’s DOM comparison process used to efficiently update the UI.
+      React’s reconciliation algorithm compares Virtual DOM trees to efficiently update the real DOM.
     </div>
 
   </div>
@@ -433,8 +431,8 @@
 
   <div class="fixed-page-nav-spacer"></div>
   <div class="fixed-page-nav">
-    <a href="032%20What%20is%20the%20difference%20between%20createRoot%20and%20render%20in%20React%2018.html">←</a>
-    <a href="034%20What%20is%20the%20reconciliation%20algorithm%20in%20React.html">→</a>
+    <a href="033%20What%20is%20the%20reconciliation%20process%20in%20React.html">←</a>
+    <a href="035%20What%20is%20the%20diffing%20algorithm%20in%20React.html">→</a>
   </div>
 </body>
 </html>

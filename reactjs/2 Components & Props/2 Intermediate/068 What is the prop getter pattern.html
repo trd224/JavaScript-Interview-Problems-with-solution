@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!-- <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -470,5 +470,392 @@
     <a href="067%20What%20is%20the%20controlled%20props%20pattern.html">←</a>
     <a href="../3%20State%20Management/081%20What%20is%20state%20in%20React.html">→</a>
   </div>
+</body>
+</html> -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>068. What is the Prop Getter Pattern?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+
+body{
+  margin:0;
+  padding:0;
+  background:#000814;
+  color:#e2e8f0;
+  font-family:Arial,sans-serif;
+  line-height:1.7;
+}
+
+.container{
+  max-width:1000px;
+  margin:40px auto;
+  background:#020617;
+  padding:40px;
+  border-radius:18px;
+  border:1px solid #0f172a;
+  box-shadow:0 0 40px rgba(0,0,0,.95);
+}
+
+h1{
+  color:#f8fafc;
+  margin-bottom:30px;
+  font-size:34px;
+}
+
+h2{
+  color:#c084fc;
+  margin-top:35px;
+  margin-bottom:15px;
+  font-size:26px;
+}
+
+h3{
+  color:#38bdf8;
+  margin-top:25px;
+  margin-bottom:10px;
+}
+
+p{
+  color:#cbd5e1;
+}
+
+ul{
+  padding-left:24px;
+}
+
+li{
+  margin-bottom:10px;
+  color:#cbd5e1;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:20px;
+}
+
+table th,
+table td{
+  border:1px solid #1e293b;
+  padding:14px;
+  text-align:left;
+}
+
+table th{
+  background:#0f172a;
+  color:#38bdf8;
+}
+
+table td{
+  background:#020617;
+  color:#d1d5db;
+}
+
+.highlight{
+  background:#0f172a;
+  padding:18px;
+  border-left:5px solid #38bdf8;
+  border-radius:10px;
+  margin-top:15px;
+}
+
+.flow{
+  background:#020617;
+  border:1px solid #1e293b;
+  padding:20px;
+  border-radius:10px;
+  margin-top:15px;
+  text-align:center;
+  line-height:2;
+  font-size:18px;
+}
+
+pre{
+  border-radius:12px;
+  overflow-x:auto;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>068. What is the Prop Getter Pattern?</h1>
+
+<h2>One-Line Definition</h2>
+
+<div class="highlight">
+The Prop Getter Pattern is a React pattern where a function returns props that should be applied to an element, allowing reusable behavior while still letting consumers add their own props.
+</div>
+
+<h2>Why Is It Used?</h2>
+
+<p>
+Sometimes a custom hook or reusable component needs to provide event handlers, accessibility attributes, IDs, class names, or other props.
+</p>
+
+<p>
+Instead of forcing every developer to manually add those props, the hook returns a function that generates them automatically.
+</p>
+
+<h2>Problem Without Prop Getter Pattern</h2>
+
+<p>
+Suppose we create a reusable toggle hook.
+</p>
+
+<pre><code class="language-jsx">import { useState } from 'react';
+
+function useToggle() {
+
+  const [on, setOn] = useState(false);
+
+  return {
+    on,
+    setOn
+  };
+
+}</code></pre>
+
+<p>
+Now every component must manually wire up the click handler.
+</p>
+
+<pre><code class="language-jsx">function App() {
+
+  const { on, setOn } = useToggle();
+
+  return (
+    &lt;button onClick={() =&gt; setOn(!on)}&gt;
+      {on ? 'ON' : 'OFF'}
+    &lt;/button&gt;
+  );
+
+}</code></pre>
+
+<h2>Prop Getter Pattern Solution</h2>
+
+<p>
+Instead of exposing the implementation details, the hook provides a function that returns the required props.
+</p>
+
+<pre><code class="language-jsx">import { useState } from 'react';
+
+function useToggle() {
+
+  const [on, setOn] = useState(false);
+
+  const getTogglerProps = () => ({
+    onClick: () => setOn(prev => !prev)
+  });
+
+  return {
+    on,
+    getTogglerProps
+  };
+
+}</code></pre>
+
+<h2>Using the Prop Getter</h2>
+
+<pre><code class="language-jsx">function App() {
+
+  const { on, getTogglerProps } = useToggle();
+
+  return (
+    &lt;button {...getTogglerProps()}&gt;
+      {on ? 'ON' : 'OFF'}
+    &lt;/button&gt;
+  );
+
+}</code></pre>
+
+<p>
+The button automatically receives the required click handler from the hook.
+</p>
+
+<h2>How It Works</h2>
+
+<div class="flow">
+
+Custom Hook
+<br>
+↓
+<br>
+Returns Prop Getter Function
+<br>
+↓
+<br>
+Component Calls Function
+<br>
+↓
+<br>
+Receives Props
+<br>
+↓
+<br>
+Applies Props to Element
+
+</div>
+
+<h2>Advanced Prop Getter Pattern</h2>
+
+<p>
+A good prop getter also allows consumers to pass their own props.
+</p>
+
+<pre><code class="language-jsx">import { useState } from 'react';
+
+function useToggle() {
+
+  const [on, setOn] = useState(false);
+
+  const getTogglerProps = (props = {}) => ({
+    ...props,
+
+    onClick: event => {
+
+      props.onClick?.(event);
+
+      setOn(prev => !prev);
+
+    }
+  });
+
+  return {
+    on,
+    getTogglerProps
+  };
+
+}</code></pre>
+
+<h3>Usage</h3>
+
+<pre><code class="language-jsx">function App() {
+
+  const { on, getTogglerProps } = useToggle();
+
+  return (
+    &lt;button
+      {...getTogglerProps({
+        onClick: () =&gt; console.log('Custom Click')
+      })}
+    &gt;
+      {on ? 'ON' : 'OFF'}
+    &lt;/button&gt;
+  );
+
+}</code></pre>
+
+<p>
+Now both event handlers execute:
+</p>
+
+<ul>
+<li>Custom click handler</li>
+<li>Toggle hook click handler</li>
+</ul>
+
+<h2>Why Is This Better?</h2>
+
+<table>
+
+<tr>
+<th>Without Prop Getter</th>
+<th>With Prop Getter</th>
+</tr>
+
+<tr>
+<td>Manual wiring of props</td>
+<td>Automatic prop generation</td>
+</tr>
+
+<tr>
+<td>Repeated code</td>
+<td>Reusable behavior</td>
+</tr>
+
+<tr>
+<td>Harder to maintain</td>
+<td>Easier to maintain</td>
+</tr>
+
+<tr>
+<td>Less flexible</td>
+<td>Highly flexible</td>
+</tr>
+
+</table>
+
+<h2>Popular Library Example</h2>
+
+<p>
+The Prop Getter Pattern became popular through the Downshift library.
+</p>
+
+<pre><code class="language-jsx">getInputProps()
+
+getMenuProps()
+
+getItemProps()</code></pre>
+
+<p>
+These functions return the required props for dropdown and autocomplete components.
+</p>
+
+<h2>Real Project Example</h2>
+
+<div class="highlight">
+Suppose our Aadhaar Authentication application has a reusable searchable dropdown component. The hook can expose functions such as getInputProps() and getOptionProps() so every screen automatically receives the correct event handlers, IDs, and accessibility attributes.
+</div>
+
+<h2>Advantages</h2>
+
+<ul>
+<li>Encapsulates behavior.</li>
+<li>Improves reusability.</li>
+<li>Supports custom user props.</li>
+<li>Keeps components flexible.</li>
+<li>Improves accessibility support.</li>
+<li>Reduces duplicate code.</li>
+</ul>
+
+<h2>Important Interview Points</h2>
+
+<ul>
+<li>A prop getter is a function that returns props.</li>
+<li>Commonly used in custom hooks and component libraries.</li>
+<li>Separates behavior from UI rendering.</li>
+<li>Allows merging library props with consumer props.</li>
+<li>Downshift is a well-known example.</li>
+</ul>
+
+<h2>Short Interview Answer</h2>
+
+<div class="highlight">
+The Prop Getter Pattern is a React pattern where a function returns props that should be spread onto an element. It helps create reusable components by encapsulating behavior while still allowing developers to pass their own props.
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+The Prop Getter Pattern uses functions that return props, making reusable React components flexible and customizable.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+
 </body>
 </html>

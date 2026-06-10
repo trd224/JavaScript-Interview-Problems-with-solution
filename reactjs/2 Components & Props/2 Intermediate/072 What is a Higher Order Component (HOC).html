@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>072. What is a Higher Order Component (HOC)?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+
+body{
+  margin:0;
+  padding:0;
+  background:#000814;
+  color:#e2e8f0;
+  font-family:Arial,sans-serif;
+  line-height:1.7;
+}
+
+.container{
+  max-width:1000px;
+  margin:40px auto;
+  background:#020617;
+  padding:40px;
+  border-radius:18px;
+  border:1px solid #0f172a;
+  box-shadow:0 0 40px rgba(0,0,0,.95);
+}
+
+h1{
+  color:#f8fafc;
+  margin-bottom:30px;
+  font-size:34px;
+}
+
+h2{
+  color:#c084fc;
+  margin-top:35px;
+  margin-bottom:15px;
+  font-size:26px;
+}
+
+h3{
+  color:#38bdf8;
+  margin-top:25px;
+  margin-bottom:10px;
+}
+
+p{
+  color:#cbd5e1;
+}
+
+ul{
+  padding-left:24px;
+}
+
+li{
+  margin-bottom:10px;
+  color:#cbd5e1;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:20px;
+}
+
+table th,
+table td{
+  border:1px solid #1e293b;
+  padding:14px;
+  text-align:left;
+}
+
+table th{
+  background:#0f172a;
+  color:#38bdf8;
+}
+
+table td{
+  background:#020617;
+  color:#d1d5db;
+}
+
+.highlight{
+  background:#0f172a;
+  padding:18px;
+  border-left:5px solid #38bdf8;
+  border-radius:10px;
+  margin-top:15px;
+}
+
+.flow{
+  background:#020617;
+  border:1px solid #1e293b;
+  padding:20px;
+  border-radius:10px;
+  margin-top:15px;
+  text-align:center;
+  line-height:2;
+  font-size:18px;
+}
+
+pre{
+  border-radius:12px;
+  overflow-x:auto;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>072. What is a Higher Order Component (HOC)?</h1>
+
+<h2>One-Line Definition</h2>
+
+<div class="highlight">
+A Higher Order Component (HOC) is a function that takes a component as input and returns a new enhanced component with additional functionality.
+</div>
+
+<h2>Why Is It Needed?</h2>
+
+<p>
+Sometimes multiple components need the same logic.
+</p>
+
+<p>
+Instead of duplicating code, we can place the shared logic inside a Higher Order Component and reuse it across many components.
+</p>
+
+<div class="flow">
+
+Shared Logic
+<br>
+↓
+<br>
+Higher Order Component
+<br>
+↓
+<br>
+Wrap Existing Component
+<br>
+↓
+<br>
+Return Enhanced Component
+
+</div>
+
+<h2>What Does "Higher Order" Mean?</h2>
+
+<p>
+A Higher Order Function is a function that works with other functions.
+</p>
+
+<p>
+Similarly, a Higher Order Component is a function that works with React components.
+</p>
+
+<pre><code class="language-javascript">function withSomething(Component) {
+
+  return function EnhancedComponent() {
+
+    return &lt;Component /&gt;;
+
+  };
+
+}</code></pre>
+
+<p>
+The HOC receives a component and returns a new component.
+</p>
+
+<h2>Simple Example</h2>
+
+<h3>User Component</h3>
+
+<pre><code class="language-jsx">function User() {
+
+  return &lt;h2&gt;Rizwan&lt;/h2&gt;;
+
+}</code></pre>
+
+<h3>HOC</h3>
+
+<pre><code class="language-jsx">function withBorder(Component) {
+
+  return function EnhancedComponent() {
+
+    return (
+      &lt;div style={{ border: '2px solid blue' }}&gt;
+        &lt;Component /&gt;
+      &lt;/div&gt;
+    );
+
+  };
+
+}</code></pre>
+
+<h3>Create Enhanced Component</h3>
+
+<pre><code class="language-jsx">const UserWithBorder = withBorder(User);</code></pre>
+
+<h3>Usage</h3>
+
+<pre><code class="language-jsx">&lt;UserWithBorder /&gt;</code></pre>
+
+<h2>Output</h2>
+
+<div class="highlight">
+A blue border is added around the User component without modifying the original component.
+</div>
+
+<h2>Real Example - Authentication</h2>
+
+<p>
+A common use case is route protection.
+</p>
+
+<h3>Protected HOC</h3>
+
+<pre><code class="language-jsx">function withAuth(Component) {
+
+  return function AuthenticatedComponent(props) {
+
+    const isLoggedIn = true;
+
+    if (!isLoggedIn) {
+      return &lt;h2&gt;Access Denied&lt;/h2&gt;;
+    }
+
+    return &lt;Component {...props} /&gt;;
+
+  };
+
+}</code></pre>
+
+<h3>Dashboard Component</h3>
+
+<pre><code class="language-jsx">function Dashboard() {
+
+  return &lt;h2&gt;Dashboard&lt;/h2&gt;;
+
+}</code></pre>
+
+<h3>Wrap Component</h3>
+
+<pre><code class="language-jsx">const ProtectedDashboard = withAuth(Dashboard);</code></pre>
+
+<h2>How It Works</h2>
+
+<div class="flow">
+
+Dashboard Component
+<br>
+↓
+<br>
+Pass Into HOC
+<br>
+↓
+<br>
+HOC Adds Authentication Logic
+<br>
+↓
+<br>
+Returns New Component
+<br>
+↓
+<br>
+Render Enhanced Component
+
+</div>
+
+<h2>Passing Props Through HOC</h2>
+
+<p>
+The HOC should forward props to the wrapped component.
+</p>
+
+<pre><code class="language-jsx">function withUser(Component) {
+
+  return function EnhancedComponent(props) {
+
+    const user = {
+      name: 'Rizwan'
+    };
+
+    return (
+      &lt;Component {...props} user={user} /&gt;
+    );
+
+  };
+
+}</code></pre>
+
+<h3>Usage</h3>
+
+<pre><code class="language-jsx">function Profile({ user }) {
+
+  return &lt;h2&gt;{user.name}&lt;/h2&gt;;
+
+}
+
+const EnhancedProfile = withUser(Profile);</code></pre>
+
+<h2>Advantages</h2>
+
+<ul>
+<li>Promotes code reuse.</li>
+<li>Separates concerns.</li>
+<li>Adds functionality without modifying components.</li>
+<li>Keeps business logic centralized.</li>
+<li>Useful for authentication, logging, permissions, and analytics.</li>
+</ul>
+
+<h2>Disadvantages</h2>
+
+<ul>
+<li>Can create deeply nested wrappers.</li>
+<li>Makes component trees harder to debug.</li>
+<li>Prop collisions can occur.</li>
+<li>Less common after React Hooks.</li>
+</ul>
+
+<h2>HOC vs Render Props</h2>
+
+<table>
+
+<tr>
+<th>Feature</th>
+<th>HOC</th>
+<th>Render Props</th>
+</tr>
+
+<tr>
+<td>Uses Wrapper Component</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+
+<tr>
+<td>Uses Function Prop</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+
+<tr>
+<td>Logic Sharing</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+
+</table>
+
+<h2>HOC vs Custom Hooks</h2>
+
+<table>
+
+<tr>
+<th>Feature</th>
+<th>HOC</th>
+<th>Custom Hooks</th>
+</tr>
+
+<tr>
+<td>Introduced</td>
+<td>Before Hooks</td>
+<td>React 16.8</td>
+</tr>
+
+<tr>
+<td>Logic Sharing</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+
+<tr>
+<td>Modern React</td>
+<td>Less Common</td>
+<td>Preferred</td>
+</tr>
+
+<tr>
+<td>Readability</td>
+<td>Lower</td>
+<td>Higher</td>
+</tr>
+
+</table>
+
+<h2>Popular HOC Examples</h2>
+
+<ul>
+<li>connect() from Redux</li>
+<li>withRouter() in older React Router versions</li>
+<li>withAuth()</li>
+<li>withLoading()</li>
+<li>withPermissions()</li>
+</ul>
+
+<h2>Real Project Example</h2>
+
+<div class="highlight">
+Before React Hooks, our Aadhaar Authentication application could have used HOCs such as withAuth() to protect screens, withPermissions() to control access, or withAuditLogs() to automatically log user actions across multiple components.
+</div>
+
+<h2>Why Are HOCs Less Common Today?</h2>
+
+<p>
+After React Hooks were introduced, most reusable logic moved into Custom Hooks because Hooks provide cleaner, simpler, and more readable code.
+</p>
+
+<pre><code class="language-jsx">function useAuth() {
+
+  const isLoggedIn = true;
+
+  return isLoggedIn;
+
+}</code></pre>
+
+<p>
+Today, Custom Hooks are usually preferred over HOCs for sharing logic.
+</p>
+
+<h2>Important Interview Points</h2>
+
+<ul>
+<li>A HOC is a function that receives a component and returns a new component.</li>
+<li>Used for sharing reusable logic.</li>
+<li>Does not modify the original component.</li>
+<li>Common before React Hooks.</li>
+<li>connect() from Redux is a popular HOC example.</li>
+<li>Custom Hooks are now the preferred solution.</li>
+</ul>
+
+<h2>Short Interview Answer</h2>
+
+<div class="highlight">
+A Higher Order Component (HOC) is a function that takes a component and returns an enhanced version of that component with additional functionality. It is commonly used for logic reuse, authentication, permissions, and analytics.
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+A Higher Order Component is a function that receives a component and returns a new enhanced component.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+
+</body>
+</html>

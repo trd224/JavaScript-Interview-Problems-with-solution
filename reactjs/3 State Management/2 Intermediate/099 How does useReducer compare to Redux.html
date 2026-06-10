@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>099. How does useReducer compare to Redux?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px;margin-bottom:10px}
+p{color:#cbd5e1}
+ul{padding-left:24px}
+li{margin-bottom:10px;color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;margin-top:15px;text-align:center;line-height:2;font-size:18px}
+pre{border-radius:12px;overflow-x:auto}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>099. How does useReducer compare to Redux?</h1>
+
+<h2>One-Line Definition</h2>
+
+<div class="highlight">
+useReducer is a built-in React Hook for component-level state management, while Redux is a separate library used for managing application-wide global state.
+</div>
+
+<h2>The Most Important Thing to Understand</h2>
+
+<p>
+Both useReducer and Redux use the same core concepts:
+</p>
+
+<ul>
+<li>State</li>
+<li>Actions</li>
+<li>Reducers</li>
+<li>Dispatch</li>
+</ul>
+
+<p>
+In fact, Redux was the inspiration for React's useReducer Hook.
+</p>
+
+<h2>Both Follow the Same Flow</h2>
+
+<div class="flow">
+
+dispatch(action)
+<br>
+↓
+<br>
+Reducer Receives Action
+<br>
+↓
+<br>
+Returns New State
+<br>
+↓
+<br>
+UI Updates
+
+</div>
+
+<h2>useReducer Example</h2>
+
+<pre><code class="language-jsx">const initialState = {
+  count: 0
+};
+
+function reducer(state, action) {
+  switch (action.type) {
+    case 'INCREMENT':
+      return {
+        count: state.count + 1
+      };
+
+    default:
+      return state;
+  }
+}
+
+function Counter() {
+
+  const [state, dispatch] =
+    useReducer(reducer, initialState);
+
+  return (
+    &lt;button
+      onClick={() =&gt; dispatch({ type: 'INCREMENT' })}
+    &gt;
+      {state.count}
+    &lt;/button&gt;
+  );
+
+}</code></pre>
+
+<h2>Redux Example</h2>
+
+<pre><code class="language-jsx">const initialState = {
+  count: 0
+};
+
+function counterReducer(state = initialState, action) {
+
+  switch (action.type) {
+
+    case 'INCREMENT':
+      return {
+        count: state.count + 1
+      };
+
+    default:
+      return state;
+
+  }
+
+}</code></pre>
+
+<p>
+Notice that the reducer looks almost identical.
+</p>
+
+<h2>Main Difference</h2>
+
+<table>
+
+<tr>
+<th>useReducer</th>
+<th>Redux</th>
+</tr>
+
+<tr>
+<td>Inside a React component</td>
+<td>Outside React components</td>
+</tr>
+
+<tr>
+<td>Local or shared state</td>
+<td>Global application state</td>
+</tr>
+
+<tr>
+<td>Built into React</td>
+<td>Separate library</td>
+</tr>
+
+<tr>
+<td>No installation needed</td>
+<td>Requires installation</td>
+</tr>
+
+</table>
+
+<h2>State Scope Comparison</h2>
+
+<div class="flow">
+
+useState
+<br>
+↓
+<br>
+Single Component
+
+<br><br>
+
+useReducer
+<br>
+↓
+<br>
+Component / Feature State
+
+<br><br>
+
+Redux
+<br>
+↓
+<br>
+Entire Application
+
+</div>
+
+<h2>How Data Is Accessed</h2>
+
+<h3>useReducer</h3>
+
+<pre><code class="language-jsx">function UserForm() {
+
+  const [state, dispatch] = useReducer(reducer, initialState);
+
+}</code></pre>
+
+<p>
+Only this component and its children can easily access the state.
+</p>
+
+<h3>Redux</h3>
+
+<pre><code class="language-jsx">const user = useSelector(state => state.user);
+
+const dispatch = useDispatch();</code></pre>
+
+<p>
+Any component in the application can access the Redux store.
+</p>
+
+<h2>Real Example</h2>
+
+<p>
+Imagine an e-commerce application.
+</p>
+
+<h3>Good useReducer Use Cases</h3>
+
+<ul>
+<li>Checkout form</li>
+<li>Login form</li>
+<li>Wizard form</li>
+<li>Complex modal workflow</li>
+</ul>
+
+<h3>Good Redux Use Cases</h3>
+
+<ul>
+<li>Logged-in user</li>
+<li>Shopping cart</li>
+<li>Theme</li>
+<li>Language</li>
+<li>Notifications</li>
+<li>Application-wide settings</li>
+</ul>
+
+<h2>Complex Form Example</h2>
+
+<p>
+A form with multiple related fields is a great use case for useReducer.
+</p>
+
+<pre><code class="language-jsx">const initialState = {
+  firstName: '',
+  lastName: '',
+  email: '',
+  loading: false,
+  error: ''
+};
+
+const [state, dispatch] =
+  useReducer(reducer, initialState);</code></pre>
+
+<p>
+The state belongs only to that form, so Redux would be unnecessary.
+</p>
+
+<h2>Authentication Example</h2>
+
+<p>
+Suppose the logged-in user must be accessible everywhere.
+</p>
+
+<p>
+In that case Redux is a better choice.
+</p>
+
+<pre><code class="language-jsx">{
+  user: {
+    id: 1,
+    name: 'Rizwan'
+  }
+}</code></pre>
+
+<p>
+Many pages may need access to the same user information.
+</p>
+
+<h2>Can useReducer Replace Redux?</h2>
+
+<p>
+Sometimes yes.
+</p>
+
+<p>
+Many small and medium React applications use:
+</p>
+
+<pre><code class="language-jsx">useReducer + Context API</code></pre>
+
+<p>
+instead of Redux.
+</p>
+
+<div class="highlight">
+For many projects, useReducer combined with Context API can provide Redux-like state management without installing Redux.
+</div>
+
+<h2>useReducer + Context API Example</h2>
+
+<pre><code class="language-jsx">const UserContext = createContext();
+
+function App() {
+
+  const [state, dispatch] = useReducer(reducer, initialState);
+
+  return (
+    &lt;UserContext.Provider value={{ state, dispatch }}&gt;
+        &lt;Dashboard /&gt;
+    &lt;/UserContext.Provider&gt;
+  );
+
+}</code></pre>
+
+<p>
+Now multiple components can access the reducer state.
+</p>
+
+<h2>Advantages of useReducer</h2>
+
+<ul>
+<li>Built into React.</li>
+<li>No extra dependency.</li>
+<li>Easier to learn.</li>
+<li>Perfect for component-level state.</li>
+<li>Great for complex forms.</li>
+</ul>
+
+<h2>Advantages of Redux</h2>
+
+<ul>
+<li>Centralized global store.</li>
+<li>Excellent DevTools.</li>
+<li>Middleware support.</li>
+<li>Better for large applications.</li>
+<li>Works outside React as well.</li>
+</ul>
+
+<h2>useReducer vs Redux</h2>
+
+<table>
+
+<tr>
+<th>Feature</th>
+<th>useReducer</th>
+<th>Redux</th>
+</tr>
+
+<tr>
+<td>Built Into React</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+
+<tr>
+<td>Installation Required</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+
+<tr>
+<td>Global State</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+
+<tr>
+<td>Local State</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+
+<tr>
+<td>Redux DevTools</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+
+<tr>
+<td>Middleware</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+
+<tr>
+<td>Learning Curve</td>
+<td>Easy</td>
+<td>Higher</td>
+</tr>
+
+</table>
+
+<h2>Real Project Example</h2>
+
+<div class="highlight">
+In our Aadhaar Authentication application, useReducer is a great choice for managing the authentication form because Aadhaar number, OTP, loading state, consent, and errors are closely related. However, if user information, department details, permissions, and session data need to be shared across the entire application, Redux would be a better choice.
+</div>
+
+<h2>Important Interview Points</h2>
+
+<ul>
+<li>useReducer and Redux use the same concepts.</li>
+<li>Both use actions, reducers, and dispatch.</li>
+<li>useReducer is built into React.</li>
+<li>Redux is a separate state management library.</li>
+<li>useReducer is best for local complex state.</li>
+<li>Redux is best for global application state.</li>
+<li>useReducer + Context API can sometimes replace Redux.</li>
+</ul>
+
+<h2>Short Interview Answer</h2>
+
+<div class="highlight">
+useReducer and Redux both use reducers, actions, and dispatch. The main difference is that useReducer is a built-in React Hook for component-level state management, while Redux is a separate library designed for managing global application state.
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+useReducer manages complex local state inside React components, while Redux manages global state across the entire application.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+
+</body>
+</html>

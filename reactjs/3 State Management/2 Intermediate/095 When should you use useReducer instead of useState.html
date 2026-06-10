@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>095. When should you use useReducer instead of useState?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px;margin-bottom:10px}
+p{color:#cbd5e1}
+ul{padding-left:24px}
+li{margin-bottom:10px;color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;margin-top:15px;text-align:center;line-height:2;font-size:18px}
+pre{border-radius:12px;overflow-x:auto}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>095. When should you use useReducer instead of useState?</h1>
+
+<h2>One-Line Definition</h2>
+
+<div class="highlight">
+useReducer should be used instead of useState when state has multiple related values, complex update logic, or different actions that update the same state.
+</div>
+
+<h2>Simple Rule</h2>
+
+<table>
+<tr>
+<th>State Type</th>
+<th>Use</th>
+</tr>
+<tr>
+<td>Simple state</td>
+<td>useState</td>
+</tr>
+<tr>
+<td>Complex or related state</td>
+<td>useReducer</td>
+</tr>
+</table>
+
+<h2>When useState Is Enough</h2>
+
+<p>
+For simple values, useState is better and easier.
+</p>
+
+<pre><code class="language-jsx">function Counter() {
+  const [count, setCount] = useState(0);
+
+  return &lt;button onClick={() =&gt; setCount(count + 1)}&gt;{count}&lt;/button&gt;;
+}</code></pre>
+
+<h3>Good useState Examples</h3>
+
+<ul>
+<li>Counter value</li>
+<li>Input value</li>
+<li>Checkbox state</li>
+<li>Modal open/close</li>
+<li>Dropdown visibility</li>
+</ul>
+
+<h2>Why useReducer Is Needed?</h2>
+
+<p>
+When we have many related states, multiple useState hooks can become messy.
+</p>
+
+<pre><code class="language-jsx">const [firstName, setFirstName] = useState('');
+const [lastName, setLastName] = useState('');
+const [email, setEmail] = useState('');
+const [mobile, setMobile] = useState('');
+const [error, setError] = useState('');</code></pre>
+
+<div class="highlight">
+Instead of many separate states and setters, useReducer keeps related state in one object and updates it through actions.
+</div>
+
+<h2>How useReducer Works</h2>
+
+<div class="flow">
+dispatch(action)
+<br>
+↓
+<br>
+Reducer Receives Current State + Action
+<br>
+↓
+<br>
+Reducer Returns New State
+<br>
+↓
+<br>
+React Updates State
+<br>
+↓
+<br>
+Component Re-renders
+</div>
+
+<h2>Important Mental Model</h2>
+
+<table>
+<tr>
+<th>Term</th>
+<th>Meaning</th>
+</tr>
+<tr>
+<td>state</td>
+<td>Current data</td>
+</tr>
+<tr>
+<td>dispatch</td>
+<td>Sends an action</td>
+</tr>
+<tr>
+<td>action</td>
+<td>Describes what happened</td>
+</tr>
+<tr>
+<td>reducer</td>
+<td>Decides how state should change</td>
+</tr>
+</table>
+
+<h2>Simple Working Example</h2>
+
+<pre><code class="language-jsx">const initialState = { count: 0 };
+
+function reducer(state, action) {
+  switch (action.type) {
+    case 'INCREMENT':
+      return { count: state.count + 1 };
+    default:
+      return state;
+  }
+}
+
+function Counter() {
+  const [state, dispatch] = useReducer(reducer, initialState);
+
+  return &lt;button onClick={() =&gt; dispatch({ type: 'INCREMENT' })}&gt;{state.count}&lt;/button&gt;;
+}</code></pre>
+
+<h2>What Happens Internally?</h2>
+
+<div class="flow">
+Initial State: { count: 0 }
+<br>
+↓
+<br>
+User Clicks Button
+<br>
+↓
+<br>
+dispatch({ type: 'INCREMENT' })
+<br>
+↓
+<br>
+reducer({ count: 0 }, { type: 'INCREMENT' })
+<br>
+↓
+<br>
+Reducer Returns { count: 1 }
+<br>
+↓
+<br>
+React Re-renders UI
+</div>
+
+<h2>Complete Multi-Input Form Example</h2>
+
+<p>
+This is a common real-world example where useReducer is better than many useState hooks.
+</p>
+
+<pre><code class="language-jsx">import { useReducer } from 'react';
+
+const initialState = {
+  firstName: '',
+  lastName: '',
+  email: '',
+  mobile: '',
+  loading: false,
+  error: ''
+};
+
+function reducer(state, action) {
+  switch (action.type) {
+    case 'UPDATE_FIELD':
+      return { ...state, [action.field]: action.value, error: '' };
+
+    case 'SUBMIT_START':
+      return { ...state, loading: true, error: '' };
+
+    case 'SUBMIT_SUCCESS':
+      return { ...state, loading: false };
+
+    case 'SET_ERROR':
+      return { ...state, loading: false, error: action.message };
+
+    case 'RESET_FORM':
+      return initialState;
+
+    default:
+      return state;
+  }
+}
+
+function UserForm() {
+  const [state, dispatch] = useReducer(reducer, initialState);
+
+  const handleChange = event => {
+    dispatch({ type: 'UPDATE_FIELD', field: event.target.name, value: event.target.value });
+  };
+
+  const handleSubmit = event => {
+    event.preventDefault();
+
+    if (!state.firstName || !state.email || !state.mobile) {
+      dispatch({ type: 'SET_ERROR', message: 'Please fill required fields' });
+      return;
+    }
+
+    dispatch({ type: 'SUBMIT_START' });
+
+    setTimeout(() => {
+      console.log('Form Submitted:', state);
+      dispatch({ type: 'SUBMIT_SUCCESS' });
+    }, 1000);
+  };
+
+  return (
+    &lt;form onSubmit={handleSubmit}&gt;
+      &lt;input name="firstName" placeholder="First Name" value={state.firstName} onChange={handleChange} /&gt;
+      &lt;input name="lastName" placeholder="Last Name" value={state.lastName} onChange={handleChange} /&gt;
+      &lt;input name="email" placeholder="Email" value={state.email} onChange={handleChange} /&gt;
+      &lt;input name="mobile" placeholder="Mobile" value={state.mobile} onChange={handleChange} /&gt;
+
+      &lt;button type="submit" disabled={state.loading}&gt;
+        {state.loading ? 'Submitting...' : 'Submit'}
+      &lt;/button&gt;
+
+      &lt;button type="button" disabled={state.loading} onClick={() =&gt; dispatch({ type: 'RESET_FORM' })}&gt;
+        Reset
+      &lt;/button&gt;
+
+      {state.error && &lt;p&gt;{state.error}&lt;/p&gt;}
+    &lt;/form&gt;
+  );
+}
+
+export default UserForm;</code></pre>
+
+<h2>How Multi-Input Example Works</h2>
+
+<p>
+When the user types in the first name input:
+</p>
+
+<pre><code class="language-jsx">dispatch({ type: 'UPDATE_FIELD', field: 'firstName', value: 'Rizwan' });</code></pre>
+
+<p>
+Reducer receives the action and updates only that field:
+</p>
+
+<pre><code class="language-jsx">return { ...state, [action.field]: action.value, error: '' };</code></pre>
+
+<p>
+So the new state becomes:
+</p>
+
+<pre><code class="language-jsx">{
+  firstName: 'Rizwan',
+  lastName: '',
+  email: '',
+  mobile: '',
+  error: ''
+}</code></pre>
+
+<h2>Why useReducer Is Better in This Form?</h2>
+
+<table>
+<tr>
+<th>Multiple useState</th>
+<th>useReducer</th>
+</tr>
+<tr>
+<td>Many state variables</td>
+<td>One state object</td>
+</tr>
+<tr>
+<td>Many setter functions</td>
+<td>One dispatch function</td>
+</tr>
+<tr>
+<td>Update logic spread everywhere</td>
+<td>Update logic inside reducer</td>
+</tr>
+<tr>
+<td>Harder to manage large forms</td>
+<td>Easier to manage large forms</td>
+</tr>
+</table>
+
+<h2>When Should We Use useReducer?</h2>
+
+<ul>
+<li>When state has many related fields.</li>
+<li>When one action updates multiple values.</li>
+<li>When state update logic is complex.</li>
+<li>When form logic has validation, reset, error, and submit states.</li>
+<li>When we want predictable state transitions.</li>
+</ul>
+
+<h2>useState vs useReducer</h2>
+
+<table>
+<tr>
+<th>Feature</th>
+<th>useState</th>
+<th>useReducer</th>
+</tr>
+<tr>
+<td>Best for</td>
+<td>Simple state</td>
+<td>Complex state</td>
+</tr>
+<tr>
+<td>Update method</td>
+<td>Setter function</td>
+<td>dispatch action</td>
+</tr>
+<tr>
+<td>Logic location</td>
+<td>Inside component</td>
+<td>Inside reducer function</td>
+</tr>
+<tr>
+<td>Multiple related values</td>
+<td>Harder</td>
+<td>Easier</td>
+</tr>
+<tr>
+<td>Learning</td>
+<td>Easy</td>
+<td>Medium</td>
+</tr>
+</table>
+
+<h2>Real Project Example</h2>
+
+<div class="highlight">
+In our Aadhaar Authentication application, useState is good for simple values like OTP input, captcha value, or popup visibility. But useReducer is better for a complete authentication form where Aadhaar number, OTP, consent, loading, error, authentication type, and API response are managed together.
+</div>
+
+<h2>Important Interview Points</h2>
+
+<ul>
+<li>useState is best for simple independent state.</li>
+<li>useReducer is best for complex related state.</li>
+<li>dispatch sends an action.</li>
+<li>Reducer decides how state changes.</li>
+<li>Reducer returns the new state.</li>
+<li>React stores the new state and re-renders the component.</li>
+</ul>
+
+<h2>Short Interview Answer</h2>
+
+<div class="highlight">
+We should use useReducer instead of useState when state logic becomes complex, when multiple related values are updated together, or when different actions affect the same state. useReducer keeps state updates centralized and predictable.
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+Use useReducer for complex, related, or action-based state updates, and use useState for simple state.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+
+</body>
+</html>

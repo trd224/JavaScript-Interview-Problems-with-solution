@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>096. What is useReducer and when is it better than useState?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px;margin-bottom:10px}
+p{color:#cbd5e1}
+ul{padding-left:24px}
+li{margin-bottom:10px;color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;margin-top:15px;text-align:center;line-height:2;font-size:18px}
+pre{border-radius:12px;overflow-x:auto}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>096. What is useReducer and when is it better than useState?</h1>
+
+<h2>One-Line Definition</h2>
+
+<div class="highlight">
+useReducer is a React Hook that manages state using a reducer function and actions, making it useful for complex state logic and multiple related state values.
+</div>
+
+<h2>What is useReducer?</h2>
+
+<p>
+useReducer is an alternative to useState.
+</p>
+
+<p>
+Instead of updating state directly, we dispatch actions and let a reducer function decide how the state should change.
+</p>
+
+<div class="flow">
+
+dispatch(action)
+<br>
+↓
+<br>
+Reducer Receives Action
+<br>
+↓
+<br>
+Returns New State
+<br>
+↓
+<br>
+React Updates State
+<br>
+↓
+<br>
+Component Re-renders
+
+</div>
+
+<h2>useReducer Syntax</h2>
+
+<pre><code class="language-jsx">const [state, dispatch] =
+  useReducer(reducer, initialState);</code></pre>
+
+<h3>Parameters</h3>
+
+<ul>
+<li><strong>reducer</strong> → Function that updates state.</li>
+<li><strong>initialState</strong> → Initial value of state.</li>
+</ul>
+
+<h3>Returns</h3>
+
+<ul>
+<li><strong>state</strong> → Current state.</li>
+<li><strong>dispatch</strong> → Function used to send actions.</li>
+</ul>
+
+<h2>Simple Counter Example</h2>
+
+<pre><code class="language-jsx">import { useReducer } from 'react';
+
+const initialState = { count: 0 };
+
+function reducer(state, action) {
+  switch (action.type) {
+    case 'INCREMENT':
+      return { count: state.count + 1 };
+
+    case 'DECREMENT':
+      return { count: state.count - 1 };
+
+    default:
+      return state;
+  }
+}
+
+function Counter() {
+  const [state, dispatch] = useReducer(reducer, initialState);
+
+  return (
+    &lt;&gt;
+      &lt;h2&gt;{state.count}&lt;/h2&gt;
+
+      &lt;button onClick={() =&gt; dispatch({ type: 'INCREMENT' })}&gt;
+        +
+      &lt;/button&gt;
+
+      &lt;button onClick={() =&gt; dispatch({ type: 'DECREMENT' })}&gt;
+        -
+      &lt;/button&gt;
+    &lt;/&gt;
+  );
+}</code></pre>
+
+<h2>How It Works Internally</h2>
+
+<p>
+Suppose the user clicks the Increment button.
+</p>
+
+<pre><code class="language-jsx">dispatch({ type: 'INCREMENT' });</code></pre>
+
+<p>
+React automatically calls:
+</p>
+
+<pre><code class="language-jsx">reducer(
+  { count: 0 },
+  { type: 'INCREMENT' }
+);</code></pre>
+
+<p>
+Reducer returns:
+</p>
+
+<pre><code class="language-jsx">{ count: 1 }</code></pre>
+
+<p>
+React stores the new state and re-renders the component.
+</p>
+
+<h2>Complete Real-World Example</h2>
+
+<p>
+This example shows why useReducer becomes useful when a form contains multiple related fields.
+</p>
+
+<pre><code class="language-jsx">import { useReducer } from 'react';
+
+const initialState = {
+  firstName: '',
+  lastName: '',
+  email: '',
+  mobile: '',
+  loading: false,
+  error: ''
+};
+
+function reducer(state, action) {
+  switch (action.type) {
+
+    case 'UPDATE_FIELD':
+      return {
+        ...state,
+        [action.field]: action.value,
+        error: ''
+      };
+
+    case 'SUBMIT_START':
+      return {
+        ...state,
+        loading: true,
+        error: ''
+      };
+
+    case 'SUBMIT_SUCCESS':
+      return {
+        ...state,
+        loading: false
+      };
+
+    case 'SET_ERROR':
+      return {
+        ...state,
+        loading: false,
+        error: action.message
+      };
+
+    case 'RESET_FORM':
+      return initialState;
+
+    default:
+      return state;
+
+  }
+}
+
+function UserForm() {
+
+  const [state, dispatch] = useReducer(reducer, initialState);
+
+  const handleChange = event => {
+    dispatch({
+      type: 'UPDATE_FIELD',
+      field: event.target.name,
+      value: event.target.value
+    });
+  };
+
+  const handleSubmit = event => {
+
+    event.preventDefault();
+
+    if (!state.firstName || !state.email || !state.mobile) {
+      dispatch({
+        type: 'SET_ERROR',
+        message: 'Please fill required fields'
+      });
+      return;
+    }
+
+    dispatch({ type: 'SUBMIT_START' });
+
+    setTimeout(() => {
+      console.log('Form Submitted', state);
+      dispatch({ type: 'SUBMIT_SUCCESS' });
+    }, 1000);
+
+  };
+
+  return (
+    &lt;form onSubmit={handleSubmit}&gt;
+
+      &lt;input
+        name="firstName"
+        placeholder="First Name"
+        value={state.firstName}
+        onChange={handleChange}
+      /&gt;
+
+      &lt;input
+        name="lastName"
+        placeholder="Last Name"
+        value={state.lastName}
+        onChange={handleChange}
+      /&gt;
+
+      &lt;input
+        name="email"
+        placeholder="Email"
+        value={state.email}
+        onChange={handleChange}
+      /&gt;
+
+      &lt;input
+        name="mobile"
+        placeholder="Mobile"
+        value={state.mobile}
+        onChange={handleChange}
+      /&gt;
+
+      &lt;button
+        type="submit"
+        disabled={state.loading}
+      &gt;
+        {state.loading ? 'Submitting...' : 'Submit'}
+      &lt;/button&gt;
+
+      &lt;button
+        type="button"
+        disabled={state.loading}
+        onClick={() =&gt; dispatch({ type: 'RESET_FORM' })}
+      &gt;
+        Reset
+      &lt;/button&gt;
+
+      {state.error && &lt;p&gt;{state.error}&lt;/p&gt;}
+
+    &lt;/form&gt;
+  );
+
+}</code></pre>
+
+<h2>State Flow</h2>
+
+<div class="flow">
+
+User Types In Input
+<br>
+↓
+<br>
+dispatch({
+type: 'UPDATE_FIELD'
+})
+<br>
+↓
+<br>
+Reducer Updates State
+<br>
+↓
+<br>
+React Re-renders
+
+<br><br>
+
+User Clicks Submit
+<br>
+↓
+<br>
+dispatch({
+type: 'SUBMIT_START'
+})
+<br>
+↓
+<br>
+loading = true
+<br>
+↓
+<br>
+dispatch({
+type: 'SUBMIT_SUCCESS'
+})
+
+</div>
+
+<h2>When Is useReducer Better Than useState?</h2>
+
+<table>
+
+<tr>
+<th>Scenario</th>
+<th>Recommended Hook</th>
+</tr>
+
+<tr>
+<td>Counter</td>
+<td>useState</td>
+</tr>
+
+<tr>
+<td>Input Value</td>
+<td>useState</td>
+</tr>
+
+<tr>
+<td>Modal Visibility</td>
+<td>useState</td>
+</tr>
+
+<tr>
+<td>Large Form</td>
+<td>useReducer</td>
+</tr>
+
+<tr>
+<td>Shopping Cart</td>
+<td>useReducer</td>
+</tr>
+
+<tr>
+<td>Authentication Workflow</td>
+<td>useReducer</td>
+</tr>
+
+<tr>
+<td>Loading + Error + Data State</td>
+<td>useReducer</td>
+</tr>
+
+</table>
+
+<h2>useState vs useReducer</h2>
+
+<table>
+
+<tr>
+<th>Feature</th>
+<th>useState</th>
+<th>useReducer</th>
+</tr>
+
+<tr>
+<td>Simple State</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+
+<tr>
+<td>Complex State</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+
+<tr>
+<td>Many Related Fields</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+
+<tr>
+<td>Action-Based Updates</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+
+<tr>
+<td>Easy To Learn</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+
+</table>
+
+<h2>Real Project Example</h2>
+
+<div class="highlight">
+In our Aadhaar Authentication application, useState is perfect for simple values such as OTP input or popup visibility. However, useReducer is better for managing Aadhaar number, OTP, consent, loading, authentication type, API response, and error messages together in a single state object.
+</div>
+
+<h2>Important Interview Points</h2>
+
+<ul>
+<li>useReducer is an alternative to useState.</li>
+<li>State updates happen through actions.</li>
+<li>dispatch sends actions to the reducer.</li>
+<li>Reducer decides how state changes.</li>
+<li>Best for complex and related state values.</li>
+<li>Similar to Redux-style state management.</li>
+</ul>
+
+<h2>Short Interview Answer</h2>
+
+<div class="highlight">
+useReducer is a React Hook that manages state using a reducer function and actions. It is better than useState when state logic becomes complex, contains multiple related values, or requires predictable state transitions.
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+useReducer manages state through actions and reducers and is best suited for complex state logic.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+
+</body>
+</html>

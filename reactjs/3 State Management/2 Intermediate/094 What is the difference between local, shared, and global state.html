@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>094. What is the Difference Between Local, Shared, and Global State?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{
+  margin:0;
+  padding:0;
+  background:#000814;
+  color:#e2e8f0;
+  font-family:Arial,sans-serif;
+  line-height:1.7;
+}
+
+.container{
+  max-width:1000px;
+  margin:40px auto;
+  background:#020617;
+  padding:40px;
+  border-radius:18px;
+  border:1px solid #0f172a;
+  box-shadow:0 0 40px rgba(0,0,0,.95);
+}
+
+h1{
+  color:#f8fafc;
+  margin-bottom:30px;
+  font-size:34px;
+}
+
+h2{
+  color:#c084fc;
+  margin-top:35px;
+  margin-bottom:15px;
+  font-size:26px;
+}
+
+h3{
+  color:#38bdf8;
+  margin-top:25px;
+  margin-bottom:10px;
+}
+
+p{
+  color:#cbd5e1;
+}
+
+ul{
+  padding-left:24px;
+}
+
+li{
+  margin-bottom:10px;
+  color:#cbd5e1;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:20px;
+}
+
+table th,
+table td{
+  border:1px solid #1e293b;
+  padding:14px;
+  text-align:left;
+}
+
+table th{
+  background:#0f172a;
+  color:#38bdf8;
+}
+
+table td{
+  background:#020617;
+  color:#d1d5db;
+}
+
+.highlight{
+  background:#0f172a;
+  padding:18px;
+  border-left:5px solid #38bdf8;
+  border-radius:10px;
+  margin-top:15px;
+}
+
+.flow{
+  background:#020617;
+  border:1px solid #1e293b;
+  padding:20px;
+  border-radius:10px;
+  margin-top:15px;
+  text-align:center;
+  line-height:2;
+  font-size:18px;
+}
+
+pre{
+  border-radius:12px;
+  overflow-x:auto;
+}
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>094. What is the Difference Between Local, Shared, and Global State?</h1>
+
+<h2>One-Line Definition</h2>
+
+<div class="highlight">
+Local state belongs to one component, shared state belongs to multiple related components, and global state belongs to the entire application.
+</div>
+
+<h2>Why Do We Need Different Types of State?</h2>
+
+<p>
+Not every piece of data should be accessible everywhere.
+</p>
+
+<p>
+The scope of the data determines where the state should live.
+</p>
+
+<div class="flow">
+
+One Component
+<br>
+↓
+<br>
+Local State
+
+<br><br>
+
+Multiple Related Components
+<br>
+↓
+<br>
+Shared State
+
+<br><br>
+
+Entire Application
+<br>
+↓
+<br>
+Global State
+
+</div>
+
+<h2>1. Local State</h2>
+
+<p>
+Local state is owned and used by a single component.
+</p>
+
+<p>
+It is usually created using useState.
+</p>
+
+<h3>Example</h3>
+
+<pre><code class="language-jsx">function Counter() {
+  const [count, setCount] = useState(0);
+
+  return (
+    &lt;button onClick={() =&gt; setCount(count + 1)}&gt;
+      {count}
+    &lt;/button&gt;
+  );
+}</code></pre>
+
+<p>
+Only the Counter component can access count.
+</p>
+
+<h3>Common Examples</h3>
+
+<ul>
+<li>Input field value</li>
+<li>Dropdown open/close state</li>
+<li>Modal visibility</li>
+<li>Component loading state</li>
+</ul>
+
+<h2>2. Shared State</h2>
+
+<p>
+Shared state is used when multiple related components need access to the same data.
+</p>
+
+<p>
+The state is usually lifted to the nearest common parent.
+</p>
+
+<h3>Example</h3>
+
+<pre><code class="language-jsx">function App() {
+  const [search, setSearch] = useState('');
+
+  return (
+    &lt;&gt;
+      &lt;SearchBox
+        search={search}
+        setSearch={setSearch}
+      /&gt;
+
+      &lt;ProductList search={search} /&gt;
+    &lt;/&gt;
+  );
+}</code></pre>
+
+<div class="flow">
+
+Parent Component
+<br>
+↓
+<br>
+Stores State
+<br>
+↓
+<br>
+Passes Props
+<br>
+↓
+<br>
+Multiple Children Use Same Data
+
+</div>
+
+<h3>Common Examples</h3>
+
+<ul>
+<li>Search filters</li>
+<li>Selected user</li>
+<li>Current tab</li>
+<li>Multi-step form data</li>
+</ul>
+
+<h2>3. Global State</h2>
+
+<p>
+Global state is accessible throughout the application.
+</p>
+
+<p>
+Any component can access it without prop drilling.
+</p>
+
+<h3>Example Using Context API</h3>
+
+<pre><code class="language-jsx">const UserContext = createContext();
+
+function App() {
+  const [user] = useState('Rizwan');
+
+  return (
+    &lt;UserContext.Provider value={user}&gt;
+      &lt;Dashboard /&gt;
+    &lt;/UserContext.Provider&gt;
+  );
+}</code></pre>
+
+<h3>Nested Component</h3>
+
+<pre><code class="language-jsx">function Profile() {
+  const user = useContext(UserContext);
+
+  return &lt;h2&gt;{user}&lt;/h2&gt;;
+}</code></pre>
+
+<h3>Common Examples</h3>
+
+<ul>
+<li>Logged-in user</li>
+<li>Theme (Dark/Light)</li>
+<li>Language</li>
+<li>Authentication status</li>
+<li>Shopping cart</li>
+</ul>
+
+<h2>Visual Representation</h2>
+
+<div class="flow">
+
+Local State
+<br>
+Counter Component
+<br>
+↓
+<br>
+Counter Uses State
+
+<br><br>
+
+Shared State
+<br>
+Parent
+<br>
+↓
+<br>
+Child A
+<br>
+Child B
+
+<br><br>
+
+Global State
+<br>
+App
+<br>
+↓
+<br>
+Any Component Can Access
+
+</div>
+
+<h2>Local vs Shared vs Global State</h2>
+
+<table>
+
+<tr>
+<th>Feature</th>
+<th>Local State</th>
+<th>Shared State</th>
+<th>Global State</th>
+</tr>
+
+<tr>
+<td>Scope</td>
+<td>One Component</td>
+<td>Related Components</td>
+<td>Entire App</td>
+</tr>
+
+<tr>
+<td>Storage</td>
+<td>useState</td>
+<td>Parent Component</td>
+<td>Context, Redux, Zustand</td>
+</tr>
+
+<tr>
+<td>Accessibility</td>
+<td>Single Component</td>
+<td>Selected Components</td>
+<td>Any Component</td>
+</tr>
+
+<tr>
+<td>Complexity</td>
+<td>Low</td>
+<td>Medium</td>
+<td>High</td>
+</tr>
+
+<tr>
+<td>Best For</td>
+<td>UI State</td>
+<td>Related Features</td>
+<td>Application-Wide Data</td>
+</tr>
+
+</table>
+
+<h2>When Should We Use Each?</h2>
+
+<table>
+
+<tr>
+<th>Situation</th>
+<th>Recommended State</th>
+</tr>
+
+<tr>
+<td>Input Value</td>
+<td>Local State</td>
+</tr>
+
+<tr>
+<td>Modal Open/Close</td>
+<td>Local State</td>
+</tr>
+
+<tr>
+<td>Search Filter</td>
+<td>Shared State</td>
+</tr>
+
+<tr>
+<td>Wizard Form Data</td>
+<td>Shared State</td>
+</tr>
+
+<tr>
+<td>Logged-In User</td>
+<td>Global State</td>
+</tr>
+
+<tr>
+<td>Theme</td>
+<td>Global State</td>
+</tr>
+
+</table>
+
+<h2>Important Rule</h2>
+
+<div class="highlight">
+Start with local state. Move it to shared state only when multiple components need it. Use global state only when the data is needed across many unrelated parts of the application.
+</div>
+
+<h2>Real Project Example</h2>
+
+<div class="highlight">
+In our Aadhaar Authentication application:
+<ul>
+<li><strong>Local State:</strong> OTP input value, captcha value, popup visibility.</li>
+<li><strong>Shared State:</strong> Authentication form data shared between multiple child components.</li>
+<li><strong>Global State:</strong> Logged-in user details, department information, session data, theme settings.</li>
+</ul>
+</div>
+
+<h2>Important Interview Points</h2>
+
+<ul>
+<li>Local state belongs to one component.</li>
+<li>Shared state is lifted to a common parent.</li>
+<li>Global state is available application-wide.</li>
+<li>Do not put everything into global state.</li>
+<li>Prefer local state whenever possible.</li>
+<li>Context API, Redux, and Zustand are common global state solutions.</li>
+</ul>
+
+<h2>Short Interview Answer</h2>
+
+<div class="highlight">
+Local state is used by a single component, shared state is used by multiple related components through a common parent, and global state is available throughout the entire application using tools such as Context API, Redux, or Zustand.
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+Local state belongs to one component, shared state belongs to related components, and global state belongs to the entire application.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+
+</body>
+</html>

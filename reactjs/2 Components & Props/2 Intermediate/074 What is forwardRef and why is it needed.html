@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>074. What is forwardRef and why is it needed?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{
+  margin:0;
+  padding:0;
+  background:#000814;
+  color:#e2e8f0;
+  font-family:Arial,sans-serif;
+  line-height:1.7;
+}
+
+.container{
+  max-width:1000px;
+  margin:40px auto;
+  background:#020617;
+  padding:40px;
+  border-radius:18px;
+  border:1px solid #0f172a;
+  box-shadow:0 0 40px rgba(0,0,0,.95);
+}
+
+h1{
+  color:#f8fafc;
+  margin-bottom:30px;
+  font-size:34px;
+}
+
+h2{
+  color:#c084fc;
+  margin-top:35px;
+  margin-bottom:15px;
+  font-size:26px;
+}
+
+h3{
+  color:#38bdf8;
+  margin-top:25px;
+  margin-bottom:10px;
+}
+
+p{
+  color:#cbd5e1;
+}
+
+ul{
+  padding-left:24px;
+}
+
+li{
+  margin-bottom:10px;
+  color:#cbd5e1;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:20px;
+}
+
+table th,
+table td{
+  border:1px solid #1e293b;
+  padding:14px;
+  text-align:left;
+}
+
+table th{
+  background:#0f172a;
+  color:#38bdf8;
+}
+
+table td{
+  background:#020617;
+  color:#d1d5db;
+}
+
+.highlight{
+  background:#0f172a;
+  padding:18px;
+  border-left:5px solid #38bdf8;
+  border-radius:10px;
+  margin-top:15px;
+}
+
+.flow{
+  background:#020617;
+  border:1px solid #1e293b;
+  padding:20px;
+  border-radius:10px;
+  margin-top:15px;
+  text-align:center;
+  line-height:2;
+  font-size:18px;
+}
+
+pre{
+  border-radius:12px;
+  overflow-x:auto;
+}
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>074. What is forwardRef and why is it needed?</h1>
+
+<h2>One-Line Definition</h2>
+
+<div class="highlight">
+forwardRef is a React API that allows a parent component to pass a ref through a custom component and access a DOM element inside that component.
+</div>
+
+<h2>Why Is It Needed?</h2>
+
+<p>
+Normally, refs work directly with DOM elements.
+</p>
+
+<pre><code class="language-jsx">const inputRef = useRef();
+
+&lt;input ref={inputRef} /&gt;</code></pre>
+
+<p>
+But refs do not automatically work with custom components.
+</p>
+
+<h2>The Problem</h2>
+
+<h3>Custom Component</h3>
+
+<pre><code class="language-jsx">function CustomInput() {
+  return &lt;input /&gt;;
+}</code></pre>
+
+<h3>Parent Component</h3>
+
+<pre><code class="language-jsx">function App() {
+  const inputRef = useRef();
+
+  return &lt;CustomInput ref={inputRef} /&gt;;
+}</code></pre>
+
+<p>
+This does not work.
+</p>
+
+<div class="highlight">
+The ref stops at the CustomInput component and never reaches the actual input element.
+</div>
+
+<h2>Solution: forwardRef</h2>
+
+<p>
+forwardRef allows the child component to receive the ref and forward it to its internal DOM element.
+</p>
+
+<h3>CustomInput Component</h3>
+
+<pre><code class="language-jsx">import { forwardRef } from 'react';
+
+const CustomInput = forwardRef((props, ref) => {
+  return &lt;input ref={ref} {...props} /&gt;;
+});
+
+export default CustomInput;</code></pre>
+
+<h3>Parent Component</h3>
+
+<pre><code class="language-jsx">import { useRef } from 'react';
+
+function App() {
+  const inputRef = useRef();
+
+  return &lt;CustomInput ref={inputRef} /&gt;;
+}</code></pre>
+
+<h2>How It Works</h2>
+
+<div class="flow">
+
+Parent Creates Ref
+<br>
+↓
+<br>
+Passes Ref To Child
+<br>
+↓
+<br>
+forwardRef Receives Ref
+<br>
+↓
+<br>
+Ref Attached To Input
+<br>
+↓
+<br>
+Parent Can Access Input
+
+</div>
+
+<h2>Real Example - Focus Input</h2>
+
+<h3>Child Component</h3>
+
+<pre><code class="language-jsx">import { forwardRef } from 'react';
+
+const CustomInput = forwardRef((props, ref) => {
+  return &lt;input ref={ref} {...props} /&gt;;
+});</code></pre>
+
+<h3>Parent Component</h3>
+
+<pre><code class="language-jsx">import { useRef } from 'react';
+
+function App() {
+  const inputRef = useRef();
+
+  const focusInput = () => inputRef.current.focus();
+
+  return (
+    &lt;&gt;
+      &lt;CustomInput ref={inputRef} /&gt;
+      &lt;button onClick={focusInput}&gt;Focus Input&lt;/button&gt;
+    &lt;/&gt;
+  );
+}</code></pre>
+
+<h2>Output</h2>
+
+<div class="highlight">
+When the button is clicked, the parent component focuses the input element inside the child component.
+</div>
+
+<h2>forwardRef Syntax</h2>
+
+<pre><code class="language-jsx">const MyComponent = forwardRef((props, ref) => {
+  return &lt;input ref={ref} {...props} /&gt;;
+});</code></pre>
+
+<h2>Common Use Cases</h2>
+
+<ul>
+<li>Focus an input field.</li>
+<li>Scroll to an element.</li>
+<li>Select text automatically.</li>
+<li>Integrate with third-party libraries.</li>
+<li>Build reusable UI components.</li>
+</ul>
+
+<h2>forwardRef + useImperativeHandle</h2>
+
+<p>
+forwardRef is often used together with useImperativeHandle.
+</p>
+
+<pre><code class="language-jsx">useImperativeHandle(ref, () => ({
+  focus() {
+    inputRef.current.focus();
+  }
+}));</code></pre>
+
+<p>
+Instead of exposing the whole DOM element, we expose only specific methods.
+</p>
+
+<h2>Without forwardRef vs With forwardRef</h2>
+
+<table>
+
+<tr>
+<th>Feature</th>
+<th>Without forwardRef</th>
+<th>With forwardRef</th>
+</tr>
+
+<tr>
+<td>Pass ref to custom component</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+
+<tr>
+<td>Access child DOM element</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+
+<tr>
+<td>Focus child input</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+
+<tr>
+<td>Create reusable inputs</td>
+<td>Difficult</td>
+<td>Easy</td>
+</tr>
+
+</table>
+
+<h2>Real Project Example</h2>
+
+<div class="highlight">
+Suppose our Aadhaar Authentication application has a reusable AadhaarInput component. When validation fails, we may want to automatically focus the Aadhaar field. forwardRef allows the parent component to access the actual input element inside AadhaarInput and call focus().
+</div>
+
+<h2>Important Interview Points</h2>
+
+<ul>
+<li>Refs do not automatically pass through custom components.</li>
+<li>forwardRef forwards refs to child DOM elements.</li>
+<li>Used in reusable component libraries.</li>
+<li>Commonly used for focus and scroll operations.</li>
+<li>Often used with useImperativeHandle.</li>
+</ul>
+
+<h2>Short Interview Answer</h2>
+
+<div class="highlight">
+forwardRef is a React API that allows a parent component to pass a ref through a child component and access a DOM element inside that child. It is commonly used for focus management, scrolling, and reusable UI components.
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+forwardRef allows a parent component to forward a ref through a custom component to access a DOM element inside it.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+
+</body>
+</html>

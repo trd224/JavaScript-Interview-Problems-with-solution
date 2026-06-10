@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>032 - Difference Between createRoot and render in React 18</title>
+  <title>033 - createRoot vs ReactDOM.render</title>
 
   <style>
 
@@ -144,26 +144,38 @@
 
   <div class="container">
 
-    <h1>032. What is the difference between createRoot and render in React 18?</h1>
+    <h1>031. What is createRoot() and how does it differ from ReactDOM.render()?</h1>
 
     <h2>One-Line Definition</h2>
 
     <div class="highlight">
-      createRoot() creates and manages the React root container, while render() displays React elements inside that root.
+      createRoot() is the new React 18 API used to create and manage the React application root, replacing the older ReactDOM.render() method.
     </div>
 
-    <h2>Simple Understanding</h2>
+    <h2>What Was Used Before React 18?</h2>
 
     <p>
-      In React 18:
+      Before React 18, applications were rendered using:
     </p>
 
-    <ul>
-      <li><strong>createRoot()</strong> prepares the React application root.</li>
-      <li><strong>render()</strong> renders the UI into that root.</li>
-    </ul>
+    <pre><code><span class="keyword">import</span> ReactDOM <span class="keyword">from</span> <span class="string">'react-dom'</span>;
+<span class="keyword">import</span> App <span class="keyword">from</span> <span class="string">'./App'</span>;
 
-    <h2>Basic Example</h2>
+ReactDOM.<span class="function">render</span>(
+
+  <span class="tag">&lt;App /&gt;</span>,
+
+  document.getElementById(<span class="string">'root'</span>)
+
+);</code></pre>
+
+    <h2>Problem with ReactDOM.render()</h2>
+
+    <p>
+      ReactDOM.render() uses the old rendering engine and does not support React 18 concurrent features.
+    </p>
+
+    <h2>New React 18 Way</h2>
 
     <pre><code><span class="keyword">import</span> { createRoot } <span class="keyword">from</span> <span class="string">'react-dom/client'</span>;
 <span class="keyword">import</span> App <span class="keyword">from</span> <span class="string">'./App'</span>;
@@ -172,154 +184,141 @@
   document.getElementById(<span class="string">'root'</span>)
 );
 
-root.render(<span class="tag">&lt;App /&gt;</span>);</code></pre>
+root.<span class="function">render</span>(<span class="tag">&lt;App /&gt;</span>);</code></pre>
 
-    <h2>What Happens Internally?</h2>
+    <h2>How createRoot() Works</h2>
 
     <table>
 
       <tr>
-        <th>Code</th>
+        <th>Step</th>
         <th>Purpose</th>
       </tr>
 
       <tr>
         <td>createRoot()</td>
-        <td>Create React root container</td>
+        <td>Creates React root container</td>
       </tr>
 
       <tr>
         <td>root.render()</td>
-        <td>Render React UI inside root</td>
+        <td>Renders React application</td>
       </tr>
 
     </table>
 
-    <h2>Real-Life Analogy</h2>
-
-    <table>
-
-      <tr>
-        <th>React</th>
-        <th>Real-Life Example</th>
-      </tr>
-
-      <tr>
-        <td>createRoot()</td>
-        <td>Create a TV screen</td>
-      </tr>
-
-      <tr>
-        <td>render()</td>
-        <td>Display a movie on the TV</td>
-      </tr>
-
-    </table>
-
-    <h2>Detailed Difference</h2>
+    <h2>Main Difference</h2>
 
     <table>
 
       <tr>
         <th>createRoot()</th>
-        <th>render()</th>
+        <th>ReactDOM.render()</th>
       </tr>
 
       <tr>
-        <td>Creates root object</td>
-        <td>Renders UI</td>
+        <td>Introduced in React 18</td>
+        <td>Used before React 18</td>
       </tr>
 
       <tr>
-        <td>Called once usually</td>
-        <td>Can be called multiple times</td>
+        <td>Supports concurrent rendering</td>
+        <td>No concurrent features</td>
       </tr>
 
       <tr>
-        <td>Connects React to DOM container</td>
-        <td>Displays components</td>
+        <td>Modern rendering engine</td>
+        <td>Legacy rendering engine</td>
       </tr>
 
       <tr>
-        <td>Setup phase</td>
-        <td>Rendering phase</td>
+        <td>Recommended approach</td>
+        <td>Deprecated approach</td>
       </tr>
 
       <tr>
-        <td>Returns root instance</td>
-        <td>No root creation</td>
+        <td>Uses root.render()</td>
+        <td>Direct render method</td>
       </tr>
 
     </table>
 
+    <h2>What Is Concurrent Rendering?</h2>
+
+    <p>
+      Concurrent rendering allows React to:
+    </p>
+
+    <ul>
+      <li>Pause rendering</li>
+      <li>Prioritize important updates</li>
+      <li>Improve UI responsiveness</li>
+      <li>Handle large applications more efficiently</li>
+    </ul>
+
     <h2>Flow Diagram</h2>
 
     <div class="flow">
-      HTML root div → createRoot() → React Root Created → render() → UI Displayed
+      createRoot() → Create React Root → root.render() → React UI Appears
     </div>
 
-    <h2>Why React 18 Uses This Pattern</h2>
+    <h2>Why React Changed It</h2>
 
     <p>
       React 18 introduced a new rendering architecture for:
     </p>
 
     <ul>
-      <li>Concurrent rendering</li>
       <li>Better performance</li>
+      <li>Concurrent rendering</li>
       <li>Automatic batching</li>
-      <li>Improved rendering control</li>
+      <li>Improved user experience</li>
     </ul>
 
-    <h2>Important Concept</h2>
+    <h2>Old vs New Syntax</h2>
 
-    <div class="highlight">
-      createRoot() itself does NOT display UI.  
-      render() actually renders the UI.
-    </div>
+    <h3>Old Syntax</h3>
 
-    <h2>What Does createRoot() Return?</h2>
-
-    <pre><code><span class="keyword">const</span> root = createRoot(
+    <pre><code>ReactDOM.render(
+  <span class="tag">&lt;App /&gt;</span>,
   document.getElementById(<span class="string">'root'</span>)
 );</code></pre>
 
-    <p>
-      It returns a React root object.
-    </p>
+    <h3>New Syntax</h3>
+
+    <pre><code><span class="keyword">const</span> root = createRoot(
+  document.getElementById(<span class="string">'root'</span>)
+);
+
+root.render(<span class="tag">&lt;App /&gt;</span>);</code></pre>
+
+    <h2>Where createRoot() Is Usually Used</h2>
 
     <p>
-      That object contains methods like:
+      Normally inside:
     </p>
 
-    <pre><code>root.render()
-root.unmount()</code></pre>
+    <pre><code>src/index.js</code></pre>
 
-    <h2>render() Example</h2>
+    <h2>Example with StrictMode</h2>
 
-    <pre><code>root.render(<span class="tag">&lt;App /&gt;</span>);</code></pre>
+    <pre><code><span class="keyword">import</span> { createRoot } <span class="keyword">from</span> <span class="string">'react-dom/client'</span>;
+<span class="keyword">import</span> React <span class="keyword">from</span> <span class="string">'react'</span>;
+<span class="keyword">import</span> App <span class="keyword">from</span> <span class="string">'./App'</span>;
 
-    <p>
-      This tells React:
-    </p>
+<span class="keyword">const</span> root = createRoot(
+  document.getElementById(<span class="string">'root'</span>)
+);
 
-    <div class="highlight">
-      "Render the App component inside the created root container."
-    </div>
+root.render(
 
-    <h2>Can render() Be Called Again?</h2>
+  <span class="tag">&lt;React.StrictMode&gt;</span>
 
-    <p>
-      Yes.
-    </p>
+    <span class="tag">&lt;App /&gt;</span>
 
-    <pre><code>root.render(<span class="tag">&lt;Login /&gt;</span>);
+  <span class="tag">&lt;/React.StrictMode&gt;</span>
 
-root.render(<span class="tag">&lt;Dashboard /&gt;</span>);</code></pre>
-
-    <p>
-      React updates the UI accordingly.
-    </p>
+);</code></pre>
 
     <h2>Real Project Use Cases</h2>
 
@@ -327,27 +326,27 @@ root.render(<span class="tag">&lt;Dashboard /&gt;</span>);</code></pre>
 
       <tr>
         <th>Feature</th>
-        <th>Role</th>
+        <th>Benefit with createRoot()</th>
       </tr>
 
       <tr>
-        <td>Application startup</td>
-        <td>createRoot()</td>
+        <td>Large dashboards</td>
+        <td>Better rendering performance</td>
       </tr>
 
       <tr>
-        <td>Rendering dashboard</td>
-        <td>render()</td>
+        <td>Dynamic forms</td>
+        <td>Smoother UI updates</td>
       </tr>
 
       <tr>
-        <td>Theme switching</td>
-        <td>render() updates UI</td>
+        <td>Authentication apps</td>
+        <td>Responsive rendering</td>
       </tr>
 
       <tr>
-        <td>Authentication app</td>
-        <td>render() updates components</td>
+        <td>Heavy UI interactions</td>
+        <td>Concurrent rendering support</td>
       </tr>
 
     </table>
@@ -355,23 +354,23 @@ root.render(<span class="tag">&lt;Dashboard /&gt;</span>);</code></pre>
     <h2>Important Interview Points</h2>
 
     <ul>
-      <li>createRoot() creates React root container.</li>
-      <li>render() displays React UI.</li>
-      <li>Both are used together in React 18.</li>
-      <li>createRoot() supports concurrent rendering features.</li>
-      <li>render() can re-render updated UI.</li>
+      <li>createRoot() was introduced in React 18.</li>
+      <li>It replaces ReactDOM.render().</li>
+      <li>Supports concurrent rendering features.</li>
+      <li>Uses the new React rendering engine.</li>
+      <li>root.render() is used after createRoot().</li>
     </ul>
 
     <h2>Short Interview Answer</h2>
 
     <div class="highlight">
-      In React 18, createRoot() creates the React root container, while render() renders React components into that root.
+      createRoot() is the modern React 18 API for creating the application root and supports concurrent rendering, while ReactDOM.render() is the older legacy rendering method.
     </div>
 
     <h2>One-Line Interview Answer</h2>
 
     <div class="highlight">
-      createRoot() creates the React root, and render() displays the UI inside it.
+      createRoot() is the React 18 replacement for ReactDOM.render() with support for concurrent rendering features.
     </div>
 
   </div>
@@ -379,8 +378,8 @@ root.render(<span class="tag">&lt;Dashboard /&gt;</span>);</code></pre>
 
   <div class="fixed-page-nav-spacer"></div>
   <div class="fixed-page-nav">
-    <a href="031%20What%20is%20createRoot%28%29%20and%20how%20does%20it%20differ%20from%20ReactDOM.render%28%29.html">←</a>
-    <a href="033%20What%20is%20the%20reconciliation%20process%20in%20React.html">→</a>
+    <a href="030%20What%20is%20the%20difference%20between%20imperative%20and%20declarative%20approaches%20in%20React.html">←</a>
+    <a href="032%20What%20is%20the%20difference%20between%20createRoot%20and%20render%20in%20React%2018.html">→</a>
   </div>
 </body>
 </html>
