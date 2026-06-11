@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Separate Files Example - Context + useReducer</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px;margin-bottom:10px}
+p{color:#cbd5e1}
+ul{padding-left:24px}
+li{margin-bottom:10px;color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;margin-top:15px;text-align:center;line-height:2;font-size:18px}
+pre{border-radius:12px;overflow-x:auto}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>Separate Files Example: Context + useReducer With Backend Login</h1>
+
+<h2>Why Split Into Multiple Files?</h2>
+
+<p>
+In large React applications, keeping Context, Reducer, Provider, Custom Hooks, and API services in separate files makes the code easier to maintain, test, and scale.
+</p>
+
+<div class="highlight">
+In real projects, login credentials should not be verified directly in the React component. The component sends username and password to the backend, and the backend verifies them.
+</div>
+
+<h2>Real Login Flow</h2>
+
+<div class="flow">
+User enters username and password
+<br>↓<br>
+User clicks Login
+<br>↓<br>
+React dispatches LOGIN_START
+<br>↓<br>
+Frontend sends credentials to backend API
+<br>↓<br>
+Backend verifies credentials
+<br>↓<br>
+Backend sends success or error response
+<br>↓<br>
+React dispatches LOGIN_SUCCESS or LOGIN_ERROR
+<br>↓<br>
+Global auth state updates
+<br>↓<br>
+Dashboard appears or error message shows
+</div>
+
+<h2>Folder Structure</h2>
+
+<pre><code class="language-text">src
+│
+├── context
+│   └── AuthContext.jsx
+│
+├── reducers
+│   └── authReducer.js
+│
+├── providers
+│   └── AuthProvider.jsx
+│
+├── hooks
+│   └── useAuth.js
+│
+├── services
+│   └── authService.js
+│
+├── components
+│   ├── Login.jsx
+│   └── Dashboard.jsx
+│
+├── App.jsx
+└── main.jsx</code></pre>
+
+<h2>1. Create Context</h2>
+
+<h3>context/AuthContext.jsx</h3>
+
+<pre><code class="language-jsx">import { createContext } from 'react';
+
+export const AuthContext = createContext();</code></pre>
+
+<div class="highlight">
+This file only creates and exports AuthContext.
+</div>
+
+<h2>2. Create Reducer</h2>
+
+<h3>reducers/authReducer.js</h3>
+
+<pre><code class="language-jsx">export const initialState = {
+  user: null,
+  loading: false,
+  error: ''
+};
+
+export function authReducer(state, action) {
+  switch (action.type) {
+    case 'LOGIN_START':
+      return {
+        ...state,
+        loading: true,
+        error: ''
+      };
+
+    case 'LOGIN_SUCCESS':
+      return {
+        ...state,
+        loading: false,
+        user: action.payload,
+        error: ''
+      };
+
+    case 'LOGIN_ERROR':
+      return {
+        ...state,
+        loading: false,
+        error: action.payload
+      };
+
+    case 'LOGOUT':
+      return {
+        ...state,
+        user: null,
+        error: ''
+      };
+
+    default:
+      return state;
+  }
+}</code></pre>
+
+<div class="highlight">
+The reducer controls authentication state like user, loading, and error.
+</div>
+
+<h2>3. Create Provider</h2>
+
+<h3>providers/AuthProvider.jsx</h3>
+
+<pre><code class="language-jsx">import { useReducer } from 'react';
+import { AuthContext } from '../context/AuthContext';
+import { authReducer, initialState } from '../reducers/authReducer';
+
+export function AuthProvider({ children }) {
+  const [state, dispatch] = useReducer(authReducer, initialState);
+
+  return (
+    &lt;AuthContext.Provider value={{ state, dispatch }}&gt;
+      {children}
+    &lt;/AuthContext.Provider&gt;
+  );
+}</code></pre>
+
+<div class="highlight">
+AuthProvider creates state using useReducer and shares state + dispatch globally.
+</div>
+
+<h2>4. Create Custom Hook</h2>
+
+<h3>hooks/useAuth.js</h3>
+
+<pre><code class="language-jsx">import { useContext } from 'react';
+import { AuthContext } from '../context/AuthContext';
+
+export function useAuth() {
+  return useContext(AuthContext);
+}</code></pre>
+
+<div class="highlight">
+useAuth hides useContext(AuthContext), so components can access auth state easily.
+</div>
+
+<h2>5. Create Backend API Service</h2>
+
+<h3>services/authService.js</h3>
+
+<pre><code class="language-jsx">export async function loginUser(credentials) {
+  const response = await fetch('https://your-api.com/api/login', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(credentials)
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.message || 'Login failed');
+  }
+
+  return data;
+}</code></pre>
+
+<div class="highlight">
+This service sends username and password to the backend. The backend verifies credentials and returns success or error.
+</div>
+
+<h3>Request Sent To Backend</h3>
+
+<pre><code class="language-jsx">{
+  "username": "admin",
+  "password": "123"
+}</code></pre>
+
+<h3>Backend Success Response</h3>
+
+<pre><code class="language-jsx">{
+  "success": true,
+  "user": {
+    "id": 1,
+    "name": "Rizwan",
+    "role": "Admin"
+  },
+  "token": "jwt_token_here"
+}</code></pre>
+
+<h3>Backend Error Response</h3>
+
+<pre><code class="language-jsx">{
+  "success": false,
+  "message": "Invalid username or password"
+}</code></pre>
+
+<h2>6. Login Component</h2>
+
+<h3>components/Login.jsx</h3>
+
+<pre><code class="language-jsx">import { useState } from 'react';
+import { useAuth } from '../hooks/useAuth';
+import { loginUser } from '../services/authService';
+
+function Login() {
+  const { state, dispatch } = useAuth();
+
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+
+  async function handleLogin(e) {
+    e.preventDefault();
+
+    dispatch({
+      type: 'LOGIN_START'
+    });
+
+    try {
+      const data = await loginUser({
+        username,
+        password
+      });
+
+      dispatch({
+        type: 'LOGIN_SUCCESS',
+        payload: data.user
+      });
+
+      localStorage.setItem('token', data.token);
+    } catch (error) {
+      dispatch({
+        type: 'LOGIN_ERROR',
+        payload: error.message
+      });
+    }
+  }
+
+  return (
+    &lt;form onSubmit={handleLogin}&gt;
+      &lt;input
+        value={username}
+        onChange={(e) =&gt; setUsername(e.target.value)}
+        placeholder="Username"
+      /&gt;
+
+      &lt;input
+        type="password"
+        value={password}
+        onChange={(e) =&gt; setPassword(e.target.value)}
+        placeholder="Password"
+      /&gt;
+
+      {state.error && &lt;p&gt;{state.error}&lt;/p&gt;}
+
+      &lt;button disabled={state.loading}&gt;
+        {state.loading ? 'Logging In...' : 'Login'}
+      &lt;/button&gt;
+    &lt;/form&gt;
+  );
+}
+
+export default Login;</code></pre>
+
+<div class="highlight">
+Here username and password are local state because only Login component needs them. loading, error, and user are global auth state because other components may need them.
+</div>
+
+<h2>7. Dashboard Component</h2>
+
+<h3>components/Dashboard.jsx</h3>
+
+<pre><code class="language-jsx">import { useAuth } from '../hooks/useAuth';
+
+function Dashboard() {
+  const { state, dispatch } = useAuth();
+
+  function handleLogout() {
+    localStorage.removeItem('token');
+
+    dispatch({
+      type: 'LOGOUT'
+    });
+  }
+
+  return (
+    &lt;div&gt;
+      &lt;h2&gt;Dashboard&lt;/h2&gt;
+
+      &lt;p&gt;Welcome {state.user.name}&lt;/p&gt;
+
+      &lt;p&gt;Role: {state.user.role}&lt;/p&gt;
+
+      &lt;button onClick={handleLogout}&gt;
+        Logout
+      &lt;/button&gt;
+    &lt;/div&gt;
+  );
+}
+
+export default Dashboard;</code></pre>
+
+<h2>8. App Component</h2>
+
+<h3>App.jsx</h3>
+
+<pre><code class="language-jsx">import Login from './components/Login';
+import Dashboard from './components/Dashboard';
+import { useAuth } from './hooks/useAuth';
+
+function App() {
+  const { state } = useAuth();
+
+  return (
+    &lt;&gt;
+      {state.user ? &lt;Dashboard /&gt; : &lt;Login /&gt;}
+    &lt;/&gt;
+  );
+}
+
+export default App;</code></pre>
+
+<div class="highlight">
+App checks global auth state. If user exists, Dashboard is shown. If user is null, Login is shown.
+</div>
+
+<h2>9. Wrap Application With Provider</h2>
+
+<h3>main.jsx</h3>
+
+<pre><code class="language-jsx">import React from 'react';
+import ReactDOM from 'react-dom/client';
+import App from './App';
+import { AuthProvider } from './providers/AuthProvider';
+
+ReactDOM.createRoot(document.getElementById('root')).render(
+  &lt;AuthProvider&gt;
+    &lt;App /&gt;
+  &lt;/AuthProvider&gt;
+);</code></pre>
+
+
+<h2>10. Where Should We Use useEffect In Authentication?</h2>
+
+<p>
+Many beginners think login API calls should be placed inside useEffect.
+</p>
+
+<div class="highlight">
+Login is a user action, so the login API should be called inside handleLogin(), not inside useEffect.
+</div>
+
+<h3>Wrong Example</h3>
+
+<pre><code class="language-jsx">useEffect(() => {
+  loginUser({
+    username,
+    password
+  });
+}, []);</code></pre>
+
+<p>
+This runs immediately when the page loads, before the user enters credentials.
+</p>
+
+<h3>Another Wrong Example</h3>
+
+<pre><code class="language-jsx">useEffect(() => {
+  loginUser({
+    username,
+    password
+  });
+}, [username, password]);</code></pre>
+
+<p>
+Now every keystroke triggers an API call.
+</p>
+
+<div class="flow">
+Type "a"
+<br>↓<br>
+API Call
+<br><br>
+Type "ad"
+<br>↓<br>
+API Call
+<br><br>
+Type "admin"
+<br>↓<br>
+API Call
+</div>
+
+<div class="highlight">
+This is not how login forms should work.
+</div>
+
+<h2>Correct Login Approach</h2>
+
+<pre><code class="language-jsx">async function handleLogin(e) {
+  e.preventDefault();
+
+  const data = await loginUser({
+    username,
+    password
+  });
+}</code></pre>
+
+<p>
+The API call happens only when the user clicks Login.
+</p>
+
+<h2>Real Place To Use useEffect</h2>
+
+<p>
+The best authentication use case for useEffect is checking whether the user is already logged in when the application starts.
+</p>
+
+<h3>services/authService.js</h3>
+
+<pre><code class="language-jsx">export async function getCurrentUser(token) {
+
+  const response = await fetch(
+    'https://your-api.com/api/me',
+    {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    }
+  );
+
+  return response.json();
+
+}</code></pre>
+
+<h3>App.jsx</h3>
+
+<pre><code class="language-jsx">import { useEffect } from 'react';
+import { useAuth } from './hooks/useAuth';
+import { getCurrentUser } from './services/authService';
+
+function App() {
+
+  const { state, dispatch } = useAuth();
+
+  useEffect(() => {
+
+    async function loadUser() {
+
+      const token = localStorage.getItem('token');
+
+      if (!token) return;
+
+      dispatch({
+        type: 'LOGIN_START'
+      });
+
+      try {
+
+        const user =  await getCurrentUser(token);
+
+        dispatch({
+          type: 'LOGIN_SUCCESS',
+          payload: user
+        });
+
+      } catch {
+
+        localStorage.removeItem('token');
+
+        dispatch({
+          type: 'LOGOUT'
+        });
+
+      }
+
+    }
+
+    loadUser();
+
+  }, []);
+
+  return (
+    <>
+      {state.user
+        ? <Dashboard />
+        : <Login />
+      }
+    </>
+  );
+
+}
+
+export default App;</code></pre>
+
+<h2>How This useEffect Works</h2>
+
+<div class="flow">
+Application Starts
+<br>↓<br>
+useEffect Runs
+<br>↓<br>
+Check localStorage Token
+<br>↓<br>
+Token Exists?
+<br>↓<br>
+Yes
+<br>↓<br>
+Call Backend API
+<br>↓<br>
+Get Current User
+<br>↓<br>
+LOGIN_SUCCESS
+<br>↓<br>
+User Stored In Global State
+<br>↓<br>
+Dashboard Appears
+</div>
+
+<h2>Other Real Authentication useEffect Examples</h2>
+
+<table>
+<tr>
+<th>Feature</th>
+<th>Use useEffect?</th>
+<th>Reason</th>
+</tr>
+
+<tr>
+<td>Login Button Click</td>
+<td>❌ No</td>
+<td>User Action</td>
+</tr>
+
+<tr>
+<td>Logout Button Click</td>
+<td>❌ No</td>
+<td>User Action</td>
+</tr>
+
+<tr>
+<td>Submit Form</td>
+<td>❌ No</td>
+<td>User Action</td>
+</tr>
+
+<tr>
+<td>Check Existing Session</td>
+<td>✅ Yes</td>
+<td>Automatic On App Start</td>
+</tr>
+
+<tr>
+<td>Load User Profile</td>
+<td>✅ Yes</td>
+<td>Automatic Data Fetch</td>
+</tr>
+
+<tr>
+<td>Auto Logout</td>
+<td>✅ Yes</td>
+<td>Automatic Timer</td>
+</tr>
+
+<tr>
+<td>Refresh Notifications</td>
+<td>✅ Yes</td>
+<td>Automatic Background Task</td>
+</tr>
+
+<tr>
+<td>WebSocket Connection</td>
+<td>✅ Yes</td>
+<td>Automatic Connection Setup</td>
+</tr>
+</table>
+
+<h2>Easy Rule</h2>
+
+<div class="highlight">
+If something should happen because the user clicked a button, use an event handler such as onClick or onSubmit.
+<br><br>
+If something should happen automatically when a component loads or when data changes, use useEffect.
+</div>
+
+<h2>How State Changes During Login</h2>
+
+<h3>Initial State</h3>
+
+<pre><code class="language-jsx">{
+  user: null,
+  loading: false,
+  error: ''
+}</code></pre>
+
+<h3>After User Clicks Login</h3>
+
+<pre><code class="language-jsx">dispatch({
+  type: 'LOGIN_START'
+});</code></pre>
+
+<pre><code class="language-jsx">{
+  user: null,
+  loading: true,
+  error: ''
+}</code></pre>
+
+<h3>After Backend Success</h3>
+
+<pre><code class="language-jsx">dispatch({
+  type: 'LOGIN_SUCCESS',
+  payload: data.user
+});</code></pre>
+
+<pre><code class="language-jsx">{
+  user: {
+    id: 1,
+    name: 'Rizwan',
+    role: 'Admin'
+  },
+  loading: false,
+  error: ''
+}</code></pre>
+
+<h3>After Backend Error</h3>
+
+<pre><code class="language-jsx">dispatch({
+  type: 'LOGIN_ERROR',
+  payload: 'Invalid username or password'
+});</code></pre>
+
+<pre><code class="language-jsx">{
+  user: null,
+  loading: false,
+  error: 'Invalid username or password'
+}</code></pre>
+
+<h2>Why We Use state in Login Component?</h2>
+
+<table>
+<tr>
+<th>Code</th>
+<th>Use</th>
+</tr>
+
+<tr>
+<td>state.loading</td>
+<td>Disable login button and show Logging In...</td>
+</tr>
+
+<tr>
+<td>state.error</td>
+<td>Show backend error message</td>
+</tr>
+
+<tr>
+<td>dispatch</td>
+<td>Send actions like LOGIN_START, LOGIN_SUCCESS, LOGIN_ERROR</td>
+</tr>
+
+<tr>
+<td>username/password</td>
+<td>Local input values only for Login component</td>
+</tr>
+</table>
+
+<h2>Full Backend Login Flow</h2>
+
+<div class="flow">
+User types username and password
+<br>↓<br>
+username and password stored in local useState
+<br>↓<br>
+User clicks Login
+<br>↓<br>
+LOGIN_START dispatch
+<br>↓<br>
+state.loading becomes true
+<br>↓<br>
+loginUser sends credentials to backend
+<br>↓<br>
+Backend checks database
+<br>↓<br>
+Backend sends success response with user and token
+<br>↓<br>
+LOGIN_SUCCESS dispatch
+<br>↓<br>
+user saved in global state
+<br>↓<br>
+App re-renders
+<br>↓<br>
+Dashboard appears
+</div>
+
+<h2>Responsibility of Each File</h2>
+
+<table>
+<tr>
+<th>File</th>
+<th>Responsibility</th>
+</tr>
+
+<tr>
+<td>AuthContext.jsx</td>
+<td>Create Context</td>
+</tr>
+
+<tr>
+<td>authReducer.js</td>
+<td>Manage auth state update logic</td>
+</tr>
+
+<tr>
+<td>AuthProvider.jsx</td>
+<td>Create and share state globally</td>
+</tr>
+
+<tr>
+<td>useAuth.js</td>
+<td>Provide easy access to AuthContext</td>
+</tr>
+
+<tr>
+<td>authService.js</td>
+<td>Send login request to backend API</td>
+</tr>
+
+<tr>
+<td>Login.jsx</td>
+<td>Collect credentials and dispatch login actions</td>
+</tr>
+
+<tr>
+<td>Dashboard.jsx</td>
+<td>Read logged-in user data and logout</td>
+</tr>
+
+<tr>
+<td>App.jsx</td>
+<td>Switch between Login and Dashboard</td>
+</tr>
+</table>
+
+<h2>Important Interview Points</h2>
+
+<ul>
+<li>React should not verify username and password directly.</li>
+<li>React sends credentials to the backend API.</li>
+<li>The backend verifies credentials and returns user data or error.</li>
+<li>useReducer manages loading, user, and error state.</li>
+<li>Context shares auth state globally.</li>
+<li>Custom hook makes Context usage cleaner.</li>
+<li>API logic should be kept in a separate service file.</li>
+</ul>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+In a real login flow, React collects credentials, sends them to the backend API, stores the backend response in global auth state using useReducer, and shares that state across the app using Context.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+
+</body>
+</html>

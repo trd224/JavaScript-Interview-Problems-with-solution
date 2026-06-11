@@ -31,6 +31,7 @@ pre{border-radius:12px;overflow-x:auto}
 <div class="container">
 
 <h1>100. How do you combine Context + useReducer for global state?</h1>
+<p>For more understanding see example 100.1 and 100.2</p>
 
 <h2>One-Line Definition</h2>
 
@@ -272,6 +273,197 @@ function App() {
 }
 
 export default App;</code></pre>
+
+<h2>Real-World Authentication Example (Recommended)</h2>
+
+<p>
+In real projects, we usually create Contexts based on business domains instead of generic names like AppContext.
+</p>
+
+<div class="highlight">
+Authentication is one of the most common use cases for combining Context and useReducer.
+</div>
+
+<h3>Folder Structure</h3>
+
+<pre><code class="language-text">src
+│
+├── context
+│   └── AuthContext.jsx
+│
+├── components
+│   ├── Login.jsx
+│   └── Dashboard.jsx
+│
+├── App.jsx
+├── main.jsx
+└── style.css</code></pre>
+
+<h3>AuthContext.jsx</h3>
+
+<pre><code class="language-jsx">import { createContext, useContext, useReducer } from 'react';
+
+const AuthContext = createContext();
+
+const initialState = {
+  user: null,
+  loading: false,
+  error: ''
+};
+
+function authReducer(state, action) {
+  switch (action.type) {
+    case 'LOGIN_START':
+      return {
+        ...state,
+        loading: true,
+        error: ''
+      };
+
+    case 'LOGIN_SUCCESS':
+      return {
+        ...state,
+        loading: false,
+        user: action.payload
+      };
+
+    case 'LOGIN_ERROR':
+      return {
+        ...state,
+        loading: false,
+        error: action.payload
+      };
+
+    case 'LOGOUT':
+      return {
+        ...state,
+        user: null
+      };
+
+    default:
+      return state;
+  }
+}
+
+export function AuthProvider({ children }) {
+  const [state, dispatch] = useReducer(authReducer, initialState);
+
+  return (
+    &lt;AuthContext.Provider value={{ state, dispatch }}&gt;
+      {children}
+    &lt;/AuthContext.Provider&gt;
+  );
+}
+
+export function useAuth() {
+  return useContext(AuthContext);
+}</code></pre>
+
+<h3>Login.jsx</h3>
+
+<pre><code class="language-jsx">import { useState } from 'react';
+import { useAuth } from '../context/AuthContext';
+
+function Login() {
+  const { state, dispatch } = useAuth();
+
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+
+  function handleSubmit(e) {
+    e.preventDefault();
+
+    dispatch({ type: 'LOGIN_START' });
+
+    setTimeout(() => {
+      if (username === 'admin' && password === '123') {
+        dispatch({
+          type: 'LOGIN_SUCCESS',
+          payload: {
+            id: 1,
+            name: 'Rizwan',
+            role: 'Admin'
+          }
+        });
+      } else {
+        dispatch({
+          type: 'LOGIN_ERROR',
+          payload: 'Invalid Username or Password'
+        });
+      }
+    }, 1500);
+  }
+
+  return (
+    &lt;form onSubmit={handleSubmit}&gt;
+      &lt;input
+        value={username}
+        onChange={(e) => setUsername(e.target.value)}
+        placeholder="Username"
+      /&gt;
+
+      &lt;input
+        type="password"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+        placeholder="Password"
+      /&gt;
+
+      {state.error && &lt;p&gt;{state.error}&lt;/p&gt;}
+
+      &lt;button disabled={state.loading}&gt;
+        {state.loading ? 'Logging In...' : 'Login'}
+      &lt;/button&gt;
+    &lt;/form&gt;
+  );
+}
+
+export default Login;</code></pre>
+
+<h3>Dashboard.jsx</h3>
+
+<pre><code class="language-jsx">import { useAuth } from '../context/AuthContext';
+
+function Dashboard() {
+  const { state, dispatch } = useAuth();
+
+  return (
+    &lt;div&gt;
+      &lt;h2&gt;Dashboard&lt;/h2&gt;
+
+      &lt;p&gt;Welcome {state.user.name}&lt;/p&gt;
+      &lt;p&gt;Role: {state.user.role}&lt;/p&gt;
+
+      &lt;button onClick={() => dispatch({ type: 'LOGOUT' })}&gt;
+        Logout
+      &lt;/button&gt;
+    &lt;/div&gt;
+  );
+}
+
+export default Dashboard;</code></pre>
+
+<h3>App.jsx</h3>
+
+<pre><code class="language-jsx">import { useAuth } from './context/AuthContext';
+import Login from './components/Login';
+import Dashboard from './components/Dashboard';
+
+function App() {
+  const { state } = useAuth();
+
+  return (
+    &lt;div&gt;
+      {state.user ? &lt;Dashboard /&gt; : &lt;Login /&gt;}
+    &lt;/div&gt;
+  );
+}
+
+export default App;</code></pre>
+
+<div class="highlight">
+This example is closer to what you will see in production React applications. Instead of generic names like AppContext and AppProvider, we use AuthContext, AuthProvider, and useAuth because the Context manages authentication-related state.
+</div>
 
 <h2>How the Full Flow Works</h2>
 
