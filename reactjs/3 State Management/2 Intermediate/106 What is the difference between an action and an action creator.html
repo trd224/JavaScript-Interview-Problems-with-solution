@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>106 - Difference Between Action and Action Creator</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px;margin-bottom:10px}
+p{color:#cbd5e1}
+ul{padding-left:24px}
+li{margin-bottom:10px;color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px;margin-top:15px}
+.warning{background:#1e1b4b;border-left:5px solid #fbbf24;padding:18px;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;margin-top:15px;text-align:center;line-height:2;font-size:18px}
+pre{border-radius:12px;overflow-x:auto}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>106. What is the Difference Between an Action and an Action Creator?</h1>
+
+<h2>One-Line Definition</h2>
+
+<div class="highlight">
+An action is a plain JavaScript object that describes what happened, while an action creator is a function that creates and returns an action object.
+</div>
+
+<h2>Think of It Like an Order Slip</h2>
+
+<p>
+Imagine a restaurant.
+</p>
+
+<ul>
+<li>Action = The written food order.</li>
+<li>Action Creator = The waiter who writes the order.</li>
+</ul>
+
+<div class="flow">
+Action Creator
+<br>↓<br>
+Creates Action
+<br>↓<br>
+Dispatch Sends Action
+<br>↓<br>
+Reducer Updates State
+</div>
+
+<h2>What Is an Action?</h2>
+
+<p>
+An action is a plain JavaScript object.
+</p>
+
+<p>
+It describes what happened in the application.
+</p>
+
+<h3>Example Action</h3>
+
+<pre><code class="language-js">{
+  type: 'ADD_TO_CART',
+  payload: {
+    id: 1,
+    name: 'Laptop'
+  }
+}</code></pre>
+
+<div class="highlight">
+The action is the object itself.
+</div>
+
+<p>
+Redux reducers read this object and decide how state should change.
+</p>
+
+<h2>What Is an Action Creator?</h2>
+
+<p>
+An action creator is a function that creates and returns an action object.
+</p>
+
+<h3>Example Action Creator</h3>
+
+<pre><code class="language-js">function addToCart(product) {
+
+  return {
+    type: 'ADD_TO_CART',
+    payload: product
+  };
+
+}</code></pre>
+
+<p>
+Calling the function:
+</p>
+
+<pre><code class="language-js">addToCart({
+  id: 1,
+  name: 'Laptop'
+});</code></pre>
+
+<p>
+returns:
+</p>
+
+<pre><code class="language-js">{
+  type: 'ADD_TO_CART',
+  payload: {
+    id: 1,
+    name: 'Laptop'
+  }
+}</code></pre>
+
+<div class="highlight">
+The function is the action creator. The returned object is the action.
+</div>
+
+<h2>Traditional Redux Example</h2>
+
+<h3>Action Creator</h3>
+
+<pre><code class="language-js">export const addToCart = product => {
+
+  return {
+    type: 'ADD_TO_CART',
+    payload: product
+  };
+
+};</code></pre>
+
+<h3>Dispatching Action</h3>
+
+<pre><code class="language-js">dispatch(
+  addToCart(product)
+);</code></pre>
+
+<p>
+Step-by-step:
+</p>
+
+<pre><code class="language-text">addToCart(product)
+        ↓
+Returns Action Object
+        ↓
+dispatch(action)
+        ↓
+Reducer Receives Action
+</code></pre>
+
+<h2>Visual Difference</h2>
+
+<table>
+<tr>
+<th>Action Creator</th>
+<th>Action</th>
+</tr>
+
+<tr>
+<td>Function</td>
+<td>Object</td>
+</tr>
+
+<tr>
+<td>Creates action</td>
+<td>Describes what happened</td>
+</tr>
+
+<tr>
+<td>Executed by developer</td>
+<td>Consumed by reducer</td>
+</tr>
+
+<tr>
+<td>Returns an object</td>
+<td>Is the returned object</td>
+</tr>
+</table>
+
+<h2>Redux Toolkit Example</h2>
+
+<p>
+Redux Toolkit automatically creates action creators for us.
+</p>
+
+<h3>Slice</h3>
+
+<pre><code class="language-jsx">const cartSlice = createSlice({
+
+  name: 'cart',
+
+  initialState: {
+    items: []
+  },
+
+  reducers: {
+
+    addToCart(state, action) {
+      state.items.push(action.payload);
+    }
+
+  }
+
+});</code></pre>
+
+<h3>Generated Action Creator</h3>
+
+<pre><code class="language-jsx">export const {
+  addToCart
+} = cartSlice.actions;</code></pre>
+
+<p>
+Redux Toolkit automatically creates:
+</p>
+
+<pre><code class="language-js">function addToCart(payload) {
+
+  return {
+    type: 'cart/addToCart',
+    payload
+  };
+
+}</code></pre>
+
+<p>
+We don't write this ourselves.
+</p>
+
+<h2>What Actually Gets Dispatched?</h2>
+
+<h3>Code We Write</h3>
+
+<pre><code class="language-jsx">dispatch(
+  addToCart(product)
+);</code></pre>
+
+<h3>What Happens Internally</h3>
+
+<pre><code class="language-js">dispatch({
+
+  type: 'cart/addToCart',
+
+  payload: product
+
+});</code></pre>
+
+<div class="highlight">
+dispatch never receives the action creator function. It receives the action object returned by the action creator.
+</div>
+
+<h2>Real Project Example</h2>
+
+<h3>ProductCard.jsx</h3>
+
+<pre><code class="language-jsx">import { useDispatch } from 'react-redux';
+import { addToCart } from '../features/cart/cartSlice';
+
+function ProductCard({ product }) {
+
+  const dispatch = useDispatch();
+
+  return (
+    &lt;button
+      onClick={() =&gt; dispatch(addToCart(product))}
+    &gt;
+      Add To Cart
+    &lt;/button&gt;
+  );
+}</code></pre>
+
+<p>
+Flow:
+</p>
+
+<div class="flow">
+Button Click
+<br>↓<br>
+addToCart(product)
+<br>↓<br>
+Action Object Created
+<br>↓<br>
+dispatch(action)
+<br>↓<br>
+Reducer Runs
+<br>↓<br>
+Store Updates
+</div>
+
+<h2>Most Common Interview Confusion</h2>
+
+<p>
+Many developers think this is the action:
+</p>
+
+<pre><code class="language-js">addToCart(product)</code></pre>
+
+<p>
+Actually:
+</p>
+
+<ul>
+<li><strong>addToCart</strong> = Action Creator</li>
+<li><strong>addToCart(product)</strong> = Function Call</li>
+<li><strong>Returned Object</strong> = Action</li>
+</ul>
+
+<h3>Example</h3>
+
+<pre><code class="language-js">const action = addToCart(product);
+
+console.log(action);</code></pre>
+
+<p>
+Output:
+</p>
+
+<pre><code class="language-js">{
+  type: 'cart/addToCart',
+  payload: product
+}</code></pre>
+
+<p>
+This output object is the actual action.
+</p>
+
+<h2>Easy Way To Remember</h2>
+
+<div class="flow">
+Action Creator
+<br>↓<br>
+Function
+<br>↓<br>
+Creates
+<br>↓<br>
+Action
+<br>↓<br>
+Object
+</div>
+
+<h2>Interview Answer</h2>
+
+<div class="highlight">
+An action is a plain JavaScript object that describes what happened in the application, while an action creator is a function that creates and returns that action object. Redux Toolkit automatically generates action creators when we use createSlice().
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+An action is an object, and an action creator is the function that creates that object.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-js.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+
+</body>
+</html>

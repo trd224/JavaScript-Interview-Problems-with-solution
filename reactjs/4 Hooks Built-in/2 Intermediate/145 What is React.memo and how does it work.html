@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>145 - What is React.memo and How Does It Work?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px;margin-bottom:10px}
+p{color:#cbd5e1}
+ul{padding-left:24px}
+li{margin-bottom:10px;color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px;margin-top:15px}
+.warning{background:#1e1b4b;border-left:5px solid #fbbf24;padding:18px;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;margin-top:15px;text-align:center;line-height:2;font-size:18px}
+pre{border-radius:12px;overflow-x:auto}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>145. What is React.memo and How Does It Work?</h1>
+
+<h2>One-Line Definition</h2>
+
+<div class="highlight">
+React.memo is a Higher Order Component (HOC) that prevents a component from re-rendering when its props have not changed.
+</div>
+
+<h2>Why Do We Need React.memo?</h2>
+
+<p>
+Normally, when a parent component re-renders, all child components re-render too.
+</p>
+
+<p>
+Even if the child's props are exactly the same.
+</p>
+
+<h3>Example</h3>
+
+<pre><code class="language-jsx">function Child() {
+
+  console.log('Child Rendered');
+
+  return &lt;h2&gt;Child Component&lt;/h2&gt;;
+
+}</code></pre>
+
+<pre><code class="language-jsx">import { useState } from 'react';
+
+export default function App() {
+
+  const [count, setCount] = useState(0);
+
+  return (
+    &lt;&gt;
+      &lt;h2&gt;Count: {count}&lt;/h2&gt;
+
+      &lt;button onClick={() =&gt; setCount(count + 1)}&gt;
+        Increment
+      &lt;/button&gt;
+
+      &lt;Child /&gt;
+    &lt;/&gt;
+  );
+
+}</code></pre>
+
+<h3>What Happens?</h3>
+
+<div class="flow">
+Count Changes
+<br>↓<br>
+App Re-renders
+<br>↓<br>
+Child Re-renders
+</div>
+
+<p>
+Even though Child uses no state and receives no props.
+</p>
+
+<div class="warning">
+React automatically re-renders child components whenever the parent re-renders.
+</div>
+
+<h2>How React.memo Helps</h2>
+
+<p>
+Wrap the component:
+</p>
+
+<pre><code class="language-jsx">const Child = React.memo(function Child() {
+
+  console.log('Child Rendered');
+
+  return &lt;h2&gt;Child Component&lt;/h2&gt;;
+
+});</code></pre>
+
+<h3>Now What Happens?</h3>
+
+<div class="flow">
+Count Changes
+<br>↓<br>
+App Re-renders
+<br>↓<br>
+React.memo Checks Props
+<br>↓<br>
+Props Same?
+<br>↓<br>
+Yes
+<br>↓<br>
+Skip Child Re-render
+</div>
+
+<div class="highlight">
+React.memo remembers the previous props and compares them with the new props.
+</div>
+
+<h2>How React.memo Works Internally</h2>
+
+<p>
+Imagine:
+</p>
+
+<pre><code class="language-jsx">&lt;Child name="Rizwan" /&gt;</code></pre>
+
+<p>
+First render:
+</p>
+
+<pre><code class="language-text">Previous Props
+
+{
+  name: "Rizwan"
+}</code></pre>
+
+<p>
+Second render:
+</p>
+
+<pre><code class="language-text">New Props
+
+{
+  name: "Rizwan"
+}</code></pre>
+
+<p>
+React.memo performs a shallow comparison:
+</p>
+
+<pre><code class="language-text">"Rizwan" === "Rizwan"
+
+true</code></pre>
+
+<p>
+Since props are equal:
+</p>
+
+<pre><code class="language-text">Skip Re-render
+</code></pre>
+
+<h2>Real Example</h2>
+
+<h3>Without React.memo</h3>
+
+<pre><code class="language-jsx">function Child({ name }) {
+
+  console.log('Child Rendered');
+
+  return &lt;h2&gt;{name}&lt;/h2&gt;;
+
+}</code></pre>
+
+<pre><code class="language-jsx">import { useState } from 'react';
+
+export default function App() {
+
+  const [count, setCount] = useState(0);
+
+  return (
+    &lt;&gt;
+      &lt;button onClick={() =&gt; setCount(count + 1)}&gt;
+        Increment
+      &lt;/button&gt;
+
+      &lt;Child name="Rizwan" /&gt;
+    &lt;/&gt;
+  );
+
+}</code></pre>
+
+<p>
+Console:
+</p>
+
+<pre><code class="language-text">Child Rendered
+Child Rendered
+Child Rendered
+Child Rendered
+</code></pre>
+
+<h3>With React.memo</h3>
+
+<pre><code class="language-jsx">const Child = React.memo(function Child({ name }) {
+
+  console.log('Child Rendered');
+
+  return &lt;h2&gt;{name}&lt;/h2&gt;;
+
+});</code></pre>
+
+<p>
+Console:
+</p>
+
+<pre><code class="language-text">Child Rendered
+</code></pre>
+
+<p>
+Only once.
+</p>
+
+<h2>The Most Important Limitation</h2>
+
+<p>
+React.memo only compares props.
+</p>
+
+<p>
+If component state changes:
+</p>
+
+<pre><code class="language-jsx">const Child = React.memo(function Child() {
+
+  const [count, setCount] = useState(0);
+
+  return (
+    &lt;button onClick={() =&gt; setCount(count + 1)}&gt;
+      {count}
+    &lt;/button&gt;
+  );
+
+});</code></pre>
+
+<p>
+React.memo cannot stop:
+</p>
+
+<pre><code class="language-text">State Update
+↓
+Component Re-render
+</code></pre>
+
+<div class="warning">
+React.memo only skips renders caused by unchanged props.
+</div>
+
+<h2>The Function Prop Problem</h2>
+
+<p>
+Many developers use React.memo but still see re-renders.
+</p>
+
+<h3>Example</h3>
+
+<pre><code class="language-jsx">const Child = React.memo(function Child({ onClick }) {
+
+  console.log('Child Rendered');
+
+  return (
+    &lt;button onClick={onClick}&gt;
+      Click
+    &lt;/button&gt;
+  );
+
+});</code></pre>
+
+<pre><code class="language-jsx">function App() {
+
+  const [count, setCount] = useState(0);
+
+  const handleClick = () => {
+    console.log('Clicked');
+  };
+
+  return (
+    &lt;Child onClick={handleClick} /&gt;
+  );
+
+}</code></pre>
+
+<p>
+Every render creates:
+</p>
+
+<pre><code class="language-text">New Function Reference
+</code></pre>
+
+<p>
+React.memo sees:
+</p>
+
+<pre><code class="language-text">Old Function !== New Function
+</code></pre>
+
+<p>
+Result:
+</p>
+
+<pre><code class="language-text">Child Re-renders
+</code></pre>
+
+<h2>Solution: useCallback</h2>
+
+<pre><code class="language-jsx">const handleClick = useCallback(() => {
+  console.log('Clicked');
+}, []);</code></pre>
+
+<div class="highlight">
+React.memo and useCallback are commonly used together.
+</div>
+
+<h2>Shallow Comparison</h2>
+
+<p>
+React.memo performs shallow comparison.
+</p>
+
+<table>
+<tr>
+<th>Value</th>
+<th>Comparison Result</th>
+</tr>
+
+<tr>
+<td>"Rizwan"</td>
+<td>Compared by value</td>
+</tr>
+
+<tr>
+<td>100</td>
+<td>Compared by value</td>
+</tr>
+
+<tr>
+<td>true</td>
+<td>Compared by value</td>
+</tr>
+
+<tr>
+<td>{}</td>
+<td>Compared by reference</td>
+</tr>
+
+<tr>
+<td>[]</td>
+<td>Compared by reference</td>
+</tr>
+
+<tr>
+<td>function(){}</td>
+<td>Compared by reference</td>
+</tr>
+</table>
+
+<h2>Common Mistake</h2>
+
+<pre><code class="language-jsx">const users = [
+  'Rizwan',
+  'Ali'
+];
+
+&lt;Child users={users} /&gt;</code></pre>
+
+<p>
+Each render creates:
+</p>
+
+<pre><code class="language-text">New Array Reference
+</code></pre>
+
+<p>
+React.memo sees:
+</p>
+
+<pre><code class="language-text">Old Array !== New Array
+</code></pre>
+
+<p>
+Child re-renders.
+</p>
+
+<h3>Fix</h3>
+
+<pre><code class="language-jsx">const users = useMemo(() => {
+  return ['Rizwan', 'Ali'];
+}, []);</code></pre>
+
+<div class="highlight">
+React.memo often works together with useMemo and useCallback.
+</div>
+
+<h2>When Should You Use React.memo?</h2>
+
+<ul>
+<li>Expensive child components.</li>
+<li>Large lists.</li>
+<li>Complex UI trees.</li>
+<li>Frequently re-rendering parent components.</li>
+</ul>
+
+<h2>When Should You NOT Use React.memo?</h2>
+
+<ul>
+<li>Very small components.</li>
+<li>Components that always receive changing props.</li>
+<li>Components that rarely re-render.</li>
+</ul>
+
+<div class="warning">
+React.memo itself performs prop comparisons. Using it everywhere can actually reduce performance.
+</div>
+
+<h2>Easy Way To Remember</h2>
+
+<div class="flow">
+Parent Re-render
+<br>↓<br>
+React.memo Checks Props
+<br>↓<br>
+Props Changed?
+<br>↓<br>
+Yes → Re-render
+<br><br>
+No → Skip Re-render
+</div>
+
+<h2>Interview Answer</h2>
+
+<div class="highlight">
+React.memo is a Higher Order Component that memoizes a component and skips re-rendering when its props remain unchanged. It improves performance by avoiding unnecessary renders caused by parent component updates.
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+React.memo prevents unnecessary component re-renders by performing a shallow comparison of props.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+
+</body>
+</html>

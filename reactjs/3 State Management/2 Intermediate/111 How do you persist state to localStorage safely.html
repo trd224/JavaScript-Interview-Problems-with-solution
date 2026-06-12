@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>111 - Persist State to localStorage Safely</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px;margin-bottom:10px}
+p{color:#cbd5e1}
+ul{padding-left:24px}
+li{margin-bottom:10px;color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px;margin-top:15px}
+.warning{background:#1e1b4b;border-left:5px solid #fbbf24;padding:18px;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;margin-top:15px;text-align:center;line-height:2;font-size:18px}
+pre{border-radius:12px;overflow-x:auto}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+<h1>111. How Do You Persist State to localStorage Safely?</h1>
+
+<h2>One-Line Definition</h2>
+
+<div class="highlight">
+Persisting state to localStorage means saving selected React state in the browser so it remains available after page refresh, but it must be done safely with JSON parsing, error handling, browser checks, and without storing sensitive data.
+</div>
+
+<h2>Why Do We Persist State?</h2>
+
+<p>
+Normally React state is lost when the page refreshes.
+</p>
+
+<pre><code class="language-jsx">const [theme, setTheme] = useState('dark');</code></pre>
+
+<p>
+If the user changes the theme and refreshes the page, React starts again from the initial value.
+</p>
+
+<div class="flow">
+User Changes State
+<br>↓<br>
+Page Refresh
+<br>↓<br>
+React State Resets
+</div>
+
+<p>
+To keep some values after refresh, we can save them in localStorage.
+</p>
+
+<h2>What Should You Store in localStorage?</h2>
+
+<table>
+<tr>
+<th>Good To Store</th>
+<th>Do Not Store</th>
+</tr>
+
+<tr>
+<td>Theme preference</td>
+<td>Password</td>
+</tr>
+
+<tr>
+<td>Language preference</td>
+<td>Access token if avoidable</td>
+</tr>
+
+<tr>
+<td>Cart items</td>
+<td>Credit card details</td>
+</tr>
+
+<tr>
+<td>Sidebar open/close preference</td>
+<td>Private user documents</td>
+</tr>
+
+<tr>
+<td>Non-sensitive filters</td>
+<td>Highly sensitive personal data</td>
+</tr>
+</table>
+
+<div class="warning">
+localStorage is readable by JavaScript, so never store passwords, secret keys, or highly sensitive data in it.
+</div>
+
+<h2>Unsafe Example</h2>
+
+<pre><code class="language-jsx">const savedCart = JSON.parse(localStorage.getItem('cart'));
+
+const [cart, setCart] = useState(savedCart);</code></pre>
+
+<p>
+This can break because:
+</p>
+
+<ul>
+<li>localStorage may not exist during server-side rendering.</li>
+<li>Stored JSON may be invalid.</li>
+<li>localStorage access can throw errors.</li>
+<li>Initial value may become null unexpectedly.</li>
+</ul>
+
+<h2>Safe Local Storage Helpers</h2>
+
+<p>
+Create reusable helper functions.
+</p>
+
+<h3>utils/storage.js</h3>
+
+<pre><code class="language-jsx">export function getStorageValue(key, fallbackValue) {
+  try {
+    if (typeof window === 'undefined') return fallbackValue;
+
+    const savedValue = window.localStorage.getItem(key);
+
+    if (savedValue === null) return fallbackValue;
+
+    return JSON.parse(savedValue);
+  } catch (error) {
+    console.error('Error reading localStorage:', error);
+    return fallbackValue;
+  }
+}
+
+export function setStorageValue(key, value) {
+  try {
+    if (typeof window === 'undefined') return;
+
+    window.localStorage.setItem(key, JSON.stringify(value));
+  } catch (error) {
+    console.error('Error writing localStorage:', error);
+  }
+}
+
+export function removeStorageValue(key) {
+  try {
+    if (typeof window === 'undefined') return;
+
+    window.localStorage.removeItem(key);
+  } catch (error) {
+    console.error('Error removing localStorage:', error);
+  }
+}</code></pre>
+
+<div class="highlight">
+Safe localStorage code should always use try/catch and check if window exists.
+</div>
+
+<h2>React Example: Persist Theme</h2>
+
+<p>
+Use lazy initial state so localStorage is read only once on first render.
+</p>
+
+<pre><code class="language-jsx">import { useEffect, useState } from 'react';
+import { getStorageValue, setStorageValue } from './utils/storage';
+
+function ThemeSwitcher() {
+  const [theme, setTheme] = useState(() => getStorageValue('theme', 'dark'));
+
+  useEffect(() => {
+    setStorageValue('theme', theme);
+  }, [theme]);
+
+  return (
+    &lt;button onClick={() =&gt; setTheme(theme === 'dark' ? 'light' : 'dark')}&gt;
+      Current Theme: {theme}
+    &lt;/button&gt;
+  );
+}
+
+export default ThemeSwitcher;</code></pre>
+
+<h2>Why Lazy Initial State?</h2>
+
+<p>
+This is better:
+</p>
+
+<pre><code class="language-jsx">const [theme, setTheme] = useState(() => getStorageValue('theme', 'dark'));</code></pre>
+
+<p>
+Than this:
+</p>
+
+<pre><code class="language-jsx">const [theme, setTheme] = useState(getStorageValue('theme', 'dark'));</code></pre>
+
+<div class="highlight">
+Lazy initial state runs only during the initial render, not on every re-render.
+</div>
+
+<h2>Custom Hook: useLocalStorage</h2>
+
+<p>
+A reusable hook is the cleanest solution.
+</p>
+
+<h3>hooks/useLocalStorage.js</h3>
+
+<pre><code class="language-jsx">import { useEffect, useState } from 'react';
+
+function readValue(key, initialValue) {
+  try {
+    if (typeof window === 'undefined') return initialValue;
+
+    const item = window.localStorage.getItem(key);
+
+    return item ? JSON.parse(item) : initialValue;
+  } catch (error) {
+    console.error('localStorage read error:', error);
+    return initialValue;
+  }
+}
+
+export function useLocalStorage(key, initialValue) {
+  const [value, setValue] = useState(() => readValue(key, initialValue));
+
+  useEffect(() => {
+    try {
+      window.localStorage.setItem(key, JSON.stringify(value));
+    } catch (error) {
+      console.error('localStorage write error:', error);
+    }
+  }, [key, value]);
+
+  return [value, setValue];
+}</code></pre>
+
+<h3>Using the Hook</h3>
+
+<pre><code class="language-jsx">import { useLocalStorage } from './hooks/useLocalStorage';
+
+function CartPage() {
+  const [cart, setCart] = useLocalStorage('cart', []);
+
+  function addToCart(product) {
+    setCart(prevCart =&gt; [...prevCart, product]);
+  }
+
+  return (
+    &lt;button onClick={() =&gt; addToCart({ id: 1, name: 'Laptop' })}&gt;
+      Add Laptop
+    &lt;/button&gt;
+  );
+}
+
+export default CartPage;</code></pre>
+
+<h2>Persist Redux State Safely</h2>
+
+<p>
+Do not persist the whole Redux store blindly.
+</p>
+
+<div class="warning">
+Only persist selected non-sensitive slices like cart, theme, or filters.
+</div>
+
+<h3>Example: Persist Only Cart</h3>
+
+<pre><code class="language-jsx">const preloadedState = {
+  cart: getStorageValue('cart', { items: [] })
+};</code></pre>
+
+<h3>store.js</h3>
+
+<pre><code class="language-jsx">import { configureStore } from '@reduxjs/toolkit';
+import cartReducer from '../features/cart/cartSlice';
+import { getStorageValue, setStorageValue } from '../utils/storage';
+
+export const store = configureStore({
+  reducer: {
+    cart: cartReducer
+  },
+  preloadedState: {
+    cart: getStorageValue('cart', { items: [] })
+  }
+});
+
+store.subscribe(() =&gt; {
+  const state = store.getState();
+  setStorageValue('cart', state.cart);
+});</code></pre>
+
+<div class="highlight">
+preloadedState loads saved state when the Redux store is created.
+</div>
+
+<h2>Important Safety Rules</h2>
+
+<ul>
+<li>Use try/catch when reading or writing localStorage.</li>
+<li>Check typeof window before accessing localStorage.</li>
+<li>Use JSON.stringify before saving objects or arrays.</li>
+<li>Use JSON.parse when reading objects or arrays.</li>
+<li>Use fallback values if saved data is missing or broken.</li>
+<li>Do not store passwords, tokens, or sensitive data.</li>
+<li>Persist only the required state, not the complete app state.</li>
+</ul>
+
+<h2>Common Mistakes</h2>
+
+<table>
+<tr>
+<th>Mistake</th>
+<th>Problem</th>
+</tr>
+
+<tr>
+<td>Reading localStorage directly in SSR</td>
+<td>window is not defined</td>
+</tr>
+
+<tr>
+<td>No try/catch around JSON.parse</td>
+<td>App can crash if stored data is invalid</td>
+</tr>
+
+<tr>
+<td>Saving sensitive data</td>
+<td>Security risk</td>
+</tr>
+
+<tr>
+<td>Saving entire Redux store</td>
+<td>Unnecessary data and possible stale state</td>
+</tr>
+
+<tr>
+<td>No fallback value</td>
+<td>State can become null or undefined</td>
+</tr>
+</table>
+
+<h2>Complete Flow</h2>
+
+<div class="flow">
+Initial Page Load
+<br>↓<br>
+Read localStorage Safely
+<br>↓<br>
+Use Fallback If Missing
+<br>↓<br>
+Set Initial React State
+<br>↓<br>
+State Changes
+<br>↓<br>
+Save Updated State to localStorage
+</div>
+
+<h2>Interview Answer</h2>
+
+<div class="highlight">
+To persist state to localStorage safely, we should read the saved value inside a lazy initializer, wrap JSON.parse and localStorage access in try/catch, check that window exists for SSR safety, provide a fallback value, stringify data before saving, and avoid storing sensitive information.
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+Persist state safely by reading localStorage with fallback and try/catch, writing with JSON.stringify inside useEffect, checking for window, and never storing sensitive data.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>107 - What is Middleware in Redux?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px;margin-bottom:10px}
+p{color:#cbd5e1}
+ul{padding-left:24px}
+li{margin-bottom:10px;color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px;margin-top:15px}
+.warning{background:#1e1b4b;border-left:5px solid #fbbf24;padding:18px;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;margin-top:15px;text-align:center;line-height:2;font-size:18px}
+pre{border-radius:12px;overflow-x:auto}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>107. What is Middleware in Redux? Name a Common Middleware.</h1>
+
+<h2>One-Line Definition</h2>
+
+<div class="highlight">
+Middleware is a function that runs between dispatching an action and the action reaching the reducer. It allows Redux to perform extra work such as API calls, logging, analytics, and error handling.
+</div>
+
+<h2>Normal Redux Flow</h2>
+
+<p>
+Without middleware, Redux follows a simple flow:
+</p>
+
+<div class="flow">
+Component
+<br>↓<br>
+dispatch(action)
+<br>↓<br>
+Reducer
+<br>↓<br>
+Store Updated
+</div>
+
+<p>
+The action goes directly to the reducer.
+</p>
+
+<h2>Redux Flow With Middleware</h2>
+
+<p>
+Middleware sits between dispatch and reducer.
+</p>
+
+<div class="flow">
+Component
+<br>↓<br>
+dispatch(action)
+<br>↓<br>
+Middleware
+<br>↓<br>
+Reducer
+<br>↓<br>
+Store Updated
+</div>
+
+<div class="highlight">
+Middleware gets a chance to inspect, modify, delay, log, or perform async work before the action reaches the reducer.
+</div>
+
+<h2>Why Do We Need Middleware?</h2>
+
+<p>
+Reducers must be pure functions.
+</p>
+
+<p>
+Reducers should:
+</p>
+
+<ul>
+<li>Return new state.</li>
+<li>Not call APIs.</li>
+<li>Not use setTimeout.</li>
+<li>Not perform side effects.</li>
+</ul>
+
+<h3>Wrong Example</h3>
+
+<pre><code class="language-js">function cartReducer(state, action) {
+
+  fetch('/products');
+
+  return state;
+}</code></pre>
+
+<div class="warning">
+Reducers should never contain API calls or side effects.
+</div>
+
+<p>
+Instead, Redux middleware handles those tasks.
+</p>
+
+<h2>Real Example - API Call</h2>
+
+<p>
+Suppose we need to load products from the server.
+</p>
+
+<div class="flow">
+User Opens Page
+<br>↓<br>
+Dispatch Action
+<br>↓<br>
+Middleware Calls API
+<br>↓<br>
+Receives Data
+<br>↓<br>
+Dispatch Success Action
+<br>↓<br>
+Reducer Updates Store
+</div>
+
+<p>
+This is one of the most common uses of middleware.
+</p>
+
+<h2>How Middleware Works</h2>
+
+<p>
+Middleware receives an action before the reducer.
+</p>
+
+<pre><code class="language-js">const logger = store => next => action => {
+
+  console.log('Action:', action);
+
+  next(action);
+
+};</code></pre>
+
+<p>
+When an action is dispatched:
+</p>
+
+<pre><code class="language-text">dispatch(action)
+       ↓
+logger middleware runs
+       ↓
+next(action)
+       ↓
+reducer runs
+</code></pre>
+
+<div class="highlight">
+Calling next(action) passes the action to the next middleware or reducer.
+</div>
+
+<h2>Common Middleware: Redux Thunk</h2>
+
+<p>
+The most common Redux middleware is Redux Thunk.
+</p>
+
+<p>
+Redux normally expects:
+</p>
+
+<pre><code class="language-js">dispatch({
+  type: 'LOAD_PRODUCTS'
+});</code></pre>
+
+<p>
+A plain object action.
+</p>
+
+<p>
+Redux Thunk allows:
+</p>
+
+<pre><code class="language-js">dispatch(async function() {
+
+  const response = await fetch('/api/products');
+
+});</code></pre>
+
+<p>
+Now we can perform asynchronous operations before updating Redux state.
+</p>
+
+<h2>Traditional Redux Thunk Example</h2>
+
+<pre><code class="language-js">export const fetchProducts = () => {
+
+  return async dispatch => {
+
+    const response = await fetch('/api/products');
+
+    const data = await response.json();
+
+    dispatch({
+      type: 'PRODUCTS_LOADED',
+      payload: data
+    });
+
+  };
+
+};</code></pre>
+
+<p>
+Flow:
+</p>
+
+<div class="flow">
+dispatch(fetchProducts())
+<br>↓<br>
+Redux Thunk Runs
+<br>↓<br>
+API Call
+<br>↓<br>
+Data Received
+<br>↓<br>
+Dispatch Success Action
+<br>↓<br>
+Reducer Updates Store
+</div>
+
+<h2>Redux Toolkit and Middleware</h2>
+
+<p>
+Redux Toolkit automatically includes useful middleware.
+</p>
+
+<h3>configureStore()</h3>
+
+<pre><code class="language-js">import { configureStore } from '@reduxjs/toolkit';
+
+const store = configureStore({
+  reducer: {
+    cart: cartReducer
+  }
+});</code></pre>
+
+<p>
+Redux Toolkit automatically adds:
+</p>
+
+<ul>
+<li>Redux Thunk middleware</li>
+<li>Immutability check middleware</li>
+<li>Serializable state check middleware</li>
+</ul>
+
+<div class="highlight">
+In Redux Toolkit, Redux Thunk is already included by default.
+</div>
+
+<h2>Real Project Example</h2>
+
+<p>
+User opens Product Page.
+</p>
+
+<div class="flow">
+ProductPage Component
+<br>↓<br>
+dispatch(fetchProducts())
+<br>↓<br>
+Redux Thunk Middleware
+<br>↓<br>
+API Request
+<br>↓<br>
+Products Received
+<br>↓<br>
+dispatch(productsLoaded())
+<br>↓<br>
+Reducer Updates Store
+<br>↓<br>
+UI Re-renders
+</div>
+
+<h2>Common Redux Middleware</h2>
+
+<table>
+<tr>
+<th>Middleware</th>
+<th>Purpose</th>
+</tr>
+
+<tr>
+<td>Redux Thunk</td>
+<td>Handle async operations such as API calls</td>
+</tr>
+
+<tr>
+<td>Logger Middleware</td>
+<td>Log actions and state changes</td>
+</tr>
+
+<tr>
+<td>Redux Saga</td>
+<td>Complex async workflows</td>
+</tr>
+
+<tr>
+<td>Analytics Middleware</td>
+<td>Track user events</td>
+</tr>
+
+<tr>
+<td>Error Middleware</td>
+<td>Centralized error handling</td>
+</tr>
+</table>
+
+<h2>Easy Way To Remember</h2>
+
+<div class="flow">
+dispatch(action)
+<br>↓<br>
+Middleware
+<br>↓<br>
+Extra Work
+(API, Logging, Analytics)
+<br>↓<br>
+Reducer
+<br>↓<br>
+Store Updated
+</div>
+
+<h2>Interview Answer</h2>
+
+<div class="highlight">
+Middleware is a function that runs between dispatching an action and the action reaching the reducer. It is commonly used for API calls, logging, analytics, and other side effects. Redux Thunk is the most commonly used Redux middleware.
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+Middleware intercepts actions before they reach reducers, and Redux Thunk is the most common middleware used for asynchronous operations.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-js.min.js"></script>
+</body>
+</html>

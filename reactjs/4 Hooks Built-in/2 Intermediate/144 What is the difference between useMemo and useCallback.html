@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>144 - Difference Between useMemo and useCallback</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px;margin-bottom:10px}
+p{color:#cbd5e1}
+ul{padding-left:24px}
+li{margin-bottom:10px;color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px;margin-top:15px}
+.warning{background:#1e1b4b;border-left:5px solid #fbbf24;padding:18px;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;margin-top:15px;text-align:center;line-height:2;font-size:18px}
+pre{border-radius:12px;overflow-x:auto}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>144. What is the Difference Between useMemo and useCallback?</h1>
+
+<h2>One-Line Definition</h2>
+
+<div class="highlight">
+useMemo memoizes a value, while useCallback memoizes a function.
+</div>
+
+<h2>The Biggest Difference</h2>
+
+<table>
+<tr>
+<th>Hook</th>
+<th>What It Caches</th>
+</tr>
+
+<tr>
+<td>useMemo</td>
+<td>Value</td>
+</tr>
+
+<tr>
+<td>useCallback</td>
+<td>Function</td>
+</tr>
+</table>
+
+<div class="flow">
+useMemo
+<br>↓<br>
+Caches Value
+
+
+<br><br>
+
+useCallback
+<br>↓<br>
+Caches Function
+</div>
+
+<h2>Why Do We Need Them?</h2>
+
+<p>
+React re-runs the entire component whenever state changes.
+</p>
+
+<p>
+That means:
+</p>
+
+<ul>
+<li>Variables are recalculated.</li>
+<li>Functions are recreated.</li>
+<li>Arrays and objects are recreated.</li>
+</ul>
+
+<div class="warning">
+Sometimes these recalculations are expensive or cause unnecessary child re-renders.
+</div>
+
+<p>
+That's why React provides:
+</p>
+
+<ul>
+<li>useMemo → Cache values.</li>
+<li>useCallback → Cache functions.</li>
+</ul>
+
+<h2>useMemo Example</h2>
+
+<p>
+Suppose filtering products is expensive.
+</p>
+
+<pre><code class="language-jsx">const expensiveProducts = useMemo(() => {
+
+  return products.filter(
+    product => product.price > 1000
+  );
+
+}, [products]);</code></pre>
+
+<p>
+Result:
+</p>
+
+<pre><code class="language-text">products unchanged
+        ↓
+cached value returned
+
+
+products changed
+        ↓
+recalculate filter
+</code></pre>
+
+<div class="highlight">
+useMemo stores the filtered array result.
+</div>
+
+<h2>useCallback Example</h2>
+
+<p>
+Suppose a function is passed to a React.memo component.
+</p>
+
+<pre><code class="language-jsx">const handleAddToCart = useCallback(() => {
+
+  console.log('Added');
+
+}, []);</code></pre>
+
+<p>
+Result:
+</p>
+
+<pre><code class="language-text">dependencies unchanged
+        ↓
+same function returned
+
+
+dependencies changed
+        ↓
+new function created
+</code></pre>
+
+<div class="highlight">
+useCallback stores the function reference.
+</div>
+
+<h2>Side-by-Side Comparison</h2>
+
+<h3>useMemo</h3>
+
+<pre><code class="language-jsx">const total = useMemo(() => {
+
+  return price * quantity;
+
+}, [price, quantity]);</code></pre>
+
+<p>
+Returns:
+</p>
+
+<pre><code class="language-jsx">500</code></pre>
+
+<p>
+A value is returned.
+</p>
+
+<h3>useCallback</h3>
+
+<pre><code class="language-jsx">const handleClick = useCallback(() => {
+
+  console.log('Clicked');
+
+}, []);</code></pre>
+
+<p>
+Returns:
+</p>
+
+<pre><code class="language-jsx">function handleClick() { ... }</code></pre>
+
+<p>
+A function is returned.
+</p>
+
+<h2>Visual Comparison</h2>
+
+<div class="flow">
+useMemo
+<br>↓<br>
+Calculation
+<br>↓<br>
+Value
+<br>↓<br>
+Cache Value
+</div>
+
+<br>
+
+<div class="flow">
+useCallback
+<br>↓<br>
+Function
+<br>↓<br>
+Cache Function Reference
+</div>
+
+<h2>How useCallback Is Actually Implemented</h2>
+
+<p>
+Many developers don't know this:
+</p>
+
+<pre><code class="language-jsx">useCallback(fn, deps)</code></pre>
+
+<p>
+is roughly equivalent to:
+</p>
+
+<pre><code class="language-jsx">useMemo(() => fn, deps)</code></pre>
+
+<div class="highlight">
+useCallback is essentially a specialized version of useMemo designed specifically for functions.
+</div>
+
+<h2>Real Project Example</h2>
+
+<h3>Problem</h3>
+
+<pre><code class="language-jsx">function App() {
+
+  const [count, setCount] = useState(0);
+
+  const users = [
+    'Rizwan',
+    'Ali',
+    'John'
+  ];
+
+  const handleClick = () => {
+    console.log('Clicked');
+  };
+
+  return (
+    <UserList
+      users={users}
+      onClick={handleClick}
+    />
+  );
+
+}</code></pre>
+
+<p>
+Every render creates:
+</p>
+
+<ul>
+<li>New users array</li>
+<li>New handleClick function</li>
+</ul>
+
+<h3>Optimized Version</h3>
+
+<pre><code class="language-jsx">const users = useMemo(() => {
+
+  return [
+    'Rizwan',
+    'Ali',
+    'John'
+  ];
+
+}, []);
+
+const handleClick = useCallback(() => {
+
+  console.log('Clicked');
+
+}, []);</code></pre>
+
+<div class="highlight">
+useMemo stabilizes the array.
+<br><br>
+useCallback stabilizes the function.
+</div>
+
+<h2>When Should You Use useMemo?</h2>
+
+<ul>
+<li>Expensive calculations.</li>
+<li>Filtering large arrays.</li>
+<li>Sorting large arrays.</li>
+<li>Creating stable object references.</li>
+<li>Creating stable array references.</li>
+</ul>
+
+<h2>When Should You Use useCallback?</h2>
+
+<ul>
+<li>Passing functions to React.memo components.</li>
+<li>Functions used inside dependency arrays.</li>
+<li>Preventing unnecessary child re-renders.</li>
+<li>Creating stable function references.</li>
+</ul>
+
+<h2>Common Interview Trick Question</h2>
+
+<p>
+Question:
+</p>
+
+<pre><code class="language-text">Can useCallback replace useMemo?</code></pre>
+
+<p>
+Answer:
+</p>
+
+<div class="warning">
+No.
+<br><br>
+useCallback caches functions.
+<br>
+useMemo caches values.
+</div>
+
+<p>
+Question:
+</p>
+
+<pre><code class="language-text">Can useMemo replace useCallback?</code></pre>
+
+<p>
+Technically:
+</p>
+
+<pre><code class="language-jsx">const handleClick = useMemo(() => {
+
+  return () => {
+    console.log('Clicked');
+  };
+
+}, []);</code></pre>
+
+<p>
+works.
+</p>
+
+<p>
+But:
+</p>
+
+<div class="warning">
+useCallback is clearer and should be used for functions.
+</div>
+
+<h2>Most Common Beginner Mistake</h2>
+
+<p>
+Many developers think:
+</p>
+
+<pre><code class="language-text">useMemo
+↓
+Prevents Re-renders
+
+
+useCallback
+↓
+Prevents Re-renders
+</code></pre>
+
+<p>
+This is incorrect.
+</p>
+
+<div class="warning">
+Neither hook prevents component re-renders.
+<br><br>
+They only preserve references between renders.
+</div>
+
+<h2>Easy Way To Remember</h2>
+
+<table>
+<tr>
+<th>Need To Cache</th>
+<th>Use</th>
+</tr>
+
+<tr>
+<td>Number</td>
+<td>useMemo</td>
+</tr>
+
+<tr>
+<td>String</td>
+<td>useMemo</td>
+</tr>
+
+<tr>
+<td>Array</td>
+<td>useMemo</td>
+</tr>
+
+<tr>
+<td>Object</td>
+<td>useMemo</td>
+</tr>
+
+<tr>
+<td>Function</td>
+<td>useCallback</td>
+</tr>
+</table>
+
+<div class="flow">
+Value?
+<br>↓<br>
+useMemo
+
+
+<br><br>
+
+Function?
+<br>↓<br>
+useCallback
+</div>
+
+<h2>Interview Answer</h2>
+
+<div class="highlight">
+useMemo memoizes a calculated value and recomputes it only when dependencies change, whereas useCallback memoizes a function and returns the same function reference until dependencies change. useMemo is used for expensive calculations, while useCallback is used for stable function references.
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+useMemo caches values, while useCallback caches functions.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+
+</body>
+</html>

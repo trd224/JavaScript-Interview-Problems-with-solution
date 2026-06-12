@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>109 - What is Zustand and How Does It Compare to Context + useReducer?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px;margin-bottom:10px}
+p{color:#cbd5e1}
+ul{padding-left:24px}
+li{margin-bottom:10px;color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px;margin-top:15px}
+.warning{background:#1e1b4b;border-left:5px solid #fbbf24;padding:18px;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;margin-top:15px;text-align:center;line-height:2;font-size:18px}
+pre{border-radius:12px;overflow-x:auto}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>109. What is Zustand and How Does It Compare to Context + useReducer?</h1>
+
+<h2>One-Line Definition</h2>
+
+<div class="highlight">
+Zustand is a lightweight state management library for React that provides a global store without requiring Context Providers, reducers, or boilerplate code.
+</div>
+
+<h2>What Problem Does Zustand Solve?</h2>
+
+<p>
+As React applications grow, many components need access to the same shared state.
+</p>
+
+<p>
+Examples:
+</p>
+
+<ul>
+<li>User information</li>
+<li>Shopping cart</li>
+<li>Theme settings</li>
+<li>Notifications</li>
+<li>Authentication state</li>
+</ul>
+
+<p>
+React provides Context and useReducer to solve this problem.
+</p>
+
+<p>
+However, Context + useReducer can become verbose in large applications.
+</p>
+
+<div class="warning">
+Zustand was created to provide global state management with much less code than Context + useReducer or Redux.
+</div>
+
+<h2>Context + useReducer Approach</h2>
+
+<p>
+To create global state using React only, we usually need:
+</p>
+
+<ul>
+<li>Create Context</li>
+<li>Create Reducer</li>
+<li>Create Provider</li>
+<li>Wrap App with Provider</li>
+<li>Create Custom Hook</li>
+</ul>
+
+<h3>Step 1 - Create Context</h3>
+
+<pre><code class="language-jsx">import { createContext } from 'react';
+
+export const CartContext = createContext();</code></pre>
+
+<h3>Step 2 - Create Reducer</h3>
+
+<pre><code class="language-jsx">function cartReducer(state, action) {
+
+  switch(action.type) {
+
+    case 'ADD_TO_CART':
+      return {
+        ...state,
+        items: [...state.items, action.payload]
+      };
+
+    default:
+      return state;
+
+  }
+
+}</code></pre>
+
+<h3>Step 3 - Create Provider</h3>
+
+<pre><code class="language-jsx">export function CartProvider({ children }) {
+
+  const [state, dispatch] = useReducer(
+    cartReducer,
+    { items: [] }
+  );
+
+  return (
+    <CartContext.Provider
+      value={{ state, dispatch }}
+    >
+      {children}
+    </CartContext.Provider>
+  );
+
+}</code></pre>
+
+<h3>Step 4 - Wrap App</h3>
+
+<pre><code class="language-jsx">&lt;CartProvider&gt;
+  &lt;App /&gt;
+&lt;/CartProvider&gt;</code></pre>
+
+<h3>Step 5 - Consume Context</h3>
+
+<pre><code class="language-jsx">const { state, dispatch } =
+  useContext(CartContext);</code></pre>
+
+<div class="highlight">
+Context + useReducer works very well, but it requires several setup steps.
+</div>
+
+<h2>Zustand Approach</h2>
+
+<p>
+With Zustand, everything can live in a single file.
+</p>
+
+<h3>cartStore.js</h3>
+
+<pre><code class="language-jsx">import { create } from 'zustand';
+
+const useCartStore = create(set => ({
+
+  items: [],
+
+  addToCart: product =>
+    set(state => ({
+      items: [...state.items, product]
+    }))
+
+}));
+
+export default useCartStore;</code></pre>
+
+<div class="highlight">
+No Context.
+<br>
+No Provider.
+<br>
+No useReducer.
+<br>
+No dispatch.
+</div>
+
+<h2>Using Zustand State</h2>
+
+<h3>ProductCard.jsx</h3>
+
+<pre><code class="language-jsx">import useCartStore from './cartStore';
+
+function ProductCard({ product }) {
+
+  const addToCart =
+    useCartStore(state => state.addToCart);
+
+  return (
+    &lt;button
+      onClick={() => addToCart(product)}
+    &gt;
+      Add To Cart
+    &lt;/button&gt;
+  );
+}</code></pre>
+
+<h3>Navbar.jsx</h3>
+
+<pre><code class="language-jsx">import useCartStore from './cartStore';
+
+function Navbar() {
+
+  const items =
+    useCartStore(state => state.items);
+
+  return (
+    &lt;h3&gt;Cart Items: {items.length}&lt;/h3&gt;
+  );
+}</code></pre>
+
+<h2>Notice the Difference</h2>
+
+<div class="flow">
+Context + useReducer
+<br>↓<br>
+Provider
+<br>↓<br>
+Context
+<br>↓<br>
+Reducer
+<br>↓<br>
+Dispatch
+<br>↓<br>
+Component
+</div>
+
+<br>
+
+<div class="flow">
+Zustand
+<br>↓<br>
+Store
+<br>↓<br>
+Component
+</div>
+
+<h2>How Zustand Updates State</h2>
+
+<p>
+Redux uses:
+</p>
+
+<pre><code class="language-jsx">dispatch(addToCart(product));</code></pre>
+
+<p>
+Context + useReducer uses:
+</p>
+
+<pre><code class="language-jsx">dispatch({
+  type: 'ADD_TO_CART',
+  payload: product
+});</code></pre>
+
+<p>
+Zustand uses:
+</p>
+
+<pre><code class="language-jsx">addToCart(product);</code></pre>
+
+<div class="highlight">
+Zustand directly calls store functions instead of dispatching actions.
+</div>
+
+<h2>Performance Difference</h2>
+
+<h3>Context Problem</h3>
+
+<p>
+When Context value changes, every component consuming that Context may re-render.
+</p>
+
+<pre><code class="language-text">Context Updated
+      ↓
+All Consumers Re-render
+</code></pre>
+
+<h3>Zustand</h3>
+
+<p>
+Zustand subscribes only to the selected state.
+</p>
+
+<pre><code class="language-jsx">const items =
+  useCartStore(state => state.items);</code></pre>
+
+<p>
+Only components using <strong>items</strong> will update.
+</p>
+
+<div class="highlight">
+Zustand usually causes fewer unnecessary re-renders than Context.
+</div>
+
+<h2>Real Project Example</h2>
+
+<p>
+Suppose our application contains:
+</p>
+
+<pre><code class="language-text">Navbar
+ProductDetails
+CartPage
+CheckoutPage
+WishlistPage
+</code></pre>
+
+<p>
+All need cart data.
+</p>
+
+<h3>Context + useReducer</h3>
+
+<pre><code class="language-text">Create Context
+Create Reducer
+Create Provider
+Wrap App
+Use Context
+Dispatch Actions
+</code></pre>
+
+<h3>Zustand</h3>
+
+<pre><code class="language-text">Create Store
+Use Store Anywhere
+</code></pre>
+
+<div class="warning">
+This simplicity is the biggest reason Zustand has become very popular in modern React applications.
+</div>
+
+<h2>Context + useReducer vs Zustand</h2>
+
+<table>
+<tr>
+<th>Feature</th>
+<th>Context + useReducer</th>
+<th>Zustand</th>
+</tr>
+
+<tr>
+<td>Built into React</td>
+<td>✅ Yes</td>
+<td>❌ No</td>
+</tr>
+
+<tr>
+<td>Requires Provider</td>
+<td>✅ Yes</td>
+<td>❌ No</td>
+</tr>
+
+<tr>
+<td>Requires Reducer</td>
+<td>✅ Usually</td>
+<td>❌ No</td>
+</tr>
+
+<tr>
+<td>Requires Dispatch</td>
+<td>✅ Yes</td>
+<td>❌ No</td>
+</tr>
+
+<tr>
+<td>Boilerplate</td>
+<td>More</td>
+<td>Less</td>
+</tr>
+
+<tr>
+<td>Performance</td>
+<td>Good</td>
+<td>Usually Better</td>
+</tr>
+
+<tr>
+<td>Learning Curve</td>
+<td>Medium</td>
+<td>Easy</td>
+</tr>
+
+<tr>
+<td>Best For</td>
+<td>Small to Medium Apps</td>
+<td>Medium to Large Apps</td>
+</tr>
+</table>
+
+<h2>When Should You Use Zustand?</h2>
+
+<ul>
+<li>Global state is needed.</li>
+<li>You want less boilerplate.</li>
+<li>You do not want Redux complexity.</li>
+<li>You want better performance than large Context trees.</li>
+<li>You want a simple API.</li>
+</ul>
+
+<h2>Easy Way To Remember</h2>
+
+<div class="flow">
+Context + useReducer
+<br>↓<br>
+React Built-In Solution
+<br>↓<br>
+More Setup
+</div>
+
+<br>
+
+<div class="flow">
+Zustand
+<br>↓<br>
+External Library
+<br>↓<br>
+Less Setup
+<br>↓<br>
+Simpler Global State
+</div>
+
+<h2>Interview Answer</h2>
+
+<div class="highlight">
+Zustand is a lightweight React state management library that provides global state without requiring Context Providers, reducers, or dispatch functions. Compared to Context + useReducer, Zustand requires less boilerplate, offers simpler APIs, and often provides better performance through selective subscriptions.
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+Zustand is a lightweight global state management library that achieves the same goal as Context + useReducer but with less code and simpler state updates.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+
+</body>
+</html>
