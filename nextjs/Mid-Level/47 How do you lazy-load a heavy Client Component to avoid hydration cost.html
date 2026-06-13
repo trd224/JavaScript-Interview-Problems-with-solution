@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How do you lazy-load a heavy Client Component to avoid hydration cost?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0f172a;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.8;padding:40px 20px}
+.container{max-width:1000px;margin:auto;background:#111827;padding:40px;border-radius:16px}
+h1{color:#38bdf8;margin-bottom:20px}
+h2{color:#a78bfa;margin-top:30px;margin-bottom:10px}
+h3{color:#fbbf24;margin-top:25px;margin-bottom:10px}
+p{margin-bottom:15px}
+ul{margin-left:20px}
+li{margin-bottom:8px}
+.feature{background:#1e293b;border-left:5px solid #38bdf8;padding:15px;border-radius:8px;margin:20px 0}
+.warning{background:#451a1a;border-left:5px solid #f87171;padding:15px;border-radius:8px;margin:20px 0}
+.code-title{background:#1e293b;color:#93c5fd;padding:10px;font-weight:bold}
+pre[class*="language-"]{margin:0!important}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+th{background:#1e293b;color:#38bdf8;text-align:left;padding:12px}
+td{padding:12px;border-top:1px solid #334155}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>How do you lazy-load a heavy Client Component to avoid hydration cost?</h1>
+
+<p>
+We lazy-load a heavy Client Component by using <code>next/dynamic</code>, so that the heavy component's JavaScript is not included in the initial page bundle.
+</p>
+
+<div class="feature">
+<strong>Simple Meaning:</strong><br>
+Load the heavy Client Component only when needed, instead of downloading and hydrating it immediately on page load.
+</div>
+
+<hr>
+
+<h2>Problem: Heavy Client Component</h2>
+
+<p>
+A Client Component needs JavaScript in the browser and must be hydrated.
+</p>
+
+<div class="code-title">Heavy Component</div>
+
+<pre><code class="language-tsx">'use client';
+
+export default function Chart() {
+  return &lt;div&gt;Heavy Chart Component&lt;/div&gt;;
+}</code></pre>
+
+<p>
+If we import it normally, it becomes part of the initial JavaScript bundle.
+</p>
+
+<div class="code-title">Normal Import</div>
+
+<pre><code class="language-tsx">import Chart from './Chart';
+
+export default function Page() {
+  return &lt;Chart /&gt;;
+}</code></pre>
+
+<div class="code-title">Flow</div>
+
+<pre><code class="language-text">Page Loads
+      ↓
+Chart JavaScript Downloads Immediately
+      ↓
+Chart Hydrates Immediately
+      ↓
+Initial Load Becomes Heavier
+</code></pre>
+
+<hr>
+
+<h2>Solution: Lazy Load With next/dynamic</h2>
+
+<p>
+Use <code>dynamic()</code> from <code>next/dynamic</code>.
+</p>
+
+<div class="code-title">Lazy Loaded Component</div>
+
+<pre><code class="language-tsx">import dynamic from 'next/dynamic';
+
+const Chart = dynamic(() => import('./Chart'), {
+  loading: () => &lt;p&gt;Loading chart...&lt;/p&gt;
+});
+
+export default function Page() {
+  return &lt;Chart /&gt;;
+}</code></pre>
+
+<div class="code-title">Flow</div>
+
+<pre><code class="language-text">Page Loads
+      ↓
+Main Page Hydrates
+      ↓
+Chart Bundle Loads Separately
+      ↓
+Chart Hydrates Later
+</code></pre>
+
+<hr>
+
+<h2>Disable SSR For Browser-Only Heavy Component</h2>
+
+<p>
+If the component uses browser-only APIs like <code>window</code>, <code>document</code>, <code>localStorage</code>, maps, charts, or editors, use <code>ssr: false</code>.
+</p>
+
+<div class="code-title">Client Only Dynamic Import</div>
+
+<pre><code class="language-tsx">import dynamic from 'next/dynamic';
+
+const RichEditor = dynamic(() => import('./RichEditor'), {
+  ssr: false,
+  loading: () => &lt;p&gt;Loading editor...&lt;/p&gt;
+});
+
+export default function Page() {
+  return &lt;RichEditor /&gt;;
+}</code></pre>
+
+<div class="feature">
+<strong>Meaning:</strong><br>
+<code>ssr: false</code> means this component will not render on the server. It will only load and render in the browser.
+</div>
+
+<hr>
+
+<h2>Real World Example: Dashboard Chart</h2>
+
+<p>
+Suppose our dashboard has normal static content plus one heavy chart.
+</p>
+
+<div class="code-title">HeavyChart.tsx</div>
+
+<pre><code class="language-tsx">'use client';
+
+import Chart from 'chart.js/auto';
+
+export default function HeavyChart() {
+  return &lt;canvas id="sales-chart"&gt;&lt;/canvas&gt;;
+}</code></pre>
+
+<div class="code-title">page.tsx</div>
+
+<pre><code class="language-tsx">import dynamic from 'next/dynamic';
+
+const HeavyChart = dynamic(() => import('./HeavyChart'), {
+  ssr: false,
+  loading: () => &lt;p&gt;Loading sales chart...&lt;/p&gt;
+});
+
+export default function DashboardPage() {
+  return (
+    &lt;main&gt;
+      &lt;h1&gt;Dashboard&lt;/h1&gt;
+      &lt;p&gt;This content loads fast.&lt;/p&gt;
+      &lt;HeavyChart /&gt;
+    &lt;/main&gt;
+  );
+}</code></pre>
+
+<p>
+Now the dashboard content can load first, and the chart JavaScript loads separately.
+</p>
+
+<hr>
+
+<h2>Lazy Load Only After User Click</h2>
+
+<p>
+For maximum saving, we can load the heavy component only after user interaction.
+</p>
+
+<div class="code-title">ReportSection.tsx</div>
+
+<pre><code class="language-tsx">'use client';
+
+import { useState } from 'react';
+import dynamic from 'next/dynamic';
+
+const HeavyReport = dynamic(() => import('./HeavyReport'), {
+  loading: () => &lt;p&gt;Loading report...&lt;/p&gt;
+});
+
+export default function ReportSection() {
+  const [showReport, setShowReport] = useState(false);
+
+  return (
+    &lt;div&gt;
+      &lt;button onClick={() => setShowReport(true)}&gt;Show Report&lt;/button&gt;
+      {showReport && &lt;HeavyReport /&gt;}
+    &lt;/div&gt;
+  );
+}</code></pre>
+
+<div class="code-title">Flow</div>
+
+<pre><code class="language-text">Page Loads
+      ↓
+HeavyReport Not Downloaded
+      ↓
+User Clicks Show Report
+      ↓
+HeavyReport Downloads
+      ↓
+HeavyReport Hydrates
+</code></pre>
+
+<hr>
+
+<h2>When Should We Lazy Load?</h2>
+
+<table>
+<tr>
+<th>Component</th>
+<th>Lazy Load?</th>
+</tr>
+
+<tr>
+<td>Chart component</td>
+<td>✅ Yes</td>
+</tr>
+
+<tr>
+<td>Map component</td>
+<td>✅ Yes</td>
+</tr>
+
+<tr>
+<td>Rich text editor</td>
+<td>✅ Yes</td>
+</tr>
+
+<tr>
+<td>Video player</td>
+<td>✅ Yes</td>
+</tr>
+
+<tr>
+<td>Payment widget</td>
+<td>✅ Yes</td>
+</tr>
+
+<tr>
+<td>Small button</td>
+<td>❌ Usually No</td>
+</tr>
+
+<tr>
+<td>Header navigation</td>
+<td>❌ Usually No</td>
+</tr>
+</table>
+
+<hr>
+
+<h2>Important: Lazy Loading Reduces Initial JS</h2>
+
+<p>
+Lazy loading does not remove hydration completely. It delays hydration until the component is loaded and rendered.
+</p>
+
+<table>
+<tr>
+<th>Normal Import</th>
+<th>Dynamic Import</th>
+</tr>
+
+<tr>
+<td>Component JS loads immediately</td>
+<td>Component JS loads later</td>
+</tr>
+
+<tr>
+<td>Hydrates immediately</td>
+<td>Hydrates later</td>
+</tr>
+
+<tr>
+<td>Higher initial cost</td>
+<td>Lower initial cost</td>
+</tr>
+</table>
+
+<hr>
+
+<h2>Best Practice</h2>
+
+<div class="code-title">Best Pattern</div>
+
+<pre><code class="language-tsx">import dynamic from 'next/dynamic';
+
+const HeavyClientComponent = dynamic(() => import('./HeavyClientComponent'), {
+  ssr: false,
+  loading: () => &lt;p&gt;Loading...&lt;/p&gt;
+});
+
+export default function Page() {
+  return &lt;HeavyClientComponent /&gt;;
+}</code></pre>
+
+<div class="warning">
+<strong>Important:</strong><br>
+Use <code>ssr: false</code> only for components that do not need server rendering or depend on browser-only APIs.
+</div>
+
+<hr>
+
+<h2>Easy Memory Trick</h2>
+
+<div class="code-title">Remember</div>
+
+<pre><code class="language-text">Heavy Client Component
+        ↓
+dynamic()
+        ↓
+Separate JS Chunk
+        ↓
+Hydrate Later
+        ↓
+Faster Initial Load
+</code></pre>
+
+<div class="feature">
+<strong>One-Line Definition:</strong><br>
+We lazy-load a heavy Client Component with <code>next/dynamic</code> so its JavaScript loads and hydrates later instead of increasing the initial page hydration cost.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-tsx.min.js"></script>
+
+</body>
+</html>

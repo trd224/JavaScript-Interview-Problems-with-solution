@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How does prefetching work in the Link component and how did it change in v13?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0f172a;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.8;padding:40px 20px}
+.container{max-width:1000px;margin:auto;background:#111827;padding:40px;border-radius:16px}
+h1{color:#38bdf8;margin-bottom:20px}
+h2{color:#a78bfa;margin-top:30px;margin-bottom:10px}
+h3{color:#fbbf24;margin-top:25px;margin-bottom:10px}
+p{margin-bottom:15px}
+ul{margin-left:20px}
+li{margin-bottom:8px}
+.feature{background:#1e293b;border-left:5px solid #38bdf8;padding:15px;border-radius:8px;margin:20px 0}
+.warning{background:#451a1a;border-left:5px solid #f87171;padding:15px;border-radius:8px;margin:20px 0}
+.code-title{background:#1e293b;color:#93c5fd;padding:10px;font-weight:bold}
+pre[class*="language-"]{margin:0!important}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+th{background:#1e293b;color:#38bdf8;text-align:left;padding:12px}
+td{padding:12px;border-top:1px solid #334155}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>How does prefetching work in the Link component and how did it change in v13?</h1>
+
+<p>
+Prefetching allows Next.js to download a route before the user clicks the link, making navigation much faster.
+</p>
+
+<div class="feature">
+<strong>Simple Meaning:</strong><br>
+When a link becomes visible on the screen, Next.js can quietly prepare the destination page in the background.
+</div>
+
+<hr>
+
+<h2>What Is Prefetching?</h2>
+
+<p>
+Without prefetching:
+</p>
+
+<div class="code-title">Normal Navigation</div>
+
+<pre><code class="language-text">User Clicks Link
+        ↓
+Download Route Code
+        ↓
+Fetch Route Data
+        ↓
+Render New Page
+</code></pre>
+
+<p>
+There is a delay because everything starts after the click.
+</p>
+
+<p>
+With prefetching:
+</p>
+
+<div class="code-title">Prefetch Navigation</div>
+
+<pre><code class="language-text">Page Loads
+      ↓
+Link Becomes Visible
+      ↓
+Route Prefetched
+      ↓
+User Clicks Link
+      ↓
+Instant Navigation
+</code></pre>
+
+<hr>
+
+<h2>Basic Link Example</h2>
+
+<div class="code-title">Link</div>
+
+<pre><code class="language-tsx">import Link from 'next/link';
+
+export default function Page() {
+  return (
+    &lt;Link href="/products"&gt;
+      Products
+    &lt;/Link&gt;
+  );
+}</code></pre>
+
+<p>
+In production mode, Next.js automatically prefetches this route when the link enters the viewport.
+</p>
+
+<hr>
+
+<h2>How Prefetching Works</h2>
+
+<p>
+Next.js uses an Intersection Observer internally.
+</p>
+
+<div class="code-title">Flow</div>
+
+<pre><code class="language-text">Link Appears In Viewport
+          ↓
+Intersection Observer Detects It
+          ↓
+Next.js Starts Prefetching
+          ↓
+Route Stored In Cache
+          ↓
+User Clicks Link
+          ↓
+Fast Navigation
+</code></pre>
+
+<hr>
+
+<h2>Automatic Prefetching</h2>
+
+<p>
+By default:
+</p>
+
+<div class="code-title">Automatic Prefetch</div>
+
+<pre><code class="language-tsx">&lt;Link href="/products"&gt;
+  Products
+&lt;/Link&gt;</code></pre>
+
+<table>
+<tr>
+<th>Environment</th>
+<th>Prefetch</th>
+</tr>
+
+<tr>
+<td>Development</td>
+<td>❌ Disabled</td>
+</tr>
+
+<tr>
+<td>Production</td>
+<td>✅ Enabled</td>
+</tr>
+</table>
+
+<p>
+This prevents unnecessary network requests during development.
+</p>
+
+<hr>
+
+<h2>Disable Prefetching</h2>
+
+<p>
+Sometimes we do not want prefetching.
+</p>
+
+<div class="code-title">Disable</div>
+
+<pre><code class="language-tsx">&lt;Link href="/products" prefetch={false}&gt;
+  Products
+&lt;/Link&gt;</code></pre>
+
+<p>
+Now the route loads only after the user clicks.
+</p>
+
+<hr>
+
+<h2>What Changed In Next.js 13?</h2>
+
+<h3>1. No More &lt;a&gt; Tag Required</h3>
+
+<p>
+Before v13:
+</p>
+
+<div class="code-title">Next.js 12</div>
+
+<pre><code class="language-tsx">&lt;Link href="/products"&gt;
+  &lt;a&gt;Products&lt;/a&gt;
+&lt;/Link&gt;</code></pre>
+
+<p>
+Starting with v13:
+</p>
+
+<div class="code-title">Next.js 13+</div>
+
+<pre><code class="language-tsx">&lt;Link href="/products"&gt;
+  Products
+&lt;/Link&gt;</code></pre>
+
+<p>
+The Link component automatically renders the anchor element.
+</p>
+
+<table>
+<tr>
+<th>Version</th>
+<th>Syntax</th>
+</tr>
+
+<tr>
+<td>v12</td>
+<td>&lt;Link&gt;&lt;a&gt;...&lt;/a&gt;&lt;/Link&gt;</td>
+</tr>
+
+<tr>
+<td>v13+</td>
+<td>&lt;Link&gt;...&lt;/Link&gt;</td>
+</tr>
+</table>
+
+<hr>
+
+<h3>2. App Router Prefetching Became Smarter</h3>
+
+<p>
+In the App Router, Next.js prefetches React Server Component (RSC) payloads instead of just JavaScript bundles.
+</p>
+
+<div class="code-title">Pages Router</div>
+
+<pre><code class="language-text">Prefetch JavaScript Bundle
+          ↓
+User Click
+          ↓
+Render Page
+</code></pre>
+
+<div class="code-title">App Router</div>
+
+<pre><code class="language-text">Prefetch Route Segments
+          ↓
+Prefetch RSC Payload
+          ↓
+User Click
+          ↓
+Faster Render
+</code></pre>
+
+<div class="feature">
+<strong>Main v13 Improvement:</strong><br>
+The App Router can prefetch route segments and React Server Component payloads, making navigation more efficient.
+</div>
+
+<hr>
+
+<h2>Real World Example</h2>
+
+<div class="code-title">Navigation Menu</div>
+
+<pre><code class="language-tsx">import Link from 'next/link';
+
+export default function Navigation() {
+  return (
+    &lt;nav&gt;
+      &lt;Link href="/"&gt;Home&lt;/Link&gt;
+      &lt;Link href="/products"&gt;Products&lt;/Link&gt;
+      &lt;Link href="/about"&gt;About&lt;/Link&gt;
+    &lt;/nav&gt;
+  );
+}</code></pre>
+
+<div class="code-title">Flow</div>
+
+<pre><code class="language-text">Home Page Loads
+        ↓
+Links Become Visible
+        ↓
+Routes Prefetched
+        ↓
+User Clicks Products
+        ↓
+Products Page Opens Quickly
+</code></pre>
+
+<hr>
+
+<h2>When Should We Disable Prefetch?</h2>
+
+<table>
+<tr>
+<th>Scenario</th>
+<th>Disable Prefetch?</th>
+</tr>
+
+<tr>
+<td>Main Navigation</td>
+<td>❌ No</td>
+</tr>
+
+<tr>
+<td>Frequently Visited Pages</td>
+<td>❌ No</td>
+</tr>
+
+<tr>
+<td>Thousands Of Links</td>
+<td>✅ Sometimes</td>
+</tr>
+
+<tr>
+<td>Rarely Used Admin Pages</td>
+<td>✅ Sometimes</td>
+</tr>
+
+<tr>
+<td>Huge Dynamic Routes</td>
+<td>✅ Sometimes</td>
+</tr>
+</table>
+
+<hr>
+
+<h2>Link vs Traditional Anchor</h2>
+
+<table>
+<tr>
+<th>Feature</th>
+<th>Link</th>
+<th>&lt;a&gt;</th>
+</tr>
+
+<tr>
+<td>Client Navigation</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+
+<tr>
+<td>Prefetching</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+
+<tr>
+<td>SPA Experience</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+
+<tr>
+<td>Full Page Reload</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+</table>
+
+<hr>
+
+<h2>Important Interview Point</h2>
+
+<div class="warning">
+<strong>Important:</strong><br>
+Prefetching works only in production builds. During development (<code>next dev</code>), automatic prefetching is disabled.
+</div>
+
+<hr>
+
+<h2>Easy Memory Trick</h2>
+
+<div class="code-title">Remember</div>
+
+<pre><code class="language-text">Link Visible
+      ↓
+Prefetch Route
+      ↓
+User Clicks
+      ↓
+Fast Navigation
+
+
+v12
+ ↓
+&lt;Link&gt;&lt;a&gt;&lt;/a&gt;&lt;/Link&gt;
+
+
+v13+
+ ↓
+&lt;Link&gt;&lt;/Link&gt;
+</code></pre>
+
+<div class="feature">
+<strong>One-Line Definition:</strong><br>
+The Link component automatically prefetches visible routes in production, and in Next.js 13 it became smarter by prefetching App Router data and no longer requiring a nested <code>&lt;a&gt;</code> element.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-tsx.min.js"></script>
+
+</body>
+</html>

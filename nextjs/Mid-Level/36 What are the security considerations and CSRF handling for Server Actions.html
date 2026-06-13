@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Security Considerations and CSRF Handling for Server Actions</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0f172a;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.8;padding:40px 20px}
+.container{max-width:1000px;margin:auto;background:#111827;padding:40px;border-radius:16px}
+h1{color:#38bdf8;margin-bottom:20px}
+h2{color:#a78bfa;margin-top:30px;margin-bottom:10px}
+h3{color:#fbbf24;margin-top:25px;margin-bottom:10px}
+p{margin-bottom:15px}
+ul{margin-left:20px}
+li{margin-bottom:8px}
+.feature{background:#1e293b;border-left:5px solid #38bdf8;padding:15px;border-radius:8px;margin:20px 0}
+.warning{background:#451a1a;border-left:5px solid #f87171;padding:15px;border-radius:8px;margin:20px 0}
+.code-title{background:#1e293b;color:#93c5fd;padding:10px;font-weight:bold}
+pre[class*="language-"]{margin:0!important}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+th{background:#1e293b;color:#38bdf8;text-align:left;padding:12px}
+td{padding:12px;border-top:1px solid #334155}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>What are the security considerations and CSRF handling for Server Actions?</h1>
+
+<p>
+Server Actions run on the server, so they can safely access databases, cookies, sessions, and secret values. But they still need proper validation, authentication, authorization, and CSRF protection.
+</p>
+
+<div class="feature">
+<strong>Simple Meaning:</strong><br>
+Server Actions are server-side, but they are still callable from the browser, so every action must be treated like a protected backend endpoint.
+</div>
+
+<hr>
+
+<h2>1. Server Actions Are Not Public Browser Code</h2>
+
+<p>
+Code inside a Server Action is not shipped to the browser.
+</p>
+
+<div class="code-title">Server Action</div>
+
+<pre><code class="language-ts">'use server';
+
+export async function createUser(formData: FormData) {
+  await db.user.create({ data: { name: formData.get('name') as string } });
+}</code></pre>
+
+<p>
+This code runs on the server, not inside the browser.
+</p>
+
+<div class="feature">
+<strong>Good:</strong><br>
+Database logic, secret keys, and server-side checks can stay on the server.
+</div>
+
+<hr>
+
+<h2>2. But Server Actions Still Need Authentication</h2>
+
+<p>
+Do not assume that only a valid user can call the action. Always check the current session inside the Server Action.
+</p>
+
+<div class="code-title">Check Session</div>
+
+<pre><code class="language-ts">'use server';
+
+import { auth } from '@/lib/auth';
+
+export async function updateProfile(formData: FormData) {
+  const session = await auth();
+
+  if (!session?.user) {
+    return { success: false, message: 'Unauthorized' };
+  }
+
+  await db.user.update({
+    where: { id: session.user.id },
+    data: { name: formData.get('name') as string }
+  });
+
+  return { success: true, message: 'Profile updated' };
+}</code></pre>
+
+<div class="warning">
+<strong>Important:</strong><br>
+Never trust only the UI. Hiding a button is not security. Always check permission inside the Server Action.
+</div>
+
+<hr>
+
+<h2>3. Authorization Is Also Required</h2>
+
+<p>
+Authentication means the user is logged in. Authorization means the user is allowed to perform that specific action.
+</p>
+
+<div class="code-title">Authorization Example</div>
+
+<pre><code class="language-ts">'use server';
+
+export async function deleteProduct(productId: string) {
+  const session = await auth();
+
+  if (!session?.user) {
+    return { success: false, message: 'Unauthorized' };
+  }
+
+  if (session.user.role !== 'admin') {
+    return { success: false, message: 'Forbidden' };
+  }
+
+  await db.product.delete({ where: { id: productId } });
+
+  return { success: true, message: 'Product deleted' };
+}</code></pre>
+
+<table>
+<tr>
+<th>Check</th>
+<th>Meaning</th>
+</tr>
+
+<tr>
+<td>Authentication</td>
+<td>Is the user logged in?</td>
+</tr>
+
+<tr>
+<td>Authorization</td>
+<td>Is the user allowed to do this action?</td>
+</tr>
+</table>
+
+<hr>
+
+<h2>4. Validate All Form Data</h2>
+
+<p>
+Never trust <code>formData</code>. A user can modify form values from the browser DevTools.
+</p>
+
+<div class="code-title">Validation Example</div>
+
+<pre><code class="language-ts">'use server';
+
+export async function createUser(formData: FormData) {
+  const name = formData.get('name') as string;
+  const email = formData.get('email') as string;
+
+  if (!name) return { success: false, message: 'Name is required' };
+  if (!email.includes('@')) return { success: false, message: 'Invalid email' };
+
+  await db.user.create({ data: { name, email } });
+
+  return { success: true, message: 'User created' };
+}</code></pre>
+
+<hr>
+
+<h2>5. Do Not Trust Hidden Inputs</h2>
+
+<p>
+Hidden inputs are useful for sending IDs, but they are not secure. Users can change them.
+</p>
+
+<div class="code-title">Form</div>
+
+<pre><code class="language-tsx">&lt;form action={deleteProduct}&gt;
+  &lt;input type="hidden" name="productId" value={product.id} /&gt;
+  &lt;button&gt;Delete&lt;/button&gt;
+&lt;/form&gt;</code></pre>
+
+<p>
+The Server Action must still check whether the logged-in user can delete that product.
+</p>
+
+<div class="code-title">Server Action</div>
+
+<pre><code class="language-ts">'use server';
+
+export async function deleteProduct(formData: FormData) {
+  const session = await auth();
+  const productId = formData.get('productId') as string;
+
+  if (session?.user.role !== 'admin') {
+    return { success: false, message: 'Forbidden' };
+  }
+
+  await db.product.delete({ where: { id: productId } });
+
+  return { success: true, message: 'Product deleted' };
+}</code></pre>
+
+<hr>
+
+<h2>6. CSRF Handling in Server Actions</h2>
+
+<p>
+CSRF means Cross-Site Request Forgery. It happens when another website tries to submit a request using the logged-in user's cookies.
+</p>
+
+<div class="code-title">CSRF Attack Idea</div>
+
+<pre><code class="language-text">User logged in on our site
+        ↓
+User opens malicious website
+        ↓
+Malicious site tries to submit a request
+        ↓
+Browser may send cookies automatically
+</code></pre>
+
+<p>
+Next.js Server Actions include built-in CSRF protection by checking request origins. In simple terms, the request must come from the same origin as our application.
+</p>
+
+<div class="feature">
+<strong>Simple Meaning:</strong><br>
+Next.js checks where the Server Action request is coming from. Cross-site action requests are blocked unless explicitly allowed.
+</div>
+
+<hr>
+
+<h2>7. allowedOrigins for Proxies or Different Domains</h2>
+
+<p>
+Sometimes our app may be behind a reverse proxy, load balancer, or different domain. In that case, we can configure allowed origins.
+</p>
+
+<div class="code-title">next.config.js</div>
+
+<pre><code class="language-js">/** @type {import('next').NextConfig} */
+const nextConfig = {
+  experimental: {
+    serverActions: {
+      allowedOrigins: ['my-proxy.com', '*.my-proxy.com']
+    }
+  }
+};
+
+module.exports = nextConfig;</code></pre>
+
+<div class="warning">
+<strong>Important:</strong><br>
+Only add trusted domains in <code>allowedOrigins</code>. Do not add random public domains.
+</div>
+
+<hr>
+
+<h2>8. Use SameSite Cookies</h2>
+
+<p>
+For cookie-based authentication, use secure cookie settings.
+</p>
+
+<div class="code-title">Cookie Security</div>
+
+<pre><code class="language-ts">cookies().set('session', token, {
+  httpOnly: true,
+  secure: true,
+  sameSite: 'lax',
+  path: '/'
+});</code></pre>
+
+<table>
+<tr>
+<th>Cookie Option</th>
+<th>Purpose</th>
+</tr>
+
+<tr>
+<td>httpOnly</td>
+<td>JavaScript cannot read the cookie</td>
+</tr>
+
+<tr>
+<td>secure</td>
+<td>Cookie is sent only over HTTPS</td>
+</tr>
+
+<tr>
+<td>sameSite</td>
+<td>Helps reduce CSRF risk</td>
+</tr>
+</table>
+
+<hr>
+
+<h2>9. Do Not Put Secrets in Client Components</h2>
+
+<p>
+Server Actions can access secrets, but Client Components cannot safely store secret values.
+</p>
+
+<div class="code-title">Good</div>
+
+<pre><code class="language-ts">'use server';
+
+export async function callPrivateApi() {
+  const apiKey = process.env.PRIVATE_API_KEY;
+
+  await fetch('https://api.example.com/private', {
+    headers: { Authorization: `Bearer ${apiKey}` }
+  });
+}</code></pre>
+
+<div class="code-title">Bad</div>
+
+<pre><code class="language-tsx">'use client';
+
+const apiKey = 'secret-key';
+
+export default function Page() {
+  return &lt;button&gt;Call API&lt;/button&gt;;
+}</code></pre>
+
+<hr>
+
+<h2>10. Avoid Returning Sensitive Data</h2>
+
+<p>
+A Server Action can return data to the browser. So do not return passwords, tokens, secret keys, or private database fields.
+</p>
+
+<div class="code-title">Bad</div>
+
+<pre><code class="language-ts">return {
+  success: true,
+  token: user.sessionToken,
+  passwordHash: user.passwordHash
+};</code></pre>
+
+<div class="code-title">Good</div>
+
+<pre><code class="language-ts">return {
+  success: true,
+  message: 'Login successful'
+};</code></pre>
+
+<hr>
+
+<h2>11. Security Checklist</h2>
+
+<table>
+<tr>
+<th>Security Rule</th>
+<th>Required?</th>
+</tr>
+
+<tr>
+<td>Check logged-in user</td>
+<td>✅ Yes</td>
+</tr>
+
+<tr>
+<td>Check user permission</td>
+<td>✅ Yes</td>
+</tr>
+
+<tr>
+<td>Validate all form data</td>
+<td>✅ Yes</td>
+</tr>
+
+<tr>
+<td>Trust hidden input values</td>
+<td>❌ No</td>
+</tr>
+
+<tr>
+<td>Return secrets to browser</td>
+<td>❌ No</td>
+</tr>
+
+<tr>
+<td>Use secure cookies</td>
+<td>✅ Yes</td>
+</tr>
+
+<tr>
+<td>Add random allowedOrigins</td>
+<td>❌ No</td>
+</tr>
+</table>
+
+<hr>
+
+<h2>Easy Memory Trick</h2>
+
+<div class="code-title">Remember</div>
+
+<pre><code class="language-text">Server Action
+      ↓
+Still a Backend Endpoint
+      ↓
+Auth + Permission + Validation + CSRF Safety
+</code></pre>
+
+<div class="feature">
+<strong>One-Line Definition:</strong><br>
+Server Actions are protected by server-side execution and built-in origin checks, but we must still validate input, check authentication, check authorization, secure cookies, and avoid exposing sensitive data.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-tsx.min.js"></script>
+
+</body>
+</html>

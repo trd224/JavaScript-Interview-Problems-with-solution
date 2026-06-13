@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>What are Core Web Vitals and which Next.js features directly improve each?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0f172a;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.8;padding:40px 20px}
+.container{max-width:1000px;margin:auto;background:#111827;padding:40px;border-radius:16px}
+h1{color:#38bdf8;margin-bottom:20px}
+h2{color:#a78bfa;margin-top:30px;margin-bottom:10px}
+h3{color:#fbbf24;margin-top:25px;margin-bottom:10px}
+p{margin-bottom:15px}
+ul{margin-left:20px}
+li{margin-bottom:8px}
+.feature{background:#1e293b;border-left:5px solid #38bdf8;padding:15px;border-radius:8px;margin:20px 0}
+.warning{background:#451a1a;border-left:5px solid #f87171;padding:15px;border-radius:8px;margin:20px 0}
+.code-title{background:#1e293b;color:#93c5fd;padding:10px;font-weight:bold}
+pre[class*="language-"]{margin:0!important}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+th{background:#1e293b;color:#38bdf8;text-align:left;padding:12px}
+td{padding:12px;border-top:1px solid #334155}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>What are Core Web Vitals and which Next.js features directly improve each?</h1>
+
+<p>
+Core Web Vitals are Google's user experience metrics that measure loading speed, responsiveness, and visual stability.
+</p>
+
+<div class="feature">
+<strong>Simple Meaning:</strong><br>
+Core Web Vitals tell us how fast, responsive, and stable our application feels to real users.
+</div>
+
+<hr>
+
+<h2>The Three Core Web Vitals</h2>
+
+<table>
+<tr>
+<th>Metric</th>
+<th>Measures</th>
+<th>Good Score</th>
+</tr>
+
+<tr>
+<td>LCP</td>
+<td>Loading Performance</td>
+<td>≤ 2.5 seconds</td>
+</tr>
+
+<tr>
+<td>INP</td>
+<td>User Interaction Responsiveness</td>
+<td>≤ 200 ms</td>
+</tr>
+
+<tr>
+<td>CLS</td>
+<td>Visual Stability</td>
+<td>≤ 0.1</td>
+</tr>
+</table>
+
+<hr>
+
+<h2>1. LCP (Largest Contentful Paint)</h2>
+
+<p>
+LCP measures how quickly the largest visible content appears on the screen.
+</p>
+
+<div class="code-title">Example</div>
+
+<pre><code class="language-text">User Opens Page
+       ↓
+Hero Image Appears
+       ↓
+LCP Recorded
+</code></pre>
+
+<p>
+Usually the LCP element is:
+</p>
+
+<ul>
+<li>Hero image</li>
+<li>Banner image</li>
+<li>Large heading</li>
+<li>Featured product image</li>
+</ul>
+
+<hr>
+
+<h2>Next.js Features That Improve LCP</h2>
+
+<table>
+<tr>
+<th>Feature</th>
+<th>How It Helps</th>
+</tr>
+
+<tr>
+<td>next/image</td>
+<td>Image optimization</td>
+</tr>
+
+<tr>
+<td>priority</td>
+<td>Preloads LCP image</td>
+</tr>
+
+<tr>
+<td>SSG</td>
+<td>HTML already generated</td>
+</tr>
+
+<tr>
+<td>ISR</td>
+<td>Cached HTML served quickly</td>
+</tr>
+
+<tr>
+<td>Server Components</td>
+<td>Less JavaScript sent</td>
+</tr>
+
+<tr>
+<td>next/font</td>
+<td>Eliminates font delays</td>
+</tr>
+</table>
+
+<div class="code-title">LCP Example</div>
+
+<pre><code class="language-tsx">import Image from 'next/image';
+
+export default function Home() {
+  return (
+    &lt;Image
+      src="/hero.jpg"
+      alt="Hero"
+      width={1200}
+      height={600}
+      priority
+    /&gt;
+  );
+}</code></pre>
+
+<div class="feature">
+<strong>Why?</strong><br>
+The <code>priority</code> prop preloads the hero image, helping the largest visible content appear faster.
+</div>
+
+<hr>
+
+<h2>2. INP (Interaction to Next Paint)</h2>
+
+<p>
+INP measures how quickly the page responds after a user interaction.
+</p>
+
+<div class="code-title">Example</div>
+
+<pre><code class="language-text">User Clicks Button
+        ↓
+Browser Processes Event
+        ↓
+UI Updates
+        ↓
+INP Recorded
+</code></pre>
+
+<p>
+Slow JavaScript usually causes poor INP.
+</p>
+
+<hr>
+
+<h2>Next.js Features That Improve INP</h2>
+
+<table>
+<tr>
+<th>Feature</th>
+<th>How It Helps</th>
+</tr>
+
+<tr>
+<td>Server Components</td>
+<td>Less client JS</td>
+</tr>
+
+<tr>
+<td>next/dynamic</td>
+<td>Lazy loads heavy code</td>
+</tr>
+
+<tr>
+<td>Code Splitting</td>
+<td>Smaller bundles</td>
+</tr>
+
+<tr>
+<td>next/script</td>
+<td>Optimized third-party scripts</td>
+</tr>
+
+<tr>
+<td>Suspense</td>
+<td>Avoids blocking UI</td>
+</tr>
+
+<tr>
+<td>Partial Prerendering (PPR)</td>
+<td>Interactive shell loads faster</td>
+</tr>
+</table>
+
+<div class="code-title">Dynamic Import Example</div>
+
+<pre><code class="language-tsx">import dynamic from 'next/dynamic';
+
+const Chart = dynamic(() => import('./Chart'));
+
+export default function Page() {
+  return &lt;Chart /&gt;;
+}</code></pre>
+
+<div class="feature">
+<strong>Why?</strong><br>
+Heavy chart code is downloaded later, reducing the amount of JavaScript that blocks interaction.
+</div>
+
+<hr>
+
+<h2>3. CLS (Cumulative Layout Shift)</h2>
+
+<p>
+CLS measures unexpected movement of page elements while the page is loading.
+</p>
+
+<div class="code-title">Bad Experience</div>
+
+<pre><code class="language-text">Page Loads
+      ↓
+Button Appears
+      ↓
+Image Loads
+      ↓
+Button Moves Down
+      ↓
+CLS Increases
+</code></pre>
+
+<p>
+Users may click the wrong thing because the layout shifts.
+</p>
+
+<hr>
+
+<h2>Next.js Features That Improve CLS</h2>
+
+<table>
+<tr>
+<th>Feature</th>
+<th>How It Helps</th>
+</tr>
+
+<tr>
+<td>next/image</td>
+<td>Reserves image space</td>
+</tr>
+
+<tr>
+<td>width / height</td>
+<td>Prevents image shifts</td>
+</tr>
+
+<tr>
+<td>fill</td>
+<td>Maintains image layout</td>
+</tr>
+
+<tr>
+<td>next/font</td>
+<td>Prevents font swapping shifts</td>
+</tr>
+
+<tr>
+<td>Layouts</td>
+<td>Keeps stable UI structure</td>
+</tr>
+</table>
+
+<div class="code-title">Good Example</div>
+
+<pre><code class="language-tsx">import Image from 'next/image';
+
+export default function Page() {
+  return (
+    &lt;Image
+      src="/product.jpg"
+      alt="Product"
+      width={600}
+      height={400}
+    /&gt;
+  );
+}</code></pre>
+
+<div class="feature">
+<strong>Why?</strong><br>
+Because dimensions are known before loading, space is reserved and no layout shift occurs.
+</div>
+
+<hr>
+
+<h2>Core Web Vitals and Next.js Mapping</h2>
+
+<table>
+<tr>
+<th>Next.js Feature</th>
+<th>LCP</th>
+<th>INP</th>
+<th>CLS</th>
+</tr>
+
+<tr>
+<td>next/image</td>
+<td>✅</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+
+<tr>
+<td>priority</td>
+<td>✅</td>
+<td>❌</td>
+<td>❌</td>
+</tr>
+
+<tr>
+<td>next/font</td>
+<td>✅</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+
+<tr>
+<td>Server Components</td>
+<td>✅</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+
+<tr>
+<td>next/dynamic</td>
+<td>❌</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+
+<tr>
+<td>Code Splitting</td>
+<td>❌</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+
+<tr>
+<td>SSG / ISR</td>
+<td>✅</td>
+<td>❌</td>
+<td>❌</td>
+</tr>
+
+<tr>
+<td>next/script</td>
+<td>❌</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+</table>
+
+<hr>
+
+<h2>Real World Example</h2>
+
+<div class="code-title">E-Commerce Home Page</div>
+
+<pre><code class="language-text">Hero Banner
+    ↓
+next/image + priority
+    ↓
+Better LCP
+
+
+Heavy Product Carousel
+    ↓
+next/dynamic
+    ↓
+Better INP
+
+
+Product Images
+    ↓
+width + height
+    ↓
+Better CLS
+</code></pre>
+
+<hr>
+
+<h2>Interview Question</h2>
+
+<div class="code-title">Question</div>
+
+<pre><code class="language-text">Which Next.js feature most directly improves CLS?</code></pre>
+
+<div class="code-title">Answer</div>
+
+<pre><code class="language-text">next/image
+
+Because it reserves image space
+before the image loads.
+</code></pre>
+
+<hr>
+
+<h2>Easy Memory Trick</h2>
+
+<div class="code-title">Remember</div>
+
+<pre><code class="language-text">LCP
+ ↓
+Loading Speed
+ ↓
+next/image
+priority
+SSG
+ISR
+
+
+INP
+ ↓
+Interaction Speed
+ ↓
+Server Components
+dynamic()
+Code Splitting
+
+
+CLS
+ ↓
+Layout Stability
+ ↓
+next/image
+next/font
+</code></pre>
+
+<div class="feature">
+<strong>One-Line Definition:</strong><br>
+Core Web Vitals measure loading speed (LCP), interaction responsiveness (INP), and visual stability (CLS), and Next.js improves them through features such as <code>next/image</code>, <code>priority</code>, <code>next/font</code>, Server Components, dynamic imports, and static rendering.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-tsx.min.js"></script>
+
+</body>
+</html>

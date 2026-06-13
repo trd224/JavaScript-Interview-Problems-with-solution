@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How do you analyze and reduce bundle size in a Next.js app?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0f172a;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.8;padding:40px 20px}
+.container{max-width:1000px;margin:auto;background:#111827;padding:40px;border-radius:16px}
+h1{color:#38bdf8;margin-bottom:20px}
+h2{color:#a78bfa;margin-top:30px;margin-bottom:10px}
+h3{color:#fbbf24;margin-top:25px;margin-bottom:10px}
+p{margin-bottom:15px}
+ul{margin-left:20px}
+li{margin-bottom:8px}
+.feature{background:#1e293b;border-left:5px solid #38bdf8;padding:15px;border-radius:8px;margin:20px 0}
+.warning{background:#451a1a;border-left:5px solid #f87171;padding:15px;border-radius:8px;margin:20px 0}
+.code-title{background:#1e293b;color:#93c5fd;padding:10px;font-weight:bold}
+pre[class*="language-"]{margin:0!important}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+th{background:#1e293b;color:#38bdf8;text-align:left;padding:12px}
+td{padding:12px;border-top:1px solid #334155}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>How do you analyze and reduce bundle size in a Next.js app?</h1>
+
+<p>
+Bundle size means the amount of JavaScript sent to the browser. In Next.js, we analyze bundle size using bundle analyzer tools and reduce it by sending less client-side JavaScript.
+</p>
+
+<div class="feature">
+<strong>Simple Meaning:</strong><br>
+Smaller bundle size means the browser downloads, parses, and hydrates less JavaScript, so our application becomes faster.
+</div>
+
+<hr>
+
+<h2>Why Bundle Size Matters</h2>
+
+<div class="code-title">Large Bundle Problem</div>
+
+<pre><code class="language-text">User Opens Page
+      ↓
+Browser Downloads Large JS
+      ↓
+Browser Parses JS
+      ↓
+React Hydrates Page
+      ↓
+Page Becomes Interactive Slowly
+</code></pre>
+
+<p>
+Large JavaScript mainly hurts interaction performance, especially on slow devices.
+</p>
+
+<hr>
+
+<h2>1. Analyze Bundle Size</h2>
+
+<p>
+Use <code>@next/bundle-analyzer</code> to see which packages are increasing the bundle.
+</p>
+
+<div class="code-title">Install</div>
+
+<pre><code class="language-bash">npm install @next/bundle-analyzer</code></pre>
+
+<div class="code-title">next.config.js</div>
+
+<pre><code class="language-js">const withBundleAnalyzer = require('@next/bundle-analyzer')({
+  enabled: process.env.ANALYZE === 'true'
+});
+
+const nextConfig = {};
+
+module.exports = withBundleAnalyzer(nextConfig);</code></pre>
+
+<div class="code-title">Run Analyzer</div>
+
+<pre><code class="language-bash">ANALYZE=true npm run build</code></pre>
+
+<p>
+On Windows PowerShell:
+</p>
+
+<div class="code-title">Windows PowerShell</div>
+
+<pre><code class="language-bash">$env:ANALYZE="true"; npm run build</code></pre>
+
+<hr>
+
+<h2>2. Check Build Output</h2>
+
+<p>
+Next.js build output also shows route sizes.
+</p>
+
+<div class="code-title">Command</div>
+
+<pre><code class="language-bash">npm run build</code></pre>
+
+<div class="code-title">Example Output</div>
+
+<pre><code class="language-text">Route                          Size      First Load JS
+┌ ○ /                          5 kB      95 kB
+├ ○ /about                     2 kB      92 kB
+└ ○ /dashboard                 50 kB     180 kB
+</code></pre>
+
+<table>
+<tr>
+<th>Column</th>
+<th>Meaning</th>
+</tr>
+
+<tr>
+<td>Size</td>
+<td>JavaScript specific to that route</td>
+</tr>
+
+<tr>
+<td>First Load JS</td>
+<td>Total JS needed when opening that route first time</td>
+</tr>
+</table>
+
+<hr>
+
+<h2>3. Prefer Server Components</h2>
+
+<p>
+In the App Router, components are Server Components by default. Server Components do not send their JavaScript to the browser.
+</p>
+
+<div class="code-title">Good</div>
+
+<pre><code class="language-js">export default async function ProductsPage() {
+  const products = await getProducts();
+
+  return (
+    &lt;ul&gt;
+      {products.map(product =&gt; &lt;li key={product.id}&gt;{product.name}&lt;/li&gt;)}
+    &lt;/ul&gt;
+  );
+}</code></pre>
+
+<div class="feature">
+<strong>Why?</strong><br>
+Because this component runs on the server, its JavaScript is not added to the client bundle.
+</div>
+
+<hr>
+
+<h2>4. Do Not Add 'use client' Everywhere</h2>
+
+<p>
+Adding <code>'use client'</code> makes that component and its imports part of the browser bundle.
+</p>
+
+<div class="code-title">Bad</div>
+
+<pre><code class="language-js">'use client';
+
+import HeavyChart from './HeavyChart';
+import ProductList from './ProductList';
+
+export default function Page() {
+  return &lt;ProductList /&gt;;
+}</code></pre>
+
+<p>
+Now unnecessary code may go to the browser.
+</p>
+
+<div class="code-title">Better</div>
+
+<pre><code class="language-js">import ProductList from './ProductList';
+import AddToCartButton from './AddToCartButton';
+
+export default function Page() {
+  return (
+    &lt;&gt;
+      &lt;ProductList /&gt;
+      &lt;AddToCartButton /&gt;
+    &lt;/&gt;
+  );
+}</code></pre>
+
+<p>
+Only <code>AddToCartButton</code> should be a Client Component if it needs browser interaction.
+</p>
+
+<hr>
+
+<h2>5. Lazy Load Heavy Client Components</h2>
+
+<p>
+Use <code>next/dynamic</code> for heavy browser components like charts, maps, editors, and video players.
+</p>
+
+<div class="code-title">Dynamic Import</div>
+
+<pre><code class="language-js">import dynamic from 'next/dynamic';
+
+const Chart = dynamic(() => import('./Chart'), {
+  ssr: false,
+  loading: () => &lt;p&gt;Loading chart...&lt;/p&gt;
+});
+
+export default function Page() {
+  return &lt;Chart /&gt;;
+}</code></pre>
+
+<div class="code-title">Flow</div>
+
+<pre><code class="language-text">Initial Page Load
+        ↓
+Chart JS Not Included Immediately
+        ↓
+Chart Loads Separately
+        ↓
+Initial Bundle Smaller
+</code></pre>
+
+<hr>
+
+<hr>
+
+<h3>Main Difference Between Lazy Loading and Suspense</h3>
+
+<p>
+Many developers get confused between <code>lazy loading</code> and <code>Suspense</code>, but both have different responsibilities.
+</p>
+
+<h4>Suspense</h4>
+
+<p>
+<code>Suspense</code> is used to show a fallback UI while a component or data is not ready.
+</p>
+
+<div class="code-title">Suspense Example</div>
+
+<pre><code class="language-js">&lt;Suspense fallback={&lt;Loading /&gt;}&gt;
+  &lt;Chart /&gt;
+&lt;/Suspense&gt;</code></pre>
+
+<div class="feature">
+<strong>Meaning:</strong><br>
+If <code>Chart</code> is not ready yet, show <code>Loading</code>.
+</div>
+
+<p>
+<code>Suspense</code> does not decide whether the component should be server-rendered or client-rendered. It only controls what the user sees while waiting.
+</p>
+
+<h4>Lazy Loading</h4>
+
+<p>
+Lazy loading means the component code is not downloaded immediately. It is downloaded only when the component is needed.
+</p>
+
+<div class="code-title">React Lazy Example</div>
+
+<pre><code class="language-js">import { lazy, Suspense } from 'react';
+
+const Chart = lazy(() =&gt; import('./Chart'));
+
+export default function Page() {
+  return (
+    &lt;Suspense fallback={&lt;p&gt;Loading...&lt;/p&gt;}&gt;
+      &lt;Chart /&gt;
+    &lt;/Suspense&gt;
+  );
+}</code></pre>
+
+<div class="feature">
+<strong>Meaning:</strong><br>
+<code>lazy()</code> delays the download of the component, and <code>Suspense</code> shows the loading UI while waiting.
+</div>
+
+<h4>Next.js dynamic()</h4>
+
+<p>
+In Next.js, <code>dynamic()</code> is commonly used instead of <code>React.lazy()</code> because it supports lazy loading, loading UI, and optional SSR control.
+</p>
+
+<div class="code-title">Next.js dynamic Example</div>
+
+<pre><code class="language-js">import dynamic from 'next/dynamic';
+
+const Chart = dynamic(() =&gt; import('./Chart'), {
+  loading: () =&gt; &lt;p&gt;Loading...&lt;/p&gt;
+});
+
+export default function Page() {
+  return &lt;Chart /&gt;;
+}</code></pre>
+
+<table>
+<tr>
+<th>Feature</th>
+<th>Suspense</th>
+<th>lazy()</th>
+<th>dynamic()</th>
+</tr>
+
+<tr>
+<td>Shows loading UI</td>
+<td>✅ Yes</td>
+<td>❌ No</td>
+<td>✅ Yes</td>
+</tr>
+
+<tr>
+<td>Delays component download</td>
+<td>❌ No</td>
+<td>✅ Yes</td>
+<td>✅ Yes</td>
+</tr>
+
+<tr>
+<td>Controls SSR</td>
+<td>❌ No</td>
+<td>❌ No</td>
+<td>✅ Yes, using <code>ssr:false</code></td>
+</tr>
+
+<tr>
+<td>Next.js optimized</td>
+<td>❌ No</td>
+<td>❌ No</td>
+<td>✅ Yes</td>
+</tr>
+</table>
+
+<div class="code-title">Easy Memory Trick</div>
+
+<pre><code class="language-text">Suspense
+    ↓
+Shows loading UI
+
+lazy()
+    ↓
+Delays component download
+
+dynamic()
+    ↓
+Lazy loading
++ Loading UI
++ Optional SSR control
+</code></pre>
+
+<div class="feature">
+<strong>One-Line Interview Answer:</strong><br>
+<code>lazy()</code> or <code>dynamic()</code> decides when the component code is downloaded, while <code>Suspense</code> decides what the user sees while waiting.
+</div>
+
+<h2>6. Import Only What We Need</h2>
+
+<p>
+Avoid importing a full library when only one function is needed.
+</p>
+
+<div class="code-title">Bad</div>
+
+<pre><code class="language-ts">import _ from 'lodash';
+
+const name = _.capitalize('rizwan');</code></pre>
+
+<div class="code-title">Better</div>
+
+<pre><code class="language-ts">import capitalize from 'lodash/capitalize';
+
+const name = capitalize('rizwan');</code></pre>
+
+<hr>
+
+<h2>7. Remove Heavy Libraries</h2>
+
+<p>
+Sometimes a small native JavaScript solution can replace a heavy package.
+</p>
+
+<table>
+<tr>
+<th>Heavy Usage</th>
+<th>Better Option</th>
+</tr>
+
+<tr>
+<td>Moment.js</td>
+<td>date-fns or Intl API</td>
+</tr>
+
+<tr>
+<td>Lodash full import</td>
+<td>Specific function import</td>
+</tr>
+
+<tr>
+<td>Large chart library</td>
+<td>Lazy load chart</td>
+</tr>
+
+<tr>
+<td>Large editor</td>
+<td>Dynamic import editor</td>
+</tr>
+</table>
+
+<hr>
+
+<h2>8. Use next/script For Third-Party Scripts</h2>
+
+<p>
+Third-party scripts can increase main thread work. Load them carefully.
+</p>
+
+<div class="code-title">Example</div>
+
+<pre><code class="language-js">import Script from 'next/script';
+
+export default function Page() {
+  return (
+    &lt;Script src="https://example.com/analytics.js" strategy="lazyOnload" /&gt;
+  );
+}</code></pre>
+
+<table>
+<tr>
+<th>Strategy</th>
+<th>Use Case</th>
+</tr>
+
+<tr>
+<td>afterInteractive</td>
+<td>Needed soon after page load</td>
+</tr>
+
+<tr>
+<td>lazyOnload</td>
+<td>Low priority scripts</td>
+</tr>
+
+<tr>
+<td>beforeInteractive</td>
+<td>Critical scripts only</td>
+</tr>
+</table>
+
+<hr>
+
+<h2>9. Split Large Client Components</h2>
+
+<p>
+If one Client Component imports many features, split it into smaller components.
+</p>
+
+<div class="code-title">Bad</div>
+
+<pre><code class="language-js">'use client';
+
+import Chart from './Chart';
+import Editor from './Editor';
+import VideoPlayer from './VideoPlayer';
+
+export default function Dashboard() {
+  return (
+    &lt;&gt;
+      &lt;Chart /&gt;
+      &lt;Editor /&gt;
+      &lt;VideoPlayer /&gt;
+    &lt;/&gt;
+  );
+}</code></pre>
+
+<div class="code-title">Better</div>
+
+<pre><code class="language-js">import dynamic from 'next/dynamic';
+
+const Chart = dynamic(() => import('./Chart'));
+const Editor = dynamic(() => import('./Editor'), { ssr: false });
+const VideoPlayer = dynamic(() => import('./VideoPlayer'));
+
+export default function Dashboard() {
+  return (
+    &lt;&gt;
+      &lt;Chart /&gt;
+      &lt;Editor /&gt;
+      &lt;VideoPlayer /&gt;
+    &lt;/&gt;
+  );
+}</code></pre>
+
+<hr>
+
+<h2>10. Use Package Import Optimization</h2>
+
+<p>
+Next.js can optimize imports from some large libraries using <code>optimizePackageImports</code>.
+</p>
+
+<div class="code-title">next.config.js</div>
+
+<pre><code class="language-js">const nextConfig = {
+  experimental: {
+    optimizePackageImports: ['lucide-react', 'date-fns']
+  }
+};
+
+module.exports = nextConfig;</code></pre>
+
+<p>
+This helps avoid pulling unnecessary code from supported packages.
+</p>
+
+<hr>
+
+<h2>Bundle Reduction Checklist</h2>
+
+<table>
+<tr>
+<th>Technique</th>
+<th>Improves Bundle?</th>
+</tr>
+
+<tr>
+<td>Use Server Components</td>
+<td>✅ Yes</td>
+</tr>
+
+<tr>
+<td>Avoid unnecessary 'use client'</td>
+<td>✅ Yes</td>
+</tr>
+
+<tr>
+<td>Use next/dynamic</td>
+<td>✅ Yes</td>
+</tr>
+
+<tr>
+<td>Remove unused libraries</td>
+<td>✅ Yes</td>
+</tr>
+
+<tr>
+<td>Import specific functions</td>
+<td>✅ Yes</td>
+</tr>
+
+<tr>
+<td>Use next/script strategy</td>
+<td>✅ Yes</td>
+</tr>
+
+<tr>
+<td>Add more Client Components</td>
+<td>❌ No</td>
+</tr>
+
+<tr>
+<td>Import full lodash</td>
+<td>❌ No</td>
+</tr>
+</table>
+
+<hr>
+
+<h2>Easy Memory Trick</h2>
+
+<div class="code-title">Remember</div>
+
+<pre><code class="language-text">Analyze
+   ↓
+@next/bundle-analyzer
+
+
+Reduce
+   ↓
+Server Components
+dynamic()
+Specific imports
+Remove heavy libraries
+Avoid unnecessary use client
+</code></pre>
+
+<div class="feature">
+<strong>One-Line Definition:</strong><br>
+We analyze Next.js bundle size using build output and <code>@next/bundle-analyzer</code>, then reduce it by using Server Components, avoiding unnecessary <code>'use client'</code>, lazy-loading heavy components, removing large libraries, and optimizing imports.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism-javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism-jsx.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism-typescript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism-js.min.js"></script>
+
+</body>
+</html>

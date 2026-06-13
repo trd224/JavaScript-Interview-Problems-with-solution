@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How do you handle and surface validation errors from a Server Action?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0f172a;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.8;padding:40px 20px}
+.container{max-width:1000px;margin:auto;background:#111827;padding:40px;border-radius:16px}
+h1{color:#38bdf8;margin-bottom:20px}
+h2{color:#a78bfa;margin-top:30px;margin-bottom:10px}
+h3{color:#fbbf24;margin-top:25px;margin-bottom:10px}
+p{margin-bottom:15px}
+ul{margin-left:20px}
+li{margin-bottom:8px}
+.feature{background:#1e293b;border-left:5px solid #38bdf8;padding:15px;border-radius:8px;margin:20px 0}
+.code-title{background:#1e293b;color:#93c5fd;padding:10px;font-weight:bold}
+pre[class*="language-"]{margin:0!important}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+th{background:#1e293b;color:#38bdf8;text-align:left;padding:12px}
+td{padding:12px;border-top:1px solid #334155}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>How do you handle and surface validation errors from a Server Action?</h1>
+
+<p>
+Validation errors from a Server Action are handled by returning an error object from the Server Action and showing that object in the UI using <code>useActionState()</code>.
+</p>
+
+<div class="feature">
+<strong>Simple Meaning:</strong><br>
+Do not throw validation errors for normal user mistakes. Return them as state and display them in the form.
+</div>
+
+<hr>
+
+<h2>Recommended Flow</h2>
+
+<div class="code-title">Flow</div>
+
+<pre><code class="language-text">User Submits Form
+        ↓
+Server Action Receives FormData
+        ↓
+Validate Data
+        ↓
+If Invalid → Return Error Object
+        ↓
+useActionState Receives Error
+        ↓
+Show Error In UI
+</code></pre>
+
+<hr>
+
+<h2>1. Create Server Action</h2>
+
+<p>
+The Server Action validates the form data and returns a state object.
+</p>
+
+<div class="code-title">app/actions.ts</div>
+
+<pre><code class="language-ts">'use server';
+
+type State = {
+  success: boolean;
+  message: string;
+  errors?: {
+    name?: string;
+    email?: string;
+  };
+};
+
+export async function createUser(previousState: State, formData: FormData): Promise&lt;State&gt; {
+  const name = formData.get('name') as string;
+  const email = formData.get('email') as string;
+
+  const errors: State['errors'] = {};
+
+  if (!name) errors.name = 'Name is required';
+  if (!email) errors.email = 'Email is required';
+
+  if (Object.keys(errors).length > 0) {
+    return { success: false, message: 'Please fix the errors below', errors };
+  }
+
+  await db.user.create({ data: { name, email } });
+
+  return { success: true, message: 'User created successfully' };
+}</code></pre>
+
+<hr>
+
+<h2>2. Use useActionState In Form</h2>
+
+<p>
+The Client Component receives the returned state from the Server Action.
+</p>
+
+<div class="code-title">app/UserForm.tsx</div>
+
+<pre><code class="language-tsx">'use client';
+
+import { useActionState } from 'react';
+import { createUser } from './actions';
+
+const initialState = { success: false, message: '', errors: {} };
+
+export default function UserForm() {
+  const [state, formAction] = useActionState(createUser, initialState);
+
+  return (
+    &lt;form action={formAction}&gt;
+      &lt;input name="name" placeholder="Enter name" /&gt;
+      {state.errors?.name && &lt;p&gt;{state.errors.name}&lt;/p&gt;}
+
+      &lt;input name="email" placeholder="Enter email" /&gt;
+      {state.errors?.email && &lt;p&gt;{state.errors.email}&lt;/p&gt;}
+
+      &lt;button&gt;Save&lt;/button&gt;
+
+      {state.message && &lt;p&gt;{state.message}&lt;/p&gt;}
+    &lt;/form&gt;
+  );
+}</code></pre>
+
+<hr>
+
+<h2>Important Point</h2>
+
+<p>
+For expected validation errors, return values instead of throwing errors.
+</p>
+
+<table>
+<tr>
+<th>Situation</th>
+<th>Recommended Handling</th>
+</tr>
+
+<tr>
+<td>User left name empty</td>
+<td>Return validation error</td>
+</tr>
+
+<tr>
+<td>Email is invalid</td>
+<td>Return validation error</td>
+</tr>
+
+<tr>
+<td>Password is too short</td>
+<td>Return validation error</td>
+</tr>
+
+<tr>
+<td>Database server crashed</td>
+<td>Throw error or handle with error boundary</td>
+</tr>
+</table>
+
+<hr>
+
+<h2>With Zod Validation</h2>
+
+<p>
+In real projects, we usually validate with a schema library like Zod.
+</p>
+
+<div class="code-title">app/actions.ts</div>
+
+<pre><code class="language-ts">'use server';
+
+import { z } from 'zod';
+
+const UserSchema = z.object({
+  name: z.string().min(1, 'Name is required'),
+  email: z.string().email('Invalid email address')
+});
+
+type State = {
+  success: boolean;
+  message: string;
+  errors?: {
+    name?: string[];
+    email?: string[];
+  };
+};
+
+export async function createUser(previousState: State, formData: FormData): Promise&lt;State&gt; {
+  const result = UserSchema.safeParse({
+    name: formData.get('name'),
+    email: formData.get('email')
+  });
+
+  if (!result.success) {
+    return { success: false, message: 'Validation failed', errors: result.error.flatten().fieldErrors };
+  }
+
+  await db.user.create({ data: result.data });
+
+  return { success: true, message: 'User created successfully', errors: {} };
+}</code></pre>
+
+<hr>
+
+<h2>Client Form With Zod Errors</h2>
+
+<div class="code-title">app/UserForm.tsx</div>
+
+<pre><code class="language-tsx">'use client';
+
+import { useActionState } from 'react';
+import { createUser } from './actions';
+
+const initialState = { success: false, message: '', errors: {} };
+
+export default function UserForm() {
+  const [state, formAction] = useActionState(createUser, initialState);
+
+  return (
+    &lt;form action={formAction}&gt;
+      &lt;input name="name" placeholder="Enter name" /&gt;
+      {state.errors?.name && &lt;p&gt;{state.errors.name[0]}&lt;/p&gt;}
+
+      &lt;input name="email" placeholder="Enter email" /&gt;
+      {state.errors?.email && &lt;p&gt;{state.errors.email[0]}&lt;/p&gt;}
+
+      &lt;button&gt;Save&lt;/button&gt;
+
+      {state.message && &lt;p&gt;{state.message}&lt;/p&gt;}
+    &lt;/form&gt;
+  );
+}</code></pre>
+
+<hr>
+
+<h2>Why We Return Errors Instead Of Throwing</h2>
+
+<p>
+Validation errors are expected user mistakes, so they should be returned as normal state.
+</p>
+
+<div class="code-title">Good</div>
+
+<pre><code class="language-ts">return { success: false, message: 'Email is required' };</code></pre>
+
+<div class="code-title">Avoid For Validation</div>
+
+<pre><code class="language-ts">throw new Error('Email is required');</code></pre>
+
+<p>
+Throwing is better for unexpected failures like database errors, server crashes, or permission problems.
+</p>
+
+<hr>
+
+<h2>useActionState vs useFormStatus</h2>
+
+<table>
+<tr>
+<th>Hook</th>
+<th>Purpose</th>
+</tr>
+
+<tr>
+<td>useActionState()</td>
+<td>Shows returned validation errors or success messages</td>
+</tr>
+
+<tr>
+<td>useFormStatus()</td>
+<td>Shows loading/pending status while submitting</td>
+</tr>
+</table>
+
+<hr>
+
+<h2>Final Best Practice</h2>
+
+<div class="code-title">Best Practice Flow</div>
+
+<pre><code class="language-text">Server Action
+      ↓
+Validate FormData
+      ↓
+Return { success, message, errors }
+      ↓
+useActionState()
+      ↓
+Show errors beside fields
+</code></pre>
+
+<div class="feature">
+<strong>One-Line Definition:</strong><br>
+Validation errors from a Server Action should be returned as structured state and displayed in the UI using <code>useActionState()</code>, while unexpected system errors should be thrown or handled separately.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-tsx.min.js"></script>
+
+</body>
+</html>

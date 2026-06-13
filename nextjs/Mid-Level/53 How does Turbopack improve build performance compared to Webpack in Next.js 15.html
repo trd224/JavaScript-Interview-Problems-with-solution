@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How does Turbopack improve build performance compared to Webpack in Next.js 15?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0f172a;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.8;padding:40px 20px}
+.container{max-width:1000px;margin:auto;background:#111827;padding:40px;border-radius:16px}
+h1{color:#38bdf8;margin-bottom:20px}
+h2{color:#a78bfa;margin-top:30px;margin-bottom:10px}
+h3{color:#fbbf24;margin-top:25px;margin-bottom:10px}
+p{margin-bottom:15px}
+ul{margin-left:20px}
+li{margin-bottom:8px}
+.feature{background:#1e293b;border-left:5px solid #38bdf8;padding:15px;border-radius:8px;margin:20px 0}
+.warning{background:#451a1a;border-left:5px solid #f87171;padding:15px;border-radius:8px;margin:20px 0}
+.code-title{background:#1e293b;color:#93c5fd;padding:10px;font-weight:bold}
+pre[class*="language-"]{margin:0!important}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+th{background:#1e293b;color:#38bdf8;text-align:left;padding:12px}
+td{padding:12px;border-top:1px solid #334155}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>How does Turbopack improve build performance compared to Webpack in Next.js 15?</h1>
+
+<p>
+Turbopack improves performance by using a Rust-based incremental bundler that only rebuilds the parts of our application that changed, instead of repeatedly processing the whole project like traditional bundling systems.
+</p>
+
+<div class="feature">
+<strong>Simple Meaning:</strong><br>
+Webpack often does more repeated work. Turbopack remembers previous work and updates only the changed parts, so development builds and refreshes become faster.
+</div>
+
+<hr>
+
+<h2>What Is Turbopack?</h2>
+
+<p>
+Turbopack is Next.js's newer bundler, written in Rust and built for faster JavaScript and TypeScript compilation.
+</p>
+
+<div class="code-title">Main Idea</div>
+
+<pre><code class="language-text">Turbopack
+    ↓
+Rust-based bundler
+    ↓
+Incremental compilation
+    ↓
+Faster dev server and updates
+</code></pre>
+
+<p>
+In Next.js 15, Turbopack Dev became stable, while production Turbopack builds became beta later in Next.js 15.5.
+</p>
+
+<hr>
+
+<h2>Webpack vs Turbopack</h2>
+
+<table>
+<tr>
+<th>Feature</th>
+<th>Webpack</th>
+<th>Turbopack</th>
+</tr>
+
+<tr>
+<td>Language</td>
+<td>JavaScript</td>
+<td>Rust</td>
+</tr>
+
+<tr>
+<td>Build Style</td>
+<td>Traditional bundling</td>
+<td>Incremental bundling</td>
+</tr>
+
+<tr>
+<td>Rebuilds</td>
+<td>Often processes more modules</td>
+<td>Processes only changed parts</td>
+</tr>
+
+<tr>
+<td>Dev Server Startup</td>
+<td>Slower in large apps</td>
+<td>Faster in large apps</td>
+</tr>
+
+<tr>
+<td>Fast Refresh</td>
+<td>Can slow down as app grows</td>
+<td>Optimized for quick updates</td>
+</tr>
+</table>
+
+<hr>
+
+<h2>1. Incremental Compilation</h2>
+
+<p>
+Turbopack keeps track of the project graph and recompiles only what changed.
+</p>
+
+<div class="code-title">Webpack Style</div>
+
+<pre><code class="language-text">Change One Component
+        ↓
+Reprocess Many Related Files
+        ↓
+Slower Rebuild
+</code></pre>
+
+<div class="code-title">Turbopack Style</div>
+
+<pre><code class="language-text">Change One Component
+        ↓
+Find Only Affected Modules
+        ↓
+Rebuild Changed Parts
+        ↓
+Faster Update
+</code></pre>
+
+<div class="feature">
+<strong>Why It Is Faster:</strong><br>
+Turbopack avoids repeating work that has already been done.
+</div>
+
+<hr>
+
+<h2>2. Rust-Based Performance</h2>
+
+<p>
+Turbopack is written in Rust, which helps it perform heavy compilation and bundling work faster than JavaScript-based tooling in many cases.
+</p>
+
+<div class="code-title">Concept</div>
+
+<pre><code class="language-text">Webpack
+   ↓
+JavaScript-based bundling
+
+
+Turbopack
+   ↓
+Rust-based bundling
+</code></pre>
+
+<hr>
+
+<h2>3. Unified Graph</h2>
+
+<p>
+Next.js needs separate outputs for server code, client code, and route code. Turbopack uses a unified graph to manage these environments more efficiently.
+</p>
+
+<div class="code-title">Concept</div>
+
+<pre><code class="language-text">Client Code
+Server Code
+Route Code
+    ↓
+Unified Graph
+    ↓
+Less duplicated work
+</code></pre>
+
+<hr>
+
+<h2>4. Faster Fast Refresh</h2>
+
+<p>
+Fast Refresh is the update we see in the browser after changing a file during development.
+</p>
+
+<div class="code-title">With Webpack</div>
+
+<pre><code class="language-text">Change File
+    ↓
+Rebuild
+    ↓
+Browser Updates
+</code></pre>
+
+<div class="code-title">With Turbopack</div>
+
+<pre><code class="language-text">Change File
+    ↓
+Incremental Update
+    ↓
+Browser Updates Faster
+</code></pre>
+
+<p>
+This is especially useful in large applications with many components, layouts, and routes.
+</p>
+
+<hr>
+
+<h2>How To Use Turbopack In Next.js 15</h2>
+
+<div class="code-title">Development</div>
+
+<pre><code class="language-bash">next dev --turbopack</code></pre>
+
+<p>
+Or in package.json:
+</p>
+
+<div class="code-title">package.json</div>
+
+<pre><code class="language-json">{
+  "scripts": {
+    "dev": "next dev --turbopack"
+  }
+}</code></pre>
+
+<hr>
+
+<h2>Production Build In Next.js 15.5+</h2>
+
+<p>
+In Next.js 15.5, Turbopack production builds became beta.
+</p>
+
+<div class="code-title">Build With Turbopack</div>
+
+<pre><code class="language-bash">next build --turbopack</code></pre>
+
+<div class="warning">
+<strong>Important:</strong><br>
+In Next.js 15, Turbopack is mainly known for stable development performance. Production builds with Turbopack were beta in Next.js 15.5, not the default stable build path.
+</div>
+
+<hr>
+
+<h2>Why It Feels Faster In Development</h2>
+
+<table>
+<tr>
+<th>Situation</th>
+<th>Webpack</th>
+<th>Turbopack</th>
+</tr>
+
+<tr>
+<td>Start dev server</td>
+<td>Can take longer</td>
+<td>Starts faster</td>
+</tr>
+
+<tr>
+<td>Edit component</td>
+<td>More rebuild work</td>
+<td>Only changed graph updates</td>
+</tr>
+
+<tr>
+<td>Large app</td>
+<td>Can slow down more</td>
+<td>Scales better</td>
+</tr>
+
+<tr>
+<td>Repeated changes</td>
+<td>More repeated work</td>
+<td>Reuses previous work</td>
+</tr>
+</table>
+
+<hr>
+
+<h2>Real World Example</h2>
+
+<p>
+Suppose our project has many routes and components.
+</p>
+
+<div class="code-title">Project</div>
+
+<pre><code class="language-text">app/
+├── dashboard/
+├── products/
+├── orders/
+├── users/
+├── reports/
+└── settings/
+</code></pre>
+
+<p>
+If we edit only this file:
+</p>
+
+<div class="code-title">Changed File</div>
+
+<pre><code class="language-text">app/products/ProductCard.tsx</code></pre>
+
+<p>
+Turbopack tries to update only the affected part of the dependency graph.
+</p>
+
+<div class="code-title">Result</div>
+
+<pre><code class="language-text">Only ProductCard and related modules update
+        ↓
+Browser refreshes faster
+        ↓
+Developer waits less
+</code></pre>
+
+<hr>
+
+<h2>Does Turbopack Reduce Browser Bundle Size?</h2>
+
+<p>
+Not directly.
+</p>
+
+<table>
+<tr>
+<th>Goal</th>
+<th>Tool / Technique</th>
+</tr>
+
+<tr>
+<td>Faster builds</td>
+<td>Turbopack</td>
+</tr>
+
+<tr>
+<td>Smaller browser JS</td>
+<td>Server Components, dynamic imports, code splitting</td>
+</tr>
+
+<tr>
+<td>Better images</td>
+<td>next/image</td>
+</tr>
+
+<tr>
+<td>Better fonts</td>
+<td>next/font</td>
+</tr>
+</table>
+
+<div class="feature">
+<strong>Important:</strong><br>
+Turbopack mainly improves developer/build performance. It does not automatically fix a large client bundle.
+</div>
+
+<hr>
+
+<h2>Easy Memory Trick</h2>
+
+<div class="code-title">Remember</div>
+
+<pre><code class="language-text">Webpack
+   ↓
+Older bundler
+   ↓
+More repeated work
+
+
+Turbopack
+   ↓
+Rust + incremental graph
+   ↓
+Less repeated work
+   ↓
+Faster development builds
+</code></pre>
+
+<div class="feature">
+<strong>One-Line Definition:</strong><br>
+Turbopack improves Next.js 15 build performance by using a Rust-based incremental bundling system that reuses previous work and rebuilds only changed parts, making dev startup and Fast Refresh faster than Webpack.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-tsx.min.js"></script>
+
+</body>
+</html>

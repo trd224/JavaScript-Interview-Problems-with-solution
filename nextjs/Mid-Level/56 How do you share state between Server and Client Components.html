@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How do you share state between Server and Client Components?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0f172a;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.8;padding:40px 20px}
+.container{max-width:1000px;margin:auto;background:#111827;padding:40px;border-radius:16px}
+h1{color:#38bdf8;margin-bottom:20px}
+h2{color:#a78bfa;margin-top:30px;margin-bottom:10px}
+h3{color:#fbbf24;margin-top:25px;margin-bottom:10px}
+p{margin-bottom:15px}
+ul{margin-left:20px}
+li{margin-bottom:8px}
+.feature{background:#1e293b;border-left:5px solid #38bdf8;padding:15px;border-radius:8px;margin:20px 0}
+.warning{background:#451a1a;border-left:5px solid #f87171;padding:15px;border-radius:8px;margin:20px 0}
+.code-title{background:#1e293b;color:#93c5fd;padding:10px;font-weight:bold}
+pre[class*="language-"]{margin:0!important}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+th{background:#1e293b;color:#38bdf8;text-align:left;padding:12px}
+td{padding:12px;border-top:1px solid #334155}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>How do you share state between Server and Client Components?</h1>
+
+<p>
+Server Components and Client Components do not share live React state directly. Instead, we pass server data to Client Components through props, and Client Components manage interactive state in the browser.
+</p>
+
+<div class="feature">
+<strong>Simple Meaning:</strong><br>
+Server Components can send initial data to Client Components, but live state like <code>useState()</code> belongs only inside Client Components.
+</div>
+
+<hr>
+
+<h2>Important Rule</h2>
+
+<table>
+<tr>
+<th>Component Type</th>
+<th>Can Use useState?</th>
+<th>Main Role</th>
+</tr>
+
+<tr>
+<td>Server Component</td>
+<td>❌ No</td>
+<td>Fetch data and render HTML/RSC payload</td>
+</tr>
+
+<tr>
+<td>Client Component</td>
+<td>✅ Yes</td>
+<td>Handle interaction and browser state</td>
+</tr>
+</table>
+
+<hr>
+
+<h2>1. Pass Server Data To Client Component Using Props</h2>
+
+<p>
+This is the most common way.
+</p>
+
+<div class="code-title">Server Component - page.tsx</div>
+
+<pre><code class="language-tsx">import Counter from './Counter';
+
+export default async function Page() {
+  const initialCount = await getCartCount();
+
+  return &lt;Counter initialCount={initialCount} /&gt;;
+}</code></pre>
+
+<div class="code-title">Client Component - Counter.tsx</div>
+
+<pre><code class="language-tsx">'use client';
+
+import { useState } from 'react';
+
+export default function Counter({ initialCount }: { initialCount: number }) {
+  const [count, setCount] = useState(initialCount);
+
+  return (
+    &lt;button onClick={() =&gt; setCount(count + 1)}&gt;
+      Cart: {count}
+    &lt;/button&gt;
+  );
+}</code></pre>
+
+<div class="code-title">Flow</div>
+
+<pre><code class="language-text">Server Component
+      ↓
+Fetch initialCount
+      ↓
+Pass initialCount as prop
+      ↓
+Client Component
+      ↓
+useState(initialCount)
+      ↓
+User interaction updates client state
+</code></pre>
+
+<hr>
+
+<h2>2. Server State vs Client State</h2>
+
+<table>
+<tr>
+<th>State Type</th>
+<th>Where It Lives</th>
+<th>Example</th>
+</tr>
+
+<tr>
+<td>Server State</td>
+<td>Database / API / Server Component</td>
+<td>Products, user profile, cart count from DB</td>
+</tr>
+
+<tr>
+<td>Client State</td>
+<td>Browser / Client Component</td>
+<td>Modal open, selected tab, input value</td>
+</tr>
+</table>
+
+<div class="feature">
+<strong>Best Practice:</strong><br>
+Fetch real data on the server, then pass it as props to the Client Component only when interaction is needed.
+</div>
+
+<hr>
+
+<h2>3. Client Component Can Update Server State Using Server Action</h2>
+
+<p>
+If the user changes data, call a Server Action and then update UI.
+</p>
+
+<div class="code-title">actions.ts</div>
+
+<pre><code class="language-ts">'use server';
+
+export async function updateCart(productId: string) {
+  await db.cart.update({ where: { productId }, data: { quantity: 1 } });
+
+  return { success: true };
+}</code></pre>
+
+<div class="code-title">AddToCartButton.tsx</div>
+
+<pre><code class="language-tsx">'use client';
+
+import { useState } from 'react';
+import { updateCart } from './actions';
+
+export default function AddToCartButton({ productId }: { productId: string }) {
+  const [added, setAdded] = useState(false);
+
+  async function handleClick() {
+    const result = await updateCart(productId);
+    if (result.success) setAdded(true);
+  }
+
+  return &lt;button onClick={handleClick}&gt;{added ? 'Added' : 'Add To Cart'}&lt;/button&gt;;
+}</code></pre>
+
+<div class="code-title">Flow</div>
+
+<pre><code class="language-text">Client Button Click
+        ↓
+Server Action Runs
+        ↓
+Database Updated
+        ↓
+Client State Updates
+</code></pre>
+
+<hr>
+
+<h2>4. Refresh Server Components After Mutation</h2>
+
+<p>
+After updating data, we can refresh the route to get fresh Server Component data.
+</p>
+
+<div class="code-title">Client Component</div>
+
+<pre><code class="language-tsx">'use client';
+
+import { useRouter } from 'next/navigation';
+import { updateCart } from './actions';
+
+export default function AddToCartButton({ productId }: { productId: string }) {
+  const router = useRouter();
+
+  async function handleClick() {
+    await updateCart(productId);
+    router.refresh();
+  }
+
+  return &lt;button onClick={handleClick}&gt;Add To Cart&lt;/button&gt;;
+}</code></pre>
+
+<p>
+<code>router.refresh()</code> asks Next.js to re-fetch Server Components for the current route.
+</p>
+
+<div class="code-title">Flow</div>
+
+<pre><code class="language-text">Server Action Updates DB
+        ↓
+router.refresh()
+        ↓
+Server Component Re-renders
+        ↓
+Fresh Data Sent To Client
+</code></pre>
+
+<hr>
+
+<h2>5. Use URL Search Params For Shareable State</h2>
+
+<p>
+For filters, sorting, pagination, and tabs that should be shareable, use URL search params.
+</p>
+
+<div class="code-title">Client Component</div>
+
+<pre><code class="language-tsx">'use client';
+
+import { useRouter, useSearchParams } from 'next/navigation';
+
+export default function ProductFilter() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  function changeCategory(category: string) {
+    router.push(`/products?category=${category}`);
+  }
+
+  return &lt;button onClick={() =&gt; changeCategory('mobile')}&gt;Mobiles&lt;/button&gt;;
+}</code></pre>
+
+<div class="code-title">Server Component</div>
+
+<pre><code class="language-tsx">export default async function ProductsPage({ searchParams }: { searchParams: Promise&lt;{ category?: string }&gt; }) {
+  const { category } = await searchParams;
+  const products = await getProducts(category);
+
+  return &lt;ProductList products={products} /&gt;;
+}</code></pre>
+
+<div class="feature">
+<strong>Use URL State For:</strong><br>
+Filters, sorting, pagination, search query, selected category, and shareable tabs.
+</div>
+
+<hr>
+
+<h2>6. Use Context Only Inside Client Components</h2>
+
+<p>
+React Context with state works only in Client Components.
+</p>
+
+<div class="code-title">ThemeProvider.tsx</div>
+
+<pre><code class="language-tsx">'use client';
+
+import { createContext, useContext, useState } from 'react';
+
+const ThemeContext = createContext(null);
+
+export function ThemeProvider({ children }: { children: React.ReactNode }) {
+  const [theme, setTheme] = useState('dark');
+
+  return &lt;ThemeContext.Provider value={{ theme, setTheme }}&gt;{children}&lt;/ThemeContext.Provider&gt;;
+}
+
+export function useTheme() {
+  return useContext(ThemeContext);
+}</code></pre>
+
+<p>
+Server Components can be rendered inside a Client Provider as children, but they cannot read client context directly.
+</p>
+
+<hr>
+
+<h2>What We Cannot Do</h2>
+
+<div class="warning">
+<strong>Important:</strong><br>
+We cannot directly share live <code>useState()</code> between Server Components and Client Components.
+</div>
+
+<div class="code-title">Wrong Idea</div>
+
+<pre><code class="language-text">Server Component useState
+        ↓
+Client Component useState
+        ↓
+Shared live state
+</code></pre>
+
+<p>
+This does not work because Server Components run on the server, while Client Components run in the browser.
+</p>
+
+<hr>
+
+<h2>Best Patterns</h2>
+
+<table>
+<tr>
+<th>Need</th>
+<th>Best Pattern</th>
+</tr>
+
+<tr>
+<td>Initial data from database</td>
+<td>Server Component fetches and passes props</td>
+</tr>
+
+<tr>
+<td>Button click / modal / tabs</td>
+<td>Client Component useState</td>
+</tr>
+
+<tr>
+<td>Update database</td>
+<td>Server Action</td>
+</tr>
+
+<tr>
+<td>Refresh server data after update</td>
+<td>router.refresh() or revalidatePath()</td>
+</tr>
+
+<tr>
+<td>Share filter/search state</td>
+<td>URL search params</td>
+</tr>
+
+<tr>
+<td>Global browser state</td>
+<td>Client Context / Zustand / Redux</td>
+</tr>
+</table>
+
+<hr>
+
+<h2>Easy Memory Trick</h2>
+
+<div class="code-title">Remember</div>
+
+<pre><code class="language-text">Server Component
+      ↓
+Fetch data
+      ↓
+Pass props
+
+
+Client Component
+      ↓
+useState
+      ↓
+Interaction
+
+
+Server Action
+      ↓
+Update database
+
+
+router.refresh()
+      ↓
+Get fresh server data
+</code></pre>
+
+<div class="feature">
+<strong>One-Line Definition:</strong><br>
+We share state between Server and Client Components by passing server data as props to Client Components, managing interactive state on the client, and syncing changes back to the server using Server Actions, URL params, or route refreshes.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-tsx.min.js"></script>
+
+</body>
+</html>

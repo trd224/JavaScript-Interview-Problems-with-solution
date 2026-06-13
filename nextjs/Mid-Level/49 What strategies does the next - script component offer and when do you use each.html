@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>What strategies does the next/script component offer and when do you use each?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0f172a;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.8;padding:40px 20px}
+.container{max-width:1000px;margin:auto;background:#111827;padding:40px;border-radius:16px}
+h1{color:#38bdf8;margin-bottom:20px}
+h2{color:#a78bfa;margin-top:30px;margin-bottom:10px}
+h3{color:#fbbf24;margin-top:25px;margin-bottom:10px}
+p{margin-bottom:15px}
+ul{margin-left:20px}
+li{margin-bottom:8px}
+.feature{background:#1e293b;border-left:5px solid #38bdf8;padding:15px;border-radius:8px;margin:20px 0}
+.warning{background:#451a1a;border-left:5px solid #f87171;padding:15px;border-radius:8px;margin:20px 0}
+.code-title{background:#1e293b;color:#93c5fd;padding:10px;font-weight:bold}
+pre[class*="language-"]{margin:0!important}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+th{background:#1e293b;color:#38bdf8;text-align:left;padding:12px}
+td{padding:12px;border-top:1px solid #334155}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>What strategies does the next/script component offer and when do you use each?</h1>
+
+<p>
+<code>next/script</code> allows us to control when third-party JavaScript files are loaded so they do not negatively impact page performance.
+</p>
+
+<div class="feature">
+<strong>Simple Meaning:</strong><br>
+The <code>strategy</code> prop decides when a script should be downloaded and executed.
+</div>
+
+<hr>
+
+<h2>Why Use next/script?</h2>
+
+<p>
+Normally, a script tag can block page rendering.
+</p>
+
+<div class="code-title">Traditional Script</div>
+
+<pre><code class="language-html">&lt;script src="https://example.com/script.js"&gt;&lt;/script&gt;</code></pre>
+
+<div class="code-title">Problem</div>
+
+<pre><code class="language-text">Browser Reads HTML
+        ↓
+Downloads Script
+        ↓
+Executes Script
+        ↓
+Continues Rendering
+</code></pre>
+
+<p>
+Large scripts can slow down page loading.
+</p>
+
+<p>
+<code>next/script</code> provides optimized loading strategies.
+</p>
+
+<hr>
+
+<h2>Basic Usage</h2>
+
+<div class="code-title">Example</div>
+
+<pre><code class="language-tsx">import Script from 'next/script';
+
+export default function Page() {
+  return (
+    &lt;&gt;
+      &lt;Script
+        src="https://example.com/script.js"
+        strategy="afterInteractive"
+      /&gt;
+    &lt;/&gt;
+  );
+}</code></pre>
+
+<hr>
+
+<h2>Available Strategies</h2>
+
+<table>
+<tr>
+<th>Strategy</th>
+<th>When It Runs</th>
+</tr>
+
+<tr>
+<td>beforeInteractive</td>
+<td>Before Next.js hydration</td>
+</tr>
+
+<tr>
+<td>afterInteractive</td>
+<td>After hydration begins</td>
+</tr>
+
+<tr>
+<td>lazyOnload</td>
+<td>During browser idle time</td>
+</tr>
+
+<tr>
+<td>worker</td>
+<td>Inside a web worker</td>
+</tr>
+</table>
+
+<hr>
+
+<h2>1. beforeInteractive</h2>
+
+<p>
+Loads and executes before Next.js hydrates the page.
+</p>
+
+<div class="code-title">Example</div>
+
+<pre><code class="language-tsx">&lt;Script
+  src="https://example.com/script.js"
+  strategy="beforeInteractive"
+/&gt;</code></pre>
+
+<div class="code-title">Flow</div>
+
+<pre><code class="language-text">HTML Arrives
+      ↓
+Script Loads
+      ↓
+Script Executes
+      ↓
+Hydration Starts
+</code></pre>
+
+<div class="feature">
+<strong>Use For:</strong><br>
+Critical scripts that must run before the application becomes interactive.
+</div>
+
+<p>
+Examples:
+</p>
+
+<ul>
+<li>Bot detection</li>
+<li>Security scripts</li>
+<li>Consent management</li>
+<li>Critical monitoring scripts</li>
+</ul>
+
+<div class="warning">
+<strong>Warning:</strong><br>
+Use sparingly because it can delay page interactivity.
+</div>
+
+<hr>
+
+<h2>2. afterInteractive (Default)</h2>
+
+<p>
+This is the default strategy.
+</p>
+
+<div class="code-title">Example</div>
+
+<pre><code class="language-tsx">&lt;Script
+  src="https://example.com/script.js"
+  strategy="afterInteractive"
+/&gt;</code></pre>
+
+<div class="code-title">Flow</div>
+
+<pre><code class="language-text">HTML Loads
+      ↓
+Hydration Starts
+      ↓
+Script Downloads
+      ↓
+Script Executes
+</code></pre>
+
+<div class="feature">
+<strong>Use For:</strong><br>
+Scripts needed soon after page interaction begins.
+</div>
+
+<p>
+Examples:
+</p>
+
+<ul>
+<li>Google Analytics</li>
+<li>Tag Manager</li>
+<li>Customer chat widgets</li>
+<li>A/B testing tools</li>
+</ul>
+
+<hr>
+
+<h2>3. lazyOnload</h2>
+
+<p>
+Loads only when the browser is idle.
+</p>
+
+<div class="code-title">Example</div>
+
+<pre><code class="language-tsx">&lt;Script
+  src="https://example.com/script.js"
+  strategy="lazyOnload"
+/&gt;</code></pre>
+
+<div class="code-title">Flow</div>
+
+<pre><code class="language-text">Page Loads
+      ↓
+Hydration Completes
+      ↓
+Browser Becomes Idle
+      ↓
+Script Downloads
+      ↓
+Script Executes
+</code></pre>
+
+<div class="feature">
+<strong>Use For:</strong><br>
+Low-priority scripts that are not immediately needed.
+</div>
+
+<p>
+Examples:
+</p>
+
+<ul>
+<li>Social sharing widgets</li>
+<li>Heatmaps</li>
+<li>Feedback widgets</li>
+<li>Marketing tools</li>
+</ul>
+
+<hr>
+
+<h2>4. worker</h2>
+
+<p>
+Loads the script inside a Web Worker instead of the main thread.
+</p>
+
+<div class="code-title">Example</div>
+
+<pre><code class="language-tsx">&lt;Script
+  src="https://example.com/script.js"
+  strategy="worker"
+/&gt;</code></pre>
+
+<div class="code-title">Flow</div>
+
+<pre><code class="language-text">Script Loads
+      ↓
+Runs In Worker
+      ↓
+Main Thread Remains Free
+</code></pre>
+
+<div class="feature">
+<strong>Use For:</strong><br>
+Heavy third-party scripts that support running in a worker environment.
+</div>
+
+<div class="warning">
+<strong>Important:</strong><br>
+Not all third-party scripts work inside a Web Worker.
+</div>
+
+<hr>
+
+<h2>Real World Examples</h2>
+
+<table>
+<tr>
+<th>Script</th>
+<th>Recommended Strategy</th>
+</tr>
+
+<tr>
+<td>Cookie Consent</td>
+<td>beforeInteractive</td>
+</tr>
+
+<tr>
+<td>Google Analytics</td>
+<td>afterInteractive</td>
+</tr>
+
+<tr>
+<td>Google Tag Manager</td>
+<td>afterInteractive</td>
+</tr>
+
+<tr>
+<td>Hotjar</td>
+<td>lazyOnload</td>
+</tr>
+
+<tr>
+<td>Feedback Widget</td>
+<td>lazyOnload</td>
+</tr>
+
+<tr>
+<td>Heavy Analytics SDK</td>
+<td>worker (if supported)</td>
+</tr>
+</table>
+
+<hr>
+
+<h2>Which Strategy Should We Choose?</h2>
+
+<div class="code-title">Decision Flow</div>
+
+<pre><code class="language-text">Needed Before Page Works?
+           ↓
+         Yes
+           ↓
+beforeInteractive
+
+
+Needed Soon After Load?
+           ↓
+         Yes
+           ↓
+afterInteractive
+
+
+Can Wait?
+           ↓
+         Yes
+           ↓
+lazyOnload
+
+
+Heavy CPU Work?
+           ↓
+         Yes
+           ↓
+worker
+</code></pre>
+
+<hr>
+
+<h2>Complete Example</h2>
+
+<div class="code-title">Layout</div>
+
+<pre><code class="language-tsx">import Script from 'next/script';
+
+export default function RootLayout({ children }) {
+  return (
+    &lt;html&gt;
+      &lt;body&gt;
+        {children}
+
+        &lt;Script
+          src="https://www.googletagmanager.com/gtag/js"
+          strategy="afterInteractive"
+        /&gt;
+
+        &lt;Script
+          src="https://example.com/feedback.js"
+          strategy="lazyOnload"
+        /&gt;
+      &lt;/body&gt;
+    &lt;/html&gt;
+  );
+}</code></pre>
+
+<hr>
+
+<h2>Easy Memory Trick</h2>
+
+<div class="code-title">Remember</div>
+
+<pre><code class="language-text">beforeInteractive
+       ↓
+Before Hydration
+
+
+afterInteractive
+       ↓
+After Hydration Starts
+
+
+lazyOnload
+       ↓
+When Browser Is Idle
+
+
+worker
+       ↓
+Run In Worker Thread
+</code></pre>
+
+<div class="feature">
+<strong>One-Line Definition:</strong><br>
+The <code>strategy</code> prop of <code>next/script</code> controls when a script loads and executes, with <code>beforeInteractive</code>, <code>afterInteractive</code>, <code>lazyOnload</code>, and <code>worker</code> providing different performance and loading behaviors.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-tsx.min.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>What is next/dynamic and what options does it accept?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0f172a;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.8;padding:40px 20px}
+.container{max-width:1000px;margin:auto;background:#111827;padding:40px;border-radius:16px}
+h1{color:#38bdf8;margin-bottom:20px}
+h2{color:#a78bfa;margin-top:30px;margin-bottom:10px}
+h3{color:#fbbf24;margin-top:25px;margin-bottom:10px}
+p{margin-bottom:15px}
+ul{margin-left:20px}
+li{margin-bottom:8px}
+.feature{background:#1e293b;border-left:5px solid #38bdf8;padding:15px;border-radius:8px;margin:20px 0}
+.code-title{background:#1e293b;color:#93c5fd;padding:10px;font-weight:bold}
+pre[class*="language-"]{margin:0!important}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+th{background:#1e293b;color:#38bdf8;text-align:left;padding:12px}
+td{padding:12px;border-top:1px solid #334155}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>What is next/dynamic and what options (ssr, loading) does it accept?</h1>
+
+<p>
+<code>next/dynamic</code> is a Next.js utility that allows us to dynamically import components instead of including them in the initial JavaScript bundle.
+</p>
+
+<div class="feature">
+<strong>Simple Meaning:</strong><br>
+<code>next/dynamic</code> lets us load a component only when it is needed, reducing the initial bundle size and improving page performance.
+</div>
+
+<hr>
+
+<h2>Why Do We Need next/dynamic?</h2>
+
+<p>
+Normally, imported components become part of the page bundle.
+</p>
+
+<div class="code-title">Normal Import</div>
+
+<pre><code class="language-tsx">import Chart from './Chart';
+
+export default function Page() {
+  return &lt;Chart /&gt;;
+}</code></pre>
+
+<p>
+Flow:
+</p>
+
+<pre><code class="language-text">Page Loads
+      ↓
+Chart Downloaded
+      ↓
+Page Rendered
+</code></pre>
+
+<p>
+Even if the user never views the chart, its JavaScript is still downloaded.
+</p>
+
+<hr>
+
+<h2>Using next/dynamic</h2>
+
+<div class="code-title">Dynamic Import</div>
+
+<pre><code class="language-tsx">import dynamic from 'next/dynamic';
+
+const Chart = dynamic(() => import('./Chart'));
+
+export default function Page() {
+  return &lt;Chart /&gt;;
+}</code></pre>
+
+<p>
+Flow:
+</p>
+
+<pre><code class="language-text">Page Loads
+      ↓
+Chart Not Downloaded Yet
+      ↓
+Chart Needed
+      ↓
+Download Chart
+      ↓
+Render Chart
+</code></pre>
+
+<hr>
+
+<h2>Basic Syntax</h2>
+
+<div class="code-title">Syntax</div>
+
+<pre><code class="language-tsx">const Component = dynamic(
+  () => import('./Component'),
+  options
+);</code></pre>
+
+<hr>
+
+<h2>Option 1: ssr</h2>
+
+<p>
+The <code>ssr</code> option controls whether the component should be rendered on the server.
+</p>
+
+<div class="code-title">Disable SSR</div>
+
+<pre><code class="language-tsx">import dynamic from 'next/dynamic';
+
+const Map = dynamic(() => import('./Map'), {
+  ssr: false
+});</code></pre>
+
+<p>
+Flow:
+</p>
+
+<pre><code class="language-text">Server Render
+      ↓
+Map Skipped
+      ↓
+Browser Loads
+      ↓
+Map Rendered
+</code></pre>
+
+<div class="feature">
+<strong>Use Case:</strong><br>
+Browser-only libraries such as Google Maps, Leaflet, Chart.js, or components that access <code>window</code>, <code>document</code>, or <code>localStorage</code>.
+</div>
+
+<hr>
+
+<h2>Without ssr: false</h2>
+
+<div class="code-title">Problem Example</div>
+
+<pre><code class="language-tsx">const Map = dynamic(() => import('./Map'));</code></pre>
+
+<p>
+If the component contains:
+</p>
+
+<pre><code class="language-tsx">window.location.href</code></pre>
+
+<p>
+The server will throw an error because <code>window</code> does not exist on the server.
+</p>
+
+<hr>
+
+<h2>Option 2: loading</h2>
+
+<p>
+The <code>loading</code> option displays a fallback component while the dynamic component is being downloaded.
+</p>
+
+<div class="code-title">Loading Example</div>
+
+<pre><code class="language-tsx">import dynamic from 'next/dynamic';
+
+const Chart = dynamic(() => import('./Chart'), {
+  loading: () => &lt;p&gt;Loading Chart...&lt;/p&gt;
+});</code></pre>
+
+<p>
+Flow:
+</p>
+
+<pre><code class="language-text">Page Loads
+      ↓
+Loading Chart...
+      ↓
+Chart Bundle Downloaded
+      ↓
+Chart Rendered
+</code></pre>
+
+<hr>
+
+<h2>Using Both Options Together</h2>
+
+<div class="code-title">Example</div>
+
+<pre><code class="language-tsx">import dynamic from 'next/dynamic';
+
+const Map = dynamic(() => import('./Map'), {
+  ssr: false,
+  loading: () => &lt;p&gt;Loading Map...&lt;/p&gt;
+});</code></pre>
+
+<p>
+Meaning:
+</p>
+
+<table>
+<tr>
+<th>Option</th>
+<th>Effect</th>
+</tr>
+
+<tr>
+<td>ssr: false</td>
+<td>Do not render on server</td>
+</tr>
+
+<tr>
+<td>loading</td>
+<td>Show fallback while downloading</td>
+</tr>
+</table>
+
+<hr>
+
+<h2>Real World Example</h2>
+
+<p>
+Suppose our dashboard contains a heavy chart library.
+</p>
+
+<div class="code-title">Without Dynamic Import</div>
+
+<pre><code class="language-text">Dashboard Page
+      ↓
+Download Chart Library
+      ↓
+Download Table
+      ↓
+Download Filters
+      ↓
+Render
+</code></pre>
+
+<p>
+The page becomes slower.
+</p>
+
+<div class="code-title">With Dynamic Import</div>
+
+<pre><code class="language-text">Dashboard Page
+      ↓
+Render Immediately
+      ↓
+Chart Downloads Separately
+      ↓
+Chart Appears Later
+</code></pre>
+
+<p>
+The dashboard becomes faster because the chart code is split into a separate chunk.
+</p>
+
+<hr>
+
+<h2>Common Use Cases</h2>
+
+<table>
+<tr>
+<th>Use Case</th>
+<th>Use next/dynamic?</th>
+</tr>
+
+<tr>
+<td>Google Maps</td>
+<td>✅ Yes</td>
+</tr>
+
+<tr>
+<td>Chart.js</td>
+<td>✅ Yes</td>
+</tr>
+
+<tr>
+<td>Video Player</td>
+<td>✅ Yes</td>
+</tr>
+
+<tr>
+<td>Rich Text Editor</td>
+<td>✅ Yes</td>
+</tr>
+
+<tr>
+<td>Small Header Component</td>
+<td>❌ Usually No</td>
+</tr>
+</table>
+
+<hr>
+
+<h2>next/dynamic vs React.lazy</h2>
+
+<table>
+<tr>
+<th>Feature</th>
+<th>next/dynamic</th>
+<th>React.lazy</th>
+</tr>
+
+<tr>
+<td>Works In Next.js</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+
+<tr>
+<td>Supports SSR Control</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+
+<tr>
+<td>loading Option</td>
+<td>✅</td>
+<td>❌ (Uses Suspense)</td>
+</tr>
+
+<tr>
+<td>Next.js Optimized</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+</table>
+
+<hr>
+
+<h2>Easy Memory Trick</h2>
+
+<div class="code-title">Remember</div>
+
+<pre><code class="language-text">next/dynamic
+      ↓
+Load Later
+
+
+ssr: false
+      ↓
+Client Only
+
+
+loading
+      ↓
+Show Placeholder
+</code></pre>
+
+<div class="feature">
+<strong>One-Line Definition:</strong><br>
+<code>next/dynamic</code> dynamically loads components to reduce initial bundle size, while <code>ssr</code> controls server rendering and <code>loading</code> provides a temporary fallback UI during download.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-tsx.min.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>What is the priority prop on next/image and when must you set it?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0f172a;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.8;padding:40px 20px}
+.container{max-width:1000px;margin:auto;background:#111827;padding:40px;border-radius:16px}
+h1{color:#38bdf8;margin-bottom:20px}
+h2{color:#a78bfa;margin-top:30px;margin-bottom:10px}
+h3{color:#fbbf24;margin-top:25px;margin-bottom:10px}
+p{margin-bottom:15px}
+ul{margin-left:20px}
+li{margin-bottom:8px}
+.feature{background:#1e293b;border-left:5px solid #38bdf8;padding:15px;border-radius:8px;margin:20px 0}
+.warning{background:#451a1a;border-left:5px solid #f87171;padding:15px;border-radius:8px;margin:20px 0}
+.code-title{background:#1e293b;color:#93c5fd;padding:10px;font-weight:bold}
+pre[class*="language-"]{margin:0!important}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+th{background:#1e293b;color:#38bdf8;text-align:left;padding:12px}
+td{padding:12px;border-top:1px solid #334155}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>What is the priority prop on next/image and when must you set it?</h1>
+
+<p>
+The <code>priority</code> prop tells Next.js that an image is important and should be loaded immediately instead of being lazy-loaded.
+</p>
+
+<div class="feature">
+<strong>Simple Meaning:</strong><br>
+Use <code>priority</code> for the most important image visible when the page first loads, usually the Hero or LCP image.
+</div>
+
+<hr>
+
+<h2>Why Does next/image Lazy Load By Default?</h2>
+
+<p>
+Next.js automatically lazy-loads most images to improve performance.
+</p>
+
+<div class="code-title">Default Image</div>
+
+<pre><code class="language-tsx">import Image from 'next/image';
+
+export default function Page() {
+  return (
+    &lt;Image
+      src="/product.jpg"
+      alt="Product"
+      width={600}
+      height={400}
+    /&gt;
+  );
+}</code></pre>
+
+<div class="code-title">Flow</div>
+
+<pre><code class="language-text">Page Loads
+      ↓
+Visible Content Loads
+      ↓
+Image Loads When Needed
+</code></pre>
+
+<p>
+This is good for most images.
+</p>
+
+<hr>
+
+<h2>What Does priority Do?</h2>
+
+<p>
+The <code>priority</code> prop tells Next.js to preload the image and fetch it as soon as possible.
+</p>
+
+<div class="code-title">Priority Image</div>
+
+<pre><code class="language-tsx">import Image from 'next/image';
+
+export default function Page() {
+  return (
+    &lt;Image
+      src="/hero.jpg"
+      alt="Hero"
+      width={1200}
+      height={600}
+      priority
+    /&gt;
+  );
+}</code></pre>
+
+<div class="code-title">Flow</div>
+
+<pre><code class="language-text">Page Starts Loading
+      ↓
+Image Request Starts Immediately
+      ↓
+Hero Image Appears Faster
+</code></pre>
+
+<hr>
+
+<h2>What Problem Does It Solve?</h2>
+
+<p>
+Many websites have a large hero image at the top of the page.
+</p>
+
+<div class="code-title">Without priority</div>
+
+<pre><code class="language-text">HTML Loads
+      ↓
+CSS Loads
+      ↓
+JavaScript Loads
+      ↓
+Hero Image Loads Later
+      ↓
+Slow LCP Score
+</code></pre>
+
+<div class="code-title">With priority</div>
+
+<pre><code class="language-text">HTML Loads
+      ↓
+Hero Image Preloaded
+      ↓
+Hero Image Appears Faster
+      ↓
+Better LCP Score
+</code></pre>
+
+<hr>
+
+<h2>What Is LCP?</h2>
+
+<p>
+LCP (Largest Contentful Paint) measures how quickly the largest visible content appears on the screen.
+</p>
+
+<p>
+Often the LCP element is:
+</p>
+
+<ul>
+<li>Hero image</li>
+<li>Banner image</li>
+<li>Large product image</li>
+<li>Landing page image</li>
+</ul>
+
+<div class="feature">
+<strong>Important:</strong><br>
+If an image becomes the LCP element, Next.js usually recommends adding the <code>priority</code> prop.
+</div>
+
+<hr>
+
+<h2>Real World Example</h2>
+
+<div class="code-title">E-Commerce Hero Banner</div>
+
+<pre><code class="language-tsx">import Image from 'next/image';
+
+export default function HomePage() {
+  return (
+    &lt;Image
+      src="/banner.jpg"
+      alt="Summer Sale"
+      width={1600}
+      height={700}
+      priority
+    /&gt;
+  );
+}</code></pre>
+
+<p>
+Because the banner is visible immediately after page load, it should use <code>priority</code>.
+</p>
+
+<hr>
+
+<h2>When Must You Use priority?</h2>
+
+<table>
+<tr>
+<th>Image Type</th>
+<th>Use priority?</th>
+</tr>
+
+<tr>
+<td>Main Hero Image</td>
+<td>✅ Yes</td>
+</tr>
+
+<tr>
+<td>LCP Image</td>
+<td>✅ Yes</td>
+</tr>
+
+<tr>
+<td>Above-the-Fold Banner</td>
+<td>✅ Yes</td>
+</tr>
+
+<tr>
+<td>Logo (Large & Visible)</td>
+<td>Sometimes</td>
+</tr>
+
+<tr>
+<td>Gallery Images</td>
+<td>❌ No</td>
+</tr>
+
+<tr>
+<td>Below-the-Fold Images</td>
+<td>❌ No</td>
+</tr>
+
+<tr>
+<td>Product Images Far Down Page</td>
+<td>❌ No</td>
+</tr>
+</table>
+
+<hr>
+
+<h2>When Should You Avoid priority?</h2>
+
+<p>
+Do not add <code>priority</code> to every image.
+</p>
+
+<div class="warning">
+<strong>Bad Practice:</strong><br>
+Using <code>priority</code> on many images forces the browser to download all of them immediately, which can slow down the page.
+</div>
+
+<div class="code-title">Bad Example</div>
+
+<pre><code class="language-tsx">&lt;Image src="/img1.jpg" alt="" width={400} height={300} priority /&gt;
+&lt;Image src="/img2.jpg" alt="" width={400} height={300} priority /&gt;
+&lt;Image src="/img3.jpg" alt="" width={400} height={300} priority /&gt;
+&lt;Image src="/img4.jpg" alt="" width={400} height={300} priority /&gt;</code></pre>
+
+<p>
+Usually only one or two important images should use it.
+</p>
+
+<hr>
+
+<h2>What Happens Internally?</h2>
+
+<p>
+When <code>priority</code> is used, Next.js automatically inserts preload hints.
+</p>
+
+<div class="code-title">Conceptual Output</div>
+
+<pre><code class="language-html">&lt;link
+  rel="preload"
+  as="image"
+  href="/hero.jpg"
+/&gt;</code></pre>
+
+<p>
+This tells the browser to fetch the image earlier.
+</p>
+
+<hr>
+
+<h2>priority vs Lazy Loading</h2>
+
+<table>
+<tr>
+<th>Feature</th>
+<th>priority</th>
+<th>Default Image</th>
+</tr>
+
+<tr>
+<td>Preloaded</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+
+<tr>
+<td>Lazy Loaded</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+
+<tr>
+<td>Good For LCP</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+
+<tr>
+<td>Good For Below Fold</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+</table>
+
+<hr>
+
+<h2>Common Interview Question</h2>
+
+<div class="code-title">Question</div>
+
+<pre><code class="language-text">Should we add priority to all images?</code></pre>
+
+<div class="code-title">Answer</div>
+
+<pre><code class="language-text">No.
+
+Only use priority for the most important
+above-the-fold image, usually the LCP image.
+</code></pre>
+
+<hr>
+
+<h2>Easy Memory Trick</h2>
+
+<div class="code-title">Remember</div>
+
+<pre><code class="language-text">Normal Image
+      ↓
+Lazy Load
+
+
+Hero Image
+      ↓
+priority
+      ↓
+Preload
+</code></pre>
+
+<div class="feature">
+<strong>One-Line Definition:</strong><br>
+The <code>priority</code> prop tells Next.js to preload an important image immediately and should be used for the main above-the-fold or LCP image to improve loading performance.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-tsx.min.js"></script>
+
+</body>
+</html>

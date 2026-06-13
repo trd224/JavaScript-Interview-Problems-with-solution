@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How do you redirect inside a Server Action without triggering a client-side navigation?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0f172a;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.8;padding:40px 20px}
+.container{max-width:1000px;margin:auto;background:#111827;padding:40px;border-radius:16px}
+h1{color:#38bdf8;margin-bottom:20px}
+h2{color:#a78bfa;margin-top:30px;margin-bottom:10px}
+h3{color:#fbbf24;margin-top:25px;margin-bottom:10px}
+p{margin-bottom:15px}
+ul{margin-left:20px}
+li{margin-bottom:8px}
+.feature{background:#1e293b;border-left:5px solid #38bdf8;padding:15px;border-radius:8px;margin:20px 0}
+.code-title{background:#1e293b;color:#93c5fd;padding:10px;font-weight:bold}
+pre[class*="language-"]{margin:0!important}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+th{background:#1e293b;color:#38bdf8;text-align:left;padding:12px}
+td{padding:12px;border-top:1px solid #334155}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>How do you redirect inside a Server Action without triggering a client-side navigation?</h1>
+
+<p>
+Inside a Server Action, we use <code>redirect()</code> from <code>next/navigation</code>.
+</p>
+
+<div class="feature">
+<strong>Simple Meaning:</strong><br>
+After the Server Action completes its work, Next.js can redirect the user from the server without using <code>router.push()</code>.
+</div>
+
+<hr>
+
+<h2>Import redirect()</h2>
+
+<div class="code-title">Import</div>
+
+<pre><code class="language-ts">import { redirect } from 'next/navigation';</code></pre>
+
+<hr>
+
+<h2>Basic Example</h2>
+
+<p>
+Suppose we create a user and then want to redirect to the users page.
+</p>
+
+<div class="code-title">Server Action</div>
+
+<pre><code class="language-ts">'use server';
+
+import { redirect } from 'next/navigation';
+
+export async function createUser(formData: FormData) {
+  const name = formData.get('name') as string;
+
+  await db.user.create({ data: { name } });
+
+  redirect('/users');
+}</code></pre>
+
+<div class="code-title">Page</div>
+
+<pre><code class="language-ts">import { createUser } from './actions';
+
+export default function Page() {
+  return (
+    &lt;form action={createUser}&gt;
+      &lt;input name="name" /&gt;
+      &lt;button&gt;Create User&lt;/button&gt;
+    &lt;/form&gt;
+  );
+}</code></pre>
+
+<hr>
+
+<h2>Flow</h2>
+
+<div class="code-title">What Happens?</div>
+
+<pre><code class="language-text">Submit Form
+      ↓
+Server Action Runs
+      ↓
+Database Updated
+      ↓
+redirect('/users')
+      ↓
+User Lands On /users
+</code></pre>
+
+<hr>
+
+<h2>Important: redirect() Stops Execution</h2>
+
+<p>
+Once <code>redirect()</code> is called, no code below it will execute.
+</p>
+
+<div class="code-title">Example</div>
+
+<pre><code class="language-ts">'use server';
+
+import { redirect } from 'next/navigation';
+
+export async function createUser() {
+  await db.user.create({ data: { name: 'Rizwan' } });
+
+  redirect('/users');
+
+  console.log('Never runs'); // ❌
+}</code></pre>
+
+<p>
+Think of <code>redirect()</code> like throwing a special redirect exception.
+</p>
+
+<hr>
+
+<h2>Real World Login Example</h2>
+
+<div class="code-title">Login Action</div>
+
+<pre><code class="language-ts">'use server';
+
+import { redirect } from 'next/navigation';
+
+export async function login(formData: FormData) {
+  const email = formData.get('email') as string;
+  const password = formData.get('password') as string;
+
+  const user = await validateUser(email, password);
+
+  if (!user) {
+    return { success: false, message: 'Invalid credentials' };
+  }
+
+  await createSession(user.id);
+
+  redirect('/dashboard');
+}</code></pre>
+
+<p>
+After successful login, the user is redirected to the dashboard directly from the server.
+</p>
+
+<hr>
+
+<h2>redirect() vs router.push()</h2>
+
+<table>
+<tr>
+<th>Feature</th>
+<th>redirect()</th>
+<th>router.push()</th>
+</tr>
+
+<tr>
+<td>Runs On</td>
+<td>Server</td>
+<td>Client</td>
+</tr>
+
+<tr>
+<td>Used In Server Actions</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+
+<tr>
+<td>Used In Client Components</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+
+<tr>
+<td>Navigation Type</td>
+<td>Server Driven</td>
+<td>Client Driven</td>
+</tr>
+</table>
+
+<div class="code-title">Client Navigation Example</div>
+
+<pre><code class="language-ts">'use client';
+
+import { useRouter } from 'next/navigation';
+
+export default function Page() {
+  const router = useRouter();
+
+  return (
+    &lt;button onClick={() => router.push('/users')}&gt;
+      Go To Users
+    &lt;/button&gt;
+  );
+}</code></pre>
+
+<hr>
+
+<h2>Can We Return Data And Redirect?</h2>
+
+<p>
+No. A single execution path can either return data or redirect.
+</p>
+
+<div class="code-title">Wrong</div>
+
+<pre><code class="language-ts">'use server';
+
+import { redirect } from 'next/navigation';
+
+export async function createUser() {
+  redirect('/users');
+
+  return { success: true }; // ❌ Never reached
+}</code></pre>
+
+<div class="code-title">Correct</div>
+
+<pre><code class="language-ts">'use server';
+
+import { redirect } from 'next/navigation';
+
+export async function createUser() {
+  await db.user.create({ data: { name: 'Rizwan' } });
+
+  redirect('/users');
+}</code></pre>
+
+<hr>
+
+<h2>redirect() With Validation</h2>
+
+<div class="code-title">Example</div>
+
+<pre><code class="language-ts">'use server';
+
+import { redirect } from 'next/navigation';
+
+export async function createUser(formData: FormData) {
+  const name = formData.get('name') as string;
+
+  if (!name) {
+    return { success: false, message: 'Name is required' };
+  }
+
+  await db.user.create({ data: { name } });
+
+  redirect('/users');
+}</code></pre>
+
+<div class="code-title">Flow</div>
+
+<pre><code class="language-text">Validation Fails
+       ↓
+Return Error
+
+
+Validation Passes
+       ↓
+Save User
+       ↓
+Redirect
+</code></pre>
+
+<hr>
+
+<h2>Why Is This Not Client-Side Navigation?</h2>
+
+<p>
+The redirect decision is made on the server while the Server Action is executing.
+</p>
+
+<div class="code-title">Server Redirect Flow</div>
+
+<pre><code class="language-text">Browser
+    ↓
+Submit Form
+    ↓
+Server Action
+    ↓
+redirect('/users')
+    ↓
+Server Sends Redirect Response
+    ↓
+Browser Navigates
+</code></pre>
+
+<p>
+No <code>router.push()</code> is executed in the browser.
+</p>
+
+<hr>
+
+<h2>Server Component vs Client Component</h2>
+
+<table>
+<tr>
+<th>Scenario</th>
+<th>Redirect API</th>
+</tr>
+
+<tr>
+<td>Server Action</td>
+<td><code>redirect()</code></td>
+</tr>
+
+<tr>
+<td>Server Component</td>
+<td><code>redirect()</code></td>
+</tr>
+
+<tr>
+<td>Client Component</td>
+<td><code>router.push()</code></td>
+</tr>
+</table>
+
+<hr>
+
+<h2>Easy Memory Trick</h2>
+
+<div class="code-title">Remember</div>
+
+<pre><code class="language-text">Server
+   ↓
+redirect()
+
+
+Client
+   ↓
+router.push()
+</code></pre>
+
+<div class="feature">
+<strong>One-Line Definition:</strong><br>
+Inside a Server Action, we redirect by calling <code>redirect()</code> from <code>next/navigation</code>, which performs a server-driven redirect and immediately stops further execution of the action.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-tsx.min.js"></script>
+
+</body>
+</html>

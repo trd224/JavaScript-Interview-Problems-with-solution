@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>What is useFormStatus and what does it provide during a Server Action submission?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0f172a;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.8;padding:40px 20px}
+.container{max-width:1000px;margin:auto;background:#111827;padding:40px;border-radius:16px}
+h1{color:#38bdf8;margin-bottom:20px}
+h2{color:#a78bfa;margin-top:30px;margin-bottom:10px}
+h3{color:#fbbf24;margin-top:25px;margin-bottom:10px}
+p{margin-bottom:15px}
+ul{margin-left:20px}
+li{margin-bottom:8px}
+.feature{background:#1e293b;border-left:5px solid #38bdf8;padding:15px;border-radius:8px;margin:20px 0}
+.code-title{background:#1e293b;color:#93c5fd;padding:10px;font-weight:bold}
+pre[class*="language-"]{margin:0!important}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+th{background:#1e293b;color:#38bdf8;text-align:left;padding:12px}
+td{padding:12px;border-top:1px solid #334155}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>What is useFormStatus and what does it provide during a Server Action submission?</h1>
+
+<p>
+<code>useFormStatus()</code> is a React hook that provides information about the status of a form submission while a Server Action is running.
+</p>
+
+<div class="feature">
+<strong>Simple Meaning:</strong><br>
+<code>useFormStatus()</code> tells us whether a form is currently submitting so we can show loading indicators, disable buttons, and prevent duplicate submissions.
+</div>
+
+<hr>
+
+<h2>What Problem Does useFormStatus Solve?</h2>
+
+<p>
+Suppose a Server Action takes 3 seconds to complete.
+</p>
+
+<div class="code-title">Without useFormStatus</div>
+
+<pre><code class="language-text">User Clicks Submit
+         ↓
+Nothing Changes
+         ↓
+User Clicks Again
+         ↓
+Duplicate Requests
+</code></pre>
+
+<p>
+The user cannot tell whether the form is still processing.
+</p>
+
+<p>
+With <code>useFormStatus()</code>:
+</p>
+
+<pre><code class="language-text">User Clicks Submit
+         ↓
+pending = true
+         ↓
+Button Disabled
+         ↓
+Loading Text Shown
+         ↓
+Request Completes
+         ↓
+pending = false
+         ↓
+Button Enabled
+</code></pre>
+
+<hr>
+
+<h2>Import</h2>
+
+<div class="code-title">Import Hook</div>
+
+<pre><code class="language-tsx">import { useFormStatus } from 'react-dom';</code></pre>
+
+<p>
+Unlike <code>useActionState()</code>, this hook is imported from <code>react-dom</code>.
+</p>
+
+<hr>
+
+<h2>Basic Example</h2>
+
+<h3>1. Server Action</h3>
+
+<div class="code-title">actions.ts</div>
+
+<pre><code class="language-ts">'use server';
+
+export async function createUser(formData: FormData) {
+  await new Promise(resolve => setTimeout(resolve, 3000));
+
+  console.log(formData.get('name'));
+}</code></pre>
+
+<h3>2. Submit Button</h3>
+
+<div class="code-title">SubmitButton.tsx</div>
+
+<pre><code class="language-tsx">'use client';
+
+import { useFormStatus } from 'react-dom';
+
+export default function SubmitButton() {
+  const { pending } = useFormStatus();
+
+  return (
+    &lt;button disabled={pending}&gt;
+      {pending ? 'Saving...' : 'Save'}
+    &lt;/button&gt;
+  );
+}</code></pre>
+
+<h3>3. Form</h3>
+
+<div class="code-title">UserForm.tsx</div>
+
+<pre><code class="language-tsx">import { createUser } from './actions';
+import SubmitButton from './SubmitButton';
+
+export default function UserForm() {
+  return (
+    &lt;form action={createUser}&gt;
+      &lt;input name="name" /&gt;
+      &lt;SubmitButton /&gt;
+    &lt;/form&gt;
+  );
+}</code></pre>
+
+<hr>
+
+<h2>How It Works</h2>
+
+<div class="code-title">Flow</div>
+
+<pre><code class="language-text">Submit Form
+      ↓
+pending = true
+      ↓
+Button Disabled
+      ↓
+Server Action Runs
+      ↓
+pending = false
+      ↓
+Button Enabled
+</code></pre>
+
+<hr>
+
+<h2>What Does useFormStatus Return?</h2>
+
+<p>
+The hook returns an object describing the current form submission.
+</p>
+
+<div class="code-title">Example</div>
+
+<pre><code class="language-tsx">const status = useFormStatus();</code></pre>
+
+<table>
+<tr>
+<th>Property</th>
+<th>Description</th>
+</tr>
+
+<tr>
+<td>pending</td>
+<td>Whether the form is currently submitting</td>
+</tr>
+
+<tr>
+<td>data</td>
+<td>The submitted FormData</td>
+</tr>
+
+<tr>
+<td>method</td>
+<td>The HTTP method used by the form</td>
+</tr>
+
+<tr>
+<td>action</td>
+<td>The Server Action being executed</td>
+</tr>
+</table>
+
+<hr>
+
+<h2>Using FormData During Submission</h2>
+
+<div class="code-title">Example</div>
+
+<pre><code class="language-tsx">'use client';
+
+import { useFormStatus } from 'react-dom';
+
+export default function Status() {
+  const { pending, data } = useFormStatus();
+
+  return (
+    <>
+      {pending && (
+        &lt;p&gt;Saving {data?.get('name')}...&lt;/p&gt;
+      )}
+    </>
+  );
+}</code></pre>
+
+<p>
+While the form is submitting, we can access the values currently being submitted.
+</p>
+
+<hr>
+
+<h2>Important Rule</h2>
+
+<div class="feature">
+<strong>Important:</strong><br>
+<code>useFormStatus()</code> only works inside a component rendered somewhere inside the form.
+</div>
+
+<h3>❌ Wrong</h3>
+
+<div class="code-title">Will Not Work</div>
+
+<pre><code class="language-tsx">'use client';
+
+import { useFormStatus } from 'react-dom';
+
+export default function Page() {
+  const { pending } = useFormStatus();
+
+  return (
+    &lt;form&gt;
+      &lt;button disabled={pending}&gt;
+        Save
+      &lt;/button&gt;
+    &lt;/form&gt;
+  );
+}</code></pre>
+
+<p>
+The hook is being called in the same component that creates the form, so it cannot subscribe to that form's status.
+</p>
+
+<h3>✅ Correct</h3>
+
+<div class="code-title">Works</div>
+
+<pre><code class="language-tsx">'use client';
+
+import { useFormStatus } from 'react-dom';
+
+function SubmitButton() {
+  const { pending } = useFormStatus();
+
+  return (
+    &lt;button disabled={pending}&gt;
+      {pending ? 'Saving...' : 'Save'}
+    &lt;/button&gt;
+  );
+}</button>
+}
+
+export default function UserForm() {
+  return (
+    &lt;form action={createUser}&gt;
+      &lt;input name="name" /&gt;
+      &lt;SubmitButton /&gt;
+    &lt;/form&gt;
+  );
+}</code></pre>
+
+<p>
+Here, <code>SubmitButton</code> is rendered inside the form, so it can access the form status.
+</p>
+
+<hr>
+
+<h2>useActionState vs useFormStatus</h2>
+
+<table>
+<tr>
+<th>Hook</th>
+<th>Purpose</th>
+</tr>
+
+<tr>
+<td>useActionState()</td>
+<td>Stores the value returned from the Server Action</td>
+</tr>
+
+<tr>
+<td>useFormStatus()</td>
+<td>Provides loading/submission status</td>
+</tr>
+</table>
+
+<div class="code-title">Relationship</div>
+
+<pre><code class="language-text">useActionState()
+         ↓
+Success / Error Message
+
+
+useFormStatus()
+         ↓
+Loading State
+</code></pre>
+
+<hr>
+
+<h2>Real World Example</h2>
+
+<p>
+Imagine an e-commerce checkout form.
+</p>
+
+<div class="code-title">Flow</div>
+
+<pre><code class="language-text">Place Order
+      ↓
+pending = true
+      ↓
+Button Shows "Placing Order..."
+      ↓
+Order Saved
+      ↓
+pending = false
+      ↓
+Button Shows "Place Order"
+</code></pre>
+
+<hr>
+
+<h2>Easy Memory Trick</h2>
+
+<div class="code-title">Remember</div>
+
+<pre><code class="language-text">useActionState()
+        ↓
+Result
+
+
+useFormStatus()
+        ↓
+Loading Status
+</code></pre>
+
+<div class="feature">
+<strong>One-Line Definition:</strong><br>
+<code>useFormStatus()</code> is a React hook that provides information about an active form submission, including whether a Server Action is currently pending.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-tsx.min.js"></script>
+
+</body>
+</html>

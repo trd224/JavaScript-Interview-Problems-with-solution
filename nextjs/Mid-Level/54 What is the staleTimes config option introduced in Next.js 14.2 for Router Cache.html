@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>What is the staleTimes config option introduced in Next.js 14.2 for Router Cache?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0f172a;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.8;padding:40px 20px}
+.container{max-width:1000px;margin:auto;background:#111827;padding:40px;border-radius:16px}
+h1{color:#38bdf8;margin-bottom:20px}
+h2{color:#a78bfa;margin-top:30px;margin-bottom:10px}
+h3{color:#fbbf24;margin-top:25px;margin-bottom:10px}
+p{margin-bottom:15px}
+ul{margin-left:20px}
+li{margin-bottom:8px}
+.feature{background:#1e293b;border-left:5px solid #38bdf8;padding:15px;border-radius:8px;margin:20px 0}
+.warning{background:#451a1a;border-left:5px solid #f87171;padding:15px;border-radius:8px;margin:20px 0}
+.code-title{background:#1e293b;color:#93c5fd;padding:10px;font-weight:bold}
+pre[class*="language-"]{margin:0!important}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+th{background:#1e293b;color:#38bdf8;text-align:left;padding:12px}
+td{padding:12px;border-top:1px solid #334155}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>What is the staleTimes config option introduced in Next.js 14.2 for Router Cache?</h1>
+
+<p>
+<code>staleTimes</code> is an experimental Next.js configuration that allows us to control how long page segments remain reusable inside the client-side Router Cache before Next.js considers them stale and fetches fresh data. :contentReference[oaicite:0]{index=0}
+</p>
+
+<div class="feature">
+<strong>Simple Meaning:</strong><br>
+staleTimes controls how long Next.js keeps previously visited or prefetched pages in the browser's Router Cache.
+</div>
+
+<hr>
+
+<h2>Why Was staleTimes Introduced?</h2>
+
+<p>
+Before Next.js 14.2, Router Cache durations were mostly fixed and controlled internally by Next.js.
+</p>
+
+<p>
+Next.js 14.2 introduced <code>staleTimes</code> so we can decide how long cached route segments should remain reusable on the client. :contentReference[oaicite:1]{index=1}
+</p>
+
+<div class="code-title">Without staleTimes</div>
+
+<pre><code class="language-text">Visit Page
+      ↓
+Page Cached
+      ↓
+Next.js Uses Internal Cache Rules
+</code></pre>
+
+<div class="code-title">With staleTimes</div>
+
+<pre><code class="language-text">Visit Page
+      ↓
+Page Cached
+      ↓
+Custom Expiration Time
+      ↓
+Fresh Data When Needed
+</code></pre>
+
+<hr>
+
+<h2>Basic Configuration</h2>
+
+<div class="code-title">next.config.js</div>
+
+<pre><code class="language-js">/** @type {import('next').NextConfig} */
+const nextConfig = {
+  experimental: {
+    staleTimes: {
+      dynamic: 30,
+      static: 180
+    }
+  }
+};
+
+module.exports = nextConfig;</code></pre>
+
+<p>
+Values are specified in seconds. :contentReference[oaicite:2]{index=2}
+</p>
+
+<hr>
+
+<h2>The Two staleTimes Options</h2>
+
+<table>
+<tr>
+<th>Option</th>
+<th>Purpose</th>
+</tr>
+
+<tr>
+<td>dynamic</td>
+<td>Cache duration for dynamic route navigations</td>
+</tr>
+
+<tr>
+<td>static</td>
+<td>Cache duration for static or fully prefetched routes</td>
+</tr>
+</table>
+
+<p>
+The <code>dynamic</code> and <code>static</code> settings correspond to different Router Cache scenarios. :contentReference[oaicite:3]{index=3}
+</p>
+
+<hr>
+
+<h2>dynamic</h2>
+
+<p>
+Used when a page is neither statically generated nor fully prefetched. :contentReference[oaicite:4]{index=4}
+</p>
+
+<div class="code-title">Example</div>
+
+<pre><code class="language-js">experimental: {
+  staleTimes: {
+    dynamic: 30
+  }
+}</code></pre>
+
+<div class="code-title">Flow</div>
+
+<pre><code class="language-text">Visit Dynamic Page
+        ↓
+Store In Router Cache
+        ↓
+30 Seconds Pass
+        ↓
+Cache Becomes Stale
+        ↓
+Fresh Navigation Fetches Again
+</code></pre>
+
+<p>
+In Next.js 15, the default value became <code>0 seconds</code>. :contentReference[oaicite:5]{index=5}
+</p>
+
+<hr>
+
+<h2>static</h2>
+
+<p>
+Used for statically generated pages, fully prefetched routes, or routes loaded using <code>router.prefetch()</code>. :contentReference[oaicite:6]{index=6}
+</p>
+
+<div class="code-title">Example</div>
+
+<pre><code class="language-js">experimental: {
+  staleTimes: {
+    static: 300
+  }
+}</code></pre>
+
+<div class="code-title">Flow</div>
+
+<pre><code class="language-text">Prefetch Route
+       ↓
+Store In Router Cache
+       ↓
+5 Minutes Pass
+       ↓
+Cache Becomes Stale
+       ↓
+Fresh Data Retrieved
+</code></pre>
+
+<p>
+The default static value is 5 minutes. :contentReference[oaicite:7]{index=7}
+</p>
+
+<hr>
+
+<h2>Real World Example</h2>
+
+<p>
+Suppose our application contains:
+</p>
+
+<div class="code-title">Routes</div>
+
+<pre><code class="language-text">/
+├── products
+├── product/[id]
+├── dashboard
+└── reports
+</code></pre>
+
+<p>
+Configuration:
+</p>
+
+<div class="code-title">next.config.js</div>
+
+<pre><code class="language-js">experimental: {
+  staleTimes: {
+    dynamic: 10,
+    static: 300
+  }
+}</code></pre>
+
+<table>
+<tr>
+<th>Page Type</th>
+<th>Router Cache Lifetime</th>
+</tr>
+
+<tr>
+<td>Dynamic Product Page</td>
+<td>10 seconds</td>
+</tr>
+
+<tr>
+<td>Prefetched Static Page</td>
+<td>5 minutes</td>
+</tr>
+</table>
+
+<hr>
+
+<h2>What Cache Does staleTimes Affect?</h2>
+
+<p>
+A very common confusion is thinking it affects:
+</p>
+
+<ul>
+<li>Data Cache</li>
+<li>Full Route Cache</li>
+<li>ISR Cache</li>
+</ul>
+
+<p>
+It does not.
+</p>
+
+<div class="feature">
+<strong>Important:</strong><br>
+staleTimes only affects the Client-side Router Cache (the cache used during navigation in the browser). It does not control ISR revalidation, fetch caching, Data Cache, or Full Route Cache behavior. :contentReference[oaicite:8]{index=8}
+</div>
+
+<hr>
+
+<h2>staleTimes vs revalidate</h2>
+
+<table>
+<tr>
+<th>Feature</th>
+<th>staleTimes</th>
+<th>revalidate</th>
+</tr>
+
+<tr>
+<td>Affects Router Cache</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+
+<tr>
+<td>Affects ISR</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+
+<tr>
+<td>Runs In Browser</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+
+<tr>
+<td>Runs On Server</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+
+<tr>
+<td>Controls Navigation Cache</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+</table>
+
+<hr>
+
+<h2>Example Timeline</h2>
+
+<div class="code-title">staleTimes.dynamic = 30</div>
+
+<pre><code class="language-text">10:00 Visit Product Page
+       ↓
+Stored In Router Cache
+
+10:20 Visit Again
+       ↓
+Uses Cached Version
+
+10:31 Visit Again
+       ↓
+Cache Is Stale
+       ↓
+Fresh Data Retrieved
+</code></pre>
+
+<hr>
+
+<h2>Version History</h2>
+
+<table>
+<tr>
+<th>Version</th>
+<th>Change</th>
+</tr>
+
+<tr>
+<td>Next.js 14.2</td>
+<td>Experimental staleTimes introduced</td>
+</tr>
+
+<tr>
+<td>Next.js 15</td>
+<td>dynamic default changed from 30s to 0s</td>
+</tr>
+</table>
+
+<p>
+The feature was introduced in Next.js 14.2 as an experimental Router Cache configuration. :contentReference[oaicite:9]{index=9}
+</p>
+
+<hr>
+
+<h2>Easy Memory Trick</h2>
+
+<div class="code-title">Remember</div>
+
+<pre><code class="language-text">ISR Cache
+    ↓
+revalidate
+
+
+Router Cache
+    ↓
+staleTimes
+
+
+Server Cache
+    ↓
+cacheLife
+cacheTag
+</code></pre>
+
+<div class="feature">
+<strong>One-Line Definition:</strong><br>
+<code>staleTimes</code> is an experimental Next.js Router Cache configuration introduced in v14.2 that controls how long cached page segments remain reusable in the browser before they become stale and need fresh data. :contentReference[oaicite:10]{index=10}
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-tsx.min.js"></script>
+
+</body>
+</html>

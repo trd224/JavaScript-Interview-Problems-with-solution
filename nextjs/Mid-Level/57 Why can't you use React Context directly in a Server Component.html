@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Why can't you use React Context directly in a Server Component?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0f172a;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.8;padding:40px 20px}
+.container{max-width:1000px;margin:auto;background:#111827;padding:40px;border-radius:16px}
+h1{color:#38bdf8;margin-bottom:20px}
+h2{color:#a78bfa;margin-top:30px;margin-bottom:10px}
+h3{color:#fbbf24;margin-top:25px;margin-bottom:10px}
+p{margin-bottom:15px}
+ul{margin-left:20px}
+li{margin-bottom:8px}
+.feature{background:#1e293b;border-left:5px solid #38bdf8;padding:15px;border-radius:8px;margin:20px 0}
+.warning{background:#451a1a;border-left:5px solid #f87171;padding:15px;border-radius:8px;margin:20px 0}
+.code-title{background:#1e293b;color:#93c5fd;padding:10px;font-weight:bold}
+pre[class*="language-"]{margin:0!important}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+th{background:#1e293b;color:#38bdf8;text-align:left;padding:12px}
+td{padding:12px;border-top:1px solid #334155}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>Why can't you use React Context directly in a Server Component?</h1>
+
+<p>
+React Context is designed for React trees running in the browser. Server Components run on the server, do not maintain interactive state, and cannot consume Client Context values directly.
+</p>
+
+<div class="feature">
+<strong>Simple Meaning:</strong><br>
+Server Components render once on the server and disappear. React Context depends on a live React tree, so it only works in Client Components.
+</div>
+
+<hr>
+
+<h2>How React Context Normally Works</h2>
+
+<p>
+In a traditional React application, Context shares state between components running in the browser.
+</p>
+
+<div class="code-title">Client Side Flow</div>
+
+<pre><code class="language-text">ThemeProvider
+       ↓
+ThemeContext
+       ↓
+Component A
+Component B
+Component C
+</code></pre>
+
+<p>
+All components exist inside the browser React tree and can access the same Context value.
+</p>
+
+<hr>
+
+<h2>Why It Fails In Server Components</h2>
+
+<p>
+Server Components run on the server and generate HTML/RSC payloads.
+</p>
+
+<div class="code-title">Server Component Flow</div>
+
+<pre><code class="language-text">Request Arrives
+       ↓
+Server Component Runs
+       ↓
+HTML/RSC Generated
+       ↓
+Response Sent
+       ↓
+Server Component Ends
+</code></pre>
+
+<p>
+There is no persistent React state living on the server between renders.
+</p>
+
+<div class="warning">
+<strong>Important:</strong><br>
+React Context relies on a live React state tree. Server Components do not have a live browser state tree.
+</div>
+
+<hr>
+
+<h2>Example That Does Not Work</h2>
+
+<div class="code-title">ThemeProvider.tsx</div>
+
+<pre><code class="language-tsx">'use client';
+
+import { createContext } from 'react';
+
+export const ThemeContext = createContext('dark');</code></pre>
+
+<div class="code-title">Server Component</div>
+
+<pre><code class="language-tsx">import { useContext } from 'react';
+import { ThemeContext } from './ThemeProvider';
+
+export default function Page() {
+  const theme = useContext(ThemeContext);
+
+  return &lt;div&gt;{theme}&lt;/div&gt;;
+}</code></pre>
+
+<div class="code-title">Result</div>
+
+<pre><code class="language-text">❌ Error
+
+Server Component cannot consume
+Client Context directly
+</code></pre>
+
+<hr>
+
+<h2>The Real Reason</h2>
+
+<table>
+<tr>
+<th>React Context Needs</th>
+<th>Server Component Has?</th>
+</tr>
+
+<tr>
+<td>Live React State</td>
+<td>❌ No</td>
+</tr>
+
+<tr>
+<td>Browser Runtime</td>
+<td>❌ No</td>
+</tr>
+
+<tr>
+<td>Persistent React Tree</td>
+<td>❌ No</td>
+</tr>
+
+<tr>
+<td>One-Time Render Output</td>
+<td>✅ Yes</td>
+</tr>
+</table>
+
+<hr>
+
+<h2>What Can Server Components Use Instead?</h2>
+
+<p>
+Server Components should use:
+</p>
+
+<ul>
+<li>Props</li>
+<li>Database queries</li>
+<li>API requests</li>
+<li>cookies()</li>
+<li>headers()</li>
+<li>searchParams</li>
+</ul>
+
+<div class="code-title">Server Component Example</div>
+
+<pre><code class="language-tsx">import { cookies } from 'next/headers';
+
+export default async function Page() {
+  const cookieStore = await cookies();
+  const theme = cookieStore.get('theme')?.value;
+
+  return &lt;h1&gt;Theme: {theme}&lt;/h1&gt;;
+}</code></pre>
+
+<p>
+Instead of Context, the Server Component gets data directly from the server.
+</p>
+
+<hr>
+
+<h2>Correct Pattern</h2>
+
+<p>
+Read data in the Server Component and pass it to a Client Component as props.
+</p>
+
+<div class="code-title">Server Component</div>
+
+<pre><code class="language-tsx">import ThemeSwitcher from './ThemeSwitcher';
+
+export default async function Page() {
+  const theme = 'dark';
+
+  return &lt;ThemeSwitcher initialTheme={theme} /&gt;;
+}</code></pre>
+
+<div class="code-title">Client Component</div>
+
+<pre><code class="language-tsx">'use client';
+
+import { useState } from 'react';
+
+export default function ThemeSwitcher({ initialTheme }) {
+  const [theme, setTheme] = useState(initialTheme);
+
+  return (
+    &lt;button onClick={() =&gt; setTheme('light')}&gt;
+      {theme}
+    &lt;/button&gt;
+  );
+}</code></pre>
+
+<div class="code-title">Flow</div>
+
+<pre><code class="language-text">Server Component
+       ↓
+Fetch Data
+       ↓
+Pass Props
+       ↓
+Client Component
+       ↓
+useState
+</code></pre>
+
+<hr>
+
+<h2>Can A Server Component Be Inside A Context Provider?</h2>
+
+<p>
+Yes.
+</p>
+
+<div class="code-title">Layout</div>
+
+<pre><code class="language-tsx">import ThemeProvider from './ThemeProvider';
+
+export default function RootLayout({ children }) {
+  return (
+    &lt;html&gt;
+      &lt;body&gt;
+        &lt;ThemeProvider&gt;
+          {children}
+        &lt;/ThemeProvider&gt;
+      &lt;/body&gt;
+    &lt;/html&gt;
+  );
+}</code></pre>
+
+<p>
+This is valid because the Provider is a Client Component.
+</p>
+
+<p>
+However, the Server Component itself still cannot call:
+</p>
+
+<div class="code-title">Not Allowed</div>
+
+<pre><code class="language-tsx">const theme = useContext(ThemeContext);</code></pre>
+
+<hr>
+
+<h2>What About Client Components?</h2>
+
+<p>
+Client Components can freely use Context.
+</p>
+
+<div class="code-title">Client Component</div>
+
+<pre><code class="language-tsx">'use client';
+
+import { useContext } from 'react';
+import { ThemeContext } from './ThemeProvider';
+
+export default function Navbar() {
+  const theme = useContext(ThemeContext);
+
+  return &lt;div&gt;Theme: {theme}&lt;/div&gt;;
+}</code></pre>
+
+<p>
+Because Client Components run in the browser, they participate in the live React tree.
+</p>
+
+<hr>
+
+<h2>Common Interview Question</h2>
+
+<div class="code-title">Question</div>
+
+<pre><code class="language-text">Can a Server Component use useContext()?</code></pre>
+
+<div class="code-title">Answer</div>
+
+<pre><code class="language-text">No.
+
+Server Components cannot consume
+Client Context because they do not
+run inside a live browser React tree.
+</code></pre>
+
+<hr>
+
+<h2>Server Components vs Client Components</h2>
+
+<table>
+<tr>
+<th>Feature</th>
+<th>Server Component</th>
+<th>Client Component</th>
+</tr>
+
+<tr>
+<td>useState()</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+
+<tr>
+<td>useEffect()</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+
+<tr>
+<td>useContext()</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+
+<tr>
+<td>Database Access</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+
+<tr>
+<td>cookies()</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+
+<tr>
+<td>Server Actions</td>
+<td>✅</td>
+<td>Can Call Them</td>
+</tr>
+</table>
+
+<hr>
+
+<h2>Easy Memory Trick</h2>
+
+<div class="code-title">Remember</div>
+
+<pre><code class="language-text">React Context
+      ↓
+Live React Tree
+      ↓
+Client Components
+
+
+Server Components
+      ↓
+One-Time Server Render
+      ↓
+No Live Context
+</code></pre>
+
+<div class="feature">
+<strong>One-Line Definition:</strong><br>
+Server Components cannot use React Context directly because Context depends on a live browser React state tree, while Server Components run once on the server and do not maintain client-side state.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-tsx.min.js"></script>
+
+</body>
+</html>

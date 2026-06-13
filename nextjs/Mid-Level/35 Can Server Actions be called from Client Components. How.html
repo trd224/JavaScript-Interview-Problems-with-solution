@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Can Server Actions be called from Client Components?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0f172a;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.8;padding:40px 20px}
+.container{max-width:1000px;margin:auto;background:#111827;padding:40px;border-radius:16px}
+h1{color:#38bdf8;margin-bottom:20px}
+h2{color:#a78bfa;margin-top:30px;margin-bottom:10px}
+h3{color:#fbbf24;margin-top:25px;margin-bottom:10px}
+p{margin-bottom:15px}
+ul{margin-left:20px}
+li{margin-bottom:8px}
+.feature{background:#1e293b;border-left:5px solid #38bdf8;padding:15px;border-radius:8px;margin:20px 0}
+.warning{background:#451a1a;border-left:5px solid #f87171;padding:15px;border-radius:8px;margin:20px 0}
+.code-title{background:#1e293b;color:#93c5fd;padding:10px;font-weight:bold}
+pre[class*="language-"]{margin:0!important}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+th{background:#1e293b;color:#38bdf8;text-align:left;padding:12px}
+td{padding:12px;border-top:1px solid #334155}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>Can Server Actions be called from Client Components? How?</h1>
+
+<p>
+Yes, Server Actions can be called from Client Components, but the Server Action must be defined in a separate file with <code>'use server'</code> at the top.
+</p>
+
+<div class="feature">
+<strong>Simple Meaning:</strong><br>
+A Client Component can import a Server Action and call it from a form, button click, or event handler. The function still runs on the server.
+</div>
+
+<hr>
+
+<h2>1. Create Server Action In Separate File</h2>
+
+<p>
+First, create a separate server-only file.
+</p>
+
+<div class="code-title">app/actions.ts</div>
+
+<pre><code class="language-ts">'use server';
+
+export async function createUser(name: string) {
+  await db.user.create({ data: { name } });
+
+  return { success: true, message: 'User created successfully' };
+}</code></pre>
+
+<p>
+Because this file starts with <code>'use server'</code>, the exported function becomes a Server Action.
+</p>
+
+<hr>
+
+<h2>2. Call Server Action From Client Component</h2>
+
+<p>
+Now import that Server Action inside a Client Component.
+</p>
+
+<div class="code-title">app/UserButton.tsx</div>
+
+<pre><code class="language-tsx">'use client';
+
+import { createUser } from './actions';
+
+export default function UserButton() {
+  async function handleClick() {
+    const result = await createUser('Rizwan');
+    console.log(result.message);
+  }
+
+  return &lt;button onClick={handleClick}&gt;Create User&lt;/button&gt;;
+}</code></pre>
+
+<p>
+The button click happens in the browser, but <code>createUser()</code> executes on the server.
+</p>
+
+<hr>
+
+<h2>Flow</h2>
+
+<div class="code-title">Internal Flow</div>
+
+<pre><code class="language-text">User Clicks Button
+        ↓
+Client Component Calls createUser()
+        ↓
+Next.js Sends Internal Request
+        ↓
+Server Action Runs On Server
+        ↓
+Database Updated
+        ↓
+Result Returned To Client
+</code></pre>
+
+<hr>
+
+<h2>3. Calling Server Action From Client Form</h2>
+
+<p>
+We can also use a Server Action with a form inside a Client Component.
+</p>
+
+<div class="code-title">app/actions.ts</div>
+
+<pre><code class="language-ts">'use server';
+
+export async function saveUser(formData: FormData) {
+  const name = formData.get('name') as string;
+
+  await db.user.create({ data: { name } });
+
+  return { success: true, message: 'Saved successfully' };
+}</code></pre>
+
+<div class="code-title">app/UserForm.tsx</div>
+
+<pre><code class="language-tsx">'use client';
+
+import { saveUser } from './actions';
+
+export default function UserForm() {
+  return (
+    &lt;form action={saveUser}&gt;
+      &lt;input name="name" placeholder="Enter name" /&gt;
+      &lt;button&gt;Save&lt;/button&gt;
+    &lt;/form&gt;
+  );
+}</code></pre>
+
+<hr>
+
+<h2>4. With useActionState</h2>
+
+<p>
+For showing success or error messages, use <code>useActionState()</code>.
+</p>
+
+<div class="code-title">app/actions.ts</div>
+
+<pre><code class="language-ts">'use server';
+
+type State = { success: boolean; message: string };
+
+export async function createUser(previousState: State, formData: FormData): Promise&lt;State&gt; {
+  const name = formData.get('name') as string;
+
+  if (!name) return { success: false, message: 'Name is required' };
+
+  await db.user.create({ data: { name } });
+
+  return { success: true, message: 'User created successfully' };
+}</code></pre>
+
+<div class="code-title">app/UserForm.tsx</div>
+
+<pre><code class="language-tsx">'use client';
+
+import { useActionState } from 'react';
+import { createUser } from './actions';
+
+const initialState = { success: false, message: '' };
+
+export default function UserForm() {
+  const [state, formAction] = useActionState(createUser, initialState);
+
+  return (
+    &lt;form action={formAction}&gt;
+      &lt;input name="name" placeholder="Enter name" /&gt;
+      &lt;button&gt;Save&lt;/button&gt;
+      {state.message && &lt;p&gt;{state.message}&lt;/p&gt;}
+    &lt;/form&gt;
+  );
+}</code></pre>
+
+<hr>
+
+<h2>Important Rule</h2>
+
+<div class="warning">
+<strong>Important:</strong><br>
+Do not define inline Server Actions directly inside a Client Component.
+</div>
+
+<h3>❌ Wrong</h3>
+
+<div class="code-title">Client Component</div>
+
+<pre><code class="language-tsx">'use client';
+
+export default function UserForm() {
+  async function createUser(formData: FormData) {
+    'use server';
+
+    await db.user.create({ data: { name: formData.get('name') as string } });
+  }
+
+  return (
+    &lt;form action={createUser}&gt;
+      &lt;input name="name" /&gt;
+      &lt;button&gt;Save&lt;/button&gt;
+    &lt;/form&gt;
+  );
+}</code></pre>
+
+<p>
+This is wrong because a Client Component file cannot contain an inline Server Action. In Server Component, inline Server Action is allowed.
+</p>
+
+<h3>✅ Correct</h3>
+
+<div class="code-title">actions.ts</div>
+
+<pre><code class="language-ts">'use server';
+
+export async function createUser(formData: FormData) {
+  await db.user.create({ data: { name: formData.get('name') as string } });
+}</code></pre>
+
+<div class="code-title">UserForm.tsx</div>
+
+<pre><code class="language-tsx">'use client';
+
+import { createUser } from './actions';
+
+export default function UserForm() {
+  return (
+    &lt;form action={createUser}&gt;
+      &lt;input name="name" /&gt;
+      &lt;button&gt;Save&lt;/button&gt;
+    &lt;/form&gt;
+  );
+}</code></pre>
+
+<hr>
+
+<h2>Server Component vs Client Component Usage</h2>
+
+<table>
+<tr>
+<th>Location</th>
+<th>How To Use Server Action</th>
+</tr>
+
+<tr>
+<td>Server Component</td>
+<td>Can define inline Server Action or import it</td>
+</tr>
+
+<tr>
+<td>Client Component</td>
+<td>Must import Server Action from a separate <code>'use server'</code> file</td>
+</tr>
+</table>
+
+<hr>
+
+<h2>When Should Client Components Call Server Actions?</h2>
+
+<ul>
+<li>When button click should update database</li>
+<li>When form submit should create/update/delete data</li>
+<li>When we need success/error message in UI</li>
+<li>When we need client-side interactivity plus server-side mutation</li>
+</ul>
+
+<hr>
+
+<h2>Easy Memory Trick</h2>
+
+<div class="code-title">Remember</div>
+
+<pre><code class="language-text">Client Component
+       ↓
+Import Server Action
+       ↓
+Call Action
+       ↓
+Runs On Server
+</code></pre>
+
+<div class="feature">
+<strong>One-Line Definition:</strong><br>
+Yes, Client Components can call Server Actions by importing them from a separate file marked with <code>'use server'</code>; the call starts in the browser, but the action executes on the server.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-tsx.min.js"></script>
+
+</body>
+</html>
