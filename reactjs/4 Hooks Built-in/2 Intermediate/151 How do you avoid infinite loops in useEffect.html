@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>151 - How Do You Avoid Infinite Loops in useEffect?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px;margin-bottom:10px}
+p{color:#cbd5e1}
+ul{padding-left:24px}
+li{margin-bottom:10px;color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px;margin-top:15px}
+.warning{background:#1e1b4b;border-left:5px solid #ef4444;padding:18px;border-radius:10px;margin-top:15px}
+.success{background:#052e16;padding:18px;border-left:5px solid #22c55e;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;margin-top:15px;text-align:center;line-height:2;font-size:18px}
+pre{border-radius:12px;overflow-x:auto}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>151. How Do You Avoid Infinite Loops in useEffect?</h1>
+
+<h2>One-Line Definition</h2>
+
+<div class="highlight">
+Infinite loops in useEffect happen when the effect updates something that causes the effect to run again repeatedly. To avoid them, use correct dependency arrays and avoid unnecessary state updates inside effects.
+</div>
+
+<h2>What Is An Infinite Loop?</h2>
+
+<p>
+An infinite loop happens when:
+</p>
+
+<div class="flow">
+useEffect Runs
+<br>↓<br>
+Updates State
+<br>↓<br>
+Component Re-renders
+<br>↓<br>
+useEffect Runs Again
+<br>↓<br>
+Updates State Again
+<br>↓<br>
+Forever...
+</div>
+
+<div class="warning">
+This can crash the application or cause the browser to freeze.
+</div>
+
+<h2>Most Common Infinite Loop</h2>
+
+<h3>Wrong Example</h3>
+
+<pre><code class="language-jsx">function App() {
+
+  const [count, setCount] = useState(0);
+
+  useEffect(() => {
+
+    setCount(count + 1);
+
+  });
+
+}</code></pre>
+
+<h3>What Happens?</h3>
+
+<div class="flow">
+Render
+<br>↓<br>
+useEffect Runs
+<br>↓<br>
+setCount()
+<br>↓<br>
+Re-render
+<br>↓<br>
+useEffect Runs Again
+<br>↓<br>
+setCount()
+<br>↓<br>
+Repeat Forever
+</div>
+
+<p>
+Because:
+</p>
+
+<pre><code class="language-jsx">useEffect(...)</code></pre>
+
+<p>
+without a dependency array runs after every render.
+</p>
+
+<h2>Fix #1 - Use Dependency Array</h2>
+
+<pre><code class="language-jsx">useEffect(() => {
+
+  setCount(count + 1);
+
+}, []);</code></pre>
+
+<p>
+Now:
+</p>
+
+<div class="flow">
+First Render
+<br>↓<br>
+Effect Runs Once
+<br>↓<br>
+State Updates
+<br>↓<br>
+One More Render
+<br>↓<br>
+Effect Does Not Run Again
+</div>
+
+<div class="success">
+The effect runs only once after component mount.
+</div>
+
+<h2>Another Common Infinite Loop</h2>
+
+<h3>Wrong Example</h3>
+
+<pre><code class="language-jsx">function App() {
+
+  const [count, setCount] = useState(0);
+
+  useEffect(() => {
+
+    setCount(count + 1);
+
+  }, [count]);
+
+}</code></pre>
+
+<h3>What Happens?</h3>
+
+<div class="flow">
+count Changes
+<br>↓<br>
+Dependency Changed
+<br>↓<br>
+Effect Runs
+<br>↓<br>
+setCount()
+<br>↓<br>
+count Changes Again
+<br>↓<br>
+Repeat Forever
+</div>
+
+<div class="warning">
+The effect is updating the same dependency it is watching.
+</div>
+
+<h2>Fix #2 - Add A Condition</h2>
+
+<pre><code class="language-jsx">useEffect(() => {
+
+  if (count < 5) {
+    setCount(count + 1);
+  }
+
+}, [count]);</code></pre>
+
+<p>
+Now:
+</p>
+
+<pre><code class="language-text">0 → 1 → 2 → 3 → 4 → 5
+</code></pre>
+
+<p>
+Then it stops.
+</p>
+
+<h2>Function Dependency Loop</h2>
+
+<h3>Wrong Example</h3>
+
+<pre><code class="language-jsx">function App() {
+
+  const fetchUsers = () => {
+    console.log('Fetch');
+  };
+
+  useEffect(() => {
+
+    fetchUsers();
+
+  }, [fetchUsers]);
+
+}</code></pre>
+
+<h3>Problem</h3>
+
+<p>
+Every render creates:
+</p>
+
+<pre><code class="language-text">New Function Reference
+</code></pre>
+
+<p>
+React sees:
+</p>
+
+<pre><code class="language-text">Dependency Changed
+</code></pre>
+
+<p>
+Effect runs again.
+</p>
+
+<div class="warning">
+Functions are recreated on every render.
+</div>
+
+<h2>Fix #3 - useCallback</h2>
+
+<pre><code class="language-jsx">const fetchUsers = useCallback(() => {
+
+  console.log('Fetch');
+
+}, []);
+
+useEffect(() => {
+
+  fetchUsers();
+
+}, [fetchUsers]);</code></pre>
+
+<div class="success">
+The function reference remains stable.
+</div>
+
+<h2>Object Dependency Loop</h2>
+
+<h3>Wrong Example</h3>
+
+<pre><code class="language-jsx">const options = {
+  page: 1
+};
+
+useEffect(() => {
+
+  console.log(options);
+
+}, [options]);</code></pre>
+
+<h3>Problem</h3>
+
+<p>
+Every render creates:
+</p>
+
+<pre><code class="language-text">New Object Reference
+</code></pre>
+
+<p>
+React sees:
+</p>
+
+<pre><code class="language-text">Dependency Changed
+</code></pre>
+
+<p>
+Effect runs again.
+</p>
+
+<h2>Fix #4 - useMemo</h2>
+
+<pre><code class="language-jsx">const options = useMemo(() => {
+
+  return {
+    page: 1
+  };
+
+}, []);
+
+useEffect(() => {
+
+  console.log(options);
+
+}, [options]);</code></pre>
+
+<div class="success">
+The object reference remains stable.
+</div>
+
+<h2>Array Dependency Loop</h2>
+
+<h3>Wrong Example</h3>
+
+<pre><code class="language-jsx">const users = [
+  'Rizwan',
+  'Ali'
+];
+
+useEffect(() => {
+
+  console.log(users);
+
+}, [users]);</code></pre>
+
+<p>
+Each render creates:
+</p>
+
+<pre><code class="language-text">New Array Reference
+</code></pre>
+
+<h2>Fix #5 - useMemo</h2>
+
+<pre><code class="language-jsx">const users = useMemo(() => {
+
+  return [
+    'Rizwan',
+    'Ali'
+  ];
+
+}, []);
+
+useEffect(() => {
+
+  console.log(users);
+
+}, [users]);</code></pre>
+
+<h2>API Fetch Loop</h2>
+
+<h3>Wrong Example</h3>
+
+<pre><code class="language-jsx">useEffect(() => {
+
+  fetch('/api/users')
+    .then(res => res.json())
+    .then(data => {
+      setUsers(data);
+    });
+
+}, [users]);</code></pre>
+
+<h3>Problem</h3>
+
+<div class="flow">
+Fetch Data
+<br>↓<br>
+setUsers()
+<br>↓<br>
+users Changes
+<br>↓<br>
+Dependency Changed
+<br>↓<br>
+Fetch Again
+<br>↓<br>
+Repeat Forever
+</div>
+
+<h2>Fix #6</h2>
+
+<pre><code class="language-jsx">useEffect(() => {
+
+  fetch('/api/users')
+    .then(res => res.json())
+    .then(data => {
+      setUsers(data);
+    });
+
+}, []);</code></pre>
+
+<div class="success">
+Fetch only once when the component mounts.
+</div>
+
+<h2>Golden Rule</h2>
+
+<div class="warning">
+Never update a dependency inside an effect unless you intentionally want the effect to run again.
+</div>
+
+<h2>How To Detect Infinite Loops</h2>
+
+<p>
+Common symptoms:
+</p>
+
+<ul>
+<li>Console logs continuously.</li>
+<li>API requests repeat forever.</li>
+<li>CPU usage becomes high.</li>
+<li>Browser freezes.</li>
+<li>"Maximum update depth exceeded" error appears.</li>
+</ul>
+
+<h2>Most Common React Error</h2>
+
+<pre><code class="language-text">Maximum update depth exceeded.
+</code></pre>
+
+<p>
+This usually means:
+</p>
+
+<div class="flow">
+State Update
+<br>↓<br>
+Re-render
+<br>↓<br>
+State Update
+<br>↓<br>
+Re-render
+<br>↓<br>
+Infinite Loop
+</div>
+
+<h2>Quick Comparison</h2>
+
+<table>
+<tr>
+<th>Cause</th>
+<th>Fix</th>
+</tr>
+
+<tr>
+<td>No dependency array</td>
+<td>Add dependencies</td>
+</tr>
+
+<tr>
+<td>Updating watched state</td>
+<td>Add conditions</td>
+</tr>
+
+<tr>
+<td>Function dependency</td>
+<td>useCallback</td>
+</tr>
+
+<tr>
+<td>Object dependency</td>
+<td>useMemo</td>
+</tr>
+
+<tr>
+<td>Array dependency</td>
+<td>useMemo</td>
+</tr>
+
+<tr>
+<td>API fetch loop</td>
+<td>Correct dependencies</td>
+</tr>
+</table>
+
+<h2>Easy Way To Remember</h2>
+
+<div class="flow">
+Effect Runs
+<br>↓<br>
+Updates Dependency?
+<br>↓<br>
+Yes
+<br>↓<br>
+Potential Infinite Loop
+
+
+<br><br>
+
+Effect Runs
+<br>↓<br>
+Does Not Update Dependency
+<br>↓<br>
+Safe
+</div>
+
+<h2>Interview Answer</h2>
+
+<div class="highlight">
+Infinite loops in useEffect usually occur when an effect updates state that is also listed in its dependency array, causing the effect to continuously re-run. They can be avoided by using correct dependency arrays, stabilizing functions with useCallback, stabilizing objects and arrays with useMemo, and avoiding unnecessary state updates inside effects.
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+Avoid infinite loops in useEffect by ensuring effects do not continuously update the dependencies that trigger them.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+
+</body>
+</html>

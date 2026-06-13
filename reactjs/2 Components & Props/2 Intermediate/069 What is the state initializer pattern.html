@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>069. What is the State Initializer Pattern?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+
+body{
+  margin:0;
+  padding:0;
+  background:#000814;
+  color:#e2e8f0;
+  font-family:Arial,sans-serif;
+  line-height:1.7;
+}
+
+.container{
+  max-width:1000px;
+  margin:40px auto;
+  background:#020617;
+  padding:40px;
+  border-radius:18px;
+  border:1px solid #0f172a;
+  box-shadow:0 0 40px rgba(0,0,0,.95);
+}
+
+h1{
+  color:#f8fafc;
+  margin-bottom:30px;
+  font-size:34px;
+}
+
+h2{
+  color:#c084fc;
+  margin-top:35px;
+  margin-bottom:15px;
+  font-size:26px;
+}
+
+h3{
+  color:#38bdf8;
+  margin-top:25px;
+  margin-bottom:10px;
+}
+
+p{
+  color:#cbd5e1;
+}
+
+ul{
+  padding-left:24px;
+}
+
+li{
+  margin-bottom:10px;
+  color:#cbd5e1;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:20px;
+}
+
+table th,
+table td{
+  border:1px solid #1e293b;
+  padding:14px;
+  text-align:left;
+}
+
+table th{
+  background:#0f172a;
+  color:#38bdf8;
+}
+
+table td{
+  background:#020617;
+  color:#d1d5db;
+}
+
+.highlight{
+  background:#0f172a;
+  padding:18px;
+  border-left:5px solid #38bdf8;
+  border-radius:10px;
+  margin-top:15px;
+}
+
+.flow{
+  background:#020617;
+  border:1px solid #1e293b;
+  padding:20px;
+  border-radius:10px;
+  margin-top:15px;
+  text-align:center;
+  line-height:2;
+  font-size:18px;
+}
+
+pre{
+  border-radius:12px;
+  overflow-x:auto;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>069. What is the State Initializer Pattern?</h1>
+
+<h2>One-Line Definition</h2>
+
+<div class="highlight">
+The State Initializer Pattern is a React pattern that allows consumers to provide the initial state value and reset the state back to that initial value when needed.
+</div>
+
+<h2>Why Is It Used?</h2>
+
+<p>
+Sometimes reusable components or custom hooks should not decide their own initial state.
+</p>
+
+<p>
+Instead, we allow the consumer to provide the initial value.
+</p>
+
+<p>
+This gives more flexibility and reusability.
+</p>
+
+<h2>Simple Example</h2>
+
+<pre><code class="language-jsx">function Counter() {
+
+  const [count, setCount] = useState(0);
+
+  return (
+    &lt;h2&gt;{count}&lt;/h2&gt;
+  );
+
+}</code></pre>
+
+<p>
+Here the initial value is always 0.
+</p>
+
+<p>
+Consumers cannot customize it.
+</p>
+
+<h2>State Initializer Pattern</h2>
+
+<p>
+Instead, we accept an initial value from the consumer.
+</p>
+
+<pre><code class="language-jsx">import { useState } from 'react';
+
+function useCounter(initialCount = 0) {
+
+  const [count, setCount] = useState(initialCount);
+
+  return {
+    count,
+    setCount
+  };
+
+}</code></pre>
+
+<h3>Usage</h3>
+
+<pre><code class="language-jsx">function App() {
+
+  const { count } = useCounter(100);
+
+  return &lt;h2&gt;{count}&lt;/h2&gt;;
+
+}</code></pre>
+
+<p>
+Now the consumer controls the initial state value.
+</p>
+
+<h2>Main Requirements of State Initializer Pattern</h2>
+
+<ul>
+<li>Allow configurable initial state.</li>
+<li>Provide a way to reset state.</li>
+<li>Reset back to the original initial value.</li>
+</ul>
+
+<h2>Complete State Initializer Pattern</h2>
+
+<pre><code class="language-jsx">import { useState } from 'react';
+
+function useCounter(initialCount = 0) {
+
+  const [count, setCount] = useState(initialCount);
+
+  const reset = () => {
+    setCount(initialCount);
+  };
+
+  return {
+    count,
+    setCount,
+    reset
+  };
+
+}</code></pre>
+
+<h3>Usage</h3>
+
+<pre><code class="language-jsx">function App() {
+
+  const { count, setCount, reset } = useCounter(10);
+
+  return (
+    &lt;div&gt;
+      &lt;h2&gt;{count}&lt;/h2&gt;
+
+      &lt;button onClick={() =&gt; setCount(count + 1)}&gt;
+        Increment
+      &lt;/button&gt;
+
+      &lt;button onClick={reset}&gt;
+        Reset
+      &lt;/button&gt;
+    &lt;/div&gt;
+  );
+
+}</code></pre>
+
+<h2>How It Works</h2>
+
+<div class="flow">
+
+Consumer Provides Initial State
+<br>
+↓
+<br>
+Hook Uses Initial Value
+<br>
+↓
+<br>
+State Changes
+<br>
+↓
+<br>
+Reset Called
+<br>
+↓
+<br>
+Original Initial Value Restored
+
+</div>
+
+<h2>Example Output</h2>
+
+<p>
+Initial value:
+</p>
+
+<pre><code>10</code></pre>
+
+<p>
+After clicking Increment:
+</p>
+
+<pre><code>11
+12
+13</code></pre>
+
+<p>
+After clicking Reset:
+</p>
+
+<pre><code>10</code></pre>
+
+<h2>Why Not Hardcode State?</h2>
+
+<table>
+
+<tr>
+<th>Hardcoded State</th>
+<th>State Initializer Pattern</th>
+</tr>
+
+<tr>
+<td>Fixed initial value</td>
+<td>Consumer decides initial value</td>
+</tr>
+
+<tr>
+<td>Less reusable</td>
+<td>Highly reusable</td>
+</tr>
+
+<tr>
+<td>Harder to customize</td>
+<td>Easy to customize</td>
+</tr>
+
+</table>
+
+<h2>Real Project Example</h2>
+
+<div class="highlight">
+Suppose our Aadhaar Authentication application contains a reusable OTP timer hook. Different screens may require different starting times such as 30 seconds, 60 seconds, or 120 seconds. The State Initializer Pattern allows the consumer to provide the initial timer value and reset it whenever needed.
+</div>
+
+<h2>Related Patterns</h2>
+
+<ul>
+<li>Custom Hook Pattern</li>
+<li>Control Props Pattern</li>
+<li>Prop Getter Pattern</li>
+<li>Reducer Pattern</li>
+</ul>
+
+<h2>Important Interview Points</h2>
+
+<ul>
+<li>The consumer provides the initial state value.</li>
+<li>The hook or component uses that value to initialize state.</li>
+<li>A reset function usually resets state to the original value.</li>
+<li>Improves reusability and flexibility.</li>
+<li>Commonly used in custom hooks.</li>
+</ul>
+
+<h2>Short Interview Answer</h2>
+
+<div class="highlight">
+The State Initializer Pattern is a React pattern where consumers provide the initial state value. The component or hook uses that value to initialize state and usually provides a reset function that restores the original initial value.
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+The State Initializer Pattern lets consumers control the initial state and reset it back to that original value when needed.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+
+</body>
+</html>

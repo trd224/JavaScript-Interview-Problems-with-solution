@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>033 - createRoot vs ReactDOM.render</title>
+
+  <style>
+
+    body{
+      margin:0;
+      padding:0;
+      background:#000814;
+      color:#e2e8f0;
+      font-family:Arial, sans-serif;
+      line-height:1.7;
+    }
+
+    .container{
+      max-width:1000px;
+      margin:40px auto;
+      background:#020617;
+      padding:40px;
+      border-radius:18px;
+      border:1px solid #0f172a;
+      box-shadow:0 0 40px rgba(0,0,0,0.95);
+    }
+
+    h1{
+      color:#f8fafc;
+      margin-bottom:30px;
+      font-size:34px;
+    }
+
+    h2{
+      color:#c084fc;
+      margin-top:35px;
+      margin-bottom:15px;
+      font-size:26px;
+    }
+
+    p{
+      color:#cbd5e1;
+    }
+
+    ul{
+      padding-left:24px;
+    }
+
+    li{
+      margin-bottom:10px;
+      color:#cbd5e1;
+    }
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      margin-top:20px;
+    }
+
+    table th,
+    table td{
+      border:1px solid #1e293b;
+      padding:14px;
+      text-align:left;
+      vertical-align:top;
+    }
+
+    table th{
+      background:#0f172a;
+      color:#38bdf8;
+    }
+
+    table td{
+      background:#020617;
+      color:#d1d5db;
+    }
+
+    .highlight{
+      background:#0f172a;
+      padding:18px;
+      border-left:5px solid #38bdf8;
+      border-radius:10px;
+      margin-top:15px;
+      color:#e5e7eb;
+    }
+
+    .flow{
+      background:#020617;
+      border:1px solid #1e293b;
+      padding:18px;
+      border-radius:10px;
+      margin-top:15px;
+      color:#e2e8f0;
+      text-align:center;
+      font-size:18px;
+    }
+
+    pre{
+      background:#000000;
+      padding:22px;
+      border-radius:12px;
+      overflow-x:auto;
+      border:1px solid #0f172a;
+    }
+
+    code{
+      font-family:Consolas, monospace;
+      font-size:15px;
+    }
+
+    .keyword{
+      color:#c084fc;
+    }
+
+    .function{
+      color:#38bdf8;
+    }
+
+    .string{
+      color:#facc15;
+    }
+
+    .tag{
+      color:#f472b6;
+    }
+
+    .output{
+      color:#4ade80;
+    }
+
+  
+
+    /* Fixed Previous / Next buttons */
+    .fixed-page-nav-spacer{height:110px;}
+    .fixed-page-nav{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);width:calc(100% - 32px);max-width:1180px;display:flex;justify-content:space-between;gap:16px;z-index:9999;pointer-events:none;}
+    .fixed-page-nav a,.fixed-page-nav span{width:52px;height:52px;display:flex;align-items:center;justify-content:center;text-align:center;text-decoration:none;background:#38bdf8;color:#020617;border-radius:50%;font-size:28px;font-weight:700;line-height:1;box-shadow:0 10px 30px rgba(0,0,0,0.45);pointer-events:auto;}
+    .fixed-page-nav span{background:#334155;color:#94a3b8;cursor:not-allowed;}
+    @media(max-width:600px){.fixed-page-nav{bottom:14px;width:calc(100% - 20px);}.fixed-page-nav a,.fixed-page-nav span{width:46px;height:46px;font-size:24px;}}
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+
+    <h1>031. What is createRoot() and how does it differ from ReactDOM.render()?</h1>
+
+    <h2>One-Line Definition</h2>
+
+    <div class="highlight">
+      createRoot() is the new React 18 API used to create and manage the React application root, replacing the older ReactDOM.render() method.
+    </div>
+
+    <h2>What Was Used Before React 18?</h2>
+
+    <p>
+      Before React 18, applications were rendered using:
+    </p>
+
+    <pre><code><span class="keyword">import</span> ReactDOM <span class="keyword">from</span> <span class="string">'react-dom'</span>;
+<span class="keyword">import</span> App <span class="keyword">from</span> <span class="string">'./App'</span>;
+
+ReactDOM.<span class="function">render</span>(
+
+  <span class="tag">&lt;App /&gt;</span>,
+
+  document.getElementById(<span class="string">'root'</span>)
+
+);</code></pre>
+
+    <h2>Problem with ReactDOM.render()</h2>
+
+    <p>
+      ReactDOM.render() uses the old rendering engine and does not support React 18 concurrent features.
+    </p>
+
+    <h2>New React 18 Way</h2>
+
+    <pre><code><span class="keyword">import</span> { createRoot } <span class="keyword">from</span> <span class="string">'react-dom/client'</span>;
+<span class="keyword">import</span> App <span class="keyword">from</span> <span class="string">'./App'</span>;
+
+<span class="keyword">const</span> root = createRoot(
+  document.getElementById(<span class="string">'root'</span>)
+);
+
+root.<span class="function">render</span>(<span class="tag">&lt;App /&gt;</span>);</code></pre>
+
+    <h2>How createRoot() Works</h2>
+
+    <table>
+
+      <tr>
+        <th>Step</th>
+        <th>Purpose</th>
+      </tr>
+
+      <tr>
+        <td>createRoot()</td>
+        <td>Creates React root container</td>
+      </tr>
+
+      <tr>
+        <td>root.render()</td>
+        <td>Renders React application</td>
+      </tr>
+
+    </table>
+
+    <h2>Main Difference</h2>
+
+    <table>
+
+      <tr>
+        <th>createRoot()</th>
+        <th>ReactDOM.render()</th>
+      </tr>
+
+      <tr>
+        <td>Introduced in React 18</td>
+        <td>Used before React 18</td>
+      </tr>
+
+      <tr>
+        <td>Supports concurrent rendering</td>
+        <td>No concurrent features</td>
+      </tr>
+
+      <tr>
+        <td>Modern rendering engine</td>
+        <td>Legacy rendering engine</td>
+      </tr>
+
+      <tr>
+        <td>Recommended approach</td>
+        <td>Deprecated approach</td>
+      </tr>
+
+      <tr>
+        <td>Uses root.render()</td>
+        <td>Direct render method</td>
+      </tr>
+
+    </table>
+
+    <h2>What Is Concurrent Rendering?</h2>
+
+    <p>
+      Concurrent rendering allows React to:
+    </p>
+
+    <ul>
+      <li>Pause rendering</li>
+      <li>Prioritize important updates</li>
+      <li>Improve UI responsiveness</li>
+      <li>Handle large applications more efficiently</li>
+    </ul>
+
+    <h2>Flow Diagram</h2>
+
+    <div class="flow">
+      createRoot() → Create React Root → root.render() → React UI Appears
+    </div>
+
+    <h2>Why React Changed It</h2>
+
+    <p>
+      React 18 introduced a new rendering architecture for:
+    </p>
+
+    <ul>
+      <li>Better performance</li>
+      <li>Concurrent rendering</li>
+      <li>Automatic batching</li>
+      <li>Improved user experience</li>
+    </ul>
+
+    <h2>Old vs New Syntax</h2>
+
+    <h3>Old Syntax</h3>
+
+    <pre><code>ReactDOM.render(
+  <span class="tag">&lt;App /&gt;</span>,
+  document.getElementById(<span class="string">'root'</span>)
+);</code></pre>
+
+    <h3>New Syntax</h3>
+
+    <pre><code><span class="keyword">const</span> root = createRoot(
+  document.getElementById(<span class="string">'root'</span>)
+);
+
+root.render(<span class="tag">&lt;App /&gt;</span>);</code></pre>
+
+    <h2>Where createRoot() Is Usually Used</h2>
+
+    <p>
+      Normally inside:
+    </p>
+
+    <pre><code>src/index.js</code></pre>
+
+    <h2>Example with StrictMode</h2>
+
+    <pre><code><span class="keyword">import</span> { createRoot } <span class="keyword">from</span> <span class="string">'react-dom/client'</span>;
+<span class="keyword">import</span> React <span class="keyword">from</span> <span class="string">'react'</span>;
+<span class="keyword">import</span> App <span class="keyword">from</span> <span class="string">'./App'</span>;
+
+<span class="keyword">const</span> root = createRoot(
+  document.getElementById(<span class="string">'root'</span>)
+);
+
+root.render(
+
+  <span class="tag">&lt;React.StrictMode&gt;</span>
+
+    <span class="tag">&lt;App /&gt;</span>
+
+  <span class="tag">&lt;/React.StrictMode&gt;</span>
+
+);</code></pre>
+
+    <h2>Real Project Use Cases</h2>
+
+    <table>
+
+      <tr>
+        <th>Feature</th>
+        <th>Benefit with createRoot()</th>
+      </tr>
+
+      <tr>
+        <td>Large dashboards</td>
+        <td>Better rendering performance</td>
+      </tr>
+
+      <tr>
+        <td>Dynamic forms</td>
+        <td>Smoother UI updates</td>
+      </tr>
+
+      <tr>
+        <td>Authentication apps</td>
+        <td>Responsive rendering</td>
+      </tr>
+
+      <tr>
+        <td>Heavy UI interactions</td>
+        <td>Concurrent rendering support</td>
+      </tr>
+
+    </table>
+
+    <h2>Important Interview Points</h2>
+
+    <ul>
+      <li>createRoot() was introduced in React 18.</li>
+      <li>It replaces ReactDOM.render().</li>
+      <li>Supports concurrent rendering features.</li>
+      <li>Uses the new React rendering engine.</li>
+      <li>root.render() is used after createRoot().</li>
+    </ul>
+
+    <h2>Short Interview Answer</h2>
+
+    <div class="highlight">
+      createRoot() is the modern React 18 API for creating the application root and supports concurrent rendering, while ReactDOM.render() is the older legacy rendering method.
+    </div>
+
+    <h2>One-Line Interview Answer</h2>
+
+    <div class="highlight">
+      createRoot() is the React 18 replacement for ReactDOM.render() with support for concurrent rendering features.
+    </div>
+
+  </div>
+
+
+  <div class="fixed-page-nav-spacer"></div>
+  <div class="fixed-page-nav">
+    <a href="030%20What%20is%20the%20difference%20between%20imperative%20and%20declarative%20approaches%20in%20React.html">←</a>
+    <a href="032%20What%20is%20the%20difference%20between%20createRoot%20and%20render%20in%20React%2018.html">→</a>
+  </div>
+</body>
+</html>

@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>101. What is the problem with Context for high-frequency updates?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px;margin-bottom:10px}
+p{color:#cbd5e1}
+ul{padding-left:24px}
+li{margin-bottom:10px;color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;margin-top:15px;text-align:center;line-height:2;font-size:18px}
+pre{border-radius:12px;overflow-x:auto}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>101. What is the Problem with Context for High-Frequency Updates?</h1>
+
+<h2>One-Line Definition</h2>
+
+<div class="highlight">
+Context can become inefficient for high-frequency updates because whenever the Provider value changes, all components consuming that Context re-render, even if they do not use the updated data.
+</div>
+
+<h2>What Are High-Frequency Updates?</h2>
+
+<p>
+High-frequency updates are state changes that happen very often.
+</p>
+
+<h3>Real-World Examples</h3>
+
+<ul>
+<li>Live notifications</li>
+<li>Chat messages</li>
+<li>Stock market prices</li>
+<li>Live audit logs</li>
+<li>Online users count</li>
+<li>GPS tracking</li>
+<li>Real-time monitoring dashboards</li>
+<li>Mouse position tracking</li>
+</ul>
+
+<div class="highlight">
+Authentication state usually changes rarely, but notifications and live monitoring data can change every second.
+</div>
+
+<h2>Real-World Example Using Context + useReducer</h2>
+
+<p>
+Suppose we are building an Aadhaar Authentication Monitoring Dashboard.
+</p>
+
+<p>
+We decide to keep all global data inside a single AuthContext.
+</p>
+
+<h3>Reducer State</h3>
+
+<pre><code class="language-jsx">const initialState = {
+  currentUser: null,
+  permissions: [],
+  notifications: [],
+  liveAuditLogs: []
+};</code></pre>
+
+<h3>AuthProvider</h3>
+
+<pre><code class="language-jsx">export function AuthProvider({ children }) {
+
+  const [state, dispatch] =
+    useReducer(authReducer, initialState);
+
+  return (
+    &lt;AuthContext.Provider
+      value={{ state, dispatch }}
+    &gt;
+      {children}
+    &lt;/AuthContext.Provider&gt;
+  );
+
+}</code></pre>
+
+<p>
+Multiple components consume the same AuthContext.
+</p>
+
+<pre><code class="language-text">App
+│
+├── Header
+├── Sidebar
+├── Profile
+├── NotificationPanel
+└── AuditDashboard</code></pre>
+
+<h2>Header.jsx</h2>
+
+<p>
+Shows logged-in user information.
+</p>
+
+<pre><code class="language-jsx">const { state } = useAuth();
+
+return (
+  &lt;h2&gt;
+    Welcome {state.currentUser.name}
+  &lt;/h2&gt;
+);</code></pre>
+
+<h2>Sidebar.jsx</h2>
+
+<p>
+Shows menus based on permissions.
+</p>
+
+<pre><code class="language-jsx">const { state } = useAuth();
+
+const permissions =
+  state.permissions;</code></pre>
+
+<h2>NotificationPanel.jsx</h2>
+
+<p>
+Shows notifications.
+</p>
+
+<pre><code class="language-jsx">const { state } = useAuth();
+
+const notifications =
+  state.notifications;</code></pre>
+
+<h2>AuditDashboard.jsx</h2>
+
+<p>
+Shows real-time audit logs.
+</p>
+
+<pre><code class="language-jsx">const { state } = useAuth();
+
+const auditLogs =
+  state.liveAuditLogs;</code></pre>
+
+<h2>Everything Works Fine...</h2>
+
+<p>
+Until audit logs start arriving continuously from the backend.
+</p>
+
+<h3>New Audit Log Arrives</h3>
+
+<pre><code class="language-jsx">dispatch({
+  type: 'NEW_AUDIT_LOG',
+  payload: auditLog
+});</code></pre>
+
+<h3>Reducer Updates State</h3>
+
+<pre><code class="language-jsx">case 'NEW_AUDIT_LOG':
+
+  return {
+    ...state,
+
+    liveAuditLogs: [
+      auditLog,
+      ...state.liveAuditLogs
+    ]
+  };</code></pre>
+
+<p>
+Now state changes.
+</p>
+
+<p>
+Because state changed:
+</p>
+
+<pre><code class="language-jsx">value={{ state, dispatch }}</code></pre>
+
+<p>
+also changes.
+</p>
+
+<h2>What Developers Expect</h2>
+
+<div class="flow">
+New Audit Log
+<br>
+↓
+<br>
+AuditDashboard Re-renders
+</div>
+
+<p>
+Because AuditDashboard is the only component using liveAuditLogs.
+</p>
+
+<h2>What Actually Happens</h2>
+
+<div class="flow">
+New Audit Log
+<br>
+↓
+<br>
+State Changes
+<br>
+↓
+<br>
+Provider Value Changes
+<br>
+↓
+<br>
+Header Re-renders
+<br>
+↓
+<br>
+Sidebar Re-renders
+<br>
+↓
+<br>
+Profile Re-renders
+<br>
+↓
+<br>
+NotificationPanel Re-renders
+<br>
+↓
+<br>
+AuditDashboard Re-renders
+</div>
+
+<div class="highlight">
+Every component using AuthContext re-renders even though most of them do not use liveAuditLogs.
+</div>
+
+<h2>Why Does React Do This?</h2>
+
+<p>
+React does not track individual properties inside Context.
+</p>
+
+<p>
+React only checks whether the Provider value changed.
+</p>
+
+<pre><code class="language-jsx">value={{ state, dispatch }}</code></pre>
+
+<p>
+Before update:
+</p>
+
+<pre><code class="language-jsx">{
+  state: oldState,
+  dispatch
+}</code></pre>
+
+<p>
+After update:
+</p>
+
+<pre><code class="language-jsx">{
+  state: newState,
+  dispatch
+}</code></pre>
+
+<p>
+React sees:
+</p>
+
+<pre><code class="language-jsx">oldState !== newState</code></pre>
+
+<p>
+Therefore all Context consumers re-render.
+</p>
+
+<h2>Real Production Problem</h2>
+
+<p>
+Imagine audit logs arrive:
+</p>
+
+<pre><code class="language-text">10 times every second</code></pre>
+
+<p>
+Now:
+</p>
+
+<div class="flow">
+10 Audit Updates Per Second
+<br>
+↓
+<br>
+Header Re-renders 10 Times
+<br>
+Sidebar Re-renders 10 Times
+<br>
+Profile Re-renders 10 Times
+<br>
+NotificationPanel Re-renders 10 Times
+<br>
+AuditDashboard Re-renders 10 Times
+</div>
+
+<p>
+Most of these renders are completely unnecessary.
+</p>
+
+<h2>Why Is This Bad?</h2>
+
+<ul>
+<li>Higher CPU usage</li>
+<li>More memory consumption</li>
+<li>Slower UI rendering</li>
+<li>Poor scalability</li>
+<li>Wasted rendering work</li>
+</ul>
+
+<div class="highlight">
+The larger the application becomes, the bigger the performance impact becomes.
+</div>
+
+<h2>When Context Works Well</h2>
+
+<p>
+Context is excellent for data that changes infrequently.
+</p>
+
+<ul>
+<li>Logged-in user</li>
+<li>Theme</li>
+<li>Language</li>
+<li>User permissions</li>
+<li>Department information</li>
+</ul>
+
+<h3>Authentication Example</h3>
+
+<pre><code class="language-jsx">dispatch({
+  type: 'LOGIN_SUCCESS',
+  payload: user
+});</code></pre>
+
+<p>
+This happens only occasionally, so Context performs well.
+</p>
+
+<h2>When Context Is Not Ideal</h2>
+
+<ul>
+<li>Live notifications</li>
+<li>Chat messages</li>
+<li>Live audit monitoring</li>
+<li>Stock prices</li>
+<li>GPS tracking</li>
+<li>Real-time dashboards</li>
+<li>Mouse tracking</li>
+</ul>
+
+<p>
+These updates can happen many times per second.
+</p>
+
+<h2>Solution #1 - Split Contexts</h2>
+
+<p>
+Instead of one giant Context:
+</p>
+
+<pre><code class="language-jsx">AuthContext</code></pre>
+
+<p>
+Create multiple Contexts:
+</p>
+
+<pre><code class="language-jsx">AuthContext
+
+NotificationContext
+
+AuditContext
+
+ThemeContext</code></pre>
+
+<div class="flow">
+Audit Log Updated
+<br>
+↓
+<br>
+AuditContext Changes
+<br>
+↓
+<br>
+Only Audit Components Re-render
+</div>
+
+<h2>Solution #2 - Zustand</h2>
+
+<p>
+Zustand allows components to subscribe only to the state they need.
+</p>
+
+<pre><code class="language-jsx">const auditLogs =
+  useAuditStore(
+    state => state.auditLogs
+  );</code></pre>
+
+<p>
+Now:
+</p>
+
+<div class="flow">
+Audit Log Updated
+<br>
+↓
+<br>
+Audit Store Changes
+<br>
+↓
+<br>
+Only AuditDashboard Re-renders
+</div>
+
+<p>
+Header and Sidebar do not re-render.
+</p>
+
+<h2>Context vs Zustand</h2>
+
+<table>
+<tr>
+<th>Feature</th>
+<th>Context</th>
+<th>Zustand</th>
+</tr>
+
+<tr>
+<td>Authentication State</td>
+<td>✅ Excellent</td>
+<td>✅ Excellent</td>
+</tr>
+
+<tr>
+<td>Theme</td>
+<td>✅ Excellent</td>
+<td>✅ Excellent</td>
+</tr>
+
+<tr>
+<td>Permissions</td>
+<td>✅ Excellent</td>
+<td>✅ Excellent</td>
+</tr>
+
+<tr>
+<td>Live Notifications</td>
+<td>⚠️ Can Cause Many Re-renders</td>
+<td>✅ Excellent</td>
+</tr>
+
+<tr>
+<td>Live Audit Logs</td>
+<td>⚠️ Can Cause Many Re-renders</td>
+<td>✅ Excellent</td>
+</tr>
+
+<tr>
+<td>Stock Prices</td>
+<td>⚠️ Can Cause Many Re-renders</td>
+<td>✅ Excellent</td>
+</tr>
+
+<tr>
+<td>Selective Re-rendering</td>
+<td>❌ No</td>
+<td>✅ Yes</td>
+</tr>
+</table>
+
+<h2>Important Interview Points</h2>
+
+<ul>
+<li>Context re-renders all consumers when the Provider value changes.</li>
+<li>React does not track individual properties inside Context.</li>
+<li>Frequently changing data can cause unnecessary re-renders.</li>
+<li>Authentication is usually a good use case for Context.</li>
+<li>Live notifications and monitoring streams are often poor candidates for Context.</li>
+<li>Splitting Contexts can reduce unnecessary re-renders.</li>
+<li>Zustand and Redux provide more granular updates.</li>
+</ul>
+
+<h2>Short Interview Answer</h2>
+
+<div class="highlight">
+The problem with Context is that whenever the Provider value changes, React re-renders all Context consumers. For frequently changing data such as notifications, chat messages, and live audit logs, this can lead to unnecessary re-renders and performance issues.
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+Context is not ideal for high-frequency updates because all Context consumers re-render whenever the Provider value changes.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+
+</body>
+</html>

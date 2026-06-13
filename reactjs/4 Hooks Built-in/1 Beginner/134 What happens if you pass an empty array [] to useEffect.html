@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>134 - Empty Dependency Array in useEffect</title>
+
+  <style>
+
+    body{
+      margin:0;
+      padding:40px 20px;
+      background:#000814;
+      color:#e2e8f0;
+      font-family:Arial,sans-serif;
+      line-height:1.7;
+    }
+
+    .container{
+      max-width:1000px;
+      margin:auto;
+    }
+
+    .card{
+      background:#020617;
+      border:1px solid #1e293b;
+      border-radius:18px;
+      padding:35px;
+      margin-bottom:30px;
+      box-shadow:0 0 25px rgba(0,0,0,0.6);
+    }
+
+    h1{
+      color:#f8fafc;
+      font-size:38px;
+      margin:0;
+    }
+
+    h2{
+      color:#c084fc;
+      margin-top:0;
+      margin-bottom:18px;
+      font-size:28px;
+    }
+
+    h3{
+      color:#38bdf8;
+      margin-top:25px;
+      margin-bottom:12px;
+      font-size:20px;
+    }
+
+    p{
+      color:#cbd5e1;
+    }
+
+    ul{
+      padding-left:24px;
+    }
+
+    li{
+      margin-bottom:10px;
+      color:#cbd5e1;
+    }
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      margin-top:20px;
+    }
+
+    table th,
+    table td{
+      border:1px solid #334155;
+      padding:14px;
+      text-align:left;
+      vertical-align:top;
+    }
+
+    table th{
+      background:#0f172a;
+      color:#38bdf8;
+    }
+
+    table td{
+      color:#d1d5db;
+    }
+
+    .highlight{
+      background:#0f172a;
+      padding:18px;
+      border-left:5px solid #38bdf8;
+      border-radius:10px;
+      color:#e5e7eb;
+    }
+
+    .flow{
+      background:#000000;
+      border:1px solid #334155;
+      padding:20px;
+      border-radius:12px;
+      color:#e2e8f0;
+      line-height:2;
+      text-align:center;
+      font-size:18px;
+    }
+
+    pre{
+      background:#000000;
+      padding:22px;
+      border-radius:12px;
+      overflow-x:auto;
+      border:1px solid #1e293b;
+    }
+
+    code{
+      font-family:Consolas,monospace;
+      font-size:15px;
+    }
+
+    .keyword{
+      color:#c084fc;
+    }
+
+    .function{
+      color:#38bdf8;
+    }
+
+    .string{
+      color:#facc15;
+    }
+
+    .tag{
+      color:#f472b6;
+    }
+
+    .comment{
+      color:#94a3b8;
+    }
+
+    .output{
+      color:#4ade80;
+    }
+
+  
+
+    /* Fixed Previous / Next buttons */
+    .fixed-page-nav-spacer{height:110px;}
+    .fixed-page-nav{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);width:calc(100% - 32px);max-width:1180px;display:flex;justify-content:space-between;gap:16px;z-index:9999;pointer-events:none;}
+    .fixed-page-nav a,.fixed-page-nav span{width:52px;height:52px;display:flex;align-items:center;justify-content:center;text-align:center;text-decoration:none;background:#38bdf8;color:#020617;border-radius:50%;font-size:28px;font-weight:700;line-height:1;box-shadow:0 10px 30px rgba(0,0,0,0.45);pointer-events:auto;}
+    .fixed-page-nav span{background:#334155;color:#94a3b8;cursor:not-allowed;}
+    @media(max-width:600px){.fixed-page-nav{bottom:14px;width:calc(100% - 20px);}.fixed-page-nav a,.fixed-page-nav span{width:46px;height:46px;font-size:24px;}}
+  </style>
+
+</head>
+
+<body>
+
+  <div class="container">
+
+    <section class="card">
+
+      <h1>134. What happens if you pass an empty array [] to useEffect?</h1>
+
+    </section>
+
+    <section class="card">
+
+      <h2>One-Line Definition</h2>
+
+      <div class="highlight">
+        Passing an empty dependency array [] makes useEffect run only once after the first render.
+      </div>
+
+      <h2>Simple Understanding</h2>
+
+      <p>
+        React runs the effect one time because there are no dependencies to watch.
+      </p>
+
+    </section>
+
+    <section class="card">
+
+      <h2>Main Idea</h2>
+
+      <div class="flow">
+        Component Mounts
+        <br>
+        ↓
+        <br>
+        useEffect Runs Once
+        <br>
+        ↓
+        <br>
+        No Dependency Changes
+        <br>
+        ↓
+        <br>
+        Effect Does Not Re-Run
+      </div>
+
+      <h2>Basic Syntax</h2>
+
+      <pre><code>useEffect(() => {
+
+  <span class="comment">// Side effect</span>
+
+}, []);</code></pre>
+
+    </section>
+
+    <section class="card">
+
+      <h2>Basic Example</h2>
+
+      <pre><code><span class="keyword">import</span> { useEffect } from <span class="string">'react'</span>;
+
+<span class="keyword">function</span> <span class="function">App</span>() {
+
+  useEffect(() => {
+
+    console.log(<span class="string">'Runs Once'</span>);
+
+  }, []);
+
+}</code></pre>
+
+      <h3>What Happens?</h3>
+
+      <ul>
+        <li>Component renders</li>
+        <li>useEffect runs once</li>
+        <li>Effect does not run again</li>
+      </ul>
+
+    </section>
+
+    <section class="card">
+
+      <h2>Equivalent Class Lifecycle</h2>
+
+      <pre><code>componentDidMount()</code></pre>
+
+      <h3>Why?</h3>
+
+      <p>
+        Empty dependency array means React has no changing dependency to monitor.
+      </p>
+
+    </section>
+
+    <section class="card">
+
+      <h2>Render Flow</h2>
+
+      <div class="flow">
+        First Render
+        <br>
+        ↓
+        <br>
+        Effect Runs
+        <br>
+        ↓
+        <br>
+        Future Re-Renders
+        <br>
+        ↓
+        <br>
+        Effect Skipped
+      </div>
+
+    </section>
+
+    <section class="card">
+
+      <h2>Example with State Updates</h2>
+
+      <pre><code><span class="keyword">import</span> { useEffect, useState } from <span class="string">'react'</span>;
+
+<span class="keyword">function</span> <span class="function">App</span>() {
+
+  <span class="keyword">const</span> [count, setCount] = useState(0);
+
+  useEffect(() => {
+
+    console.log(<span class="string">'Runs Once'</span>);
+
+  }, []);
+
+  <span class="keyword">return</span> (
+
+    <span class="tag">&lt;button</span> onClick={() => setCount(count + 1)}<span class="tag">&gt;</span>{count}<span class="tag">&lt;/button&gt;</span>
+
+  );
+
+}</code></pre>
+
+      <h3>What Happens?</h3>
+
+      <ul>
+        <li>Effect runs only after first render</li>
+        <li>Clicking button re-renders component</li>
+        <li>Effect does not run again</li>
+      </ul>
+
+    </section>
+
+    <section class="card">
+
+      <h2>Cleanup with Empty Array</h2>
+
+      <pre><code>useEffect(() => {
+
+  console.log(<span class="string">'Mounted'</span>);
+
+  <span class="keyword">return</span> () => {
+
+    console.log(<span class="string">'Cleanup'</span>);
+
+  };
+
+}, []);</code></pre>
+
+      <h3>What Happens?</h3>
+
+      <table>
+
+        <tr>
+          <th>Phase</th>
+          <th>Behavior</th>
+        </tr>
+
+        <tr>
+          <td>Component mounts</td>
+          <td>Effect runs once</td>
+        </tr>
+
+        <tr>
+          <td>Component unmounts</td>
+          <td>Cleanup runs once</td>
+        </tr>
+
+      </table>
+
+    </section>
+
+    <section class="card">
+
+      <h2>Real Example with API Call</h2>
+
+      <pre><code><span class="keyword">import</span> { useEffect, useState } from <span class="string">'react'</span>;
+
+<span class="keyword">function</span> <span class="function">App</span>() {
+
+  <span class="keyword">const</span> [users, setUsers] = useState([]);
+
+  useEffect(() => {
+
+    fetch(<span class="string">'https://api.com/users'</span>)
+      .then((res) => res.json())
+      .then((data) => setUsers(data));
+
+  }, []);
+
+}</code></pre>
+
+      <h3>Why Use Empty Array Here?</h3>
+
+      <p>
+        We usually want the API call only once when the component loads.
+      </p>
+
+    </section>
+
+    <section class="card">
+
+      <h2>Common Real-World Uses</h2>
+
+      <table>
+
+        <tr>
+          <th>Feature</th>
+          <th>Reason</th>
+        </tr>
+
+        <tr>
+          <td>API calls</td>
+          <td>Load data once</td>
+        </tr>
+
+        <tr>
+          <td>Authentication check</td>
+          <td>Run once on startup</td>
+        </tr>
+
+        <tr>
+          <td>Initialize WebSocket</td>
+          <td>Create single connection</td>
+        </tr>
+
+        <tr>
+          <td>Load theme</td>
+          <td>Read localStorage once</td>
+        </tr>
+
+        <tr>
+          <td>OTP timer setup</td>
+          <td>Start timer once</td>
+        </tr>
+
+      </table>
+
+    </section>
+
+    <section class="card">
+
+      <h2>Difference Between Dependency Types</h2>
+
+      <table>
+
+        <tr>
+          <th>Code</th>
+          <th>Behavior</th>
+        </tr>
+
+        <tr>
+          <td>useEffect(fn)</td>
+          <td>Runs after every render</td>
+        </tr>
+
+        <tr>
+          <td>useEffect(fn, [])</td>
+          <td>Runs once after first render</td>
+        </tr>
+
+        <tr>
+          <td>useEffect(fn, [count])</td>
+          <td>Runs when count changes</td>
+        </tr>
+
+      </table>
+
+    </section>
+
+    <section class="card">
+
+      <h2>Important Interview Points</h2>
+
+      <ul>
+        <li>Empty dependency array means run once.</li>
+        <li>Effect runs after first render.</li>
+        <li>Cleanup runs on unmount.</li>
+        <li>Equivalent to componentDidMount().</li>
+        <li>Commonly used for API calls and initialization.</li>
+      </ul>
+
+      <h2>Short Interview Answer</h2>
+
+      <div class="highlight">
+        Passing an empty dependency array [] makes useEffect run only once after the component’s first render.
+      </div>
+
+      <h2>One-Line Interview Answer</h2>
+
+      <div class="highlight">
+        [] makes useEffect run only once after initial render.
+      </div>
+
+    </section>
+
+  </div>
+
+
+  <div class="fixed-page-nav-spacer"></div>
+  <div class="fixed-page-nav">
+    <a href="133%20What%20is%20the%20cleanup%20function%20in%20useEffect.html">←</a>
+    <a href="135%20What%20happens%20if%20you%20omit%20the%20dependency%20array%20in%20useEffect.html">→</a>
+  </div>
+</body>
+</html>

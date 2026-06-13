@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>142 - What is useMemo and When Should You Use It?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px;margin-bottom:10px}
+p{color:#cbd5e1}
+ul{padding-left:24px}
+li{margin-bottom:10px;color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px;margin-top:15px}
+.warning{background:#1e1b4b;border-left:5px solid #fbbf24;padding:18px;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;margin-top:15px;text-align:center;line-height:2;font-size:18px}
+pre{border-radius:12px;overflow-x:auto}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>142. What is useMemo and When Should You Use It?</h1>
+
+<h2>One-Line Definition</h2>
+
+<div class="highlight">
+useMemo is a React hook that caches (memorizes) the result of a calculation and only recalculates it when its dependencies change.
+</div>
+
+<h2>Simple Meaning</h2>
+
+<p>
+Normally React re-runs the entire component whenever state changes.
+</p>
+
+<p>
+That means every variable, function call, filter, sort, or calculation inside the component runs again.
+</p>
+
+<pre><code class="language-jsx">function App() {
+
+  const total = calculateTotal();
+
+  return &lt;h2&gt;{total}&lt;/h2&gt;;
+
+}</code></pre>
+
+<p>
+Every re-render calls:
+</p>
+
+<pre><code class="language-jsx">calculateTotal();</code></pre>
+
+<p>
+even if the data used by the calculation has not changed.
+</p>
+
+<div class="warning">
+This can become expensive when calculations are heavy.
+</div>
+
+<h2>What Problem Does useMemo Solve?</h2>
+
+<p>
+Suppose we have 10,000 products.
+</p>
+
+<pre><code class="language-jsx">const filteredProducts = products.filter(
+  product => product.price > 1000
+);</code></pre>
+
+<p>
+Every component re-render runs the filter again.
+</p>
+
+<div class="flow">
+Component Re-renders
+<br>↓<br>
+Filter Runs Again
+<br>↓<br>
+Filter Runs Again
+<br>↓<br>
+Filter Runs Again
+</div>
+
+<p>
+Even if products never changed.
+</p>
+
+<p>
+useMemo can cache the result.
+</p>
+
+<h2>Syntax</h2>
+
+<pre><code class="language-jsx">const memoizedValue = useMemo(() => {
+    return expensiveCalculation();
+  },
+  [dependencies]
+);</code></pre>
+
+<h3>Parameters</h3>
+
+<table>
+<tr>
+<th>Parameter</th>
+<th>Purpose</th>
+</tr>
+
+<tr>
+<td>Callback Function</td>
+<td>Returns the value to cache</td>
+</tr>
+
+<tr>
+<td>Dependency Array</td>
+<td>Determines when recalculation should happen</td>
+</tr>
+</table>
+
+<h2>Basic Example</h2>
+
+<pre><code class="language-jsx">import { useMemo } from 'react';
+
+function App() {
+
+  const total = useMemo(() => {
+    return 10 + 20;
+  }, []);
+
+  return &lt;h2&gt;{total}&lt;/h2&gt;;
+
+}</code></pre>
+
+<p>
+The value is calculated only once.
+</p>
+
+<h2>Real Example Without useMemo</h2>
+
+<pre><code class="language-jsx">function ProductList({ products }) {
+
+  const expensiveProducts = products.filter(
+    product => product.price > 1000
+  );
+
+  return (
+    &lt;div&gt;
+      {expensiveProducts.length}
+    &lt;/div&gt;
+  );
+
+}</code></pre>
+
+<p>
+Every re-render:
+</p>
+
+<pre><code class="language-text">Component Re-renders
+       ↓
+filter()
+       ↓
+Runs Again
+</code></pre>
+
+<h2>Same Example With useMemo</h2>
+
+<pre><code class="language-jsx">import { useMemo } from 'react';
+
+function ProductList({ products }) {
+
+  const expensiveProducts = useMemo(() => {
+
+    return products.filter(
+      product => product.price > 1000
+    );
+
+  }, [products]);
+
+  return (
+    &lt;div&gt;
+      {expensiveProducts.length}
+    &lt;/div&gt;
+  );
+
+}</code></pre>
+
+<p>
+Now the filter runs only when:
+</p>
+
+<pre><code class="language-text">products changes
+</code></pre>
+
+<div class="highlight">
+If products stay the same, React reuses the cached value.
+</div>
+
+<h2>Visual Flow</h2>
+
+<h3>Without useMemo</h3>
+
+<div class="flow">
+State Change
+<br>↓<br>
+Component Re-renders
+<br>↓<br>
+Expensive Calculation Runs
+<br>↓<br>
+Every Time
+</div>
+
+<h3>With useMemo</h3>
+
+<div class="flow">
+State Change
+<br>↓<br>
+Component Re-renders
+<br>↓<br>
+Dependencies Changed?
+<br>↓<br>
+No
+<br>↓<br>
+Use Cached Value
+</div>
+
+<h2>Real Search Example</h2>
+
+<pre><code class="language-jsx">function Search({ products, search }) {
+
+  const filteredProducts = useMemo(() => {
+
+    return products.filter(product =>
+      product.name
+        .toLowerCase()
+        .includes(search.toLowerCase())
+    );
+
+  }, [products, search]);
+
+  return (
+    &lt;ul&gt;
+      {filteredProducts.map(product => (
+        &lt;li key={product.id}&gt;
+          {product.name}
+        &lt;/li&gt;
+      ))}
+    &lt;/ul&gt;
+  );
+
+}</code></pre>
+
+<p>
+Filtering only happens when:
+</p>
+
+<ul>
+<li>products changes</li>
+<li>search changes</li>
+</ul>
+
+<h2>Common useMemo Use Cases</h2>
+
+<ul>
+<li>Filtering large arrays</li>
+<li>Sorting large arrays</li>
+<li>Complex calculations</li>
+<li>Generating expensive derived data</li>
+<li>Preventing unnecessary re-renders with React.memo</li>
+</ul>
+
+<h2>Important Example: React.memo + useMemo</h2>
+
+<h3>Parent Component</h3>
+
+<pre><code class="language-jsx">const users = useMemo(() => {
+  return [
+    'Rizwan',
+    'Ali',
+    'John'
+  ];
+}, []);</code></pre>
+
+<h3>Child Component</h3>
+
+<pre><code class="language-jsx">const UserList = React.memo(
+  function UserList({ users }) {
+    return &lt;div&gt;{users.length}&lt;/div&gt;;
+  }
+);</code></pre>
+
+<div class="highlight">
+useMemo keeps the same array reference, helping React.memo avoid unnecessary child re-renders.
+</div>
+
+<h2>When Should You Use useMemo?</h2>
+
+<p>
+Use useMemo when:
+</p>
+
+<ul>
+<li>Calculation is expensive.</li>
+<li>Large arrays are filtered or sorted.</li>
+<li>Derived data is expensive to compute.</li>
+<li>React.memo optimization needs stable references.</li>
+</ul>
+
+<h2>When Should You NOT Use useMemo?</h2>
+
+<p>
+Do not use useMemo for simple calculations.
+</p>
+
+<h3>Bad Example</h3>
+
+<pre><code class="language-jsx">const total = useMemo(() => {
+  return 5 + 10;
+}, []);</code></pre>
+
+<div class="warning">
+useMemo itself has overhead. Simple calculations are usually faster than memoization.
+</div>
+
+<h3>Better</h3>
+
+<pre><code class="language-jsx">const total = 5 + 10;</code></pre>
+
+<h2>Most Common Beginner Mistake</h2>
+
+<p>
+Many developers think useMemo prevents component re-renders.
+</p>
+
+<div class="warning">
+useMemo does NOT stop re-renders.
+<br><br>
+It only prevents recalculating a value.
+</div>
+
+<h3>Wrong Thinking</h3>
+
+<pre><code class="language-text">useMemo
+     ↓
+Stops Component Re-render
+</code></pre>
+
+<h3>Correct Thinking</h3>
+
+<pre><code class="language-text">useMemo
+     ↓
+Caches Calculation Result
+</code></pre>
+
+<h2>How useMemo Compares to useCallback</h2>
+
+<table>
+<tr>
+<th>Hook</th>
+<th>Returns</th>
+</tr>
+
+<tr>
+<td>useMemo</td>
+<td>Memoized Value</td>
+</tr>
+
+<tr>
+<td>useCallback</td>
+<td>Memoized Function</td>
+</tr>
+</table>
+
+<h3>useMemo</h3>
+
+<pre><code class="language-jsx">const total = useMemo(() => {
+  return price * quantity;
+}, [price, quantity]);</code></pre>
+
+<h3>useCallback</h3>
+
+<pre><code class="language-jsx">const handleClick = useCallback(() => {
+  console.log('Clicked');
+}, []);</code></pre>
+
+<h2>Easy Way To Remember</h2>
+
+<div class="flow">
+useMemo
+<br>↓<br>
+Caches Value
+<br>↓<br>
+Recalculate Only When Dependencies Change
+</div>
+
+<h2>Interview Answer</h2>
+
+<div class="highlight">
+useMemo is a React hook that memoizes the result of a calculation and returns the cached value until one of its dependencies changes. It is mainly used to optimize expensive calculations and prevent unnecessary recomputation during re-renders.
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+useMemo caches a calculated value and recomputes it only when its dependencies change.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+
+</body>
+</html>

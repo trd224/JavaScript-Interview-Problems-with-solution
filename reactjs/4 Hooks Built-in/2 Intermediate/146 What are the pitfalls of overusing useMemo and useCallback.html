@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>146 - What are the Pitfalls of Overusing useMemo and useCallback?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px;margin-bottom:10px}
+p{color:#cbd5e1}
+ul{padding-left:24px}
+li{margin-bottom:10px;color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px;margin-top:15px}
+.warning{background:#1e1b4b;border-left:5px solid #fbbf24;padding:18px;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;margin-top:15px;text-align:center;line-height:2;font-size:18px}
+pre{border-radius:12px;overflow-x:auto}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>146. What are the Pitfalls of Overusing useMemo and useCallback?</h1>
+
+<h2>One-Line Definition</h2>
+
+<div class="highlight">
+Overusing useMemo and useCallback can make code more complex, increase memory usage, add comparison overhead, and sometimes make performance worse instead of better.
+</div>
+
+<h2>The Biggest Misconception</h2>
+
+<p>
+Many developers think:
+</p>
+
+<pre><code class="language-text">More useMemo
+↓
+More Performance
+
+
+More useCallback
+↓
+More Performance
+</code></pre>
+
+<p>
+This is not true.
+</p>
+
+<div class="warning">
+useMemo and useCallback are optimization tools, not performance boosters for every situation.
+</div>
+
+<h2>What React Already Does</h2>
+
+<p>
+Normal calculations are very fast.
+</p>
+
+<pre><code class="language-jsx">const total = price * quantity;</code></pre>
+
+<p>
+Normal functions are also very cheap.
+</p>
+
+<pre><code class="language-jsx">const handleClick = () => {
+  console.log('Clicked');
+};</code></pre>
+
+<p>
+Creating these values usually costs less than memoizing them.
+</p>
+
+<div class="highlight">
+Sometimes the optimization costs more than the thing being optimized.
+</div>
+
+<h2>Pitfall #1 - Memoizing Simple Calculations</h2>
+
+<h3>Bad</h3>
+
+<pre><code class="language-jsx">const total = useMemo(() => {
+  return price * quantity;
+}, [price, quantity]);</code></pre>
+
+<h3>Better</h3>
+
+<pre><code class="language-jsx">const total = price * quantity;</code></pre>
+
+<p>
+Why?
+</p>
+
+<ul>
+<li>Multiplication is extremely fast.</li>
+<li>useMemo must store the value.</li>
+<li>useMemo must compare dependencies.</li>
+<li>useMemo adds extra work.</li>
+</ul>
+
+<div class="warning">
+Simple calculations usually do not need memoization.
+</div>
+
+<h2>Pitfall #2 - Wrapping Every Function in useCallback</h2>
+
+<h3>Bad</h3>
+
+<pre><code class="language-jsx">const handleClick = useCallback(() => {
+  alert('Hello');
+}, []);</code></pre>
+
+<p>
+If the function is not:
+</p>
+
+<ul>
+<li>Passed to React.memo</li>
+<li>Used in dependency arrays</li>
+<li>Causing re-render issues</li>
+</ul>
+
+<p>
+Then useCallback provides no benefit.
+</p>
+
+<h3>Better</h3>
+
+<pre><code class="language-jsx">const handleClick = () => {
+  alert('Hello');
+};</code></pre>
+
+<div class="highlight">
+Not every function needs a stable reference.
+</div>
+
+<h2>Pitfall #3 - Harder To Read Code</h2>
+
+<h3>Without Memoization</h3>
+
+<pre><code class="language-jsx">const users = usersData.filter(
+  user => user.active
+);</code></pre>
+
+<h3>Over-Optimized</h3>
+
+<pre><code class="language-jsx">const users = useMemo(() => {
+
+  return usersData.filter(
+    user => user.active
+  );
+
+}, [usersData]);</code></pre>
+
+<p>
+Now imagine every variable and function in the component looks like this.
+</p>
+
+<div class="warning">
+Excessive memoization can make components harder to understand and maintain.
+</div>
+
+<h2>Pitfall #4 - Extra Memory Usage</h2>
+
+<p>
+React must remember memoized values.
+</p>
+
+<div class="flow">
+useMemo
+<br>↓<br>
+Store Value
+<br>↓<br>
+Store Dependencies
+<br>↓<br>
+Compare Dependencies
+<br>↓<br>
+Manage Cache
+</div>
+
+<p>
+The more memoized values we create:
+</p>
+
+<ul>
+<li>More memory is used.</li>
+<li>More dependency comparisons occur.</li>
+</ul>
+
+<div class="warning">
+Memoization is not free.
+</div>
+
+<h2>Pitfall #5 - Dependency Array Bugs</h2>
+
+<h3>Example</h3>
+
+<pre><code class="language-jsx">const total = useMemo(() => {
+  return price * quantity;
+}, [price]);</code></pre>
+
+<p>
+Missing dependency:
+</p>
+
+<pre><code class="language-text">quantity
+</code></pre>
+
+<p>
+Now:
+</p>
+
+<pre><code class="language-text">quantity changes
+↓
+useMemo does not run
+↓
+Stale value shown
+</code></pre>
+
+<div class="warning">
+Incorrect dependency arrays can create difficult bugs.
+</div>
+
+<h2>Pitfall #6 - Stale Closures</h2>
+
+<h3>Example</h3>
+
+<pre><code class="language-jsx">const handleClick = useCallback(() => {
+  console.log(count);
+}, []);</code></pre>
+
+<p>
+Problem:
+</p>
+
+<pre><code class="language-text">count changes
+↓
+useCallback never recreates function
+↓
+Old count is logged
+</code></pre>
+
+<p>
+Correct:
+</p>
+
+<pre><code class="language-jsx">const handleClick = useCallback(() => {
+  console.log(count);
+}, [count]);</code></pre>
+
+<div class="warning">
+Incorrect dependencies can cause stale data bugs.
+</div>
+
+<h2>Pitfall #7 - No Benefit Without React.memo</h2>
+
+<p>
+Consider:
+</p>
+
+<pre><code class="language-jsx">const handleClick = useCallback(() => {
+  console.log('Clicked');
+}, []);</code></pre>
+
+<p>
+If the child component is not memoized:
+</p>
+
+<pre><code class="language-jsx">&lt;Child onClick={handleClick} /&gt;</code></pre>
+
+<p>
+Then:
+</p>
+
+<pre><code class="language-text">Parent Re-renders
+↓
+Child Re-renders Anyway
+</code></pre>
+
+<p>
+The stable function reference provides little or no benefit.
+</p>
+
+<div class="highlight">
+useCallback is often useful only when combined with React.memo.
+</div>
+
+<h2>Pitfall #8 - Premature Optimization</h2>
+
+<p>
+Many developers write:
+</p>
+
+<pre><code class="language-jsx">const users = useMemo(...);
+
+const products = useMemo(...);
+
+const total = useMemo(...);
+
+const handleAdd = useCallback(...);
+
+const handleDelete = useCallback(...);
+
+const handleUpdate = useCallback(...);</code></pre>
+
+<p>
+before measuring performance.
+</p>
+
+<div class="warning">
+Never optimize because you think something might be slow.
+<br><br>
+Optimize because profiling shows it is slow.
+</div>
+
+<h2>Real Interview Scenario</h2>
+
+<p>
+Question:
+</p>
+
+<pre><code class="language-text">Should we use useCallback for every event handler?</code></pre>
+
+<p>
+Answer:
+</p>
+
+<div class="highlight">
+No.
+<br><br>
+Only when stable function references matter, such as React.memo children or hook dependency arrays.
+</div>
+
+<h2>When useMemo Is Actually Worth Using</h2>
+
+<ul>
+<li>Filtering thousands of records.</li>
+<li>Sorting large datasets.</li>
+<li>Heavy calculations.</li>
+<li>Expensive derived state.</li>
+<li>Creating stable object or array references for React.memo.</li>
+</ul>
+
+<h2>When useCallback Is Actually Worth Using</h2>
+
+<ul>
+<li>Passing functions to React.memo components.</li>
+<li>Functions used in useEffect dependencies.</li>
+<li>Functions used in custom hooks.</li>
+<li>Large applications with render bottlenecks.</li>
+</ul>
+
+<h2>Decision Rule</h2>
+
+<div class="flow">
+Is Calculation Expensive?
+<br>↓<br>
+Yes
+<br>↓<br>
+useMemo
+
+
+<br><br>
+
+Need Stable Function Reference?
+<br>↓<br>
+Yes
+<br>↓<br>
+useCallback
+
+
+<br><br>
+
+Otherwise
+<br>↓<br>
+Use Normal JavaScript
+</div>
+
+<h2>Easy Way To Remember</h2>
+
+<div class="flow">
+Overusing useMemo
+<br>↓<br>
+More Complexity
+<br>↓<br>
+More Dependency Bugs
+<br>↓<br>
+More Memory Usage
+
+
+<br><br>
+
+Overusing useCallback
+<br>↓<br>
+More Complexity
+<br>↓<br>
+Little Or No Benefit
+</div>
+
+<h2>Interview Answer</h2>
+
+<div class="highlight">
+The main pitfalls of overusing useMemo and useCallback are unnecessary complexity, extra memory usage, dependency management bugs, stale closures, and added comparison overhead. These hooks should be used only when they solve a measurable performance problem.
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+Overusing useMemo and useCallback can hurt performance and readability because memoization itself has a cost.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>104 - What is Redux Toolkit and Why Was It Introduced?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px;margin-bottom:10px}
+p{color:#cbd5e1}
+ul{padding-left:24px}
+li{margin-bottom:10px;color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px;margin-top:15px}
+.warning{background:#1e1b4b;border-left:5px solid #fbbf24;padding:18px;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;margin-top:15px;text-align:center;line-height:2;font-size:18px}
+pre{border-radius:12px;overflow-x:auto}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>104. What is Redux Toolkit and Why Was It Introduced?</h1>
+
+<h2>One-Line Definition</h2>
+
+<div class="highlight">
+Redux Toolkit (RTK) is the official recommended way to write Redux code. It simplifies Redux setup and removes most of the boilerplate code required in traditional Redux.
+</div>
+
+<h2>What Problem Did Traditional Redux Have?</h2>
+
+<p>
+Redux itself is powerful, but developers often complained that writing Redux required too much code.
+</p>
+
+<h3>Traditional Redux Required Many Files</h3>
+
+<pre><code class="language-text">redux/
+│
+├── actions/
+│   └── cartActions.js
+│
+├── reducers/
+│   └── cartReducer.js
+│
+├── constants/
+│   └── actionTypes.js
+│
+└── store.js
+</code></pre>
+
+<p>
+Even a simple Add To Cart feature required multiple files.
+</p>
+
+<h3>Step 1 - Create Action Types</h3>
+
+<pre><code class="language-js">const ADD_TO_CART = 'ADD_TO_CART';
+const REMOVE_FROM_CART = 'REMOVE_FROM_CART';
+</code></pre>
+
+<h3>Step 2 - Create Action Creators</h3>
+
+<pre><code class="language-js">export const addToCart = product => ({
+  type: ADD_TO_CART,
+  payload: product
+});
+</code></pre>
+
+<h3>Step 3 - Create Reducer</h3>
+
+<pre><code class="language-js">const initialState = {
+  items: []
+};
+
+function cartReducer(state = initialState, action) {
+
+  switch (action.type) {
+
+    case ADD_TO_CART:
+      return {
+        ...state,
+        items: [...state.items, action.payload]
+      };
+
+    default:
+      return state;
+  }
+
+}
+</code></pre>
+
+<h3>Step 4 - Configure Store</h3>
+
+<pre><code class="language-js">import { createStore } from 'redux';
+
+const store = createStore(cartReducer);
+</code></pre>
+
+<div class="warning">
+A simple feature required action types, action creators, reducers, switch statements, and store configuration.
+</div>
+
+<h2>Why Redux Toolkit Was Introduced</h2>
+
+<p>
+The Redux team introduced Redux Toolkit to solve the most common Redux problems.
+</p>
+
+<table>
+<tr>
+<th>Problem</th>
+<th>Redux Toolkit Solution</th>
+</tr>
+
+<tr>
+<td>Too much boilerplate</td>
+<td>createSlice()</td>
+</tr>
+
+<tr>
+<td>Complex store setup</td>
+<td>configureStore()</td>
+</tr>
+
+<tr>
+<td>Manual immutable updates</td>
+<td>Immer integration</td>
+</tr>
+
+<tr>
+<td>Too many files</td>
+<td>Actions and reducers together</td>
+</tr>
+
+<tr>
+<td>Async logic complexity</td>
+<td>createAsyncThunk()</td>
+</tr>
+</table>
+
+<h2>Redux Toolkit Approach</h2>
+
+<p>
+Instead of creating action types, action creators, and reducers separately, Redux Toolkit combines them into one slice.
+</p>
+
+<h3>Single Slice Example</h3>
+
+<pre><code class="language-js">import { createSlice } from '@reduxjs/toolkit';
+
+const initialState = {
+  items: []
+};
+
+const cartSlice = createSlice({
+
+  name: 'cart',
+
+  initialState,
+
+  reducers: {
+
+    addToCart(state, action) {
+      state.items.push(action.payload);
+    },
+
+    removeFromCart(state, action) {
+      state.items = state.items.filter(
+        item => item.id !== action.payload
+      );
+    }
+
+  }
+
+});
+
+export const {
+  addToCart,
+  removeFromCart
+} = cartSlice.actions;
+
+export default cartSlice.reducer;
+</code></pre>
+
+<div class="highlight">
+One file automatically creates action types, action creators, and reducers.
+</div>
+
+<h2>What Does createSlice() Automatically Generate?</h2>
+
+<p>
+When Redux Toolkit sees:
+</p>
+
+<pre><code class="language-js">reducers: {
+
+  addToCart(state, action) {},
+
+  removeFromCart(state, action) {}
+
+}
+</code></pre>
+
+<p>
+It automatically generates:
+</p>
+
+<pre><code class="language-text">Action Type:
+cart/addToCart
+
+Action Creator:
+addToCart()
+
+Reducer Case:
+addToCart reducer logic
+</code></pre>
+
+<p>
+You no longer write those manually.
+</p>
+
+<h2>Store Configuration Becomes Easier</h2>
+
+<h3>Traditional Redux</h3>
+
+<pre><code class="language-js">import { createStore } from 'redux';
+
+const store = createStore(rootReducer);
+</code></pre>
+
+<h3>Redux Toolkit</h3>
+
+<pre><code class="language-js">import { configureStore } from '@reduxjs/toolkit';
+
+const store = configureStore({
+
+  reducer: {
+    cart: cartReducer,
+    user: userReducer
+  }
+
+});
+</code></pre>
+
+<div class="highlight">
+configureStore automatically adds Redux DevTools support and useful middleware.
+</div>
+
+<h2>Immer Makes State Updates Easier</h2>
+
+<p>
+Traditional Redux required manual immutable updates.
+</p>
+
+<h3>Traditional Redux</h3>
+
+<pre><code class="language-js">return {
+  ...state,
+  items: [...state.items, action.payload]
+};
+</code></pre>
+
+<h3>Redux Toolkit</h3>
+
+<pre><code class="language-js">state.items.push(action.payload);
+</code></pre>
+
+<p>
+This looks like mutation but Redux Toolkit uses Immer internally and safely creates a new immutable state behind the scenes.
+</p>
+
+<div class="highlight">
+Redux state is still immutable. Redux Toolkit simply makes immutable updates easier to write.
+</div>
+
+<h2>Real Project Folder Structure</h2>
+
+<pre><code class="language-text">src
+│
+├── app
+│   └── store.js
+│
+├── features
+│   ├── cart
+│   │   └── cartSlice.js
+│   │
+│   └── user
+│       └── userSlice.js
+│
+├── components
+│   ├── Navbar.jsx
+│   ├── ProductCard.jsx
+│   ├── CartItem.jsx
+│   └── Loader.jsx
+│
+├── pages
+│   ├── Home.jsx
+│   ├── CartPage.jsx
+│   └── ProfilePage.jsx
+│
+├── hooks
+│   └── useCart.js
+│
+├── services
+│   └── api.js
+│
+├── App.jsx
+│
+└── main.jsx
+</code></pre>
+
+<p>
+Each feature gets its own slice.
+</p>
+
+<h2>Redux Toolkit Flow</h2>
+
+<div class="flow">
+Component
+<br>↓<br>
+dispatch(addToCart(product))
+<br>↓<br>
+Slice Reducer Runs
+<br>↓<br>
+Redux Store Updates
+<br>↓<br>
+useSelector Receives New State
+<br>↓<br>
+UI Re-renders
+</div>
+
+<h2>Why Almost Every Modern Redux Project Uses Redux Toolkit</h2>
+
+<ul>
+<li>Less code</li>
+<li>Less boilerplate</li>
+<li>Simpler store setup</li>
+<li>Built-in Immer support</li>
+<li>Built-in Redux DevTools support</li>
+<li>Official Redux recommendation</li>
+<li>Easier maintenance in large applications</li>
+</ul>
+
+<div class="warning">
+Today, when developers say "Redux", they almost always mean Redux Toolkit because it is the officially recommended way to use Redux.
+</div>
+
+<h2>Interview Answer</h2>
+
+<div class="highlight">
+Redux Toolkit is the official Redux package that simplifies Redux development by reducing boilerplate code, simplifying store configuration, automatically generating actions and reducers, and providing built-in support for immutable state updates through Immer.
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+Redux Toolkit is the official recommended way to write Redux because it makes Redux simpler, cleaner, and requires much less code than traditional Redux.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+
+</body>
+</html>

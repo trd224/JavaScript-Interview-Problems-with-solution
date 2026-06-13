@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>077. What is React.FC and should you use it?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{
+  margin:0;
+  padding:0;
+  background:#000814;
+  color:#e2e8f0;
+  font-family:Arial,sans-serif;
+  line-height:1.7;
+}
+
+.container{
+  max-width:1000px;
+  margin:40px auto;
+  background:#020617;
+  padding:40px;
+  border-radius:18px;
+  border:1px solid #0f172a;
+  box-shadow:0 0 40px rgba(0,0,0,.95);
+}
+
+h1{
+  color:#f8fafc;
+  margin-bottom:30px;
+  font-size:34px;
+}
+
+h2{
+  color:#c084fc;
+  margin-top:35px;
+  margin-bottom:15px;
+  font-size:26px;
+}
+
+h3{
+  color:#38bdf8;
+  margin-top:25px;
+  margin-bottom:10px;
+}
+
+p{
+  color:#cbd5e1;
+}
+
+ul{
+  padding-left:24px;
+}
+
+li{
+  margin-bottom:10px;
+  color:#cbd5e1;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:20px;
+}
+
+table th,
+table td{
+  border:1px solid #1e293b;
+  padding:14px;
+  text-align:left;
+}
+
+table th{
+  background:#0f172a;
+  color:#38bdf8;
+}
+
+table td{
+  background:#020617;
+  color:#d1d5db;
+}
+
+.highlight{
+  background:#0f172a;
+  padding:18px;
+  border-left:5px solid #38bdf8;
+  border-radius:10px;
+  margin-top:15px;
+}
+
+.flow{
+  background:#020617;
+  border:1px solid #1e293b;
+  padding:20px;
+  border-radius:10px;
+  margin-top:15px;
+  text-align:center;
+  line-height:2;
+  font-size:18px;
+}
+
+pre{
+  border-radius:12px;
+  overflow-x:auto;
+}
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>077. What is React.FC and should you use it?</h1>
+
+<h2>One-Line Definition</h2>
+
+<div class="highlight">
+React.FC (React Functional Component) is a TypeScript type that can be used to define React function components.
+</div>
+
+<h2>What is React.FC?</h2>
+
+<p>
+React.FC is a generic type provided by React for typing functional components.
+</p>
+
+<pre><code class="language-tsx">type UserProps = {
+  name: string;
+};
+
+const User: React.FC&lt;UserProps&gt; = ({ name }) => {
+  return &lt;h2&gt;{name}&lt;/h2&gt;;
+};</code></pre>
+
+<p>
+Here React.FC tells TypeScript that User is a React component and UserProps is the props type.
+</p>
+
+<h2>Without React.FC</h2>
+
+<p>
+Modern React applications usually type props directly.
+</p>
+
+<pre><code class="language-tsx">type UserProps = {
+  name: string;
+};
+
+function User({ name }: UserProps) {
+  return &lt;h2&gt;{name}&lt;/h2&gt;;
+}</code></pre>
+
+<p>
+This is currently the most common approach.
+</p>
+
+<h2>How React.FC Works</h2>
+
+<div class="flow">
+
+Component
+<br>
+↓
+<br>
+React.FC&lt;Props&gt;
+<br>
+↓
+<br>
+TypeScript Validates Props
+<br>
+↓
+<br>
+Component Becomes Fully Typed
+
+</div>
+
+<h2>Benefits of React.FC</h2>
+
+<ul>
+<li>Clearly identifies a React component.</li>
+<li>Provides type checking for props.</li>
+<li>Provides IntelliSense support.</li>
+<li>Ensures the component returns valid React elements.</li>
+</ul>
+
+<h2>Example</h2>
+
+<pre><code class="language-tsx">type ButtonProps = {
+  text: string;
+};
+
+const Button: React.FC&lt;ButtonProps&gt; = ({ text }) => {
+  return &lt;button&gt;{text}&lt;/button&gt;;
+};</code></pre>
+
+<h2>Older React.FC Behavior</h2>
+
+<p>
+In older React versions, React.FC automatically included the children prop.
+</p>
+
+<pre><code class="language-tsx">const Card: React.FC = ({ children }) => {
+  return &lt;div&gt;{children}&lt;/div&gt;;
+};</code></pre>
+
+<p>
+This was one of the reasons many developers used React.FC.
+</p>
+
+<h2>Current React Behavior</h2>
+
+<p>
+Modern React type definitions no longer automatically include children.
+</p>
+
+<p>
+You must explicitly type children yourself.
+</p>
+
+<pre><code class="language-tsx">import { ReactNode } from 'react';
+
+type CardProps = {
+  children: ReactNode;
+};
+
+function Card({ children }: CardProps) {
+  return &lt;div&gt;{children}&lt;/div&gt;;
+}</code></pre>
+
+<h2>Should You Use React.FC?</h2>
+
+<div class="highlight">
+Most modern React + TypeScript projects do not use React.FC and instead type props directly.
+</div>
+
+<h2>Recommended Modern Approach</h2>
+
+<pre><code class="language-tsx">type UserProps = {
+  name: string;
+  age: number;
+};
+
+function User({ name, age }: UserProps) {
+  return (
+    &lt;div&gt;
+      &lt;h2&gt;{name}&lt;/h2&gt;
+      &lt;p&gt;{age}&lt;/p&gt;
+    &lt;/div&gt;
+  );
+}</code></pre>
+
+<h2>Why Many Developers Avoid React.FC?</h2>
+
+<ul>
+<li>Adds extra typing that is often unnecessary.</li>
+<li>Direct prop typing is simpler.</li>
+<li>Can make generic components harder to type.</li>
+<li>Modern React documentation does not recommend it.</li>
+<li>Most new codebases prefer direct props typing.</li>
+</ul>
+
+<h2>React.FC vs Direct Typing</h2>
+
+<table>
+
+<tr>
+<th>Feature</th>
+<th>React.FC</th>
+<th>Direct Props Typing</th>
+</tr>
+
+<tr>
+<td>Type Safety</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+
+<tr>
+<td>Less Code</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+
+<tr>
+<td>Modern Preference</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+
+<tr>
+<td>Used in Older Projects</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+
+<tr>
+<td>Recommended Today</td>
+<td>Usually No</td>
+<td>Yes</td>
+</tr>
+
+</table>
+
+<h2>Real Project Example</h2>
+
+<div class="highlight">
+In our Aadhaar Authentication application, modern TypeScript components would typically use direct props typing instead of React.FC because it is simpler, more explicit, and aligns with current React best practices.
+</div>
+
+<h2>Important Interview Points</h2>
+
+<ul>
+<li>React.FC stands for React Functional Component.</li>
+<li>It is used to type functional components.</li>
+<li>Older versions automatically included children.</li>
+<li>Modern React types no longer include children automatically.</li>
+<li>Most modern projects prefer direct props typing.</li>
+<li>React.FC is still valid but less commonly used today.</li>
+</ul>
+
+<h2>Short Interview Answer</h2>
+
+<div class="highlight">
+React.FC is a TypeScript type for React functional components. While it provides prop type checking and component typing, most modern React projects prefer direct props typing because it is simpler and more explicit.
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+React.FC is a TypeScript type for functional components, but modern React projects usually prefer direct props typing instead.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-tsx.min.js"></script>
+
+</body>
+</html>

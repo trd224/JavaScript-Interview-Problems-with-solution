@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>256. What is useParams and When Would You Use It?</title>
+
+  <style>
+
+    body{
+      margin:0;
+      padding:0;
+      background:#000814;
+      color:#e2e8f0;
+      font-family:Arial,sans-serif;
+      line-height:1.7;
+    }
+
+    .container{
+      max-width:1000px;
+      margin:40px auto;
+      background:#020617;
+      padding:40px;
+      border-radius:18px;
+      border:1px solid #0f172a;
+      box-shadow:0 0 40px rgba(0,0,0,.95);
+    }
+
+    h1{
+      color:#f8fafc;
+      margin-bottom:30px;
+      font-size:34px;
+    }
+
+    h2{
+      color:#c084fc;
+      margin-top:35px;
+      margin-bottom:15px;
+      font-size:26px;
+    }
+
+    p{
+      color:#cbd5e1;
+    }
+
+    ul{
+      padding-left:24px;
+    }
+
+    li{
+      margin-bottom:10px;
+      color:#cbd5e1;
+    }
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      margin-top:20px;
+    }
+
+    table th,
+    table td{
+      border:1px solid #1e293b;
+      padding:14px;
+      text-align:left;
+      vertical-align:top;
+    }
+
+    table th{
+      background:#0f172a;
+      color:#38bdf8;
+    }
+
+    table td{
+      background:#020617;
+      color:#d1d5db;
+    }
+
+    .highlight{
+      background:#0f172a;
+      padding:18px;
+      border-left:5px solid #38bdf8;
+      border-radius:10px;
+      margin-top:15px;
+      color:#e5e7eb;
+    }
+
+    .flow{
+      background:#020617;
+      border:1px solid #1e293b;
+      padding:20px;
+      border-radius:10px;
+      margin-top:15px;
+      color:#e2e8f0;
+      line-height:2;
+      text-align:center;
+      font-size:18px;
+    }
+
+    pre{
+      background:#000;
+      padding:22px;
+      border-radius:12px;
+      overflow-x:auto;
+      border:1px solid #0f172a;
+    }
+
+    code{
+      font-family:Consolas,monospace;
+      font-size:15px;
+    }
+
+    .keyword{color:#c084fc;}
+    .function{color:#38bdf8;}
+    .string{color:#facc15;}
+    .tag{color:#f472b6;}
+    .comment{color:#94a3b8;}
+    .output{color:#4ade80;}
+
+  </style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <h1>256. What is useParams and When Would You Use It?</h1>
+
+  <h2>One-Line Definition</h2>
+
+  <div class="highlight">
+    useParams is a React Router hook used to read dynamic values from the URL.
+  </div>
+
+  <h2>Why Do We Need useParams?</h2>
+
+  <p>
+    Many applications have pages whose content depends on an ID or other value in the URL.
+  </p>
+
+  <p>
+    Examples:
+  </p>
+
+<pre><code><span class="string">/users/101</span>
+
+<span class="string">/products/25</span>
+
+<span class="string">/orders/500</span></code></pre>
+
+  <div class="highlight">
+    The values 101, 25, and 500 are dynamic route parameters. useParams allows us to access them.
+  </div>
+
+  <h2>Real World Example</h2>
+
+  <table>
+
+    <tr>
+      <th>URL</th>
+      <th>Parameter Value</th>
+    </tr>
+
+    <tr>
+      <td>/users/101</td>
+      <td>101</td>
+    </tr>
+
+    <tr>
+      <td>/users/102</td>
+      <td>102</td>
+    </tr>
+
+    <tr>
+      <td>/products/50</td>
+      <td>50</td>
+    </tr>
+
+  </table>
+
+  <h2>Step 1 - Define a Dynamic Route</h2>
+
+<pre><code><span class="keyword">import</span> { Routes, Route } <span class="keyword">from</span> <span class="string">'react-router-dom'</span>;
+
+<span class="tag">&lt;Routes&gt;</span>
+
+  <span class="tag">&lt;Route</span> path=<span class="string">"/users/:id"</span> element={<span class="tag">&lt;UserDetails /&gt;</span>} <span class="tag">/&gt;</span>
+
+<span class="tag">&lt;/Routes&gt;</span></code></pre>
+
+  <div class="highlight">
+    The colon (:) indicates a dynamic route parameter.
+  </div>
+
+  <h2>Step 2 - Read the Parameter</h2>
+
+<pre><code><span class="keyword">import</span> { useParams } <span class="keyword">from</span> <span class="string">'react-router-dom'</span>;
+
+<span class="keyword">function</span> <span class="function">UserDetails</span>() {
+
+  <span class="keyword">const</span> params = <span class="function">useParams</span>();
+
+  console.log(params);
+
+}</code></pre>
+
+  <h2>Output</h2>
+
+<p>
+If the URL is:
+</p>
+
+<pre><code><span class="string">/users/101</span></code></pre>
+
+<p>
+Then:
+</p>
+
+<pre class="output"><code>{
+  id: "101"
+}</code></pre>
+
+  <h2>Using Destructuring</h2>
+
+<pre><code><span class="keyword">const</span> { id } = <span class="function">useParams</span>();
+
+console.log(id);</code></pre>
+
+<p>
+Output:
+</p>
+
+<pre class="output"><code>101</code></pre>
+
+  <h2>Complete Example</h2>
+
+<pre><code><span class="keyword">import</span> { useParams } <span class="keyword">from</span> <span class="string">'react-router-dom'</span>;
+
+<span class="keyword">function</span> <span class="function">UserDetails</span>() {
+
+  <span class="keyword">const</span> { id } = <span class="function">useParams</span>();
+
+  <span class="keyword">return</span> (
+
+    <span class="tag">&lt;h2&gt;</span>
+
+      User ID: {id}
+
+    <span class="tag">&lt;/h2&gt;</span>
+
+  );
+
+}</code></pre>
+
+  <h2>Route Matching Flow</h2>
+
+  <div class="flow">
+
+    URL
+    <br>
+    /users/101
+    <br>
+    ↓
+    <br>
+    Route
+    <br>
+    /users/:id
+    <br>
+    ↓
+    <br>
+    useParams()
+    <br>
+    ↓
+    <br>
+    { id: "101" }
+
+  </div>
+
+  <h2>Fetching Data Using the Parameter</h2>
+
+<pre><code><span class="keyword">import</span> { useEffect, useState } <span class="keyword">from</span> <span class="string">'react'</span>;
+<span class="keyword">import</span> { useParams } <span class="keyword">from</span> <span class="string">'react-router-dom'</span>;
+
+<span class="keyword">function</span> <span class="function">UserDetails</span>() {
+
+  <span class="keyword">const</span> { id } = <span class="function">useParams</span>();
+
+  <span class="keyword">const</span> [user, setUser] = <span class="function">useState</span>(null);
+
+  <span class="function">useEffect</span>(() =&gt; {
+
+    <span class="function">fetch</span>(<span class="string">`/api/users/${id}`</span>)
+      .then(res =&gt; res.json())
+      .then(data =&gt; <span class="function">setUser</span>(data));
+
+  }, [id]);
+
+}</code></pre>
+
+  <div class="highlight">
+    This allows us to load different user records based on the URL.
+  </div>
+
+  <h2>Multiple Parameters</h2>
+
+<pre><code><span class="tag">&lt;Route</span> path=<span class="string">"/users/:userId/orders/:orderId"</span> element={<span class="tag">&lt;OrderDetails /&gt;</span>} <span class="tag">/&gt;</span></code></pre>
+
+<pre><code><span class="keyword">const</span> { userId, orderId } = <span class="function">useParams</span>();</code></pre>
+
+<p>
+URL:
+</p>
+
+<pre><code><span class="string">/users/101/orders/500</span></code></pre>
+
+<p>
+Output:
+</p>
+
+<pre class="output"><code>{
+  userId: "101",
+  orderId: "500"
+}</code></pre>
+
+  <h2>useParams Return Type</h2>
+
+  <div class="highlight">
+    useParams always returns an object containing all route parameters as strings.
+  </div>
+
+<pre><code><span class="keyword">const</span> params = <span class="function">useParams</span>();</code></pre>
+
+<p>
+Example:
+</p>
+
+<pre class="output"><code>{
+  id: "101"
+}</code></pre>
+
+  <h2>Link Example</h2>
+
+<pre><code><span class="tag">&lt;Link</span> to=<span class="string">"/users/101"</span><span class="tag">&gt;</span>
+
+  View User
+
+<span class="tag">&lt;/Link&gt;</span></code></pre>
+
+<p>
+When clicked:
+</p>
+
+<pre><code><span class="string">/users/101</span></code></pre>
+
+<p>
+Then:
+</p>
+
+<pre><code><span class="keyword">const</span> { id } = <span class="function">useParams</span>();</code></pre>
+
+<p>
+Output:
+</p>
+
+<pre class="output"><code>101</code></pre>
+
+  <h2>Real Project Example</h2>
+
+  <div class="highlight">
+    In our Aadhaar Authentication application, useParams can be used to open pages such as /audit/1001, /report/50, or /user/25 and load the corresponding audit, report, or user information dynamically.
+  </div>
+
+  <h2>Important Interview Points</h2>
+
+  <ul>
+    <li>useParams is a React Router hook.</li>
+    <li>It reads dynamic values from the URL.</li>
+    <li>Route parameters are defined using a colon (:).</li>
+    <li>useParams returns an object.</li>
+    <li>All parameter values are returned as strings.</li>
+    <li>Commonly used for user, product, order, and detail pages.</li>
+  </ul>
+
+  <h2>Short Interview Answer</h2>
+
+  <div class="highlight">
+    useParams is used to access dynamic route parameters from the URL, allowing components to load data based on values such as IDs.
+  </div>
+
+  <h2>One-Line Interview Answer</h2>
+
+  <div class="highlight">
+    useParams reads dynamic route parameters from the URL in React Router.
+  </div>
+
+</div>
+
+</body>
+</html>

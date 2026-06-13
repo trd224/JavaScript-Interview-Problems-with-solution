@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>274. What is the Difference Between Controlled and Uncontrolled Components?</title>
+
+  <style>
+
+    body{
+      margin:0;
+      padding:0;
+      background:#000814;
+      color:#e2e8f0;
+      font-family:Arial,sans-serif;
+      line-height:1.7;
+    }
+
+    .container{
+      max-width:1000px;
+      margin:40px auto;
+      background:#020617;
+      padding:40px;
+      border-radius:18px;
+      border:1px solid #0f172a;
+      box-shadow:0 0 40px rgba(0,0,0,.95);
+    }
+
+    h1{
+      color:#f8fafc;
+      margin-bottom:30px;
+      font-size:34px;
+    }
+
+    h2{
+      color:#c084fc;
+      margin-top:35px;
+      margin-bottom:15px;
+      font-size:26px;
+    }
+
+    p{
+      color:#cbd5e1;
+    }
+
+    ul{
+      padding-left:24px;
+    }
+
+    li{
+      margin-bottom:10px;
+      color:#cbd5e1;
+    }
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      margin-top:20px;
+    }
+
+    table th,
+    table td{
+      border:1px solid #1e293b;
+      padding:14px;
+      text-align:left;
+      vertical-align:top;
+    }
+
+    table th{
+      background:#0f172a;
+      color:#38bdf8;
+    }
+
+    table td{
+      background:#020617;
+      color:#d1d5db;
+    }
+
+    .highlight{
+      background:#0f172a;
+      padding:18px;
+      border-left:5px solid #38bdf8;
+      border-radius:10px;
+      margin-top:15px;
+      color:#e5e7eb;
+    }
+
+    .flow{
+      background:#020617;
+      border:1px solid #1e293b;
+      padding:20px;
+      border-radius:10px;
+      margin-top:15px;
+      color:#e2e8f0;
+      line-height:2;
+      text-align:center;
+      font-size:18px;
+    }
+
+    pre{
+      background:#000;
+      padding:22px;
+      border-radius:12px;
+      overflow-x:auto;
+      border:1px solid #0f172a;
+    }
+
+    code{
+      font-family:Consolas,monospace;
+      font-size:15px;
+    }
+
+    .keyword{color:#c084fc;}
+    .function{color:#38bdf8;}
+    .string{color:#facc15;}
+    .tag{color:#f472b6;}
+    .comment{color:#94a3b8;}
+    .output{color:#4ade80;}
+
+  </style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <h1>274. What is the Difference Between Controlled and Uncontrolled Components?</h1>
+
+  <h2>One-Line Definition</h2>
+
+  <div class="highlight">
+    A controlled component stores form values in React state, while an uncontrolled component stores form values in the DOM.
+  </div>
+
+  <h2>What Is the Main Difference?</h2>
+
+  <table>
+
+    <tr>
+      <th>Controlled Component</th>
+      <th>Uncontrolled Component</th>
+    </tr>
+
+    <tr>
+      <td>React controls the value</td>
+      <td>DOM controls the value</td>
+    </tr>
+
+    <tr>
+      <td>Uses useState</td>
+      <td>Uses useRef</td>
+    </tr>
+
+    <tr>
+      <td>Value stored in React state</td>
+      <td>Value stored in DOM element</td>
+    </tr>
+
+    <tr>
+      <td>Re-renders on every change</td>
+      <td>Does not re-render while typing</td>
+    </tr>
+
+    <tr>
+      <td>Easy validation</td>
+      <td>Validation requires reading DOM value</td>
+    </tr>
+
+    <tr>
+      <td>Recommended for most forms</td>
+      <td>Useful for simple forms and file inputs</td>
+    </tr>
+
+  </table>
+
+  <h2>Controlled Component Flow</h2>
+
+  <div class="flow">
+
+    User Types
+    <br>
+    ↓
+    <br>
+    onChange
+    <br>
+    ↓
+    <br>
+    setState()
+    <br>
+    ↓
+    <br>
+    React State Updated
+    <br>
+    ↓
+    <br>
+    Component Re-renders
+
+  </div>
+
+  <h2>Controlled Component Example</h2>
+
+<pre><code><span class="keyword">import</span> { useState } <span class="keyword">from</span> <span class="string">'react'</span>;
+
+<span class="keyword">function</span> <span class="function">Form</span>() {
+
+  <span class="keyword">const</span> [name, setName] = <span class="function">useState</span>(<span class="string">''</span>);
+
+  <span class="keyword">return</span> (
+
+    <span class="tag">&lt;input</span>
+      value={name}
+      onChange={e =&gt; <span class="function">setName</span>(e.target.value)}
+    <span class="tag">/&gt;</span>
+
+  );
+
+}</code></pre>
+
+  <h2>How Controlled Component Works</h2>
+
+<pre><code><span class="comment">// User types "R"</span>
+
+<span class="function">setName</span>(<span class="string">'R'</span>);
+
+<span class="comment">// State becomes</span>
+
+name = <span class="string">'R'</span>;
+
+<span class="comment">// Component re-renders</span>
+
+<span class="comment">// Input shows "R"</span></code></pre>
+
+  <h2>Uncontrolled Component Flow</h2>
+
+  <div class="flow">
+
+    User Types
+    <br>
+    ↓
+    <br>
+    DOM Stores Value
+    <br>
+    ↓
+    <br>
+    React Does Nothing
+    <br>
+    ↓
+    <br>
+    Read Value Using Ref
+
+  </div>
+
+  <h2>Uncontrolled Component Example</h2>
+
+<pre><code><span class="keyword">import</span> { useRef } <span class="keyword">from</span> <span class="string">'react'</span>;
+
+<span class="keyword">function</span> <span class="function">Form</span>() {
+
+  <span class="keyword">const</span> nameRef = <span class="function">useRef</span>(null);
+
+  <span class="keyword">return</span> (
+
+    <span class="tag">&lt;input</span> ref={nameRef} <span class="tag">/&gt;</span>
+
+  );
+
+}</code></pre>
+
+  <h2>How Uncontrolled Component Works</h2>
+
+<pre><code><span class="comment">// User types "Rizwan"</span>
+
+<span class="comment">// DOM stores value internally</span>
+
+<span class="comment">// No React state update</span>
+
+<span class="comment">// No component re-render</span>
+
+nameRef.current.value
+<span class="comment">// "Rizwan"</span></code></pre>
+
+  <h2>Side-by-Side Example</h2>
+
+  <table>
+
+    <tr>
+      <th>Controlled</th>
+      <th>Uncontrolled</th>
+    </tr>
+
+    <tr>
+      <td>
+
+<pre><code><span class="keyword">const</span> [name, setName] =
+<span class="function">useState</span>(<span class="string">''</span>);
+
+<span class="tag">&lt;input</span>
+  value={name}
+  onChange={e =&gt;
+    <span class="function">setName</span>(e.target.value)
+  }
+<span class="tag">/&gt;</span></code></pre>
+
+      </td>
+
+      <td>
+
+<pre><code><span class="keyword">const</span> nameRef =
+<span class="function">useRef</span>(null);
+
+<span class="tag">&lt;input</span>
+  ref={nameRef}
+<span class="tag">/&gt;</span></code></pre>
+
+      </td>
+
+    </tr>
+
+  </table>
+
+  <h2>When Should We Use Controlled Components?</h2>
+
+  <ul>
+    <li>Form validation.</li>
+    <li>Real-time error messages.</li>
+    <li>Live search.</li>
+    <li>Character counters.</li>
+    <li>Complex forms.</li>
+  </ul>
+
+  <h2>Example - Live Validation</h2>
+
+<pre><code><span class="keyword">const</span> [email, setEmail] =
+<span class="function">useState</span>(<span class="string">''</span>);
+
+<span class="keyword">const</span> isValid =
+email.includes(<span class="string">'@'</span>);</code></pre>
+
+  <div class="highlight">
+    This is easy because React already has the current value in state.
+  </div>
+
+  <h2>When Should We Use Uncontrolled Components?</h2>
+
+  <ul>
+    <li>Simple forms.</li>
+    <li>Reading values only on submit.</li>
+    <li>File uploads.</li>
+    <li>Third-party DOM libraries.</li>
+    <li>Performance-sensitive forms.</li>
+  </ul>
+
+  <h2>File Input Example</h2>
+
+<pre><code><span class="keyword">const</span> fileRef =
+<span class="function">useRef</span>(null);
+
+<span class="tag">&lt;input</span>
+  type=<span class="string">"file"</span>
+  ref={fileRef}
+<span class="tag">/&gt;</span></code></pre>
+
+  <div class="highlight">
+    File inputs are usually implemented as uncontrolled components because browsers do not allow React to directly control file values.
+  </div>
+
+  <h2>Which One Is More Common?</h2>
+
+  <div class="highlight">
+    Controlled components are more common in React applications because they make validation, conditional UI updates, and form handling much easier.
+  </div>
+
+  <h2>Real Project Example</h2>
+
+  <div class="highlight">
+    In our Aadhaar Authentication application, Aadhaar Number, OTP, Department, Purpose, and Consent fields are controlled components because React needs to validate and process their values. File uploads and some third-party integrations may use uncontrolled components with useRef.
+  </div>
+
+  <h2>Important Interview Points</h2>
+
+  <ul>
+    <li>Controlled components use useState.</li>
+    <li>Uncontrolled components use useRef.</li>
+    <li>Controlled components re-render when values change.</li>
+    <li>Uncontrolled components keep values inside the DOM.</li>
+    <li>Controlled components are preferred for most React forms.</li>
+    <li>File inputs are usually uncontrolled.</li>
+  </ul>
+
+  <h2>Short Interview Answer</h2>
+
+  <div class="highlight">
+    Controlled components store form values in React state and update through onChange, while uncontrolled components store values in the DOM and access them using refs.
+  </div>
+
+  <h2>One-Line Interview Answer</h2>
+
+  <div class="highlight">
+    Controlled components use React state to manage form values, whereas uncontrolled components use the DOM and refs.
+  </div>
+
+</div>
+
+</body>
+</html>

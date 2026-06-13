@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>075. What is useImperativeHandle and when is it used?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{
+  margin:0;
+  padding:0;
+  background:#000814;
+  color:#e2e8f0;
+  font-family:Arial,sans-serif;
+  line-height:1.7;
+}
+
+.container{
+  max-width:1000px;
+  margin:40px auto;
+  background:#020617;
+  padding:40px;
+  border-radius:18px;
+  border:1px solid #0f172a;
+  box-shadow:0 0 40px rgba(0,0,0,.95);
+}
+
+h1{
+  color:#f8fafc;
+  margin-bottom:30px;
+  font-size:34px;
+}
+
+h2{
+  color:#c084fc;
+  margin-top:35px;
+  margin-bottom:15px;
+  font-size:26px;
+}
+
+h3{
+  color:#38bdf8;
+  margin-top:25px;
+  margin-bottom:10px;
+}
+
+p{
+  color:#cbd5e1;
+}
+
+ul{
+  padding-left:24px;
+}
+
+li{
+  margin-bottom:10px;
+  color:#cbd5e1;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:20px;
+}
+
+table th,
+table td{
+  border:1px solid #1e293b;
+  padding:14px;
+  text-align:left;
+}
+
+table th{
+  background:#0f172a;
+  color:#38bdf8;
+}
+
+table td{
+  background:#020617;
+  color:#d1d5db;
+}
+
+.highlight{
+  background:#0f172a;
+  padding:18px;
+  border-left:5px solid #38bdf8;
+  border-radius:10px;
+  margin-top:15px;
+}
+
+.flow{
+  background:#020617;
+  border:1px solid #1e293b;
+  padding:20px;
+  border-radius:10px;
+  margin-top:15px;
+  text-align:center;
+  line-height:2;
+  font-size:18px;
+}
+
+pre{
+  border-radius:12px;
+  overflow-x:auto;
+}
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>075. What is useImperativeHandle and when is it used?</h1>
+
+<h2>One-Line Definition</h2>
+
+<div class="highlight">
+useImperativeHandle is a React Hook used with forwardRef to control what a parent component can access through a ref.
+</div>
+
+<h2>Why Is It Needed?</h2>
+
+<p>
+Normally, when we use forwardRef, the parent gets access to the entire DOM element.
+</p>
+
+<pre><code class="language-jsx">const CustomInput = forwardRef((props, ref) => {
+  return &lt;input ref={ref} /&gt;;
+});</code></pre>
+
+<p>
+Now the parent can access everything:
+</p>
+
+<pre><code class="language-jsx">inputRef.current.focus();
+inputRef.current.value;
+inputRef.current.select();
+inputRef.current.style.color = 'red';</code></pre>
+
+<p>
+Sometimes we do not want to expose the entire DOM element.
+</p>
+
+<div class="highlight">
+We may want to expose only specific methods such as focus() or clear().
+</div>
+
+<h2>Solution: useImperativeHandle</h2>
+
+<p>
+useImperativeHandle lets us customize what is exposed through the ref.
+</p>
+
+<div class="flow">
+
+Parent Creates Ref
+<br>
+↓
+<br>
+Child Receives Ref
+<br>
+↓
+<br>
+useImperativeHandle Controls Access
+<br>
+↓
+<br>
+Parent Gets Only Allowed Methods
+
+</div>
+
+<h2>Without useImperativeHandle</h2>
+
+<h3>Child Component</h3>
+
+<pre><code class="language-jsx">const CustomInput = forwardRef((props, ref) => {
+  return &lt;input ref={ref} /&gt;;
+});</code></pre>
+
+<h3>Parent Component</h3>
+
+<pre><code class="language-jsx">const inputRef = useRef();
+
+&lt;CustomInput ref={inputRef} /&gt;</code></pre>
+
+<p>
+Parent receives the complete input element.
+</p>
+
+<h2>With useImperativeHandle</h2>
+
+<h3>Child Component</h3>
+
+<pre><code class="language-jsx">import { forwardRef, useRef, useImperativeHandle } from 'react';
+
+const CustomInput = forwardRef((props, ref) => {
+
+  const inputRef = useRef();
+
+  useImperativeHandle(ref, () => ({
+    focus() {
+      inputRef.current.focus();
+    }
+  }));
+
+  return &lt;input ref={inputRef} /&gt;;
+
+});</code></pre>
+
+<h3>Parent Component</h3>
+
+<pre><code class="language-jsx">function App() {
+
+  const inputRef = useRef();
+
+  return (
+    &lt;CustomInput ref={inputRef} /&gt;
+  );
+
+}</code></pre>
+
+<h3>Using the Ref</h3>
+
+<pre><code class="language-jsx">inputRef.current.focus();</code></pre>
+
+<p>
+This works because focus() was explicitly exposed.
+</p>
+
+<h2>What Does the Parent Receive?</h2>
+
+<p>
+Instead of receiving the whole input element:
+</p>
+
+<pre><code class="language-jsx">inputRef.current</code></pre>
+
+<p>
+The parent receives:
+</p>
+
+<pre><code class="language-jsx">{
+  focus: function
+}</code></pre>
+
+<h2>Expose Multiple Methods</h2>
+
+<pre><code class="language-jsx">useImperativeHandle(ref, () => ({
+  focus() {
+    inputRef.current.focus();
+  },
+
+  clear() {
+    inputRef.current.value = '';
+  },
+
+  select() {
+    inputRef.current.select();
+  }
+}));</code></pre>
+
+<h3>Parent Usage</h3>
+
+<pre><code class="language-jsx">inputRef.current.focus();
+
+inputRef.current.clear();
+
+inputRef.current.select();</code></pre>
+
+<h2>How It Works</h2>
+
+<div class="flow">
+
+forwardRef Receives Ref
+<br>
+↓
+<br>
+useImperativeHandle Runs
+<br>
+↓
+<br>
+Creates Custom API
+<br>
+↓
+<br>
+Parent Receives Custom API
+<br>
+↓
+<br>
+Parent Calls Methods
+
+</div>
+
+<h2>When Is It Used?</h2>
+
+<ul>
+<li>Reusable input components.</li>
+<li>Focus management.</li>
+<li>Custom modals.</li>
+<li>Custom dropdowns.</li>
+<li>Video player controls.</li>
+<li>Canvas and chart components.</li>
+<li>Third-party library integrations.</li>
+</ul>
+
+<h2>Real Example - Modal Component</h2>
+
+<h3>Child Component</h3>
+
+<pre><code class="language-jsx">useImperativeHandle(ref, () => ({
+  open() {
+    setIsOpen(true);
+  },
+
+  close() {
+    setIsOpen(false);
+  }
+}));</code></pre>
+
+<h3>Parent Component</h3>
+
+<pre><code class="language-jsx">modalRef.current.open();
+
+modalRef.current.close();</code></pre>
+
+<p>
+The parent can control the modal without knowing its internal implementation.
+</p>
+
+<h2>forwardRef vs useImperativeHandle</h2>
+
+<table>
+
+<tr>
+<th>Feature</th>
+<th>forwardRef</th>
+<th>useImperativeHandle</th>
+</tr>
+
+<tr>
+<td>Pass Ref To Child</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+
+<tr>
+<td>Customize Ref Value</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+
+<tr>
+<td>Required Together</td>
+<td>Usually</td>
+<td>Yes</td>
+</tr>
+
+<tr>
+<td>Controls Exposed Methods</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+
+</table>
+
+<h2>Real Project Example</h2>
+
+<div class="highlight">
+In our Aadhaar Authentication application, a reusable AadhaarInput component might expose only focus() and clear() methods. The parent component can call these methods when validation fails, without receiving direct access to the entire input element.
+</div>
+
+<h2>Important Interview Points</h2>
+
+<ul>
+<li>useImperativeHandle works with forwardRef.</li>
+<li>It customizes what is exposed through a ref.</li>
+<li>It helps hide internal implementation details.</li>
+<li>It improves component encapsulation.</li>
+<li>Commonly used in reusable component libraries.</li>
+</ul>
+
+<h2>Short Interview Answer</h2>
+
+<div class="highlight">
+useImperativeHandle is a React Hook used with forwardRef to control what a parent component can access through a ref. Instead of exposing the entire DOM element, it allows the child component to expose only selected methods or properties.
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+useImperativeHandle lets a child component customize what is exposed to a parent through a forwarded ref.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+
+</body>
+</html>

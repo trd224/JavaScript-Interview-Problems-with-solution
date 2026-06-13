@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>useRef vs useState in React</title>
+
+  <style>
+
+    body{
+      margin:0;
+      padding:0;
+      background:#000814;
+      color:#e2e8f0;
+      font-family:Arial, sans-serif;
+      line-height:1.7;
+    }
+
+    .container{
+      max-width:1000px;
+      margin:40px auto;
+      background:#020617;
+      padding:40px;
+      border-radius:18px;
+      border:1px solid #0f172a;
+      box-shadow:0 0 40px rgba(0,0,0,0.95);
+    }
+
+    h1{
+      color:#f8fafc;
+      margin-bottom:30px;
+      font-size:34px;
+    }
+
+    h2{
+      color:#c084fc;
+      margin-top:35px;
+      margin-bottom:15px;
+      font-size:26px;
+    }
+
+    p{
+      color:#cbd5e1;
+    }
+
+    ul{
+      padding-left:24px;
+    }
+
+    li{
+      margin-bottom:10px;
+      color:#cbd5e1;
+    }
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      margin-top:20px;
+    }
+
+    table th,
+    table td{
+      border:1px solid #1e293b;
+      padding:14px;
+      text-align:left;
+      vertical-align:top;
+    }
+
+    table th{
+      background:#0f172a;
+      color:#38bdf8;
+    }
+
+    table td{
+      background:#020617;
+      color:#d1d5db;
+    }
+
+    .highlight{
+      background:#0f172a;
+      padding:18px;
+      border-left:5px solid #38bdf8;
+      border-radius:10px;
+      margin-top:15px;
+      color:#e5e7eb;
+    }
+
+    .flow{
+      background:#020617;
+      border:1px solid #1e293b;
+      padding:20px;
+      border-radius:10px;
+      margin-top:15px;
+      color:#e2e8f0;
+      line-height:2;
+      text-align:center;
+      font-size:18px;
+    }
+
+    pre{
+      background:#000000;
+      padding:22px;
+      border-radius:12px;
+      overflow-x:auto;
+      border:1px solid #0f172a;
+    }
+
+    code{
+      font-family:Consolas, monospace;
+      font-size:15px;
+    }
+
+    .keyword{
+      color:#c084fc;
+    }
+
+    .function{
+      color:#38bdf8;
+    }
+
+    .string{
+      color:#facc15;
+    }
+
+    .tag{
+      color:#f472b6;
+    }
+
+    .comment{
+      color:#94a3b8;
+    }
+
+    .output{
+      color:#4ade80;
+    }
+
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+
+    <h1>140. What is the Difference Between useRef and useState for Storing Values?</h1>
+
+    <h2>One-Line Definition</h2>
+
+    <div class="highlight">
+      <strong>useState</strong> stores values that affect the UI and trigger re-renders, while <strong>useRef</strong> stores values without triggering re-renders.
+    </div>
+
+    <h2>Quick Comparison</h2>
+
+    <table>
+
+      <tr>
+        <th>Feature</th>
+        <th>useState</th>
+        <th>useRef</th>
+      </tr>
+
+      <tr>
+        <td>Triggers Re-render</td>
+        <td>✅ Yes</td>
+        <td>❌ No</td>
+      </tr>
+
+      <tr>
+        <td>Updates UI</td>
+        <td>✅ Yes</td>
+        <td>❌ No</td>
+      </tr>
+
+      <tr>
+        <td>Stores Value Between Renders</td>
+        <td>✅ Yes</td>
+        <td>✅ Yes</td>
+      </tr>
+
+      <tr>
+        <td>Used For DOM Access</td>
+        <td>❌ No</td>
+        <td>✅ Yes</td>
+      </tr>
+
+      <tr>
+        <td>Causes Component Function to Run Again</td>
+        <td>✅ Yes</td>
+        <td>❌ No</td>
+      </tr>
+
+    </table>
+
+    <h2>useState Example</h2>
+
+    <p>
+      When the value changes, React re-renders the component and updates the UI.
+    </p>
+
+    <pre><code><span class="keyword">import</span> { useState } <span class="keyword">from</span> <span class="string">'react'</span>;
+
+<span class="keyword">function</span> <span class="function">Counter</span>() {
+
+  <span class="keyword">const</span> [count, setCount] = useState(0);
+
+  <span class="keyword">return</span> (
+    &lt;&gt;
+      &lt;h1&gt;{count}&lt;/h1&gt;
+      &lt;button onClick={() =&gt; setCount(count + 1)}&gt;
+        Increment
+      &lt;/button&gt;
+    &lt;/&gt;
+  );
+
+}</code></pre>
+
+    <h2>Flow of useState</h2>
+
+    <div class="flow">
+      setCount(1)
+      <br>
+      ↓
+      <br>
+      State Changes
+      <br>
+      ↓
+      <br>
+      Component Re-renders
+      <br>
+      ↓
+      <br>
+      UI Updates
+    </div>
+
+    <h2>useRef Example</h2>
+
+    <p>
+      When the value changes, React does not re-render the component.
+    </p>
+
+    <pre><code><span class="keyword">import</span> { useRef } <span class="keyword">from</span> <span class="string">'react'</span>;
+
+<span class="keyword">function</span> <span class="function">Counter</span>() {
+
+  <span class="keyword">const</span> countRef = useRef(0);
+
+  <span class="keyword">const</span> increment = () =&gt; {
+
+    countRef.current++;
+
+    console.log(countRef.current);
+
+  };
+
+  <span class="keyword">return</span> (
+
+    &lt;button onClick={increment}&gt;
+      Increment
+    &lt;/button&gt;
+
+  );
+
+}</code></pre>
+
+    <h2>Flow of useRef</h2>
+
+    <div class="flow">
+      countRef.current++
+      <br>
+      ↓
+      <br>
+      Ref Value Changes
+      <br>
+      ↓
+      <br>
+      No Re-render
+      <br>
+      ↓
+      <br>
+      UI Remains Same
+    </div>
+
+    <h2>Important Example</h2>
+
+    <pre><code><span class="keyword">import</span> { useState, useRef } <span class="keyword">from</span> <span class="string">'react'</span>;
+
+<span class="keyword">function</span> <span class="function">App</span>() {
+
+  <span class="keyword">const</span> [stateCount, setStateCount] = useState(0);
+
+  <span class="keyword">const</span> refCount = useRef(0);
+
+  <span class="keyword">return</span> (
+    &lt;&gt;
+      &lt;h2&gt;State: {stateCount}&lt;/h2&gt;
+      &lt;h2&gt;Ref: {refCount.current}&lt;/h2&gt;
+
+      &lt;button onClick={() =&gt; setStateCount(stateCount + 1)}&gt;
+        State +
+      &lt;/button&gt;
+
+      &lt;button onClick={() =&gt; refCount.current++}&gt;
+        Ref +
+      &lt;/button&gt;
+    &lt;/&gt;
+  );
+
+}</code></pre>
+
+    <h2>What Happens?</h2>
+
+    <ul>
+      <li>Clicking <strong>State +</strong> updates the screen immediately.</li>
+      <li>Clicking <strong>Ref +</strong> changes the value internally.</li>
+      <li>The screen does not update because no re-render occurs.</li>
+    </ul>
+
+    <h2>When To Use useState</h2>
+
+    <ul>
+      <li>Counter values</li>
+      <li>Form fields</li>
+      <li>API response data</li>
+      <li>Modal or popup visibility</li>
+      <li>Anything displayed on the screen</li>
+    </ul>
+
+    <h2>When To Use useRef</h2>
+
+    <ul>
+      <li>DOM element references</li>
+      <li>Input focus</li>
+      <li>Timers</li>
+      <li>Previous values</li>
+      <li>Values that should not trigger UI updates</li>
+    </ul>
+
+    <h2>Real Project Example</h2>
+
+    <div class="highlight">
+      In our Aadhaar Authentication application:
+      <br><br>
+
+      <strong>useState</strong> is used for OTP values, loader state, consent state, and authentication results because the UI must update.
+
+      <br><br>
+
+      <strong>useRef</strong> is used for input references, timer IDs, SignalR connections, and tracking values because changing them should not re-render the entire component.
+    </div>
+
+    <h2>Important Interview Points</h2>
+
+    <ul>
+      <li>Both persist values between renders.</li>
+      <li>Only useState triggers re-renders.</li>
+      <li>useRef is commonly used for DOM access.</li>
+      <li>Changing ref.current does not update the UI.</li>
+      <li>UI-related data should usually be stored in useState.</li>
+    </ul>
+
+    <h2>Short Interview Answer</h2>
+
+    <div class="highlight">
+      useState is used for values that affect the UI and should trigger re-renders, while useRef is used for values that should persist between renders without causing a re-render.
+    </div>
+
+    <h2>One-Line Interview Answer</h2>
+
+    <div class="highlight">
+      useState updates the UI by re-rendering the component, while useRef stores values without triggering a re-render.
+    </div>
+
+  </div>
+
+</body>
+</html>

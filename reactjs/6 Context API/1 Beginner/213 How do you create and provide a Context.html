@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>213. How Do You Create and Provide a Context?</title>
+
+  <style>
+
+    body{
+      margin:0;
+      padding:0;
+      background:#000814;
+      color:#e2e8f0;
+      font-family:Arial,sans-serif;
+      line-height:1.7;
+    }
+
+    .container{
+      max-width:1000px;
+      margin:40px auto;
+      background:#020617;
+      padding:40px;
+      border-radius:18px;
+      border:1px solid #0f172a;
+      box-shadow:0 0 40px rgba(0,0,0,.95);
+    }
+
+    h1{
+      color:#f8fafc;
+      margin-bottom:30px;
+      font-size:34px;
+    }
+
+    h2{
+      color:#c084fc;
+      margin-top:35px;
+      margin-bottom:15px;
+      font-size:26px;
+    }
+
+    p{
+      color:#cbd5e1;
+    }
+
+    ul{
+      padding-left:24px;
+    }
+
+    li{
+      margin-bottom:10px;
+      color:#cbd5e1;
+    }
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      margin-top:20px;
+    }
+
+    table th,
+    table td{
+      border:1px solid #1e293b;
+      padding:14px;
+      text-align:left;
+      vertical-align:top;
+    }
+
+    table th{
+      background:#0f172a;
+      color:#38bdf8;
+    }
+
+    table td{
+      background:#020617;
+      color:#d1d5db;
+    }
+
+    .highlight{
+      background:#0f172a;
+      padding:18px;
+      border-left:5px solid #38bdf8;
+      border-radius:10px;
+      margin-top:15px;
+      color:#e5e7eb;
+    }
+
+    .flow{
+      background:#020617;
+      border:1px solid #1e293b;
+      padding:20px;
+      border-radius:10px;
+      margin-top:15px;
+      color:#e2e8f0;
+      line-height:2;
+      text-align:center;
+      font-size:18px;
+    }
+
+    pre{
+      background:#000;
+      padding:22px;
+      border-radius:12px;
+      overflow-x:auto;
+      border:1px solid #0f172a;
+    }
+
+    code{
+      font-family:Consolas,monospace;
+      font-size:15px;
+    }
+
+    .keyword{
+      color:#c084fc;
+    }
+
+    .function{
+      color:#38bdf8;
+    }
+
+    .string{
+      color:#facc15;
+    }
+
+    .tag{
+      color:#f472b6;
+    }
+
+    .comment{
+      color:#94a3b8;
+    }
+
+    .output{
+      color:#4ade80;
+    }
+
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+
+    <h1>213. How Do You Create and Provide a Context?</h1>
+
+    <h2>One-Line Definition</h2>
+
+    <div class="highlight">
+      A Context is created using <strong>createContext()</strong> and provided to child components using <strong>Context.Provider</strong>.
+    </div>
+
+    <h2>Why Do We Create a Context?</h2>
+
+    <p>
+      Context allows us to share data with multiple components without passing props through every level of the component tree.
+    </p>
+
+    <div class="flow">
+
+      Shared Data
+      <br>
+      ↓
+      <br>
+      Context
+      <br>
+      ↓
+      <br>
+      Provider
+      <br>
+      ↓
+      <br>
+      Child Components
+
+    </div>
+
+    <h2>Step 1 - Create a Context</h2>
+
+    <p>
+      First, create a context using createContext().
+    </p>
+
+<pre><code><span class="comment">// context/UserContext.js</span>
+
+<span class="keyword">import</span> { createContext } <span class="keyword">from</span> <span class="string">'react'</span>;
+
+<span class="keyword">export const</span> UserContext = createContext();</code></pre>
+
+    <h2>What Does createContext() Return?</h2>
+
+    <div class="highlight">
+      createContext() returns a Context object that contains a Provider and allows components to share data.
+    </div>
+
+<pre><code><span class="keyword">const</span> UserContext = createContext();
+
+UserContext.Provider</code></pre>
+
+    <h2>Step 2 - Import the Context</h2>
+
+<pre><code><span class="comment">// App.js</span>
+
+<span class="keyword">import</span> { UserContext } <span class="keyword">from</span> <span class="string">'./context/UserContext'</span>;</code></pre>
+
+    <h2>Step 3 - Provide a Value</h2>
+
+    <p>
+      Wrap child components inside the Provider and pass the value prop.
+    </p>
+
+<pre><code><span class="keyword">import</span> { useState } <span class="keyword">from</span> <span class="string">'react'</span>;
+<span class="keyword">import</span> { UserContext } <span class="keyword">from</span> <span class="string">'./context/UserContext'</span>;
+<span class="keyword">import</span> Profile <span class="keyword">from</span> <span class="string">'./Profile'</span>;
+
+<span class="keyword">function</span> <span class="function">App</span>() {
+
+  <span class="keyword">const</span> [user] = useState(<span class="string">'Rizwan'</span>);
+
+  <span class="keyword">return</span> (
+
+    <span class="tag">&lt;UserContext.Provider</span> value={user}<span class="tag">&gt;</span>
+
+      <span class="tag">&lt;Profile</span> <span class="tag">/&gt;</span>
+
+    <span class="tag">&lt;/UserContext.Provider&gt;</span>
+
+  );
+
+}
+
+<span class="keyword">export default</span> App;</code></pre>
+
+    <h2>How Provider Works</h2>
+
+    <div class="flow">
+
+      value="Rizwan"
+      <br>
+      ↓
+      <br>
+      UserContext.Provider
+      <br>
+      ↓
+      <br>
+      Makes Value Available
+      <br>
+      ↓
+      <br>
+      All Descendant Components
+
+    </div>
+
+    <h2>Provider Can Wrap Multiple Components</h2>
+
+<pre><code><span class="tag">&lt;UserContext.Provider</span> value={user}<span class="tag">&gt;</span>
+
+  <span class="tag">&lt;Header</span> <span class="tag">/&gt;</span>
+
+  <span class="tag">&lt;Sidebar</span> <span class="tag">/&gt;</span>
+
+  <span class="tag">&lt;Profile</span> <span class="tag">/&gt;</span>
+
+<span class="tag">&lt;/UserContext.Provider&gt;</span></code></pre>
+
+    <div class="highlight">
+      Every component inside the Provider can access the context value.
+    </div>
+
+    <h2>Provider Can Pass Objects Too</h2>
+
+<pre><code><span class="keyword">const</span> user = {
+
+  name: <span class="string">'Rizwan'</span>,
+  role: <span class="string">'Admin'</span>
+
+};
+
+<span class="tag">&lt;UserContext.Provider</span> value={user}<span class="tag">&gt;</span>
+
+  <span class="tag">&lt;Profile</span> <span class="tag">/&gt;</span>
+
+<span class="tag">&lt;/UserContext.Provider&gt;</span></code></pre>
+
+    <h2>Provider Can Pass State and Functions</h2>
+
+<pre><code><span class="keyword">const</span> [theme, setTheme] = useState(<span class="string">'dark'</span>);
+
+<span class="tag">&lt;ThemeContext.Provider</span>
+
+  value={{ theme, setTheme }}
+
+<span class="tag">&gt;</span>
+
+  <span class="tag">&lt;App</span> <span class="tag">/&gt;</span>
+
+<span class="tag">&lt;/ThemeContext.Provider&gt;</span></code></pre>
+
+    <div class="highlight">
+      A Provider can share values, objects, state variables, and functions.
+    </div>
+
+    <h2>What Happens When Provider Value Changes?</h2>
+
+<pre><code><span class="keyword">setTheme</span>(<span class="string">'light'</span>);</code></pre>
+
+    <div class="flow">
+
+      Provider Value Changes
+      <br>
+      ↓
+      <br>
+      Context Updates
+      <br>
+      ↓
+      <br>
+      Consuming Components Re-render
+
+    </div>
+
+    <h2>Real Project Example</h2>
+
+    <div class="highlight">
+      In our Aadhaar Authentication application, we can create an AuthContext and provide logged-in user information, department details, permissions, language settings, and theme settings to all child components from a single Provider.
+    </div>
+
+    <h2>Important Interview Points</h2>
+
+    <ul>
+      <li>Context is created using createContext().</li>
+      <li>Provider shares the value with descendant components.</li>
+      <li>The shared data is passed through the value prop.</li>
+      <li>A Provider can share primitive values, objects, state, and functions.</li>
+      <li>When the Provider value changes, consuming components re-render.</li>
+    </ul>
+
+    <h2>Short Interview Answer</h2>
+
+    <div class="highlight">
+      We create a Context using createContext() and provide data to child components by wrapping them inside Context.Provider and passing the value prop.
+    </div>
+
+    <h2>One-Line Interview Answer</h2>
+
+    <div class="highlight">
+      A Context is created with createContext() and shared with components using Context.Provider.
+    </div>
+
+  </div>
+
+</body>
+</html>

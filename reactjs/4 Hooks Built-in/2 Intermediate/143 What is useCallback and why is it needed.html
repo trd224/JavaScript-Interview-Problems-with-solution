@@ -1,0 +1,928 @@
+<!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>143 - What is useCallback and Why is it Needed?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px;margin-bottom:10px}
+p{color:#cbd5e1}
+ul{padding-left:24px}
+li{margin-bottom:10px;color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px;margin-top:15px}
+.warning{background:#1e1b4b;border-left:5px solid #fbbf24;padding:18px;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;margin-top:15px;text-align:center;line-height:2;font-size:18px}
+pre{border-radius:12px;overflow-x:auto}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>143. What is useCallback and Why is it Needed?</h1>
+
+<h2>One-Line Definition</h2>
+
+<div class="highlight">
+useCallback is a React hook that memoizes a function and returns the same function reference between renders until its dependencies change.
+</div>
+
+<h2>Simple Meaning</h2>
+
+<p>
+Every time a React component re-renders, all functions inside that component are recreated.
+</p>
+
+<pre><code class="language-jsx">function App() {
+
+  const handleClick = () => {
+    console.log('Clicked');
+  };
+
+  return &lt;button onClick={handleClick}&gt;Click&lt;/button&gt;;
+
+}</code></pre>
+
+<p>
+When App re-renders:
+</p>
+
+<pre><code class="language-text">Render 1
+↓
+handleClick created
+
+
+Render 2
+↓
+new handleClick created
+
+
+Render 3
+↓
+new handleClick created
+</code></pre>
+
+<div class="warning">
+Even if the function logic is identical, React creates a new function object on every render.
+</div>
+
+<h2>What Problem Does useCallback Solve?</h2>
+
+<p>
+Normally this is not a problem.
+</p>
+
+<p>
+However, it becomes a problem when:
+</p>
+
+<ul>
+<li>Functions are passed to React.memo components.</li>
+<li>Functions are used in dependency arrays.</li>
+<li>Functions trigger expensive re-renders.</li>
+</ul>
+
+<h2>Without useCallback</h2>
+
+<h3>Child Component</h3>
+
+<pre><code class="language-jsx">const Child = React.memo(function Child({ onClick }) {
+
+  console.log('Child Rendered');
+
+  return (
+    &lt;button onClick={onClick}&gt;
+      Click
+    &lt;/button&gt;
+  );
+
+});</code></pre>
+
+<h3>Parent Component</h3>
+
+<pre><code class="language-jsx">function App() {
+
+  const [count, setCount] = useState(0);
+
+  const handleClick = () => {
+    console.log('Clicked');
+  };
+
+  return (
+    &lt;&gt;
+      &lt;h2&gt;{count}&lt;/h2&gt;
+
+      &lt;button
+        onClick={() => setCount(count + 1)}
+      &gt;
+        Increment
+      &lt;/button&gt;
+
+      &lt;Child onClick={handleClick} /&gt;
+    &lt;/&gt;
+  );
+
+}</code></pre>
+
+<p>
+When count changes:
+</p>
+
+<pre><code class="language-text">App Re-renders
+       ↓
+New handleClick Function
+       ↓
+Child Receives New Prop
+       ↓
+React.memo Fails
+       ↓
+Child Re-renders
+</code></pre>
+
+<div class="warning">
+React.memo compares prop references. A new function reference looks like a changed prop.
+</div>
+
+<h2>With useCallback</h2>
+
+<pre><code class="language-jsx">const handleClick = useCallback(() => {
+  console.log('Clicked');
+}, []);</code></pre>
+
+<p>
+Now React keeps the same function reference.
+</p>
+
+<pre><code class="language-text">App Re-renders
+       ↓
+Same Function Reference
+       ↓
+Child Props Unchanged
+       ↓
+React.memo Works
+       ↓
+Child Skips Re-render
+</code></pre>
+
+<div class="highlight">
+useCallback helps React.memo avoid unnecessary child re-renders.
+</div>
+
+<h2>Syntax</h2>
+
+<pre><code class="language-jsx">const memoizedFunction = useCallback(
+  () => {
+    // function logic
+  },
+  [dependencies]
+);</code></pre>
+
+<h3>Parameters</h3>
+
+<table>
+<tr>
+<th>Parameter</th>
+<th>Purpose</th>
+</tr>
+
+<tr>
+<td>Function</td>
+<td>Function to memoize</td>
+</tr>
+
+<tr>
+<td>Dependencies</td>
+<td>When changed, create a new function</td>
+</tr>
+</table>
+
+<h2>Example With Dependencies</h2>
+
+<pre><code class="language-jsx">const handleSubmit = useCallback(() => {
+  console.log(username);
+}, [username]);</code></pre>
+
+<p>
+Behavior:
+</p>
+
+<pre><code class="language-text">username unchanged
+       ↓
+same function returned
+
+
+username changed
+       ↓
+new function created
+</code></pre>
+
+<h2>Real Search Example</h2>
+
+<pre><code class="language-jsx">function SearchPage() {
+
+  const [search, setSearch] = useState('');
+
+  const handleSearch = useCallback(() => {
+    console.log(search);
+  }, [search]);
+
+  return (
+    &lt;button onClick={handleSearch}&gt;
+      Search
+    &lt;/button&gt;
+  );
+
+}</code></pre>
+
+<h2>Another Common Use Case</h2>
+
+<p>
+Functions inside useEffect dependencies.
+</p>
+
+<h3>Without useCallback</h3>
+
+<pre><code class="language-jsx">function App() {
+
+  const fetchUsers = () => {
+    console.log('Fetch Users');
+  };
+
+  useEffect(() => {
+    fetchUsers();
+  }, [fetchUsers]);
+
+}</code></pre>
+
+<p>
+Problem:
+</p>
+
+<pre><code class="language-text">Render
+↓
+New fetchUsers
+↓
+Dependency Changed
+↓
+useEffect Runs Again
+</code></pre>
+
+<p>
+This may create an infinite loop.
+</p>
+
+<h3>With useCallback</h3>
+
+<pre><code class="language-jsx">const fetchUsers = useCallback(() => {
+  console.log('Fetch Users');
+}, []);
+
+useEffect(() => {
+  fetchUsers();
+}, [fetchUsers]);</code></pre>
+
+<div class="highlight">
+Now the function reference remains stable.
+</div>
+
+<h2>How useCallback Compares to useMemo</h2>
+
+<table>
+<tr>
+<th>Hook</th>
+<th>Caches</th>
+</tr>
+
+<tr>
+<td>useMemo</td>
+<td>Value</td>
+</tr>
+
+<tr>
+<td>useCallback</td>
+<td>Function</td>
+</tr>
+</table>
+
+<h3>useMemo</h3>
+
+<pre><code class="language-jsx">const total = useMemo(() => {
+  return price * quantity;
+}, [price, quantity]);</code></pre>
+
+<h3>useCallback</h3>
+
+<pre><code class="language-jsx">const handleClick = useCallback(() => {
+  console.log('Clicked');
+}, []);</code></pre>
+
+<div class="flow">
+useMemo
+<br>↓<br>
+Caches Value
+
+
+<br><br>
+
+useCallback
+<br>↓<br>
+Caches Function
+</div>
+
+<h2>When Should You Use useCallback?</h2>
+
+<ul>
+<li>Passing functions to React.memo components.</li>
+<li>Function is a dependency of useEffect.</li>
+<li>Function is a dependency of useMemo.</li>
+<li>Preventing expensive child re-renders.</li>
+</ul>
+
+<h2>When Should You NOT Use useCallback?</h2>
+
+<p>
+Do not wrap every function in useCallback.
+</p>
+
+<h3>Bad Example</h3>
+
+<pre><code class="language-jsx">const handleClick = useCallback(() => {
+  alert('Hello');
+}, []);</code></pre>
+
+<p>
+If the function is not causing performance problems, useCallback adds unnecessary complexity.
+</p>
+
+<div class="warning">
+useCallback itself has overhead. Use it only when it provides a measurable benefit.
+</div>
+
+<h2>Most Common Beginner Mistake</h2>
+
+<p>
+Many developers think:
+</p>
+
+<pre><code class="language-text">useCallback
+       ↓
+Prevents Re-renders
+</code></pre>
+
+<p>
+This is incorrect.
+</p>
+
+<div class="warning">
+useCallback does NOT prevent component re-renders.
+<br><br>
+It only preserves the same function reference between renders.
+</div>
+
+<h2>Easy Way To Remember</h2>
+
+<div class="flow">
+Normal Function
+<br>↓<br>
+New Reference Every Render
+
+
+<br><br>
+
+useCallback
+<br>↓<br>
+Same Reference
+<br>↓<br>
+Until Dependencies Change
+</div>
+
+<h2>Interview Answer</h2>
+
+<div class="highlight">
+useCallback is a React hook that memoizes a function and returns the same function reference across renders until its dependencies change. It is mainly used to optimize React.memo components and stabilize function dependencies in hooks such as useEffect.
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+useCallback caches a function reference and recreates it only when its dependencies change.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+
+</body>
+</html> -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>143 - What is useCallback and Why is it Needed?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px;margin-bottom:10px}
+p{color:#cbd5e1}
+ul{padding-left:24px}
+li{margin-bottom:10px;color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px;margin-top:15px}
+.warning{background:#1e1b4b;border-left:5px solid #fbbf24;padding:18px;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;margin-top:15px;text-align:center;line-height:2;font-size:18px}
+pre{border-radius:12px;overflow-x:auto}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>143. What is useCallback and Why is it Needed?</h1>
+
+<h2>One-Line Definition</h2>
+
+<div class="highlight">
+useCallback is a React hook that remembers a function and returns the same function reference between renders until its dependencies change.
+</div>
+
+<h2>Why Most Developers Get Confused</h2>
+
+<p>
+Most tutorials say:
+</p>
+
+<pre><code class="language-jsx">const handleClick = useCallback(() => {
+  console.log('Clicked');
+}, []);</code></pre>
+
+<p>
+But they never explain what problem this actually solves.
+</p>
+
+<div class="warning">
+The real purpose of useCallback is NOT to make a function run faster.
+<br><br>
+The real purpose is to keep the same function reference between renders.
+</div>
+
+<h2>First Understand the Real Problem</h2>
+
+<p>
+Consider this simple application:
+</p>
+
+<pre><code class="language-jsx">import { useState } from 'react';
+
+function Child({ onClick }) {
+
+  console.log('Child Rendered');
+
+  return (
+    &lt;button onClick={onClick}&gt;
+      Child Button
+    &lt;/button&gt;
+  );
+
+}
+
+export default function App() {
+
+  const [count, setCount] = useState(0);
+
+  const handleClick = () => {
+    console.log('Clicked');
+  };
+
+  return (
+    &lt;&gt;
+      &lt;h2&gt;{count}&lt;/h2&gt;
+
+      &lt;button onClick={() =&gt; setCount(count + 1)}&gt;
+        Increment
+      &lt;/button&gt;
+
+      &lt;Child onClick={handleClick} /&gt;
+    &lt;/&gt;
+  );
+
+}</code></pre>
+
+<h2>What Happens During First Render?</h2>
+
+<p>
+React creates:
+</p>
+
+<pre><code class="language-text">handleClick → Function #101
+</code></pre>
+
+<p>
+Child receives:
+</p>
+
+<pre><code class="language-text">onClick = Function #101
+</code></pre>
+
+<h2>User Clicks Increment</h2>
+
+<pre><code class="language-jsx">setCount(count + 1);</code></pre>
+
+<p>
+App re-renders.
+</p>
+
+<p>
+React runs the entire component again.
+</p>
+
+<p>
+This line runs again:
+</p>
+
+<pre><code class="language-jsx">const handleClick = () => {
+  console.log('Clicked');
+};</code></pre>
+
+<p>
+React creates a completely new function:
+</p>
+
+<pre><code class="language-text">Function #102
+</code></pre>
+
+<h2>Next Render</h2>
+
+<pre><code class="language-text">Function #103
+</code></pre>
+
+<h2>Next Render</h2>
+
+<pre><code class="language-text">Function #104
+</code></pre>
+
+<div class="warning">
+Even though the code is identical, React creates a new function object every render.
+</div>
+
+<h2>Why Is This Bad?</h2>
+
+<p>
+Normally it is not a problem.
+</p>
+
+<p>
+But now let's optimize Child with React.memo.
+</p>
+
+<pre><code class="language-jsx">const Child = React.memo(function Child({ onClick }) {
+
+  console.log('Child Rendered');
+
+  return (
+    &lt;button onClick={onClick}&gt;
+      Child Button
+    &lt;/button&gt;
+  );
+
+});</code></pre>
+
+<p>
+React.memo says:
+</p>
+
+<div class="flow">
+Props Changed?
+<br>↓<br>
+Yes → Re-render
+<br><br>
+No → Skip Re-render
+</div>
+
+<h2>Problem</h2>
+
+<p>
+First render:
+</p>
+
+<pre><code class="language-text">onClick = Function #101
+</code></pre>
+
+<p>
+Second render:
+</p>
+
+<pre><code class="language-text">onClick = Function #102
+</code></pre>
+
+<p>
+React compares:
+</p>
+
+<pre><code class="language-text">#101 === #102
+</code></pre>
+
+<p>
+Result:
+</p>
+
+<pre><code class="language-text">false
+</code></pre>
+
+<p>
+React thinks:
+</p>
+
+<pre><code class="language-text">Props Changed
+</code></pre>
+
+<p>
+Therefore:
+</p>
+
+<pre><code class="language-text">Child Re-renders
+</code></pre>
+
+<div class="warning">
+React.memo cannot help because the function reference changes every render.
+</div>
+
+<h2>How useCallback Fixes It</h2>
+
+<pre><code class="language-jsx">const handleClick = useCallback(() => {
+  console.log('Clicked');
+}, []);</code></pre>
+
+<h2>First Render</h2>
+
+<pre><code class="language-text">Function #101
+</code></pre>
+
+<h2>Second Render</h2>
+
+<p>
+Dependencies:
+</p>
+
+<pre><code class="language-jsx">[]
+</code></pre>
+
+<p>
+Changed?
+</p>
+
+<pre><code class="language-text">No
+</code></pre>
+
+<p>
+React returns:
+</p>
+
+<pre><code class="language-text">Function #101
+</code></pre>
+
+<h2>Third Render</h2>
+
+<pre><code class="language-text">Function #101
+</code></pre>
+
+<h2>Fourth Render</h2>
+
+<pre><code class="language-text">Function #101
+</code></pre>
+
+<div class="highlight">
+React keeps returning the same function reference.
+</div>
+
+<h2>Now React.memo Works</h2>
+
+<p>
+React compares:
+</p>
+
+<pre><code class="language-text">#101 === #101
+</code></pre>
+
+<p>
+Result:
+</p>
+
+<pre><code class="language-text">true
+</code></pre>
+
+<p>
+Props did not change.
+</p>
+
+<p>
+Child skips re-render.
+</p>
+
+<div class="flow">
+Parent Re-render
+<br>↓<br>
+Same Function Reference
+<br>↓<br>
+Props Unchanged
+<br>↓<br>
+React.memo Works
+<br>↓<br>
+Child Skips Re-render
+</div>
+
+<h2>Another Common Use Case</h2>
+
+<h3>Function Inside useEffect</h3>
+
+<pre><code class="language-jsx">function App() {
+
+  const fetchUsers = () => {
+    console.log('Fetch Users');
+  };
+
+  useEffect(() => {
+    fetchUsers();
+  }, [fetchUsers]);
+
+}</code></pre>
+
+<p>
+Problem:
+</p>
+
+<div class="flow">
+Render
+<br>↓<br>
+New Function
+<br>↓<br>
+Dependency Changed
+<br>↓<br>
+useEffect Runs Again
+</div>
+
+<p>
+Possibly forever.
+</p>
+
+<h3>Solution</h3>
+
+<pre><code class="language-jsx">const fetchUsers = useCallback(() => {
+  console.log('Fetch Users');
+}, []);
+
+useEffect(() => {
+  fetchUsers();
+}, [fetchUsers]);</code></pre>
+
+<div class="highlight">
+Now the function reference remains stable.
+</div>
+
+<h2>When Should You Use useCallback?</h2>
+
+<ul>
+<li>Passing functions to React.memo components.</li>
+<li>Function is used inside useEffect dependencies.</li>
+<li>Function is used inside useMemo dependencies.</li>
+<li>Large applications with expensive child renders.</li>
+</ul>
+
+<h2>When Should You NOT Use useCallback?</h2>
+
+<p>
+Do not wrap every function.
+</p>
+
+<pre><code class="language-jsx">const sayHello = useCallback(() => {
+  alert('Hello');
+}, []);</code></pre>
+
+<p>
+Usually unnecessary.
+</p>
+
+<div class="warning">
+useCallback itself has overhead. Use it only when stable function references actually matter.
+</div>
+
+<h2>The Biggest Interview Point</h2>
+
+<p>
+Many developers incorrectly say:
+</p>
+
+<pre><code class="language-text">useCallback prevents re-renders
+</code></pre>
+
+<p>
+Wrong.
+</p>
+
+<div class="warning">
+useCallback does NOT prevent component re-renders.
+<br><br>
+It only preserves the same function reference between renders.
+</div>
+
+<h2>How It Compares to useMemo</h2>
+
+<table>
+<tr>
+<th>Hook</th>
+<th>Caches</th>
+</tr>
+
+<tr>
+<td>useMemo</td>
+<td>Value</td>
+</tr>
+
+<tr>
+<td>useCallback</td>
+<td>Function</td>
+</tr>
+</table>
+
+<h3>useMemo</h3>
+
+<pre><code class="language-jsx">const total = useMemo(() => {
+  return price * quantity;
+}, [price, quantity]);</code></pre>
+
+<h3>useCallback</h3>
+
+<pre><code class="language-jsx">const handleClick = useCallback(() => {
+  console.log('Clicked');
+}, []);</code></pre>
+
+<h2>Easy Way To Remember</h2>
+
+<div class="flow">
+Without useCallback
+<br>↓<br>
+Render
+<br>↓<br>
+New Function
+<br>↓<br>
+New Function
+<br>↓<br>
+New Function
+</div>
+
+<br>
+
+<div class="flow">
+With useCallback
+<br>↓<br>
+Render
+<br>↓<br>
+Same Function
+<br>↓<br>
+Same Function
+<br>↓<br>
+Same Function
+</div>
+
+<h2>Interview Answer</h2>
+
+<div class="highlight">
+useCallback is a React hook that memoizes a function and returns the same function reference until its dependencies change. It is mainly used when passing functions to React.memo components or when functions are used in dependency arrays such as useEffect.
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+useCallback caches a function reference so React can reuse the same function between renders until dependencies change.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+
+</body>
+</html>

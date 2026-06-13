@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>071. What is the Render Prop Pattern?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+
+body{
+  margin:0;
+  padding:0;
+  background:#000814;
+  color:#e2e8f0;
+  font-family:Arial,sans-serif;
+  line-height:1.7;
+}
+
+.container{
+  max-width:1000px;
+  margin:40px auto;
+  background:#020617;
+  padding:40px;
+  border-radius:18px;
+  border:1px solid #0f172a;
+  box-shadow:0 0 40px rgba(0,0,0,.95);
+}
+
+h1{
+  color:#f8fafc;
+  margin-bottom:30px;
+  font-size:34px;
+}
+
+h2{
+  color:#c084fc;
+  margin-top:35px;
+  margin-bottom:15px;
+  font-size:26px;
+}
+
+h3{
+  color:#38bdf8;
+  margin-top:25px;
+  margin-bottom:10px;
+}
+
+p{
+  color:#cbd5e1;
+}
+
+ul{
+  padding-left:24px;
+}
+
+li{
+  margin-bottom:10px;
+  color:#cbd5e1;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:20px;
+}
+
+table th,
+table td{
+  border:1px solid #1e293b;
+  padding:14px;
+  text-align:left;
+}
+
+table th{
+  background:#0f172a;
+  color:#38bdf8;
+}
+
+table td{
+  background:#020617;
+  color:#d1d5db;
+}
+
+.highlight{
+  background:#0f172a;
+  padding:18px;
+  border-left:5px solid #38bdf8;
+  border-radius:10px;
+  margin-top:15px;
+}
+
+.flow{
+  background:#020617;
+  border:1px solid #1e293b;
+  padding:20px;
+  border-radius:10px;
+  margin-top:15px;
+  text-align:center;
+  line-height:2;
+  font-size:18px;
+}
+
+pre{
+  border-radius:12px;
+  overflow-x:auto;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>071. What is the Render Prop Pattern?</h1>
+
+<h2>One-Line Definition</h2>
+
+<div class="highlight">
+The Render Prop Pattern is a React pattern where a component receives a function as a prop and calls that function to determine what UI should be rendered.
+</div>
+
+<h2>Why Is It Needed?</h2>
+
+<p>
+Sometimes multiple components need the same stateful logic but different UI.
+</p>
+
+<p>
+Instead of duplicating logic, we place the logic inside one component and let consumers decide how the UI should be rendered.
+</p>
+
+<div class="flow">
+
+Reusable Logic
+<br>
+↓
+<br>
+One Component Owns Logic
+<br>
+↓
+<br>
+Consumer Provides Render Function
+<br>
+↓
+<br>
+Consumer Controls UI
+
+</div>
+
+<h2>Basic Render Prop Pattern</h2>
+
+<p>
+The component receives a function prop called <code>render</code>.
+</p>
+
+<pre><code class="language-jsx">function DataProvider({ render }) {
+
+  const user = {
+    name: 'Rizwan',
+    age: 39
+  };
+
+  return render(user);
+
+}</code></pre>
+
+<h3>Usage</h3>
+
+<pre><code class="language-jsx">function App() {
+
+  return (
+    &lt;DataProvider
+      render={(user) =&gt; (
+        &lt;h2&gt;{user.name}&lt;/h2&gt;
+      )}
+    /&gt;
+  );
+
+}</code></pre>
+
+<p>
+The DataProvider component provides the data, while the App component decides how to display it.
+</p>
+
+<h2>Real Example - Mouse Tracker</h2>
+
+<p>
+A classic Render Prop Pattern example is mouse position tracking.
+</p>
+
+<pre><code class="language-jsx">import { useState } from 'react';
+
+function MouseTracker({ render }) {
+
+  const [position, setPosition] = useState({
+    x: 0,
+    y: 0
+  });
+
+  const handleMouseMove = event => {
+
+    setPosition({
+      x: event.clientX,
+      y: event.clientY
+    });
+
+  };
+
+  return (
+    &lt;div
+      style={{ height: '100vh' }}
+      onMouseMove={handleMouseMove}
+    &gt;
+      {render(position)}
+    &lt;/div&gt;
+  );
+
+}</code></pre>
+
+<h3>Usage</h3>
+
+<pre><code class="language-jsx">function App() {
+
+  return (
+    &lt;MouseTracker
+      render={(position) =&gt; (
+        &lt;h2&gt;
+          X: {position.x}
+          Y: {position.y}
+        &lt;/h2&gt;
+      )}
+    /&gt;
+  );
+
+}</code></pre>
+
+<h2>How It Works</h2>
+
+<div class="flow">
+
+Component Owns Logic
+<br>
+↓
+<br>
+Creates Data
+<br>
+↓
+<br>
+Calls Render Function
+<br>
+↓
+<br>
+Function Returns JSX
+<br>
+↓
+<br>
+React Renders UI
+
+</div>
+
+<h2>Using Children as a Render Prop</h2>
+
+<p>
+Many libraries use the children prop instead of a render prop.
+</p>
+
+<pre><code class="language-jsx">function DataProvider({ children }) {
+
+  const user = {
+    name: 'Rizwan'
+  };
+
+  return children(user);
+
+}</code></pre>
+
+<h3>Usage</h3>
+
+<pre><code class="language-jsx">&lt;DataProvider&gt;
+  {(user) =&gt; (
+    &lt;h2&gt;{user.name}&lt;/h2&gt;
+  )}
+&lt;/DataProvider&gt;</code></pre>
+
+<h2>Advantages</h2>
+
+<ul>
+<li>Promotes code reuse.</li>
+<li>Separates logic from UI.</li>
+<li>Reduces code duplication.</li>
+<li>Makes components flexible.</li>
+<li>Allows different UIs to share the same logic.</li>
+</ul>
+
+<h2>Disadvantages</h2>
+
+<ul>
+<li>Can create deeply nested JSX.</li>
+<li>Harder to read in large applications.</li>
+<li>Less popular after React Hooks.</li>
+</ul>
+
+<h2>Render Prop Pattern vs Custom Hooks</h2>
+
+<table>
+
+<tr>
+<th>Feature</th>
+<th>Render Props</th>
+<th>Custom Hooks</th>
+</tr>
+
+<tr>
+<td>Logic Sharing</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+
+<tr>
+<td>JSX Nesting</td>
+<td>More</td>
+<td>Less</td>
+</tr>
+
+<tr>
+<td>Readability</td>
+<td>Lower</td>
+<td>Higher</td>
+</tr>
+
+<tr>
+<td>Modern React</td>
+<td>Less Common</td>
+<td>Preferred</td>
+</tr>
+
+</table>
+
+<h2>Render Prop Pattern vs HOC</h2>
+
+<table>
+
+<tr>
+<th>Feature</th>
+<th>Render Props</th>
+<th>HOC</th>
+</tr>
+
+<tr>
+<td>Uses Function Prop</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+
+<tr>
+<td>Wraps Components</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+
+<tr>
+<td>Logic Sharing</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+
+</table>
+
+<h2>Real Project Example</h2>
+
+<div class="highlight">
+Before React Hooks, our Aadhaar Authentication application could have used the Render Prop Pattern to share OTP timer logic, authentication status logic, or device connection logic across multiple screens while allowing each screen to render a different UI.
+</div>
+
+<h2>Why Is It Less Common Today?</h2>
+
+<p>
+After React Hooks were introduced in React 16.8, most reusable logic moved to Custom Hooks because they provide cleaner and more readable code.
+</p>
+
+<pre><code class="language-jsx">function useUser() {
+
+  return {
+    name: 'Rizwan'
+  };
+
+}</code></pre>
+
+<p>
+Today, Custom Hooks are usually preferred over Render Props.
+</p>
+
+<h2>Important Interview Points</h2>
+
+<ul>
+<li>A Render Prop is a function passed as a prop.</li>
+<li>The function returns JSX.</li>
+<li>Used to share stateful logic.</li>
+<li>Separates logic from presentation.</li>
+<li>Popular before React Hooks.</li>
+<li>Custom Hooks are now the preferred solution.</li>
+</ul>
+
+<h2>Short Interview Answer</h2>
+
+<div class="highlight">
+The Render Prop Pattern is a React pattern where a component receives a function as a prop and calls it to determine what UI should be rendered. It solves the problem of sharing reusable logic while allowing different components to render different UIs.
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+The Render Prop Pattern uses a function prop that returns JSX, allowing reusable logic to be shared across different components.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+
+</body>
+</html>

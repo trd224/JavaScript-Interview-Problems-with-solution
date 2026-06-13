@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>102. What is Redux and what problem does it solve?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px;margin-bottom:10px}
+p{color:#cbd5e1}
+ul{padding-left:24px}
+li{margin-bottom:10px;color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;margin-top:15px;text-align:center;line-height:2;font-size:18px}
+pre{border-radius:12px;overflow-x:auto}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>102. What is Redux and What Problem Does It Solve?</h1>
+
+<h2>One-Line Definition</h2>
+
+<div class="highlight">
+Redux is a centralized state management library that stores shared application state in a single store and allows any component to read or update that state predictably.
+</div>
+
+<h2>Before Learning Redux, Understand the Real Problem</h2>
+
+<p>
+Many developers think Redux exists only to solve prop drilling.
+</p>
+
+<p>
+That is partially true, but Redux became popular because large applications faced much bigger state management problems.
+</p>
+
+<div class="highlight">
+Redux solves prop drilling, scattered state, scattered update logic, difficult debugging, and large-scale state management.
+</div>
+
+<h2>Problem #1 - Prop Drilling</h2>
+
+<p>
+Suppose we are building an e-commerce application.
+</p>
+
+<p>
+The logged-in user is stored in App.
+</p>
+
+<pre><code class="language-jsx">const [user, setUser] = useState({
+  id: 1,
+  name: 'Rizwan'
+});</code></pre>
+
+<p>
+Only UserInfo needs user data.
+</p>
+
+<pre><code class="language-text">App
+│
+└── ProductPage
+      │
+      └── ProductDetails
+            │
+            └── UserInfo</code></pre>
+
+<p>
+Without Redux:
+</p>
+
+<h3>App.jsx</h3>
+
+<pre><code class="language-jsx">&lt;ProductPage user={user} /&gt;</code></pre>
+
+<h3>ProductPage.jsx</h3>
+
+<pre><code class="language-jsx">&lt;ProductDetails user={user} /&gt;</code></pre>
+
+<h3>ProductDetails.jsx</h3>
+
+<pre><code class="language-jsx">&lt;UserInfo user={user} /&gt;</code></pre>
+
+<p>
+ProductPage does not use user.
+</p>
+
+<p>
+ProductDetails does not use user.
+</p>
+
+<p>
+They only pass it forward.
+</p>
+
+<div class="highlight">
+Passing data through multiple intermediate components is called Prop Drilling.
+</div>
+
+<h2>Can Context Solve This?</h2>
+
+<p>
+Yes.
+</p>
+
+<p>
+Context can solve prop drilling very easily.
+</p>
+
+<p>
+So if prop drilling were the only problem, Redux would not be necessary.
+</p>
+
+<h2>Problem #2 - State Scattered Everywhere</h2>
+
+<p>
+Imagine a real e-commerce application.
+</p>
+
+<p>
+The application contains:
+</p>
+
+<ul>
+<li>User Authentication</li>
+<li>Products</li>
+<li>Cart</li>
+<li>Wishlist</li>
+<li>Orders</li>
+<li>Coupons</li>
+<li>Notifications</li>
+<li>Addresses</li>
+<li>Payments</li>
+</ul>
+
+<p>
+Many screens need access to this data.
+</p>
+
+<pre><code class="language-text">Navbar
+
+Home Page
+
+Product Page
+
+Cart Page
+
+Checkout Page
+
+Order History
+
+Profile Page</code></pre>
+
+<p>
+Without Redux:
+</p>
+
+<pre><code class="language-text">Cart State In Navbar
+
+Cart State In Product Page
+
+Cart State In Checkout
+
+Wishlist State In Product Page
+
+User State In Profile
+
+Orders State In History</code></pre>
+
+<p>
+Now state becomes scattered throughout the application.
+</p>
+
+<div class="highlight">
+As the application grows, it becomes difficult to know where state lives and who is responsible for updating it.
+</div>
+
+<h2>Why Scattered State Becomes Difficult</h2>
+
+<p>
+The previous example does not mean we create multiple copies of cart state in different components.
+</p>
+
+<p>
+The real problem is that many parts of the application need access to the same data.
+</p>
+
+<h3>E-Commerce Example</h3>
+
+<p>
+Suppose a user adds a product to the cart:
+</p>
+
+<pre><code class="language-jsx">{
+  id: 1,
+  name: 'Laptop',
+  price: 50000
+}</code></pre>
+
+<p>
+Now several screens need cart information:
+</p>
+
+<ul>
+<li>Navbar → Show cart count</li>
+<li>Cart Page → Show cart items</li>
+<li>Checkout Page → Calculate total amount</li>
+</ul>
+
+<p>
+Similarly, user information is needed by:
+</p>
+
+<ul>
+<li>Navbar</li>
+<li>Profile Page</li>
+<li>Order History Page</li>
+</ul>
+
+<p>
+Wishlist information is needed by:
+</p>
+
+<ul>
+<li>Product Page</li>
+<li>Wishlist Page</li>
+</ul>
+
+<div class="highlight">
+The problem is not multiple copies of state. The problem is that the same state is required by many different parts of the application.
+</div>
+
+<h3>Without Redux</h3>
+
+<p>
+A common solution is to move everything to App.
+</p>
+
+<pre><code class="language-jsx">const [cart, setCart] = useState([]);
+
+const [wishlist, setWishlist] = useState([]);
+
+const [user, setUser] = useState(null);
+
+const [orders, setOrders] = useState([]);
+</code></pre>
+
+<p>
+Now App becomes responsible for managing all shared state.
+</p>
+
+<p>
+As the application grows, more and more state gets added:
+</p>
+
+<pre><code class="language-jsx">const [cart, setCart] = useState([]);
+
+const [wishlist, setWishlist] = useState([]);
+
+const [user, setUser] = useState(null);
+
+const [orders, setOrders] = useState([]);
+
+const [notifications, setNotifications] = useState([]);
+
+const [addresses, setAddresses] = useState([]);
+</code></pre>
+
+<div class="highlight">
+Eventually App becomes a giant state container and many components depend on it. This is where centralized state management tools such as Redux become useful.
+</div>
+
+<h2>Problem #3 - Shared State Everywhere</h2>
+
+<p>
+Suppose a user adds a product to the cart.
+</p>
+
+<p>
+The following components must update:
+</p>
+
+<ul>
+<li>Navbar Cart Count</li>
+<li>Cart Page</li>
+<li>Checkout Page</li>
+<li>Mini Cart Popup</li>
+</ul>
+
+<p>
+Without centralized state management, synchronizing all these components becomes difficult.
+</p>
+
+<h2>Problem #4 - Update Logic Becomes Scattered</h2>
+
+<p>
+Cart can be updated from:
+</p>
+
+<ul>
+<li>Product Page</li>
+<li>Wishlist Page</li>
+<li>Cart Page</li>
+<li>Checkout Page</li>
+</ul>
+
+<p>
+Without Redux:
+</p>
+
+<pre><code class="language-text">Cart Logic In Product Page
+
+Cart Logic In Wishlist
+
+Cart Logic In Cart Page
+
+Cart Logic In Checkout</code></pre>
+
+<p>
+Now business logic becomes duplicated across the application.
+</p>
+
+<h2>Problem #5 - Difficult Debugging</h2>
+
+<p>
+Imagine:
+</p>
+
+<ul>
+<li>Cart Count Wrong</li>
+<li>Order Total Incorrect</li>
+<li>Coupon Not Applied</li>
+<li>Wishlist Not Updated</li>
+</ul>
+
+<p>
+Question:
+</p>
+
+<div class="highlight">
+Which component changed the state?
+</div>
+
+<p>
+In large applications this becomes difficult to trace.
+</p>
+
+<h2>Redux Solution</h2>
+
+<p>
+Redux creates a centralized store.
+</p>
+
+<div class="flow">
+Redux Store
+<br>
+↓
+<br>
+Single Source Of Truth
+<br>
+↓
+<br>
+All Components Read State
+<br>
+↓
+<br>
+All Components Update State Through Actions
+</div>
+
+<h2>Redux Store Example</h2>
+
+<pre><code class="language-jsx">{
+  user: {},
+  cart: [],
+  wishlist: [],
+  orders: [],
+  notifications: []
+}</code></pre>
+
+<div class="highlight">
+Instead of storing state in many components, Redux stores shared state in one place.
+</div>
+
+<h2>How Redux Works</h2>
+
+<div class="flow">
+Component
+<br>
+↓
+<br>
+Dispatch Action
+<br>
+↓
+<br>
+Reducer
+<br>
+↓
+<br>
+Store Updated
+<br>
+↓
+<br>
+Subscribed Components Re-render
+</div>
+
+<h2>Real Cart Example</h2>
+
+<p>
+User clicks Add To Cart.
+</p>
+
+<pre><code class="language-jsx">dispatch({
+  type: 'ADD_TO_CART',
+  payload: product
+});</code></pre>
+
+<h3>Reducer</h3>
+
+<pre><code class="language-jsx">function cartReducer(state, action) {
+
+  switch(action.type) {
+
+    case 'ADD_TO_CART':
+
+      return {
+        ...state,
+        cart: [
+          ...state.cart,
+          action.payload
+        ]
+      };
+
+    default:
+      return state;
+  }
+
+}</code></pre>
+
+<h3>Store Updated</h3>
+
+<pre><code class="language-jsx">{
+  cart: [
+    {
+      id: 101,
+      name: 'Laptop'
+    }
+  ]
+}</code></pre>
+
+<p>
+Now:
+</p>
+
+<ul>
+<li>Navbar Cart Count Updates</li>
+<li>Cart Page Updates</li>
+<li>Checkout Updates</li>
+<li>Mini Cart Updates</li>
+</ul>
+
+<p>
+All automatically read the latest cart data from Redux.
+</p>
+
+<h2>Why Redux Is Better Than Context For Large Apps</h2>
+
+<p>
+Context re-renders all consumers whenever the Provider value changes.
+</p>
+
+<p>
+Redux allows components to subscribe only to the state they need.
+</p>
+
+<pre><code class="language-jsx">const cart =
+  useSelector(
+    state => state.cart.items
+  );
+
+const user =
+  useSelector(
+    state => state.auth.user
+  );</code></pre>
+
+<p>
+If cart changes:
+</p>
+
+<div class="flow">
+Cart Updated
+<br>
+↓
+<br>
+Cart Components Re-render
+</div>
+
+<p>
+User components do not re-render.
+</p>
+
+<h2>Real-World Redux Use Cases</h2>
+
+<ul>
+<li>E-commerce Applications</li>
+<li>Food Delivery Apps</li>
+<li>Banking Applications</li>
+<li>Social Media Platforms</li>
+<li>Project Management Tools</li>
+<li>Chat Applications</li>
+<li>Large Enterprise Applications</li>
+</ul>
+
+<h2>Redux Toolkit (Modern Redux)</h2>
+
+<p>
+Today we usually use Redux Toolkit instead of writing raw Redux.
+</p>
+
+<pre><code class="language-jsx">import {
+  configureStore
+} from '@reduxjs/toolkit';</code></pre>
+
+<div class="highlight">
+Redux Toolkit is the official recommended way to use Redux because it reduces boilerplate and simplifies setup.
+</div>
+
+<h2>Context vs Redux</h2>
+
+<table>
+<tr>
+<th>Feature</th>
+<th>Context</th>
+<th>Redux</th>
+</tr>
+
+<tr>
+<td>Solves Prop Drilling</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+
+<tr>
+<td>Centralized Store</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+
+<tr>
+<td>Large Applications</td>
+<td>⚠️ Limited</td>
+<td>✅ Excellent</td>
+</tr>
+
+<tr>
+<td>Selective Re-rendering</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+
+<tr>
+<td>DevTools</td>
+<td>❌</td>
+<td>✅ Powerful</td>
+</tr>
+
+<tr>
+<td>Time Travel Debugging</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+
+<tr>
+<td>Predictable State Updates</td>
+<td>⚠️ Limited</td>
+<td>✅</td>
+</tr>
+</table>
+
+<h2>Important Interview Points</h2>
+
+<ul>
+<li>Redux is a centralized state management library.</li>
+<li>Redux solves prop drilling, but that is not its main advantage.</li>
+<li>Redux provides a single source of truth.</li>
+<li>Redux centralizes update logic inside reducers.</li>
+<li>Redux improves debugging and maintainability.</li>
+<li>Redux allows selective subscriptions using useSelector.</li>
+<li>Redux Toolkit is the modern recommended approach.</li>
+</ul>
+
+<h2>Short Interview Answer</h2>
+
+<div class="highlight">
+Redux is a centralized state management library that stores shared application state in a single store. It solves problems such as prop drilling, scattered state, duplicated update logic, and difficult debugging by providing predictable and centralized state management.
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+Redux solves large-scale state management problems by providing a centralized store and predictable state updates.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+
+</body>
+</html>

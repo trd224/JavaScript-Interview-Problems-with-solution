@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>085 - What Happens When You Call setState or State Setter?</title>
+
+  <style>
+
+    body{
+      margin:0;
+      padding:0;
+      background:#000814;
+      color:#e2e8f0;
+      font-family:Arial, sans-serif;
+      line-height:1.7;
+    }
+
+    .container{
+      max-width:1000px;
+      margin:40px auto;
+      background:#020617;
+      padding:40px;
+      border-radius:18px;
+      border:1px solid #0f172a;
+      box-shadow:0 0 40px rgba(0,0,0,0.95);
+    }
+
+    h1{
+      color:#f8fafc;
+      margin-bottom:30px;
+      font-size:34px;
+    }
+
+    h2{
+      color:#c084fc;
+      margin-top:35px;
+      margin-bottom:15px;
+      font-size:26px;
+    }
+
+    p{
+      color:#cbd5e1;
+    }
+
+    ul{
+      padding-left:24px;
+    }
+
+    li{
+      margin-bottom:10px;
+      color:#cbd5e1;
+    }
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      margin-top:20px;
+    }
+
+    table th,
+    table td{
+      border:1px solid #1e293b;
+      padding:14px;
+      text-align:left;
+      vertical-align:top;
+    }
+
+    table th{
+      background:#0f172a;
+      color:#38bdf8;
+    }
+
+    table td{
+      background:#020617;
+      color:#d1d5db;
+    }
+
+    .highlight{
+      background:#0f172a;
+      padding:18px;
+      border-left:5px solid #38bdf8;
+      border-radius:10px;
+      margin-top:15px;
+      color:#e5e7eb;
+    }
+
+    .flow{
+      background:#020617;
+      border:1px solid #1e293b;
+      padding:20px;
+      border-radius:10px;
+      margin-top:15px;
+      color:#e2e8f0;
+      line-height:2;
+      text-align:center;
+      font-size:18px;
+    }
+
+    pre{
+      background:#000000;
+      padding:22px;
+      border-radius:12px;
+      overflow-x:auto;
+      border:1px solid #0f172a;
+    }
+
+    code{
+      font-family:Consolas, monospace;
+      font-size:15px;
+    }
+
+    .keyword{
+      color:#c084fc;
+    }
+
+    .function{
+      color:#38bdf8;
+    }
+
+    .string{
+      color:#facc15;
+    }
+
+    .tag{
+      color:#f472b6;
+    }
+
+    .comment{
+      color:#94a3b8;
+    }
+
+    .output{
+      color:#4ade80;
+    }
+
+    .warning{
+      color:#fb7185;
+    }
+
+  
+
+    /* Fixed Previous / Next buttons */
+    .fixed-page-nav-spacer{height:110px;}
+    .fixed-page-nav{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);width:calc(100% - 32px);max-width:1180px;display:flex;justify-content:space-between;gap:16px;z-index:9999;pointer-events:none;}
+    .fixed-page-nav a,.fixed-page-nav span{width:52px;height:52px;display:flex;align-items:center;justify-content:center;text-align:center;text-decoration:none;background:#38bdf8;color:#020617;border-radius:50%;font-size:28px;font-weight:700;line-height:1;box-shadow:0 10px 30px rgba(0,0,0,0.45);pointer-events:auto;}
+    .fixed-page-nav span{background:#334155;color:#94a3b8;cursor:not-allowed;}
+    @media(max-width:600px){.fixed-page-nav{bottom:14px;width:calc(100% - 20px);}.fixed-page-nav a,.fixed-page-nav span{width:46px;height:46px;font-size:24px;}}
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+
+    <h1>085. What happens when you call setState or a state setter function?</h1>
+
+    <h2>One-Line Definition</h2>
+
+    <div class="highlight">
+      When setState() or a useState setter function is called, React schedules a state update and re-renders the component with updated data.
+    </div>
+
+    <h2>Simple Understanding</h2>
+
+    <p>
+      Calling a state setter does NOT instantly change the UI directly.
+    </p>
+
+    <p>
+      React performs several internal steps.
+    </p>
+
+    <h2>Main Flow</h2>
+
+    <div class="flow">
+      State Setter Called
+      <br>
+      ↓
+      <br>
+      React Schedules Update
+      <br>
+      ↓
+      <br>
+      React Re-Renders Component
+      <br>
+      ↓
+      <br>
+      Virtual DOM Updated
+      <br>
+      ↓
+      <br>
+      React Compares Changes
+      <br>
+      ↓
+      <br>
+      Real DOM Updates
+    </div>
+
+    <h2>Basic Example</h2>
+
+    <pre><code><span class="keyword">import</span> { useState } from <span class="string">'react'</span>;
+
+<span class="keyword">function</span> <span class="function">App</span>() {
+
+  <span class="keyword">const</span> [count, setCount] = useState(0);
+
+  <span class="keyword">const</span> handleClick = () => {
+
+    setCount(count + 1);
+
+  };
+
+  <span class="keyword">return</span> (
+
+    <span class="tag">&lt;button</span> onClick={handleClick}<span class="tag">&gt;</span>
+
+      {count}
+
+    <span class="tag">&lt;/button&gt;</span>
+
+  );
+
+}</code></pre>
+
+    <h2>What Happens Internally?</h2>
+
+    <table>
+
+      <tr>
+        <th>Step</th>
+        <th>What React Does</th>
+      </tr>
+
+      <tr>
+        <td>1</td>
+        <td>setCount() called</td>
+      </tr>
+
+      <tr>
+        <td>2</td>
+        <td>React schedules state update</td>
+      </tr>
+
+      <tr>
+        <td>3</td>
+        <td>Component function runs again</td>
+      </tr>
+
+      <tr>
+        <td>4</td>
+        <td>New Virtual DOM created</td>
+      </tr>
+
+      <tr>
+        <td>5</td>
+        <td>React compares old vs new Virtual DOM</td>
+      </tr>
+
+      <tr>
+        <td>6</td>
+        <td>Only changed DOM updates</td>
+      </tr>
+
+    </table>
+
+    <h2>Very Important Point</h2>
+
+    <div class="highlight">
+      State updates are asynchronous.
+    </div>
+
+    <h2>Example</h2>
+
+    <pre><code><span class="keyword">const</span> handleClick = () => {
+
+  setCount(count + 1);
+
+  console.log(count);
+
+};</code></pre>
+
+    <h2>Output</h2>
+
+    <pre class="output"><code>Old value prints first</code></pre>
+
+    <h2>Why?</h2>
+
+    <p>
+      Because React schedules the update instead of updating immediately.
+    </p>
+
+    <h2>Functional Update Example</h2>
+
+    <pre><code>setCount((prev) => prev + 1);</code></pre>
+
+    <h2>Why Functional Updates Are Better</h2>
+
+    <p>
+      They always use the latest state value.
+    </p>
+
+    <h2>Multiple Updates Example</h2>
+
+    <pre><code><span class="keyword">const</span> handleClick = () => {
+
+  setCount((prev) => prev + 1);
+
+  setCount((prev) => prev + 1);
+
+};</code></pre>
+
+    <h2>Output</h2>
+
+    <pre class="output"><code>Count increases by 2</code></pre>
+
+    <h2>Incorrect Version</h2>
+
+    <pre><code><span class="comment">// Wrong for multiple updates</span>
+
+setCount(count + 1);
+
+setCount(count + 1);</code></pre>
+
+    <h2>Result</h2>
+
+    <pre class="warning"><code>Count may increase only once</code></pre>
+
+    <h2>Why React Schedules Updates</h2>
+
+    <ul>
+      <li>Better performance</li>
+      <li>Batch multiple updates</li>
+      <li>Reduce unnecessary rendering</li>
+      <li>Improve UI responsiveness</li>
+    </ul>
+
+    <h2>Batching Updates</h2>
+
+    <p>
+      React often groups multiple state updates together.
+    </p>
+
+    <div class="flow">
+      Multiple setState Calls
+      <br>
+      ↓
+      <br>
+      React Batches Updates
+      <br>
+      ↓
+      <br>
+      Single Re-Render
+    </div>
+
+    <h2>Does setState Immediately Update DOM?</h2>
+
+    <div class="highlight">
+      No.  
+      React first updates Virtual DOM, then efficiently updates the real DOM.
+    </div>
+
+    <h2>Class Component Version</h2>
+
+    <pre><code><span class="comment">// Class Component</span>
+
+this.setState({
+
+  count: this.state.count + 1
+
+});</code></pre>
+
+    <h2>Functional Component Version</h2>
+
+    <pre><code><span class="comment">// Functional Component</span>
+
+setCount(count + 1);</code></pre>
+
+    <h2>Re-Rendering Behavior</h2>
+
+    <p>
+      When state changes:
+    </p>
+
+    <ul>
+      <li>Component function runs again</li>
+      <li>JSX recalculates</li>
+      <li>React compares changes</li>
+      <li>DOM updates efficiently</li>
+    </ul>
+
+    <h2>Important Optimization</h2>
+
+    <p>
+      React updates only changed parts of the UI.
+    </p>
+
+    <p>
+      It does NOT reload the entire page.
+    </p>
+
+    <h2>Real Project Use Cases</h2>
+
+    <table>
+
+      <tr>
+        <th>Feature</th>
+        <th>State Update Trigger</th>
+      </tr>
+
+      <tr>
+        <td>OTP input</td>
+        <td>User typing</td>
+      </tr>
+
+      <tr>
+        <td>Captcha validation</td>
+        <td>Validation response</td>
+      </tr>
+
+      <tr>
+        <td>Popup visibility</td>
+        <td>Button click</td>
+      </tr>
+
+      <tr>
+        <td>Theme switching</td>
+        <td>Toggle action</td>
+      </tr>
+
+      <tr>
+        <td>API loading</td>
+        <td>Fetch lifecycle</td>
+      </tr>
+
+    </table>
+
+    <h2>Important Interview Points</h2>
+
+    <ul>
+      <li>State updates trigger re-rendering.</li>
+      <li>Updates are asynchronous.</li>
+      <li>React batches multiple updates.</li>
+      <li>Virtual DOM comparison improves performance.</li>
+      <li>Functional updates are safer for previous-state calculations.</li>
+    </ul>
+
+    <h2>Short Interview Answer</h2>
+
+    <div class="highlight">
+      When a state setter function is called, React schedules a state update, re-renders the component, compares Virtual DOM changes, and efficiently updates only necessary parts of the real DOM.
+    </div>
+
+    <h2>One-Line Interview Answer</h2>
+
+    <div class="highlight">
+      Calling a state setter schedules a re-render with updated state and optimized DOM updates.
+    </div>
+
+  </div>
+
+
+  <div class="fixed-page-nav-spacer"></div>
+  <div class="fixed-page-nav">
+    <a href="084%20How%20do%20you%20update%20state%20using%20useState.html">←</a>
+    <a href="086%20Why%20must%20state%20updates%20be%20immutable.html">→</a>
+  </div>
+</body>
+</html>

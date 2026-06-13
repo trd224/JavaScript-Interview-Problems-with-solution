@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>480. How do you handle environment-specific configuration in React?</title>
+
+<style>
+
+body{
+  margin:0;
+  padding:0;
+  background:#000814;
+  color:#e2e8f0;
+  font-family:Arial,sans-serif;
+  line-height:1.7;
+}
+
+.container{
+  max-width:1000px;
+  margin:40px auto;
+  background:#020617;
+  padding:40px;
+  border-radius:18px;
+  border:1px solid #0f172a;
+  box-shadow:0 0 40px rgba(0,0,0,.95);
+}
+
+h1{
+  color:#f8fafc;
+  margin-bottom:30px;
+  font-size:34px;
+}
+
+h2{
+  color:#c084fc;
+  margin-top:35px;
+  margin-bottom:15px;
+  font-size:26px;
+}
+
+h3{
+  color:#38bdf8;
+  margin-top:25px;
+  margin-bottom:10px;
+}
+
+p{
+  color:#cbd5e1;
+}
+
+ul{
+  padding-left:24px;
+}
+
+li{
+  margin-bottom:10px;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:20px;
+}
+
+table th,
+table td{
+  border:1px solid #1e293b;
+  padding:14px;
+  text-align:left;
+}
+
+table th{
+  background:#0f172a;
+  color:#38bdf8;
+}
+
+table td{
+  background:#020617;
+}
+
+.highlight{
+  background:#0f172a;
+  padding:18px;
+  border-left:5px solid #38bdf8;
+  border-radius:10px;
+  margin-top:15px;
+}
+
+.flow{
+  background:#020617;
+  border:1px solid #1e293b;
+  padding:20px;
+  border-radius:10px;
+  margin-top:15px;
+  text-align:center;
+  line-height:2;
+  font-size:18px;
+}
+
+pre{
+  background:#000;
+  padding:22px;
+  border-radius:12px;
+  overflow-x:auto;
+  border:1px solid #0f172a;
+}
+
+code{
+  font-family:Consolas,monospace;
+  font-size:15px;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>480. How do you handle environment-specific configuration in React?</h1>
+
+<h2>One-Line Definition</h2>
+
+<div class="highlight">
+Environment-specific configuration means using different configuration values for development and production environments without changing the React code.
+</div>
+
+<h2>Why Is It Used?</h2>
+
+<p>
+Different environments usually need different values.
+</p>
+
+<ul>
+<li>Different API URLs</li>
+<li>Different application names</li>
+<li>Different feature flags</li>
+<li>Different analytics settings</li>
+</ul>
+
+<h2>Simple Environment Files</h2>
+
+<pre><code>.env
+.env.development
+.env.production</code></pre>
+
+<div class="highlight">
+For most React projects, these three files are enough.
+</div>
+
+<h2>Why Do We Need Both Files?</h2>
+
+<p>
+The <strong>.env</strong> file stores common values used in every environment.
+</p>
+
+<p>
+The <strong>.env.development</strong> file stores values used only during development.
+</p>
+
+<p>
+The <strong>.env.production</strong> file stores values used only in production.
+</p>
+
+<h2>.env (Common Configuration)</h2>
+
+<pre><code>REACT_APP_NAME=Aadhaar Authentication
+REACT_APP_TIMEOUT=30000</code></pre>
+
+<div class="highlight">
+These values are shared by both development and production.
+</div>
+
+<h2>.env.development</h2>
+
+<pre><code>REACT_APP_API_URL=https://uat.aadhaarauth.rajasthan.gov.in</code></pre>
+
+<div class="highlight">
+Used only when running the application locally with npm start.
+</div>
+
+<h2>.env.production</h2>
+
+<pre><code>REACT_APP_API_URL=https://aadhaarauth.rajasthan.gov.in</code></pre>
+
+<div class="highlight">
+Used only when creating the production build with npm run build.
+</div>
+
+<h2>How React Loads Environment Files</h2>
+
+<h3>Development Mode</h3>
+
+<pre><code>npm start</code></pre>
+
+<div class="flow">
+
+.env
+<br>
++
+<br>
+.env.development
+<br>
+↓
+<br>
+Final Configuration
+
+</div>
+
+<pre><code>REACT_APP_NAME=Aadhaar Authentication
+REACT_APP_TIMEOUT=30000
+REACT_APP_API_URL=https://uat.aadhaarauth.rajasthan.gov.in</code></pre>
+
+<h3>Production Build</h3>
+
+<pre><code>npm run build</code></pre>
+
+<div class="flow">
+
+.env
+<br>
++
+<br>
+.env.production
+<br>
+↓
+<br>
+Final Configuration
+
+</div>
+
+<pre><code>REACT_APP_NAME=Aadhaar Authentication
+REACT_APP_TIMEOUT=30000
+REACT_APP_API_URL=https://aadhaarauth.rajasthan.gov.in</code></pre>
+
+<h2>What Happens During Build?</h2>
+
+<p>
+When we run:
+</p>
+
+<pre><code>npm run build</code></pre>
+
+<p>
+React first reads:
+</p>
+
+<pre><code>.env</code></pre>
+
+<p>
+Then React reads:
+</p>
+
+<pre><code>.env.production</code></pre>
+
+<p>
+Finally, both files are merged together to create the production configuration.
+</p>
+
+<div class="flow">
+
+Read .env
+<br>
+↓
+<br>
+Read .env.production
+<br>
+↓
+<br>
+Merge Values
+<br>
+↓
+<br>
+Create Production Build
+
+</div>
+
+<h2>Variable Override Example</h2>
+
+<h3>.env</h3>
+
+<pre><code>REACT_APP_API_URL=https://common-api.com</code></pre>
+
+<h3>.env.production</h3>
+
+<pre><code>REACT_APP_API_URL=https://production-api.com</code></pre>
+
+<p>
+Final value after build:
+</p>
+
+<pre><code>REACT_APP_API_URL=https://production-api.com</code></pre>
+
+<div class="highlight">
+If the same variable exists in both files, the environment-specific file overrides the value from .env.
+</div>
+
+<h2>Create React App (CRA)</h2>
+
+<p>
+In Create React App, environment variables must start with:
+</p>
+
+<pre><code>REACT_APP_</code></pre>
+
+<h3>Example</h3>
+
+<pre><code>REACT_APP_API_URL=https://api.myapp.com</code></pre>
+
+<h3>Usage</h3>
+
+<pre><code>const apiUrl = process.env.REACT_APP_API_URL;</code></pre>
+
+<h2>Vite</h2>
+
+<p>
+In Vite, environment variables must start with:
+</p>
+
+<pre><code>VITE_</code></pre>
+
+<h3>Example</h3>
+
+<pre><code>VITE_API_URL=https://api.myapp.com</code></pre>
+
+<h3>Usage</h3>
+
+<pre><code>const apiUrl = import.meta.env.VITE_API_URL;</code></pre>
+
+<h2>CRA vs Vite</h2>
+
+<table>
+
+<tr>
+<th>Feature</th>
+<th>CRA</th>
+<th>Vite</th>
+</tr>
+
+<tr>
+<td>Variable Prefix</td>
+<td>REACT_APP_</td>
+<td>VITE_</td>
+</tr>
+
+<tr>
+<td>Access Method</td>
+<td>process.env</td>
+<td>import.meta.env</td>
+</tr>
+
+</table>
+
+<h2>Real Project Example</h2>
+
+<div class="highlight">
+
+.env
+
+<pre><code>REACT_APP_NAME=Aadhaar Authentication
+REACT_APP_TIMEOUT=30000</code></pre>
+
+.env.development
+
+<pre><code>REACT_APP_API_URL=https://uat.aadhaarauth.rajasthan.gov.in</code></pre>
+
+.env.production
+
+<pre><code>REACT_APP_API_URL=https://aadhaarauth.rajasthan.gov.in</code></pre>
+
+This avoids repeating common values in every environment file.
+
+</div>
+
+<h2>Important Interview Points</h2>
+
+<ul>
+<li>Use .env for common configuration.</li>
+<li>Use .env.development for development-only values.</li>
+<li>Use .env.production for production-only values.</li>
+<li>React merges .env with the environment-specific file.</li>
+<li>Environment-specific files override duplicate values.</li>
+<li>CRA uses REACT_APP_ variables.</li>
+<li>Vite uses VITE_ variables.</li>
+<li>Restart the server after changing environment files.</li>
+</ul>
+
+<h2>Short Interview Answer</h2>
+
+<div class="highlight">
+We handle environment-specific configuration using .env files. Common values are stored in .env, while environment-specific values are stored in .env.development and .env.production. React merges these files automatically and environment-specific values override common values when necessary.
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+Environment-specific configuration in React is managed using .env files that provide different settings for development and production environments.
+</div>
+
+</div>
+
+</body>
+</html>

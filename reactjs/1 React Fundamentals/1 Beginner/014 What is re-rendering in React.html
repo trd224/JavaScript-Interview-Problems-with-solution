@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>014 - What is re-rendering in React?</title>
+
+  <style>
+
+    body{
+      margin:0;
+      padding:0;
+      background:#000814;
+      color:#e2e8f0;
+      font-family:Arial, sans-serif;
+      line-height:1.7;
+    }
+
+    .container{
+      max-width:1000px;
+      margin:40px auto;
+      background:#020617;
+      padding:40px;
+      border-radius:18px;
+      border:1px solid #0f172a;
+      box-shadow:0 0 40px rgba(0,0,0,0.95);
+    }
+
+    h1{
+      color:#f8fafc;
+      margin-bottom:30px;
+      font-size:34px;
+    }
+
+    h2{
+      color:#c084fc;
+      margin-top:35px;
+      margin-bottom:15px;
+      font-size:26px;
+    }
+
+    h3{
+      color:#f472b6;
+      margin-top:25px;
+    }
+
+    p{
+      color:#cbd5e1;
+    }
+
+    ul{
+      padding-left:24px;
+    }
+
+    li{
+      margin-bottom:10px;
+      color:#cbd5e1;
+    }
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      margin-top:20px;
+    }
+
+    table th,
+    table td{
+      border:1px solid #1e293b;
+      padding:14px;
+      text-align:left;
+      vertical-align:top;
+    }
+
+    table th{
+      background:#0f172a;
+      color:#38bdf8;
+    }
+
+    table td{
+      background:#020617;
+      color:#d1d5db;
+    }
+
+    .highlight{
+      background:#0f172a;
+      padding:18px;
+      border-left:5px solid #38bdf8;
+      border-radius:10px;
+      margin-top:15px;
+      color:#e5e7eb;
+    }
+
+    .flow{
+      background:#020617;
+      border:1px solid #1e293b;
+      padding:18px;
+      border-radius:10px;
+      margin-top:15px;
+      color:#e2e8f0;
+      text-align:center;
+      font-size:18px;
+    }
+
+    pre{
+      background:#000000;
+      padding:22px;
+      border-radius:12px;
+      overflow-x:auto;
+      border:1px solid #0f172a;
+    }
+
+    code{
+      font-family:Consolas, monospace;
+      font-size:15px;
+    }
+
+    .keyword{
+      color:#c084fc;
+    }
+
+    .function{
+      color:#38bdf8;
+    }
+
+    .string{
+      color:#facc15;
+    }
+
+    .tag{
+      color:#f472b6;
+    }
+
+    .variable{
+      color:#4ade80;
+    }
+
+    .comment{
+      color:#94a3b8;
+    }
+
+    .output{
+      color:#4ade80;
+    }
+
+  
+
+    /* Fixed Previous / Next buttons */
+    .fixed-page-nav-spacer{height:110px;}
+    .fixed-page-nav{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);width:calc(100% - 32px);max-width:1180px;display:flex;justify-content:space-between;gap:16px;z-index:9999;pointer-events:none;}
+    .fixed-page-nav a,.fixed-page-nav span{width:52px;height:52px;display:flex;align-items:center;justify-content:center;text-align:center;text-decoration:none;background:#38bdf8;color:#020617;border-radius:50%;font-size:28px;font-weight:700;line-height:1;box-shadow:0 10px 30px rgba(0,0,0,0.45);pointer-events:auto;}
+    .fixed-page-nav span{background:#334155;color:#94a3b8;cursor:not-allowed;}
+    @media(max-width:600px){.fixed-page-nav{bottom:14px;width:calc(100% - 20px);}.fixed-page-nav a,.fixed-page-nav span{width:46px;height:46px;font-size:24px;}}
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+
+    <h1>014. What is re-rendering in React?</h1>
+
+    <h2>One-Line Definition</h2>
+
+    <div class="highlight">
+      Re-rendering means React updates a component again when its state, props, or parent component changes.
+    </div>
+
+    <h2>Why Is Re-rendering Needed?</h2>
+
+    <p>
+      React applications are dynamic.
+    </p>
+
+    <p>
+      Whenever data changes, the UI must also update to show the latest information.
+    </p>
+
+    <p>
+      Re-rendering allows React to refresh the component UI automatically.
+    </p>
+
+    <h2>Common Causes of Re-rendering</h2>
+
+    <table>
+
+      <tr>
+        <th>Cause</th>
+        <th>Description</th>
+      </tr>
+
+      <tr>
+        <td>State change</td>
+        <td>Component state updates using setState or useState</td>
+      </tr>
+
+      <tr>
+        <td>Props change</td>
+        <td>Parent sends new props to child</td>
+      </tr>
+
+      <tr>
+        <td>Parent re-renders</td>
+        <td>Child components may also re-render</td>
+      </tr>
+
+      <tr>
+        <td>Context change</td>
+        <td>Context API values update</td>
+      </tr>
+
+    </table>
+
+    <h2>Example Using useState</h2>
+
+    <pre><code><span class="keyword">import</span> { useState } <span class="keyword">from</span> <span class="string">'react'</span>;
+
+<span class="keyword">function</span> <span class="function">Counter</span>() {
+
+  <span class="keyword">const</span> [count, setCount] = useState(0);
+
+  console.log(<span class="string">'Component Re-rendered'</span>);
+
+  <span class="keyword">return</span> (
+
+    <span class="tag">&lt;div&gt;</span>
+
+      <span class="tag">&lt;h1&gt;</span>{count}<span class="tag">&lt;/h1&gt;</span>
+
+      <span class="tag">&lt;button</span> onClick={() => setCount(count + 1)} <span class="tag">&gt;</span>
+        Increment
+      <span class="tag">&lt;/button&gt;</span>
+
+    <span class="tag">&lt;/div&gt;</span>
+
+  );
+
+}</code></pre>
+
+    <h2>What Happens Here?</h2>
+
+    <table>
+
+      <tr>
+        <th>Step</th>
+        <th>Process</th>
+      </tr>
+
+      <tr>
+        <td>1</td>
+        <td>User clicks button</td>
+      </tr>
+
+      <tr>
+        <td>2</td>
+        <td>setCount() updates state</td>
+      </tr>
+
+      <tr>
+        <td>3</td>
+        <td>React re-renders component</td>
+      </tr>
+
+      <tr>
+        <td>4</td>
+        <td>Updated UI appears in browser</td>
+      </tr>
+
+    </table>
+
+    <h2>Output</h2>
+
+    <pre class="output"><code>0
+1
+2
+3</code></pre>
+
+    <h2>Important Point</h2>
+
+    <div class="highlight">
+      Re-rendering does NOT mean React reloads the full webpage.
+    </div>
+
+    <p>
+      React only updates the changed parts using the Virtual DOM.
+    </p>
+
+    <h2>How React Optimizes Re-rendering</h2>
+
+    <div class="flow">
+      State Change → Virtual DOM Update → Compare Changes → Update Only Changed UI
+    </div>
+
+    <h2>Props Re-render Example</h2>
+
+    <h3>Parent Component</h3>
+
+    <pre><code><span class="keyword">function</span> <span class="function">App</span>() {
+
+  <span class="keyword">const</span> [name, setName] = useState(<span class="string">'Rizwan'</span>);
+
+  <span class="keyword">return</span> (
+    <span class="tag">&lt;User</span> name={name} <span class="tag">/&gt;</span>
+  );
+
+}</code></pre>
+
+    <h3>Child Component</h3>
+
+    <pre><code><span class="keyword">function</span> <span class="function">User</span>(props) {
+
+  console.log(<span class="string">'User Re-rendered'</span>);
+
+  <span class="keyword">return</span> (
+    <span class="tag">&lt;h1&gt;</span>{props.name}<span class="tag">&lt;/h1&gt;</span>
+  );
+
+}</code></pre>
+
+    <p>
+      If the parent sends new props, the child component re-renders.
+    </p>
+
+    <h2>Real Project Use Case</h2>
+
+    <p>
+      Re-rendering happens continuously in:
+    </p>
+
+    <ul>
+      <li>OTP verification screens</li>
+      <li>Dashboard updates</li>
+      <li>Live chat applications</li>
+      <li>Notification systems</li>
+      <li>Shopping cart updates</li>
+    </ul>
+
+    <h2>Performance Optimization</h2>
+
+    <p>
+      React provides optimization tools like:
+    </p>
+
+    <ul>
+      <li>React.memo()</li>
+      <li>useMemo()</li>
+      <li>useCallback()</li>
+    </ul>
+
+    <p>
+      These help avoid unnecessary re-renders.
+    </p>
+
+    <h2>Important Interview Points</h2>
+
+    <ul>
+      <li>Re-rendering updates component UI.</li>
+      <li>State and props changes trigger re-rendering.</li>
+      <li>React uses Virtual DOM for efficient updates.</li>
+      <li>Re-rendering does not reload the entire page.</li>
+      <li>React optimizes DOM updates internally.</li>
+    </ul>
+
+    <h2>Short Interview Answer</h2>
+
+    <div class="highlight">
+      Re-rendering means React updates a component again whenever its state, props, or related data changes.
+    </div>
+
+    <h2>One-Line Interview Answer</h2>
+
+    <div class="highlight">
+      Re-rendering is the process where React updates component UI after data changes.
+    </div>
+
+  </div>
+
+
+  <div class="fixed-page-nav-spacer"></div>
+  <div class="fixed-page-nav">
+    <a href="013%20What%20does%20StrictMode%20do%20in%20React.html">←</a>
+    <a href="015%20What%20is%20the%20difference%20between%20mounting%20and%20updating%20a%20component.html">→</a>
+  </div>
+</body>
+</html>

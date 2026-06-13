@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>108 - What are useSelector and useDispatch in React Redux?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px;margin-bottom:10px}
+p{color:#cbd5e1}
+ul{padding-left:24px}
+li{margin-bottom:10px;color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px;margin-top:15px}
+.warning{background:#1e1b4b;border-left:5px solid #fbbf24;padding:18px;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;margin-top:15px;text-align:center;line-height:2;font-size:18px}
+pre{border-radius:12px;overflow-x:auto}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>108. What are useSelector and useDispatch Hooks in React Redux?</h1>
+
+<h2>One-Line Definition</h2>
+
+<div class="highlight">
+useSelector is used to read data from the Redux store, while useDispatch is used to send actions to the Redux store.
+</div>
+
+<h2>The Two Most Important Redux Hooks</h2>
+
+<p>
+Almost every React Redux component uses these two hooks:
+</p>
+
+<ul>
+<li><strong>useSelector()</strong> → Read data from Redux Store</li>
+<li><strong>useDispatch()</strong> → Update data in Redux Store</li>
+</ul>
+
+<div class="flow">
+Read State
+<br>↓<br>
+useSelector()
+<br><br>
+Update State
+<br>↓<br>
+useDispatch()
+</div>
+
+<h2>First Understand the Redux Store</h2>
+
+<p>
+Suppose our Redux store looks like this:
+</p>
+
+<pre><code class="language-jsx">{
+  user: {
+    name: 'Rizwan',
+    email: 'rizwan@gmail.com'
+  },
+
+  cart: {
+    items: [
+      { id: 1, name: 'Laptop' },
+      { id: 2, name: 'Mouse' }
+    ]
+  }
+}</code></pre>
+
+<p>
+Components need two things:
+</p>
+
+<ul>
+<li>Read data from this store</li>
+<li>Update data inside this store</li>
+</ul>
+
+<h2>What is useSelector?</h2>
+
+<div class="highlight">
+useSelector is used to read data from the Redux store.
+</div>
+
+<h3>Example</h3>
+
+<pre><code class="language-jsx">import { useSelector } from 'react-redux';
+
+function Navbar() {
+
+  const items = useSelector(
+    state => state.cart.items
+  );
+
+  return (
+    &lt;h3&gt;Cart Items: {items.length}&lt;/h3&gt;
+  );
+}</code></pre>
+
+<h3>What Happens?</h3>
+
+<pre><code class="language-text">Redux Store
+      ↓
+state.cart.items
+      ↓
+useSelector()
+      ↓
+Navbar Component
+</code></pre>
+
+<p>
+The component automatically receives the latest Redux state.
+</p>
+
+<h2>Reading Different Parts of State</h2>
+
+<h3>Read User Name</h3>
+
+<pre><code class="language-jsx">const name = useSelector(
+  state => state.user.name
+);</code></pre>
+
+<h3>Read User Email</h3>
+
+<pre><code class="language-jsx">const email = useSelector(
+  state => state.user.email
+);</code></pre>
+
+<h3>Read Cart Items</h3>
+
+<pre><code class="language-jsx">const items = useSelector(
+  state => state.cart.items
+);</code></pre>
+
+<h3>Read Entire Cart Slice</h3>
+
+<pre><code class="language-jsx">const cart = useSelector(
+  state => state.cart
+);</code></pre>
+
+<div class="highlight">
+useSelector only reads state. It cannot update state.
+</div>
+
+<h2>What is useDispatch?</h2>
+
+<div class="highlight">
+useDispatch is used to send actions to Redux so that state can be updated.
+</div>
+
+<h3>Example</h3>
+
+<pre><code class="language-jsx">import { useDispatch } from 'react-redux';
+import { addToCart } from './cartSlice';
+
+function ProductCard({ product }) {
+
+  const dispatch = useDispatch();
+
+  return (
+    &lt;button
+      onClick={() =&gt; dispatch(addToCart(product))}
+    &gt;
+      Add To Cart
+    &lt;/button&gt;
+  );
+}</code></pre>
+
+<h3>What Happens?</h3>
+
+<pre><code class="language-text">Button Click
+      ↓
+dispatch(addToCart(product))
+      ↓
+Action Created
+      ↓
+Reducer Runs
+      ↓
+Redux Store Updated
+</code></pre>
+
+<h2>Understanding dispatch()</h2>
+
+<p>
+This line:
+</p>
+
+<pre><code class="language-jsx">dispatch(addToCart(product));</code></pre>
+
+<p>
+actually performs two steps:
+</p>
+
+<h3>Step 1</h3>
+
+<pre><code class="language-jsx">addToCart(product)</code></pre>
+
+<p>
+Returns an action object:
+</p>
+
+<pre><code class="language-js">{
+  type: 'cart/addToCart',
+  payload: product
+}</code></pre>
+
+<h3>Step 2</h3>
+
+<pre><code class="language-jsx">dispatch(action)</code></pre>
+
+<p>
+Sends the action to Redux.
+</p>
+
+<div class="highlight">
+dispatch does not update state directly. It sends an action to Redux reducers.
+</div>
+
+<h2>Complete Example</h2>
+
+<h3>cartSlice.js</h3>
+
+<pre><code class="language-jsx">import { createSlice } from '@reduxjs/toolkit';
+
+const cartSlice = createSlice({
+
+  name: 'cart',
+
+  initialState: {
+    items: []
+  },
+
+  reducers: {
+
+    addToCart(state, action) {
+      state.items.push(action.payload);
+    }
+
+  }
+
+});
+
+export const { addToCart } = cartSlice.actions;
+
+export default cartSlice.reducer;</code></pre>
+
+<h3>ProductCard.jsx</h3>
+
+<pre><code class="language-jsx">import { useDispatch } from 'react-redux';
+import { addToCart } from '../features/cart/cartSlice';
+
+function ProductCard({ product }) {
+
+  const dispatch = useDispatch();
+
+  return (
+    &lt;button
+      onClick={() =&gt; dispatch(addToCart(product))}
+    &gt;
+      Add To Cart
+    &lt;/button&gt;
+  );
+}</code></pre>
+
+<h3>Navbar.jsx</h3>
+
+<pre><code class="language-jsx">import { useSelector } from 'react-redux';
+
+function Navbar() {
+
+  const items = useSelector(
+    state => state.cart.items
+  );
+
+  return (
+    &lt;h3&gt;Cart Items: {items.length}&lt;/h3&gt;
+  );
+}</code></pre>
+
+<h2>Complete Flow</h2>
+
+<div class="flow">
+ProductCard
+<br>↓<br>
+useDispatch()
+<br>↓<br>
+dispatch(addToCart(product))
+<br>↓<br>
+cartSlice Reducer
+<br>↓<br>
+Redux Store Updated
+<br>↓<br>
+useSelector()
+<br>↓<br>
+Navbar Receives New Data
+<br>↓<br>
+UI Re-renders
+</div>
+
+<h2>Most Common Beginner Mistake</h2>
+
+<p>
+Many beginners think:
+</p>
+
+<pre><code class="language-jsx">const items = useSelector(
+  state => state.cart.items
+);</code></pre>
+
+<p>
+creates state.
+</p>
+
+<div class="warning">
+useSelector does not create state.
+<br><br>
+It only reads existing Redux state.
+</div>
+
+<p>
+Similarly:
+</p>
+
+<pre><code class="language-jsx">const dispatch = useDispatch();</code></pre>
+
+<p>
+does not update state.
+</p>
+
+<div class="warning">
+dispatch only sends actions.
+<br><br>
+Reducers actually update the state.
+</div>
+
+<h2>Easy Way To Remember</h2>
+
+<table>
+<tr>
+<th>Hook</th>
+<th>Purpose</th>
+</tr>
+
+<tr>
+<td>useSelector</td>
+<td>Read data from Redux Store</td>
+</tr>
+
+<tr>
+<td>useDispatch</td>
+<td>Send actions to Redux Store</td>
+</tr>
+</table>
+
+<div class="flow">
+useSelector()
+<br>↓<br>
+Read State
+<br><br>
+useDispatch()
+<br>↓<br>
+Send Action
+</div>
+
+<h2>Interview Answer</h2>
+
+<div class="highlight">
+useSelector is a React Redux hook used to read data from the Redux store, while useDispatch is a hook used to dispatch actions that update the Redux store state.
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+useSelector reads Redux state and useDispatch sends actions to update Redux state.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-js.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+
+</body>
+</html>

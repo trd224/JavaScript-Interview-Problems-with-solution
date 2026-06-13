@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>097. What is a Reducer Function?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px;margin-bottom:10px}
+p{color:#cbd5e1}
+ul{padding-left:24px}
+li{margin-bottom:10px;color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;margin-top:15px;text-align:center;line-height:2;font-size:18px}
+pre{border-radius:12px;overflow-x:auto}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>097. What is a Reducer Function?</h1>
+
+<h2>One-Line Definition</h2>
+
+<div class="highlight">
+A reducer function is a function that receives the current state and an action, then returns the next state.
+</div>
+
+<h2>Why Is It Called a Reducer?</h2>
+
+<p>
+The term comes from JavaScript's Array.reduce() method, where multiple values are reduced into a single result.
+</p>
+
+<p>
+In React, a reducer takes the current state and an action and reduces them into a new state.
+</p>
+
+<h2>Reducer Function Syntax</h2>
+
+<pre><code class="language-jsx">function reducer(state, action) {
+  return newState;
+}</code></pre>
+
+<h3>Parameters</h3>
+
+<ul>
+<li><strong>state</strong> → Current state.</li>
+<li><strong>action</strong> → Information about what happened.</li>
+</ul>
+
+<h3>Return Value</h3>
+
+<ul>
+<li>Returns the next state.</li>
+</ul>
+
+<h2>Simple Example</h2>
+
+<pre><code class="language-jsx">function reducer(state, action) {
+
+  switch (action.type) {
+
+    case 'INCREMENT':
+      return {
+        count: state.count + 1
+      };
+
+    default:
+      return state;
+
+  }
+
+}</code></pre>
+
+<h2>How a Reducer Works</h2>
+
+<div class="flow">
+
+Current State
+<br>
++
+<br>
+Action
+<br>
+↓
+<br>
+Reducer Function
+<br>
+↓
+<br>
+New State
+
+</div>
+
+<h2>Step-by-Step Example</h2>
+
+<p>
+Current state:
+</p>
+
+<pre><code class="language-jsx">{ count: 0 }</code></pre>
+
+<p>
+Action dispatched:
+</p>
+
+<pre><code class="language-jsx">dispatch({ type: 'INCREMENT' });</code></pre>
+
+<p>
+React calls:
+</p>
+
+<pre><code class="language-jsx">reducer(
+  { count: 0 },
+  { type: 'INCREMENT' }
+);</code></pre>
+
+<p>
+Reducer returns:
+</p>
+
+<pre><code class="language-jsx">{ count: 1 }</code></pre>
+
+<p>
+React stores the new state and re-renders the component.
+</p>
+
+<h2>Reducer Inside useReducer</h2>
+
+<pre><code class="language-jsx">const initialState = {
+  count: 0
+};
+
+function reducer(state, action) {
+
+  switch (action.type) {
+
+    case 'INCREMENT':
+      return {
+        count: state.count + 1
+      };
+
+    case 'DECREMENT':
+      return {
+        count: state.count - 1
+      };
+
+    default:
+      return state;
+
+  }
+
+}
+
+function Counter() {
+
+  const [state, dispatch] =
+    useReducer(reducer, initialState);
+
+  return (
+    &lt;&gt;
+      &lt;h2&gt;{state.count}&lt;/h2&gt;
+
+      &lt;button
+        onClick={() =&gt; dispatch({ type: 'INCREMENT' })}
+      &gt;
+        +
+      &lt;/button&gt;
+
+      &lt;button
+        onClick={() =&gt; dispatch({ type: 'DECREMENT' })}
+      &gt;
+        -
+      &lt;/button&gt;
+    &lt;/&gt;
+  );
+
+}</code></pre>
+
+<h2>Reducer Is Like a Decision Maker</h2>
+
+<p>
+Think of the reducer as a security guard that checks the action and decides how state should change.
+</p>
+
+<div class="flow">
+
+dispatch({
+type: 'INCREMENT'
+})
+<br>
+↓
+<br>
+Reducer Checks Action
+<br>
+↓
+<br>
+Returns Updated State
+
+</div>
+
+<h2>Multiple Actions Example</h2>
+
+<pre><code class="language-jsx">function reducer(state, action) {
+
+  switch (action.type) {
+
+    case 'ADD':
+      return {
+        count: state.count + 1
+      };
+
+    case 'SUBTRACT':
+      return {
+        count: state.count - 1
+      };
+
+    case 'RESET':
+      return {
+        count: 0
+      };
+
+    default:
+      return state;
+
+  }
+
+}</code></pre>
+
+<p>
+One reducer can handle many actions.
+</p>
+
+<h2>Real-World Form Reducer</h2>
+
+<pre><code class="language-jsx">function reducer(state, action) {
+
+  switch (action.type) {
+
+    case 'UPDATE_FIELD':
+      return {
+        ...state,
+        [action.field]: action.value
+      };
+
+    case 'SET_ERROR':
+      return {
+        ...state,
+        error: action.message
+      };
+
+    case 'RESET_FORM':
+      return initialState;
+
+    default:
+      return state;
+
+  }
+
+}</code></pre>
+
+<p>
+This reducer can update form fields, show errors, and reset the form.
+</p>
+
+<h2>Rules of a Reducer Function</h2>
+
+<ul>
+<li>Must be a pure function.</li>
+<li>Must not modify the existing state directly.</li>
+<li>Must return a new state object.</li>
+<li>Same input should always produce the same output.</li>
+</ul>
+
+<h2>Bad Example</h2>
+
+<p>
+Never mutate state directly.
+</p>
+
+<pre><code class="language-jsx">function reducer(state, action) {
+
+  state.count++;
+
+  return state;
+
+}</code></pre>
+
+<div class="highlight">
+This mutates the existing state object and should be avoided.
+</div>
+
+<h2>Good Example</h2>
+
+<pre><code class="language-jsx">function reducer(state, action) {
+
+  return {
+    count: state.count + 1
+  };
+
+}</code></pre>
+
+<div class="highlight">
+Always return a new state object.
+</div>
+
+<h2>Reducer Flow Summary</h2>
+
+<div class="flow">
+
+dispatch(action)
+<br>
+↓
+<br>
+Reducer Receives
+state + action
+<br>
+↓
+<br>
+Reducer Returns
+new state
+<br>
+↓
+<br>
+React Updates State
+<br>
+↓
+<br>
+Component Re-renders
+
+</div>
+
+<h2>Real Project Example</h2>
+
+<div class="highlight">
+In our Aadhaar Authentication application, a reducer can manage Aadhaar number, OTP, loading state, error messages, consent, and authentication type. Different actions such as UPDATE_OTP, SET_ERROR, START_LOADING, and RESET_FORM can all be handled by a single reducer function.
+</div>
+
+<h2>Reducer vs Dispatch</h2>
+
+<table>
+
+<tr>
+<th>Reducer</th>
+<th>Dispatch</th>
+</tr>
+
+<tr>
+<td>Decides how state changes</td>
+<td>Sends an action</td>
+</tr>
+
+<tr>
+<td>Receives state and action</td>
+<td>Receives an action object</td>
+</tr>
+
+<tr>
+<td>Returns new state</td>
+<td>Triggers reducer execution</td>
+</tr>
+
+</table>
+
+<h2>Important Interview Points</h2>
+
+<ul>
+<li>A reducer receives state and action.</li>
+<li>A reducer returns the next state.</li>
+<li>Reducers are used with useReducer.</li>
+<li>Reducers should be pure functions.</li>
+<li>Reducers must not mutate state directly.</li>
+<li>One reducer can handle multiple actions.</li>
+</ul>
+
+<h2>Short Interview Answer</h2>
+
+<div class="highlight">
+A reducer function is a function that receives the current state and an action, then returns the next state. It is commonly used with useReducer to manage complex state updates in a predictable way.
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+A reducer function takes the current state and an action and returns the new state.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>065 - Container vs Presentational Components</title>
+
+  <style>
+
+    body{
+      margin:0;
+      padding:0;
+      background:#000814;
+      color:#e2e8f0;
+      font-family:Arial, sans-serif;
+      line-height:1.7;
+    }
+
+    .container{
+      max-width:1000px;
+      margin:40px auto;
+      background:#020617;
+      padding:40px;
+      border-radius:18px;
+      border:1px solid #0f172a;
+      box-shadow:0 0 40px rgba(0,0,0,0.95);
+    }
+
+    h1{
+      color:#f8fafc;
+      margin-bottom:30px;
+      font-size:34px;
+    }
+
+    h2{
+      color:#c084fc;
+      margin-top:35px;
+      margin-bottom:15px;
+      font-size:26px;
+    }
+
+    p{
+      color:#cbd5e1;
+    }
+
+    ul{
+      padding-left:24px;
+    }
+
+    li{
+      margin-bottom:10px;
+      color:#cbd5e1;
+    }
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      margin-top:20px;
+    }
+
+    table th,
+    table td{
+      border:1px solid #1e293b;
+      padding:14px;
+      text-align:left;
+      vertical-align:top;
+    }
+
+    table th{
+      background:#0f172a;
+      color:#38bdf8;
+    }
+
+    table td{
+      background:#020617;
+      color:#d1d5db;
+    }
+
+    .highlight{
+      background:#0f172a;
+      padding:18px;
+      border-left:5px solid #38bdf8;
+      border-radius:10px;
+      margin-top:15px;
+      color:#e5e7eb;
+    }
+
+    .flow{
+      background:#020617;
+      border:1px solid #1e293b;
+      padding:20px;
+      border-radius:10px;
+      margin-top:15px;
+      color:#e2e8f0;
+      line-height:2;
+      text-align:center;
+      font-size:18px;
+    }
+
+    pre{
+      background:#000000;
+      padding:22px;
+      border-radius:12px;
+      overflow-x:auto;
+      border:1px solid #0f172a;
+    }
+
+    code{
+      font-family:Consolas, monospace;
+      font-size:15px;
+    }
+
+    .keyword{
+      color:#c084fc;
+    }
+
+    .function{
+      color:#38bdf8;
+    }
+
+    .string{
+      color:#facc15;
+    }
+
+    .tag{
+      color:#f472b6;
+    }
+
+    .comment{
+      color:#94a3b8;
+    }
+
+    .good{
+      color:#4ade80;
+    }
+
+  
+
+    /* Fixed Previous / Next buttons */
+    .fixed-page-nav-spacer{height:110px;}
+    .fixed-page-nav{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);width:calc(100% - 32px);max-width:1180px;display:flex;justify-content:space-between;gap:16px;z-index:9999;pointer-events:none;}
+    .fixed-page-nav a,.fixed-page-nav span{width:52px;height:52px;display:flex;align-items:center;justify-content:center;text-align:center;text-decoration:none;background:#38bdf8;color:#020617;border-radius:50%;font-size:28px;font-weight:700;line-height:1;box-shadow:0 10px 30px rgba(0,0,0,0.45);pointer-events:auto;}
+    .fixed-page-nav span{background:#334155;color:#94a3b8;cursor:not-allowed;}
+    @media(max-width:600px){.fixed-page-nav{bottom:14px;width:calc(100% - 20px);}.fixed-page-nav a,.fixed-page-nav span{width:46px;height:46px;font-size:24px;}}
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+
+    <h1>065. What is the difference between a container and a presentational component?</h1>
+
+    <h2>One-Line Definition</h2>
+
+    <div class="highlight">
+      Container components handle logic and data, while presentational components focus only on UI rendering.
+    </div>
+
+    <h2>Simple Understanding</h2>
+
+    <p>
+      React applications are often divided into:
+    </p>
+
+    <ul>
+      <li>Logic components</li>
+      <li>UI components</li>
+    </ul>
+
+    <p>
+      This separation improves:
+    </p>
+
+    <ul>
+      <li>Code organization</li>
+      <li>Reusability</li>
+      <li>Maintainability</li>
+    </ul>
+
+    <h2>Main Idea</h2>
+
+    <div class="flow">
+      Container Component
+      <br>
+      ↓
+      <br>
+      Handles Logic + State + API
+      <br>
+      ↓
+      <br>
+      Passes Data via Props
+      <br>
+      ↓
+      <br>
+      Presentational Component
+      <br>
+      ↓
+      <br>
+      Renders UI
+    </div>
+
+    <h2>Presentational Component</h2>
+
+    <p>
+      Also called:
+    </p>
+
+    <ul>
+      <li>UI Component</li>
+      <li>Dumb Component</li>
+    </ul>
+
+    <h2>Responsibilities</h2>
+
+    <ul>
+      <li>Display UI</li>
+      <li>Receive props</li>
+      <li>Focus on design</li>
+      <li>Reusable rendering</li>
+    </ul>
+
+    <h2>Example</h2>
+
+    <pre><code><span class="keyword">function</span> <span class="function">UserCard</span>({ name }) {
+
+  <span class="keyword">return</span> (
+
+    <span class="tag">&lt;div&gt;</span>
+
+      <span class="tag">&lt;h1&gt;</span>{name}<span class="tag">&lt;/h1&gt;</span>
+
+    <span class="tag">&lt;/div&gt;</span>
+
+  );
+
+}</code></pre>
+
+    <h2>Why It Is Presentational</h2>
+
+    <ul>
+      <li>No API calls</li>
+      <li>No business logic</li>
+      <li>No complex state handling</li>
+      <li>Only renders UI</li>
+    </ul>
+
+    <h2>Container Component</h2>
+
+    <p>
+      Also called:
+    </p>
+
+    <ul>
+      <li>Smart Component</li>
+      <li>Logic Component</li>
+    </ul>
+
+    <h2>Responsibilities</h2>
+
+    <ul>
+      <li>Manage state</li>
+      <li>Fetch API data</li>
+      <li>Handle business logic</li>
+      <li>Pass data to UI components</li>
+    </ul>
+
+    <h2>Example</h2>
+
+    <pre><code><span class="keyword">import</span> { useState, useEffect } from <span class="string">'react'</span>;
+
+<span class="keyword">function</span> <span class="function">UserContainer</span>() {
+
+  <span class="keyword">const</span> [user, setUser] = useState(<span class="string">''</span>);
+
+  useEffect(() => {
+
+    setUser(<span class="string">'Rizwan'</span>);
+
+  }, []);
+
+  <span class="keyword">return</span> (
+
+    <span class="tag">&lt;UserCard</span> name={user} <span class="tag">/&gt;</span>
+
+  );
+
+}</code></pre>
+
+    <h2>How It Works</h2>
+
+    <table>
+
+      <tr>
+        <th>Component</th>
+        <th>Responsibility</th>
+      </tr>
+
+      <tr>
+        <td>UserContainer</td>
+        <td>Logic + state</td>
+      </tr>
+
+      <tr>
+        <td>UserCard</td>
+        <td>UI rendering</td>
+      </tr>
+
+    </table>
+
+    <h2>Data Flow</h2>
+
+    <div class="flow">
+      API / State
+      <br>
+      ↓
+      <br>
+      Container Component
+      <br>
+      ↓
+      <br>
+      Props
+      <br>
+      ↓
+      <br>
+      Presentational Component
+    </div>
+
+    <h2>Main Differences</h2>
+
+    <table>
+
+      <tr>
+        <th>Container Component</th>
+        <th>Presentational Component</th>
+      </tr>
+
+      <tr>
+        <td>Handles logic</td>
+        <td>Handles UI</td>
+      </tr>
+
+      <tr>
+        <td>May use state</td>
+        <td>Usually stateless</td>
+      </tr>
+
+      <tr>
+        <td>Fetches data</td>
+        <td>Receives props</td>
+      </tr>
+
+      <tr>
+        <td>Business logic</td>
+        <td>UI rendering only</td>
+      </tr>
+
+      <tr>
+        <td>Less reusable</td>
+        <td>Highly reusable</td>
+      </tr>
+
+    </table>
+
+    <h2>Real Project Example</h2>
+
+    <table>
+
+      <tr>
+        <th>Container</th>
+        <th>Presentational</th>
+      </tr>
+
+      <tr>
+        <td>OTP logic component</td>
+        <td>OTP input UI</td>
+      </tr>
+
+      <tr>
+        <td>Authentication API handler</td>
+        <td>Login form UI</td>
+      </tr>
+
+      <tr>
+        <td>Dashboard data loader</td>
+        <td>Chart component</td>
+      </tr>
+
+      <tr>
+        <td>Redux-connected component</td>
+        <td>Reusable table UI</td>
+      </tr>
+
+    </table>
+
+    <h2>Why This Pattern Is Useful</h2>
+
+    <ul>
+      <li>Cleaner architecture</li>
+      <li>Easier testing</li>
+      <li>Better reusability</li>
+      <li>Separation of concerns</li>
+      <li>Improved maintainability</li>
+    </ul>
+
+    <h2>Modern React Note</h2>
+
+    <div class="highlight">
+      With Hooks, the difference is less strict now because one component can handle both logic and UI cleanly.
+    </div>
+
+    <h2>Example Using Hooks</h2>
+
+    <p>
+      Modern React often combines:
+    </p>
+
+    <ul>
+      <li>useState</li>
+      <li>useEffect</li>
+      <li>UI rendering</li>
+    </ul>
+
+    <p>
+      inside a single functional component.
+    </p>
+
+    <h2>Still Important Concept</h2>
+
+    <p>
+      Even today, separating logic and UI is considered good architecture in large applications.
+    </p>
+
+    <h2>Important Interview Points</h2>
+
+    <ul>
+      <li>Container components handle logic and data.</li>
+      <li>Presentational components focus on UI.</li>
+      <li>Container passes data through props.</li>
+      <li>Improves separation of concerns.</li>
+      <li>Hooks reduced strict separation in modern React.</li>
+    </ul>
+
+    <h2>Short Interview Answer</h2>
+
+    <div class="highlight">
+      Container components manage logic, state, and data fetching, while presentational components focus only on displaying UI using props.
+    </div>
+
+    <h2>One-Line Interview Answer</h2>
+
+    <div class="highlight">
+      Container components handle logic, while presentational components handle UI rendering.
+    </div>
+
+  </div>
+
+
+  <div class="fixed-page-nav-spacer"></div>
+  <div class="fixed-page-nav">
+    <a href="064%20What%20is%20prop%20types%20and%20how%20do%20you%20use%20it.html">←</a>
+    <a href="066%20What%20is%20the%20compound%20component%20pattern.html">→</a>
+  </div>
+</body>
+</html>

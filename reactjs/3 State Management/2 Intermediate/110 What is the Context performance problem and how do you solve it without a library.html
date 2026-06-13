@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>110 - Context Performance Problem</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px;margin-bottom:10px}
+p{color:#cbd5e1}
+ul{padding-left:24px}
+li{margin-bottom:10px;color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px;margin-top:15px}
+.warning{background:#1e1b4b;border-left:5px solid #fbbf24;padding:18px;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;margin-top:15px;text-align:center;line-height:2;font-size:18px}
+pre{border-radius:12px;overflow-x:auto}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+<h1>110. What is the Context Performance Problem and How Do You Solve It Without a Library?</h1>
+
+<h2>One-Line Definition</h2>
+
+<div class="highlight">
+The Context performance problem happens when many components consume the same Context value, and every consumer re-renders whenever that Context value changes, even if the component only needs a small part of the data.
+</div>
+
+<h2>Simple Meaning</h2>
+
+<p>
+React Context is useful for sharing global data.
+</p>
+
+<p>
+But if we put too much state inside one Context, then many components can re-render unnecessarily.
+</p>
+
+<div class="warning">
+Context is not bad. The problem happens when one large Context stores many unrelated values together.
+</div>
+
+<h2>Problem Example</h2>
+
+<p>
+Suppose our application has one big AppContext.
+</p>
+
+<pre><code class="language-jsx">const AppContext = createContext();
+
+function AppProvider({ children }) {
+  const [user, setUser] = useState(null);
+  const [cart, setCart] = useState([]);
+  const [theme, setTheme] = useState('dark');
+  const [notifications, setNotifications] = useState([]);
+
+  return (
+    &lt;AppContext.Provider value={{ user, setUser, cart, setCart, theme, setTheme, notifications, setNotifications }}&gt;
+      {children}
+    &lt;/AppContext.Provider&gt;
+  );
+}</code></pre>
+
+<p>
+Now many components use this same Context.
+</p>
+
+<pre><code class="language-jsx">const { user } = useContext(AppContext);
+
+const { cart } = useContext(AppContext);
+
+const { theme } = useContext(AppContext);</code></pre>
+
+<h2>What Goes Wrong?</h2>
+
+<p>
+If cart changes, the Provider value becomes a new object.
+</p>
+
+<pre><code class="language-jsx">value={{ user, setUser, cart, setCart, theme, setTheme, notifications, setNotifications }}</code></pre>
+
+<p>
+Because this object changes, all components using AppContext may re-render.
+</p>
+
+<div class="flow">
+Cart Changes
+<br>↓<br>
+AppContext value changes
+<br>↓<br>
+All AppContext consumers re-render
+<br>↓<br>
+Even components that only use user or theme
+</div>
+
+<div class="warning">
+This is the main Context performance problem.
+</div>
+
+<h2>Real Example</h2>
+
+<table>
+<tr>
+<th>Component</th>
+<th>Uses</th>
+<th>Should Re-render When Cart Changes?</th>
+</tr>
+
+<tr>
+<td>Navbar</td>
+<td>cart</td>
+<td>Yes</td>
+</tr>
+
+<tr>
+<td>ProfilePage</td>
+<td>user</td>
+<td>No</td>
+</tr>
+
+<tr>
+<td>ThemeButton</td>
+<td>theme</td>
+<td>No</td>
+</tr>
+
+<tr>
+<td>NotificationBell</td>
+<td>notifications</td>
+<td>No</td>
+</tr>
+</table>
+
+<div class="highlight">
+Only Navbar needs the updated cart, but other components may also re-render because they consume the same large Context.
+</div>
+
+<h2>Solution 1: Split Contexts</h2>
+
+<p>
+Do not keep all global state inside one big Context.
+</p>
+
+<p>
+Split Context based on feature.
+</p>
+
+<pre><code class="language-text">Bad:
+
+AppContext
+├── user
+├── cart
+├── theme
+└── notifications
+
+
+Good:
+
+UserContext
+CartContext
+ThemeContext
+NotificationContext</code></pre>
+
+<h3>CartContext.jsx</h3>
+
+<pre><code class="language-jsx">import { createContext, useContext, useState } from 'react';
+
+const CartContext = createContext();
+
+export function CartProvider({ children }) {
+  const [cart, setCart] = useState([]);
+
+  return (
+    &lt;CartContext.Provider value={{ cart, setCart }}&gt;
+      {children}
+    &lt;/CartContext.Provider&gt;
+  );
+}
+
+export function useCart() {
+  return useContext(CartContext);
+}</code></pre>
+
+<h3>UserContext.jsx</h3>
+
+<pre><code class="language-jsx">import { createContext, useContext, useState } from 'react';
+
+const UserContext = createContext();
+
+export function UserProvider({ children }) {
+  const [user, setUser] = useState(null);
+
+  return (
+    &lt;UserContext.Provider value={{ user, setUser }}&gt;
+      {children}
+    &lt;/UserContext.Provider&gt;
+  );
+}
+
+export function useUser() {
+  return useContext(UserContext);
+}</code></pre>
+
+<h3>App.jsx</h3>
+
+<pre><code class="language-jsx">&lt;UserProvider&gt;
+  &lt;CartProvider&gt;
+    &lt;ThemeProvider&gt;
+      &lt;App /&gt;
+    &lt;/ThemeProvider&gt;
+  &lt;/CartProvider&gt;
+&lt;/UserProvider&gt;</code></pre>
+
+<div class="highlight">
+Now cart changes only affect CartContext consumers. UserContext consumers are not affected.
+</div>
+
+<h2>Solution 2: Memoize Provider Value</h2>
+
+<p>
+If Provider value is an object, memoize it with useMemo.
+</p>
+
+<h3>Without useMemo</h3>
+
+<pre><code class="language-jsx">&lt;CartContext.Provider value={{ cart, setCart }}&gt;
+  {children}
+&lt;/CartContext.Provider&gt;</code></pre>
+
+<p>
+A new object is created on every render.
+</p>
+
+<h3>With useMemo</h3>
+
+<pre><code class="language-jsx">const value = useMemo(() =&gt; ({ cart, setCart }), [cart]);
+
+return (
+  &lt;CartContext.Provider value={value}&gt;
+    {children}
+  &lt;/CartContext.Provider&gt;
+);</code></pre>
+
+<div class="highlight">
+useMemo prevents creating a new Context value object unless cart changes.
+</div>
+
+<h2>Solution 3: Separate State and Actions Context</h2>
+
+<p>
+Sometimes components only need actions, not state.
+</p>
+
+<p>
+Example:
+</p>
+
+<pre><code class="language-jsx">const { addToCart } = useCart();</code></pre>
+
+<p>
+This component only needs the function. It does not need cart data.
+</p>
+
+<p>
+So we can create two Contexts:
+</p>
+
+<pre><code class="language-text">CartStateContext
+CartActionsContext</code></pre>
+
+<h3>CartProvider.jsx</h3>
+
+<pre><code class="language-jsx">import { createContext, useContext, useMemo, useState } from 'react';
+
+const CartStateContext = createContext();
+const CartActionsContext = createContext();
+
+export function CartProvider({ children }) {
+  const [cart, setCart] = useState([]);
+
+  const actions = useMemo(() =&gt; ({
+    addToCart(product) {
+      setCart(prev =&gt; [...prev, product]);
+    },
+
+    clearCart() {
+      setCart([]);
+    }
+  }), []);
+
+  return (
+    &lt;CartStateContext.Provider value={cart}&gt;
+      &lt;CartActionsContext.Provider value={actions}&gt;
+        {children}
+      &lt;/CartActionsContext.Provider&gt;
+    &lt;/CartStateContext.Provider&gt;
+  );
+}
+
+export function useCartState() {
+  return useContext(CartStateContext);
+}
+
+export function useCartActions() {
+  return useContext(CartActionsContext);
+}</code></pre>
+
+<h3>ProductCard.jsx</h3>
+
+<pre><code class="language-jsx">function ProductCard({ product }) {
+  const { addToCart } = useCartActions();
+
+  return &lt;button onClick={() =&gt; addToCart(product)}&gt;Add To Cart&lt;/button&gt;;
+}</code></pre>
+
+<h3>Navbar.jsx</h3>
+
+<pre><code class="language-jsx">function Navbar() {
+  const cart = useCartState();
+
+  return &lt;h3&gt;Cart Items: {cart.length}&lt;/h3&gt;;
+}</code></pre>
+
+<div class="highlight">
+ProductCard uses only actions, so it does not re-render when cart state changes.
+</div>
+
+<h2>Solution 4: Keep Local State Local</h2>
+
+<p>
+Do not put every state in Context.
+</p>
+
+<p>
+Only put truly shared state in Context.
+</p>
+
+<table>
+<tr>
+<th>State</th>
+<th>Where Should It Live?</th>
+</tr>
+
+<tr>
+<td>Modal open/close</td>
+<td>Local component state</td>
+</tr>
+
+<tr>
+<td>Input field value</td>
+<td>Local component state</td>
+</tr>
+
+<tr>
+<td>Dropdown open/close</td>
+<td>Local component state</td>
+</tr>
+
+<tr>
+<td>Logged-in user</td>
+<td>Context or global state</td>
+</tr>
+
+<tr>
+<td>Cart items</td>
+<td>Context or global state</td>
+</tr>
+</table>
+
+<div class="warning">
+Putting unnecessary local UI state into Context creates unnecessary global re-renders.
+</div>
+
+<h2>Solution 5: Use React.memo for Child Components</h2>
+
+<p>
+React.memo can help when parent components re-render but child props are the same.
+</p>
+
+<pre><code class="language-jsx">const ProductCard = React.memo(function ProductCard({ product, onAdd }) {
+  return &lt;button onClick={() =&gt; onAdd(product)}&gt;Add To Cart&lt;/button&gt;;
+});</code></pre>
+
+<div class="highlight">
+React.memo does not stop Context consumers from re-rendering when Context value changes, but it can help protect child components receiving unchanged props.
+</div>
+
+<h2>Best Practical Solution</h2>
+
+<p>
+For most projects, use this approach:
+</p>
+
+<ul>
+<li>Split large Context into smaller feature Contexts.</li>
+<li>Memoize Provider values using useMemo.</li>
+<li>Separate state Context and actions Context when needed.</li>
+<li>Keep local UI state local.</li>
+<li>Use React.memo for heavy child components.</li>
+</ul>
+
+<h2>Context vs Zustand Difference</h2>
+
+<table>
+<tr>
+<th>Context</th>
+<th>Zustand</th>
+</tr>
+
+<tr>
+<td>All consumers of a changed Context may re-render</td>
+<td>Components subscribe to selected state</td>
+</tr>
+
+<tr>
+<td>Need manual optimization</td>
+<td>Optimized selector-based usage</td>
+</tr>
+
+<tr>
+<td>Built into React</td>
+<td>External library</td>
+</tr>
+
+<tr>
+<td>Good for simple shared state</td>
+<td>Better for larger global state</td>
+</tr>
+</table>
+
+<h2>Easy Way To Remember</h2>
+
+<div class="flow">
+One Big Context
+<br>↓<br>
+Any Value Changes
+<br>↓<br>
+Many Consumers Re-render
+<br>↓<br>
+Performance Problem
+</div>
+
+<br>
+
+<div class="flow">
+Better Solution
+<br>↓<br>
+Split Contexts
+<br>↓<br>
+Memoize Values
+<br>↓<br>
+Separate State and Actions
+<br>↓<br>
+Keep Local State Local
+</div>
+
+<h2>Interview Answer</h2>
+
+<div class="highlight">
+The Context performance problem happens when many components consume the same Context and all of them re-render whenever the Provider value changes. Without using a library, we can solve it by splitting Contexts by feature, memoizing Provider values, separating state and actions into different Contexts, keeping local state local, and using React.memo for heavy child components.
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+Context performance issues are solved by avoiding one large Context, splitting state into smaller Contexts, memoizing Provider values, and keeping unnecessary state out of Context.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+</body>
+</html>

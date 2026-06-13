@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>141 - What is useReducer?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px;margin-bottom:10px}
+p{color:#cbd5e1}
+ul{padding-left:24px}
+li{margin-bottom:10px;color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px;margin-top:15px}
+.warning{background:#1e1b4b;border-left:5px solid #fbbf24;padding:18px;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;margin-top:15px;text-align:center;line-height:2;font-size:18px}
+pre{border-radius:12px;overflow-x:auto}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>141. What is useReducer?</h1>
+
+<h2>One-Line Definition</h2>
+
+<div class="highlight">
+useReducer is a React hook used to manage complex state logic by updating state through actions and a reducer function instead of directly using multiple useState hooks.
+</div>
+
+<h2>Simple Meaning</h2>
+
+<p>
+With useState, we directly update state:
+</p>
+
+<pre><code class="language-jsx">const [count, setCount] = useState(0);
+
+setCount(count + 1);</code></pre>
+
+<p>
+With useReducer, we do not update state directly.
+</p>
+
+<p>
+Instead, we send an action.
+</p>
+
+<pre><code class="language-jsx">dispatch({
+  type: 'INCREMENT'
+});</code></pre>
+
+<p>
+A reducer function decides how state should change.
+</p>
+
+<div class="flow">
+dispatch(action)
+<br>↓<br>
+Reducer Function
+<br>↓<br>
+New State
+<br>↓<br>
+Component Re-renders
+</div>
+
+<h2>Why Does useReducer Exist?</h2>
+
+<p>
+useState works great for simple state.
+</p>
+
+<pre><code class="language-jsx">const [count, setCount] = useState(0);</code></pre>
+
+<p>
+But as state grows, update logic becomes harder to manage.
+</p>
+
+<h3>Example Using Multiple useState</h3>
+
+<pre><code class="language-jsx">const [username, setUsername] = useState('');
+const [password, setPassword] = useState('');
+const [loading, setLoading] = useState(false);
+const [error, setError] = useState('');
+const [isLoggedIn, setIsLoggedIn] = useState(false);</code></pre>
+
+<p>
+Now state logic is scattered across many setters.
+</p>
+
+<div class="warning">
+When multiple pieces of state are related, useReducer can make the logic easier to organize.
+</div>
+
+<h2>Syntax</h2>
+
+<pre><code class="language-jsx">const [state, dispatch] = useReducer(reducer, initialState);</code></pre>
+
+<h3>Returns</h3>
+
+<table>
+<tr>
+<th>Value</th>
+<th>Purpose</th>
+</tr>
+
+<tr>
+<td>state</td>
+<td>Current state object</td>
+</tr>
+
+<tr>
+<td>dispatch</td>
+<td>Function used to send actions</td>
+</tr>
+</table>
+
+<h2>The Three Parts of useReducer</h2>
+
+<div class="flow">
+Initial State
+<br>↓<br>
+Reducer Function
+<br>↓<br>
+dispatch()
+</div>
+
+<h3>1. Initial State</h3>
+
+<pre><code class="language-jsx">const initialState = {
+  count: 0
+};</code></pre>
+
+<h3>2. Reducer Function</h3>
+
+<pre><code class="language-jsx">function reducer(state, action) {
+
+  switch (action.type) {
+
+    case 'INCREMENT':
+      return {
+        count: state.count + 1
+      };
+
+    case 'DECREMENT':
+      return {
+        count: state.count - 1
+      };
+
+    default:
+      return state;
+  }
+
+}</code></pre>
+
+<h3>3. useReducer Hook</h3>
+
+<pre><code class="language-jsx">const [state, dispatch] = useReducer(reducer,initialState);</code></pre>
+
+<h2>Complete Counter Example</h2>
+
+<pre><code class="language-jsx">import { useReducer } from 'react';
+
+const initialState = {
+  count: 0
+};
+
+function reducer(state, action) {
+
+  switch (action.type) {
+
+    case 'INCREMENT':
+      return {
+        count: state.count + 1
+      };
+
+    case 'DECREMENT':
+      return {
+        count: state.count - 1
+      };
+
+    default:
+      return state;
+  }
+
+}
+
+export default function Counter() {
+
+  const [state, dispatch] = useReducer(reducer, initialState);
+
+  return (
+    &lt;&gt;
+      &lt;h2&gt;Count: {state.count}&lt;/h2&gt;
+
+      &lt;button
+        onClick={() =&gt; dispatch({ type: 'INCREMENT' })}
+      &gt;
+        Increment
+      &lt;/button&gt;
+
+      &lt;button
+        onClick={() =&gt; dispatch({ type: 'DECREMENT' })}
+      &gt;
+        Decrement
+      &lt;/button&gt;
+    &lt;/&gt;
+  );
+}</code></pre>
+
+<h2>How It Works Internally</h2>
+
+<p>
+User clicks Increment:
+</p>
+
+<pre><code class="language-jsx">dispatch({
+  type: 'INCREMENT'
+});</code></pre>
+
+<p>
+Reducer receives:
+</p>
+
+<pre><code class="language-jsx">state = { count: 0 }
+
+action = {
+  type: 'INCREMENT'
+}</code></pre>
+
+<p>
+Reducer returns:
+</p>
+
+<pre><code class="language-jsx">{
+  count: 1
+}</code></pre>
+
+<div class="flow">
+Button Click
+<br>↓<br>
+dispatch()
+<br>↓<br>
+Reducer Runs
+<br>↓<br>
+Returns New State
+<br>↓<br>
+React Re-renders
+</div>
+
+<h2>Real Login Form Example</h2>
+
+<p>
+This is where useReducer becomes more useful.
+</p>
+
+<pre><code class="language-jsx">const initialState = {
+  username: '',
+  password: '',
+  loading: false,
+  error: '',
+  isLoggedIn: false
+};</code></pre>
+
+<h3>Reducer</h3>
+
+<pre><code class="language-jsx">function reducer(state, action) {
+
+  switch (action.type) {
+
+    case 'SET_USERNAME':
+      return {
+        ...state,
+        username: action.payload
+      };
+
+    case 'SET_PASSWORD':
+      return {
+        ...state,
+        password: action.payload
+      };
+
+    case 'LOGIN_START':
+      return {
+        ...state,
+        loading: true
+      };
+
+    case 'LOGIN_SUCCESS':
+      return {
+        ...state,
+        loading: false,
+        isLoggedIn: true
+      };
+
+    case 'LOGIN_ERROR':
+      return {
+        ...state,
+        loading: false,
+        error: action.payload
+      };
+
+    default:
+      return state;
+  }
+
+}</code></pre>
+
+<div class="highlight">
+Instead of managing many useState hooks, all related state updates are centralized inside one reducer.
+</div>
+
+<h2>How useReducer Compares to useState</h2>
+
+<table>
+<tr>
+<th>useState</th>
+<th>useReducer</th>
+</tr>
+
+<tr>
+<td>Simple state</td>
+<td>Complex state</td>
+</tr>
+
+<tr>
+<td>Direct updates</td>
+<td>Action-based updates</td>
+</tr>
+
+<tr>
+<td>Easy to learn</td>
+<td>More structured</td>
+</tr>
+
+<tr>
+<td>Few state values</td>
+<td>Many related state values</td>
+</tr>
+
+<tr>
+<td>Simple forms</td>
+<td>Complex forms</td>
+</tr>
+</table>
+
+<h2>Relationship with Redux</h2>
+
+<p>
+Redux is heavily inspired by useReducer.
+</p>
+
+<p>
+Both use the same idea:
+</p>
+
+<div class="flow">
+Action
+<br>↓<br>
+Reducer
+<br>↓<br>
+New State
+</div>
+
+<p>
+The difference:
+</p>
+
+<table>
+<tr>
+<th>useReducer</th>
+<th>Redux</th>
+</tr>
+
+<tr>
+<td>Component-level state</td>
+<td>Global application state</td>
+</tr>
+
+<tr>
+<td>Built into React</td>
+<td>External library</td>
+</tr>
+
+<tr>
+<td>No Provider required</td>
+<td>Store and Provider required</td>
+</tr>
+</table>
+
+<h2>When Should You Use useReducer?</h2>
+
+<ul>
+<li>When state has multiple related values.</li>
+<li>When update logic becomes complicated.</li>
+<li>When many state changes depend on actions.</li>
+<li>For forms with many fields.</li>
+<li>For state machines or workflows.</li>
+</ul>
+
+<h2>When Should You NOT Use useReducer?</h2>
+
+<p>
+Do not use useReducer for simple state.
+</p>
+
+<pre><code class="language-jsx">const [isOpen, setIsOpen] = useState(false);</code></pre>
+
+<p>
+This is simpler than creating a reducer.
+</p>
+
+<div class="warning">
+If a single useState solves the problem clearly, useState is usually the better choice.
+</div>
+
+<h2>Easy Way To Remember</h2>
+
+<div class="flow">
+useState
+<br>↓<br>
+Direct State Update
+<br><br>
+useReducer
+<br>↓<br>
+dispatch(action)
+<br>↓<br>
+Reducer Decides Update
+</div>
+
+<h2>Interview Answer</h2>
+
+<div class="highlight">
+useReducer is a React hook used for managing complex state logic. It stores state in a reducer function and updates state through dispatched actions, making related state changes easier to organize and maintain.
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+useReducer is a React hook that manages state through actions and a reducer function instead of directly updating state with setters.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+
+</body>
+</html>

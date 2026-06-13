@@ -1,0 +1,1577 @@
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Part 2 - Redux Toolkit Real-World Example</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px;margin-bottom:10px}
+p{color:#cbd5e1}
+ul{padding-left:24px}
+li{margin-bottom:10px;color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;margin-top:15px;text-align:center;line-height:2;font-size:18px}
+pre{border-radius:12px;overflow-x:auto}
+</style>
+</head>
+
+
+<body>
+
+<div class="container">
+<h1>Part 2: Redux Toolkit and Real-World Code Example</h1>
+
+<div class="highlight">This file starts after the Redux need/problem explanation. Here we learn how Redux is implemented in a real React application using Redux Toolkit.</div>
+
+<h2>Important Redux Words</h2>
+
+<table>
+<tr>
+<th>Redux Term</th>
+<th>Meaning</th>
+</tr>
+
+<tr>
+<td>Store</td>
+<td>The central place where all shared state is stored.</td>
+</tr>
+
+<tr>
+<td>State</td>
+<td>The actual data, such as cart items, user, orders, etc.</td>
+</tr>
+
+<tr>
+<td>Action</td>
+<td>An object or function that describes what happened.</td>
+</tr>
+
+<tr>
+<td>Dispatch</td>
+<td>A function used to send an action to Redux.</td>
+</tr>
+
+<tr>
+<td>Reducer</td>
+<td>A function that updates state based on the action.</td>
+</tr>
+
+<tr>
+<td>useSelector</td>
+<td>A hook used to read Redux state inside a component.</td>
+</tr>
+
+<tr>
+<td>useDispatch</td>
+<td>A hook used to dispatch Redux actions inside a component.</td>
+</tr>
+</table>
+
+<h2>Folder Structure</h2>
+
+<pre><code class="language-text">src
+│
+├── app
+│   └── store.js
+│
+├── features
+│   ├── cart
+│   │   └── cartSlice.js
+│   │
+│   └── auth
+│       └── authSlice.js
+│
+├── components
+│   ├── Navbar.jsx
+│   ├── ProductDetails.jsx
+│   ├── CartPage.jsx
+│   └── Login.jsx
+│
+├── App.jsx
+└── main.jsx</code></pre>
+
+<h2>Step 1: Install Redux Toolkit</h2>
+
+<pre><code class="language-text">npm install @reduxjs/toolkit react-redux</code></pre>
+
+<div class="highlight">
+Redux Toolkit is the modern recommended way to use Redux. In real projects, we use Redux Toolkit because it gives us store setup, slices, actions, and reducers with less boilerplate code.
+</div>
+
+<h2>Before Code: Understand Redux Real-World Flow</h2>
+
+<p>
+In our e-commerce application, many components need cart data and many components can update cart data.
+</p>
+
+<table>
+<tr>
+<th>Component</th>
+<th>Work</th>
+</tr>
+<tr>
+<td>Navbar</td>
+<td>Reads cart count</td>
+</tr>
+<tr>
+<td>ProductDetails</td>
+<td>Adds product to cart</td>
+</tr>
+<tr>
+<td>CartPage</td>
+<td>Shows cart items, removes items, increases/decreases quantity</td>
+</tr>
+<tr>
+<td>WishlistPage</td>
+<td>Moves wishlist item to cart</td>
+</tr>
+<tr>
+<td>CheckoutPage</td>
+<td>Clears cart after successful order</td>
+</tr>
+</table>
+
+<div class="highlight">
+Redux does not mean every component gets its own cart. Redux means all components use one central cart state and one central cart update logic.
+</div>
+
+<div class="flow">
+Component
+<br>↓<br>
+dispatch(action)
+<br>↓<br>
+Reducer function runs
+<br>↓<br>
+Redux store updates
+<br>↓<br>
+All components get latest state
+</div>
+
+
+
+<h2>Before Step 2: Why createSlice Is Used?</h2>
+
+<p>
+Before learning Redux Toolkit code, first understand that Redux already worked before <strong>createSlice()</strong> existed.
+</p>
+
+<p>
+The old Redux way required us to write three things separately for every update:
+</p>
+
+<ul>
+<li>Action Type</li>
+<li>Action Creator</li>
+<li>Reducer Case</li>
+</ul>
+
+<div class="highlight">
+<strong>createSlice()</strong> does not create a new Redux concept. It mainly removes repeated boilerplate code by keeping state, reducers, and actions together in one place.
+</div>
+
+<h2>Solution 1: Traditional Redux Without createSlice</h2>
+
+<p>
+Before Redux Toolkit, Redux code was usually separated into different files.
+</p>
+
+<div class="highlight">
+To understand why <strong>createSlice()</strong> is useful, first understand the old Redux structure with filenames.
+</div>
+
+<h3>Traditional Redux Folder Structure</h3>
+
+<pre><code class="language-text">src
+│
+├── redux
+│   │
+│   ├── constants
+│   │   └── cartConstants.js
+│   │
+│   ├── actions
+│   │   └── cartActions.js
+│   │
+│   ├── reducers
+│   │   ├── cartReducer.js
+│   │   ├── authReducer.js
+│   │   └── wishlistReducer.js
+│   │
+│   └── store.js
+│
+├── components
+│   ├── Navbar.jsx
+│   └── ProductDetails.jsx
+│
+├── App.jsx
+└── main.jsx</code></pre>
+
+<div class="highlight">
+In traditional Redux, one cart feature is split into multiple files: constants, actions, reducer, and store.
+</div>
+
+<h3>Step A: Create Action Types</h3>
+
+<h3>src/redux/constants/cartConstants.js</h3>
+
+<pre><code class="language-jsx">export const ADD_TO_CART = 'ADD_TO_CART';
+export const REMOVE_FROM_CART = 'REMOVE_FROM_CART';</code></pre>
+
+<p>
+Action type tells Redux what happened.
+</p>
+
+<pre><code class="language-jsx">{
+  type: 'ADD_TO_CART'
+}</code></pre>
+
+<div class="highlight">
+<strong>ADD_TO_CART</strong> means: user wants to add a product to cart.
+</div>
+
+<h3>Step B: Create Action Creators</h3>
+
+<h3>src/redux/actions/cartActions.js</h3>
+
+<pre><code class="language-jsx">import { ADD_TO_CART, REMOVE_FROM_CART } from '../constants/cartConstants';
+
+export function addToCart(product) {
+  return {
+    type: ADD_TO_CART,
+    payload: product
+  };
+}
+
+export function removeFromCart(id) {
+  return {
+    type: REMOVE_FROM_CART,
+    payload: id
+  };
+}</code></pre>
+
+<p>
+Action creator is a normal function that returns an action object.
+</p>
+
+<pre><code class="language-jsx">dispatch(addToCart(product));</code></pre>
+
+<p>
+This creates this action object:
+</p>
+
+<pre><code class="language-jsx">{
+  type: 'ADD_TO_CART',
+  payload: product
+}</code></pre>
+
+<div class="highlight">
+Component does not directly send a plain object every time. Usually, component calls an action creator like <strong>addToCart(product)</strong>.
+</div>
+
+<h3>Step C: Create Reducer</h3>
+
+<h3>src/redux/reducers/cartReducer.js</h3>
+
+<pre><code class="language-jsx">import { ADD_TO_CART, REMOVE_FROM_CART } from '../constants/cartConstants';
+
+const initialState = {
+  items: []
+};
+
+export default function cartReducer(state = initialState, action) {
+  switch (action.type) {
+    case ADD_TO_CART:
+      return {
+        ...state,
+        items: [...state.items, action.payload]
+      };
+
+    case REMOVE_FROM_CART:
+      return {
+        ...state,
+        items: state.items.filter(item =&gt; item.id !== action.payload)
+      };
+
+    default:
+      return state;
+  }
+}</code></pre>
+
+<p>
+Reducer receives current state and action, then returns the new state.
+</p>
+
+<div class="highlight">
+In traditional Redux, we must return a new object manually. We should not directly mutate Redux state.
+</div>
+
+<h3>Step D: Create Store</h3>
+
+<p>
+There are two cases when creating a Redux store in traditional Redux.
+</p>
+
+<h3>Case 1: Store With Single Reducer</h3>
+
+<p>
+If our application has only cart state, we can directly pass <strong>cartReducer</strong> to <strong>createStore()</strong>.
+</p>
+
+<h3>src/redux/store.js</h3>
+
+<pre><code class="language-jsx">import { createStore } from 'redux';
+import cartReducer from './reducers/cartReducer';
+
+const store = createStore(cartReducer);
+
+export default store;</code></pre>
+
+<p>
+In this case, Redux state directly looks like this:
+</p>
+
+<pre><code class="language-jsx">{
+  items: []
+}</code></pre>
+
+<p>
+So we read cart items like this:
+</p>
+
+<pre><code class="language-jsx">const cartItems = useSelector(state =&gt; state.items);</code></pre>
+
+<div class="highlight">
+This works only when the store has one reducer directly, like <strong>createStore(cartReducer)</strong>.
+</div>
+
+<h3>Case 2: Store With Multiple Reducers</h3>
+
+<p>
+Real applications usually have multiple reducers such as cart, auth, wishlist, and orders.
+</p>
+
+<pre><code class="language-text">cartReducer
+authReducer
+wishlistReducer
+orderReducer</code></pre>
+
+<p>
+In this case, we cannot directly pass only one reducer. We combine all reducers using <strong>combineReducers()</strong>.
+</p>
+
+<h3>src/redux/store.js</h3>
+
+<pre><code class="language-jsx">import { createStore, combineReducers } from 'redux';
+import cartReducer from './reducers/cartReducer';
+import authReducer from './reducers/authReducer';
+import wishlistReducer from './reducers/wishlistReducer';
+
+const rootReducer = combineReducers({
+  cart: cartReducer,
+  auth: authReducer,
+  wishlist: wishlistReducer
+});
+
+const store = createStore(rootReducer);
+
+export default store;</code></pre>
+
+<p>
+Now Redux state becomes an object with separate sections.
+</p>
+
+<pre><code class="language-jsx">{
+  cart: {
+    items: []
+  },
+
+  auth: {
+    user: null
+  },
+
+  wishlist: {
+    items: []
+  }
+}</code></pre>
+
+<p>
+So we read data using the reducer keys.
+</p>
+
+<pre><code class="language-jsx">const cartItems = useSelector(state =&gt; state.cart.items);
+const user = useSelector(state =&gt; state.auth.user);
+const wishlistItems = useSelector(state =&gt; state.wishlist.items);</code></pre>
+
+<div class="highlight" style="border-left-color:#fbbf24;background:#1e1b4b">
+<strong>Important:</strong> When we use <strong>combineReducers()</strong>, the keys we write inside combineReducers become the keys in Redux state. If we write <strong>cart: cartReducer</strong>, then cart data is read using <strong>state.cart</strong>.
+</div>
+
+<h3>Single Reducer vs Multiple Reducers</h3>
+
+<table>
+<tr>
+<th>Case</th>
+<th>Store Code</th>
+<th>State Reading</th>
+</tr>
+<tr>
+<td>Single reducer</td>
+<td>createStore(cartReducer)</td>
+<td>state.items</td>
+</tr>
+<tr>
+<td>Multiple reducers</td>
+<td>createStore(rootReducer)</td>
+<td>state.cart.items</td>
+</tr>
+</table>
+
+<div class="flow">
+Single Reducer
+<br>↓<br>
+createStore(cartReducer)
+<br>↓<br>
+state.items
+<br><br>
+Multiple Reducers
+<br>↓<br>
+combineReducers({ cart: cartReducer, auth: authReducer })
+<br>↓<br>
+createStore(rootReducer)
+<br>↓<br>
+state.cart.items and state.auth.user
+</div>
+
+<h3>Step E: Connect Redux Store With React</h3>
+
+<h3>src/main.jsx</h3>
+
+<pre><code class="language-jsx">import React from 'react';
+import ReactDOM from 'react-dom/client';
+import { Provider } from 'react-redux';
+import store from './redux/store';
+import App from './App';
+
+ReactDOM.createRoot(document.getElementById('root')).render(
+  &lt;Provider store={store}&gt;
+    &lt;App /&gt;
+  &lt;/Provider&gt;
+);</code></pre>
+
+<p>
+Provider makes the Redux store available to all React components.
+</p>
+
+<h3>Step F: Dispatch Action From Component</h3>
+
+<h3>src/components/ProductDetails.jsx</h3>
+
+<pre><code class="language-jsx">import { useDispatch } from 'react-redux';
+import { addToCart } from '../redux/actions/cartActions';
+
+function ProductDetails() {
+  const dispatch = useDispatch();
+
+  const product = {
+    id: 101,
+    name: 'Laptop',
+    price: 50000
+  };
+
+  function handleAddToCart() {
+    dispatch(addToCart(product));
+  }
+
+  return (
+    &lt;div&gt;
+      &lt;h2&gt;{product.name}&lt;/h2&gt;
+      &lt;p&gt;Price: ₹{product.price}&lt;/p&gt;
+      &lt;button onClick={handleAddToCart}&gt;Add To Cart&lt;/button&gt;
+    &lt;/div&gt;
+  );
+}
+
+export default ProductDetails;</code></pre>
+
+<h3>Step G: Read Cart State In Component</h3>
+
+<h3>src/components/Navbar.jsx</h3>
+
+<pre><code class="language-jsx">import { useSelector } from 'react-redux';
+
+function Navbar() {
+  const cartItems = useSelector(state =&gt; state.cart.items);
+  const cartCount = cartItems.length;
+
+  return (
+    &lt;nav&gt;
+      &lt;h2&gt;My Shop&lt;/h2&gt;
+      &lt;p&gt;Cart: {cartCount}&lt;/p&gt;
+    &lt;/nav&gt;
+  );
+}
+
+export default Navbar;</code></pre>
+
+<div class="highlight">
+Because our realistic traditional store uses <strong>combineReducers({ cart: cartReducer })</strong>, cart data is inside <strong>state.cart</strong>. That is why we read cart items using <strong>state.cart.items</strong>.
+</div>
+
+<h3>Complete Traditional Redux Flow</h3>
+
+<div class="flow">
+ProductDetails.jsx
+<br>↓<br>
+dispatch(addToCart(product))
+<br>↓<br>
+cartActions.js creates action object
+<br>↓<br>
+{ type: 'ADD_TO_CART', payload: product }
+<br>↓<br>
+cartReducer.js receives action
+<br>↓<br>
+switch(action.type) runs
+<br>↓<br>
+New state returned
+<br>↓<br>
+store.js updates Redux store
+<br>↓<br>
+Navbar and other components re-render
+</div>
+
+<h3>Problem With Traditional Redux</h3>
+
+<p>
+For every cart operation, we have to create action type, action creator, and reducer case separately.
+</p>
+
+<pre><code class="language-text">ADD_TO_CART
+REMOVE_FROM_CART
+INCREASE_QUANTITY
+DECREASE_QUANTITY
+CLEAR_CART</code></pre>
+
+<p>
+For each action above, old Redux needs repeated code.
+</p>
+
+<table>
+<tr>
+<th>Requirement</th>
+<th>Traditional Redux Work</th>
+</tr>
+<tr>
+<td>Add product</td>
+<td>Write action type, action creator, reducer case</td>
+</tr>
+<tr>
+<td>Remove product</td>
+<td>Write action type, action creator, reducer case</td>
+</tr>
+<tr>
+<td>Increase quantity</td>
+<td>Write action type, action creator, reducer case</td>
+</tr>
+<tr>
+<td>Clear cart</td>
+<td>Write action type, action creator, reducer case</td>
+</tr>
+</table>
+
+<div class="highlight">
+Traditional Redux is powerful, but it creates too much repeated code for simple state updates.
+</div>
+
+<h3>Traditional Redux vs Redux Toolkit File Difference</h3>
+
+<table>
+<tr>
+<th>Traditional Redux</th>
+<th>Redux Toolkit</th>
+</tr>
+<tr>
+<td>cartConstants.js</td>
+<td rowspan="3">cartSlice.js</td>
+</tr>
+<tr>
+<td>cartActions.js</td>
+</tr>
+<tr>
+<td>cartReducer.js</td>
+</tr>
+</table>
+
+<div class="highlight" style="border-left-color:#fbbf24;background:#1e1b4b">
+This is the main reason <strong>createSlice()</strong> exists: it combines action types, action creators, and reducer logic into one slice file.
+</div>
+
+<h3>Traditional Redux Store vs Redux Toolkit Store</h3>
+
+<table>
+<tr>
+<th>Traditional Redux</th>
+<th>Redux Toolkit</th>
+</tr>
+<tr>
+<td>Uses createStore()</td>
+<td>Uses configureStore()</td>
+</tr>
+<tr>
+<td>Multiple reducers need combineReducers()</td>
+<td>Multiple reducers are passed directly inside reducer object</td>
+</tr>
+<tr>
+<td>Manual setup</td>
+<td>Simpler setup with good defaults</td>
+</tr>
+</table>
+
+<pre><code class="language-jsx">// Traditional Redux
+const rootReducer = combineReducers({
+  cart: cartReducer,
+  auth: authReducer,
+  wishlist: wishlistReducer
+});
+
+const store = createStore(rootReducer);</code></pre>
+
+<pre><code class="language-jsx">// Redux Toolkit
+export const store = configureStore({
+  reducer: {
+    cart: cartReducer,
+    auth: authReducer,
+    wishlist: wishlistReducer
+  }
+});</code></pre>
+
+<div class="highlight">
+In both cases, the final state shape is almost the same: <strong>state.cart</strong>, <strong>state.auth</strong>, and <strong>state.wishlist</strong>. Redux Toolkit only makes the setup easier.
+</div>
+
+<h2>Solution 2: Redux Toolkit With createSlice</h2>
+
+<p>
+Redux Toolkit says: instead of writing action types, action creators, and reducers separately, write them together inside one slice.
+</p>
+
+<pre><code class="language-jsx">import { createSlice } from '@reduxjs/toolkit';
+
+const initialState = {
+  items: [],
+  totalItems: 0,
+  totalAmount: 0,
+  loading: false,
+  error: ''
+};
+
+const cartSlice = createSlice({
+  name: 'cart',
+  initialState,
+  reducers: {
+    addToCart(state, action) {
+      const product = action.payload;
+
+      state.items.push({
+        ...product,
+        quantity: 1
+      });
+
+      state.totalItems += 1;
+      state.totalAmount += product.price;
+    },
+
+    removeFromCart(state, action) {
+      const item = state.items.find(item =&gt; item.id === action.payload);
+
+      if (item) {
+        state.totalItems -= item.quantity;
+        state.totalAmount -= item.price * item.quantity;
+      }
+
+      state.items = state.items.filter(item =&gt; item.id !== action.payload);
+    }
+  }
+});
+
+export const { addToCart, removeFromCart } = cartSlice.actions;
+export default cartSlice.reducer;</code></pre>
+
+<div class="highlight">
+Here <strong>items</strong>, <strong>totalItems</strong>, <strong>totalAmount</strong>, <strong>loading</strong>, and <strong>error</strong> all belong to one feature: cart. This is why they live together inside one cart slice initialState.
+</div>
+
+<h3>What createSlice Automatically Creates</h3>
+
+<table>
+<tr>
+<th>You Write</th>
+<th>Redux Toolkit Creates</th>
+</tr>
+<tr>
+<td>name: 'cart'</td>
+<td>Action type prefix: cart</td>
+</tr>
+<tr>
+<td>addToCart(state, action)</td>
+<td>Action type: cart/addToCart</td>
+</tr>
+<tr>
+<td>removeFromCart(state, action)</td>
+<td>Action type: cart/removeFromCart</td>
+</tr>
+<tr>
+<td>cartSlice.actions</td>
+<td>Action creators</td>
+</tr>
+<tr>
+<td>cartSlice.reducer</td>
+<td>Reducer function for the store</td>
+</tr>
+</table>
+
+<h3>Multiple State Values Inside One Slice</h3>
+
+<p>
+A slice is not limited to one value. One slice usually manages a complete feature state.
+</p>
+
+<pre><code class="language-jsx">const initialState = {
+  items: [],
+  totalItems: 0,
+  totalAmount: 0,
+  loading: false,
+  error: ''
+};</code></pre>
+
+<table>
+<tr>
+<th>State Value</th>
+<th>Meaning</th>
+</tr>
+<tr>
+<td>items</td>
+<td>Products added to cart.</td>
+</tr>
+<tr>
+<td>totalItems</td>
+<td>Total product quantity in cart.</td>
+</tr>
+<tr>
+<td>totalAmount</td>
+<td>Total cart price.</td>
+</tr>
+<tr>
+<td>loading</td>
+<td>Used while cart-related API work is running.</td>
+</tr>
+<tr>
+<td>error</td>
+<td>Stores cart error message.</td>
+</tr>
+</table>
+
+<div class="highlight">
+Do not confuse multiple reducers with multiple state values. <strong>cart</strong> is one reducer/slice, but inside cart initialState we can keep many related state values.
+</div>
+
+<h3>Side-by-Side Comparison</h3>
+
+<table>
+<tr>
+<th>Traditional Redux</th>
+<th>Redux Toolkit createSlice</th>
+</tr>
+<tr>
+<td>Write action type manually</td>
+<td>Action type generated automatically</td>
+</tr>
+<tr>
+<td>Write action creator manually</td>
+<td>Action creator generated automatically</td>
+</tr>
+<tr>
+<td>Write switch case manually</td>
+<td>Reducer functions written directly</td>
+</tr>
+<tr>
+<td>Need immutable updates manually</td>
+<td>Can write simpler update logic</td>
+</tr>
+<tr>
+<td>More boilerplate</td>
+<td>Less boilerplate</td>
+</tr>
+</table>
+
+<h3>Important: Why We Can Write state.items.push()</h3>
+
+<p>
+In normal Redux, state should not be mutated directly.
+</p>
+
+<pre><code class="language-jsx">return {
+  ...state,
+  items: [...state.items, product]
+};</code></pre>
+
+<p>
+But inside <strong>createSlice()</strong>, this is allowed:
+</p>
+
+<pre><code class="language-jsx">state.items.push(product);</code></pre>
+
+<p>
+It looks like direct mutation, but Redux Toolkit uses Immer internally. Immer converts this simple-looking code into safe immutable updates behind the scenes.
+</p>
+
+<div class="highlight" style="border-left-color:#fbbf24;background:#1e1b4b">
+<strong>Main Point:</strong> createSlice is used because it keeps state, reducers, and actions together, automatically creates action creators and action types, reduces boilerplate, and makes Redux code easier to read.
+</div>
+
+<h2>Now Continue With Redux Toolkit Setup</h2>
+
+<h2>Step 2: Create Redux Store</h2>
+
+<h3>src/app/store.js</h3>
+
+<pre><code class="language-jsx">import { configureStore } from '@reduxjs/toolkit';
+import cartReducer from '../features/cart/cartSlice';
+import authReducer from '../features/auth/authSlice';
+
+export const store = configureStore({
+  reducer: {
+    cart: cartReducer,
+    auth: authReducer
+  }
+});</code></pre>
+
+<p>
+This file creates the main Redux store of our application.
+</p>
+
+<div class="highlight">
+The store is like one central data box. Inside that box, we keep different sections such as cart and auth.
+</div>
+
+<pre><code class="language-jsx">{
+  cart: {
+    items: [],
+    totalItems: 0,
+    totalAmount: 0,
+    loading: false,
+    error: ''
+  },
+  auth: {
+    user: null,
+    loading: false,
+    error: ''
+  }
+}</code></pre>
+
+<div class="highlight">
+Important: <strong>cart</strong> and <strong>auth</strong> are multiple reducers in the Redux store. Inside each reducer, we can also keep multiple state values in initialState.
+</div>
+
+<h2>Step 3: Connect Redux Store With React</h2>
+
+<h3>src/main.jsx</h3>
+
+<pre><code class="language-jsx">import React from 'react';
+import ReactDOM from 'react-dom/client';
+import { Provider } from 'react-redux';
+import { store } from './app/store';
+import App from './App';
+
+ReactDOM.createRoot(document.getElementById('root')).render(
+  &lt;Provider store={store}&gt;
+    &lt;App /&gt;
+  &lt;/Provider&gt;
+);</code></pre>
+
+<p>
+Provider makes Redux store available to our whole React application.
+</p>
+
+<div class="highlight">
+After wrapping App with Provider, any component inside App can read Redux state using useSelector and update Redux state using useDispatch.
+</div>
+
+<h2>Step 4: Create Cart Slice</h2>
+
+<h3>src/features/cart/cartSlice.js</h3>
+
+<pre><code class="language-jsx">import { createSlice } from '@reduxjs/toolkit';
+
+const initialState = {
+  items: [],
+  totalItems: 0,
+  totalAmount: 0,
+  loading: false,
+  error: ''
+};
+
+function calculateCartTotals(state) {
+  state.totalItems = state.items.reduce((total, item) =&gt; total + item.quantity, 0);
+  state.totalAmount = state.items.reduce((total, item) =&gt; total + item.price * item.quantity, 0);
+}
+
+const cartSlice = createSlice({
+  name: 'cart',
+  initialState,
+  reducers: {
+    addToCart(state, action) {
+      const product = action.payload;
+      const existingItem = state.items.find(item =&gt; item.id === product.id);
+
+      if (existingItem) {
+        existingItem.quantity += 1;
+      } else {
+        state.items.push({ ...product, quantity: 1 });
+      }
+
+      calculateCartTotals(state);
+    },
+
+    increaseQuantity(state, action) {
+      const id = action.payload;
+      const item = state.items.find(item =&gt; item.id === id);
+
+      if (item) {
+        item.quantity += 1;
+      }
+
+      calculateCartTotals(state);
+    },
+
+    decreaseQuantity(state, action) {
+      const id = action.payload;
+      const item = state.items.find(item =&gt; item.id === id);
+
+      if (item && item.quantity &gt; 1) {
+        item.quantity -= 1;
+      } else {
+        state.items = state.items.filter(item =&gt; item.id !== id);
+      }
+
+      calculateCartTotals(state);
+    },
+
+    removeFromCart(state, action) {
+      state.items = state.items.filter(item =&gt; item.id !== action.payload);
+      calculateCartTotals(state);
+    },
+
+    clearCart(state) {
+      state.items = [];
+      state.totalItems = 0;
+      state.totalAmount = 0;
+      state.loading = false;
+      state.error = '';
+    },
+
+    cartLoading(state) {
+      state.loading = true;
+      state.error = '';
+    },
+
+    cartError(state, action) {
+      state.loading = false;
+      state.error = action.payload;
+    }
+  }
+});
+
+export const { addToCart, increaseQuantity, decreaseQuantity, removeFromCart, clearCart, cartLoading, cartError } = cartSlice.actions;
+export default cartSlice.reducer;</code></pre>
+
+<h2>Why This Cart Slice Is Complete</h2>
+
+<p>
+A real cart usually needs more than only add and remove. It also needs quantity handling and clear cart logic.
+</p>
+
+<table>
+<tr>
+<th>State / Reducer</th>
+<th>Real Project Use</th>
+</tr>
+<tr>
+<td>items</td>
+<td>Stores cart product list.</td>
+</tr>
+<tr>
+<td>totalItems</td>
+<td>Stores total quantity shown in Navbar.</td>
+</tr>
+<tr>
+<td>totalAmount</td>
+<td>Stores final cart amount shown in CartPage and CheckoutPage.</td>
+</tr>
+<tr>
+<td>loading</td>
+<td>Used when cart data is loading from API or local storage.</td>
+</tr>
+<tr>
+<td>error</td>
+<td>Stores cart-related error message.</td>
+</tr>
+<tr>
+<td>addToCart</td>
+<td>Add product. If product already exists, increase quantity.</td>
+</tr>
+<tr>
+<td>increaseQuantity</td>
+<td>User clicks plus button in cart.</td>
+</tr>
+<tr>
+<td>decreaseQuantity</td>
+<td>User clicks minus button. If quantity becomes zero, remove item.</td>
+</tr>
+<tr>
+<td>removeFromCart</td>
+<td>User removes product from cart.</td>
+</tr>
+<tr>
+<td>clearCart</td>
+<td>Cart clears after successful order.</td>
+</tr>
+</table>
+
+<div class="highlight">
+This shows two levels clearly: Redux store can have multiple reducers like cart and auth, and each reducer can have multiple state values inside its own initialState.
+</div>
+
+<div class="highlight">
+Now cart update logic is not written separately in ProductDetails, CartPage, WishlistPage, and CheckoutPage. All cart update logic lives in one file: cartSlice.js.
+</div>
+
+<h2>Step 5: Create Auth Slice</h2>
+
+<h3>src/features/auth/authSlice.js</h3>
+
+<pre><code class="language-jsx">import { createSlice } from '@reduxjs/toolkit';
+
+const initialState = {
+  user: null,
+  loading: false,
+  error: ''
+};
+
+const authSlice = createSlice({
+  name: 'auth',
+  initialState,
+  reducers: {
+    loginStart(state) {
+      state.loading = true;
+      state.error = '';
+    },
+
+    loginSuccess(state, action) {
+      state.loading = false;
+      state.user = action.payload;
+      state.error = '';
+    },
+
+    loginError(state, action) {
+      state.loading = false;
+      state.error = action.payload;
+    },
+
+    logout(state) {
+      state.user = null;
+      state.loading = false;
+      state.error = '';
+    }
+  }
+});
+
+export const { loginStart, loginSuccess, loginError, logout } = authSlice.actions;
+export default authSlice.reducer;</code></pre>
+
+<p>
+Auth slice stores logged-in user information, loading state, and error message.
+</p>
+
+<h2>Step 6: Read Cart Count in Navbar</h2>
+
+<h3>src/components/Navbar.jsx</h3>
+
+<pre><code class="language-jsx">import { useSelector, useDispatch } from 'react-redux';
+import { logout } from '../features/auth/authSlice';
+
+function Navbar() {
+  const dispatch = useDispatch();
+  const totalItems = useSelector(state =&gt; state.cart.totalItems);
+  const user = useSelector(state =&gt; state.auth.user);
+
+  return (
+    &lt;nav&gt;
+      &lt;h2&gt;My Shop&lt;/h2&gt;
+      &lt;p&gt;Cart: {cartCount}&lt;/p&gt;
+      {user ? &lt;p&gt;Welcome, {user.name} &lt;button onClick={() =&gt; dispatch(logout())}&gt;Logout&lt;/button&gt;&lt;/p&gt; : &lt;p&gt;Please login&lt;/p&gt;}
+    &lt;/nav&gt;
+  );
+}
+
+export default Navbar;</code></pre>
+
+<div class="highlight">
+Navbar does not receive cart or user as props. It directly reads them from Redux store using useSelector.
+</div>
+
+<h2>Step 7: Add Product To Cart From ProductDetails</h2>
+
+<h3>src/components/ProductDetails.jsx</h3>
+
+<pre><code class="language-jsx">import { useDispatch } from 'react-redux';
+import { addToCart } from '../features/cart/cartSlice';
+
+function ProductDetails() {
+  const dispatch = useDispatch();
+
+  const product = {
+    id: 101,
+    name: 'Laptop',
+    price: 50000
+  };
+
+  function handleAddToCart() {
+    dispatch(addToCart(product));
+  }
+
+  return (
+    &lt;div&gt;
+      &lt;h2&gt;{product.name}&lt;/h2&gt;
+      &lt;p&gt;Price: ₹{product.price}&lt;/p&gt;
+      &lt;button onClick={handleAddToCart}&gt;Add To Cart&lt;/button&gt;
+    &lt;/div&gt;
+  );
+}
+
+export default ProductDetails;</code></pre>
+
+<p>
+ProductDetails does not need setCart from App.
+</p>
+
+<div class="highlight">
+ProductDetails only says what happened: addToCart(product). The reducer decides how cart should be updated.
+</div>
+
+<h2>Step 8: Show Cart Page With Quantity Buttons</h2>
+
+<h3>src/components/CartPage.jsx</h3>
+
+<pre><code class="language-jsx">import { useSelector, useDispatch } from 'react-redux';
+import { increaseQuantity, decreaseQuantity, removeFromCart, clearCart } from '../features/cart/cartSlice';
+
+function CartPage() {
+  const dispatch = useDispatch();
+  const cartItems = useSelector(state =&gt; state.cart.items);
+  const totalAmount = useSelector(state =&gt; state.cart.totalAmount);
+
+  if (cartItems.length === 0) return &lt;h2&gt;Cart is empty&lt;/h2&gt;;
+
+  return (
+    &lt;div&gt;
+      &lt;h2&gt;Cart Page&lt;/h2&gt;
+
+      {cartItems.map(item =&gt; (
+        &lt;div key={item.id}&gt;
+          &lt;h3&gt;{item.name}&lt;/h3&gt;
+          &lt;p&gt;Price: ₹{item.price}&lt;/p&gt;
+          &lt;p&gt;Quantity: {item.quantity}&lt;/p&gt;
+          &lt;button onClick={() =&gt; dispatch(decreaseQuantity(item.id))}&gt;-&lt;/button&gt;
+          &lt;button onClick={() =&gt; dispatch(increaseQuantity(item.id))}&gt;+&lt;/button&gt;
+          &lt;button onClick={() =&gt; dispatch(removeFromCart(item.id))}&gt;Remove&lt;/button&gt;
+        &lt;/div&gt;
+      ))}
+
+      &lt;h3&gt;Total: ₹{totalAmount}&lt;/h3&gt;
+      &lt;button onClick={() =&gt; dispatch(clearCart())}&gt;Clear Cart&lt;/button&gt;
+    &lt;/div&gt;
+  );
+}
+
+export default CartPage;</code></pre>
+
+<div class="highlight">
+CartPage reads cart items using useSelector and updates cart using dispatch. It does not directly modify cart state.
+</div>
+
+<h2>Step 9: Move Wishlist Item To Cart</h2>
+
+<h3>src/components/WishlistPage.jsx</h3>
+
+<pre><code class="language-jsx">import { useDispatch } from 'react-redux';
+import { addToCart } from '../features/cart/cartSlice';
+
+function WishlistPage() {
+  const dispatch = useDispatch();
+
+  const wishlistProduct = {
+    id: 102,
+    name: 'Mobile Phone',
+    price: 25000
+  };
+
+  function handleMoveToCart() {
+    dispatch(addToCart(wishlistProduct));
+  }
+
+  return (
+    &lt;div&gt;
+      &lt;h2&gt;Wishlist Page&lt;/h2&gt;
+      &lt;p&gt;{wishlistProduct.name} - ₹{wishlistProduct.price}&lt;/p&gt;
+      &lt;button onClick={handleMoveToCart}&gt;Move To Cart&lt;/button&gt;
+    &lt;/div&gt;
+  );
+}
+
+export default WishlistPage;</code></pre>
+
+<p>
+Now ProductDetails and WishlistPage both use the same addToCart reducer logic.
+</p>
+
+<div class="highlight">
+This is the real Redux benefit: two different components update cart through one shared reducer function.
+</div>
+
+<h2>Step 10: Login With Redux</h2>
+
+<h3>src/components/Login.jsx</h3>
+
+<pre><code class="language-jsx">import { useState } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
+import { loginStart, loginSuccess, loginError } from '../features/auth/authSlice';
+
+function Login() {
+  const dispatch = useDispatch();
+  const { loading, error } = useSelector(state =&gt; state.auth);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+
+  async function handleLogin(e) {
+    e.preventDefault();
+    dispatch(loginStart());
+
+    try {
+      const response = await fetch('/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
+
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message || 'Login failed');
+      dispatch(loginSuccess(data.user));
+    } catch (error) {
+      dispatch(loginError(error.message));
+    }
+  }
+
+  return (
+    &lt;form onSubmit={handleLogin}&gt;
+      &lt;input value={email} onChange={(e) =&gt; setEmail(e.target.value)} placeholder="Email" /&gt;
+      &lt;input type="password" value={password} onChange={(e) =&gt; setPassword(e.target.value)} placeholder="Password" /&gt;
+      {error && &lt;p&gt;{error}&lt;/p&gt;}
+      &lt;button disabled={loading}&gt;{loading ? 'Logging in...' : 'Login'}&lt;/button&gt;
+    &lt;/form&gt;
+  );
+}
+
+export default Login;</code></pre>
+
+<h2>Step 11: Clear Cart After Successful Checkout</h2>
+
+<h3>src/components/CheckoutPage.jsx</h3>
+
+<pre><code class="language-jsx">import { useSelector, useDispatch } from 'react-redux';
+import { clearCart } from '../features/cart/cartSlice';
+
+function CheckoutPage() {
+  const dispatch = useDispatch();
+  const cartItems = useSelector(state =&gt; state.cart.items);
+  const totalItems = useSelector(state =&gt; state.cart.totalItems);
+  const totalAmount = useSelector(state =&gt; state.cart.totalAmount);
+  const user = useSelector(state =&gt; state.auth.user);
+
+  function handlePlaceOrder() {
+    if (!user) {
+      alert('Please login first');
+      return;
+    }
+
+    alert('Order placed successfully');
+    dispatch(clearCart());
+  }
+
+  return (
+    &lt;div&gt;
+      &lt;h2&gt;Checkout Page&lt;/h2&gt;
+      &lt;p&gt;Total Items: {cartItems.length}&lt;/p&gt;
+      &lt;p&gt;Total Amount: ₹{totalAmount}&lt;/p&gt;
+      &lt;button onClick={handlePlaceOrder}&gt;Place Order&lt;/button&gt;
+    &lt;/div&gt;
+  );
+}
+
+export default CheckoutPage;</code></pre>
+
+<div class="highlight">
+CheckoutPage does not need to know how cart is stored. It only dispatches clearCart after successful order.
+</div>
+
+<h2>Step 12: Use Components in App</h2>
+
+<h3>src/App.jsx</h3>
+
+<pre><code class="language-jsx">import Navbar from './components/Navbar';
+import Login from './components/Login';
+import ProductDetails from './components/ProductDetails';
+import WishlistPage from './components/WishlistPage';
+import CartPage from './components/CartPage';
+import CheckoutPage from './components/CheckoutPage';
+
+function App() {
+  return (
+    &lt;&gt;
+      &lt;Navbar /&gt;
+      &lt;Login /&gt;
+      &lt;ProductDetails /&gt;
+      &lt;WishlistPage /&gt;
+      &lt;CartPage /&gt;
+      &lt;CheckoutPage /&gt;
+    &lt;/&gt;
+  );
+}
+
+export default App;</code></pre>
+
+<h2>Complete Real-World Cart Flow</h2>
+
+<div class="flow">
+User clicks Add To Cart in ProductDetails
+<br>↓<br>
+dispatch(addToCart(product))
+<br>↓<br>
+cartSlice reducer checks product exists or not
+<br>↓<br>
+Redux store updates cart.items
+<br>↓<br>
+Navbar cart count updates automatically
+<br>↓<br>
+CartPage product list updates automatically
+<br>↓<br>
+CheckoutPage total amount updates automatically
+</div>
+
+<h2>Same Action From Different Components</h2>
+
+<p>
+This is the main point.
+</p>
+
+<table>
+<tr>
+<th>Component</th>
+<th>Action</th>
+<th>Reducer Logic</th>
+</tr>
+<tr>
+<td>ProductDetails</td>
+<td>dispatch(addToCart(product))</td>
+<td>cartSlice.addToCart</td>
+</tr>
+<tr>
+<td>WishlistPage</td>
+<td>dispatch(addToCart(wishlistProduct))</td>
+<td>cartSlice.addToCart</td>
+</tr>
+<tr>
+<td>CartPage</td>
+<td>dispatch(increaseQuantity(id))</td>
+<td>cartSlice.increaseQuantity</td>
+</tr>
+<tr>
+<td>CartPage</td>
+<td>dispatch(removeFromCart(id))</td>
+<td>cartSlice.removeFromCart</td>
+</tr>
+<tr>
+<td>CheckoutPage</td>
+<td>dispatch(clearCart())</td>
+<td>cartSlice.clearCart</td>
+</tr>
+</table>
+
+<div class="highlight">
+Without Redux, these update rules may be written inside many components. With Redux, all cart rules stay in cartSlice.js.
+</div>
+
+<h2>Redux Is Not Only For Cart</h2>
+
+<p>
+In a real application, Redux can manage multiple shared states.
+</p>
+
+<pre><code class="language-jsx">{
+  auth: {
+    user: { id: 1, name: 'Rizwan' },
+    loading: false,
+    error: ''
+  },
+  cart: {
+    items: [
+      { id: 101, name: 'Laptop', price: 50000, quantity: 2 }
+    ],
+    totalItems: 2,
+    totalAmount: 100000,
+    loading: false,
+    error: ''
+  },
+  wishlist: {
+    items: []
+  },
+  orders: {
+    list: []
+  }
+}</code></pre>
+
+<h2>Why Redux Is Useful Here</h2>
+
+<table>
+<tr>
+<th>Problem</th>
+<th>Redux Solution</th>
+</tr>
+<tr>
+<td>Many components need cart data</td>
+<td>Store cart in Redux store</td>
+</tr>
+<tr>
+<td>Many components update cart</td>
+<td>Use dispatch and reducers</td>
+</tr>
+<tr>
+<td>Cart update logic repeated in many files</td>
+<td>Keep cart logic in cartSlice.js</td>
+</tr>
+<tr>
+<td>Navbar needs user and cart count</td>
+<td>Read both using useSelector</td>
+</tr>
+<tr>
+<td>Checkout needs cart and user</td>
+<td>Read both from one central store</td>
+</tr>
+<tr>
+<td>Debugging is difficult</td>
+<td>Redux DevTools can show every dispatched action</td>
+</tr>
+</table>
+
+<h2>Redux Toolkit Terms Again In Simple Words</h2>
+
+<table>
+<tr>
+<th>Term</th>
+<th>Simple Meaning</th>
+</tr>
+<tr>
+<td>Store</td>
+<td>One central place for shared state.</td>
+</tr>
+<tr>
+<td>Slice</td>
+<td>One feature part of Redux state, like cart or auth.</td>
+</tr>
+<tr>
+<td>Reducer</td>
+<td>Function that contains state update logic.</td>
+</tr>
+<tr>
+<td>Action</td>
+<td>Message that tells Redux what happened.</td>
+</tr>
+<tr>
+<td>dispatch</td>
+<td>Function used to send action to Redux.</td>
+</tr>
+<tr>
+<td>useSelector</td>
+<td>Hook used to read Redux state.</td>
+</tr>
+<tr>
+<td>useDispatch</td>
+<td>Hook used to update Redux state.</td>
+</tr>
+</table>
+
+<h2>Final Simple Understanding</h2>
+
+<div class="highlight">
+Redux is not mainly used because React cannot share state. React can share state using props or Context. Redux is used when shared state becomes large, many components read it, many components update it, and we need one predictable place for state and update logic.
+</div>
+
+<div class="flow">
+Shared State
+<br>↓<br>
+Many Components Read It
+<br>↓<br>
+Many Components Update It
+<br>↓<br>
+Update Logic Becomes Scattered
+<br>↓<br>
+Redux Keeps State And Update Logic Centralized
+</div>
+
+
+
+<h2>Important Interview Points</h2>
+
+<ul>
+<li>Redux is used for centralized state management.</li>
+<li>Redux solves prop drilling, but that is not its only purpose.</li>
+<li>Redux is useful when many components need the same state.</li>
+<li>Redux keeps update logic inside reducers.</li>
+<li>Redux Toolkit is the modern recommended way to use Redux.</li>
+<li>useSelector reads data from Redux.</li>
+<li>useDispatch sends actions to Redux.</li>
+<li>Redux is useful in large applications like e-commerce, banking, food delivery, and social media apps.</li>
+</ul>
+
+<h2>Short Interview Answer</h2>
+
+<div class="highlight">
+Redux is a centralized state management library. It solves problems that happen when the same shared state is needed and updated by many components, such as prop drilling, scattered state, duplicated update logic, and difficult debugging. Redux keeps shared state in one store and updates it through predictable actions and reducers.
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+Redux solves large-scale state management problems by keeping shared state in one centralized store and updating it through predictable actions.
+</div>
+
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+
+</body>
+</html>

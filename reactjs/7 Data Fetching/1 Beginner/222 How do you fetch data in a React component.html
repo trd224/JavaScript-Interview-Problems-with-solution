@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>222. How Do You Fetch Data in a React Component?</title>
+
+  <style>
+
+    body{
+      margin:0;
+      padding:0;
+      background:#000814;
+      color:#e2e8f0;
+      font-family:Arial,sans-serif;
+      line-height:1.7;
+    }
+
+    .container{
+      max-width:1000px;
+      margin:40px auto;
+      background:#020617;
+      padding:40px;
+      border-radius:18px;
+      border:1px solid #0f172a;
+      box-shadow:0 0 40px rgba(0,0,0,.95);
+    }
+
+    h1{
+      color:#f8fafc;
+      margin-bottom:30px;
+      font-size:34px;
+    }
+
+    h2{
+      color:#c084fc;
+      margin-top:35px;
+      margin-bottom:15px;
+      font-size:26px;
+    }
+
+    p{
+      color:#cbd5e1;
+    }
+
+    ul{
+      padding-left:24px;
+    }
+
+    li{
+      margin-bottom:10px;
+      color:#cbd5e1;
+    }
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      margin-top:20px;
+    }
+
+    table th,
+    table td{
+      border:1px solid #1e293b;
+      padding:14px;
+      text-align:left;
+      vertical-align:top;
+    }
+
+    table th{
+      background:#0f172a;
+      color:#38bdf8;
+    }
+
+    table td{
+      background:#020617;
+      color:#d1d5db;
+    }
+
+    .highlight{
+      background:#0f172a;
+      padding:18px;
+      border-left:5px solid #38bdf8;
+      border-radius:10px;
+      margin-top:15px;
+      color:#e5e7eb;
+    }
+
+    .flow{
+      background:#020617;
+      border:1px solid #1e293b;
+      padding:20px;
+      border-radius:10px;
+      margin-top:15px;
+      color:#e2e8f0;
+      line-height:2;
+      text-align:center;
+      font-size:18px;
+    }
+
+    pre{
+      background:#000;
+      padding:22px;
+      border-radius:12px;
+      overflow-x:auto;
+      border:1px solid #0f172a;
+    }
+
+    code{
+      font-family:Consolas,monospace;
+      font-size:15px;
+    }
+
+    .keyword{
+      color:#c084fc;
+    }
+
+    .function{
+      color:#38bdf8;
+    }
+
+    .string{
+      color:#facc15;
+    }
+
+    .tag{
+      color:#f472b6;
+    }
+
+    .comment{
+      color:#94a3b8;
+    }
+
+    .output{
+      color:#4ade80;
+    }
+
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+
+    <h1>222. How Do You Fetch Data in a React Component?</h1>
+
+    <h2>One-Line Definition</h2>
+
+    <div class="highlight">
+      Data is typically fetched in a React component using the fetch() API inside the useEffect() hook and stored using useState().
+    </div>
+
+    <h2>Why Do We Use useEffect for Fetching?</h2>
+
+    <p>
+      Fetching data is a side effect because it communicates with an external server.
+    </p>
+
+    <p>
+      Side effects should be handled inside useEffect().
+    </p>
+
+    <div class="flow">
+
+      Component Mounts
+      <br>
+      ↓
+      <br>
+      useEffect Runs
+      <br>
+      ↓
+      <br>
+      API Request Sent
+      <br>
+      ↓
+      <br>
+      Response Received
+      <br>
+      ↓
+      <br>
+      State Updated
+      <br>
+      ↓
+      <br>
+      Component Re-renders
+
+    </div>
+
+    <h2>Basic Example</h2>
+
+<pre><code><span class="keyword">import</span> { useEffect, useState } <span class="keyword">from</span> <span class="string">'react'</span>;
+
+<span class="keyword">function</span> <span class="function">Users</span>() {
+
+  <span class="keyword">const</span> [users, setUsers] = useState([]);
+
+  useEffect(() => {
+
+    fetch(<span class="string">'https://jsonplaceholder.typicode.com/users'</span>)
+      .then(res =&gt; res.json())
+      .then(data =&gt; setUsers(data));
+
+  }, []);
+
+  <span class="keyword">return</span> (
+
+    <span class="tag">&lt;ul&gt;</span>
+
+      {users.map(user =&gt; (
+
+        <span class="tag">&lt;li</span> key={user.id}<span class="tag">&gt;</span>
+
+          {user.name}
+
+        <span class="tag">&lt;/li&gt;</span>
+
+      ))}
+
+    <span class="tag">&lt;/ul&gt;</span>
+
+  );
+
+}</code></pre>
+
+    <h2>Why is the Dependency Array Empty?</h2>
+
+<pre><code>useEffect(() =&gt; {
+
+  fetchData();
+
+}, []);</code></pre>
+
+    <div class="highlight">
+      An empty dependency array means the API call runs only once when the component mounts.
+    </div>
+
+    <h2>Using async/await</h2>
+
+<pre><code><span class="keyword">import</span> { useEffect, useState } <span class="keyword">from</span> <span class="string">'react'</span>;
+
+<span class="keyword">function</span> <span class="function">Users</span>() {
+
+  <span class="keyword">const</span> [users, setUsers] = useState([]);
+
+  useEffect(() =&gt; {
+
+    <span class="keyword">async function</span> <span class="function">fetchUsers</span>() {
+
+      <span class="keyword">const</span> response = <span class="keyword">await</span> fetch(
+        <span class="string">'https://jsonplaceholder.typicode.com/users'</span>
+      );
+
+      <span class="keyword">const</span> data = <span class="keyword">await</span> response.json();
+
+      setUsers(data);
+
+    }
+
+    fetchUsers();
+
+  }, []);
+
+}</code></pre>
+
+    <h2>Loading State Example</h2>
+
+<pre><code><span class="keyword">const</span> [users, setUsers] = useState([]);
+<span class="keyword">const</span> [loading, setLoading] = useState(true);
+
+useEffect(() =&gt; {
+
+  fetch(url)
+    .then(res =&gt; res.json())
+    .then(data =&gt; {
+
+      setUsers(data);
+
+      setLoading(false);
+
+    });
+
+}, []);</code></pre>
+
+<pre><code><span class="keyword">if</span> (loading) {
+
+  <span class="keyword">return</span> <span class="tag">&lt;p&gt;</span>Loading...<span class="tag">&lt;/p&gt;</span>;
+
+}</code></pre>
+
+    <h2>Error Handling Example</h2>
+
+<pre><code><span class="keyword">const</span> [error, setError] = useState(null);
+
+useEffect(() =&gt; {
+
+  fetch(url)
+    .then(res =&gt; res.json())
+    .then(data =&gt; setUsers(data))
+    .catch(err =&gt; setError(err.message));
+
+}, []);</code></pre>
+
+<pre><code><span class="keyword">if</span> (error) {
+
+  <span class="keyword">return</span> <span class="tag">&lt;p&gt;</span>{error}<span class="tag">&lt;/p&gt;</span>;
+
+}</code></pre>
+
+    <h2>Complete Real-World Example</h2>
+
+<pre><code><span class="keyword">import</span> { useEffect, useState } <span class="keyword">from</span> <span class="string">'react'</span>;
+
+<span class="keyword">function</span> <span class="function">Users</span>() {
+
+  <span class="keyword">const</span> [users, setUsers] = useState([]);
+  <span class="keyword">const</span> [loading, setLoading] = useState(true);
+  <span class="keyword">const</span> [error, setError] = useState(null);
+
+  useEffect(() =&gt; {
+
+    fetch(<span class="string">'https://jsonplaceholder.typicode.com/users'</span>)
+      .then(res =&gt; res.json())
+      .then(data =&gt; {
+
+        setUsers(data);
+
+        setLoading(false);
+
+      })
+      .catch(err =&gt; {
+
+        setError(err.message);
+
+        setLoading(false);
+
+      });
+
+  }, []);
+
+  <span class="keyword">if</span> (loading) {
+
+    <span class="keyword">return</span> <span class="tag">&lt;p&gt;</span>Loading...<span class="tag">&lt;/p&gt;</span>;
+
+  }
+
+  <span class="keyword">if</span> (error) {
+
+    <span class="keyword">return</span> <span class="tag">&lt;p&gt;</span>{error}<span class="tag">&lt;/p&gt;</span>;
+
+  }
+
+  <span class="keyword">return</span> (
+
+    <span class="tag">&lt;ul&gt;</span>
+
+      {users.map(user =&gt; (
+
+        <span class="tag">&lt;li</span> key={user.id}<span class="tag">&gt;</span>
+
+          {user.name}
+
+        <span class="tag">&lt;/li&gt;</span>
+
+      ))}
+
+    <span class="tag">&lt;/ul&gt;</span>
+
+  );
+
+}</code></pre>
+
+    <h2>Can We Fetch Data Without useEffect?</h2>
+
+    <div class="highlight">
+      Yes, but in most client-side React applications, useEffect is the standard way to fetch data when a component loads.
+    </div>
+
+<pre><code><span class="comment">// Event-driven API call</span>
+
+<span class="keyword">const</span> handleSearch = () =&gt; {
+
+  fetch(url);
+
+};</code></pre>
+
+    <div class="highlight">
+      When an API call is triggered by a user action such as a button click, useEffect is usually not needed.
+    </div>
+
+    <h2>Real Project Example</h2>
+
+    <div class="highlight">
+      In our Aadhaar Authentication application, useEffect can be used to fetch user details, audit records, department lists, service configurations, and dashboard statistics when a page loads. The returned data is stored in state and displayed in the UI.
+    </div>
+
+    <h2>Important Interview Points</h2>
+
+    <ul>
+      <li>Data fetching is a side effect.</li>
+      <li>useEffect is commonly used for API calls on component mount.</li>
+      <li>useState stores the fetched data.</li>
+      <li>Loading and error states should be handled.</li>
+      <li>API calls triggered by user actions usually do not require useEffect.</li>
+    </ul>
+
+    <h2>Short Interview Answer</h2>
+
+    <div class="highlight">
+      Data is usually fetched inside useEffect() and stored using useState(). After the API response arrives, updating state causes React to re-render the component with the new data.
+    </div>
+
+    <h2>One-Line Interview Answer</h2>
+
+    <div class="highlight">
+      React components typically fetch data using fetch() inside useEffect() and store the result in useState().
+    </div>
+
+  </div>
+
+</body>
+</html>

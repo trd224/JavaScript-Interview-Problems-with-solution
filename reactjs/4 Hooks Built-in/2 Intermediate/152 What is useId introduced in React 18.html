@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>152 - What is useId Introduced in React 18?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px;margin-bottom:10px}
+p{color:#cbd5e1}
+ul{padding-left:24px}
+li{margin-bottom:10px;color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px;margin-top:15px}
+.warning{background:#1e1b4b;border-left:5px solid #fbbf24;padding:18px;border-radius:10px;margin-top:15px}
+.success{background:#052e16;padding:18px;border-left:5px solid #22c55e;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;margin-top:15px;text-align:center;line-height:2;font-size:18px}
+pre{border-radius:12px;overflow-x:auto}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>152. What is useId Introduced in React 18?</h1>
+
+<h2>One-Line Definition</h2>
+
+<div class="highlight">
+useId is a React 18 hook that generates stable, unique IDs for accessibility attributes and works correctly with both client-side rendering and server-side rendering.
+</div>
+
+<h2>Why Was useId Introduced?</h2>
+
+<p>
+Many HTML elements need matching IDs.
+</p>
+
+<h3>Example</h3>
+
+<pre><code class="language-html">&lt;label for="email"&gt;
+  Email
+&lt;/label&gt;
+
+&lt;input id="email" /&gt;</code></pre>
+
+<p>
+The label and input must share the same ID.
+</p>
+
+<p>
+In React we often generate IDs dynamically.
+</p>
+
+<h2>The Problem Before React 18</h2>
+
+<p>
+Developers commonly used:
+</p>
+
+<pre><code class="language-jsx">Math.random()</code></pre>
+
+<p>
+or:
+</p>
+
+<pre><code class="language-jsx">Date.now()</code></pre>
+
+<h3>Example</h3>
+
+<pre><code class="language-jsx">const id = Math.random();
+
+return (
+  &lt;&gt;
+    &lt;label htmlFor={id}&gt;
+      Email
+    &lt;/label&gt;
+
+    &lt;input id={id} /&gt;
+  &lt;/&gt;
+);</code></pre>
+
+<p>
+This works on the client.
+</p>
+
+<p>
+But React 18 introduced more SSR features.
+</p>
+
+<div class="warning">
+Random IDs can cause server and client HTML to generate different IDs.
+</div>
+
+<h2>The SSR Problem</h2>
+
+<h3>Server Render</h3>
+
+<pre><code class="language-text">ID = 12345
+</code></pre>
+
+<h3>Client Hydration</h3>
+
+<pre><code class="language-text">ID = 98765
+</code></pre>
+
+<p>
+React compares:
+</p>
+
+<pre><code class="language-text">12345 !== 98765
+</code></pre>
+
+<p>
+Result:
+</p>
+
+<pre><code class="language-text">Hydration Warning
+</code></pre>
+
+<div class="warning">
+The server HTML and client HTML no longer match.
+</div>
+
+<h2>Solution: useId</h2>
+
+<pre><code class="language-jsx">import { useId } from 'react';
+
+function SignupForm() {
+
+  const id = useId();
+
+  return (
+    &lt;&gt;
+      &lt;label htmlFor={id}&gt;
+        Email
+      &lt;/label&gt;
+
+      &lt;input id={id} /&gt;
+    &lt;/&gt;
+  );
+
+}</code></pre>
+
+<div class="success">
+React generates a stable ID that matches between the server and client.
+</div>
+
+<h2>How useId Works</h2>
+
+<pre><code class="language-jsx">const id = useId();</code></pre>
+
+<p>
+React generates something similar to:
+</p>
+
+<pre><code class="language-text">:r0:
+</code></pre>
+
+<p>
+or:
+</p>
+
+<pre><code class="language-text">:r1:
+</code></pre>
+
+<p>
+The exact value is managed internally by React.
+</p>
+
+<div class="highlight">
+We should treat the ID as an opaque string and never rely on its format.
+</div>
+
+<h2>Basic Example</h2>
+
+<pre><code class="language-jsx">import { useId } from 'react';
+
+export default function App() {
+
+  const id = useId();
+
+  return (
+    &lt;&gt;
+      &lt;label htmlFor={id}&gt;
+        Username
+      &lt;/label&gt;
+
+      &lt;input id={id} /&gt;
+    &lt;/&gt;
+  );
+
+}</code></pre>
+
+<h2>Real Accessibility Example</h2>
+
+<p>
+The most common use case is accessibility.
+</p>
+
+<pre><code class="language-jsx">import { useId } from 'react';
+
+function InputField() {
+
+  const id = useId();
+
+  return (
+    &lt;&gt;
+      &lt;label htmlFor={id}&gt;
+        Email Address
+      &lt;/label&gt;
+
+      &lt;input
+        id={id}
+        type="email"
+      /&gt;
+    &lt;/&gt;
+  );
+
+}</code></pre>
+
+<p>
+Now screen readers correctly connect:
+</p>
+
+<pre><code class="language-text">Label
+↓
+Input
+</code></pre>
+
+<h2>Multiple IDs</h2>
+
+<p>
+Sometimes we need multiple related IDs.
+</p>
+
+<pre><code class="language-jsx">const id = useId();
+
+const inputId = `${id}-input`;
+const errorId = `${id}-error`;</code></pre>
+
+<h3>Usage</h3>
+
+<pre><code class="language-jsx">&lt;input
+  id={inputId}
+  aria-describedby={errorId}
+/&gt;
+
+&lt;p id={errorId}&gt;
+  Invalid email
+&lt;/p&gt;</code></pre>
+
+<div class="success">
+This creates multiple unique IDs from one useId value.
+</div>
+
+<h2>Common Interview Question</h2>
+
+<p>
+Can useId be used as a React key?
+</p>
+
+<h3>Wrong</h3>
+
+<pre><code class="language-jsx">{users.map(user => (
+
+  &lt;div key={useId()}&gt;
+    {user.name}
+  &lt;/div&gt;
+
+))}</code></pre>
+
+<div class="warning">
+Never use useId for React keys.
+</div>
+
+<h2>Why Not?</h2>
+
+<p>
+React keys should come from data.
+</p>
+
+<h3>Correct</h3>
+
+<pre><code class="language-jsx">{users.map(user => (
+
+  &lt;div key={user.id}&gt;
+    {user.name}
+  &lt;/div&gt;
+
+))}</code></pre>
+
+<div class="highlight">
+useId is for accessibility IDs, not list keys.
+</div>
+
+<h2>Another Common Mistake</h2>
+
+<h3>Wrong</h3>
+
+<pre><code class="language-jsx">const id = useId();
+
+fetch(`/api/users/${id}`);</code></pre>
+
+<p>
+useId should not be used as:
+</p>
+
+<ul>
+<li>Database IDs.</li>
+<li>API IDs.</li>
+<li>User IDs.</li>
+<li>Primary keys.</li>
+</ul>
+
+<div class="warning">
+useId only creates UI identifiers.
+</div>
+
+<h2>Most Common useId Use Cases</h2>
+
+<ul>
+<li>label + input linking.</li>
+<li>aria-describedby.</li>
+<li>aria-labelledby.</li>
+<li>Form accessibility.</li>
+<li>SSR-safe IDs.</li>
+<li>Reusable form components.</li>
+</ul>
+
+<h2>Comparison</h2>
+
+<table>
+<tr>
+<th>Method</th>
+<th>SSR Safe?</th>
+</tr>
+
+<tr>
+<td>Math.random()</td>
+<td>❌ No</td>
+</tr>
+
+<tr>
+<td>Date.now()</td>
+<td>❌ No</td>
+</tr>
+
+<tr>
+<td>UUID Generated During Render</td>
+<td>❌ Usually No</td>
+</tr>
+
+<tr>
+<td>useId()</td>
+<td>✅ Yes</td>
+</tr>
+</table>
+
+<h2>When Should You Use useId?</h2>
+
+<ul>
+<li>Accessibility attributes.</li>
+<li>Form labels.</li>
+<li>ARIA relationships.</li>
+<li>Reusable form components.</li>
+<li>SSR applications.</li>
+</ul>
+
+<h2>When Should You NOT Use useId?</h2>
+
+<ul>
+<li>React list keys.</li>
+<li>Database IDs.</li>
+<li>User IDs.</li>
+<li>API identifiers.</li>
+<li>Business logic identifiers.</li>
+</ul>
+
+<h2>Easy Way To Remember</h2>
+
+<div class="flow">
+Need Unique UI ID?
+<br>↓<br>
+Label
+<br>↓<br>
+Input
+<br>↓<br>
+ARIA
+<br>↓<br>
+useId()
+
+
+<br><br>
+
+Need Database ID?
+<br>↓<br>
+Need React Key?
+<br>↓<br>
+Need API ID?
+<br>↓<br>
+NOT useId()
+</div>
+
+<h2>Interview Answer</h2>
+
+<div class="highlight">
+useId is a React 18 hook that generates unique, stable IDs that work correctly across server-side rendering and client-side hydration. It is primarily used for accessibility features such as linking labels, inputs, and ARIA attributes.
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+useId generates stable, SSR-safe unique IDs for accessibility and form elements.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+
+</body>
+</html>

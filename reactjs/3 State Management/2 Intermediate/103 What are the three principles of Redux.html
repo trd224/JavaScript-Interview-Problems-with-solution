@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>103 - Three Principles of Redux</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px;margin-bottom:10px}
+p{color:#cbd5e1}
+ul{padding-left:24px}
+li{margin-bottom:10px;color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;margin-top:15px;text-align:center;line-height:2;font-size:18px}
+pre{border-radius:12px;overflow-x:auto}
+.bad{border-left-color:#ef4444;background:#1f1018}
+.good{border-left-color:#22c55e;background:#052e16}
+.warning{border-left-color:#fbbf24;background:#1e1b4b}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>103. What Are the Three Principles of Redux?</h1>
+
+<h2>One-Line Definition</h2>
+
+<div class="highlight">
+Redux is based on three principles: one central store, state is read-only, and reducers are responsible for creating the next state.
+</div>
+
+<h2>Why These Principles Exist</h2>
+
+<p>
+Redux is used when our application has shared state that is read and updated by many components.
+</p>
+
+<p>
+To keep state predictable, Redux follows a fixed rule-based flow.
+</p>
+
+<div class="flow">
+Component
+<br>↓<br>
+dispatch(action)
+<br>↓<br>
+Reducer
+<br>↓<br>
+Redux Store Updated
+<br>↓<br>
+React UI Re-renders
+</div>
+
+<h2>Principle 1: Single Source of Truth</h2>
+
+<div class="highlight">
+The entire shared state of our application is stored in one central Redux store.
+</div>
+
+<p>
+Without Redux, state may be stored in many different components.
+</p>
+
+<pre><code class="language-text">ProductPage  → own cart state
+CartPage     → own cart state
+Navbar       → own cart count state</code></pre>
+
+<p>
+This can make the application harder to manage when it grows.
+</p>
+
+<p>
+With Redux, shared state lives in one store.
+</p>
+
+<pre><code class="language-jsx">{
+  auth: {
+    user: null
+  },
+  cart: {
+    items: []
+  },
+  products: {
+    list: []
+  },
+  orders: {
+    list: []
+  }
+}</code></pre>
+
+<p>
+Now every component reads the required data from the same Redux store.
+</p>
+
+<pre><code class="language-jsx">const cartItems = useSelector(state =&gt; state.cart.items);</code></pre>
+
+<h3>Real Project Example</h3>
+
+<table>
+<tr>
+<th>Component</th>
+<th>Data Needed</th>
+<th>Read From</th>
+</tr>
+
+<tr>
+<td>Navbar</td>
+<td>Cart count</td>
+<td>Redux store</td>
+</tr>
+
+<tr>
+<td>CartPage</td>
+<td>Cart items</td>
+<td>Redux store</td>
+</tr>
+
+<tr>
+<td>CheckoutPage</td>
+<td>Cart items and user</td>
+<td>Redux store</td>
+</tr>
+
+<tr>
+<td>ProfilePage</td>
+<td>User data</td>
+<td>Redux store</td>
+</tr>
+</table>
+
+<div class="highlight warning">
+Easy Meaning: One application should have one reliable place for shared state.
+</div>
+
+<h2>Principle 2: State Is Read-Only</h2>
+
+<div class="highlight">
+Redux state cannot be changed directly from components. Components must dispatch actions.
+</div>
+
+<p>
+A component should not directly modify Redux state.
+</p>
+
+<div class="highlight bad">
+<strong>Wrong:</strong> Directly changing state is not allowed in Redux.
+</div>
+
+<pre><code class="language-jsx">state.cart.items.push(product);</code></pre>
+
+<p>
+Instead, the component dispatches an action.
+</p>
+
+<div class="highlight good">
+<strong>Correct:</strong> Tell Redux what happened by dispatching an action.
+</div>
+
+<pre><code class="language-jsx">dispatch(addToCart(product));</code></pre>
+
+<p>
+The action describes what happened in the application.
+</p>
+
+<pre><code class="language-jsx">{
+  type: 'cart/addToCart',
+  payload: product
+}</code></pre>
+
+<h3>Why Is This Important?</h3>
+
+<p>
+Because every state change becomes easy to track.
+</p>
+
+<div class="flow">
+User clicks Add To Cart
+<br>↓<br>
+dispatch(addToCart(product))
+<br>↓<br>
+Redux receives action
+<br>↓<br>
+Reducer updates state
+</div>
+
+<div class="highlight warning">
+Easy Meaning: Components do not directly change state. They only send actions to Redux.
+</div>
+
+<h2>Principle 3: Changes Are Made With Pure Reducers</h2>
+
+<div class="highlight">
+Reducers decide how Redux state changes based on the current state and action.
+</div>
+
+<p>
+A reducer receives two things:
+</p>
+
+<pre><code class="language-jsx">(state, action)</code></pre>
+
+<p>
+Then it returns the next state.
+</p>
+
+<h3>Normal Redux Reducer Example</h3>
+
+<pre><code class="language-jsx">const initialState = {
+  items: []
+};
+
+function cartReducer(state = initialState, action) {
+  switch (action.type) {
+    case 'ADD_TO_CART':
+      return {
+        ...state,
+        items: [...state.items, action.payload]
+      };
+
+    default:
+      return state;
+  }
+}</code></pre>
+
+<h3>Reducer Rules</h3>
+
+<ul>
+<li>A reducer should return new state.</li>
+<li>A reducer should not directly mutate existing state in normal Redux.</li>
+<li>A reducer should not call APIs.</li>
+<li>A reducer should not use timers.</li>
+<li>A reducer should produce the same output for the same input.</li>
+</ul>
+
+<h3>Redux Toolkit Reducer Example</h3>
+
+<p>
+In Redux Toolkit, we can write simpler reducer code.
+</p>
+
+<pre><code class="language-jsx">import { createSlice } from '@reduxjs/toolkit';
+
+const initialState = {
+  items: []
+};
+
+const cartSlice = createSlice({
+  name: 'cart',
+  initialState,
+  reducers: {
+    addToCart(state, action) {
+      state.items.push(action.payload);
+    },
+
+    removeFromCart(state, action) {
+      state.items = state.items.filter(item =&gt; item.id !== action.payload);
+    }
+  }
+});
+
+export const { addToCart, removeFromCart } = cartSlice.actions;
+export default cartSlice.reducer;</code></pre>
+
+<div class="highlight">
+Redux Toolkit uses Immer internally, so this mutation-style syntax is safe inside createSlice reducers.
+</div>
+
+<div class="highlight warning">
+Easy Meaning: Reducers are the only place where Redux decides how state should change.
+</div>
+
+<h2>Complete Simple Flow</h2>
+
+<p>
+Suppose the user clicks the Add To Cart button.
+</p>
+
+<div class="flow">
+Button Click
+<br>↓<br>
+dispatch(addToCart(product))
+<br>↓<br>
+Action goes to reducer
+<br>↓<br>
+Reducer adds product to cart
+<br>↓<br>
+Redux store updates
+<br>↓<br>
+Navbar and CartPage show latest cart
+</div>
+
+<h2>Three Principles Summary Table</h2>
+
+<table>
+<tr>
+<th>Principle</th>
+<th>Meaning</th>
+<th>Simple Memory</th>
+</tr>
+
+<tr>
+<td>Single Source of Truth</td>
+<td>Shared state lives in one Redux store.</td>
+<td>One Store</td>
+</tr>
+
+<tr>
+<td>State Is Read-Only</td>
+<td>Components cannot directly change Redux state.</td>
+<td>Dispatch Actions</td>
+</tr>
+
+<tr>
+<td>Changes Are Made With Pure Reducers</td>
+<td>Reducers create the next state from state and action.</td>
+<td>Reducer Updates State</td>
+</tr>
+</table>
+
+<h2>Easy Way To Remember</h2>
+
+<div class="flow">
+1. Single Source of Truth
+<br>↓<br>
+One Store
+<br><br>
+2. State Is Read-Only
+<br>↓<br>
+Dispatch Actions
+<br><br>
+3. Changes Through Reducers
+<br>↓<br>
+Reducers Update State
+</div>
+
+<h2>Important Interview Points</h2>
+
+<ul>
+<li>Redux keeps shared application state in one central store.</li>
+<li>Redux state should not be modified directly from components.</li>
+<li>Components update state by dispatching actions.</li>
+<li>Reducers receive current state and action, then produce the next state.</li>
+<li>This makes state changes predictable, traceable, and easier to debug.</li>
+</ul>
+
+<h2>Short Interview Answer</h2>
+
+<div class="highlight">
+Redux has three principles. First, the entire shared state is stored in one central store. Second, state is read-only, so components cannot directly change it and must dispatch actions. Third, reducers handle those actions and produce the next state in a predictable way.
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight warning">
+Redux is based on one central store, read-only state, and reducers that create the next state from actions.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+
+</body>
+</html>

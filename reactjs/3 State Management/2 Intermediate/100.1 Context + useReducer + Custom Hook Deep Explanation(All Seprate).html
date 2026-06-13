@@ -1,0 +1,1046 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Context + useReducer + Custom Hook Deep Explanation</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:38px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px;margin-bottom:10px}
+p{color:#cbd5e1}
+ul{padding-left:24px}
+li{margin-bottom:10px;color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;margin-top:15px;text-align:center;line-height:2;font-size:18px}
+pre{border-radius:12px;overflow-x:auto}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>Context + useReducer + Custom Hook Deep Explanation</h1>
+
+<h2>Learning Flow</h2>
+
+<div class="flow">
+1. Context Only
+<br>↓<br>
+2. Reducer Only
+<br>↓<br>
+3. useReducer Only
+<br>↓<br>
+4. Custom Hook Only
+<br>↓<br>
+5. Context + useReducer
+<br>↓<br>
+6. Context + useReducer + Custom Hook
+<br>↓<br>
+7. Single File Authentication Example
+<br>↓<br>
+8. Large Project Structure
+</div>
+
+<div class="highlight">
+The key is understanding why each thing exists before combining them.
+</div>
+
+<h2>1. Context Only</h2>
+
+<h3>Problem Without Context</h3>
+
+<p>
+Imagine our application has this component structure:
+</p>
+
+<pre><code class="language-text">App
+├── Header
+│   └── UserMenu
+│       └── Avatar
+│
+└── Dashboard</code></pre>
+
+<p>
+Logged-in user data is stored in App.
+</p>
+
+<pre><code class="language-jsx">const user = {
+  name: 'Rizwan'
+};</code></pre>
+
+<p>
+Now Avatar needs this user data. Without Context, we have to pass user through every component.
+</p>
+
+<pre><code class="language-text">App
+↓
+Header
+↓
+UserMenu
+↓
+Avatar</code></pre>
+
+<pre><code class="language-jsx">&lt;Header user={user} /&gt;
+
+&lt;UserMenu user={user} /&gt;
+
+&lt;Avatar user={user} /&gt;</code></pre>
+
+<div class="highlight">
+This is called prop drilling. We pass props through components that may not even need the data.
+</div>
+
+<h3>Context Solution</h3>
+
+<p>
+Context creates a shared container.
+</p>
+
+<pre><code class="language-jsx">const AuthContext = createContext();</code></pre>
+
+<p>
+Provide value once:
+</p>
+
+<pre><code class="language-jsx">&lt;AuthContext.Provider value={user}&gt;
+  &lt;App /&gt;
+&lt;/AuthContext.Provider&gt;</code></pre>
+
+<p>
+Read anywhere:
+</p>
+
+<pre><code class="language-jsx">const user = useContext(AuthContext);</code></pre>
+
+<div class="highlight">
+Now Avatar can directly read the user from Context without passing props through Header and UserMenu.
+</div>
+
+<h3>Real-World Use Cases</h3>
+
+<table>
+<tr>
+<th>Use Case</th>
+<th>Example State</th>
+</tr>
+
+<tr>
+<td>Authentication</td>
+<td>{ user: { id: 1, name: 'Rizwan', role: 'Admin' } }</td>
+</tr>
+
+<tr>
+<td>Theme</td>
+<td>{ theme: 'dark' }</td>
+</tr>
+
+<tr>
+<td>Language</td>
+<td>{ language: 'en' }</td>
+</tr>
+
+<tr>
+<td>Shopping Cart</td>
+<td>{ items: [] }</td>
+</tr>
+</table>
+
+<h2>2. Reducer Only</h2>
+
+<p>
+A reducer is simply a state update machine.
+</p>
+
+<div class="flow">
+Current State
+<br>+<br>
+Action
+<br>↓<br>
+Reducer
+<br>↓<br>
+New State
+</div>
+
+<h3>Simple Reducer Example</h3>
+
+<pre><code class="language-jsx">const state = {
+  count: 0
+};
+
+const action = {
+  type: 'INCREMENT'
+};
+
+function reducer(state, action) {
+  switch (action.type) {
+    case 'INCREMENT':
+      return {
+        count: state.count + 1
+      };
+
+    default:
+      return state;
+  }
+}</code></pre>
+
+<p>
+Result:
+</p>
+
+<pre><code class="language-jsx">{
+  count: 1
+}</code></pre>
+
+<h3>Real-World Authentication Reducer</h3>
+
+<p>
+Current state:
+</p>
+
+<pre><code class="language-jsx">{
+  user: null,
+  loading: false
+}</code></pre>
+
+<p>
+Action:
+</p>
+
+<pre><code class="language-jsx">{
+  type: 'LOGIN_START'
+}</code></pre>
+
+<p>
+Reducer update:
+</p>
+
+<pre><code class="language-jsx">return {
+  ...state,
+  loading: true
+};</code></pre>
+
+<p>
+New state:
+</p>
+
+<pre><code class="language-jsx">{
+  user: null,
+  loading: true
+}</code></pre>
+
+<div class="highlight">
+The reducer decides how state changes based on action type.
+</div>
+
+<h2>3. useReducer Only</h2>
+
+<p>
+useReducer is the React Hook that uses a reducer to create state and dispatch.
+</p>
+
+<pre><code class="language-jsx">const [state, dispatch] = useReducer(reducer, initialState);</code></pre>
+
+<table>
+<tr>
+<th>Part</th>
+<th>Meaning</th>
+</tr>
+
+<tr>
+<td>state</td>
+<td>Current data</td>
+</tr>
+
+<tr>
+<td>dispatch</td>
+<td>Function used to send an action</td>
+</tr>
+
+<tr>
+<td>reducer</td>
+<td>Function that updates state</td>
+</tr>
+
+<tr>
+<td>initialState</td>
+<td>Starting state</td>
+</tr>
+</table>
+
+<h3>Counter Example</h3>
+
+<pre><code class="language-jsx">const initialState = {
+  count: 0
+};
+
+function counterReducer(state, action) {
+  switch (action.type) {
+    case 'INCREMENT':
+      return {
+        count: state.count + 1
+      };
+
+    default:
+      return state;
+  }
+}</code></pre>
+
+<pre><code class="language-jsx">const [state, dispatch] = useReducer(counterReducer, initialState);</code></pre>
+
+<pre><code class="language-jsx">&lt;button onClick={() =&gt; dispatch({ type: 'INCREMENT' })}&gt;
+  Add
+&lt;/button&gt;</code></pre>
+
+<div class="flow">
+Click Button
+<br>↓<br>
+dispatch()
+<br>↓<br>
+Reducer
+<br>↓<br>
+New State
+<br>↓<br>
+UI Updates
+</div>
+
+<h3>Real-World Login Dispatch</h3>
+
+<pre><code class="language-jsx">dispatch({
+  type: 'LOGIN_START'
+});</code></pre>
+
+<p>
+After API success:
+</p>
+
+<pre><code class="language-jsx">dispatch({
+  type: 'LOGIN_SUCCESS',
+  payload: user
+});</code></pre>
+
+<h2>4. Custom Hook Only</h2>
+
+<p>
+A custom hook is reusable React logic.
+</p>
+
+<div class="highlight">
+A custom hook is just a JavaScript function whose name starts with use and can use React Hooks inside it.
+</div>
+
+<h3>Problem Without Custom Hook</h3>
+
+<p>
+If two components need the same counter logic, we may repeat the same useState logic in both components.
+</p>
+
+<pre><code class="language-jsx">const [count, setCount] = useState(0);</code></pre>
+
+<h3>Create Custom Hook</h3>
+
+<pre><code class="language-jsx">import { useState } from 'react';
+
+function useCounter() {
+  const [count, setCount] = useState(0);
+
+  function increment() {
+    setCount(prev => prev + 1);
+  }
+
+  function decrement() {
+    setCount(prev => prev - 1);
+  }
+
+  return {
+    count,
+    increment,
+    decrement
+  };
+}</code></pre>
+
+<h3>Use Custom Hook</h3>
+
+<pre><code class="language-jsx">const { count, increment, decrement } = useCounter();</code></pre>
+
+<div class="highlight">
+Custom hooks help us reuse logic between components.
+</div>
+
+<h3>Real-World Custom Hook Example</h3>
+
+<p>
+For example, instead of writing window resize logic in every component, we can create:
+</p>
+
+<pre><code class="language-jsx">useWindowSize()</code></pre>
+
+<p>
+Then use it anywhere:
+</p>
+
+<pre><code class="language-jsx">const { width, height } = useWindowSize();</code></pre>
+
+<h2>5. Context + useReducer Together</h2>
+
+<p>
+Now we combine Context and useReducer.
+</p>
+
+<p>
+useReducer creates state and dispatch:
+</p>
+
+<pre><code class="language-jsx">const [state, dispatch] = useReducer(authReducer, initialState);</code></pre>
+
+<p>
+Context shares state and dispatch:
+</p>
+
+<pre><code class="language-jsx">&lt;AuthContext.Provider value={{ state, dispatch }}&gt;
+  {children}
+&lt;/AuthContext.Provider&gt;</code></pre>
+
+<div class="highlight">
+Context + useReducer gives us global state with organized update logic.
+</div>
+
+<h3>Real-World Authentication State</h3>
+
+<pre><code class="language-jsx">{
+  user: null,
+  loading: false,
+  error: ''
+}</code></pre>
+
+<p>
+This state can be used in:
+</p>
+
+<ul>
+<li>Header</li>
+<li>Dashboard</li>
+<li>Sidebar</li>
+<li>Profile Page</li>
+<li>Protected Routes</li>
+</ul>
+
+<h2>Understanding children in Context Provider</h2>
+
+<p>
+Sometimes we write:
+</p>
+
+<pre><code class="language-jsx">&lt;AuthContext.Provider value={{ state, dispatch }}&gt;
+  &lt;App /&gt;
+&lt;/AuthContext.Provider&gt;</code></pre>
+
+<p>
+And sometimes we write:
+</p>
+
+<pre><code class="language-jsx">&lt;AuthContext.Provider value={{ state, dispatch }}&gt;
+  {children}
+&lt;/AuthContext.Provider&gt;</code></pre>
+
+<div class="highlight">
+Both are related. The difference is that &lt;App /&gt; is a fixed component, while {children} means whatever component is passed inside.
+</div>
+
+<h2>Case 1: Direct App Component</h2>
+
+<pre><code class="language-jsx">&lt;AuthContext.Provider value={{ state, dispatch }}&gt;
+  &lt;App /&gt;
+&lt;/AuthContext.Provider&gt;</code></pre>
+
+<p>
+Here we are directly wrapping App with AuthContext.Provider.
+</p>
+
+<div class="flow">
+AuthContext.Provider
+<br>
+↓
+<br>
+App
+</div>
+
+<p>
+This means only App is placed inside the Provider.
+</p>
+
+<h2>Case 2: Using children</h2>
+
+<pre><code class="language-jsx">function AuthProvider({ children }) {
+  return (
+    &lt;AuthContext.Provider value={{ state, dispatch }}&gt;
+      {children}
+    &lt;/AuthContext.Provider&gt;
+  );
+}</code></pre>
+
+<p>
+Here AuthProvider is a reusable wrapper component.
+</p>
+
+<div class="highlight">
+children means whatever we put between &lt;AuthProvider&gt; and &lt;/AuthProvider&gt;.
+</div>
+
+<h2>How React Understands children</h2>
+
+<p>
+When we write:
+</p>
+
+<pre><code class="language-jsx">&lt;AuthProvider&gt;
+  &lt;App /&gt;
+&lt;/AuthProvider&gt;</code></pre>
+
+<p>
+React internally treats it like this:
+</p>
+
+<pre><code class="language-jsx">AuthProvider({
+  children: &lt;App /&gt;
+});</code></pre>
+
+<p>
+So inside AuthProvider:
+</p>
+
+<pre><code class="language-jsx">function AuthProvider({ children }) {
+  // children = &lt;App /&gt;
+}</code></pre>
+
+<p>
+Then this:
+</p>
+
+<pre><code class="language-jsx">&lt;AuthContext.Provider value={{ state, dispatch }}&gt;
+  {children}
+&lt;/AuthContext.Provider&gt;</code></pre>
+
+<p>
+becomes:
+</p>
+
+<pre><code class="language-jsx">&lt;AuthContext.Provider value={{ state, dispatch }}&gt;
+  &lt;App /&gt;
+&lt;/AuthContext.Provider&gt;</code></pre>
+
+<h2>Why We Prefer children</h2>
+
+<h3>Not Reusable</h3>
+
+<pre><code class="language-jsx">function AuthProvider() {
+  return (
+    &lt;AuthContext.Provider value={{ state, dispatch }}&gt;
+      &lt;App /&gt;
+    &lt;/AuthContext.Provider&gt;
+  );
+}</code></pre>
+
+<div class="highlight">
+This is not reusable because AuthProvider can only wrap App.
+</div>
+
+<h3>Reusable</h3>
+
+<pre><code class="language-jsx">function AuthProvider({ children }) {
+  return (
+    &lt;AuthContext.Provider value={{ state, dispatch }}&gt;
+      {children}
+    &lt;/AuthContext.Provider&gt;
+  );
+}</code></pre>
+
+<p>
+Now AuthProvider can wrap anything.
+</p>
+
+<pre><code class="language-jsx">&lt;AuthProvider&gt;
+  &lt;App /&gt;
+&lt;/AuthProvider&gt;</code></pre>
+
+<pre><code class="language-jsx">&lt;AuthProvider&gt;
+  &lt;Dashboard /&gt;
+&lt;/AuthProvider&gt;</code></pre>
+
+<pre><code class="language-jsx">&lt;AuthProvider&gt;
+  &lt;Header /&gt;
+  &lt;Sidebar /&gt;
+  &lt;Dashboard /&gt;
+&lt;/AuthProvider&gt;</code></pre>
+
+<h2>Simple Box Example</h2>
+
+<p>
+Forget Context for a moment. Think about a normal Box component.
+</p>
+
+<pre><code class="language-jsx">function Box({ children }) {
+  return (
+    &lt;div className="box"&gt;
+      {children}
+    &lt;/div&gt;
+  );
+}</code></pre>
+
+<p>
+Usage:
+</p>
+
+<pre><code class="language-jsx">&lt;Box&gt;
+  &lt;h1&gt;Hello Rizwan&lt;/h1&gt;
+&lt;/Box&gt;</code></pre>
+
+<p>
+React sends this to Box:
+</p>
+
+<pre><code class="language-jsx">Box({
+  children: &lt;h1&gt;Hello Rizwan&lt;/h1&gt;
+});</code></pre>
+
+<p>
+Then:
+</p>
+
+<pre><code class="language-jsx">{children}</code></pre>
+
+<p>
+renders:
+</p>
+
+<pre><code class="language-jsx">&lt;h1&gt;Hello Rizwan&lt;/h1&gt;</code></pre>
+
+<h2>Final Comparison</h2>
+
+<table>
+<tr>
+<th>Code</th>
+<th>Meaning</th>
+</tr>
+
+<tr>
+<td>&lt;App /&gt;</td>
+<td>Only App is rendered here</td>
+</tr>
+
+<tr>
+<td>{children}</td>
+<td>Whatever is passed inside the component is rendered here</td>
+</tr>
+
+<tr>
+<td>&lt;AuthProvider&gt;&lt;App /&gt;&lt;/AuthProvider&gt;</td>
+<td>App becomes children of AuthProvider</td>
+</tr>
+
+<tr>
+<td>&lt;AuthProvider&gt;&lt;Dashboard /&gt;&lt;/AuthProvider&gt;</td>
+<td>Dashboard becomes children of AuthProvider</td>
+</tr>
+</table>
+
+<h2>One-Line Explanation</h2>
+
+<div class="highlight">
+{children} is a placeholder that renders whatever we put between the opening and closing tags of a component.
+</div>
+
+<h2>6. Context + useReducer + Custom Hook</h2>
+
+<h3>Without Custom Hook</h3>
+
+<pre><code class="language-jsx">import { useContext } from 'react';
+import { AuthContext } from '../context/AuthContext';
+
+const { state, dispatch } = useContext(AuthContext);</code></pre>
+
+<h3>With Custom Hook</h3>
+
+<pre><code class="language-jsx">function useAuth() {
+  return useContext(AuthContext);
+}</code></pre>
+
+<p>
+Now component code becomes:
+</p>
+
+<pre><code class="language-jsx">const { state, dispatch } = useAuth();</code></pre>
+
+<div class="highlight">
+useAuth hides useContext(AuthContext) and makes component code cleaner.
+</div>
+
+<h2>7. Single File Authentication Example</h2>
+
+<p>
+In a small or medium app, we can keep Context, Reducer, Provider, and Custom Hook in one file.
+</p>
+
+<h3>context/AuthContext.jsx</h3>
+
+<pre><code class="language-jsx">import { createContext, useContext, useReducer } from 'react';
+
+const AuthContext = createContext();
+
+const initialState = {
+  user: null,
+  loading: false,
+  error: ''
+};
+
+function authReducer(state, action) {
+  switch (action.type) {
+    case 'LOGIN_START':
+      return {
+        ...state,
+        loading: true,
+        error: ''
+      };
+
+    case 'LOGIN_SUCCESS':
+      return {
+        ...state,
+        loading: false,
+        user: action.payload
+      };
+
+    case 'LOGIN_ERROR':
+      return {
+        ...state,
+        loading: false,
+        error: action.payload
+      };
+
+    case 'LOGOUT':
+      return {
+        ...state,
+        user: null
+      };
+
+    default:
+      return state;
+  }
+}
+
+export function AuthProvider({ children }) {
+  const [state, dispatch] = useReducer(authReducer, initialState);
+
+  return (
+    &lt;AuthContext.Provider value={{ state, dispatch }}&gt;
+      {children}
+    &lt;/AuthContext.Provider&gt;
+  );
+}
+
+export function useAuth() {
+  return useContext(AuthContext);
+}</code></pre>
+
+<div class="highlight">
+This single-file approach is good for learning, interviews, and small projects.
+</div>
+
+<h2>8. Large Project Separate Files Example</h2>
+
+<p>
+In large applications, we can separate everything into different files.
+</p>
+
+<h3>Folder Structure</h3>
+
+<pre><code class="language-text">src
+│
+├── context
+│   └── AuthContext.jsx
+│
+├── reducers
+│   └── authReducer.js
+│
+├── providers
+│   └── AuthProvider.jsx
+│
+├── hooks
+│   └── useAuth.js
+│
+├── components
+│   ├── Login.jsx
+│   └── Dashboard.jsx
+│
+├── App.jsx
+└── main.jsx</code></pre>
+
+<h3>context/AuthContext.jsx</h3>
+
+<pre><code class="language-jsx">import { createContext } from 'react';
+
+export const AuthContext = createContext();</code></pre>
+
+<h3>reducers/authReducer.js</h3>
+
+<pre><code class="language-jsx">export const initialState = {
+  user: null,
+  loading: false,
+  error: ''
+};
+
+export function authReducer(state, action) {
+  switch (action.type) {
+    case 'LOGIN_START':
+      return {
+        ...state,
+        loading: true,
+        error: ''
+      };
+
+    case 'LOGIN_SUCCESS':
+      return {
+        ...state,
+        loading: false,
+        user: action.payload
+      };
+
+    case 'LOGIN_ERROR':
+      return {
+        ...state,
+        loading: false,
+        error: action.payload
+      };
+
+    case 'LOGOUT':
+      return {
+        ...state,
+        user: null
+      };
+
+    default:
+      return state;
+  }
+}</code></pre>
+
+<h3>providers/AuthProvider.jsx</h3>
+
+<pre><code class="language-jsx">import { useReducer } from 'react';
+import { AuthContext } from '../context/AuthContext';
+import { authReducer, initialState } from '../reducers/authReducer';
+
+export function AuthProvider({ children }) {
+  const [state, dispatch] = useReducer(authReducer, initialState);
+
+  return (
+    &lt;AuthContext.Provider value={{ state, dispatch }}&gt;
+      {children}
+    &lt;/AuthContext.Provider&gt;
+  );
+}</code></pre>
+
+<h3>hooks/useAuth.js</h3>
+
+<pre><code class="language-jsx">import { useContext } from 'react';
+import { AuthContext } from '../context/AuthContext';
+
+export function useAuth() {
+  return useContext(AuthContext);
+}</code></pre>
+
+<h3>components/Login.jsx</h3>
+
+<pre><code class="language-jsx">import { useState } from 'react';
+import { useAuth } from '../hooks/useAuth';
+
+function Login() {
+  const { state, dispatch } = useAuth();
+
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+
+  function handleLogin(e) {
+    e.preventDefault();
+
+    dispatch({ type: 'LOGIN_START' });
+
+    setTimeout(() => {
+      if (username === 'admin' && password === '123') {
+        dispatch({
+          type: 'LOGIN_SUCCESS',
+          payload: {
+            id: 1,
+            name: 'Rizwan',
+            role: 'Admin'
+          }
+        });
+      } else {
+        dispatch({
+          type: 'LOGIN_ERROR',
+          payload: 'Invalid Username or Password'
+        });
+      }
+    }, 1500);
+  }
+
+  return (
+    &lt;form onSubmit={handleLogin}&gt;
+      &lt;input value={username} onChange={(e) =&gt; setUsername(e.target.value)} placeholder="Username" /&gt;
+
+      &lt;input type="password" value={password} onChange={(e) =&gt; setPassword(e.target.value)} placeholder="Password" /&gt;
+
+      {state.error && &lt;p&gt;{state.error}&lt;/p&gt;}
+
+      &lt;button disabled={state.loading}&gt;
+        {state.loading ? 'Logging In...' : 'Login'}
+      &lt;/button&gt;
+    &lt;/form&gt;
+  );
+}
+
+export default Login;</code></pre>
+
+<h3>components/Dashboard.jsx</h3>
+
+<pre><code class="language-jsx">import { useAuth } from '../hooks/useAuth';
+
+function Dashboard() {
+  const { state, dispatch } = useAuth();
+
+  return (
+    &lt;div&gt;
+      &lt;h2&gt;Dashboard&lt;/h2&gt;
+
+      &lt;p&gt;Welcome {state.user.name}&lt;/p&gt;
+
+      &lt;p&gt;Role: {state.user.role}&lt;/p&gt;
+
+      &lt;button onClick={() =&gt; dispatch({ type: 'LOGOUT' })}&gt;
+        Logout
+      &lt;/button&gt;
+    &lt;/div&gt;
+  );
+}
+
+export default Dashboard;</code></pre>
+
+<h3>App.jsx</h3>
+
+<pre><code class="language-jsx">import Login from './components/Login';
+import Dashboard from './components/Dashboard';
+import { useAuth } from './hooks/useAuth';
+
+function App() {
+  const { state } = useAuth();
+
+  return (
+    &lt;&gt;
+      {state.user ? &lt;Dashboard /&gt; : &lt;Login /&gt;}
+    &lt;/&gt;
+  );
+}
+
+export default App;</code></pre>
+
+<h3>main.jsx</h3>
+
+<pre><code class="language-jsx">import React from 'react';
+import ReactDOM from 'react-dom/client';
+import App from './App';
+import { AuthProvider } from './providers/AuthProvider';
+
+ReactDOM.createRoot(document.getElementById('root')).render(
+  &lt;AuthProvider&gt;
+    &lt;App /&gt;
+  &lt;/AuthProvider&gt;
+);</code></pre>
+
+<h2>Complete Authentication Flow</h2>
+
+<div class="flow">
+User Clicks Login
+<br>↓<br>
+dispatch({ type: 'LOGIN_START' })
+<br>↓<br>
+Reducer
+<br>↓<br>
+loading = true
+<br>↓<br>
+API Call
+<br>↓<br>
+Success
+<br>↓<br>
+dispatch({ type: 'LOGIN_SUCCESS', payload: user })
+<br>↓<br>
+Reducer
+<br>↓<br>
+user saved
+<br>↓<br>
+Context updated
+<br>↓<br>
+All components re-render
+<br>↓<br>
+Dashboard appears
+</div>
+
+<h2>Final Summary</h2>
+
+<table>
+<tr>
+<th>Concept</th>
+<th>Main Purpose</th>
+</tr>
+
+<tr>
+<td>Context</td>
+<td>Shares data globally</td>
+</tr>
+
+<tr>
+<td>Reducer</td>
+<td>Controls how state changes</td>
+</tr>
+
+<tr>
+<td>useReducer</td>
+<td>Creates state and dispatch</td>
+</tr>
+
+<tr>
+<td>Custom Hook</td>
+<td>Reuses logic and makes code cleaner</td>
+</tr>
+
+<tr>
+<td>Provider</td>
+<td>Makes state available to child components</td>
+</tr>
+
+<tr>
+<td>dispatch</td>
+<td>Sends an action to the reducer</td>
+</tr>
+</table>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+Context shares global state, useReducer controls state updates through actions, and a custom hook makes that global state easy to access from any component.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+
+</body>
+</html>

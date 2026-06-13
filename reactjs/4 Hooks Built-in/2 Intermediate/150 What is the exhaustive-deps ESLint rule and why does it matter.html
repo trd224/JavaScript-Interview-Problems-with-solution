@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>150 - What is the exhaustive-deps ESLint Rule and Why Does It Matter?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px;margin-bottom:10px}
+p{color:#cbd5e1}
+ul{padding-left:24px}
+li{margin-bottom:10px;color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px;margin-top:15px}
+.warning{background:#1e1b4b;border-left:5px solid #fbbf24;padding:18px;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;margin-top:15px;text-align:center;line-height:2;font-size:18px}
+pre{border-radius:12px;overflow-x:auto}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>150. What is the exhaustive-deps ESLint Rule and Why Does It Matter?</h1>
+
+<h2>One-Line Definition</h2>
+
+<div class="highlight">
+The exhaustive-deps ESLint rule checks whether all values used inside hooks such as useEffect, useMemo, and useCallback are correctly included in their dependency arrays.
+</div>
+
+<h2>Why Does This Rule Exist?</h2>
+
+<p>
+React hooks depend on dependency arrays.
+</p>
+
+<pre><code class="language-jsx">useEffect(() => {
+
+  console.log(count);
+
+}, [count]);</code></pre>
+
+<p>
+React uses the dependency array to decide:
+</p>
+
+<div class="flow">
+Dependency Changed?
+<br>↓<br>
+Yes
+<br>↓<br>
+Run Effect Again
+
+
+<br><br>
+
+Dependency Changed?
+<br>↓<br>
+No
+<br>↓<br>
+Skip Effect
+</div>
+
+<p>
+If we forget a dependency, React may use old values.
+</p>
+
+<div class="warning">
+This creates bugs that are often difficult to find.
+</div>
+
+<h2>The Problem It Prevents</h2>
+
+<h3>Example</h3>
+
+<pre><code class="language-jsx">function App() {
+
+  const [count, setCount] = useState(0);
+
+  useEffect(() => {
+
+    console.log(count);
+
+  }, []);
+
+}</code></pre>
+
+<p>
+Inside the effect we use:
+</p>
+
+<pre><code class="language-text">count
+</code></pre>
+
+<p>
+But dependency array is:
+</p>
+
+<pre><code class="language-jsx">[]
+</code></pre>
+
+<p>
+ESLint shows:
+</p>
+
+<pre><code class="language-text">React Hook useEffect has a missing dependency: 'count'
+</code></pre>
+
+<div class="warning">
+The effect uses count but does not watch count.
+</div>
+
+<h2>Why Is This Dangerous?</h2>
+
+<h3>First Render</h3>
+
+<pre><code class="language-text">count = 0
+</code></pre>
+
+<p>
+Effect runs:
+</p>
+
+<pre><code class="language-text">0
+</code></pre>
+
+<h3>User Clicks Button</h3>
+
+<pre><code class="language-text">count = 1
+</code></pre>
+
+<p>
+Will effect run again?
+</p>
+
+<pre><code class="language-text">No
+</code></pre>
+
+<p>
+Because:
+</p>
+
+<pre><code class="language-jsx">[]
+</code></pre>
+
+<p>
+never changes.
+</p>
+
+<div class="warning">
+The effect becomes stuck with old data.
+</div>
+
+<h2>Correct Version</h2>
+
+<pre><code class="language-jsx">useEffect(() => {
+
+  console.log(count);
+
+}, [count]);</code></pre>
+
+<p>
+Now:
+</p>
+
+<div class="flow">
+count Changes
+<br>↓<br>
+Dependency Changes
+<br>↓<br>
+Effect Runs Again
+</div>
+
+<h2>What Is a Stale Closure?</h2>
+
+<p>
+This is the main bug exhaustive-deps prevents.
+</p>
+
+<h3>Example</h3>
+
+<pre><code class="language-jsx">function App() {
+
+  const [count, setCount] = useState(0);
+
+  useEffect(() => {
+
+    const id = setInterval(() => {
+
+      console.log(count);
+
+    }, 1000);
+
+    return () => clearInterval(id);
+
+  }, []);
+
+}</code></pre>
+
+<h3>What Happens?</h3>
+
+<p>
+First render:
+</p>
+
+<pre><code class="language-text">count = 0
+</code></pre>
+
+<p>
+Interval remembers:
+</p>
+
+<pre><code class="language-text">0
+</code></pre>
+
+<p>
+User clicks:
+</p>
+
+<pre><code class="language-text">count = 1
+count = 2
+count = 3
+</code></pre>
+
+<p>
+Console still prints:
+</p>
+
+<pre><code class="language-text">0
+0
+0
+0
+</code></pre>
+
+<div class="warning">
+The effect captured the old value of count.
+This is called a stale closure.
+</div>
+
+<h2>Correct Version</h2>
+
+<pre><code class="language-jsx">useEffect(() => {
+
+  const id = setInterval(() => {
+
+    console.log(count);
+
+  }, 1000);
+
+  return () => clearInterval(id);
+
+}, [count]);</code></pre>
+
+<p>
+Now the effect updates when count changes.
+</p>
+
+<h2>The Rule Also Works For useCallback</h2>
+
+<h3>Wrong</h3>
+
+<pre><code class="language-jsx">const handleClick = useCallback(() => {
+
+  console.log(count);
+
+}, []);</code></pre>
+
+<p>
+ESLint:
+</p>
+
+<pre><code class="language-text">Missing dependency: count
+</code></pre>
+
+<h3>Correct</h3>
+
+<pre><code class="language-jsx">const handleClick = useCallback(() => {
+
+  console.log(count);
+
+}, [count]);</code></pre>
+
+<div class="highlight">
+Every value used inside the callback should usually appear in the dependency array.
+</div>
+
+<h2>The Rule Also Works For useMemo</h2>
+
+<h3>Wrong</h3>
+
+<pre><code class="language-jsx">const total = useMemo(() => {
+
+  return price * quantity;
+
+}, [price]);</code></pre>
+
+<p>
+Missing:
+</p>
+
+<pre><code class="language-text">quantity
+</code></pre>
+
+<h3>Correct</h3>
+
+<pre><code class="language-jsx">const total = useMemo(() => {
+
+  return price * quantity;
+
+}, [price, quantity]);</code></pre>
+
+<h2>What Does ESLint Actually Check?</h2>
+
+<p>
+ESLint looks inside the hook.
+</p>
+
+<pre><code class="language-jsx">useEffect(() => {
+
+  console.log(user);
+  console.log(theme);
+
+}, [user]);</code></pre>
+
+<p>
+It sees:
+</p>
+
+<pre><code class="language-text">Used:
+user
+theme
+</code></pre>
+
+<p>
+Dependencies:
+</p>
+
+<pre><code class="language-text">user
+</code></pre>
+
+<p>
+Missing:
+</p>
+
+<pre><code class="language-text">theme
+</code></pre>
+
+<p>
+Warning appears.
+</p>
+
+<h2>Most Common Beginner Mistake</h2>
+
+<p>
+Developers often do this:
+</p>
+
+<pre><code class="language-jsx">useEffect(() => {
+
+  fetchUsers();
+
+}, []);</code></pre>
+
+<p>
+ESLint says:
+</p>
+
+<pre><code class="language-text">Missing dependency: fetchUsers
+</code></pre>
+
+<p>
+Many developers simply disable the warning.
+</p>
+
+<div class="warning">
+Do not ignore exhaustive-deps warnings without understanding why they appear.
+</div>
+
+<h2>How To Fix Function Dependencies</h2>
+
+<h3>Option 1 - Move Function Inside Effect</h3>
+
+<pre><code class="language-jsx">useEffect(() => {
+
+  function fetchUsers() {
+
+    console.log('Fetch');
+
+  }
+
+  fetchUsers();
+
+}, []);</code></pre>
+
+<h3>Option 2 - useCallback</h3>
+
+<pre><code class="language-jsx">const fetchUsers = useCallback(() => {
+
+  console.log('Fetch');
+
+}, []);
+
+useEffect(() => {
+
+  fetchUsers();
+
+}, [fetchUsers]);</code></pre>
+
+<h2>When Is It Okay To Ignore exhaustive-deps?</h2>
+
+<p>
+Very rarely.
+</p>
+
+<h3>Example</h3>
+
+<pre><code class="language-jsx">useEffect(() => {
+
+  initializeAnalytics();
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+
+}, []);</code></pre>
+
+<p>
+Only when we intentionally want:
+</p>
+
+<pre><code class="language-text">Run Once
+</code></pre>
+
+<p>
+and fully understand the consequences.
+</p>
+
+<div class="warning">
+Ignoring the rule should be the exception, not the default solution.
+</div>
+
+<h2>Why This Rule Matters</h2>
+
+<ul>
+<li>Prevents stale closures.</li>
+<li>Prevents missing updates.</li>
+<li>Prevents difficult bugs.</li>
+<li>Keeps hooks synchronized with state.</li>
+<li>Encourages correct dependency arrays.</li>
+</ul>
+
+<h2>Comparison</h2>
+
+<table>
+<tr>
+<th>Without exhaustive-deps</th>
+<th>With exhaustive-deps</th>
+</tr>
+
+<tr>
+<td>Easy to miss dependencies</td>
+<td>Warnings appear immediately</td>
+</tr>
+
+<tr>
+<td>More stale closure bugs</td>
+<td>Fewer stale closure bugs</td>
+</tr>
+
+<tr>
+<td>Harder debugging</td>
+<td>Safer hooks</td>
+</tr>
+</table>
+
+<h2>Easy Way To Remember</h2>
+
+<div class="flow">
+Value Used Inside Hook?
+<br>↓<br>
+Add To Dependency Array
+<br>↓<br>
+ESLint Happy
+<br>↓<br>
+Fewer Bugs
+</div>
+
+<h2>Interview Answer</h2>
+
+<div class="highlight">
+The exhaustive-deps ESLint rule verifies that all values used inside hooks such as useEffect, useMemo, and useCallback are included in their dependency arrays. It helps prevent stale closures, missing updates, and synchronization bugs by ensuring hooks react to the values they depend on.
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+The exhaustive-deps rule ensures hook dependency arrays include every value used inside the hook, helping prevent stale data and hidden bugs.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+
+</body>
+</html>

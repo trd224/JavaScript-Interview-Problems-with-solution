@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>070. What are Render Props and What Problem Do They Solve?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+
+body{
+  margin:0;
+  padding:0;
+  background:#000814;
+  color:#e2e8f0;
+  font-family:Arial,sans-serif;
+  line-height:1.7;
+}
+
+.container{
+  max-width:1000px;
+  margin:40px auto;
+  background:#020617;
+  padding:40px;
+  border-radius:18px;
+  border:1px solid #0f172a;
+  box-shadow:0 0 40px rgba(0,0,0,.95);
+}
+
+h1{
+  color:#f8fafc;
+  margin-bottom:30px;
+  font-size:34px;
+}
+
+h2{
+  color:#c084fc;
+  margin-top:35px;
+  margin-bottom:15px;
+  font-size:26px;
+}
+
+h3{
+  color:#38bdf8;
+  margin-top:25px;
+  margin-bottom:10px;
+}
+
+p{
+  color:#cbd5e1;
+}
+
+ul{
+  padding-left:24px;
+}
+
+li{
+  margin-bottom:10px;
+  color:#cbd5e1;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:20px;
+}
+
+table th,
+table td{
+  border:1px solid #1e293b;
+  padding:14px;
+  text-align:left;
+}
+
+table th{
+  background:#0f172a;
+  color:#38bdf8;
+}
+
+table td{
+  background:#020617;
+  color:#d1d5db;
+}
+
+.highlight{
+  background:#0f172a;
+  padding:18px;
+  border-left:5px solid #38bdf8;
+  border-radius:10px;
+  margin-top:15px;
+}
+
+.flow{
+  background:#020617;
+  border:1px solid #1e293b;
+  padding:20px;
+  border-radius:10px;
+  margin-top:15px;
+  text-align:center;
+  line-height:2;
+  font-size:18px;
+}
+
+pre{
+  border-radius:12px;
+  overflow-x:auto;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>070. What are Render Props and What Problem Do They Solve?</h1>
+
+<h2>One-Line Definition</h2>
+
+<div class="highlight">
+A Render Prop is a technique where a component receives a function as a prop and calls that function to decide what UI should be rendered.
+</div>
+
+<h2>What Problem Do Render Props Solve?</h2>
+
+<p>
+Before Hooks existed, React developers often needed to share stateful logic between multiple components.
+</p>
+
+<p>
+If the same logic was needed in many places, code duplication became a problem.
+</p>
+
+<div class="flow">
+
+Reusable Logic
+<br>
+↓
+<br>
+Used By Multiple Components
+<br>
+↓
+<br>
+Avoid Duplicate Code
+<br>
+↓
+<br>
+Render Props
+
+</div>
+
+<h2>Without Render Props</h2>
+
+<p>
+Suppose we need mouse position tracking in multiple components.
+</p>
+
+<pre><code class="language-jsx">function ComponentA() {
+
+  const [position, setPosition] = useState({
+    x: 0,
+    y: 0
+  });
+
+  // Mouse tracking logic
+
+}</code></pre>
+
+<p>
+Now if another component needs the same logic, we must duplicate the code.
+</p>
+
+<h2>Render Props Solution</h2>
+
+<p>
+We move the reusable logic into a separate component and let consumers decide what UI to render.
+</p>
+
+<h3>MouseTracker Component</h3>
+
+<pre><code class="language-jsx">import { useState } from 'react';
+
+function MouseTracker({ render }) {
+
+  const [position, setPosition] = useState({
+    x: 0,
+    y: 0
+  });
+
+  const handleMouseMove = event => {
+
+    setPosition({
+      x: event.clientX,
+      y: event.clientY
+    });
+
+  };
+
+  return (
+    &lt;div
+      style={{ height: '100vh' }}
+      onMouseMove={handleMouseMove}
+    &gt;
+      {render(position)}
+    &lt;/div&gt;
+  );
+
+}</code></pre>
+
+<h2>Using the Render Prop</h2>
+
+<pre><code class="language-jsx">function App() {
+
+  return (
+    &lt;MouseTracker
+      render={(position) =&gt; (
+        &lt;h2&gt;
+          X: {position.x},
+          Y: {position.y}
+        &lt;/h2&gt;
+      )}
+    /&gt;
+  );
+
+}</code></pre>
+
+<p>
+The MouseTracker component owns the logic, while the App component decides how to display the data.
+</p>
+
+<h2>How It Works</h2>
+
+<div class="flow">
+
+Component Owns Logic
+<br>
+↓
+<br>
+Pass Data To Function
+<br>
+↓
+<br>
+Function Returns UI
+<br>
+↓
+<br>
+React Renders UI
+
+</div>
+
+<h2>Why Is It Called a Render Prop?</h2>
+
+<p>
+Because the prop contains a function that returns JSX.
+</p>
+
+<pre><code class="language-jsx">render={(data) =&gt; (
+  &lt;h2&gt;{data}&lt;/h2&gt;
+)}</code></pre>
+
+<p>
+The function controls what gets rendered.
+</p>
+
+<h2>children as a Render Prop</h2>
+
+<p>
+Sometimes the function is passed through the children prop instead of a prop named render.
+</p>
+
+<pre><code class="language-jsx">function MouseTracker({ children }) {
+
+  return children({
+    x: 100,
+    y: 200
+  });
+
+}</code></pre>
+
+<h3>Usage</h3>
+
+<pre><code class="language-jsx">&lt;MouseTracker&gt;
+  {(position) =&gt; (
+    &lt;h2&gt;
+      {position.x}, {position.y}
+    &lt;/h2&gt;
+  )}
+&lt;/MouseTracker&gt;</code></pre>
+
+<h2>Advantages</h2>
+
+<ul>
+<li>Promotes code reuse.</li>
+<li>Separates logic from UI.</li>
+<li>Makes components highly flexible.</li>
+<li>Avoids code duplication.</li>
+<li>Allows different UIs to share the same logic.</li>
+</ul>
+
+<h2>Render Props vs Custom Hooks</h2>
+
+<table>
+
+<tr>
+<th>Feature</th>
+<th>Render Props</th>
+<th>Custom Hooks</th>
+</tr>
+
+<tr>
+<td>Introduced</td>
+<td>Before Hooks</td>
+<td>React 16.8</td>
+</tr>
+
+<tr>
+<td>Logic Reuse</td>
+<td>Yes</td>
+<td>Yes</td>
+</tr>
+
+<tr>
+<td>JSX Nesting</td>
+<td>More</td>
+<td>Less</td>
+</tr>
+
+<tr>
+<td>Modern React</td>
+<td>Less Common</td>
+<td>Preferred</td>
+</tr>
+
+<tr>
+<td>Readability</td>
+<td>Lower</td>
+<td>Higher</td>
+</tr>
+
+</table>
+
+<h2>Render Props vs HOC</h2>
+
+<table>
+
+<tr>
+<th>Feature</th>
+<th>Render Props</th>
+<th>HOC</th>
+</tr>
+
+<tr>
+<td>Uses Function Prop</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+
+<tr>
+<td>Wraps Component</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+
+<tr>
+<td>Logic Sharing</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+
+</table>
+
+<h2>Real Project Example</h2>
+
+<div class="highlight">
+Before React Hooks, a reusable Aadhaar Authentication component could have used Render Props to share OTP timer logic, device connection logic, or authentication status logic across multiple screens while allowing each screen to render a different UI.
+</div>
+
+<h2>Why Are Render Props Less Common Today?</h2>
+
+<p>
+After React Hooks were introduced, most logic-sharing use cases moved to Custom Hooks because they provide cleaner and more readable code.
+</p>
+
+<pre><code class="language-jsx">function useMousePosition() {
+
+  const [position, setPosition] = useState({
+    x: 0,
+    y: 0
+  });
+
+  return position;
+
+}</code></pre>
+
+<p>
+Today, Custom Hooks are usually preferred over Render Props.
+</p>
+
+<h2>Important Interview Points</h2>
+
+<ul>
+<li>A Render Prop is a function passed as a prop.</li>
+<li>The function returns JSX.</li>
+<li>Used for sharing stateful logic.</li>
+<li>Separates logic from presentation.</li>
+<li>Popular before React Hooks.</li>
+<li>Custom Hooks are now the preferred solution.</li>
+</ul>
+
+<h2>Short Interview Answer</h2>
+
+<div class="highlight">
+Render Props are a React pattern where a component receives a function as a prop and calls it to determine what UI to render. They solve the problem of sharing reusable stateful logic between multiple components while allowing each component to render its own UI.
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+Render Props use a function prop that returns JSX, allowing reusable logic to be shared across different components.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+
+</body>
+</html>

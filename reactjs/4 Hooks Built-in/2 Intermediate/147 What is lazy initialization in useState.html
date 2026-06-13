@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>147 - What is Lazy Initialization in useState?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px;margin-bottom:10px}
+p{color:#cbd5e1}
+ul{padding-left:24px}
+li{margin-bottom:10px;color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px;margin-top:15px}
+.warning{background:#1e1b4b;border-left:5px solid #fbbf24;padding:18px;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;margin-top:15px;text-align:center;line-height:2;font-size:18px}
+pre{border-radius:12px;overflow-x:auto}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>147. What is Lazy Initialization in useState?</h1>
+
+<h2>One-Line Definition</h2>
+
+<div class="highlight">
+Lazy initialization is a useState technique where we pass a function instead of a value, allowing React to calculate the initial state only once during the first render.
+</div>
+
+<h2>Why Does Lazy Initialization Exist?</h2>
+
+<p>
+Normally we initialize state like this:
+</p>
+
+<pre><code class="language-jsx">const [count, setCount] = useState(0);</code></pre>
+
+<p>
+For simple values this is perfectly fine.
+</p>
+
+<p>
+But sometimes calculating the initial value is expensive.
+</p>
+
+<h3>Example</h3>
+
+<pre><code class="language-jsx">const [users, setUsers] = useState(
+  generateLargeUserList()
+);</code></pre>
+
+<p>
+The function:
+</p>
+
+<pre><code class="language-jsx">generateLargeUserList()</code></pre>
+
+<p>
+runs every time the component renders.
+</p>
+
+<div class="warning">
+Even though React only uses the initial value once, JavaScript still executes the function on every render.
+</div>
+
+<h2>The Problem</h2>
+
+<pre><code class="language-jsx">function App() {
+
+  const [count, setCount] = useState(0);
+
+  const [users, setUsers] = useState(
+    generateLargeUserList()
+  );
+
+  return (
+    &lt;button onClick={() =&gt; setCount(count + 1)}&gt;
+      Increment
+    &lt;/button&gt;
+  );
+
+}</code></pre>
+
+<h3>First Render</h3>
+
+<pre><code class="language-text">generateLargeUserList()
+↓
+Runs
+</code></pre>
+
+<h3>Second Render</h3>
+
+<pre><code class="language-text">generateLargeUserList()
+↓
+Runs Again
+</code></pre>
+
+<h3>Third Render</h3>
+
+<pre><code class="language-text">generateLargeUserList()
+↓
+Runs Again
+</code></pre>
+
+<p>
+React ignores the returned value after the first render, but the function still executes.
+</p>
+
+<div class="warning">
+This can waste CPU time if the calculation is expensive.
+</div>
+
+<h2>Solution: Lazy Initialization</h2>
+
+<p>
+Instead of passing the result:
+</p>
+
+<pre><code class="language-jsx">useState(generateLargeUserList())</code></pre>
+
+<p>
+Pass a function:
+</p>
+
+<pre><code class="language-jsx">useState(() => generateLargeUserList())</code></pre>
+
+<h3>Example</h3>
+
+<pre><code class="language-jsx">const [users, setUsers] = useState(() => {
+  return generateLargeUserList();
+});</code></pre>
+
+<div class="highlight">
+React calls this function only during the first render.
+</div>
+
+<h2>Visual Comparison</h2>
+
+<h3>Without Lazy Initialization</h3>
+
+<div class="flow">
+Render 1
+<br>↓<br>
+generateLargeUserList()
+<br><br>
+Render 2
+<br>↓<br>
+generateLargeUserList()
+<br><br>
+Render 3
+<br>↓<br>
+generateLargeUserList()
+</div>
+
+<h3>With Lazy Initialization</h3>
+
+<div class="flow">
+Render 1
+<br>↓<br>
+generateLargeUserList()
+<br><br>
+Render 2
+<br>↓<br>
+Skipped
+<br><br>
+Render 3
+<br>↓<br>
+Skipped
+</div>
+
+<h2>Simple Example</h2>
+
+<h3>Without Lazy Initialization</h3>
+
+<pre><code class="language-jsx">function App() {
+
+  console.log('Component Rendered');
+
+  const [value] = useState(Math.random());
+
+  return &lt;h2&gt;{value}&lt;/h2&gt;;
+
+}</code></pre>
+
+<p>
+Every render:
+</p>
+
+<pre><code class="language-text">Math.random()
+↓
+Runs Again
+</code></pre>
+
+<h3>With Lazy Initialization</h3>
+
+<pre><code class="language-jsx">function App() {
+
+  console.log('Component Rendered');
+
+  const [value] = useState(() => {
+    return Math.random();
+  });
+
+  return &lt;h2&gt;{value}&lt;/h2&gt;;
+
+}</code></pre>
+
+<p>
+Now:
+</p>
+
+<pre><code class="language-text">Math.random()
+↓
+Runs Once
+</code></pre>
+
+<h2>Most Common Real-World Example</h2>
+
+<p>
+Reading from localStorage.
+</p>
+
+<h3>Bad</h3>
+
+<pre><code class="language-jsx">const [theme, setTheme] = useState(
+  localStorage.getItem('theme')
+);</code></pre>
+
+<p>
+Every render:
+</p>
+
+<pre><code class="language-text">localStorage.getItem()
+↓
+Runs Again
+</code></pre>
+
+<h3>Good</h3>
+
+<pre><code class="language-jsx">const [theme, setTheme] = useState(() => {
+  return localStorage.getItem('theme');
+});</code></pre>
+
+<p>
+Now:
+</p>
+
+<pre><code class="language-text">localStorage.getItem()
+↓
+Runs Once
+</code></pre>
+
+<div class="highlight">
+This is the most common interview example of lazy initialization.
+</div>
+
+<h2>How React Handles It Internally</h2>
+
+<p>
+When React sees:
+</p>
+
+<pre><code class="language-jsx">useState(100)</code></pre>
+
+<p>
+it stores:
+</p>
+
+<pre><code class="language-text">100
+</code></pre>
+
+<p>
+When React sees:
+</p>
+
+<pre><code class="language-jsx">useState(() => 100)</code></pre>
+
+<p>
+React executes the function once:
+</p>
+
+<pre><code class="language-text">() => 100
+↓
+100
+</code></pre>
+
+<p>
+and stores the result.
+</p>
+
+<p>
+Future renders reuse the stored state.
+</p>
+
+<h2>Important Interview Confusion</h2>
+
+<p>
+Many developers think:
+</p>
+
+<pre><code class="language-text">useState(() => value)
+↓
+Runs every render
+</code></pre>
+
+<p>
+Wrong.
+</p>
+
+<div class="warning">
+The function passed to useState for lazy initialization runs only during the first render.
+</div>
+
+<h2>When Should You Use Lazy Initialization?</h2>
+
+<ul>
+<li>Reading localStorage.</li>
+<li>Reading sessionStorage.</li>
+<li>Large array generation.</li>
+<li>Expensive calculations.</li>
+<li>Complex initial state creation.</li>
+</ul>
+
+<h2>When Should You NOT Use It?</h2>
+
+<p>
+Simple values do not need it.
+</p>
+
+<pre><code class="language-jsx">const [count, setCount] = useState(0);</code></pre>
+
+<pre><code class="language-jsx">const [name, setName] = useState('Rizwan');</code></pre>
+
+<p>
+These are already fast.
+</p>
+
+<div class="warning">
+Lazy initialization should be used only when calculating the initial state is expensive.
+</div>
+
+<h2>Normal vs Lazy Initialization</h2>
+
+<table>
+<tr>
+<th>Normal Initialization</th>
+<th>Lazy Initialization</th>
+</tr>
+
+<tr>
+<td>useState(value)</td>
+<td>useState(() => value)</td>
+</tr>
+
+<tr>
+<td>Expression runs every render</td>
+<td>Function runs once</td>
+</tr>
+
+<tr>
+<td>Good for simple values</td>
+<td>Good for expensive values</td>
+</tr>
+</table>
+
+<h2>Easy Way To Remember</h2>
+
+<div class="flow">
+Normal Initialization
+<br>↓<br>
+Compute Value
+<br>↓<br>
+Every Render
+
+
+<br><br>
+
+Lazy Initialization
+<br>↓<br>
+Compute Value
+<br>↓<br>
+Only First Render
+</div>
+
+<h2>Interview Answer</h2>
+
+<div class="highlight">
+Lazy initialization in useState means passing a function instead of a value. React executes that function only during the first render and uses its return value as the initial state. It is commonly used for expensive calculations and reading values from localStorage.
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+Lazy initialization allows useState to compute its initial value only once by passing a function instead of a direct value.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+
+</body>
+</html>

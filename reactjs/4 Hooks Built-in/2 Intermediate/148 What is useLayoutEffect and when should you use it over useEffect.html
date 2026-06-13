@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>148 - What is useLayoutEffect and When Should You Use It Over useEffect?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px;margin-bottom:10px}
+p{color:#cbd5e1}
+ul{padding-left:24px}
+li{margin-bottom:10px;color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px;margin-top:15px}
+.warning{background:#1e1b4b;border-left:5px solid #fbbf24;padding:18px;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;margin-top:15px;text-align:center;line-height:2;font-size:18px}
+pre{border-radius:12px;overflow-x:auto}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>148. What is useLayoutEffect and When Should You Use It Over useEffect?</h1>
+
+<h2>One-Line Definition</h2>
+
+<div class="highlight">
+useLayoutEffect is a React hook that runs synchronously after React updates the DOM but before the browser paints the screen, allowing us to read or modify the layout without visible flickering.
+</div>
+
+<h2>The Biggest Confusion</h2>
+
+<p>
+Most developers hear:
+</p>
+
+<pre><code class="language-jsx">useEffect()
+useLayoutEffect()</code></pre>
+
+<p>
+and think:
+</p>
+
+<pre><code class="language-text">Both run after render
+↓
+Same thing
+</code></pre>
+
+<p>
+Not exactly.
+</p>
+
+<p>
+The difference is:
+</p>
+
+<div class="flow">
+useLayoutEffect
+<br>↓<br>
+Runs Before Browser Paint
+
+
+<br><br>
+
+useEffect
+<br>↓<br>
+Runs After Browser Paint
+</div>
+
+<h2>Browser Rendering Process</h2>
+
+<p>
+When React updates the UI:
+</p>
+
+<div class="flow">
+React Render
+<br>↓<br>
+Update DOM
+<br>↓<br>
+useLayoutEffect
+<br>↓<br>
+Browser Paint
+<br>↓<br>
+useEffect
+</div>
+
+<div class="highlight">
+This timing difference is the entire reason useLayoutEffect exists.
+</div>
+
+<h2>What Does "Paint" Mean?</h2>
+
+<p>
+Paint means:
+</p>
+
+<pre><code class="language-text">Browser draws pixels on screen
+</code></pre>
+
+<p>
+The user can finally see the UI.
+</p>
+
+<h3>Example</h3>
+
+<div class="flow">
+DOM Updated
+<br>↓<br>
+Browser Paints Screen
+<br>↓<br>
+User Sees UI
+</div>
+
+<h2>How useEffect Works</h2>
+
+<pre><code class="language-jsx">useEffect(() => {
+  console.log('Effect');
+}, []);</code></pre>
+
+<p>
+Execution order:
+</p>
+
+<div class="flow">
+React Render
+<br>↓<br>
+DOM Updated
+<br>↓<br>
+Browser Paint
+<br>↓<br>
+useEffect Runs
+</div>
+
+<p>
+The user sees the UI first.
+</p>
+
+<p>
+Then useEffect executes.
+</p>
+
+<h2>How useLayoutEffect Works</h2>
+
+<pre><code class="language-jsx">useLayoutEffect(() => {
+  console.log('Layout Effect');
+}, []);</code></pre>
+
+<p>
+Execution order:
+</p>
+
+<div class="flow">
+React Render
+<br>↓<br>
+DOM Updated
+<br>↓<br>
+useLayoutEffect Runs
+<br>↓<br>
+Browser Paint
+</div>
+
+<p>
+The browser waits for useLayoutEffect to finish.
+</p>
+
+<div class="warning">
+useLayoutEffect blocks the browser from painting.
+</div>
+
+<h2>Visual Difference</h2>
+
+<h3>useEffect</h3>
+
+<div class="flow">
+DOM Updated
+<br>↓<br>
+Screen Painted
+<br>↓<br>
+User Sees UI
+<br>↓<br>
+useEffect Runs
+</div>
+
+<h3>useLayoutEffect</h3>
+
+<div class="flow">
+DOM Updated
+<br>↓<br>
+useLayoutEffect Runs
+<br>↓<br>
+Screen Painted
+<br>↓<br>
+User Sees UI
+</div>
+
+<h2>Real Problem: UI Flicker</h2>
+
+<p>
+Suppose we need to measure an element and reposition it.
+</p>
+
+<h3>Using useEffect</h3>
+
+<pre><code class="language-jsx">function Tooltip() {
+
+  const ref = useRef();
+
+  useEffect(() => {
+
+    const height =
+      ref.current.getBoundingClientRect().height;
+
+    console.log(height);
+
+  }, []);
+
+  return (
+    &lt;div ref={ref}&gt;
+      Tooltip
+    &lt;/div&gt;
+  );
+
+}</code></pre>
+
+<p>
+Sequence:
+</p>
+
+<div class="flow">
+Render
+<br>↓<br>
+Browser Paint
+<br>↓<br>
+Wrong Position Visible
+<br>↓<br>
+useEffect Runs
+<br>↓<br>
+Position Fixed
+</div>
+
+<p>
+User may briefly see the wrong layout.
+</p>
+
+<div class="warning">
+This visible jump is called flickering or layout shift.
+</div>
+
+<h2>Using useLayoutEffect</h2>
+
+<pre><code class="language-jsx">function Tooltip() {
+
+  const ref = useRef();
+
+  useLayoutEffect(() => {
+
+    const height =
+      ref.current.getBoundingClientRect().height;
+
+    console.log(height);
+
+  }, []);
+
+  return (
+    &lt;div ref={ref}&gt;
+      Tooltip
+    &lt;/div&gt;
+  );
+
+}</code></pre>
+
+<p>
+Sequence:
+</p>
+
+<div class="flow">
+Render
+<br>↓<br>
+DOM Updated
+<br>↓<br>
+Measure Layout
+<br>↓<br>
+Position Corrected
+<br>↓<br>
+Browser Paint
+</div>
+
+<p>
+User only sees the final correct layout.
+</p>
+
+<div class="highlight">
+This is the primary use case of useLayoutEffect.
+</div>
+
+<h2>Common Real-World Uses</h2>
+
+<ul>
+<li>Measuring element width or height.</li>
+<li>Reading getBoundingClientRect().</li>
+<li>Positioning tooltips.</li>
+<li>Positioning popups.</li>
+<li>Scrolling before paint.</li>
+<li>Preventing layout flicker.</li>
+<li>Animation setup.</li>
+</ul>
+
+<h2>Example: Auto Scroll</h2>
+
+<h3>Using useLayoutEffect</h3>
+
+<pre><code class="language-jsx">const listRef = useRef();
+
+useLayoutEffect(() => {
+
+  listRef.current.scrollTop =
+    listRef.current.scrollHeight;
+
+}, []);</code></pre>
+
+<p>
+Scroll position is updated before the user sees the page.
+</p>
+
+<h2>Example: Focus Input</h2>
+
+<pre><code class="language-jsx">const inputRef = useRef();
+
+useLayoutEffect(() => {
+
+  inputRef.current.focus();
+
+}, []);</code></pre>
+
+<p>
+The input receives focus before paint.
+</p>
+
+<h2>Why Not Use useLayoutEffect Everywhere?</h2>
+
+<p>
+Because it blocks painting.
+</p>
+
+<div class="flow">
+DOM Updated
+<br>↓<br>
+useLayoutEffect Runs
+<br>↓<br>
+Browser Must Wait
+<br>↓<br>
+Paint Delayed
+</div>
+
+<p>
+Too many layout effects can make the UI feel slower.
+</p>
+
+<div class="warning">
+useLayoutEffect is more powerful but more expensive than useEffect.
+</div>
+
+<h2>Most Common Mistake</h2>
+
+<p>
+Many developers write:
+</p>
+
+<pre><code class="language-jsx">useLayoutEffect(() => {
+
+  fetch('/api/users');
+
+}, []);</code></pre>
+
+<p>
+This is wrong.
+</p>
+
+<div class="warning">
+Network requests do not need to block browser painting.
+<br><br>
+API calls should use useEffect.
+</div>
+
+<h2>When Should You Use useEffect?</h2>
+
+<ul>
+<li>API calls.</li>
+<li>Subscriptions.</li>
+<li>Timers.</li>
+<li>Event listeners.</li>
+<li>Analytics.</li>
+<li>Logging.</li>
+<li>Most side effects.</li>
+</ul>
+
+<h2>When Should You Use useLayoutEffect?</h2>
+
+<ul>
+<li>DOM measurements.</li>
+<li>Reading element size.</li>
+<li>Position calculations.</li>
+<li>Preventing flicker.</li>
+<li>Animation setup.</li>
+<li>Scroll adjustments before paint.</li>
+</ul>
+
+<h2>Comparison Table</h2>
+
+<table>
+<tr>
+<th>Feature</th>
+<th>useEffect</th>
+<th>useLayoutEffect</th>
+</tr>
+
+<tr>
+<td>Runs After Paint</td>
+<td>✅ Yes</td>
+<td>❌ No</td>
+</tr>
+
+<tr>
+<td>Runs Before Paint</td>
+<td>❌ No</td>
+<td>✅ Yes</td>
+</tr>
+
+<tr>
+<td>Blocks Paint</td>
+<td>❌ No</td>
+<td>✅ Yes</td>
+</tr>
+
+<tr>
+<td>API Calls</td>
+<td>✅ Yes</td>
+<td>❌ No</td>
+</tr>
+
+<tr>
+<td>DOM Measurements</td>
+<td>⚠️ Sometimes</td>
+<td>✅ Best Choice</td>
+</tr>
+
+<tr>
+<td>Prevent Flicker</td>
+<td>❌ No</td>
+<td>✅ Yes</td>
+</tr>
+</table>
+
+<h2>Easy Way To Remember</h2>
+
+<div class="flow">
+Need Data?
+(API, Timers, Events)
+<br>↓<br>
+useEffect
+
+
+<br><br>
+
+Need Layout?
+(Size, Position, Scroll)
+<br>↓<br>
+useLayoutEffect
+</div>
+
+<h2>Interview Answer</h2>
+
+<div class="highlight">
+useLayoutEffect is similar to useEffect, but it runs synchronously after the DOM is updated and before the browser paints the screen. It is mainly used for DOM measurements, positioning, scrolling, and preventing visual flickering. For most side effects such as API calls and subscriptions, useEffect should be preferred.
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+useLayoutEffect runs before the browser paints the screen, making it ideal for layout measurements and preventing UI flicker, while useEffect runs after paint.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+
+</body>
+</html>

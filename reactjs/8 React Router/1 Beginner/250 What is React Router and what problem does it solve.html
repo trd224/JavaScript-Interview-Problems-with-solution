@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>250. What is React Router and What Problem Does It Solve?</title>
+
+  <style>
+
+    body{
+      margin:0;
+      padding:0;
+      background:#000814;
+      color:#e2e8f0;
+      font-family:Arial,sans-serif;
+      line-height:1.7;
+    }
+
+    .container{
+      max-width:1000px;
+      margin:40px auto;
+      background:#020617;
+      padding:40px;
+      border-radius:18px;
+      border:1px solid #0f172a;
+      box-shadow:0 0 40px rgba(0,0,0,.95);
+    }
+
+    h1{
+      color:#f8fafc;
+      margin-bottom:30px;
+      font-size:34px;
+    }
+
+    h2{
+      color:#c084fc;
+      margin-top:35px;
+      margin-bottom:15px;
+      font-size:26px;
+    }
+
+    p{
+      color:#cbd5e1;
+    }
+
+    ul{
+      padding-left:24px;
+    }
+
+    li{
+      margin-bottom:10px;
+      color:#cbd5e1;
+    }
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      margin-top:20px;
+    }
+
+    table th,
+    table td{
+      border:1px solid #1e293b;
+      padding:14px;
+      text-align:left;
+    }
+
+    table th{
+      background:#0f172a;
+      color:#38bdf8;
+    }
+
+    table td{
+      background:#020617;
+      color:#d1d5db;
+    }
+
+    .highlight{
+      background:#0f172a;
+      padding:18px;
+      border-left:5px solid #38bdf8;
+      border-radius:10px;
+      margin-top:15px;
+    }
+
+    .flow{
+      background:#020617;
+      border:1px solid #1e293b;
+      padding:20px;
+      border-radius:10px;
+      margin-top:15px;
+      text-align:center;
+      line-height:2;
+      font-size:18px;
+    }
+
+    pre{
+      background:#000;
+      padding:22px;
+      border-radius:12px;
+      overflow-x:auto;
+      border:1px solid #0f172a;
+    }
+
+    code{
+      font-family:Consolas,monospace;
+      font-size:15px;
+    }
+
+    .keyword{color:#c084fc;}
+    .function{color:#38bdf8;}
+    .string{color:#facc15;}
+    .tag{color:#f472b6;}
+    .comment{color:#94a3b8;}
+    .output{color:#4ade80;}
+
+  </style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>250. What is React Router and What Problem Does It Solve?</h1>
+
+<h2>One-Line Definition</h2>
+
+<div class="highlight">
+React Router is a library that enables navigation between different pages (routes) in a React Single Page Application (SPA) without reloading the browser.
+</div>
+
+<h2>What Problem Does It Solve?</h2>
+
+<p>
+A React application normally contains only a single HTML page.
+</p>
+
+<p>
+Without React Router, switching between pages such as Home, About, Contact, Dashboard, and Profile becomes difficult because React does not provide routing by default.
+</p>
+
+<div class="highlight">
+React Router solves this problem by mapping URLs to React components.
+</div>
+
+<h2>Without React Router</h2>
+
+<div class="flow">
+
+User Clicks About
+<br>
+↓
+<br>
+State Changes Manually
+<br>
+↓
+<br>
+Conditional Rendering
+<br>
+↓
+<br>
+About Component Appears
+
+</div>
+
+<pre><code><span class="keyword">import</span> { useState } <span class="keyword">from</span> <span class="string">'react'</span>;
+
+<span class="keyword">function</span> <span class="function">App</span>() {
+
+  <span class="keyword">const</span> [page, setPage] = <span class="function">useState</span>(<span class="string">'home'</span>);
+
+  <span class="keyword">return</span> (
+
+    <span class="tag">&lt;&gt;</span>
+
+      <span class="tag">&lt;button</span> onClick={() =&gt; setPage(<span class="string">'home'</span>)}<span class="tag">&gt;</span>Home<span class="tag">&lt;/button&gt;</span>
+
+      <span class="tag">&lt;button</span> onClick={() =&gt; setPage(<span class="string">'about'</span>)}<span class="tag">&gt;</span>About<span class="tag">&lt;/button&gt;</span>
+
+      {page === <span class="string">'home'</span> &amp;&amp; <span class="tag">&lt;Home /&gt;</span>}
+
+      {page === <span class="string">'about'</span> &amp;&amp; <span class="tag">&lt;About /&gt;</span>}
+
+    <span class="tag">&lt;/&gt;</span>
+
+  );
+
+}</code></pre>
+
+<h2>Problems with This Approach</h2>
+
+<ul>
+  <li>No real URLs.</li>
+  <li>Users cannot bookmark pages.</li>
+  <li>Browser back/forward buttons do not work properly.</li>
+  <li>Application becomes difficult to maintain.</li>
+</ul>
+
+<h2>With React Router</h2>
+
+<div class="flow">
+
+URL Changes
+<br>
+↓
+<br>
+React Router Detects Route
+<br>
+↓
+<br>
+Correct Component Renders
+
+</div>
+
+<h2>Installation</h2>
+
+<pre><code>npm install react-router-dom</code></pre>
+
+<h2>Basic Routing Setup</h2>
+
+<pre><code><span class="keyword">import</span> { BrowserRouter, Routes, Route } <span class="keyword">from</span> <span class="string">'react-router-dom'</span>;
+
+<span class="keyword">function</span> <span class="function">App</span>() {
+
+  <span class="keyword">return</span> (
+
+    <span class="tag">&lt;BrowserRouter&gt;</span>
+
+      <span class="tag">&lt;Routes&gt;</span>
+
+        <span class="tag">&lt;Route</span> path=<span class="string">"/"</span> element={<span class="tag">&lt;Home /&gt;</span>} <span class="tag">/&gt;</span>
+
+        <span class="tag">&lt;Route</span> path=<span class="string">"/about"</span> element={<span class="tag">&lt;About /&gt;</span>} <span class="tag">/&gt;</span>
+
+        <span class="tag">&lt;Route</span> path=<span class="string">"/contact"</span> element={<span class="tag">&lt;Contact /&gt;</span>} <span class="tag">/&gt;</span>
+
+      <span class="tag">&lt;/Routes&gt;</span>
+
+    <span class="tag">&lt;/BrowserRouter&gt;</span>
+
+  );
+
+}</code></pre>
+
+<h2>Navigation Using Link</h2>
+
+<pre><code><span class="keyword">import</span> { Link } <span class="keyword">from</span> <span class="string">'react-router-dom'</span>;
+
+<span class="keyword">function</span> <span class="function">Navbar</span>() {
+
+  <span class="keyword">return</span> (
+
+    <span class="tag">&lt;nav&gt;</span>
+
+      <span class="tag">&lt;Link</span> to=<span class="string">"/"</span><span class="tag">&gt;</span>Home<span class="tag">&lt;/Link&gt;</span>
+
+      <span class="tag">&lt;Link</span> to=<span class="string">"/about"</span><span class="tag">&gt;</span>About<span class="tag">&lt;/Link&gt;</span>
+
+    <span class="tag">&lt;/nav&gt;</span>
+
+  );
+
+}</code></pre>
+
+<h2>Example URL Mapping</h2>
+
+<table>
+
+<tr>
+<th>URL</th>
+<th>Component</th>
+</tr>
+
+<tr>
+<td>/</td>
+<td>Home</td>
+</tr>
+
+<tr>
+<td>/about</td>
+<td>About</td>
+</tr>
+
+<tr>
+<td>/contact</td>
+<td>Contact</td>
+</tr>
+
+<tr>
+<td>/dashboard</td>
+<td>Dashboard</td>
+</tr>
+
+<tr>
+<td>/users</td>
+<td>Users</td>
+</tr>
+
+</table>
+
+<h2>Why Use Link Instead of &lt;a&gt;?</h2>
+
+<table>
+
+<tr>
+<th>Anchor Tag</th>
+<th>Link Component</th>
+</tr>
+
+<tr>
+<td>Reloads Entire Page</td>
+<td>No Page Reload</td>
+</tr>
+
+<tr>
+<td>Slower Navigation</td>
+<td>Fast Navigation</td>
+</tr>
+
+<tr>
+<td>Resets React State</td>
+<td>Preserves React State</td>
+</tr>
+
+<tr>
+<td>Requests HTML Again</td>
+<td>Client-Side Navigation</td>
+</tr>
+
+</table>
+
+<h2>How React Router Works Internally</h2>
+
+<div class="flow">
+
+User Clicks Link
+<br>
+↓
+<br>
+URL Changes
+<br>
+↓
+<br>
+Browser Does Not Reload
+<br>
+↓
+<br>
+React Router Matches Route
+<br>
+↓
+<br>
+Correct Component Renders
+
+</div>
+
+<h2>Important React Router Components</h2>
+
+<table>
+
+<tr>
+<th>Component</th>
+<th>Purpose</th>
+</tr>
+
+<tr>
+<td>BrowserRouter</td>
+<td>Enables Routing</td>
+</tr>
+
+<tr>
+<td>Routes</td>
+<td>Groups Routes</td>
+</tr>
+
+<tr>
+<td>Route</td>
+<td>Maps URL to Component</td>
+</tr>
+
+<tr>
+<td>Link</td>
+<td>Navigation Without Reload</td>
+</tr>
+
+<tr>
+<td>useNavigate</td>
+<td>Programmatic Navigation</td>
+</tr>
+
+<tr>
+<td>useParams</td>
+<td>Read Route Parameters</td>
+</tr>
+
+</table>
+
+<h2>Real Project Example</h2>
+
+<div class="highlight">
+In our Aadhaar Authentication application, React Router can be used to navigate between Dashboard, Audit Management, User Management, Authentication Logs, Reports, Device Registration, and Settings pages without reloading the browser.
+</div>
+
+<h2>Important Interview Points</h2>
+
+<ul>
+  <li>React Router enables client-side routing.</li>
+  <li>It prevents full page reloads.</li>
+  <li>It maps URLs to React components.</li>
+  <li>Link is preferred over anchor tags.</li>
+  <li>BrowserRouter is the most commonly used router.</li>
+  <li>React Router is provided by react-router-dom.</li>
+</ul>
+
+<h2>Short Interview Answer</h2>
+
+<div class="highlight">
+React Router is a routing library that allows React applications to display different components based on the URL while avoiding full page reloads.
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+React Router enables navigation between pages in a React Single Page Application without reloading the browser.
+</div>
+
+</div>
+
+</body>
+</html>

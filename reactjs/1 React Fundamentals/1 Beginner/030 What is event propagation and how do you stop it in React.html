@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>048 - Event Propagation in React</title>
+
+  <style>
+
+    body{
+      margin:0;
+      padding:0;
+      background:#000814;
+      color:#e2e8f0;
+      font-family:Arial, sans-serif;
+      line-height:1.7;
+    }
+
+    .container{
+      max-width:1000px;
+      margin:40px auto;
+      background:#020617;
+      padding:40px;
+      border-radius:18px;
+      border:1px solid #0f172a;
+      box-shadow:0 0 40px rgba(0,0,0,0.95);
+    }
+
+    h1{
+      color:#f8fafc;
+      margin-bottom:30px;
+      font-size:34px;
+    }
+
+    h2{
+      color:#c084fc;
+      margin-top:35px;
+      margin-bottom:15px;
+      font-size:26px;
+    }
+
+    p{
+      color:#cbd5e1;
+    }
+
+    ul{
+      padding-left:24px;
+    }
+
+    li{
+      margin-bottom:10px;
+      color:#cbd5e1;
+    }
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      margin-top:20px;
+    }
+
+    table th,
+    table td{
+      border:1px solid #1e293b;
+      padding:14px;
+      text-align:left;
+      vertical-align:top;
+    }
+
+    table th{
+      background:#0f172a;
+      color:#38bdf8;
+    }
+
+    table td{
+      background:#020617;
+      color:#d1d5db;
+    }
+
+    .highlight{
+      background:#0f172a;
+      padding:18px;
+      border-left:5px solid #38bdf8;
+      border-radius:10px;
+      margin-top:15px;
+      color:#e5e7eb;
+    }
+
+    .flow{
+      background:#020617;
+      border:1px solid #1e293b;
+      padding:20px;
+      border-radius:10px;
+      margin-top:15px;
+      color:#e2e8f0;
+      line-height:2;
+      text-align:center;
+      font-size:18px;
+    }
+
+    pre{
+      background:#000000;
+      padding:22px;
+      border-radius:12px;
+      overflow-x:auto;
+      border:1px solid #0f172a;
+    }
+
+    code{
+      font-family:Consolas, monospace;
+      font-size:15px;
+    }
+
+    .keyword{
+      color:#c084fc;
+    }
+
+    .function{
+      color:#38bdf8;
+    }
+
+    .string{
+      color:#facc15;
+    }
+
+    .tag{
+      color:#f472b6;
+    }
+
+    .comment{
+      color:#94a3b8;
+    }
+
+    .output{
+      color:#4ade80;
+    }
+
+  
+
+    /* Fixed Previous / Next buttons */
+    .fixed-page-nav-spacer{height:110px;}
+    .fixed-page-nav{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);width:calc(100% - 32px);max-width:1180px;display:flex;justify-content:space-between;gap:16px;z-index:9999;pointer-events:none;}
+    .fixed-page-nav a,.fixed-page-nav span{width:52px;height:52px;display:flex;align-items:center;justify-content:center;text-align:center;text-decoration:none;background:#38bdf8;color:#020617;border-radius:50%;font-size:28px;font-weight:700;line-height:1;box-shadow:0 10px 30px rgba(0,0,0,0.45);pointer-events:auto;}
+    .fixed-page-nav span{background:#334155;color:#94a3b8;cursor:not-allowed;}
+    @media(max-width:600px){.fixed-page-nav{bottom:14px;width:calc(100% - 20px);}.fixed-page-nav a,.fixed-page-nav span{width:46px;height:46px;font-size:24px;}}
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+
+    <h1>048. What is event propagation and how do you stop it in React?</h1>
+
+    <h2>One-Line Definition</h2>
+
+    <div class="highlight">
+      Event propagation is the process where an event travels through parent and child elements, and it can be stopped in React using event.stopPropagation().
+    </div>
+
+    <h2>What Is Event Propagation?</h2>
+
+    <p>
+      When an event occurs on an element:
+    </p>
+
+    <ul>
+      <li>The event does not stay only on that element.</li>
+      <li>The event travels through the DOM tree.</li>
+    </ul>
+
+    <p>
+      This traveling process is called:
+    </p>
+
+    <div class="highlight">
+      Event Propagation
+    </div>
+
+    <h2>Types of Event Propagation</h2>
+
+    <table>
+
+      <tr>
+        <th>Type</th>
+        <th>Direction</th>
+      </tr>
+
+      <tr>
+        <td>Capturing Phase</td>
+        <td>Parent → Child</td>
+      </tr>
+
+      <tr>
+        <td>Bubbling Phase</td>
+        <td>Child → Parent</td>
+      </tr>
+
+    </table>
+
+    <h2>Most Common in React</h2>
+
+    <div class="highlight">
+      React mainly uses event bubbling by default.
+    </div>
+
+    <h2>Simple Example</h2>
+
+    <pre><code><span class="keyword">function</span> <span class="function">App</span>() {
+
+  <span class="keyword">const</span> parentClick = () => {
+    console.log(<span class="string">'Parent Clicked'</span>);
+  };
+
+  <span class="keyword">const</span> buttonClick = () => {
+    console.log(<span class="string">'Button Clicked'</span>);
+  };
+
+  <span class="keyword">return</span> (
+
+    <span class="tag">&lt;div</span> onClick={parentClick}<span class="tag">&gt;</span>
+
+      <span class="tag">&lt;button</span> onClick={buttonClick}<span class="tag">&gt;</span>
+        Click
+      <span class="tag">&lt;/button&gt;</span>
+
+    <span class="tag">&lt;/div&gt;</span>
+
+  );
+
+}</code></pre>
+
+    <h2>What Happens?</h2>
+
+    <p>
+      When button is clicked:
+    </p>
+
+    <pre class="output"><code>Button Clicked
+Parent Clicked</code></pre>
+
+    <h2>Why Parent Clicked?</h2>
+
+    <p>
+      Because the click event bubbled from:
+    </p>
+
+    <div class="flow">
+      button
+      <br>
+      ↓
+      <br>
+      parent div
+    </div>
+
+    <h2>How to Stop Event Propagation</h2>
+
+    <p>
+      React provides:
+    </p>
+
+    <pre><code>event.stopPropagation()</code></pre>
+
+    <h2>Example</h2>
+
+    <pre><code><span class="keyword">function</span> <span class="function">App</span>() {
+
+  <span class="keyword">const</span> parentClick = () => {
+    console.log(<span class="string">'Parent Clicked'</span>);
+  };
+
+  <span class="keyword">const</span> buttonClick = (event) => {
+
+    event.stopPropagation();
+
+    console.log(<span class="string">'Button Clicked'</span>);
+
+  };
+
+  <span class="keyword">return</span> (
+
+    <span class="tag">&lt;div</span> onClick={parentClick}<span class="tag">&gt;</span>
+
+      <span class="tag">&lt;button</span> onClick={buttonClick}<span class="tag">&gt;</span>
+        Click
+      <span class="tag">&lt;/button&gt;</span>
+
+    <span class="tag">&lt;/div&gt;</span>
+
+  );
+
+}</code></pre>
+
+    <h2>Output</h2>
+
+    <pre class="output"><code>Button Clicked</code></pre>
+
+    <h2>What stopPropagation() Does</h2>
+
+    <div class="highlight">
+      It prevents the event from moving to parent elements.
+    </div>
+
+    <h2>Flow Without stopPropagation()</h2>
+
+    <div class="flow">
+      Button Click
+      <br>
+      ↓
+      <br>
+      Button Handler Executes
+      <br>
+      ↓
+      <br>
+      Parent Handler Executes
+    </div>
+
+    <h2>Flow With stopPropagation()</h2>
+
+    <div class="flow">
+      Button Click
+      <br>
+      ↓
+      <br>
+      Button Handler Executes
+      <br>
+      ↓
+      <br>
+      Event Stops Here
+    </div>
+
+    <h2>Capturing Phase in React</h2>
+
+    <p>
+      React also supports capturing events using:
+    </p>
+
+    <pre><code>onClickCapture</code></pre>
+
+    <h2>Example</h2>
+
+    <pre><code><span class="tag">&lt;div</span> onClickCapture={handleClick}<span class="tag">&gt;</span>
+  <span class="tag">&lt;button&gt;</span>Click<span class="tag">&lt;/button&gt;</span>
+<span class="tag">&lt;/div&gt;</span></code></pre>
+
+    <p>
+      Capturing runs before bubbling.
+    </p>
+
+    <h2>Event Propagation Order</h2>
+
+    <div class="flow">
+      Capturing Phase
+      <br>
+      Parent → Child
+      <br><br>
+      Target Phase
+      <br>
+      Actual Element
+      <br><br>
+      Bubbling Phase
+      <br>
+      Child → Parent
+    </div>
+
+    <h2>Real Project Use Cases</h2>
+
+    <table>
+
+      <tr>
+        <th>Scenario</th>
+        <th>Why stopPropagation() Is Used</th>
+      </tr>
+
+      <tr>
+        <td>Popup modal</td>
+        <td>Prevent background click</td>
+      </tr>
+
+      <tr>
+        <td>Dropdown menu</td>
+        <td>Prevent parent close event</td>
+      </tr>
+
+      <tr>
+        <td>Table row buttons</td>
+        <td>Prevent row click handler</td>
+      </tr>
+
+      <tr>
+        <td>Authentication popup</td>
+        <td>Prevent overlay click events</td>
+      </tr>
+
+    </table>
+
+    <h2>Difference Between preventDefault and stopPropagation</h2>
+
+    <table>
+
+      <tr>
+        <th>preventDefault()</th>
+        <th>stopPropagation()</th>
+      </tr>
+
+      <tr>
+        <td>Stops default browser behavior</td>
+        <td>Stops event bubbling/capturing</td>
+      </tr>
+
+      <tr>
+        <td>Example: stop form reload</td>
+        <td>Example: stop parent click</td>
+      </tr>
+
+    </table>
+
+    <h2>Important Interview Points</h2>
+
+    <ul>
+      <li>Event propagation means event traveling through DOM.</li>
+      <li>React mainly uses bubbling phase.</li>
+      <li>stopPropagation() stops event bubbling.</li>
+      <li>onClickCapture handles capturing phase.</li>
+      <li>preventDefault() and stopPropagation() are different.</li>
+    </ul>
+
+    <h2>Short Interview Answer</h2>
+
+    <div class="highlight">
+      Event propagation is the movement of events through parent and child elements. In React, it can be stopped using event.stopPropagation() to prevent bubbling or capturing behavior.
+    </div>
+
+    <h2>One-Line Interview Answer</h2>
+
+    <div class="highlight">
+      Event propagation is event movement through the DOM tree, and React stops it using event.stopPropagation().
+    </div>
+
+  </div>
+
+
+  <div class="fixed-page-nav-spacer"></div>
+  <div class="fixed-page-nav">
+    <a href="047%20What%20are%20synthetic%20events%20in%20React.html">←</a>
+    <a href="049%20How%20do%20you%20prevent%20default%20browser%20behavior%20in%20React%20events.html">→</a>
+  </div>
+</body>
+</html>

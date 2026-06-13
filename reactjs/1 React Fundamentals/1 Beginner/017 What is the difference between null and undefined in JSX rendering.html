@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>017 - null vs undefined in JSX Rendering</title>
+
+  <style>
+
+    body{
+      margin:0;
+      padding:0;
+      background:#000814;
+      color:#e2e8f0;
+      font-family:Arial, sans-serif;
+      line-height:1.7;
+    }
+
+    .container{
+      max-width:1000px;
+      margin:40px auto;
+      background:#020617;
+      padding:40px;
+      border-radius:18px;
+      border:1px solid #0f172a;
+      box-shadow:0 0 40px rgba(0,0,0,0.95);
+    }
+
+    h1{
+      color:#f8fafc;
+      margin-bottom:30px;
+      font-size:34px;
+    }
+
+    h2{
+      color:#c084fc;
+      margin-top:35px;
+      margin-bottom:15px;
+      font-size:26px;
+    }
+
+    h3{
+      color:#f472b6;
+      margin-top:25px;
+    }
+
+    p{
+      color:#cbd5e1;
+    }
+
+    ul{
+      padding-left:24px;
+    }
+
+    li{
+      margin-bottom:10px;
+      color:#cbd5e1;
+    }
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      margin-top:20px;
+    }
+
+    table th,
+    table td{
+      border:1px solid #1e293b;
+      padding:14px;
+      text-align:left;
+      vertical-align:top;
+    }
+
+    table th{
+      background:#0f172a;
+      color:#38bdf8;
+    }
+
+    table td{
+      background:#020617;
+      color:#d1d5db;
+    }
+
+    .highlight{
+      background:#0f172a;
+      padding:18px;
+      border-left:5px solid #38bdf8;
+      border-radius:10px;
+      margin-top:15px;
+      color:#e5e7eb;
+    }
+
+    .flow{
+      background:#020617;
+      border:1px solid #1e293b;
+      padding:18px;
+      border-radius:10px;
+      margin-top:15px;
+      color:#e2e8f0;
+      text-align:center;
+      font-size:18px;
+    }
+
+    pre{
+      background:#000000;
+      padding:22px;
+      border-radius:12px;
+      overflow-x:auto;
+      border:1px solid #0f172a;
+    }
+
+    code{
+      font-family:Consolas, monospace;
+      font-size:15px;
+    }
+
+    .keyword{
+      color:#c084fc;
+    }
+
+    .function{
+      color:#38bdf8;
+    }
+
+    .string{
+      color:#facc15;
+    }
+
+    .tag{
+      color:#f472b6;
+    }
+
+    .variable{
+      color:#4ade80;
+    }
+
+    .comment{
+      color:#94a3b8;
+    }
+
+    .output{
+      color:#4ade80;
+    }
+
+  
+
+    /* Fixed Previous / Next buttons */
+    .fixed-page-nav-spacer{height:110px;}
+    .fixed-page-nav{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);width:calc(100% - 32px);max-width:1180px;display:flex;justify-content:space-between;gap:16px;z-index:9999;pointer-events:none;}
+    .fixed-page-nav a,.fixed-page-nav span{width:52px;height:52px;display:flex;align-items:center;justify-content:center;text-align:center;text-decoration:none;background:#38bdf8;color:#020617;border-radius:50%;font-size:28px;font-weight:700;line-height:1;box-shadow:0 10px 30px rgba(0,0,0,0.45);pointer-events:auto;}
+    .fixed-page-nav span{background:#334155;color:#94a3b8;cursor:not-allowed;}
+    @media(max-width:600px){.fixed-page-nav{bottom:14px;width:calc(100% - 20px);}.fixed-page-nav a,.fixed-page-nav span{width:46px;height:46px;font-size:24px;}}
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+
+    <h1>017. What is the difference between null and undefined in JSX rendering?</h1>
+
+    <h2>One-Line Definition</h2>
+
+    <div class="highlight">
+      In JSX, both null and undefined render nothing on the screen, but they represent different meanings in JavaScript.
+    </div>
+
+    <h2>What Is null?</h2>
+
+    <p>
+      null means:
+    </p>
+
+    <ul>
+      <li>Intentional empty value</li>
+      <li>Developer intentionally set no value</li>
+      <li>Nothing should render</li>
+    </ul>
+
+    <h3>Example</h3>
+
+    <pre><code><span class="keyword">const</span> data = <span class="keyword">null</span>;
+
+<span class="keyword">function</span> <span class="function">App</span>() {
+
+  <span class="keyword">return</span> (
+    <span class="tag">&lt;div&gt;</span>{data}<span class="tag">&lt;/div&gt;</span>
+  );
+
+}</code></pre>
+
+    <h2>Output</h2>
+
+    <pre class="output"><code>Nothing Rendered</code></pre>
+
+    <h2>What Is undefined?</h2>
+
+    <p>
+      undefined means:
+    </p>
+
+    <ul>
+      <li>Value is missing</li>
+      <li>Variable not assigned</li>
+      <li>Property does not exist</li>
+    </ul>
+
+    <h3>Example</h3>
+
+    <pre><code><span class="keyword">let</span> data;
+
+<span class="keyword">function</span> <span class="function">App</span>() {
+
+  <span class="keyword">return</span> (
+    <span class="tag">&lt;div&gt;</span>{data}<span class="tag">&lt;/div&gt;</span>
+  );
+
+}</code></pre>
+
+    <h2>Output</h2>
+
+    <pre class="output"><code>Nothing Rendered</code></pre>
+
+    <h2>Main Difference</h2>
+
+    <table>
+
+      <tr>
+        <th>null</th>
+        <th>undefined</th>
+      </tr>
+
+      <tr>
+        <td>Intentional empty value</td>
+        <td>Missing or unassigned value</td>
+      </tr>
+
+      <tr>
+        <td>Explicitly assigned</td>
+        <td>Automatically assigned by JavaScript</td>
+      </tr>
+
+      <tr>
+        <td>Developer intentionally sets it</td>
+        <td>Usually indicates missing data</td>
+      </tr>
+
+      <tr>
+        <td>Renders nothing in JSX</td>
+        <td>Also renders nothing in JSX</td>
+      </tr>
+
+    </table>
+
+    <h2>Important JSX Behavior</h2>
+
+    <div class="highlight">
+      React ignores null, undefined, and false during rendering.
+    </div>
+
+    <h3>Example</h3>
+
+    <pre><code><span class="keyword">function</span> <span class="function">App</span>() {
+
+  <span class="keyword">return</span> (
+
+    <span class="tag">&lt;div&gt;</span>
+
+      {<span class="keyword">null</span>}
+      {<span class="keyword">undefined</span>}
+      {<span class="keyword">false</span>}
+
+    <span class="tag">&lt;/div&gt;</span>
+
+  );
+
+}</code></pre>
+
+    <h2>Output</h2>
+
+    <pre class="output"><code>Nothing Rendered</code></pre>
+
+    <h2>Conditional Rendering Example</h2>
+
+    <pre><code><span class="keyword">function</span> <span class="function">User</span>({ isLoggedIn }) {
+
+  <span class="keyword">if</span> (!isLoggedIn) {
+
+    <span class="keyword">return</span> <span class="keyword">null</span>;
+
+  }
+
+  <span class="keyword">return</span> (
+    <span class="tag">&lt;h1&gt;</span>Welcome User<span class="tag">&lt;/h1&gt;</span>
+  );
+
+}</code></pre>
+
+    <h2>What Happens Here?</h2>
+
+    <table>
+
+      <tr>
+        <th>Condition</th>
+        <th>Result</th>
+      </tr>
+
+      <tr>
+        <td>isLoggedIn = true</td>
+        <td>Component renders</td>
+      </tr>
+
+      <tr>
+        <td>isLoggedIn = false</td>
+        <td>Nothing renders</td>
+      </tr>
+
+    </table>
+
+    <h2>Important Note</h2>
+
+    <div class="highlight">
+      Returning null from a component is valid in React.
+    </div>
+
+    <p>
+      It means:
+    </p>
+
+    <ul>
+      <li>Render nothing</li>
+      <li>Hide component conditionally</li>
+    </ul>
+
+    <h2>Special Case</h2>
+
+    <p>
+      Unlike null and undefined:
+    </p>
+
+    <ul>
+      <li>0 renders on screen</li>
+      <li>Empty string renders empty text node</li>
+    </ul>
+
+    <h3>Example</h3>
+
+    <pre><code><span class="tag">&lt;div&gt;</span>{0}<span class="tag">&lt;/div&gt;</span></code></pre>
+
+    <h2>Output</h2>
+
+    <pre class="output"><code>0</code></pre>
+
+    <h2>Real Project Use Case</h2>
+
+    <table>
+
+      <tr>
+        <th>Scenario</th>
+        <th>Usage</th>
+      </tr>
+
+      <tr>
+        <td>Hide popup</td>
+        <td>Return null</td>
+      </tr>
+
+      <tr>
+        <td>Missing API response</td>
+        <td>undefined value</td>
+      </tr>
+
+      <tr>
+        <td>Conditional UI rendering</td>
+        <td>null rendering</td>
+      </tr>
+
+      <tr>
+        <td>Optional data fields</td>
+        <td>undefined handling</td>
+      </tr>
+
+    </table>
+
+    <h2>Important Interview Points</h2>
+
+    <ul>
+      <li>Both null and undefined render nothing in JSX.</li>
+      <li>null is intentional empty value.</li>
+      <li>undefined usually means missing value.</li>
+      <li>Returning null from a component is valid.</li>
+      <li>React ignores null, undefined, and false while rendering.</li>
+    </ul>
+
+    <h2>Short Interview Answer</h2>
+
+    <div class="highlight">
+      Both null and undefined render nothing in JSX, but null represents an intentional empty value while undefined usually means a missing or unassigned value.
+    </div>
+
+    <h2>One-Line Interview Answer</h2>
+
+    <div class="highlight">
+      In JSX, null and undefined both render nothing, but null is intentional while undefined means missing value.
+    </div>
+
+  </div>
+
+
+  <div class="fixed-page-nav-spacer"></div>
+  <div class="fixed-page-nav">
+    <a href="016%20What%20does%20it%20mean%20to%20unmount%20a%20component.html">←</a>
+    <a href="018%20Why%20can%27t%20you%20use%20if%20statements%20directly%20inside%20JSX.html">→</a>
+  </div>
+</body>
+</html>

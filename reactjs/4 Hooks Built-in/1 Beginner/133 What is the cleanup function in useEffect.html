@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>133 - Cleanup Function in useEffect</title>
+
+  <style>
+
+    body{
+      margin:0;
+      padding:40px 20px;
+      background:#000814;
+      color:#e2e8f0;
+      font-family:Arial,sans-serif;
+      line-height:1.7;
+    }
+
+    .container{
+      max-width:1000px;
+      margin:auto;
+    }
+
+    .card{
+      background:#020617;
+      border:1px solid #1e293b;
+      border-radius:18px;
+      padding:35px;
+      margin-bottom:30px;
+      box-shadow:0 0 25px rgba(0,0,0,0.6);
+    }
+
+    h1{
+      color:#f8fafc;
+      font-size:38px;
+      margin:0;
+    }
+
+    h2{
+      color:#c084fc;
+      margin-top:0;
+      margin-bottom:18px;
+      font-size:28px;
+    }
+
+    h3{
+      color:#38bdf8;
+      margin-top:25px;
+      margin-bottom:12px;
+      font-size:20px;
+    }
+
+    p{
+      color:#cbd5e1;
+    }
+
+    ul{
+      padding-left:24px;
+    }
+
+    li{
+      margin-bottom:10px;
+      color:#cbd5e1;
+    }
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      margin-top:20px;
+    }
+
+    table th,
+    table td{
+      border:1px solid #334155;
+      padding:14px;
+      text-align:left;
+      vertical-align:top;
+    }
+
+    table th{
+      background:#0f172a;
+      color:#38bdf8;
+    }
+
+    table td{
+      color:#d1d5db;
+    }
+
+    .highlight{
+      background:#0f172a;
+      padding:18px;
+      border-left:5px solid #38bdf8;
+      border-radius:10px;
+      color:#e5e7eb;
+    }
+
+    .flow{
+      background:#000000;
+      border:1px solid #334155;
+      padding:20px;
+      border-radius:12px;
+      color:#e2e8f0;
+      line-height:2;
+      text-align:center;
+      font-size:18px;
+    }
+
+    pre{
+      background:#000000;
+      padding:22px;
+      border-radius:12px;
+      overflow-x:auto;
+      border:1px solid #1e293b;
+    }
+
+    code{
+      font-family:Consolas,monospace;
+      font-size:15px;
+    }
+
+    .keyword{
+      color:#c084fc;
+    }
+
+    .function{
+      color:#38bdf8;
+    }
+
+    .string{
+      color:#facc15;
+    }
+
+    .tag{
+      color:#f472b6;
+    }
+
+    .comment{
+      color:#94a3b8;
+    }
+
+    .output{
+      color:#4ade80;
+    }
+
+  
+
+    /* Fixed Previous / Next buttons */
+    .fixed-page-nav-spacer{height:110px;}
+    .fixed-page-nav{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);width:calc(100% - 32px);max-width:1180px;display:flex;justify-content:space-between;gap:16px;z-index:9999;pointer-events:none;}
+    .fixed-page-nav a,.fixed-page-nav span{width:52px;height:52px;display:flex;align-items:center;justify-content:center;text-align:center;text-decoration:none;background:#38bdf8;color:#020617;border-radius:50%;font-size:28px;font-weight:700;line-height:1;box-shadow:0 10px 30px rgba(0,0,0,0.45);pointer-events:auto;}
+    .fixed-page-nav span{background:#334155;color:#94a3b8;cursor:not-allowed;}
+    @media(max-width:600px){.fixed-page-nav{bottom:14px;width:calc(100% - 20px);}.fixed-page-nav a,.fixed-page-nav span{width:46px;height:46px;font-size:24px;}}
+  </style>
+
+</head>
+
+<body>
+
+  <div class="container">
+
+    <section class="card">
+
+      <h1>133. What is the cleanup function in useEffect?</h1>
+
+    </section>
+
+    <section class="card">
+
+      <h2>One-Line Definition</h2>
+
+      <div class="highlight">
+        A cleanup function is a function returned from useEffect that cleans up side effects before re-running the effect or when the component unmounts.
+      </div>
+
+      <h2>Simple Understanding</h2>
+
+      <p>
+        Cleanup removes old effects that are no longer needed.
+      </p>
+
+      <h2>Examples</h2>
+
+      <ul>
+        <li>Clearing timers</li>
+        <li>Removing event listeners</li>
+        <li>Closing WebSocket connections</li>
+        <li>Stopping subscriptions</li>
+      </ul>
+
+    </section>
+
+    <section class="card">
+
+      <h2>Main Idea</h2>
+
+      <div class="flow">
+        useEffect Runs
+        <br>
+        ↓
+        <br>
+        Side Effect Starts
+        <br>
+        ↓
+        <br>
+        Cleanup Removes Old Effect
+      </div>
+
+      <h2>Basic Syntax</h2>
+
+      <pre><code>useEffect(() => {
+
+  <span class="comment">// Side effect</span>
+
+  <span class="keyword">return</span> () => {
+
+    <span class="comment">// Cleanup code</span>
+
+  };
+
+}, []);</code></pre>
+
+    </section>
+
+    <section class="card">
+
+      <h2>Basic Cleanup Example</h2>
+
+      <pre><code>useEffect(() => {
+
+  console.log(<span class="string">'Effect Started'</span>);
+
+  <span class="keyword">return</span> () => {
+
+    console.log(<span class="string">'Cleanup Called'</span>);
+
+  };
+
+}, []);</code></pre>
+
+      <h3>What Happens?</h3>
+
+      <ul>
+        <li>Effect runs after first render</li>
+        <li>Cleanup runs when component unmounts</li>
+      </ul>
+
+    </section>
+
+    <section class="card">
+
+      <h2>When Cleanup Function Runs</h2>
+
+      <table>
+
+        <tr>
+          <th>Situation</th>
+          <th>Cleanup Runs?</th>
+        </tr>
+
+        <tr>
+          <td>Component unmounts</td>
+          <td>✅ Yes</td>
+        </tr>
+
+        <tr>
+          <td>Dependencies change</td>
+          <td>✅ Yes</td>
+        </tr>
+
+        <tr>
+          <td>Before next effect runs</td>
+          <td>✅ Yes</td>
+        </tr>
+
+        <tr>
+          <td>Initial render</td>
+          <td>❌ No</td>
+        </tr>
+
+      </table>
+
+    </section>
+
+    <section class="card">
+
+      <h2>Cleanup with Dependencies</h2>
+
+      <pre><code><span class="keyword">import</span> { useEffect, useState } from <span class="string">'react'</span>;
+
+<span class="keyword">function</span> <span class="function">App</span>() {
+
+  <span class="keyword">const</span> [count, setCount] = useState(0);
+
+  useEffect(() => {
+
+    console.log(<span class="string">'Effect Started'</span>, count);
+
+    <span class="keyword">return</span> () => {
+
+      console.log(<span class="string">'Cleanup Old Effect'</span>, count);
+
+    };
+
+  }, [count]);
+
+}</code></pre>
+
+      <h3>What Happens?</h3>
+
+      <div class="flow">
+        count Changes
+        <br>
+        ↓
+        <br>
+        Old Cleanup Runs
+        <br>
+        ↓
+        <br>
+        New Effect Runs
+      </div>
+
+    </section>
+
+    <section class="card">
+
+      <h2>Timer Cleanup Example</h2>
+
+      <pre><code><span class="keyword">import</span> { useEffect, useState } from <span class="string">'react'</span>;
+
+<span class="keyword">function</span> <span class="function">App</span>() {
+
+  <span class="keyword">const</span> [count, setCount] = useState(0);
+
+  useEffect(() => {
+
+    <span class="keyword">const</span> timer = setInterval(() => {
+
+      setCount((prev) => prev + 1);
+
+    }, 1000);
+
+    <span class="keyword">return</span> () => clearInterval(timer);
+
+  }, []);
+
+  <span class="keyword">return</span> <span class="tag">&lt;h1&gt;</span>{count}<span class="tag">&lt;/h1&gt;</span>;
+
+}</code></pre>
+
+      <h3>Why Cleanup Is Needed?</h3>
+
+      <p>
+        Without cleanup, the timer continues running even after component removal.
+      </p>
+
+    </section>
+
+    <section class="card">
+
+      <h2>Event Listener Cleanup Example</h2>
+
+      <pre><code>useEffect(() => {
+
+  <span class="keyword">const</span> handleResize = () => {
+
+    console.log(window.innerWidth);
+
+  };
+
+  window.addEventListener(<span class="string">'resize'</span>, handleResize);
+
+  <span class="keyword">return</span> () => {
+
+    window.removeEventListener(<span class="string">'resize'</span>, handleResize);
+
+  };
+
+}, []);</code></pre>
+
+      <h3>Why Cleanup Is Important?</h3>
+
+      <ul>
+        <li>Prevents duplicate listeners</li>
+        <li>Prevents memory leaks</li>
+        <li>Improves performance</li>
+      </ul>
+
+    </section>
+
+    <section class="card">
+
+      <h2>Subscription Cleanup Example</h2>
+
+      <pre><code>useEffect(() => {
+
+  socket.connect();
+
+  <span class="keyword">return</span> () => {
+
+    socket.disconnect();
+
+  };
+
+}, []);</code></pre>
+
+      <h3>Use Case</h3>
+
+      <p>
+        WebSocket, SignalR, RxJS subscriptions, chat systems, live updates.
+      </p>
+
+    </section>
+
+    <section class="card">
+
+      <h2>What Happens Without Cleanup?</h2>
+
+      <ul>
+        <li>Memory leaks</li>
+        <li>Duplicate timers</li>
+        <li>Duplicate listeners</li>
+        <li>Unexpected behavior</li>
+        <li>Performance problems</li>
+      </ul>
+
+      <h2>Main Cleanup Flow</h2>
+
+      <div class="flow">
+        Old Effect
+        <br>
+        ↓
+        <br>
+        Cleanup Removes Old Resources
+        <br>
+        ↓
+        <br>
+        New Effect Starts
+      </div>
+
+    </section>
+
+    <section class="card">
+
+      <h2>Dependency Behavior with Cleanup</h2>
+
+      <table>
+
+        <tr>
+          <th>Code</th>
+          <th>Behavior</th>
+        </tr>
+
+        <tr>
+          <td>useEffect(fn, [])</td>
+          <td>Cleanup on unmount only</td>
+        </tr>
+
+        <tr>
+          <td>useEffect(fn, [count])</td>
+          <td>Cleanup before re-run and on unmount</td>
+        </tr>
+
+        <tr>
+          <td>useEffect(fn)</td>
+          <td>Cleanup before every re-render</td>
+        </tr>
+
+      </table>
+
+    </section>
+
+    <section class="card">
+
+      <h2>Real Project Use Cases</h2>
+
+      <table>
+
+        <tr>
+          <th>Feature</th>
+          <th>Cleanup Usage</th>
+        </tr>
+
+        <tr>
+          <td>OTP countdown</td>
+          <td>clearInterval()</td>
+        </tr>
+
+        <tr>
+          <td>Captcha tracking</td>
+          <td>removeEventListener()</td>
+        </tr>
+
+        <tr>
+          <td>SignalR connection</td>
+          <td>disconnect()</td>
+        </tr>
+
+        <tr>
+          <td>RxJS subscription</td>
+          <td>unsubscribe()</td>
+        </tr>
+
+        <tr>
+          <td>Window resize tracking</td>
+          <td>removeEventListener()</td>
+        </tr>
+
+      </table>
+
+    </section>
+
+    <section class="card">
+
+      <h2>Important Interview Points</h2>
+
+      <ul>
+        <li>Cleanup function is returned from useEffect.</li>
+        <li>Runs before next effect execution.</li>
+        <li>Runs on component unmount.</li>
+        <li>Prevents memory leaks.</li>
+        <li>Used for timers, listeners, subscriptions.</li>
+      </ul>
+
+      <h2>Short Interview Answer</h2>
+
+      <div class="highlight">
+        A cleanup function in useEffect removes old side effects like timers, subscriptions, or event listeners before the next effect runs or when the component unmounts.
+      </div>
+
+      <h2>One-Line Interview Answer</h2>
+
+      <div class="highlight">
+        The cleanup function removes old side effects in useEffect.
+      </div>
+
+    </section>
+
+  </div>
+
+
+  <div class="fixed-page-nav-spacer"></div>
+  <div class="fixed-page-nav">
+    <a href="132%20What%20is%20the%20dependency%20array%20in%20useEffect.html">←</a>
+    <a href="134%20What%20happens%20if%20you%20pass%20an%20empty%20array%20%5B%5D%20to%20useEffect.html">→</a>
+  </div>
+</body>
+</html>

@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>278. What is a Controlled Form Versus an Uncontrolled Form?</title>
+
+  <style>
+
+    body{
+      margin:0;
+      padding:0;
+      background:#000814;
+      color:#e2e8f0;
+      font-family:Arial,sans-serif;
+      line-height:1.7;
+    }
+
+    .container{
+      max-width:1000px;
+      margin:40px auto;
+      background:#020617;
+      padding:40px;
+      border-radius:18px;
+      border:1px solid #0f172a;
+      box-shadow:0 0 40px rgba(0,0,0,.95);
+    }
+
+    h1{
+      color:#f8fafc;
+      margin-bottom:30px;
+      font-size:34px;
+    }
+
+    h2{
+      color:#c084fc;
+      margin-top:35px;
+      margin-bottom:15px;
+      font-size:26px;
+    }
+
+    h3{
+      color:#38bdf8;
+      margin-top:25px;
+      margin-bottom:10px;
+    }
+
+    p{
+      color:#cbd5e1;
+    }
+
+    ul{
+      padding-left:24px;
+    }
+
+    li{
+      margin-bottom:10px;
+      color:#cbd5e1;
+    }
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      margin-top:20px;
+    }
+
+    table th,
+    table td{
+      border:1px solid #1e293b;
+      padding:14px;
+      text-align:left;
+      vertical-align:top;
+    }
+
+    table th{
+      background:#0f172a;
+      color:#38bdf8;
+    }
+
+    table td{
+      background:#020617;
+      color:#d1d5db;
+    }
+
+    .highlight{
+      background:#0f172a;
+      padding:18px;
+      border-left:5px solid #38bdf8;
+      border-radius:10px;
+      margin-top:15px;
+      color:#e5e7eb;
+    }
+
+    .flow{
+      background:#020617;
+      border:1px solid #1e293b;
+      padding:20px;
+      border-radius:10px;
+      margin-top:15px;
+      color:#e2e8f0;
+      line-height:2;
+      text-align:center;
+      font-size:18px;
+    }
+
+    pre{
+      background:#000;
+      padding:22px;
+      border-radius:12px;
+      overflow-x:auto;
+      border:1px solid #0f172a;
+    }
+
+    code{
+      font-family:Consolas,monospace;
+      font-size:15px;
+    }
+
+    .keyword{color:#c084fc;}
+    .function{color:#38bdf8;}
+    .string{color:#facc15;}
+    .tag{color:#f472b6;}
+    .comment{color:#94a3b8;}
+    .output{color:#4ade80;}
+
+  </style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <h1>278. What is a Controlled Form Versus an Uncontrolled Form?</h1>
+
+  <h2>One-Line Definition</h2>
+
+  <div class="highlight">
+    A controlled form stores form values in React state, whereas an uncontrolled form stores form values in the DOM and accesses them using refs.
+  </div>
+
+  <h2>Why Do We Have Two Approaches?</h2>
+
+  <p>
+    React forms can be managed in two different ways:
+  </p>
+
+  <ul>
+    <li>Controlled Form → React manages form values.</li>
+    <li>Uncontrolled Form → Browser DOM manages form values.</li>
+  </ul>
+
+  <h2>Controlled Form Flow</h2>
+
+  <div class="flow">
+
+    User Types
+    <br>
+    ↓
+    <br>
+    onChange Event
+    <br>
+    ↓
+    <br>
+    setState()
+    <br>
+    ↓
+    <br>
+    React State Updated
+    <br>
+    ↓
+    <br>
+    Form Re-renders
+
+  </div>
+
+  <h2>Controlled Form Example</h2>
+
+<pre><code><span class="keyword">import</span> { useState } <span class="keyword">from</span> <span class="string">'react'</span>;
+
+<span class="keyword">function</span> <span class="function">LoginForm</span>() {
+
+  <span class="keyword">const</span> [email, setEmail] = <span class="function">useState</span>(<span class="string">''</span>);
+
+  <span class="keyword">return</span> (
+
+    <span class="tag">&lt;input</span>
+      value={email}
+      onChange={e =&gt; <span class="function">setEmail</span>(e.target.value)}
+    <span class="tag">/&gt;</span>
+
+  );
+
+}</code></pre>
+
+  <div class="highlight">
+    React always knows the latest value because it is stored in state.
+  </div>
+
+  <h2>Uncontrolled Form Flow</h2>
+
+  <div class="flow">
+
+    User Types
+    <br>
+    ↓
+    <br>
+    DOM Stores Value
+    <br>
+    ↓
+    <br>
+    No State Updates
+    <br>
+    ↓
+    <br>
+    Read Value Using Ref
+
+  </div>
+
+  <h2>Uncontrolled Form Example</h2>
+
+<pre><code><span class="keyword">import</span> { useRef } <span class="keyword">from</span> <span class="string">'react'</span>;
+
+<span class="keyword">function</span> <span class="function">LoginForm</span>() {
+
+  <span class="keyword">const</span> emailRef = <span class="function">useRef</span>(null);
+
+  <span class="keyword">return</span> (
+
+    <span class="tag">&lt;input</span> ref={emailRef} <span class="tag">/&gt;</span>
+
+  );
+
+}</code></pre>
+
+  <div class="highlight">
+    React does not know the current value until we read it from the DOM.
+  </div>
+
+  <h2>Controlled vs Uncontrolled Forms</h2>
+
+  <table>
+
+    <tr>
+      <th>Feature</th>
+      <th>Controlled Form</th>
+      <th>Uncontrolled Form</th>
+    </tr>
+
+    <tr>
+      <td>Source of Truth</td>
+      <td>React State</td>
+      <td>DOM</td>
+    </tr>
+
+    <tr>
+      <td>Hook Used</td>
+      <td>useState</td>
+      <td>useRef</td>
+    </tr>
+
+    <tr>
+      <td>Value Access</td>
+      <td>Directly from state</td>
+      <td>Using ref.current.value</td>
+    </tr>
+
+    <tr>
+      <td>Re-render While Typing</td>
+      <td>✅ Yes</td>
+      <td>❌ No</td>
+    </tr>
+
+    <tr>
+      <td>Validation</td>
+      <td>Easy</td>
+      <td>Requires DOM access</td>
+    </tr>
+
+    <tr>
+      <td>React Knows Current Value</td>
+      <td>✅ Yes</td>
+      <td>❌ No</td>
+    </tr>
+
+    <tr>
+      <td>Most Common in React</td>
+      <td>✅ Yes</td>
+      <td>❌ Less Common</td>
+    </tr>
+
+  </table>
+
+  <h2>Controlled Form Submission</h2>
+
+<pre><code><span class="keyword">const</span> [email, setEmail] = <span class="function">useState</span>(<span class="string">''</span>);
+
+<span class="keyword">function</span> <span class="function">handleSubmit</span>() {
+
+  console.log(email);
+
+}</code></pre>
+
+  <div class="highlight">
+    React already has the value in state, so no DOM access is required.
+  </div>
+
+  <h2>Uncontrolled Form Submission</h2>
+
+<pre><code><span class="keyword">const</span> emailRef = <span class="function">useRef</span>(null);
+
+<span class="keyword">function</span> <span class="function">handleSubmit</span>() {
+
+  console.log(emailRef.current.value);
+
+}</code></pre>
+
+  <div class="highlight">
+    We must read the value from the DOM during submission.
+  </div>
+
+  <h2>Validation Example</h2>
+
+  <h3>Controlled Form</h3>
+
+<pre><code><span class="keyword">const</span> isValid =
+email.includes(<span class="string">'@'</span>);</code></pre>
+
+  <h3>Uncontrolled Form</h3>
+
+<pre><code><span class="keyword">const</span> email =
+emailRef.current.value;
+
+<span class="keyword">const</span> isValid =
+email.includes(<span class="string">'@'</span>);</code></pre>
+
+  <div class="highlight">
+    Controlled forms make validation much easier because React always has the latest value.
+  </div>
+
+  <h2>When Should We Use Controlled Forms?</h2>
+
+  <ul>
+    <li>Form validation.</li>
+    <li>Real-time error messages.</li>
+    <li>Live search.</li>
+    <li>Dynamic UI updates.</li>
+    <li>Most React forms.</li>
+  </ul>
+
+  <h2>When Should We Use Uncontrolled Forms?</h2>
+
+  <ul>
+    <li>Simple forms.</li>
+    <li>File uploads.</li>
+    <li>Third-party DOM libraries.</li>
+    <li>Reading values only on submit.</li>
+  </ul>
+
+  <h2>File Input Example</h2>
+
+<pre><code><span class="keyword">const</span> fileRef = <span class="function">useRef</span>(null);
+
+<span class="tag">&lt;input</span>
+  type=<span class="string">"file"</span>
+  ref={fileRef}
+<span class="tag">/&gt;</span></code></pre>
+
+  <div class="highlight">
+    File inputs are usually implemented as uncontrolled forms.
+  </div>
+
+  <h2>Real Project Example</h2>
+
+  <div class="highlight">
+    In our Aadhaar Authentication application, Aadhaar Number, OTP, Department, Purpose, and Consent forms are controlled because React must validate and process values continuously. File upload fields and some third-party integrations may use uncontrolled forms.
+  </div>
+
+  <h2>Important Interview Points</h2>
+
+  <ul>
+    <li>Controlled forms use useState.</li>
+    <li>Uncontrolled forms use useRef.</li>
+    <li>Controlled forms store values in React state.</li>
+    <li>Uncontrolled forms store values in the DOM.</li>
+    <li>Controlled forms are preferred in React applications.</li>
+    <li>File inputs are usually uncontrolled.</li>
+  </ul>
+
+  <h2>Short Interview Answer</h2>
+
+  <div class="highlight">
+    A controlled form manages form values through React state, while an uncontrolled form lets the browser manage values and accesses them through refs.
+  </div>
+
+  <h2>One-Line Interview Answer</h2>
+
+  <div class="highlight">
+    Controlled forms use React state for form values, whereas uncontrolled forms use the DOM and refs.
+  </div>
+
+</div>
+
+</body>
+</html>

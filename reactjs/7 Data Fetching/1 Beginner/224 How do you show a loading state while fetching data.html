@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>224. How Do You Show a Loading State While Fetching Data?</title>
+
+  <style>
+
+    body{
+      margin:0;
+      padding:0;
+      background:#000814;
+      color:#e2e8f0;
+      font-family:Arial,sans-serif;
+      line-height:1.7;
+    }
+
+    .container{
+      max-width:1000px;
+      margin:40px auto;
+      background:#020617;
+      padding:40px;
+      border-radius:18px;
+      border:1px solid #0f172a;
+      box-shadow:0 0 40px rgba(0,0,0,.95);
+    }
+
+    h1{
+      color:#f8fafc;
+      margin-bottom:30px;
+      font-size:34px;
+    }
+
+    h2{
+      color:#c084fc;
+      margin-top:35px;
+      margin-bottom:15px;
+      font-size:26px;
+    }
+
+    p{
+      color:#cbd5e1;
+    }
+
+    ul{
+      padding-left:24px;
+    }
+
+    li{
+      margin-bottom:10px;
+      color:#cbd5e1;
+    }
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      margin-top:20px;
+    }
+
+    table th,
+    table td{
+      border:1px solid #1e293b;
+      padding:14px;
+      text-align:left;
+      vertical-align:top;
+    }
+
+    table th{
+      background:#0f172a;
+      color:#38bdf8;
+    }
+
+    table td{
+      background:#020617;
+      color:#d1d5db;
+    }
+
+    .highlight{
+      background:#0f172a;
+      padding:18px;
+      border-left:5px solid #38bdf8;
+      border-radius:10px;
+      margin-top:15px;
+      color:#e5e7eb;
+    }
+
+    .flow{
+      background:#020617;
+      border:1px solid #1e293b;
+      padding:20px;
+      border-radius:10px;
+      margin-top:15px;
+      color:#e2e8f0;
+      line-height:2;
+      text-align:center;
+      font-size:18px;
+    }
+
+    pre{
+      background:#000;
+      padding:22px;
+      border-radius:12px;
+      overflow-x:auto;
+      border:1px solid #0f172a;
+    }
+
+    code{
+      font-family:Consolas,monospace;
+      font-size:15px;
+    }
+
+    .keyword{
+      color:#c084fc;
+    }
+
+    .function{
+      color:#38bdf8;
+    }
+
+    .string{
+      color:#facc15;
+    }
+
+    .tag{
+      color:#f472b6;
+    }
+
+    .comment{
+      color:#94a3b8;
+    }
+
+    .output{
+      color:#4ade80;
+    }
+
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+
+    <h1>224. How Do You Show a Loading State While Fetching Data?</h1>
+
+    <h2>One-Line Definition</h2>
+
+    <div class="highlight">
+      A loading state is usually displayed by storing a loading flag in useState() and showing a loading message or spinner until the API response arrives.
+    </div>
+
+    <h2>Why Do We Need a Loading State?</h2>
+
+    <p>
+      API requests take time to complete.
+    </p>
+
+    <p>
+      Without a loading state, users may see an empty screen and think the application is broken.
+    </p>
+
+    <div class="highlight">
+      A loading state informs users that data is currently being fetched.
+    </div>
+
+    <h2>How It Works</h2>
+
+    <div class="flow">
+
+      Component Mounts
+      <br>
+      ↓
+      <br>
+      loading = true
+      <br>
+      ↓
+      <br>
+      API Request Sent
+      <br>
+      ↓
+      <br>
+      Response Received
+      <br>
+      ↓
+      <br>
+      loading = false
+      <br>
+      ↓
+      <br>
+      Show Data
+
+    </div>
+
+    <h2>Step 1 - Create a Loading State</h2>
+
+<pre><code><span class="keyword">const</span> [loading, setLoading] = useState(true);</code></pre>
+
+    <div class="highlight">
+      We initialize loading with true because the API request has not completed yet.
+    </div>
+
+    <h2>Step 2 - Update Loading During Fetch</h2>
+
+<pre><code><span class="keyword">import</span> { useEffect, useState } <span class="keyword">from</span> <span class="string">'react'</span>;
+
+<span class="keyword">function</span> <span class="function">Users</span>() {
+
+  <span class="keyword">const</span> [users, setUsers] = useState([]);
+  <span class="keyword">const</span> [loading, setLoading] = useState(true);
+
+  <span class="function">useEffect</span>(() =&gt; {
+
+    <span class="function">fetch</span>(<span class="string">'https://jsonplaceholder.typicode.com/users'</span>)
+      .then(res =&gt; res.json())
+      .then(data =&gt; {
+
+        setUsers(data);
+
+        setLoading(false);
+
+      });
+
+  }, []);
+
+}</code></pre>
+
+    <h2>Step 3 - Display Loading UI</h2>
+
+<pre><code><span class="keyword">if</span> (loading) {
+
+  <span class="keyword">return</span> (
+
+    <span class="tag">&lt;p&gt;</span>
+
+      Loading...
+
+    <span class="tag">&lt;/p&gt;</span>
+
+  );
+
+}</code></pre>
+
+    <h2>Complete Example</h2>
+
+<pre><code><span class="keyword">import</span> { useEffect, useState } <span class="keyword">from</span> <span class="string">'react'</span>;
+
+<span class="keyword">function</span> <span class="function">Users</span>() {
+
+  <span class="keyword">const</span> [users, setUsers] = useState([]);
+  <span class="keyword">const</span> [loading, setLoading] = useState(true);
+
+  <span class="function">useEffect</span>(() =&gt; {
+
+    <span class="function">fetch</span>(<span class="string">'https://jsonplaceholder.typicode.com/users'</span>)
+      .then(res =&gt; res.json())
+      .then(data =&gt; {
+
+        setUsers(data);
+
+        setLoading(false);
+
+      });
+
+  }, []);
+
+  <span class="keyword">if</span> (loading) {
+
+    <span class="keyword">return</span> (
+
+      <span class="tag">&lt;p&gt;</span>
+
+        Loading...
+
+      <span class="tag">&lt;/p&gt;</span>
+
+    );
+
+  }
+
+  <span class="keyword">return</span> (
+
+    <span class="tag">&lt;ul&gt;</span>
+
+      {users.map(user =&gt; (
+
+        <span class="tag">&lt;li</span> key={user.id}<span class="tag">&gt;</span>
+
+          {user.name}
+
+        <span class="tag">&lt;/li&gt;</span>
+
+      ))}
+
+    <span class="tag">&lt;/ul&gt;</span>
+
+  );
+
+}</code></pre>
+
+    <h2>Output While Fetching</h2>
+
+<pre class="output"><code>Loading...</code></pre>
+
+    <h2>Output After Fetching</h2>
+
+<pre class="output"><code>Leanne Graham
+Ervin Howell
+Clementine Bauch
+Patricia Lebsack
+...</code></pre>
+
+    <h2>Using async/await</h2>
+
+<pre><code><span class="function">useEffect</span>(() =&gt; {
+
+  <span class="keyword">async function</span> <span class="function">fetchUsers</span>() {
+
+    <span class="keyword">const</span> response = <span class="keyword">await</span> <span class="function">fetch</span>(url);
+
+    <span class="keyword">const</span> data = <span class="keyword">await</span> response.json();
+
+    setUsers(data);
+
+    setLoading(false);
+
+  }
+
+  fetchUsers();
+
+}, []);</code></pre>
+
+    <h2>Loading + Error Handling</h2>
+
+<pre><code><span class="keyword">const</span> [users, setUsers] = useState([]);
+<span class="keyword">const</span> [loading, setLoading] = useState(true);
+<span class="keyword">const</span> [error, setError] = useState(null);
+
+<span class="function">useEffect</span>(() =&gt; {
+
+  <span class="function">fetch</span>(url)
+    .then(res =&gt; res.json())
+    .then(data =&gt; {
+
+      setUsers(data);
+
+      setLoading(false);
+
+    })
+    .catch(err =&gt; {
+
+      setError(err.message);
+
+      setLoading(false);
+
+    });
+
+}, []);</code></pre>
+
+    <h2>Why Do We Set Loading to False in Both Cases?</h2>
+
+    <div class="highlight">
+      Whether the request succeeds or fails, loading must become false because the request has finished.
+    </div>
+
+    <div class="flow">
+
+      Success
+      <br>
+      ↓
+      <br>
+      loading = false
+
+      <br><br>
+
+      Failure
+      <br>
+      ↓
+      <br>
+      loading = false
+
+    </div>
+
+    <h2>Real Project Example</h2>
+
+    <div class="highlight">
+      In our Aadhaar Authentication application, loading states are commonly used while fetching audit records, dashboard reports, user details, department lists, service configurations, and authentication history from backend APIs.
+    </div>
+
+    <h2>Important Interview Points</h2>
+
+    <ul>
+      <li>Loading state is usually managed using useState().</li>
+      <li>Initialize loading with true.</li>
+      <li>Set loading to false after the API request finishes.</li>
+      <li>Loading improves user experience.</li>
+      <li>Loading and error states are often handled together.</li>
+    </ul>
+
+    <h2>Short Interview Answer</h2>
+
+    <div class="highlight">
+      We create a loading state using useState(true), display a loading UI while the request is running, and set loading to false when the API call completes.
+    </div>
+
+    <h2>One-Line Interview Answer</h2>
+
+    <div class="highlight">
+      A loading state is typically shown using useState() and displayed until the API request finishes.
+    </div>
+
+  </div>
+
+</body>
+</html>

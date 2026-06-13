@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>156 - What is useDeferredValue?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px;margin-bottom:10px}
+p{color:#cbd5e1}
+ul{padding-left:24px}
+li{margin-bottom:10px;color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px;margin-top:15px}
+.warning{background:#1e1b4b;border-left:5px solid #fbbf24;padding:18px;border-radius:10px;margin-top:15px}
+.success{background:#052e16;padding:18px;border-left:5px solid #22c55e;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;margin-top:15px;text-align:center;line-height:2;font-size:18px}
+pre{border-radius:12px;overflow-x:auto}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>156. What is useDeferredValue?</h1>
+
+<h2>One-Line Definition</h2>
+
+<div class="highlight">
+useDeferredValue is a React 18 hook that allows us to use a delayed version of a value so expensive UI updates do not block urgent user interactions.
+</div>
+
+<h2>The Problem It Solves</h2>
+
+<p>
+Suppose we have a search box.
+</p>
+
+<pre><code class="language-jsx">const [query, setQuery] = useState('');</code></pre>
+
+<p>
+And we filter 10,000 products:
+</p>
+
+<pre><code class="language-jsx">const filteredProducts =
+  products.filter(product =>
+    product.name.includes(query)
+  );</code></pre>
+
+<p>
+Every key press triggers:
+</p>
+
+<div class="flow">
+User Types
+<br>↓<br>
+query Changes
+<br>↓<br>
+Filter 10,000 Products
+<br>↓<br>
+Render Results
+<br>↓<br>
+Input Becomes Slow
+</div>
+
+<div class="warning">
+The expensive list rendering can make typing feel laggy.
+</div>
+
+<h2>How useDeferredValue Helps</h2>
+
+<p>
+Instead of using:
+</p>
+
+<pre><code class="language-jsx">query</code></pre>
+
+<p>
+directly, we create a deferred version:
+</p>
+
+<pre><code class="language-jsx">const deferredQuery =
+  useDeferredValue(query);</code></pre>
+
+<p>
+Now React can:
+</p>
+
+<div class="flow">
+Update Input Immediately
+<br>↓<br>
+Delay Expensive Work
+<br>↓<br>
+Update Results Later
+</div>
+
+<div class="success">
+The input stays responsive while React updates the expensive UI in the background.
+</div>
+
+<h2>Basic Syntax</h2>
+
+<pre><code class="language-jsx">const deferredValue =
+  useDeferredValue(value);</code></pre>
+
+<h3>Example</h3>
+
+<pre><code class="language-jsx">const deferredQuery =
+  useDeferredValue(query);</code></pre>
+
+<p>
+React returns:
+</p>
+
+<pre><code class="language-text">Current Value (query)
+
+and
+
+Delayed Value (deferredQuery)
+</code></pre>
+
+<h2>Real Search Example</h2>
+
+<h3>Without useDeferredValue</h3>
+
+<pre><code class="language-jsx">function Search() {
+
+  const [query, setQuery] = useState('');
+
+  const filteredProducts =
+    products.filter(product =>
+      product.name.includes(query)
+    );
+
+}</code></pre>
+
+<h3>Problem</h3>
+
+<div class="flow">
+Type Letter
+<br>↓<br>
+Update Query
+<br>↓<br>
+Filter Huge List
+<br>↓<br>
+Render Huge List
+<br>↓<br>
+Typing Slows Down
+</div>
+
+<h2>With useDeferredValue</h2>
+
+<pre><code class="language-jsx">import { useDeferredValue } from 'react';
+
+function Search() {
+
+  const [query, setQuery] = useState('');
+
+  const deferredQuery = useDeferredValue(query);
+
+  const filteredProducts = products.filter(product =>
+      product.name.includes(
+        deferredQuery
+      )
+    );
+
+}</code></pre>
+
+<h3>What Happens?</h3>
+
+<div class="flow">
+User Types
+<br>↓<br>
+query Updates Immediately
+<br>↓<br>
+Input Stays Smooth
+<br>↓<br>
+deferredQuery Updates Later
+<br>↓<br>
+Results Refresh
+</div>
+
+<div class="success">
+The input and expensive list updates become separated.
+</div>
+
+<h2>Visual Timeline</h2>
+
+<h3>User Types "React"</h3>
+
+<pre><code class="language-text">query
+
+R
+Re
+Rea
+Reac
+React
+</code></pre>
+
+<p>
+But:
+</p>
+
+<pre><code class="language-text">deferredQuery
+
+R
+Re
+Rea
+(waiting)
+React
+</code></pre>
+
+<p>
+The deferred value may lag slightly behind.
+</p>
+
+<div class="highlight">
+That delay is intentional.
+</div>
+
+<h2>How React Thinks</h2>
+
+<div class="flow">
+Current Value
+<br>↓<br>
+High Priority
+
+
+<br><br>
+
+Deferred Value
+<br>↓<br>
+Low Priority
+</div>
+
+<p>
+React updates the deferred value only when the browser is free.
+</p>
+
+<h2>Most Important Difference From useTransition</h2>
+
+<p>
+Many developers confuse these hooks.
+</p>
+
+<h3>useTransition</h3>
+
+<p>
+Delays state updates.
+</p>
+
+<pre><code class="language-jsx">startTransition(() => {
+
+  setResults(data);
+
+});</code></pre>
+
+<h3>useDeferredValue</h3>
+
+<p>
+Delays values.
+</p>
+
+<pre><code class="language-jsx">const deferredQuery =
+  useDeferredValue(query);</code></pre>
+
+<table>
+<tr>
+<th>Hook</th>
+<th>What It Delays</th>
+</tr>
+
+<tr>
+<td>useTransition</td>
+<td>State Updates</td>
+</tr>
+
+<tr>
+<td>useDeferredValue</td>
+<td>Values</td>
+</tr>
+</table>
+
+<h2>Easy Way To Understand</h2>
+
+<h3>useTransition</h3>
+
+<pre><code class="language-jsx">startTransition(() => {
+
+  setResults(data);
+
+});</code></pre>
+
+<p>
+We tell React:
+</p>
+
+<pre><code class="language-text">Delay this update.
+</code></pre>
+
+<h3>useDeferredValue</h3>
+
+<pre><code class="language-jsx">const deferredQuery =
+  useDeferredValue(query);</code></pre>
+
+<p>
+We tell React:
+</p>
+
+<pre><code class="language-text">Give me a delayed version of this value.
+</code></pre>
+
+<h2>Real-World Use Cases</h2>
+
+<ul>
+<li>Search boxes.</li>
+<li>Large tables.</li>
+<li>Heavy filtering.</li>
+<li>Heavy sorting.</li>
+<li>Large dashboards.</li>
+<li>Expensive charts.</li>
+<li>Large lists.</li>
+</ul>
+
+<h2>What useDeferredValue Does NOT Do</h2>
+
+<p>
+Many developers think:
+</p>
+
+<pre><code class="language-text">useDeferredValue
+↓
+Makes Computation Faster
+</code></pre>
+
+<p>
+Wrong.
+</p>
+
+<div class="warning">
+It does not reduce work.
+<br><br>
+It only delays low-priority updates.
+</div>
+
+<h2>Loading Indicator Example</h2>
+
+<pre><code class="language-jsx">const deferredQuery =
+  useDeferredValue(query);
+
+const isStale =
+  query !== deferredQuery;</code></pre>
+
+<h3>Usage</h3>
+
+<pre><code class="language-jsx">{isStale && (
+  &lt;p&gt;Updating Results...&lt;/p&gt;
+)}</code></pre>
+
+<p>
+When values differ:
+</p>
+
+<pre><code class="language-text">query !== deferredQuery
+</code></pre>
+
+<p>
+React is still processing the update.
+</p>
+
+<h2>When Should You Use useDeferredValue?</h2>
+
+<ul>
+<li>Expensive search results.</li>
+<li>Large lists.</li>
+<li>Heavy filtering.</li>
+<li>Heavy sorting.</li>
+<li>Expensive rendering.</li>
+</ul>
+
+<h2>When Should You NOT Use useDeferredValue?</h2>
+
+<ul>
+<li>Simple forms.</li>
+<li>Small lists.</li>
+<li>Fast rendering.</li>
+<li>Values that must update immediately.</li>
+</ul>
+
+<div class="warning">
+Most applications do not need useDeferredValue.
+</div>
+
+<h2>Quick Comparison</h2>
+
+<table>
+<tr>
+<th>Feature</th>
+<th>useTransition</th>
+<th>useDeferredValue</th>
+</tr>
+
+<tr>
+<td>Introduced In</td>
+<td>React 18</td>
+<td>React 18</td>
+</tr>
+
+<tr>
+<td>Delays</td>
+<td>State Updates</td>
+<td>Values</td>
+</tr>
+
+<tr>
+<td>Provides Loading State</td>
+<td>✅ isPending</td>
+<td>❌ No</td>
+</tr>
+
+<tr>
+<td>Common Use</td>
+<td>Heavy Updates</td>
+<td>Heavy Value-Based Rendering</td>
+</tr>
+</table>
+
+<h2>Easy Way To Remember</h2>
+
+<div class="flow">
+Need To Delay
+A State Update?
+<br>↓<br>
+useTransition()
+
+
+<br><br>
+
+Need A Delayed
+Version Of A Value?
+<br>↓<br>
+useDeferredValue()
+</div>
+
+<h2>Interview Answer</h2>
+
+<div class="highlight">
+useDeferredValue is a React 18 hook that returns a deferred version of a value. React updates the deferred value with lower priority, allowing expensive UI updates such as filtering large lists to happen later while keeping user interactions responsive.
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+useDeferredValue provides a delayed version of a value so expensive UI updates do not block urgent interactions.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+
+</body>
+</html>

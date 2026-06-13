@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>076. How do you type props with TypeScript in React?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{
+  margin:0;
+  padding:0;
+  background:#000814;
+  color:#e2e8f0;
+  font-family:Arial,sans-serif;
+  line-height:1.7;
+}
+
+.container{
+  max-width:1000px;
+  margin:40px auto;
+  background:#020617;
+  padding:40px;
+  border-radius:18px;
+  border:1px solid #0f172a;
+  box-shadow:0 0 40px rgba(0,0,0,.95);
+}
+
+h1{
+  color:#f8fafc;
+  margin-bottom:30px;
+  font-size:34px;
+}
+
+h2{
+  color:#c084fc;
+  margin-top:35px;
+  margin-bottom:15px;
+  font-size:26px;
+}
+
+h3{
+  color:#38bdf8;
+  margin-top:25px;
+  margin-bottom:10px;
+}
+
+p{
+  color:#cbd5e1;
+}
+
+ul{
+  padding-left:24px;
+}
+
+li{
+  margin-bottom:10px;
+  color:#cbd5e1;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:20px;
+}
+
+table th,
+table td{
+  border:1px solid #1e293b;
+  padding:14px;
+  text-align:left;
+}
+
+table th{
+  background:#0f172a;
+  color:#38bdf8;
+}
+
+table td{
+  background:#020617;
+  color:#d1d5db;
+}
+
+.highlight{
+  background:#0f172a;
+  padding:18px;
+  border-left:5px solid #38bdf8;
+  border-radius:10px;
+  margin-top:15px;
+}
+
+.flow{
+  background:#020617;
+  border:1px solid #1e293b;
+  padding:20px;
+  border-radius:10px;
+  margin-top:15px;
+  text-align:center;
+  line-height:2;
+  font-size:18px;
+}
+
+pre{
+  border-radius:12px;
+  overflow-x:auto;
+}
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>076. How do you type props with TypeScript in React?</h1>
+
+<h2>One-Line Definition</h2>
+
+<div class="highlight">
+In React with TypeScript, we define a type or interface for component props so TypeScript can validate the data passed to the component.
+</div>
+
+<h2>Why Is It Needed?</h2>
+
+<p>
+TypeScript helps catch prop-related errors during development instead of at runtime.
+</p>
+
+<h3>Without TypeScript</h3>
+
+<pre><code class="language-jsx">&lt;User name="Rizwan" age="39" /&gt;</code></pre>
+
+<p>
+React will allow this, but age is actually a string instead of a number.
+</p>
+
+<h3>With TypeScript</h3>
+
+<p>
+TypeScript immediately shows an error because age should be a number.
+</p>
+
+<h2>Typing Props Using type</h2>
+
+<h3>Create Props Type</h3>
+
+<pre><code class="language-tsx">type UserProps = {
+  name: string;
+  age: number;
+};</code></pre>
+
+<h3>Use Props Type</h3>
+
+<pre><code class="language-tsx">type UserProps = {
+  name: string;
+  age: number;
+};
+
+function User({ name, age }: UserProps) {
+  return (
+    &lt;div&gt;
+      &lt;h2&gt;{name}&lt;/h2&gt;
+      &lt;p&gt;{age}&lt;/p&gt;
+    &lt;/div&gt;
+  );
+}
+
+export default User;</code></pre>
+
+<h3>Usage</h3>
+
+<pre><code class="language-tsx">&lt;User name="Rizwan" age={39} /&gt;</code></pre>
+
+<h2>TypeScript Error Example</h2>
+
+<pre><code class="language-tsx">&lt;User name="Rizwan" age="39" /&gt;</code></pre>
+
+<div class="highlight">
+Error: Type 'string' is not assignable to type 'number'.
+</div>
+
+<h2>Typing Props Using interface</h2>
+
+<pre><code class="language-tsx">interface UserProps {
+  name: string;
+  age: number;
+}
+
+function User({ name, age }: UserProps) {
+  return (
+    &lt;div&gt;
+      &lt;h2&gt;{name}&lt;/h2&gt;
+      &lt;p&gt;{age}&lt;/p&gt;
+    &lt;/div&gt;
+  );
+}</code></pre>
+
+<h2>type vs interface</h2>
+
+<p>
+Both are valid and commonly used for React props.
+</p>
+
+<table>
+
+<tr>
+<th>Feature</th>
+<th>type</th>
+<th>interface</th>
+</tr>
+
+<tr>
+<td>Props Typing</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+
+<tr>
+<td>Union Types</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+
+<tr>
+<td>Extendable</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+
+<tr>
+<td>Popular in React</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+
+</table>
+
+<h2>Optional Props</h2>
+
+<p>
+Use ? to make a prop optional.
+</p>
+
+<pre><code class="language-tsx">type UserProps = {
+  name: string;
+  age?: number;
+};</code></pre>
+
+<h3>Usage</h3>
+
+<pre><code class="language-tsx">&lt;User name="Rizwan" /&gt;</code></pre>
+
+<p>
+Now age is optional.
+</p>
+
+<h2>Default Values with Optional Props</h2>
+
+<pre><code class="language-tsx">type UserProps = {
+  name: string;
+  age?: number;
+};
+
+function User({ name, age = 18 }: UserProps) {
+  return &lt;h2&gt;{name} - {age}&lt;/h2&gt;;
+}</code></pre>
+
+<h2>Typing Function Props</h2>
+
+<pre><code class="language-tsx">type ButtonProps = {
+  onClick: () => void;
+};
+
+function Button({ onClick }: ButtonProps) {
+  return (
+    &lt;button onClick={onClick}&gt;
+      Click
+    &lt;/button&gt;
+  );
+}</code></pre>
+
+<h3>Usage</h3>
+
+<pre><code class="language-tsx">&lt;Button onClick={() => console.log('Clicked')} /&gt;</code></pre>
+
+<h2>Typing Object Props</h2>
+
+<pre><code class="language-tsx">type UserProps = {
+  user: {
+    id: number;
+    name: string;
+    email: string;
+  };
+};
+
+function User({ user }: UserProps) {
+  return &lt;h2&gt;{user.name}&lt;/h2&gt;;
+}</code></pre>
+
+<h3>Usage</h3>
+
+<pre><code class="language-tsx">&lt;User
+  user={{
+    id: 1,
+    name: 'Rizwan',
+    email: 'rizwan@gmail.com'
+  }}
+/&gt;</code></pre>
+
+<h2>Typing Array Props</h2>
+
+<pre><code class="language-tsx">type UserListProps = {
+  users: string[];
+};
+
+function UserList({ users }: UserListProps) {
+  return (
+    &lt;ul&gt;
+      {users.map(user => (
+        &lt;li key={user}&gt;{user}&lt;/li&gt;
+      ))}
+    &lt;/ul&gt;
+  );
+}</code></pre>
+
+<h2>Typing children</h2>
+
+<pre><code class="language-tsx">import { ReactNode } from 'react';
+
+type CardProps = {
+  children: ReactNode;
+};
+
+function Card({ children }: CardProps) {
+  return &lt;div&gt;{children}&lt;/div&gt;;
+}</code></pre>
+
+<h3>Usage</h3>
+
+<pre><code class="language-tsx">&lt;Card&gt;
+  &lt;h2&gt;Hello&lt;/h2&gt;
+&lt;/Card&gt;</code></pre>
+
+<h2>Most Common Real-World Example</h2>
+
+<pre><code class="language-tsx">type UserProps = {
+  name: string;
+  age: number;
+  city?: string;
+};
+
+function User({ name, age, city }: UserProps) {
+  return (
+    &lt;div&gt;
+      &lt;h2&gt;{name}&lt;/h2&gt;
+      &lt;p&gt;Age: {age}&lt;/p&gt;
+      {city && &lt;p&gt;City: {city}&lt;/p&gt;}
+    &lt;/div&gt;
+  );
+}</code></pre>
+
+<h3>Usage</h3>
+
+<pre><code class="language-tsx">&lt;User
+  name="Rizwan"
+  age={39}
+  city="Kota"
+/&gt;</code></pre>
+
+<h2>Real Project Example</h2>
+
+<div class="highlight">
+In our Aadhaar Authentication application, components may receive Aadhaar numbers, department details, authentication status, and callback functions. TypeScript ensures every prop has the correct type before the application is deployed.
+</div>
+
+<h2>Important Interview Points</h2>
+
+<ul>
+<li>Props are typed using type or interface.</li>
+<li>TypeScript validates props at compile time.</li>
+<li>Optional props use ?.</li>
+<li>Functions, arrays, objects, and children can all be typed.</li>
+<li>TypeScript helps prevent runtime bugs.</li>
+<li>Both type and interface are commonly used.</li>
+</ul>
+
+<h2>Short Interview Answer</h2>
+
+<div class="highlight">
+Props are typed in React using TypeScript type aliases or interfaces. This allows TypeScript to validate incoming props and catch type-related errors during development.
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+React props are typed using TypeScript types or interfaces to ensure components receive the correct data types.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-tsx.min.js"></script>
+
+</body>
+</html>
