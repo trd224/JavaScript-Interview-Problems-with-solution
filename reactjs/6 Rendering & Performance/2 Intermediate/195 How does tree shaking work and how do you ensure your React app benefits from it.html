@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>195 - How does tree shaking work and how do you ensure your React app benefits from it?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px;margin-bottom:10px}
+p{color:#cbd5e1}
+ul{padding-left:24px}
+li{margin-bottom:10px;color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left;vertical-align:top}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px;margin-top:15px}
+.warning{background:#1e1b4b;border-left:5px solid #fbbf24;padding:18px;border-radius:10px;margin-top:15px}
+.success{background:#052e16;padding:18px;border-left:5px solid #22c55e;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;margin-top:15px;text-align:center;line-height:2;font-size:18px}
+pre{border-radius:12px;overflow-x:auto}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>195. How does tree shaking work and how do you ensure your React app benefits from it?</h1>
+
+<h2>One-Line Definition</h2>
+
+<div class="highlight">
+Tree shaking works by analyzing imports and exports during the production build and removing code that is never used by the application.
+</div>
+
+<h2>How Tree Shaking Actually Works</h2>
+
+<p>
+The bundler (Webpack, Vite, Rollup, etc.) examines all files in the application.
+</p>
+
+<p>
+It checks:
+</p>
+
+<ul>
+<li>What is exported from each file.</li>
+<li>What is imported by other files.</li>
+<li>Which exports are actually used.</li>
+<li>Which exports are never referenced anywhere.</li>
+</ul>
+
+<div class="success">
+Unused exports are removed from the final production bundle.
+</div>
+
+<h2>Step-by-Step Example</h2>
+
+<h3>math.js</h3>
+
+<pre><code class="language-js">export function add(a, b) {
+  return a + b;
+}
+
+export function subtract(a, b) {
+  return a - b;
+}
+
+export function multiply(a, b) {
+  return a * b;
+}</code></pre>
+
+<h3>App.js</h3>
+
+<pre><code class="language-js">import { add } from './math';
+
+function App() {
+  return &lt;h1&gt;{add(10, 5)}&lt;/h1&gt;;
+}
+
+export default App;</code></pre>
+
+<p>
+The bundler sees:
+</p>
+
+<ul>
+<li>add() is used.</li>
+<li>subtract() is unused.</li>
+<li>multiply() is unused.</li>
+</ul>
+
+<div class="success">
+During production build, only add() is included in the final bundle.
+</div>
+
+<h2>Visual Flow</h2>
+
+<div class="flow">
+Export Functions
+<br>
+↓
+<br>
+Import Functions
+<br>
+↓
+<br>
+Bundler Analyzes Usage
+<br>
+↓
+<br>
+Unused Code Found
+<br>
+↓
+<br>
+Unused Code Removed
+<br>
+↓
+<br>
+Smaller Bundle Generated
+</div>
+
+<h2>Why Does Tree Shaking Require ES Modules?</h2>
+
+<p>
+Tree shaking depends on static analysis.
+</p>
+
+<p>
+With ES Modules, imports and exports are known before code executes.
+</p>
+
+<h3>Good</h3>
+
+<pre><code class="language-js">import { add } from './math';
+
+export function add() {}</code></pre>
+
+<h3>Not Ideal</h3>
+
+<pre><code class="language-js">const math = require('./math');</code></pre>
+
+<div class="warning">
+Tree shaking works best with import/export syntax, not CommonJS require().
+</div>
+
+<h2>How To Ensure Your React App Benefits From Tree Shaking</h2>
+
+<h3>1. Use ES Module Syntax</h3>
+
+<pre><code class="language-js">import { Button } from './Button';
+
+export function Button() {}</code></pre>
+
+<p>
+Avoid:
+</p>
+
+<pre><code class="language-js">const Button = require('./Button');</code></pre>
+
+<h3>2. Always Create a Production Build</h3>
+
+<pre><code class="language-bash">npm run build</code></pre>
+
+<p>
+Tree shaking is primarily a production optimization.
+</p>
+
+<h3>3. Import Only What You Need</h3>
+
+<p>Good:</p>
+
+<pre><code class="language-js">import { debounce } from 'lodash-es';</code></pre>
+
+<p>Less Efficient:</p>
+
+<pre><code class="language-js">import _ from 'lodash';
+
+_.debounce(...);</code></pre>
+
+<div class="success">
+Smaller imports usually produce smaller bundles.
+</div>
+
+<h3>4. Avoid Barrel Files for Huge Libraries</h3>
+
+<p>
+Suppose:
+</p>
+
+<pre><code class="language-js">export * from './Button';
+export * from './Modal';
+export * from './Table';
+export * from './Chart';
+export * from './Grid';</code></pre>
+
+<p>
+Large barrel exports can sometimes reduce tree-shaking effectiveness depending on library structure and bundler configuration.
+</p>
+
+<h3>5. Avoid Unnecessary Side Effects</h3>
+
+<pre><code class="language-js">console.log('Executed automatically');</code></pre>
+
+<p>
+When a file performs work immediately upon import, bundlers may keep it because removing it could change application behavior.
+</p>
+
+<h3>6. Use Tree-Shakable Libraries</h3>
+
+<table>
+<tr>
+<th>Library Type</th>
+<th>Tree Shaking</th>
+</tr>
+
+<tr>
+<td>ES Module Package</td>
+<td>Excellent</td>
+</tr>
+
+<tr>
+<td>CommonJS Package</td>
+<td>Limited</td>
+</tr>
+
+<tr>
+<td>Modern React Libraries</td>
+<td>Usually Good</td>
+</tr>
+</table>
+
+<h2>Real React Example</h2>
+
+<h3>icons.js</h3>
+
+<pre><code class="language-js">export const UserIcon = () => &lt;span&gt;👤&lt;/span&gt;;
+
+export const CartIcon = () => &lt;span&gt;🛒&lt;/span&gt;;
+
+export const SearchIcon = () => &lt;span&gt;🔍&lt;/span&gt;;</code></pre>
+
+<h3>Profile.js</h3>
+
+<pre><code class="language-js">import { UserIcon } from './icons';
+
+function Profile() {
+  return &lt;UserIcon /&gt;;
+}
+
+export default Profile;</code></pre>
+
+<div class="success">
+CartIcon and SearchIcon can be removed because they are never used.
+</div>
+
+<h2>How To Verify Tree Shaking Is Working</h2>
+
+<h3>Create Production Build</h3>
+
+<pre><code class="language-bash">npm run build</code></pre>
+
+<h3>Analyze Bundle</h3>
+
+<pre><code class="language-bash">npm install webpack-bundle-analyzer</code></pre>
+
+<p>
+Or use tools such as:
+</p>
+
+<ul>
+<li>Webpack Bundle Analyzer</li>
+<li>Source Map Explorer</li>
+<li>Vite Bundle Visualizer</li>
+</ul>
+
+<p>
+These tools show exactly what code ended up in the final bundle.
+</p>
+
+<h2>Common Mistakes</h2>
+
+<table>
+<tr>
+<th>Mistake</th>
+<th>Effect</th>
+</tr>
+
+<tr>
+<td>Using require()</td>
+<td>Reduces tree-shaking effectiveness</td>
+</tr>
+
+<tr>
+<td>Importing entire libraries</td>
+<td>Larger bundle size</td>
+</tr>
+
+<tr>
+<td>Adding unnecessary side effects</td>
+<td>Unused files may remain</td>
+</tr>
+
+<tr>
+<td>Testing only development build</td>
+<td>Tree shaking may not run</td>
+</tr>
+</table>
+
+<h2>Interview Difference</h2>
+
+<div class="highlight">
+Question 194 focuses on <strong>what tree shaking is</strong>.
+</div>
+
+<div class="highlight">
+Question 195 focuses on <strong>how tree shaking works internally and how to make sure your React application actually benefits from it</strong>.
+</div>
+
+<h2>Important Interview Points</h2>
+
+<ul>
+<li>Tree shaking removes unused exports.</li>
+<li>It works during production builds.</li>
+<li>It relies on static ES module analysis.</li>
+<li>Import only what you need.</li>
+<li>Avoid unnecessary side effects.</li>
+<li>Use tree-shakable libraries.</li>
+<li>Analyze bundles to verify optimization.</li>
+</ul>
+
+<h2>Short Interview Answer</h2>
+
+<div class="highlight">
+Tree shaking works by analyzing imports and exports during the build process and removing unused code. To benefit from it in React, use ES modules, create production builds, avoid unnecessary side effects, and import only the code your application actually uses.
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+Tree shaking removes unused exports during production builds, and React apps benefit from it by using ES modules and importing only necessary code.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+
+</body>
+</html>

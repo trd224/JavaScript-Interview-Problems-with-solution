@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>217 - How do you split Contexts to avoid unnecessary re-renders?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px;margin-bottom:10px}
+p{color:#cbd5e1}
+ul{padding-left:24px}
+li{margin-bottom:10px;color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left;vertical-align:top}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px;margin-top:15px}
+.warning{background:#3b0820;border-left:5px solid #ef4444;padding:18px;border-radius:10px;margin-top:15px}
+.success{background:#052e16;padding:18px;border-left:5px solid #22c55e;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;margin-top:15px;text-align:center;line-height:2;font-size:18px}
+pre{border-radius:12px;overflow-x:auto}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>217. How do you split Contexts to avoid unnecessary re-renders?</h1>
+
+<h2>One-Line Definition</h2>
+
+<div class="highlight">
+We split Contexts by responsibility so that only components using the changed data re-render instead of the entire application.
+</div>
+
+<h2>Why Do We Need To Split Contexts?</h2>
+
+<p>
+A common mistake is putting all application state into one Context.
+</p>
+
+<pre><code class="language-js">const AppContext = createContext();</code></pre>
+
+<pre><code class="language-js">value={{
+  user,
+  theme,
+  cart,
+  notifications
+}}</code></pre>
+
+<p>
+This seems simple initially.
+</p>
+
+<div class="warning">
+But when any value changes, all Context consumers re-render.
+</div>
+
+<h2>Problem Example</h2>
+
+<h3>Header</h3>
+
+<pre><code class="language-js">function Header() {
+  const { user } = useContext(AppContext);
+
+  return &lt;h2&gt;{user.name}&lt;/h2&gt;;
+}</code></pre>
+
+<h3>Cart</h3>
+
+<pre><code class="language-js">function Cart() {
+  const { cart } = useContext(AppContext);
+
+  return &lt;h2&gt;{cart.length}&lt;/h2&gt;;
+}</code></pre>
+
+<p>
+Now suppose:
+</p>
+
+<pre><code class="language-js">setCart([...cart, product]);</code></pre>
+
+<p>
+Only cart changed.
+</p>
+
+<p>
+However:
+</p>
+
+<ul>
+<li>Cart re-renders.</li>
+<li>Header re-renders.</li>
+<li>Theme components re-render.</li>
+<li>Notification components re-render.</li>
+</ul>
+
+<div class="warning">
+Most of these renders are unnecessary.
+</div>
+
+<h2>Visual Problem</h2>
+
+<div class="flow">
+One Context
+<br>
+↓
+<br>
+User + Theme + Cart + Notifications
+<br>
+↓
+<br>
+Cart Changes
+<br>
+↓
+<br>
+Entire Context Updates
+<br>
+↓
+<br>
+All Consumers Re-render
+</div>
+
+<h2>Solution - Split Contexts</h2>
+
+<p>
+Instead of one huge Context:
+</p>
+
+<pre><code class="language-js">const AppContext = createContext();</code></pre>
+
+<p>
+Create multiple Contexts:
+</p>
+
+<pre><code class="language-js">const UserContext = createContext();
+const ThemeContext = createContext();
+const CartContext = createContext();
+const NotificationContext = createContext();</code></pre>
+
+<div class="success">
+Now each Context controls only one type of state.
+</div>
+
+<h2>Step 1 - Create User Context</h2>
+
+<pre><code class="language-js">import { createContext, useState } from 'react';
+
+export const UserContext = createContext();
+
+export function UserProvider({ children }) {
+  const [user, setUser] = useState(null);
+
+  return (
+    &lt;UserContext.Provider value={{ user, setUser }}&gt;
+      {children}
+    &lt;/UserContext.Provider&gt;
+  );
+}</code></pre>
+
+<h2>Step 2 - Create Theme Context</h2>
+
+<pre><code class="language-js">import { createContext, useState } from 'react';
+
+export const ThemeContext = createContext();
+
+export function ThemeProvider({ children }) {
+  const [theme, setTheme] = useState('light');
+
+  return (
+    &lt;ThemeContext.Provider value={{ theme, setTheme }}&gt;
+      {children}
+    &lt;/ThemeContext.Provider&gt;
+  );
+}</code></pre>
+
+<h2>Step 3 - Create Cart Context</h2>
+
+<pre><code class="language-js">import { createContext, useState } from 'react';
+
+export const CartContext = createContext();
+
+export function CartProvider({ children }) {
+  const [cart, setCart] = useState([]);
+
+  return (
+    &lt;CartContext.Provider value={{ cart, setCart }}&gt;
+      {children}
+    &lt;/CartContext.Provider&gt;
+  );
+}</code></pre>
+
+<h2>Step 4 - Combine Providers</h2>
+
+<pre><code class="language-js">function App() {
+  return (
+    &lt;UserProvider&gt;
+      &lt;ThemeProvider&gt;
+        &lt;CartProvider&gt;
+          &lt;Dashboard /&gt;
+        &lt;/CartProvider&gt;
+      &lt;/ThemeProvider&gt;
+    &lt;/UserProvider&gt;
+  );
+}</code></pre>
+
+<p>
+This is often called:
+</p>
+
+<pre><code>Provider Composition</code></pre>
+
+<h2>How Components Consume Context</h2>
+
+<h3>Header Uses Only User Context</h3>
+
+<pre><code class="language-js">function Header() {
+  const { user } = useContext(UserContext);
+
+  return &lt;h2&gt;{user?.name}&lt;/h2&gt;;
+}</code></pre>
+
+<h3>Cart Uses Only Cart Context</h3>
+
+<pre><code class="language-js">function Cart() {
+  const { cart } = useContext(CartContext);
+
+  return &lt;h2&gt;Items: {cart.length}&lt;/h2&gt;;
+}</code></pre>
+
+<h2>What Happens Now?</h2>
+
+<p>
+When:
+</p>
+
+<pre><code class="language-js">setCart([...cart, product]);</code></pre>
+
+<p>
+Only:
+</p>
+
+<ul>
+<li>CartContext changes.</li>
+<li>Cart consumers re-render.</li>
+</ul>
+
+<p>
+These do not re-render:
+</p>
+
+<ul>
+<li>Header</li>
+<li>Theme components</li>
+<li>User components</li>
+</ul>
+
+<div class="success">
+This greatly reduces unnecessary renders.
+</div>
+
+<h2>Visual Result</h2>
+
+<div class="flow">
+Cart Context Changes
+<br>
+↓
+<br>
+Only Cart Consumers Notified
+<br>
+↓
+<br>
+Cart Components Re-render
+<br>
+↓
+<br>
+User Components Stay Untouched
+<br>
+↓
+<br>
+Theme Components Stay Untouched
+</div>
+
+<h2>Real Project Example</h2>
+
+<p>
+Suppose our Aadhaar Authentication application has:
+</p>
+
+<ul>
+<li>User details</li>
+<li>Department details</li>
+<li>Theme</li>
+<li>Language</li>
+<li>Authentication state</li>
+<li>Error popup state</li>
+</ul>
+
+<p>
+Bad approach:
+</p>
+
+<pre><code class="language-js">AppContext = {
+  user,
+  department,
+  theme,
+  language,
+  auth,
+  error
+};</code></pre>
+
+<p>
+Better approach:
+</p>
+
+<pre><code class="language-js">UserContext
+DepartmentContext
+ThemeContext
+LanguageContext
+AuthContext
+ErrorContext</code></pre>
+
+<div class="success">
+Changing OTP or authentication state will not force Theme or Language components to re-render.
+</div>
+
+<h2>Can We Use Custom Hooks?</h2>
+
+<p>
+Yes. This is the most common pattern.
+</p>
+
+<h3>useUser Hook</h3>
+
+<pre><code class="language-js">export function useUser() {
+  return useContext(UserContext);
+}</code></pre>
+
+<h3>useCart Hook</h3>
+
+<pre><code class="language-js">export function useCart() {
+  return useContext(CartContext);
+}</code></pre>
+
+<h3>Usage</h3>
+
+<pre><code class="language-js">const { user } = useUser();
+
+const { cart } = useCart();</code></pre>
+
+<div class="highlight">
+Custom hooks hide Context implementation details and make components cleaner.
+</div>
+
+<h2>How Many Contexts Are Too Many?</h2>
+
+<p>
+Having multiple Contexts is normal.
+</p>
+
+<p>
+Don't create Contexts for every tiny value.
+</p>
+
+<p>
+Group related state together.
+</p>
+
+<table>
+<tr>
+<th>Good Split</th>
+<th>Reason</th>
+</tr>
+
+<tr>
+<td>UserContext</td>
+<td>User-related state</td>
+</tr>
+
+<tr>
+<td>ThemeContext</td>
+<td>Theme-related state</td>
+</tr>
+
+<tr>
+<td>CartContext</td>
+<td>Cart-related state</td>
+</tr>
+
+<tr>
+<td>AuthContext</td>
+<td>Authentication state</td>
+</tr>
+</table>
+
+<h2>Interview Difference</h2>
+
+<div class="highlight">
+Question 216 explains <strong>why one giant Context is a problem</strong>.
+</div>
+
+<div class="highlight">
+Question 217 explains <strong>how to solve that problem by splitting Contexts by responsibility</strong>.
+</div>
+
+<h2>Important Interview Points</h2>
+
+<ul>
+<li>Split Contexts by responsibility.</li>
+<li>Avoid one giant global Context.</li>
+<li>Context updates trigger all consumers of that Context.</li>
+<li>Smaller Contexts reduce unnecessary re-renders.</li>
+<li>Provider composition is a common pattern.</li>
+<li>Custom hooks make Context usage cleaner.</li>
+<li>Frequently changing state benefits most from Context splitting.</li>
+</ul>
+
+<h2>Short Interview Answer</h2>
+
+<div class="highlight">
+To avoid unnecessary re-renders, split Contexts based on responsibility such as UserContext, ThemeContext, CartContext, and AuthContext. This ensures that when one piece of state changes, only components consuming that specific Context re-render.
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+Split Contexts by feature or responsibility so updates affect only relevant consumers instead of the entire application.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+
+</body>
+</html>

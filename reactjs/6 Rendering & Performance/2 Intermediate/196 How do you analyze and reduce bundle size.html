@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>196 - How do you analyze and reduce bundle size?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px;margin-bottom:10px}
+p{color:#cbd5e1}
+ul{padding-left:24px}
+li{margin-bottom:10px;color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left;vertical-align:top}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px;margin-top:15px}
+.warning{background:#1e1b4b;border-left:5px solid #fbbf24;padding:18px;border-radius:10px;margin-top:15px}
+.success{background:#052e16;padding:18px;border-left:5px solid #22c55e;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;margin-top:15px;text-align:center;line-height:2;font-size:18px}
+pre{border-radius:12px;overflow-x:auto}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>196. How do you analyze and reduce bundle size?</h1>
+
+<h2>One-Line Definition</h2>
+
+<div class="highlight">
+Bundle size analysis means checking which files, libraries, and code are making our final JavaScript bundle large, then removing or optimizing unnecessary code.
+</div>
+
+<h2>Simple Meaning</h2>
+
+<p>
+When we build a React application, all our JavaScript, components, libraries, CSS, and assets are bundled into production files.
+</p>
+
+<p>
+If the bundle becomes too large, the browser needs more time to download, parse, and execute it.
+</p>
+
+<div class="warning">
+Large bundle size can make our React app slow, especially on mobile devices or slow internet.
+</div>
+
+<h2>Why Do We Analyze Bundle Size?</h2>
+
+<ul>
+<li>To find large libraries.</li>
+<li>To find unused code.</li>
+<li>To detect duplicate packages.</li>
+<li>To improve loading speed.</li>
+<li>To reduce JavaScript sent to the browser.</li>
+<li>To improve performance and user experience.</li>
+</ul>
+
+<h2>Visual Flow</h2>
+
+<div class="flow">
+Create Production Build
+<br>
+↓
+<br>
+Analyze Bundle Report
+<br>
+↓
+<br>
+Find Large Dependencies
+<br>
+↓
+<br>
+Remove or Replace Heavy Code
+<br>
+↓
+<br>
+Apply Code Splitting
+<br>
+↓
+<br>
+Smaller and Faster App
+</div>
+
+<h2>How To Analyze Bundle Size</h2>
+
+<h3>1. Create a Production Build</h3>
+
+<pre><code class="language-bash">npm run build</code></pre>
+
+<p>
+Always analyze the production build, not the development build.
+</p>
+
+<h3>2. Use Bundle Analyzer Tools</h3>
+
+<table>
+<tr>
+<th>Tool</th>
+<th>Use</th>
+</tr>
+
+<tr>
+<td>Webpack Bundle Analyzer</td>
+<td>Shows bundle contents visually</td>
+</tr>
+
+<tr>
+<td>Source Map Explorer</td>
+<td>Shows which files take space in the bundle</td>
+</tr>
+
+<tr>
+<td>Rollup Visualizer</td>
+<td>Useful for Vite/Rollup projects</td>
+</tr>
+
+<tr>
+<td>Vite Bundle Visualizer</td>
+<td>Analyzes Vite production bundles</td>
+</tr>
+</table>
+
+<h2>Example: Using Source Map Explorer</h2>
+
+<h3>Install</h3>
+
+<pre><code class="language-bash">npm install --save-dev source-map-explorer</code></pre>
+
+<h3>Add Script</h3>
+
+<pre><code class="language-json">{
+  "scripts": {
+    "build": "react-scripts build",
+    "analyze": "source-map-explorer 'build/static/js/*.js'"
+  }
+}</code></pre>
+
+<h3>Run</h3>
+
+<pre><code class="language-bash">npm run build
+npm run analyze</code></pre>
+
+<p>
+This shows which packages and files are taking the most space.
+</p>
+
+<h2>Example: Using Webpack Bundle Analyzer</h2>
+
+<h3>Install</h3>
+
+<pre><code class="language-bash">npm install --save-dev webpack-bundle-analyzer</code></pre>
+
+<h3>Use With Custom Webpack Setup</h3>
+
+<pre><code class="language-js">const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
+
+module.exports = {
+  plugins: [
+    new BundleAnalyzerPlugin()
+  ]
+};</code></pre>
+
+<p>
+This creates a visual report of our bundle.
+</p>
+
+<h2>How To Reduce Bundle Size</h2>
+
+<h3>1. Remove Unused Dependencies</h3>
+
+<pre><code class="language-bash">npm uninstall unused-package</code></pre>
+
+<p>
+Check package.json and remove libraries that are no longer used.
+</p>
+
+<h3>2. Import Only What You Need</h3>
+
+<p>Bad:</p>
+
+<pre><code class="language-js">import _ from 'lodash';
+
+_.debounce(search, 300);</code></pre>
+
+<p>Better:</p>
+
+<pre><code class="language-js">import debounce from 'lodash/debounce';
+
+debounce(search, 300);</code></pre>
+
+<p>Or:</p>
+
+<pre><code class="language-js">import { debounce } from 'lodash-es';</code></pre>
+
+<div class="success">
+Smaller imports help reduce final bundle size.
+</div>
+
+<h3>3. Use Code Splitting</h3>
+
+<p>
+Code splitting means loading some code only when it is needed.
+</p>
+
+<pre><code class="language-js">import React, { Suspense } from 'react';
+
+const Reports = React.lazy(() => import('./Reports'));
+
+function App() {
+  return (
+    &lt;Suspense fallback={&lt;h2&gt;Loading...&lt;/h2&gt;}&gt;
+      &lt;Reports /&gt;
+    &lt;/Suspense&gt;
+  );
+}
+
+export default App;</code></pre>
+
+<p>
+Now the Reports component is loaded only when required.
+</p>
+
+<h3>4. Route-Based Code Splitting</h3>
+
+<pre><code class="language-js">import React, { Suspense } from 'react';
+import { Routes, Route } from 'react-router-dom';
+
+const Dashboard = React.lazy(() => import('./pages/Dashboard'));
+const Products = React.lazy(() => import('./pages/Products'));
+const Reports = React.lazy(() => import('./pages/Reports'));
+
+function App() {
+  return (
+    &lt;Suspense fallback={&lt;h2&gt;Loading...&lt;/h2&gt;}&gt;
+      &lt;Routes&gt;
+        &lt;Route path="/" element={&lt;Dashboard /&gt;} /&gt;
+        &lt;Route path="/products" element={&lt;Products /&gt;} /&gt;
+        &lt;Route path="/reports" element={&lt;Reports /&gt;} /&gt;
+      &lt;/Routes&gt;
+    &lt;/Suspense&gt;
+  );
+}
+
+export default App;</code></pre>
+
+<div class="success">
+Each route can get its own JavaScript chunk.
+</div>
+
+<h3>5. Enable Tree Shaking</h3>
+
+<p>
+Use ES module import/export syntax.
+</p>
+
+<pre><code class="language-js">import { formatDate } from './utils';
+
+export function formatDate(date) {
+  return date.toDateString();
+}</code></pre>
+
+<p>
+Avoid:
+</p>
+
+<pre><code class="language-js">const utils = require('./utils');</code></pre>
+
+<div class="highlight">
+Tree shaking removes unused exports from the final production bundle.
+</div>
+
+<h3>6. Replace Heavy Libraries</h3>
+
+<table>
+<tr>
+<th>Heavy Library</th>
+<th>Possible Alternative</th>
+</tr>
+
+<tr>
+<td>moment</td>
+<td>date-fns or dayjs</td>
+</tr>
+
+<tr>
+<td>lodash full import</td>
+<td>lodash-es or single-function imports</td>
+</tr>
+
+<tr>
+<td>large chart libraries</td>
+<td>load only chart pages lazily</td>
+</tr>
+<tr>
+<td>large rich text editors</td>
+<td>load editor only when user opens editor page</td>
+</tr>
+</table>
+
+<h3>7. Compress and Optimize Assets</h3>
+
+<ul>
+<li>Compress images.</li>
+<li>Use modern formats like WebP or AVIF.</li>
+<li>Lazy load images.</li>
+<li>Use SVG icons carefully.</li>
+<li>Avoid importing very large images directly into JavaScript.</li>
+</ul>
+
+<h3>8. Avoid Duplicate Packages</h3>
+
+<pre><code class="language-bash">npm ls package-name</code></pre>
+
+<p>
+Sometimes two versions of the same package are installed.
+</p>
+
+<div class="warning">
+Duplicate dependencies can increase bundle size unnecessarily.
+</div>
+
+<h3>9. Use Dynamic Import for Heavy Features</h3>
+
+<pre><code class="language-js">async function openEditor() {
+  const editor = await import('./RichTextEditor');
+  editor.showEditor();
+}</code></pre>
+
+<p>
+The editor code loads only when the user needs it.
+</p>
+
+<h3>10. Remove Console Logs in Production</h3>
+
+<p>
+Console logs do not usually create a huge bundle, but removing them keeps production code cleaner.
+</p>
+
+<pre><code class="language-js">console.log('debug data');</code></pre>
+
+<h2>Real Project Example</h2>
+
+<p>
+Suppose our dashboard page uses a large chart library.
+</p>
+
+<p>
+Instead of loading the chart library in the main bundle:
+</p>
+
+<pre><code class="language-js">import ChartDashboard from './ChartDashboard';</code></pre>
+
+<p>
+We can lazy load it:
+</p>
+
+<pre><code class="language-js">import React, { Suspense } from 'react';
+
+const ChartDashboard = React.lazy(() => import('./ChartDashboard'));
+
+function Dashboard() {
+  return (
+    &lt;Suspense fallback={&lt;p&gt;Loading charts...&lt;/p&gt;}&gt;
+      &lt;ChartDashboard /&gt;
+    &lt;/Suspense&gt;
+  );
+}
+
+export default Dashboard;</code></pre>
+
+<div class="success">
+Now chart-related JavaScript loads only when the dashboard chart component is needed.
+</div>
+
+<h2>Common Bundle Size Problems</h2>
+
+<table>
+<tr>
+<th>Problem</th>
+<th>Solution</th>
+</tr>
+
+<tr>
+<td>Large library imported fully</td>
+<td>Import only required functions</td>
+</tr>
+
+<tr>
+<td>All routes loaded initially</td>
+<td>Use React.lazy route splitting</td>
+</tr>
+
+<tr>
+<td>Unused dependencies</td>
+<td>Remove from package.json</td>
+</tr>
+
+<tr>
+<td>Heavy chart/editor libraries</td>
+<td>Lazy load those features</td>
+</tr>
+
+<tr>
+<td>Large images</td>
+<td>Compress and lazy load images</td>
+</tr>
+
+<tr>
+<td>Duplicate packages</td>
+<td>Deduplicate dependencies</td>
+</tr>
+</table>
+
+<h2>Important Interview Points</h2>
+
+<ul>
+<li>Bundle size should be analyzed using production builds.</li>
+<li>Bundle analyzer tools show what is inside the final bundle.</li>
+<li>Code splitting reduces initial JavaScript load.</li>
+<li>Tree shaking removes unused exports.</li>
+<li>Lazy loading loads code only when needed.</li>
+<li>Heavy libraries should be replaced or loaded lazily.</li>
+<li>Unused and duplicate dependencies should be removed.</li>
+</ul>
+
+<h2>Short Interview Answer</h2>
+
+<div class="highlight">
+We analyze bundle size by creating a production build and using tools like Webpack Bundle Analyzer or Source Map Explorer. We reduce bundle size by removing unused dependencies, using tree shaking, importing only required code, applying route-based code splitting, lazy loading heavy components, and optimizing assets.
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+Analyze bundle size with bundle analyzer tools and reduce it using tree shaking, code splitting, lazy loading, optimized imports, and removing unused dependencies.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>190 - What is Code Splitting?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px;margin-bottom:10px}
+p{color:#cbd5e1}
+ul{padding-left:24px}
+li{margin-bottom:10px;color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left;vertical-align:top}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px;margin-top:15px}
+.warning{background:#1e1b4b;border-left:5px solid #fbbf24;padding:18px;border-radius:10px;margin-top:15px}
+.success{background:#052e16;padding:18px;border-left:5px solid #22c55e;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;margin-top:15px;text-align:center;line-height:2;font-size:18px}
+pre{border-radius:12px;overflow-x:auto}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>190. What is Code Splitting?</h1>
+
+<h2>One-Line Definition</h2>
+
+<div class="highlight">
+Code Splitting is a technique that divides a large JavaScript bundle into smaller chunks so users download only the code they currently need.
+</div>
+
+<h2>Why Is It Needed?</h2>
+
+<p>
+Suppose our React application contains:
+</p>
+
+<ul>
+<li>Dashboard</li>
+<li>Products Page</li>
+<li>Reports Page</li>
+<li>Settings Page</li>
+<li>Admin Panel</li>
+</ul>
+
+<p>
+Without code splitting, React builds:
+</p>
+
+<pre><code>bundle.js = 5 MB</code></pre>
+
+<p>
+When the user opens:
+</p>
+
+<pre><code>/dashboard</code></pre>
+
+<p>
+the browser still downloads:
+</p>
+
+<pre><code>
+Dashboard Code
++
+Products Code
++
+Reports Code
++
+Settings Code
++
+Admin Code
+</code></pre>
+
+<div class="warning">
+The user downloads code for pages they may never visit.
+</div>
+
+<h2>The Problem</h2>
+
+<div class="flow">
+Open Dashboard
+<br>
+↓
+<br>
+Download Entire Application
+<br>
+↓
+<br>
+Large Bundle
+<br>
+↓
+<br>
+Slow Initial Load
+</div>
+
+<h2>How Code Splitting Helps</h2>
+
+<p>
+Instead of one large bundle:
+</p>
+
+<pre><code>
+bundle.js
+</code></pre>
+
+<p>
+React creates:
+</p>
+
+<pre><code>
+dashboard.chunk.js
+
+products.chunk.js
+
+reports.chunk.js
+
+settings.chunk.js
+
+admin.chunk.js
+</code></pre>
+
+<p>
+Now when the user opens:
+</p>
+
+<pre><code>/dashboard</code></pre>
+
+<p>
+the browser downloads only:
+</p>
+
+<pre><code>
+dashboard.chunk.js
+</code></pre>
+
+<div class="success">
+Users download only the code needed for the current screen.
+</div>
+
+<h2>Visual Comparison</h2>
+
+<h3>Without Code Splitting</h3>
+
+<div class="flow">
+Dashboard
+<br>
++
+<br>
+Products
+<br>
++
+<br>
+Reports
+<br>
++
+<br>
+Settings
+<br>
++
+<br>
+Admin
+<br>
+↓
+<br>
+One Huge Bundle
+</div>
+
+<h3>With Code Splitting</h3>
+
+<div class="flow">
+Dashboard Page
+<br>
+↓
+<br>
+Download Dashboard Chunk Only
+
+<br><br>
+
+Products Page
+<br>
+↓
+<br>
+Download Products Chunk Only
+</div>
+
+<h2>How To Implement Code Splitting</h2>
+
+<p>
+React provides:
+</p>
+
+<pre><code class="language-jsx">React.lazy()</code></pre>
+
+<p>
+and:
+</p>
+
+<pre><code class="language-jsx">Suspense</code></pre>
+
+<h2>Normal Import</h2>
+
+<pre><code class="language-jsx">import Dashboard from './Dashboard';</code></pre>
+
+<p>
+Dashboard becomes part of the main bundle.
+</p>
+
+<h2>Lazy Import</h2>
+
+<pre><code class="language-jsx">const Dashboard = React.lazy(() =>
+  import('./Dashboard')
+);</code></pre>
+
+<p>
+Dashboard is loaded only when needed.
+</p>
+
+<div class="success">
+This creates a separate chunk automatically.
+</div>
+
+<h2>Using Suspense</h2>
+
+<pre><code class="language-jsx">import React, { Suspense } from 'react';
+
+const Dashboard = React.lazy(() =>
+  import('./Dashboard')
+);
+
+function App() {
+
+  return (
+
+    &lt;Suspense fallback={&lt;p&gt;Loading...&lt;/p&gt;}&gt;
+
+      &lt;Dashboard /&gt;
+
+    &lt;/Suspense&gt;
+
+  );
+
+}</code></pre>
+
+<p>
+While the chunk downloads:
+</p>
+
+<pre><code>Loading...</code></pre>
+
+<p>
+is shown.
+</p>
+
+<h2>Route-Based Code Splitting</h2>
+
+<p>
+Most applications split code by routes.
+</p>
+
+<pre><code class="language-jsx">import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import React, { Suspense } from 'react';
+
+const Dashboard = React.lazy(() =&gt;
+  import('./pages/Dashboard')
+);
+
+const Products = React.lazy(() =&gt;
+  import('./pages/Products')
+);
+
+const Reports = React.lazy(() =&gt;
+  import('./pages/Reports')
+);
+
+function App() {
+
+  return (
+
+    &lt;BrowserRouter&gt;
+
+      &lt;Suspense fallback={&lt;h2&gt;Loading...&lt;/h2&gt;}&gt;
+
+        &lt;Routes&gt;
+
+          &lt;Route
+            path="/"
+            element={&lt;Dashboard /&gt;}
+          /&gt;
+
+          &lt;Route
+            path="/products"
+            element={&lt;Products /&gt;}
+          /&gt;
+
+          &lt;Route
+            path="/reports"
+            element={&lt;Reports /&gt;}
+          /&gt;
+
+        &lt;/Routes&gt;
+
+      &lt;/Suspense&gt;
+
+    &lt;/BrowserRouter&gt;
+
+  );
+
+}
+
+export default App;</code></pre>
+
+<p>
+Each page becomes its own chunk.
+</p>
+
+<h2>Real-World Example</h2>
+
+<p>
+Suppose:
+</p>
+
+<pre><code>
+Dashboard = 200 KB
+
+Products = 300 KB
+
+Reports = 400 KB
+
+Admin = 500 KB
+</code></pre>
+
+<p>
+Without code splitting:
+</p>
+
+<pre><code>
+Total Download
+
+=
+1.4 MB
+</code></pre>
+
+<p>
+Even if user visits only Dashboard.
+</p>
+
+<p>
+With code splitting:
+</p>
+
+<pre><code>
+Dashboard Only
+
+=
+200 KB
+</code></pre>
+
+<div class="success">
+Much faster initial loading.
+</div>
+
+<h2>Code Splitting vs Lazy Loading</h2>
+
+<table>
+<tr>
+<th>Code Splitting</th>
+<th>Lazy Loading</th>
+</tr>
+
+<tr>
+<td>Creates separate chunks.</td>
+<td>Loads chunks when needed.</td>
+</tr>
+
+<tr>
+<td>Build-time optimization.</td>
+<td>Runtime optimization.</td>
+</tr>
+
+<tr>
+<td>Uses dynamic imports.</td>
+<td>Uses React.lazy.</td>
+</tr>
+</table>
+
+<p>
+Usually both work together.
+</p>
+
+<h2>What Does Webpack/Vite Generate?</h2>
+
+<p>
+Instead of:
+</p>
+
+<pre><code>
+main.js
+</code></pre>
+
+<p>
+The build may create:
+</p>
+
+<pre><code>
+main.js
+
+dashboard.abc123.js
+
+products.xyz456.js
+
+reports.pqr789.js
+</code></pre>
+
+<p>
+These are called chunks.
+</p>
+
+<h2>Benefits of Code Splitting</h2>
+
+<ul>
+<li>Smaller initial bundle.</li>
+<li>Faster page load.</li>
+<li>Less bandwidth usage.</li>
+<li>Better user experience.</li>
+<li>Improved Core Web Vitals.</li>
+<li>Better performance on slow networks.</li>
+</ul>
+
+<h2>When Should You Use It?</h2>
+
+<ul>
+<li>Large React applications.</li>
+<li>Admin dashboards.</li>
+<li>E-commerce websites.</li>
+<li>Applications with many routes.</li>
+<li>Pages containing heavy libraries.</li>
+</ul>
+
+<h2>Easy Way To Remember</h2>
+
+<div class="flow">
+Large Bundle
+<br>
+↓
+<br>
+Split Into Chunks
+<br>
+↓
+<br>
+Load Only Needed Chunk
+<br>
+↓
+<br>
+Faster Application
+</div>
+
+<h2>Important Interview Points</h2>
+
+<ul>
+<li>Code splitting divides large bundles into smaller chunks.</li>
+<li>Implemented using dynamic import().</li>
+<li>React.lazy enables component-level code splitting.</li>
+<li>Suspense shows loading UI while chunks load.</li>
+<li>Commonly used with route-based splitting.</li>
+<li>Improves initial load performance.</li>
+</ul>
+
+<h2>Short Interview Answer</h2>
+
+<div class="highlight">
+Code Splitting is a performance optimization technique that divides a large JavaScript bundle into smaller chunks. React loads only the required chunks when needed, reducing initial load time and improving application performance.
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+Code Splitting loads only the code needed for the current page instead of downloading the entire application upfront.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+
+</body>
+</html>

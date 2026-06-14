@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>182 - What is Concurrent Mode / Concurrent Features in React 18?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px;margin-bottom:10px}
+p{color:#cbd5e1}
+ul{padding-left:24px}
+li{margin-bottom:10px;color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left;vertical-align:top}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px;margin-top:15px}
+.warning{background:#1e1b4b;border-left:5px solid #fbbf24;padding:18px;border-radius:10px;margin-top:15px}
+.success{background:#052e16;padding:18px;border-left:5px solid #22c55e;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;margin-top:15px;text-align:center;line-height:2;font-size:18px}
+pre{border-radius:12px;overflow-x:auto}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>182. What is Concurrent Mode / Concurrent Features in React 18?</h1>
+
+<h2>One-Line Definition</h2>
+
+<div class="highlight">
+Concurrent Features are React 18 capabilities that allow React to pause, interrupt, prioritize, and resume rendering work to keep the UI responsive.
+</div>
+
+<h2>Important Interview Update</h2>
+
+<div class="warning">
+The old term "Concurrent Mode" is mostly outdated. React 18 does not ask us to enable a special Concurrent Mode. Instead, React provides Concurrent Features automatically through the new rendering engine.
+</div>
+
+<p>
+Today, interviewers usually mean:
+</p>
+
+<pre><code>Concurrent Rendering
++
+useTransition
++
+useDeferredValue
++
+Suspense
++
+Automatic Batching</code></pre>
+
+<h2>The Problem Before React 18</h2>
+
+<p>
+Before React 18, rendering was synchronous.
+</p>
+
+<div class="flow">
+Start Rendering
+<br>
+↓
+<br>
+Must Finish Everything
+<br>
+↓
+<br>
+User Waits
+<br>
+↓
+<br>
+UI Updates
+</div>
+
+<p>
+If rendering took a long time, the UI could freeze temporarily.
+</p>
+
+<h2>Example Problem</h2>
+
+<p>
+Suppose we have:
+</p>
+
+<ul>
+<li>Search box</li>
+<li>10,000 products</li>
+<li>Expensive filtering</li>
+</ul>
+
+<p>
+User types:
+</p>
+
+<pre><code>R
+Re
+Rea
+Reac
+React</code></pre>
+
+<p>
+React must:
+</p>
+
+<pre><code>Update Input
++
+Filter 10,000 Items
++
+Render 10,000 Items</code></pre>
+
+<p>
+The typing may feel slow.
+</p>
+
+<div class="warning">
+Large rendering work can block user interactions.
+</div>
+
+<h2>How Concurrent Features Help</h2>
+
+<p>
+React can now split rendering work into smaller pieces.
+</p>
+
+<div class="flow">
+Start Rendering
+<br>
+↓
+<br>
+User Types
+<br>
+↓
+<br>
+Pause Current Work
+<br>
+↓
+<br>
+Handle User Input First
+<br>
+↓
+<br>
+Continue Rendering Later
+</div>
+
+<div class="success">
+The UI stays responsive because important updates get higher priority.
+</div>
+
+<h2>The Biggest Misunderstanding</h2>
+
+<p>
+Many developers think:
+</p>
+
+<pre><code>Concurrent = Parallel</code></pre>
+
+<p>
+This is NOT true.
+</p>
+
+<div class="warning">
+JavaScript still runs on a single thread.
+</div>
+
+<p>
+React is not rendering multiple components simultaneously.
+</p>
+
+<p>
+React is simply smarter about scheduling work.
+</p>
+
+<h2>What React Can Do Now</h2>
+
+<ul>
+<li>Pause rendering.</li>
+<li>Resume rendering.</li>
+<li>Interrupt rendering.</li>
+<li>Restart rendering.</li>
+<li>Discard outdated renders.</li>
+<li>Prioritize urgent updates.</li>
+</ul>
+
+<h2>Feature 1 - useTransition</h2>
+
+<p>
+Allows React to mark updates as low priority.
+</p>
+
+<pre><code class="language-jsx">const [isPending, startTransition] = useTransition();
+
+function handleChange(e) {
+
+  const value = e.target.value;
+
+  setInput(value);
+
+  startTransition(() => {
+
+    setSearch(value);
+
+  });
+
+}</code></pre>
+
+<p>
+React prioritizes:
+</p>
+
+<pre><code>setInput()</code></pre>
+
+<p>
+over:
+</p>
+
+<pre><code>setSearch()</code></pre>
+
+<h2>Feature 2 - useDeferredValue</h2>
+
+<p>
+Delays expensive updates while keeping important updates responsive.
+</p>
+
+<pre><code class="language-jsx">const deferredSearch = useDeferredValue(search);</code></pre>
+
+<p>
+The input updates immediately while expensive filtering waits.
+</p>
+
+<h2>Feature 3 - Suspense</h2>
+
+<p>
+Allows React to show fallback UI while waiting.
+</p>
+
+<pre><code class="language-jsx">&lt;Suspense fallback={&lt;Loading /&gt;}&gt;
+
+  &lt;ProductList /&gt;
+
+&lt;/Suspense&gt;</code></pre>
+
+<p>
+Instead of blocking the whole page, React shows loading UI.
+</p>
+
+<h2>Feature 4 - Automatic Batching</h2>
+
+<p>
+React automatically groups multiple state updates into one render.
+</p>
+
+<pre><code class="language-jsx">setCount(c => c + 1);
+
+setName('Rizwan');</code></pre>
+
+<p>
+React performs:
+</p>
+
+<pre><code>One Render</code></pre>
+
+<p>
+instead of multiple renders.
+</p>
+
+<h2>How Are Concurrent Features Enabled?</h2>
+
+<p>
+React 18 concurrent features require:
+</p>
+
+<pre><code class="language-jsx">import ReactDOM from 'react-dom/client';
+
+const root = ReactDOM.createRoot(
+  document.getElementById('root')
+);
+
+root.render(&lt;App /&gt;);</code></pre>
+
+<div class="success">
+createRoot() enables the React 18 rendering engine.
+</div>
+
+<h2>Before vs After React 18</h2>
+
+<table>
+<tr>
+<th>Before React 18</th>
+<th>React 18</th>
+</tr>
+
+<tr>
+<td>Rendering was blocking.</td>
+<td>Rendering can be interrupted.</td>
+</tr>
+
+<tr>
+<td>No prioritization.</td>
+<td>Priority-based scheduling.</td>
+</tr>
+
+<tr>
+<td>UI could become unresponsive.</td>
+<td>UI stays responsive.</td>
+</tr>
+
+<tr>
+<td>Limited batching.</td>
+<td>Automatic batching.</td>
+</tr>
+
+<tr>
+<td>No transitions.</td>
+<td>useTransition available.</td>
+</tr>
+
+<tr>
+<td>No deferred values.</td>
+<td>useDeferredValue available.</td>
+</tr>
+</table>
+
+<h2>Easy Way To Remember</h2>
+
+<div class="flow">
+Old React
+
+<br><br>
+
+Start Render
+<br>
+↓
+<br>
+Finish Everything
+<br>
+↓
+<br>
+Respond To User
+
+<br><br>
+
+React 18
+
+<br><br>
+
+Start Render
+<br>
+↓
+<br>
+User Interaction?
+<br>
+↓
+<br>
+Pause Work
+<br>
+↓
+<br>
+Handle User First
+<br>
+↓
+<br>
+Continue Later
+</div>
+
+<h2>Concurrent Mode vs Concurrent Features</h2>
+
+<table>
+<tr>
+<th>Old Term</th>
+<th>Modern React 18 Term</th>
+</tr>
+
+<tr>
+<td>Concurrent Mode</td>
+<td>Concurrent Features</td>
+</tr>
+
+<tr>
+<td>Experimental feature</td>
+<td>Built into React 18</td>
+</tr>
+
+<tr>
+<td>Manually enabled</td>
+<td>Used automatically via createRoot()</td>
+</tr>
+</table>
+
+<h2>Important Interview Points</h2>
+
+<ul>
+<li>Concurrent Mode is an older term.</li>
+<li>React 18 uses Concurrent Features.</li>
+<li>Concurrent does not mean parallel rendering.</li>
+<li>React can interrupt and prioritize rendering.</li>
+<li>Works with useTransition and useDeferredValue.</li>
+<li>Improves UI responsiveness.</li>
+<li>Enabled through createRoot().</li>
+</ul>
+
+<h2>Short Interview Answer</h2>
+
+<div class="highlight">
+Concurrent Features in React 18 allow React to pause, interrupt, resume, and prioritize rendering work. This keeps the UI responsive during expensive rendering operations and powers features like useTransition, useDeferredValue, Suspense, and Automatic Batching.
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+Concurrent Features let React prioritize important updates and interrupt less important rendering work to keep the UI responsive.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+
+</body>
+</html>

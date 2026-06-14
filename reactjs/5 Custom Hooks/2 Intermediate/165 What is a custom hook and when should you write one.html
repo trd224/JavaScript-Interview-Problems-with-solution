@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>165 - What is a Custom Hook and When Should You Write One?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px;margin-bottom:10px}
+p{color:#cbd5e1}
+ul{padding-left:24px}
+li{margin-bottom:10px;color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left;vertical-align:top}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px;margin-top:15px}
+.warning{background:#1e1b4b;border-left:5px solid #fbbf24;padding:18px;border-radius:10px;margin-top:15px}
+.success{background:#052e16;padding:18px;border-left:5px solid #22c55e;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;margin-top:15px;text-align:center;line-height:2;font-size:18px}
+pre{border-radius:12px;overflow-x:auto}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>165. What is a Custom Hook and When Should You Write One?</h1>
+
+<h2>One-Line Definition</h2>
+
+<div class="highlight">
+A custom hook is a JavaScript function that uses React hooks and allows us to reuse stateful logic across multiple components.
+</div>
+
+<h2>Why Do We Need Custom Hooks?</h2>
+
+<p>
+Many components often need the same logic.
+</p>
+
+<p>
+Examples:
+</p>
+
+<ul>
+<li>API fetching logic</li>
+<li>Window resize tracking</li>
+<li>Authentication logic</li>
+<li>Form handling logic</li>
+<li>Local storage logic</li>
+<li>Online/offline detection</li>
+</ul>
+
+<p>
+Without a custom hook, we would duplicate the same useState and useEffect code in multiple components.
+</p>
+
+<div class="warning">
+Custom hooks help us avoid duplicated React hook logic.
+</div>
+
+<h2>The Problem Without a Custom Hook</h2>
+
+<p>
+Suppose two components need the current window width.
+</p>
+
+<h3>Component A</h3>
+
+<pre><code class="language-jsx">useEffect(() => {
+
+  function handleResize() {
+    setWidth(window.innerWidth);
+  }
+
+  window.addEventListener('resize', handleResize);
+
+  return () => {
+    window.removeEventListener('resize', handleResize);
+  };
+
+}, []);</code></pre>
+
+<h3>Component B</h3>
+
+<pre><code class="language-jsx">useEffect(() => {
+
+  function handleResize() {
+    setWidth(window.innerWidth);
+  }
+
+  window.addEventListener('resize', handleResize);
+
+  return () => {
+    window.removeEventListener('resize', handleResize);
+  };
+
+}, []);</code></pre>
+
+<p>
+The same logic is repeated.
+</p>
+
+<div class="highlight">
+A custom hook allows us to write the logic once and reuse it everywhere.
+</div>
+
+<h2>Basic Syntax</h2>
+
+<pre><code class="language-jsx">function useSomething() {
+
+  // React hook logic
+
+  return something;
+
+}</code></pre>
+
+<p>
+Custom hook names must always start with:
+</p>
+
+<pre><code class="language-jsx">use</code></pre>
+
+<p>
+Examples:
+</p>
+
+<pre><code class="language-jsx">useAuth()
+useFetch()
+useCounter()
+useWindowSize()
+useLocalStorage()</code></pre>
+
+<h2>Simple Custom Hook Example</h2>
+
+<h3>Step 1 - Create Custom Hook</h3>
+
+<pre><code class="language-jsx">import { useState } from 'react';
+
+function useCounter() {
+
+  const [count, setCount] = useState(0);
+
+  function increment() {
+    setCount(c => c + 1);
+  }
+
+  return { count, increment };
+
+}
+
+export default useCounter;</code></pre>
+
+<h3>Step 2 - Use Custom Hook</h3>
+
+<pre><code class="language-jsx">import useCounter from './useCounter';
+
+function App() {
+
+  const { count, increment } = useCounter();
+
+  return (
+    &lt;&gt;
+      &lt;h1&gt;{count}&lt;/h1&gt;
+
+      &lt;button onClick={increment}&gt;
+        Increment
+      &lt;/button&gt;
+    &lt;/&gt;
+  );
+
+}
+
+export default App;</code></pre>
+
+<div class="success">
+The component receives state and functions from the custom hook.
+</div>
+
+<h2>Real Project Example - Window Width Hook</h2>
+
+<h3>Create Hook</h3>
+
+<pre><code class="language-jsx">import { useState, useEffect } from 'react';
+
+function useWindowWidth() {
+
+  const [width, setWidth] = useState(window.innerWidth);
+
+  useEffect(() => {
+
+    function handleResize() {
+      setWidth(window.innerWidth);
+    }
+
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+
+  }, []);
+
+  return width;
+
+}
+
+export default useWindowWidth;</code></pre>
+
+<h3>Use Hook</h3>
+
+<pre><code class="language-jsx">import useWindowWidth from './useWindowWidth';
+
+function App() {
+
+  const width = useWindowWidth();
+
+  return <h1>Width: {width}</h1>;
+
+}</code></pre>
+
+<div class="highlight">
+All resize logic is hidden inside the custom hook.
+</div>
+
+<h2>Important Understanding</h2>
+
+<p>
+Custom hooks reuse logic, not state.
+</p>
+
+<h3>Example</h3>
+
+<pre><code class="language-jsx">const counter1 = useCounter();
+
+const counter2 = useCounter();</code></pre>
+
+<p>
+Each hook call creates a separate state.
+</p>
+
+<div class="flow">
+useCounter()
+<br>↓<br>
+Own State
+
+<br><br>
+
+useCounter()
+<br>↓<br>
+Another Own State
+</div>
+
+<div class="warning">
+A custom hook does not automatically create shared state.
+</div>
+
+<h2>Custom Hook vs Service</h2>
+
+<table>
+<tr>
+<th>Custom Hook</th>
+<th>Service</th>
+</tr>
+
+<tr>
+<td>Can use React hooks.</td>
+<td>Cannot use React hooks.</td>
+</tr>
+
+<tr>
+<td>Uses useState, useEffect, useContext.</td>
+<td>Usually contains API calls and business logic.</td>
+</tr>
+
+<tr>
+<td>Knows about React rendering.</td>
+<td>Independent of React.</td>
+</tr>
+
+<tr>
+<td>Example: useUsers()</td>
+<td>Example: getUsers()</td>
+</tr>
+</table>
+
+<h2>Custom Hook vs Normal Function</h2>
+
+<table>
+<tr>
+<th>Normal Function</th>
+<th>Custom Hook</th>
+</tr>
+
+<tr>
+<td>Cannot use React hooks.</td>
+<td>Can use React hooks.</td>
+</tr>
+
+<tr>
+<td>General JavaScript logic.</td>
+<td>Reusable React logic.</td>
+</tr>
+
+<tr>
+<td>Any function name.</td>
+<td>Name must start with use.</td>
+</tr>
+
+<tr>
+<td>No React lifecycle access.</td>
+<td>Has access to React lifecycle.</td>
+</tr>
+</table>
+
+<h2>When Should You Write a Custom Hook?</h2>
+
+<ul>
+<li>When the same hook logic is repeated.</li>
+<li>When multiple components use identical state logic.</li>
+<li>When API-fetching hook logic is duplicated.</li>
+<li>When form logic is reused.</li>
+<li>When event listener logic is reused.</li>
+</ul>
+
+<div class="success">
+If you copy the same useState + useEffect logic into multiple components, consider creating a custom hook.
+</div>
+
+<h2>When Should You NOT Write a Custom Hook?</h2>
+
+<ul>
+<li>For one-time component logic.</li>
+<li>When logic is used in only one place.</li>
+<li>For simple utility functions.</li>
+<li>When React hooks are not involved.</li>
+</ul>
+
+<h2>Real-World Examples</h2>
+
+<pre><code class="language-jsx">useAuth()
+
+useFetch()
+
+useLocalStorage()
+
+useWindowWidth()
+
+useOnlineStatus()
+
+useDebounce()
+
+useCounter()</code></pre>
+
+<p>
+Most production React projects contain many custom hooks.
+</p>
+
+<h2>Easy Way To Remember</h2>
+
+<div class="flow">
+Repeated Hook Logic
+<br>↓<br>
+Move It Into
+Custom Hook
+<br>↓<br>
+Reuse Everywhere
+</div>
+
+<h2>Interview Answer</h2>
+
+<div class="highlight">
+A custom hook is a reusable function that uses React hooks to share stateful logic between components. We should create a custom hook whenever the same hook logic is needed in multiple places.
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+A custom hook lets us reuse React hook logic across multiple components.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+
+</body>
+</html>

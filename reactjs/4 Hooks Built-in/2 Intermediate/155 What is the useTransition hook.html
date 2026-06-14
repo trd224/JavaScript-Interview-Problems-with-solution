@@ -37,431 +37,466 @@ pre{border-radius:12px;overflow-x:auto}
 <h2>One-Line Definition</h2>
 
 <div class="highlight">
-useTransition is a React 18 hook that allows us to mark state updates as non-urgent so React can keep important user interactions responsive.
+useTransition is a React 18 hook that lets us mark non-urgent state updates as low-priority so the UI remains responsive.
 </div>
 
-<h2>Why Was useTransition Introduced?</h2>
+<h2>Why Is It Used?</h2>
 
 <p>
-Before React 18, all state updates had the same priority.
+Sometimes a state update is expensive and causes the UI to freeze.
 </p>
 
-<pre><code class="language-jsx">setSearch(value);
-setResults(filteredData);</code></pre>
+<h3>Examples</h3>
+
+<ul>
+<li>Searching a huge list.</li>
+<li>Filtering thousands of records.</li>
+<li>Rendering large tables.</li>
+<li>Updating charts.</li>
+</ul>
 
 <p>
-React processed both updates immediately.
+With <code>useTransition</code>, React can update important UI immediately and delay heavy rendering work.
 </p>
 
-<p>
-If filtering or rendering was expensive, the UI could freeze.
-</p>
-
-<div class="warning">
-Large updates could make typing, clicking, and scrolling feel slow.
+<div class="success">
+The main benefit is: typing, clicking, and urgent UI updates remain smooth.
 </div>
 
-<h2>The Main Idea</h2>
-
-<p>
-React now supports update priorities.
-</p>
-
-<div class="flow">
-Urgent Updates
-<br>↓<br>
-High Priority
-<br>↓<br>
-Run Immediately
-
-
-<br><br>
-
-Non-Urgent Updates
-<br>↓<br>
-Low Priority
-<br>↓<br>
-Can Wait
-</div>
-
-<p>
-useTransition lets us tell React:
-</p>
-
-<pre><code class="language-text">This update is important.
-Run it now.
-
-This update is not important.
-Run it later.
-</code></pre>
-
-<h2>Syntax</h2>
+<h2>Basic Syntax</h2>
 
 <pre><code class="language-jsx">const [isPending, startTransition] = useTransition();</code></pre>
+
+<h2>What Does It Return?</h2>
 
 <table>
 <tr>
 <th>Value</th>
-<th>Purpose</th>
+<th>Meaning</th>
 </tr>
-
 <tr>
 <td>isPending</td>
-<td>Indicates whether a transition is running</td>
+<td>Tells us whether the transition update is still running.</td>
 </tr>
-
 <tr>
 <td>startTransition</td>
-<td>Marks updates as low priority</td>
+<td>Marks a state update as non-urgent or low-priority.</td>
 </tr>
 </table>
 
-<h2>Basic Example</h2>
+<h2>Real Project Use Case</h2>
+
+<p>
+Imagine our application has a search box and we need to filter 10,000 products.
+</p>
+
+<ul>
+<li>The input text should update immediately.</li>
+<li>The heavy product filtering can be delayed slightly.</li>
+</ul>
+
+<div class="highlight">
+Input typing is urgent. Large list filtering is non-urgent.
+</div>
+
+<h2>Example</h2>
 
 <pre><code class="language-jsx">import { useState, useTransition } from 'react';
 
 function App() {
 
-  const [text, setText] = useState('');
+  const [input, setInput] = useState('');
+  const [query, setQuery] = useState('');
 
   const [isPending, startTransition] = useTransition();
 
-  function handleChange(e) {
+  const items = Array.from(
+    { length: 10000 },
+    (_, i) =&gt; `Product ${i + 1}`
+  );
 
-    startTransition(() => {
-
-      setText(e.target.value);
-
-    });
-
-  }
-
-}</code></pre>
-
-<p>
-Everything inside:
-</p>
-
-<pre><code class="language-jsx">startTransition(() => {
-
-  ...
-
-});</code></pre>
-
-<p>
-becomes a low-priority update.
-</p>
-
-<h2>Real Search Example</h2>
-
-<p>
-Imagine:
-</p>
-
-<ul>
-<li>10,000 products</li>
-<li>Heavy filtering</li>
-<li>Large UI updates</li>
-</ul>
-
-<h3>Without useTransition</h3>
-
-<pre><code class="language-jsx">function Search() {
-
-  const [query, setQuery] = useState('');
-
-  const filteredProducts = products.filter(product =>
-      product.name.includes(query)
-    );
-
-}</code></pre>
-
-<h3>What Happens?</h3>
-
-<div class="flow">
-User Types
-<br>↓<br>
-Update Query
-<br>↓<br>
-Filter 10,000 Products
-<br>↓<br>
-Render Results
-<br>↓<br>
-Input Feels Slow
-</div>
-
-<div class="warning">
-Every keystroke waits for the expensive update.
-</div>
-
-<h2>Using useTransition</h2>
-
-<pre><code class="language-jsx">function Search() {
-
-  const [query, setQuery] = useState('');
-
-  const [results, setResults] = useState([]);
-
-  const [isPending, startTransition] = useTransition();
+  const filteredItems = items.filter(item =&gt;
+    item.toLowerCase().includes(query.toLowerCase())
+  );
 
   function handleChange(e) {
 
     const value = e.target.value;
 
-    setQuery(value);
+    // Urgent update
+    setInput(value);
 
-    startTransition(() => {
-
-      setResults(
-        products.filter(product =>
-          product.name.includes(value)
-        )
-      );
-
+    // Non-urgent update
+    startTransition(() =&gt; {
+      setQuery(value);
     });
 
   }
 
-}</code></pre>
+  return (
+    &lt;&gt;
 
-<h2>What Happens Now?</h2>
+      &lt;input
+        type="text"
+        value={input}
+        onChange={handleChange}
+        placeholder="Search products..."
+      /&gt;
+
+      {isPending &amp;&amp; &lt;p&gt;Searching...&lt;/p&gt;}
+
+      &lt;ul&gt;
+        {filteredItems.slice(0, 20).map(item =&gt; (
+          &lt;li key={item}&gt;{item}&lt;/li&gt;
+        ))}
+      &lt;/ul&gt;
+
+    &lt;/&gt;
+  );
+
+}
+
+export default App;</code></pre>
+
+<h2>Why Do We Need Both input and query?</h2>
+
+<p>
+A very common question is:
+</p>
+
+<pre><code class="language-jsx">const [input, setInput] = useState('');
+const [query, setQuery] = useState('');
+</code></pre>
+
+<p>
+Why do we need two states? Why not use only one state?
+</p>
+
+<h3>Can We Use input as query?</h3>
+
+<p>
+Yes, technically we can.
+</p>
+
+<pre><code class="language-jsx">const [input, setInput] = useState('');
+
+const filteredItems = items.filter(item =>
+  item.includes(input)
+);
+</code></pre>
+
+<p>
+This works perfectly fine for small applications and small lists.
+</p>
+
+<div class="success">
+For normal forms and small datasets, using a single state is usually enough.
+</div>
+
+<h3>The Problem</h3>
+
+<p>
+Suppose filtering 50,000 products is expensive.
+</p>
+
+<p>
+If the textbox and filtering both depend on the same state:
+</p>
+
+<pre><code class="language-jsx">const [input, setInput] = useState('');
+
+const filteredItems = items.filter(item =>
+  item.includes(input)
+);
+</code></pre>
 
 <div class="flow">
 User Types
 <br>↓<br>
-Update Input Immediately
+input Changes
 <br>↓<br>
-Show Typed Character
+Component Re-renders
 <br>↓<br>
-Run Heavy Filter Later
+Heavy Filtering Runs
 <br>↓<br>
-Display Results
+Textbox May Feel Slow
 </div>
 
-<div class="success">
-Typing stays smooth because React prioritizes the input update.
+<p>
+The input update and heavy filtering are tied together.
+</p>
+
+<h3>Solution: Separate States</h3>
+
+<pre><code class="language-jsx">const [input, setInput] = useState('');
+const [query, setQuery] = useState('');
+</code></pre>
+
+<p>
+Now each state has a different responsibility.
+</p>
+
+<table>
+<tr>
+<th>State</th>
+<th>Purpose</th>
+</tr>
+
+<tr>
+<td>input</td>
+<td>Controls the textbox and updates immediately.</td>
+</tr>
+
+<tr>
+<td>query</td>
+<td>Controls expensive filtering and can be delayed.</td>
+</tr>
+</table>
+
+<h3>How It Works</h3>
+
+<pre><code class="language-jsx">function handleChange(e) {
+
+  const value = e.target.value;
+
+  setInput(value);
+
+  startTransition(() => {
+    setQuery(value);
+  });
+
+}
+</code></pre>
+
+<div class="flow">
+User Types
+<br>↓<br>
+input Updates Immediately
+<br>↓<br>
+Textbox Updates Immediately
+<br>↓<br>
+React Schedules query Update
+<br>↓<br>
+Heavy Filtering Runs Later
 </div>
 
-<h2>Understanding Urgent vs Non-Urgent Updates</h2>
-
-<h3>Urgent Update</h3>
-
-<pre><code class="language-jsx">setQuery(value);</code></pre>
+<h3>Temporary Difference Between States</h3>
 
 <p>
-The user expects this immediately.
+For a brief moment, both values can be different.
 </p>
 
-<h3>Non-Urgent Update</h3>
-
-<pre><code class="language-jsx">startTransition(() => {
-
-  setResults(filteredData);
-
-});</code></pre>
+<pre><code class="language-text">input = "React"
+query = "Reac"
+</code></pre>
 
 <p>
-The results can appear a little later.
+The textbox already shows the latest value, while React is still processing the expensive update.
 </p>
+
+<p>
+After the transition finishes:
+</p>
+
+<pre><code class="language-text">input = "React"
+query = "React"
+</code></pre>
 
 <div class="highlight">
-useTransition does not make updates faster.
-<br><br>
-It makes important updates happen first.
+The entire purpose of using two states is to separate an urgent update (typing) from a non-urgent update (expensive rendering).
 </div>
 
-<h2>Showing Loading State</h2>
+<h3>Important Interview Point</h3>
+
+<div class="warning">
+If your filtering is small and there is no UI lag, you do not need a second state. The extra query state is mainly used to demonstrate the real benefit of useTransition for expensive rendering scenarios.
+</div>
+
+<h2>What Happens Here?</h2>
+
+<h3>1. User Types</h3>
+
+<pre><code class="language-jsx">setInput(value);</code></pre>
 
 <p>
-isPending becomes true while React is processing the transition.
+This is an urgent update. React updates the textbox immediately.
 </p>
 
-<pre><code class="language-jsx">const [isPending, startTransition] =
-  useTransition();</code></pre>
+<h3>2. Heavy Update</h3>
 
-<h3>Example</h3>
-
-<pre><code class="language-jsx">{isPending && (
-  &lt;p&gt;Loading Results...&lt;/p&gt;
-)}</code></pre>
-
-<p>
-Timeline:
-</p>
-
-<pre><code class="language-text">false
-↓
-true
-↓
-false
-</code></pre>
-
-<h2>Another Real-World Example</h2>
-
-<h3>Large Dashboard Filter</h3>
-
-<pre><code class="language-jsx">startTransition(() => {
-
-  setFilteredReports(data);
-
+<pre><code class="language-jsx">startTransition(() =&gt; {
+  setQuery(value);
 });</code></pre>
 
 <p>
-Users can still interact with the UI while React processes the expensive update.
+This is a non-urgent update. React can delay it if the browser needs to stay responsive.
 </p>
 
-<h2>What useTransition Does NOT Do</h2>
+<h3>3. Loading State with isPending</h3>
+
+<pre><code class="language-jsx">{isPending &amp;&amp; &lt;p&gt;Searching...&lt;/p&gt;}</code></pre>
 
 <p>
-Many developers think:
+While React is processing the transition, <code>isPending</code> becomes true.
 </p>
 
-<pre><code class="language-text">useTransition
-↓
-Makes Code Faster
-</code></pre>
+<pre><code class="language-jsx">isPending === true</code></pre>
 
 <p>
-Wrong.
+After the transition finishes, <code>isPending</code> becomes false.
+</p>
+
+<pre><code class="language-jsx">isPending === false</code></pre>
+
+<h2>Flow</h2>
+
+<div class="flow">
+User Types
+<br>↓<br>
+setInput()
+<br>↓<br>
+Urgent Update
+<br>↓<br>
+Input Updates Immediately
+<br>↓<br>
+startTransition()
+<br>↓<br>
+Non-Urgent Update
+<br>↓<br>
+isPending = true
+<br>↓<br>
+React Performs Heavy Work
+<br>↓<br>
+UI Updates
+<br>↓<br>
+isPending = false
+</div>
+
+<h2>Without useTransition</h2>
+
+<pre><code class="language-jsx">setInput(value);
+setQuery(value);</code></pre>
+
+<p>
+Both updates have the same priority.
 </p>
 
 <div class="warning">
-useTransition does not reduce computation.
-<br><br>
-It only changes the priority of updates.
+If filtering or rendering is heavy, typing may become slow.
 </div>
 
-<h2>Comparison With Normal State Update</h2>
+<h2>With useTransition</h2>
 
-<h3>Normal Update</h3>
+<pre><code class="language-jsx">setInput(value);
 
-<pre><code class="language-jsx">setResults(filteredProducts);</code></pre>
-
-<p>
-Priority:
-</p>
-
-<pre><code class="language-text">High Priority
-</code></pre>
-
-<h3>Transition Update</h3>
-
-<pre><code class="language-jsx">startTransition(() => {
-
-  setResults(filteredProducts);
-
+startTransition(() =&gt; {
+  setQuery(value);
 });</code></pre>
 
 <p>
-Priority:
+The input update happens immediately, and the heavy update runs with lower priority.
 </p>
 
-<pre><code class="language-text">Low Priority
-</code></pre>
-
-<h2>Most Common Interview Confusion</h2>
-
-<p>
-Question:
-</p>
-
-<pre><code class="language-text">Should we wrap every setState in startTransition?
-</code></pre>
-
-<p>
-Answer:
-</p>
-
-<pre><code class="language-text">No
-</code></pre>
-
-<div class="warning">
-Most state updates should remain urgent.
+<div class="success">
+This keeps the UI responsive while React handles expensive rendering work.
 </div>
 
-<p>
-Examples:
-</p>
+<h2>Important Interview Points</h2>
 
 <ul>
-<li>Typing in inputs.</li>
-<li>Checkbox changes.</li>
-<li>Button clicks.</li>
-<li>Form values.</li>
+<li><code>useTransition</code> is used for non-urgent state updates.</li>
+<li>It helps avoid UI blocking during expensive rendering.</li>
+<li><code>isPending</code> is useful for showing loading text or a spinner.</li>
+<li>It does not make code asynchronous like <code>setTimeout</code>.</li>
+<li>It does not replace API loading states.</li>
+<li>It is mainly useful when rendering UI becomes heavy.</li>
 </ul>
 
-<p>
-These should update immediately.
-</p>
+<h2>Common Confusion</h2>
+
+<h3>Does useTransition delay input value?</h3>
+
+<div class="highlight">
+No. We keep the input value outside the transition so typing updates immediately.
+</div>
+
+<h3>Should API calls be inside startTransition?</h3>
+
+<div class="warning">
+Usually no. useTransition is mainly for rendering updates, not for controlling API request loading.
+</div>
 
 <h2>When Should You Use useTransition?</h2>
 
 <ul>
-<li>Large search results.</li>
-<li>Heavy filtering.</li>
-<li>Heavy sorting.</li>
-<li>Complex dashboards.</li>
-<li>Large tables.</li>
-<li>Tab switches with expensive rendering.</li>
+<li>Large list filtering.</li>
+<li>Heavy table rendering.</li>
+<li>Tab switching with expensive UI.</li>
+<li>Search results rendering.</li>
+<li>Updating charts or complex components.</li>
 </ul>
 
 <h2>When Should You NOT Use useTransition?</h2>
 
 <ul>
 <li>Simple forms.</li>
-<li>Small state updates.</li>
-<li>Normal UI interactions.</li>
-<li>Updates that must happen instantly.</li>
+<li>Small UI updates.</li>
+<li>Normal API loading state.</li>
+<li>Basic button clicks.</li>
+<li>When there is no visible UI lag.</li>
 </ul>
 
-<h2>useTransition vs useDeferredValue</h2>
+<h2>Comparison Table</h2>
 
 <table>
 <tr>
-<th>Hook</th>
-<th>Purpose</th>
+<th>Without useTransition</th>
+<th>With useTransition</th>
 </tr>
-
 <tr>
-<td>useTransition</td>
-<td>Delay state updates</td>
+<td>All updates have normal priority.</td>
+<td>Heavy updates can be low priority.</td>
 </tr>
-
 <tr>
-<td>useDeferredValue</td>
-<td>Delay a value</td>
+<td>Input may lag during expensive rendering.</td>
+<td>Input remains responsive.</td>
+</tr>
+<tr>
+<td>No pending state for transition work.</td>
+<td><code>isPending</code> can show loading UI.</td>
+</tr>
+<tr>
+<td>Good for simple updates.</td>
+<td>Good for expensive UI updates.</td>
 </tr>
 </table>
-
-<p>
-Both are React 18 performance hooks.
-</p>
 
 <h2>Easy Way To Remember</h2>
 
 <div class="flow">
-Must Happen Immediately?
+Urgent Update?
 <br>↓<br>
-Normal setState()
-
-
+Keep Outside startTransition
 <br><br>
-
-Can Wait A Little?
+Heavy UI Update?
 <br>↓<br>
-startTransition()
+Put Inside startTransition
+<br><br>
+Need Loading UI?
+<br>↓<br>
+Use isPending
 </div>
 
-<h2>Interview Answer</h2>
+<h2>Short Interview Answer</h2>
 
 <div class="highlight">
-useTransition is a React 18 hook that allows us to mark state updates as non-urgent. React prioritizes urgent updates such as typing and clicking while processing transition updates in the background, helping keep the UI responsive during expensive renders.
+useTransition allows us to mark state updates as non-urgent. React gives higher priority to important UI updates and performs heavy updates with lower priority. The isPending value tells us whether the transition is still running.
 </div>
 
 <h2>One-Line Interview Answer</h2>
 
 <div class="highlight">
-useTransition lets React prioritize urgent updates while delaying non-urgent updates to improve UI responsiveness.
+useTransition helps keep the UI responsive by running expensive state updates with lower priority, while isPending shows whether that transition is currently in progress.
 </div>
 
 </div>

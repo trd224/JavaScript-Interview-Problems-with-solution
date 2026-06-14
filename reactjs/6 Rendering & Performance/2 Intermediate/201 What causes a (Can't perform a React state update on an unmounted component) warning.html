@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>201 - What causes a "Can't perform a React state update on an unmounted component" warning?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px;margin-bottom:10px}
+p{color:#cbd5e1}
+ul{padding-left:24px}
+li{margin-bottom:10px;color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left;vertical-align:top}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px;margin-top:15px}
+.warning{background:#3b0820;border-left:5px solid #ef4444;padding:18px;border-radius:10px;margin-top:15px}
+.success{background:#052e16;padding:18px;border-left:5px solid #22c55e;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;margin-top:15px;text-align:center;line-height:2;font-size:18px}
+pre{border-radius:12px;overflow-x:auto}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>201. What causes a "Can't perform a React state update on an unmounted component" warning?</h1>
+
+<h2>One-Line Definition</h2>
+
+<div class="highlight">
+This warning occurs when a component has already been removed from the UI, but some asynchronous code still tries to update its state.
+</div>
+
+<h2>What Does "Unmounted Component" Mean?</h2>
+
+<p>
+A component is <strong>mounted</strong> when it exists in the UI.
+</p>
+
+<p>
+A component is <strong>unmounted</strong> when React removes it from the UI.
+</p>
+
+<div class="flow">
+Component Created
+<br>
+↓
+<br>
+Mounted
+<br>
+↓
+<br>
+User Navigates Away
+<br>
+↓
+<br>
+Component Removed
+<br>
+↓
+<br>
+Unmounted
+</div>
+
+<h2>Why Does The Warning Happen?</h2>
+
+<p>
+Usually some asynchronous task is still running:
+</p>
+
+<ul>
+<li>API request</li>
+<li>setTimeout</li>
+<li>setInterval</li>
+<li>WebSocket</li>
+<li>Event listener</li>
+<li>Subscription</li>
+</ul>
+
+<p>
+The component gets removed before that task finishes.
+</p>
+
+<p>
+When the task completes, it tries to call:
+</p>
+
+<pre><code class="language-js">setState(...)</code></pre>
+
+<p>
+But the component no longer exists.
+</p>
+
+<div class="warning">
+React warns because updating state on a removed component may cause memory leaks and wasted work.
+</div>
+
+<h2>Most Common Example - API Request</h2>
+
+<pre><code class="language-js">function UserProfile() {
+
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+
+    fetch('/api/user')
+      .then(res => res.json())
+      .then(data => {
+        setUser(data);
+      });
+
+  }, []);
+
+  return &lt;div&gt;{user?.name}&lt;/div&gt;;
+
+}</code></pre>
+
+<p>
+Suppose:
+</p>
+
+<ol>
+<li>Component mounts.</li>
+<li>API request starts.</li>
+<li>User navigates away.</li>
+<li>Component unmounts.</li>
+<li>API response arrives later.</li>
+<li>setUser() runs.</li>
+</ol>
+
+<div class="warning">
+React may show: "Can't perform a React state update on an unmounted component".
+</div>
+
+<h2>Visual Timeline</h2>
+
+<div class="flow">
+Component Mounted
+<br>
+↓
+<br>
+API Request Started
+<br>
+↓
+<br>
+User Leaves Page
+<br>
+↓
+<br>
+Component Unmounted
+<br>
+↓
+<br>
+API Response Arrives
+<br>
+↓
+<br>
+setState Called
+<br>
+↓
+<br>
+Warning
+</div>
+
+<h2>Another Example - setTimeout</h2>
+
+<pre><code class="language-js">function Example() {
+
+  const [message, setMessage] = useState('');
+
+  useEffect(() => {
+
+    setTimeout(() => {
+      setMessage('Hello');
+    }, 5000);
+
+  }, []);
+
+  return &lt;h2&gt;{message}&lt;/h2&gt;;
+
+}</code></pre>
+
+<p>
+If the component disappears before 5 seconds:
+</p>
+
+<ul>
+<li>Timeout still runs.</li>
+<li>setMessage executes.</li>
+<li>Component no longer exists.</li>
+</ul>
+
+<div class="warning">
+React may display the warning.
+</div>
+
+<h2>Another Example - setInterval</h2>
+
+<pre><code class="language-js">useEffect(() => {
+
+  const id = setInterval(() => {
+
+    setCount(c => c + 1);
+
+  }, 1000);
+
+}, []);</code></pre>
+
+<p>
+If the interval is not cleared:
+</p>
+
+<ul>
+<li>Interval continues running.</li>
+<li>State updates continue.</li>
+<li>Memory leak occurs.</li>
+</ul>
+
+<h2>Correct Solution - Cleanup Function</h2>
+
+<p>
+React provides cleanup functions inside useEffect.
+</p>
+
+<pre><code class="language-js">useEffect(() => {
+
+  const id = setInterval(() => {
+
+    setCount(c => c + 1);
+
+  }, 1000);
+
+  return () => {
+
+    clearInterval(id);
+
+  };
+
+}, []);</code></pre>
+
+<div class="success">
+Cleanup runs when the component unmounts.
+</div>
+
+<h2>Cleaning Up setTimeout</h2>
+
+<pre><code class="language-js">useEffect(() => {
+
+  const timeoutId = setTimeout(() => {
+
+    setMessage('Hello');
+
+  }, 5000);
+
+  return () => {
+
+    clearTimeout(timeoutId);
+
+  };
+
+}, []);</code></pre>
+
+<h2>Cleaning Up Event Listeners</h2>
+
+<pre><code class="language-js">useEffect(() => {
+
+  function handleResize() {
+    console.log(window.innerWidth);
+  }
+
+  window.addEventListener(
+    'resize',
+    handleResize
+  );
+
+  return () => {
+
+    window.removeEventListener(
+      'resize',
+      handleResize
+    );
+
+  };
+
+}, []);</code></pre>
+
+<div class="success">
+Always remove listeners when the component unmounts.
+</div>
+
+<h2>Cleaning Up API Requests</h2>
+
+<p>
+Modern fetch supports AbortController.
+</p>
+
+<pre><code class="language-js">useEffect(() => {
+  const controller = new AbortController();
+
+  fetch('/api/user', { signal: controller.signal })
+    .then(res => res.json())
+    .then(data => setUser(data))
+    .catch(error => console.log(error));
+
+  return () => controller.abort();
+}, []);</code></pre>
+
+<div class="success">
+The request is cancelled when the component unmounts.
+</div>
+
+<h2>React 18 Note</h2>
+
+<p>
+This warning was very common in React 17 and earlier.
+</p>
+
+<p>
+React 18 removed many unnecessary versions of this warning because some cases were harmless.
+</p>
+
+<div class="highlight">
+However, cleanup is still important because memory leaks, subscriptions, timers, and network requests can continue running unnecessarily.
+</div>
+
+<h2>Real Project Example</h2>
+
+<p>
+Suppose our Aadhaar Authentication page:
+</p>
+
+<ul>
+<li>Starts OTP request.</li>
+<li>Starts SignalR connection.</li>
+<li>Starts device capture process.</li>
+</ul>
+
+<p>
+User closes the modal immediately.
+</p>
+
+<p>
+The component unmounts.
+</p>
+
+<p>
+Later:
+</p>
+
+<ul>
+<li>OTP response arrives.</li>
+<li>SignalR message arrives.</li>
+<li>Device capture callback fires.</li>
+</ul>
+
+<p>
+If they call:
+</p>
+
+<pre><code class="language-js">setOtp(...)
+setLoader(...)
+setUser(...)</code></pre>
+
+<p>
+after the component is gone, React may show this warning.
+</p>
+
+<div class="warning">
+Always clean up subscriptions, timers, and async operations when the component unmounts.
+</div>
+
+<h2>Common Things That Need Cleanup</h2>
+
+<table>
+<tr>
+<th>Operation</th>
+<th>Cleanup Required?</th>
+</tr>
+
+<tr>
+<td>setTimeout</td>
+<td>Yes</td>
+</tr>
+
+<tr>
+<td>setInterval</td>
+<td>Yes</td>
+</tr>
+
+<tr>
+<td>WebSocket</td>
+<td>Yes</td>
+</tr>
+
+<tr>
+<td>SignalR</td>
+<td>Yes</td>
+</tr>
+
+<tr>
+<td>Event Listener</td>
+<td>Yes</td>
+</tr>
+
+<tr>
+<td>Subscription</td>
+<td>Yes</td>
+</tr>
+
+<tr>
+<td>Fetch Request</td>
+<td>Recommended</td>
+</tr>
+</table>
+
+<h2>Important Interview Points</h2>
+
+<ul>
+<li>The warning happens when state is updated after component unmount.</li>
+<li>Usually caused by asynchronous operations.</li>
+<li>Common sources are API calls, timers, intervals, subscriptions, and event listeners.</li>
+<li>useEffect cleanup functions prevent these issues.</li>
+<li>AbortController can cancel fetch requests.</li>
+<li>React 18 reduced unnecessary versions of this warning.</li>
+<li>Cleanup is still important to avoid memory leaks.</li>
+</ul>
+
+<h2>Short Interview Answer</h2>
+
+<div class="highlight">
+This warning occurs when asynchronous code such as an API request, timer, subscription, or event listener tries to update state after the component has already been unmounted. The solution is to clean up those operations using the cleanup function returned from useEffect.
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+The warning occurs when asynchronous code calls setState after a component has been removed from the UI.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+
+</body>
+</html>

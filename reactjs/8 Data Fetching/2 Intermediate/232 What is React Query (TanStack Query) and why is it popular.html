@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>232 - What is React Query (TanStack Query) and why is it popular?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px;margin-bottom:10px}
+p{color:#cbd5e1}
+ul{padding-left:24px}
+li{margin-bottom:10px;color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left;vertical-align:top}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px;margin-top:15px}
+.warning{background:#3b0820;border-left:5px solid #ef4444;padding:18px;border-radius:10px;margin-top:15px}
+.success{background:#052e16;padding:18px;border-left:5px solid #22c55e;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;margin-top:15px;text-align:center;line-height:2;font-size:18px}
+pre{border-radius:12px;overflow-x:auto}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>232. What is React Query (TanStack Query) and why is it popular?</h1>
+
+<h2>One-Line Definition</h2>
+
+<div class="highlight">
+TanStack Query (formerly React Query) is a library that simplifies fetching, caching, synchronizing, and updating server data in React applications.
+</div>
+
+<h2>Simple Meaning</h2>
+
+<p>
+React itself does not provide a built-in solution for:
+</p>
+
+<ul>
+<li>Fetching API data</li>
+<li>Caching responses</li>
+<li>Loading states</li>
+<li>Error handling</li>
+<li>Refetching data</li>
+<li>Keeping data fresh</li>
+</ul>
+
+<p>
+Without React Query, developers usually write lots of repetitive code.
+</p>
+
+<div class="warning">
+Managing server data manually quickly becomes difficult in large applications.
+</div>
+
+<h2>What Is Server State?</h2>
+
+<p>
+Server state is data that comes from a backend API.
+</p>
+
+<p>
+Examples:
+</p>
+
+<ul>
+<li>User list</li>
+<li>Products</li>
+<li>Orders</li>
+<li>Departments</li>
+<li>Audit records</li>
+</ul>
+
+<pre><code class="language-js">GET /api/users
+GET /api/products
+GET /api/orders</code></pre>
+
+<div class="highlight">
+React Query is specifically designed for server state management.
+</div>
+
+<h2>The Traditional Way</h2>
+
+<pre><code class="language-js">const [users, setUsers] = useState([]);
+const [loading, setLoading] = useState(false);
+const [error, setError] = useState(null);
+
+useEffect(() => {
+  setLoading(true);
+
+  fetch('/api/users')
+    .then(res => res.json())
+    .then(data => setUsers(data))
+    .catch(err => setError(err))
+    .finally(() => setLoading(false));
+}, []);</code></pre>
+
+<p>
+Problems:
+</p>
+
+<ul>
+<li>Manual loading state.</li>
+<li>Manual error state.</li>
+<li>No caching.</li>
+<li>No retries.</li>
+<li>No background updates.</li>
+<li>No request deduplication.</li>
+</ul>
+
+<h2>React Query Way</h2>
+
+<pre><code class="language-js">const {
+  data,
+  isLoading,
+  error
+} = useQuery({
+  queryKey: ['users'],
+  queryFn: fetchUsers
+});</code></pre>
+
+<div class="success">
+Loading, error handling, caching, and refetching are automatically managed.
+</div>
+
+<h2>Visual Flow</h2>
+
+<div class="flow">
+Component Mounts
+<br>
+↓
+<br>
+useQuery()
+<br>
+↓
+<br>
+Check Cache
+<br>
+↓
+<br>
+Cache Found ?
+<br>
+↓
+<br>
+Yes → Return Cached Data
+<br>
+No → Fetch API
+<br>
+↓
+<br>
+Store In Cache
+<br>
+↓
+<br>
+Update UI
+</div>
+
+<h2>Why Is React Query Popular?</h2>
+
+<table>
+<tr>
+<th>Feature</th>
+<th>Benefit</th>
+</tr>
+
+<tr>
+<td>Caching</td>
+<td>Reduces API calls.</td>
+</tr>
+
+<tr>
+<td>Auto Refetching</td>
+<td>Keeps data fresh.</td>
+</tr>
+
+<tr>
+<td>Background Updates</td>
+<td>Updates UI automatically.</td>
+</tr>
+
+<tr>
+<td>Retry Logic</td>
+<td>Handles temporary failures.</td>
+</tr>
+
+<tr>
+<td>Loading State</td>
+<td>Built-in support.</td>
+</tr>
+
+<tr>
+<td>Error State</td>
+<td>Built-in support.</td>
+</tr>
+
+<tr>
+<td>Pagination Support</td>
+<td>Easier large data handling.</td>
+</tr>
+
+<tr>
+<td>Infinite Scroll</td>
+<td>Built-in support.</td>
+</tr>
+
+<tr>
+<td>Mutations</td>
+<td>Easy create/update/delete operations.</td>
+</tr>
+</table>
+
+<h2>Installation</h2>
+
+<pre><code class="language-bash">npm install @tanstack/react-query</code></pre>
+
+<h2>Setup QueryClient</h2>
+
+<pre><code class="language-js">import {
+  QueryClient,
+  QueryClientProvider
+} from '@tanstack/react-query';
+
+const queryClient = new QueryClient();
+
+function App() {
+  return (
+    &lt;QueryClientProvider client={queryClient}&gt;
+      &lt;Dashboard /&gt;
+    &lt;/QueryClientProvider&gt;
+  );
+}</code></pre>
+
+<h2>Basic Query Example</h2>
+
+<pre><code class="language-js">async function fetchUsers() {
+  const res = await fetch('/api/users');
+
+  return res.json();
+}
+
+function Users() {
+  const {data, isLoading, error} = useQuery({
+    queryKey: ['users'],
+    queryFn: fetchUsers
+  });
+
+  if (isLoading) return &lt;p&gt;Loading...&lt;/p&gt;;
+
+  if (error) return &lt;p&gt;Error&lt;/p&gt;;
+
+  return (
+    &lt;ul&gt;
+      {data.map(user => (
+        &lt;li key={user.id}&gt;{user.name}&lt;/li&gt;
+      ))}
+    &lt;/ul&gt;
+  );
+}</code></pre>
+
+<h2>Automatic Caching</h2>
+
+<p>
+Suppose:
+</p>
+
+<ul>
+<li>User visits Users page.</li>
+<li>Data is fetched.</li>
+<li>User leaves page.</li>
+<li>User comes back.</li>
+</ul>
+
+<p>
+Without React Query:
+</p>
+
+<pre><code>New API Request</code></pre>
+
+<p>
+With React Query:
+</p>
+
+<pre><code>Use Cached Data</code></pre>
+
+<div class="success">
+This makes applications feel much faster.
+</div>
+
+<h2>Automatic Refetching</h2>
+
+<p>
+React Query can automatically refetch when:
+</p>
+
+<ul>
+<li>User returns to the tab.</li>
+<li>Internet reconnects.</li>
+<li>Query becomes stale.</li>
+</ul>
+
+<pre><code class="language-js">useQuery({
+  queryKey: ['users'],
+  queryFn: fetchUsers,
+  staleTime: 60000
+});</code></pre>
+
+<p>
+Data stays fresh for 60 seconds.
+</p>
+
+<h2>Mutations</h2>
+
+<p>
+Queries fetch data.
+</p>
+
+<p>
+Mutations modify data.
+</p>
+
+<pre><code class="language-js">const mutation = useMutation({
+  mutationFn: createUser
+});</code></pre>
+
+<h3>Create User</h3>
+
+<pre><code class="language-js">mutation.mutate({
+  name: 'Rizwan'
+});</code></pre>
+
+<div class="success">
+Mutations handle POST, PUT, PATCH, and DELETE requests.
+</div>
+
+<h2>React Query Solves Race Conditions</h2>
+
+<p>
+Earlier we learned about race conditions.
+</p>
+
+<p>
+React Query helps by:
+</p>
+
+<ul>
+<li>Managing request lifecycle.</li>
+<li>Deduplicating requests.</li>
+<li>Cancelling stale queries.</li>
+<li>Handling cache updates.</li>
+</ul>
+
+<h2>Real Project Example</h2>
+
+<p>
+Suppose our Aadhaar Authentication dashboard loads:
+</p>
+
+<ul>
+<li>Departments</li>
+<li>Audit plans</li>
+<li>User details</li>
+<li>Authentication statistics</li>
+</ul>
+
+<p>
+Without React Query:
+</p>
+
+<ul>
+<li>Many useEffects.</li>
+<li>Many loading states.</li>
+<li>Many error states.</li>
+<li>Manual caching.</li>
+</ul>
+
+<p>
+With React Query:
+</p>
+
+<pre><code class="language-js">const departments = useQuery({
+  queryKey: ['departments'],
+  queryFn: fetchDepartments
+});
+
+const audits = useQuery({
+  queryKey: ['audits'],
+  queryFn: fetchAudits
+});</code></pre>
+
+<div class="success">
+Cleaner code and automatic caching.
+</div>
+
+<section>
+
+  <h2>Why Does React Query Need queryKey?</h2>
+
+  <p>
+    React Query stores API responses in a cache.
+  </p>
+
+  <p>
+    It needs a unique identifier to know:
+  </p>
+
+  <ul>
+    <li>Which data belongs to which request.</li>
+    <li>When cached data can be reused.</li>
+    <li>When a request should run again.</li>
+    <li>Which query should be invalidated or refetched.</li>
+  </ul>
+
+  <div class="highlight">
+    Think of <code>queryKey</code> as a cache key.
+  </div>
+
+  <h2>Example 1</h2>
+
+  <pre><code class="language-js">useQuery({
+  queryKey: ['users'],
+  queryFn: fetchUsers
+});</code></pre>
+
+  <p>
+    React Query stores:
+  </p>
+
+  <pre><code class="language-js">Cache = {
+  users: [...]
+};</code></pre>
+
+  <p>
+    Later another component calls:
+  </p>
+
+  <pre><code class="language-js">useQuery({
+  queryKey: ['users'],
+  queryFn: fetchUsers
+});</code></pre>
+
+  <p>
+    React Query says:
+  </p>
+
+  <pre><code>I already have "users" in cache.</code></pre>
+
+  <p>
+    and returns cached data instantly.
+  </p>
+
+  <h2>Without queryKey</h2>
+
+  <p>
+    Imagine:
+  </p>
+
+  <pre><code class="language-js">useQuery({
+  queryFn: fetchUsers
+});</code></pre>
+
+  <p>
+    React Query would not know:
+  </p>
+
+  <pre><code>What should I call this data?
+Where should I store it?
+How do I find it later?</code></pre>
+
+  <div class="warning">
+    That's why <code>queryKey</code> is required.
+  </div>
+
+  <h2>Example 2 - Dynamic User</h2>
+
+  <pre><code class="language-js">useQuery({
+  queryKey: ['user', userId],
+  queryFn: () =&gt; fetchUser(userId)
+});</code></pre>
+
+  <p>
+    If:
+  </p>
+
+  <pre><code class="language-js">userId = 1;</code></pre>
+
+  <p>
+    Cache becomes:
+  </p>
+
+  <pre><code class="language-js">['user', 1]</code></pre>
+
+  <p>
+    Data:
+  </p>
+
+  <pre><code class="language-js">{
+  id: 1,
+  name: 'Rizwan'
+}</code></pre>
+
+  <p>
+    Later:
+  </p>
+
+  <pre><code class="language-js">userId = 2;</code></pre>
+
+  <p>
+    Now key becomes:
+  </p>
+
+  <pre><code class="language-js">['user', 2]</code></pre>
+
+  <p>
+    React Query sees:
+  </p>
+
+  <pre><code>Different queryKey</code></pre>
+
+  <p>
+    and makes a new API request.
+  </p>
+
+  <h2>Visual</h2>
+
+  <pre><code>['user', 1]
+    ↓
+User 1 Data
+
+['user', 2]
+    ↓
+User 2 Data
+
+['user', 3]
+    ↓
+User 3 Data</code></pre>
+
+  <p>
+    Each key has its own cache.
+  </p>
+
+  <h2>Why Array Instead Of String?</h2>
+
+  <p>
+    Bad:
+  </p>
+
+  <pre><code class="language-js">queryKey: 'user'</code></pre>
+
+  <p>
+    Good:
+  </p>
+
+  <pre><code class="language-js">queryKey: ['user', userId]</code></pre>
+
+  <p>
+    Because arrays support parameters.
+  </p>
+
+  <pre><code class="language-js">['user', 1]
+['user', 2]
+['user', 3]</code></pre>
+
+  <p>
+    React Query can uniquely identify each request.
+  </p>
+
+  <h2>Real Search Example</h2>
+
+  <pre><code class="language-js">useQuery({
+  queryKey: ['users', search],
+  queryFn: () =&gt; fetchUsers(search)
+});</code></pre>
+
+  <p>
+    Search:
+  </p>
+
+  <pre><code class="language-js">search = 'ri';</code></pre>
+
+  <p>
+    Key:
+  </p>
+
+  <pre><code class="language-js">['users', 'ri']</code></pre>
+
+  <p>
+    Search:
+  </p>
+
+  <pre><code class="language-js">search = 'riz';</code></pre>
+
+  <p>
+    Key:
+  </p>
+
+  <pre><code class="language-js">['users', 'riz']</code></pre>
+
+  <p>
+    React Query understands:
+  </p>
+
+  <pre><code>These are different queries.</code></pre>
+
+  <p>
+    So each search result gets its own cache.
+  </p>
+
+  <h2>Query Invalidation</h2>
+
+  <p>
+    Suppose you create a new user:
+  </p>
+
+  <pre><code class="language-js">mutation.mutate(newUser);</code></pre>
+
+  <p>
+    After success:
+  </p>
+
+  <pre><code class="language-js">queryClient.invalidateQueries({
+  queryKey: ['users']
+});</code></pre>
+
+  <p>
+    React Query finds:
+  </p>
+
+  <pre><code class="language-js">['users']</code></pre>
+
+  <p>
+    and refetches it.
+  </p>
+
+  <p>
+    Without queryKey it would not know which cache entry to refresh.
+  </p>
+
+  <h2>Simple Interview Answer</h2>
+
+  <div class="highlight">
+    <code>queryKey</code> is a unique identifier for a query. React Query uses it to cache data, detect when query parameters change, reuse cached results, and know which queries should be refetched or invalidated. Think of it as the cache key for API data.
+  </div>
+
+</section>
+
+<h2>React Query vs Context</h2>
+
+<table>
+<tr>
+<th>Context</th>
+<th>React Query</th>
+</tr>
+
+<tr>
+<td>Client state</td>
+<td>Server state</td>
+</tr>
+
+<tr>
+<td>No caching</td>
+<td>Built-in caching</td>
+</tr>
+
+<tr>
+<td>Manual fetching</td>
+<td>Automatic fetching</td>
+</tr>
+
+<tr>
+<td>Manual loading state</td>
+<td>Built-in loading state</td>
+</tr>
+
+<tr>
+<td>Manual error state</td>
+<td>Built-in error state</td>
+</tr>
+
+<tr>
+<td>Manual refetching</td>
+<td>Automatic refetching</td>
+</tr>
+</table>
+
+<div class="warning">
+React Query is not a replacement for Context. They solve different problems.
+</div>
+
+<h2>When Should You Use React Query?</h2>
+
+<ul>
+<li>Fetching API data.</li>
+<li>Caching server responses.</li>
+<li>Handling loading states.</li>
+<li>Handling error states.</li>
+<li>Pagination.</li>
+<li>Infinite scrolling.</li>
+<li>Background updates.</li>
+<li>Real-world production applications.</li>
+</ul>
+
+<h2>Important Interview Points</h2>
+
+<ul>
+<li>React Query is now called TanStack Query.</li>
+<li>Designed for server state management.</li>
+<li>Provides caching and automatic refetching.</li>
+<li>Reduces useEffect-based data fetching code.</li>
+<li>Supports queries and mutations.</li>
+<li>Handles loading and error states automatically.</li>
+<li>Improves performance through caching.</li>
+<li>Very popular in modern React applications.</li>
+</ul>
+
+<h2>Short Interview Answer</h2>
+
+<div class="highlight">
+TanStack Query (React Query) is a server-state management library that simplifies fetching, caching, synchronizing, and updating API data. It is popular because it automatically handles caching, loading states, error handling, retries, background updates, and request deduplication, greatly reducing boilerplate code.
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+TanStack Query is a library for managing server data in React with built-in caching, refetching, loading states, and error handling.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+
+</body>
+</html>

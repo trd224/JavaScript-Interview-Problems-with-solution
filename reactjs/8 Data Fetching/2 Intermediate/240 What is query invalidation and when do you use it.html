@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>240 - What is Query Invalidation and When Do You Use It?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px;margin-bottom:10px}
+p{color:#cbd5e1}
+ul{padding-left:24px}
+li{margin-bottom:10px;color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left;vertical-align:top}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px;margin-top:15px}
+.success{background:#052e16;padding:18px;border-left:5px solid #22c55e;border-radius:10px;margin-top:15px}
+.warning{background:#3b0820;padding:18px;border-left:5px solid #ef4444;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;margin-top:15px;text-align:center;line-height:2;font-size:18px}
+pre{border-radius:12px;overflow-x:auto}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>240. What is Query Invalidation and When Do You Use It?</h1>
+
+<h2>One-Line Definition</h2>
+
+<div class="highlight">
+Query invalidation tells React Query that cached data may no longer be correct and should be refetched.
+</div>
+
+<h2>Simple Meaning</h2>
+
+<p>
+React Query caches data.
+</p>
+
+<p>
+Example:
+</p>
+
+<pre><code class="language-js">['users']</code></pre>
+
+<p>
+Cached users:
+</p>
+
+<pre><code>[
+  { id: 1, name: 'Rizwan' },
+  { id: 2, name: 'Raziq' }
+]</code></pre>
+
+<p>
+Now suppose we add a new user.
+</p>
+
+<pre><code class="language-js">POST /users</code></pre>
+
+<p>
+The server now contains:
+</p>
+
+<pre><code>[
+  { id: 1, name: 'Rizwan' },
+  { id: 2, name: 'Raziq' },
+  { id: 3, name: 'John' }
+]</code></pre>
+
+<div class="warning">
+But React Query cache still contains the old data.
+</div>
+
+<h2>The Problem</h2>
+
+<div class="flow">
+Server Data Changed
+<br>
+↓
+<br>
+React Query Cache Is Old
+<br>
+↓
+<br>
+UI Shows Old Data
+</div>
+
+<p>
+We need a way to tell React Query:
+</p>
+
+<pre><code>This cache is no longer trustworthy.
+Please get fresh data.</code></pre>
+
+<p>
+That is called:
+</p>
+
+<div class="highlight">
+Query Invalidation
+</div>
+
+<h2>Basic Syntax</h2>
+
+<pre><code class="language-js">queryClient.invalidateQueries({
+  queryKey: ['users']
+});</code></pre>
+
+<h2>What Does invalidateQueries Do?</h2>
+
+<div class="warning">
+invalidateQueries does NOT immediately delete cache.
+</div>
+
+<div class="warning">
+invalidateQueries does NOT directly update cache.
+</div>
+
+<p>
+It simply marks the query as stale.
+</p>
+
+<div class="flow">
+invalidateQueries
+<br>
+↓
+<br>
+Mark Query As Stale
+<br>
+↓
+<br>
+Refetch Fresh Data
+<br>
+↓
+<br>
+Update Cache
+<br>
+↓
+<br>
+Update UI
+</div>
+
+<h2>Connection With staleTime</h2>
+
+<p>
+Earlier we learned:
+</p>
+
+<pre><code>staleTime expired
+↓
+Data becomes stale</code></pre>
+
+<p>
+Query invalidation does almost the same thing manually.
+</p>
+
+<pre><code>invalidateQueries
+↓
+Data becomes stale immediately</code></pre>
+
+<div class="highlight">
+Think of invalidateQueries as manually forcing staleTime to expire.
+</div>
+
+<h2>Example - Add User</h2>
+
+<h3>Mutation</h3>
+
+<pre><code class="language-js">const addUserMutation = useMutation({
+  mutationFn: addUser,
+
+  onSuccess: () => {
+    queryClient.invalidateQueries({
+      queryKey: ['users']
+    });
+  }
+});</code></pre>
+
+<h3>Flow</h3>
+
+<div class="flow">
+Add User
+<br>
+↓
+<br>
+POST Request Success
+<br>
+↓
+<br>
+Invalidate Users Query
+<br>
+↓
+<br>
+Refetch Users
+<br>
+↓
+<br>
+UI Shows Updated List
+</div>
+
+<h2>Example - Delete User</h2>
+
+<pre><code class="language-js">const deleteUserMutation = useMutation({
+  mutationFn: deleteUser,
+
+  onSuccess: () => {
+    queryClient.invalidateQueries({
+      queryKey: ['users']
+    });
+  }
+});</code></pre>
+
+<div class="flow">
+Delete User
+<br>
+↓
+<br>
+Server Updated
+<br>
+↓
+<br>
+Invalidate Query
+<br>
+↓
+<br>
+Refetch Users
+</div>
+
+<h2>Example - Update User</h2>
+
+<pre><code class="language-js">const updateUserMutation = useMutation({
+  mutationFn: updateUser,
+
+  onSuccess: () => {
+    queryClient.invalidateQueries({
+      queryKey: ['users']
+    });
+  }
+});</code></pre>
+
+<div class="flow">
+Update User
+<br>
+↓
+<br>
+Invalidate Query
+<br>
+↓
+<br>
+Refetch
+<br>
+↓
+<br>
+Fresh Data
+</div>
+
+<h2>Why Not Just Update State Manually?</h2>
+
+<p>
+Without React Query:
+</p>
+
+<pre><code>POST User
+↓
+Update Local State
+↓
+Update User List State
+↓
+Update Dashboard Count
+↓
+Update Other Components</code></pre>
+
+<p>
+With React Query:
+</p>
+
+<pre><code>POST User
+↓
+invalidateQueries()
+↓
+React Query Handles Everything</code></pre>
+
+<div class="success">
+React Query automatically synchronizes all components using the same query.
+</div>
+
+<h2>Invalidate Specific Query</h2>
+
+<pre><code class="language-js">queryClient.invalidateQueries({
+  queryKey: ['users']
+});</code></pre>
+
+<p>
+Only users query is affected.
+</p>
+
+<h2>Invalidate Dynamic Query</h2>
+
+<p>
+Suppose:
+</p>
+
+<pre><code class="language-js">useQuery({
+  queryKey: ['user', userId],
+  queryFn: () => fetchUser(userId)
+});</code></pre>
+
+<p>
+Invalidate specific user:
+</p>
+
+<pre><code class="language-js">queryClient.invalidateQueries({
+  queryKey: ['user', userId]
+});</code></pre>
+
+<div class="highlight">
+Only that user's cache will be refetched.
+</div>
+
+<h2>Invalidate Multiple Queries</h2>
+
+<pre><code class="language-js">queryClient.invalidateQueries({
+  queryKey: ['users']
+});</code></pre>
+
+This invalidates:
+
+<pre><code>['users']
+['users', 1]
+['users', 2]
+['users', 'active']</code></pre>
+
+because they all start with:
+
+<pre><code>['users']</code></pre>
+
+<h2>Common Interview Question</h2>
+
+<p>
+What is the difference between:
+</p>
+
+<pre><code class="language-js">invalidateQueries()</code></pre>
+
+and
+
+<pre><code class="language-js">refetch()</code></pre>
+
+<table>
+<tr>
+<th>invalidateQueries</th>
+<th>refetch</th>
+</tr>
+
+<tr>
+<td>Marks query as stale.</td>
+<td>Immediately refetches.</td>
+</tr>
+
+<tr>
+<td>Works from anywhere.</td>
+<td>Works on current query.</td>
+</tr>
+
+<tr>
+<td>Used after mutations.</td>
+<td>Used for manual refresh.</td>
+</tr>
+</table>
+
+<h2>Query Invalidation vs Optimistic Update</h2>
+
+<table>
+<tr>
+<th>Optimistic Update</th>
+<th>Query Invalidation</th>
+</tr>
+
+<tr>
+<td>Update cache immediately.</td>
+<td>Refetch fresh server data.</td>
+</tr>
+
+<tr>
+<td>Fast UI.</td>
+<td>Accurate UI.</td>
+</tr>
+
+<tr>
+<td>May require rollback.</td>
+<td>No rollback needed.</td>
+</tr>
+</table>
+
+<h2>Real Project Example</h2>
+
+<p>
+Department Master:
+</p>
+
+<pre><code class="language-js">const addDepartment = useMutation({
+  mutationFn: createDepartment,
+
+  onSuccess: () => {
+    queryClient.invalidateQueries({
+      queryKey: ['departments']
+    });
+  }
+});</code></pre>
+
+<p>
+After adding a department:
+</p>
+
+<div class="flow">
+Create Department
+<br>
+↓
+<br>
+Server Updated
+<br>
+↓
+<br>
+Invalidate Departments Query
+<br>
+↓
+<br>
+Refetch Departments
+<br>
+↓
+<br>
+All Screens Show Latest Data
+</div>
+
+<h2>When Should You Use Query Invalidation?</h2>
+
+<ul>
+<li>After creating data (POST)</li>
+<li>After updating data (PUT/PATCH)</li>
+<li>After deleting data (DELETE)</li>
+<li>Whenever server data changes</li>
+<li>Whenever cached data may be outdated</li>
+</ul>
+
+<div class="success">
+A good rule is: after most successful mutations, invalidate related queries.
+</div>
+
+<h2>Important Interview Points</h2>
+
+<ul>
+<li>invalidateQueries marks queries as stale.</li>
+<li>It does not delete cache.</li>
+<li>It does not directly update cache.</li>
+<li>Usually used after mutations.</li>
+<li>Triggers refetch of fresh server data.</li>
+<li>Keeps UI synchronized with server state.</li>
+<li>Can target specific query keys.</li>
+<li>Can target query key groups.</li>
+</ul>
+
+<h2>Short Interview Answer</h2>
+
+<div class="highlight">
+Query invalidation is a React Query mechanism used to mark cached data as stale so it can be refetched. It is commonly used after successful mutations such as create, update, or delete operations to ensure the UI stays synchronized with the latest server data.
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+Query invalidation tells React Query that cached data may be outdated and should be refetched.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+
+</body>
+</html>

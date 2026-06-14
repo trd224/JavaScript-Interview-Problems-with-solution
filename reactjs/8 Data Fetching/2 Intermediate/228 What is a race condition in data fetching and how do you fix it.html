@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>228 - What is a race condition in data fetching and how do you fix it?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px;margin-bottom:10px}
+p{color:#cbd5e1}
+ul{padding-left:24px}
+li{margin-bottom:10px;color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left;vertical-align:top}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px;margin-top:15px}
+.warning{background:#3b0820;border-left:5px solid #ef4444;padding:18px;border-radius:10px;margin-top:15px}
+.success{background:#052e16;padding:18px;border-left:5px solid #22c55e;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;margin-top:15px;text-align:center;line-height:2;font-size:18px}
+pre{border-radius:12px;overflow-x:auto}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>228. What is a race condition in data fetching and how do you fix it?</h1>
+
+<h2>One-Line Definition</h2>
+
+<div class="highlight">
+A race condition in data fetching happens when multiple API requests run at the same time and an older response finishes after a newer response, causing old data to overwrite new data.
+</div>
+
+<h2>Simple Meaning</h2>
+
+<p>
+In React, users can change input, filters, tabs, routes, or search text quickly.
+</p>
+
+<p>
+Each change may start a new API request.
+</p>
+
+<div class="warning">
+The problem happens when responses do not come back in the same order they were sent.
+</div>
+
+<h2>Simple Example</h2>
+
+<p>
+User searches quickly:
+</p>
+
+<div class="flow">
+Search: "r"
+<br>
+↓
+<br>
+API Request 1 Started
+<br><br>
+Search: "ri"
+<br>
+↓
+<br>
+API Request 2 Started
+<br><br>
+Request 2 Finishes First
+<br>
+↓
+<br>
+UI Shows "ri" Results
+<br><br>
+Request 1 Finishes Later
+<br>
+↓
+<br>
+Old "r" Results Overwrite UI
+</div>
+
+<div class="warning">
+Now the UI shows old results even though the latest search is "ri".
+</div>
+
+<h2>Problem Code</h2>
+
+<pre><code class="language-js">useEffect(() => {
+  fetch(`/api/users?search=${search}`)
+    .then(res => res.json())
+    .then(data => setUsers(data));
+}, [search]);</code></pre>
+
+<p>
+Every time search changes, a new request starts.
+</p>
+
+<p>
+But old requests are still allowed to finish and update state.
+</p>
+
+<h2>Why Is This a Race Condition?</h2>
+
+<p>
+Because multiple requests are racing to update the same state.
+</p>
+
+<table>
+<tr>
+<th>Request</th>
+<th>Search Value</th>
+<th>Finish Time</th>
+<th>Result</th>
+</tr>
+
+<tr>
+<td>Request 1</td>
+<td>r</td>
+<td>Slow</td>
+<td>Finishes last and overwrites UI</td>
+</tr>
+
+<tr>
+<td>Request 2</td>
+<td>ri</td>
+<td>Fast</td>
+<td>Finishes first and shows correct data</td>
+</tr>
+</table>
+
+<h2>Fix 1 - Use AbortController</h2>
+
+<p>
+AbortController cancels the previous request when a new request starts or when the component unmounts.
+</p>
+
+<pre><code class="language-js">useEffect(() => {
+  const controller = new AbortController();
+
+  fetch(`/api/users?search=${search}`, { signal: controller.signal })
+    .then(res => res.json())
+    .then(data => setUsers(data))
+    .catch(error => {
+      if (error.name !== 'AbortError') console.log(error);
+    });
+
+  return () => controller.abort();
+}, [search]);</code></pre>
+
+<div class="success">
+When search changes, React runs cleanup first, aborts the old request, then starts the new request.
+</div>
+
+<h2>How Cleanup Fixes It</h2>
+
+<div class="flow">
+search = "r"
+<br>
+↓
+<br>
+Request 1 Starts
+<br>
+↓
+<br>
+search = "ri"
+<br>
+↓
+<br>
+Cleanup Runs
+<br>
+↓
+<br>
+Request 1 Aborted
+<br>
+↓
+<br>
+Request 2 Starts
+<br>
+↓
+<br>
+Only Latest Request Updates State
+</div>
+
+<h2>Fix 2 - Ignore Old Responses</h2>
+
+<p>
+Sometimes an API request cannot be cancelled.
+</p>
+
+<p>
+In that case, we can ignore old responses.
+</p>
+
+<pre><code class="language-js">useEffect(() => {
+  let ignore = false;
+
+  async function loadUsers() {
+    const res = await fetch(`/api/users?search=${search}`);
+    const data = await res.json();
+
+    if (!ignore) setUsers(data);
+  }
+
+  loadUsers();
+
+  return () => {
+    ignore = true;
+  };
+}, [search]);</code></pre>
+
+<div class="success">
+Old request may finish, but it cannot update state after cleanup sets ignore to true.
+</div>
+
+<h2>Fix 3 - Track Latest Request Id</h2>
+
+<p>
+Another approach is to keep a request id and update state only for the latest request.
+</p>
+
+<pre><code class="language-js">const requestIdRef = useRef(0);
+
+useEffect(() => {
+  const requestId = ++requestIdRef.current;
+
+  async function loadUsers() {
+    const res = await fetch(`/api/users?search=${search}`);
+    const data = await res.json();
+
+    if (requestId === requestIdRef.current) setUsers(data);
+  }
+
+  loadUsers();
+}, [search]);</code></pre>
+
+<div class="highlight">
+This ensures only the latest request is allowed to update state.
+</div>
+
+<h2>Fix 4 - Use React Query / SWR</h2>
+
+<p>
+For real applications, libraries like React Query or SWR handle many data-fetching problems automatically.
+</p>
+
+<ul>
+<li>Caching</li>
+<li>Refetching</li>
+<li>Loading state</li>
+<li>Error state</li>
+<li>Stale data handling</li>
+<li>Request deduplication</li>
+</ul>
+
+<pre><code class="language-js">const { data, isLoading } = useQuery({
+  queryKey: ['users', search],
+  queryFn: () => fetchUsers(search)
+});</code></pre>
+
+<div class="success">
+React Query helps prevent many manual data-fetching bugs in large applications.
+</div>
+
+<h2>Real Project Example</h2>
+
+<p>
+Suppose our Aadhaar Authentication dashboard has a department dropdown.
+</p>
+
+<p>
+User quickly changes department:
+</p>
+
+<div class="flow">
+Department A Selected
+<br>
+↓
+<br>
+Request A Started
+<br><br>
+Department B Selected
+<br>
+↓
+<br>
+Request B Started
+<br><br>
+Request B Finishes First
+<br>
+↓
+<br>
+UI Shows Department B Data
+<br><br>
+Request A Finishes Later
+<br>
+↓
+<br>
+Old Department A Data Overwrites UI
+</div>
+
+<div class="warning">
+This is a race condition because old response updates the latest screen.
+</div>
+
+<p>
+Fix it by aborting the old request:
+</p>
+
+<pre><code class="language-js">useEffect(() => {
+  const controller = new AbortController();
+
+  fetch(`/api/audit?department=${departmentId}`, { signal: controller.signal })
+    .then(res => res.json())
+    .then(data => setAuditData(data))
+    .catch(error => {
+      if (error.name !== 'AbortError') console.log(error);
+    });
+
+  return () => controller.abort();
+}, [departmentId]);</code></pre>
+
+<h2>Common Places Race Conditions Happen</h2>
+
+<table>
+<tr>
+<th>Place</th>
+<th>Example</th>
+</tr>
+
+<tr>
+<td>Search input</td>
+<td>User types quickly</td>
+</tr>
+
+<tr>
+<td>Filter dropdown</td>
+<td>User changes filter multiple times</td>
+</tr>
+
+<tr>
+<td>Tabs</td>
+<td>User switches tabs quickly</td>
+</tr>
+
+<tr>
+<td>Route params</td>
+<td>User navigates between details pages</td>
+</tr>
+
+<tr>
+<td>Pagination</td>
+<td>User clicks next pages quickly</td>
+</tr>
+</table>
+
+<h2>Important Interview Points</h2>
+
+<ul>
+<li>Race condition happens when old async response overwrites newer state.</li>
+<li>It commonly happens with search, filters, tabs, pagination, and route changes.</li>
+<li>AbortController can cancel old fetch requests.</li>
+<li>useEffect cleanup runs before the next effect and on unmount.</li>
+<li>Ignoring old responses is useful when request cancellation is not available.</li>
+<li>Request id tracking ensures only the latest request updates state.</li>
+<li>React Query and SWR solve many data-fetching race issues.</li>
+</ul>
+
+<h2>Short Interview Answer</h2>
+
+<div class="highlight">
+A race condition in data fetching happens when multiple requests are active and an older response arrives after a newer one, causing stale data to overwrite the latest state. We fix it by cancelling old requests with AbortController, ignoring stale responses in useEffect cleanup, tracking the latest request id, or using libraries like React Query or SWR.
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+A data-fetching race condition happens when an old request finishes after a new request and overwrites fresh data; fix it by aborting or ignoring stale requests.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>238 - What is Optimistic Update in React Query?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px;margin-bottom:10px}
+p{color:#cbd5e1}
+ul{padding-left:24px}
+li{margin-bottom:10px;color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left;vertical-align:top}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px;margin-top:15px}
+.success{background:#052e16;padding:18px;border-left:5px solid #22c55e;border-radius:10px;margin-top:15px}
+.warning{background:#3b0820;padding:18px;border-left:5px solid #ef4444;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;margin-top:15px;text-align:center;line-height:2;font-size:18px}
+pre{border-radius:12px;overflow-x:auto}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>238. What is Optimistic Update in React Query?</h1>
+
+<h2>One-Line Definition</h2>
+
+<div class="highlight">
+An optimistic update updates the UI immediately before the server confirms the change, making the application feel much faster.
+</div>
+
+<h2>Why Is It Called "Optimistic"?</h2>
+
+<p>
+Because we are optimistic that the server request will succeed.
+</p>
+
+<p>
+Instead of waiting for:
+</p>
+
+<div class="flow">
+User Clicks Save
+<br>
+↓
+<br>
+API Call
+<br>
+↓
+<br>
+Server Response
+<br>
+↓
+<br>
+Update UI
+</div>
+
+<p>
+We do:
+</p>
+
+<div class="flow">
+User Clicks Save
+<br>
+↓
+<br>
+Update UI Immediately
+<br>
+↓
+<br>
+API Call In Background
+<br>
+↓
+<br>
+Server Confirms
+</div>
+
+<div class="success">
+The UI feels instant because users don't wait for the server.
+</div>
+
+<h2>Normal Update vs Optimistic Update</h2>
+
+<table>
+<tr>
+<th>Normal Update</th>
+<th>Optimistic Update</th>
+</tr>
+
+<tr>
+<td>User waits for API response.</td>
+<td>UI updates immediately.</td>
+</tr>
+
+<tr>
+<td>Feels slower.</td>
+<td>Feels instant.</td>
+</tr>
+
+<tr>
+<td>No rollback needed.</td>
+<td>Rollback may be needed.</td>
+</tr>
+</table>
+
+<h2>Real Example - Todo List</h2>
+
+<p>
+Current Todos:
+</p>
+
+<pre><code>[
+  "Learn React",
+  "Learn React Query"
+]</code></pre>
+
+<p>
+User clicks:
+</p>
+
+<pre><code>Add Todo</code></pre>
+
+<h3>Normal Approach</h3>
+
+<div class="flow">
+Click Button
+<br>
+↓
+<br>
+API Call
+<br>
+↓
+<br>
+Wait...
+<br>
+↓
+<br>
+Server Response
+<br>
+↓
+<br>
+Update UI
+</div>
+
+<h3>Optimistic Approach</h3>
+
+<div class="flow">
+Click Button
+<br>
+↓
+<br>
+Add Todo To UI Immediately
+<br>
+↓
+<br>
+API Call
+<br>
+↓
+<br>
+Server Success
+</div>
+
+<p>
+User instantly sees:
+</p>
+
+<pre><code>[
+  "Learn React",
+  "Learn React Query",
+  "Learn TypeScript"
+]</code></pre>
+
+<h2>How React Query Implements Optimistic Updates</h2>
+
+<p>
+React Query provides:
+</p>
+
+<ul>
+<li>onMutate</li>
+<li>onError</li>
+<li>onSettled</li>
+</ul>
+
+<h2>Basic Mutation</h2>
+
+<pre><code class="language-js">const addTodoMutation = useMutation({
+  mutationFn: addTodo
+});</code></pre>
+
+<h2>Optimistic Update Example</h2>
+
+<pre><code class="language-js">const queryClient = useQueryClient();
+
+const addTodoMutation = useMutation({
+  mutationFn: addTodo,
+
+  onMutate: async (newTodo) => {
+
+    await queryClient.cancelQueries({
+      queryKey: ['todos']
+    });
+
+    const previousTodos =
+      queryClient.getQueryData(['todos']);
+
+    queryClient.setQueryData(
+      ['todos'],
+      (old = []) => [
+        ...old,
+        newTodo
+      ]
+    );
+
+    return {
+      previousTodos
+    };
+  },
+
+  onError: (
+    error,
+    newTodo,
+    context
+  ) => {
+
+    queryClient.setQueryData(
+      ['todos'],
+      context.previousTodos
+    );
+
+  },
+
+  onSettled: () => {
+
+    queryClient.invalidateQueries({
+      queryKey: ['todos']
+    });
+
+  }
+});</code></pre>
+
+<h2>What Happens Here?</h2>
+
+<h3>Step 1 - User Clicks Add</h3>
+
+<div class="flow">
+User Clicks Add
+<br>
+↓
+<br>
+onMutate Runs
+</div>
+
+<h3>Step 2 - Update Cache Immediately</h3>
+
+<pre><code class="language-js">queryClient.setQueryData(
+  ['todos'],
+  (old = []) => [
+    ...old,
+    newTodo
+  ]
+);</code></pre>
+
+<p>
+UI updates instantly.
+</p>
+
+<h3>Step 3 - API Call Runs</h3>
+
+<div class="flow">
+Updated UI
+<br>
+↓
+<br>
+API Request
+<br>
+↓
+<br>
+Waiting For Server
+</div>
+
+<h3>Step 4 - Server Success</h3>
+
+<div class="success">
+Nothing special needed. UI already shows the new item.
+</div>
+
+<h3>Step 5 - Server Failure</h3>
+
+<p>
+React Query restores previous data:
+</p>
+
+<pre><code class="language-js">queryClient.setQueryData(
+  ['todos'],
+  context.previousTodos
+);</code></pre>
+
+<div class="warning">
+This is called rollback.
+</div>
+
+<h2>Visual Success Flow</h2>
+
+<div class="flow">
+Click Add Todo
+<br>
+↓
+<br>
+UI Updates Immediately
+<br>
+↓
+<br>
+API Call
+<br>
+↓
+<br>
+Server Success
+<br>
+↓
+<br>
+Keep UI As-Is
+</div>
+
+<h2>Visual Failure Flow</h2>
+
+<div class="flow">
+Click Add Todo
+<br>
+↓
+<br>
+UI Updates Immediately
+<br>
+↓
+<br>
+API Call
+<br>
+↓
+<br>
+Server Error
+<br>
+↓
+<br>
+Rollback Cache
+<br>
+↓
+<br>
+UI Reverts
+</div>
+
+<h2>Real Example - Like Button</h2>
+
+<p>
+Current Likes:
+</p>
+
+<pre><code>100</code></pre>
+
+<p>
+User clicks Like:
+</p>
+
+<div class="flow">
+100 Likes
+<br>
+↓
+<br>
+User Clicks Like
+<br>
+↓
+<br>
+Immediately Show
+<br>
+101 Likes
+<br>
+↓
+<br>
+API Call
+</div>
+
+<p>
+This feels much better than:
+</p>
+
+<div class="flow">
+100 Likes
+<br>
+↓
+<br>
+API Call
+<br>
+↓
+<br>
+Wait...
+<br>
+↓
+<br>
+101 Likes
+</div>
+
+<h2>When Should You Use Optimistic Updates?</h2>
+
+<ul>
+<li>Like buttons</li>
+<li>Todo lists</li>
+<li>Chat messages</li>
+<li>Comments</li>
+<li>Bookmarks</li>
+<li>Follow/Unfollow</li>
+</ul>
+
+<div class="success">
+Perfect when failures are rare and fast UI is important.
+</div>
+
+<h2>When Should You Avoid It?</h2>
+
+<ul>
+<li>Bank transfers</li>
+<li>Payment processing</li>
+<li>Wallet balance updates</li>
+<li>Critical financial operations</li>
+</ul>
+
+<div class="warning">
+Never show money transferred before the server actually confirms it.
+</div>
+
+<h2>Difference Between Background Refetching and Optimistic Updates</h2>
+
+<table>
+<tr>
+<th>Background Refetching</th>
+<th>Optimistic Update</th>
+</tr>
+
+<tr>
+<td>Shows cached data.</td>
+<td>Creates new UI state immediately.</td>
+</tr>
+
+<tr>
+<td>Usually for GET requests.</td>
+<td>Usually for POST/PUT/DELETE.</td>
+</tr>
+
+<tr>
+<td>Updates when fresh data arrives.</td>
+<td>Updates before server response.</td>
+</tr>
+
+<tr>
+<td>No rollback needed.</td>
+<td>Rollback may be required.</td>
+</tr>
+</table>
+
+<h2>Interview Answer</h2>
+
+<div class="highlight">
+An optimistic update is a technique where React Query updates the UI immediately before the server confirms a mutation. It improves perceived performance by making the application feel instant. If the server request fails, React Query can roll back the cache to its previous state using onError.
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+Optimistic updates update the UI before the server responds and roll back if the request fails.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+
+</body>
+</html>

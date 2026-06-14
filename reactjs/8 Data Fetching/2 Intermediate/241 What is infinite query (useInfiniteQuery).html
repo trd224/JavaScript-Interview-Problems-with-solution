@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>241 - What is Infinite Query (useInfiniteQuery)?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px;margin-bottom:10px}
+p{color:#cbd5e1}
+ul{padding-left:24px}
+li{margin-bottom:10px;color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left;vertical-align:top}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px;margin-top:15px}
+.success{background:#052e16;padding:18px;border-left:5px solid #22c55e;border-radius:10px;margin-top:15px}
+.warning{background:#3b0820;padding:18px;border-left:5px solid #ef4444;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;margin-top:15px;text-align:center;line-height:2;font-size:18px}
+pre{border-radius:12px;overflow-x:auto}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>241. What is Infinite Query (useInfiniteQuery)?</h1>
+
+<h2>One-Line Definition</h2>
+
+<div class="highlight">
+<code>useInfiniteQuery</code> is a React Query hook used for loading paginated data page-by-page, typically for "Load More" buttons and infinite scrolling.
+</div>
+
+<h2>Why Do We Need It?</h2>
+
+<p>
+A normal query loads data only once.
+</p>
+
+<pre><code class="language-js">useQuery({
+  queryKey: ['users'],
+  queryFn: fetchUsers
+});</code></pre>
+
+<p>
+Result:
+</p>
+
+<div class="flow">
+API Call
+<br>
+↓
+<br>
+Page 1 Data
+</div>
+
+<p>
+But what if we have:
+</p>
+
+<ul>
+<li>10,000 Products</li>
+<li>50,000 Users</li>
+<li>Infinite Social Media Feed</li>
+<li>Chat History</li>
+</ul>
+
+<div class="warning">
+Loading everything at once would be very slow.
+</div>
+
+<h2>Solution</h2>
+
+<div class="flow">
+Load Page 1
+<br>
+↓
+<br>
+User Scrolls
+<br>
+↓
+<br>
+Load Page 2
+<br>
+↓
+<br>
+User Scrolls
+<br>
+↓
+<br>
+Load Page 3
+</div>
+
+<p>
+This is exactly what <code>useInfiniteQuery</code> is designed for.
+</p>
+
+<h2>Real World Examples</h2>
+
+<ul>
+<li>Facebook Feed</li>
+<li>Instagram Feed</li>
+<li>X (Twitter) Timeline</li>
+<li>YouTube Comments</li>
+<li>E-commerce Product Lists</li>
+<li>Chat Applications</li>
+</ul>
+
+<h2>Traditional Pagination</h2>
+
+<div class="flow">
+Page 1
+<br>
+↓
+<br>
+Next
+<br>
+↓
+<br>
+Page 2
+<br>
+↓
+<br>
+Next
+<br>
+↓
+<br>
+Page 3
+</div>
+
+<h2>Infinite Query</h2>
+
+<div class="flow">
+Page 1
+<br>
+↓
+<br>
+Scroll
+<br>
+↓
+<br>
+Page 2 Appended
+<br>
+↓
+<br>
+Scroll
+<br>
+↓
+<br>
+Page 3 Appended
+</div>
+
+<div class="success">
+Users see one continuously growing list.
+</div>
+
+<h2>API Example</h2>
+
+<p>
+Suppose API supports page numbers:
+</p>
+
+<pre><code>/api/users?page=1
+/api/users?page=2
+/api/users?page=3</code></pre>
+
+<h2>Basic Example</h2>
+
+<pre><code class="language-js">const {
+  data,
+  fetchNextPage,
+  hasNextPage,
+  isFetchingNextPage
+} = useInfiniteQuery({
+  queryKey: ['users'],
+
+  queryFn: ({ pageParam = 1 }) =>
+    fetchUsers(pageParam),
+
+  getNextPageParam: (lastPage) =>
+    lastPage.nextPage
+});</code></pre>
+
+<h2>Understanding pageParam</h2>
+
+<p>
+This is the most confusing part for beginners.
+</p>
+
+<pre><code class="language-js">queryFn: ({ pageParam = 1 }) =>
+  fetchUsers(pageParam)</code></pre>
+
+<p>
+First request:
+</p>
+
+<pre><code>pageParam = 1</code></pre>
+
+<p>
+API call:
+</p>
+
+<pre><code>/api/users?page=1</code></pre>
+
+<p>
+When next page loads:
+</p>
+
+<pre><code>pageParam = 2</code></pre>
+
+<p>
+API call:
+</p>
+
+<pre><code>/api/users?page=2</code></pre>
+
+<h2>What Does getNextPageParam Do?</h2>
+
+<p>
+React Query must know:
+</p>
+
+<pre><code>What is the next page number?</code></pre>
+
+<p>
+Example API response:
+</p>
+
+<pre><code class="language-js">{
+  users: [...],
+  nextPage: 2
+}</code></pre>
+
+<p>
+Then:
+</p>
+
+<pre><code class="language-js">getNextPageParam: (lastPage) =>
+  lastPage.nextPage</code></pre>
+
+<div class="highlight">
+React Query automatically passes the returned value as the next pageParam.
+</div>
+
+<h2>Flow Example</h2>
+
+<div class="flow">
+Initial Load
+<br>
+↓
+<br>
+page=1
+<br>
+↓
+<br>
+Response nextPage=2
+<br><br>
+
+fetchNextPage()
+<br>
+↓
+<br>
+page=2
+<br>
+↓
+<br>
+Response nextPage=3
+<br><br>
+
+fetchNextPage()
+<br>
+↓
+<br>
+page=3
+</div>
+
+<h2>What Does data Look Like?</h2>
+
+<p>
+Unlike useQuery, infinite queries store multiple pages.
+</p>
+
+<pre><code class="language-js">data = {
+  pages: [
+    {
+      users: ['A', 'B']
+    },
+    {
+      users: ['C', 'D']
+    },
+    {
+      users: ['E', 'F']
+    }
+  ]
+}</code></pre>
+
+<h2>Rendering Pages</h2>
+
+<pre><code class="language-js">{data?.pages.map(page =>
+  page.users.map(user => (
+    &lt;div key={user.id}&gt;
+      {user.name}
+    &lt;/div&gt;
+  ))
+)}</code></pre>
+
+<h2>Load More Button</h2>
+
+<pre><code class="language-js">&lt;button
+  onClick={() => fetchNextPage()}
+  disabled={!hasNextPage}
+&gt;
+  Load More
+&lt;/button&gt;</code></pre>
+
+<h2>Useful Properties</h2>
+
+<table>
+<tr>
+<th>Property</th>
+<th>Purpose</th>
+</tr>
+
+<tr>
+<td>fetchNextPage</td>
+<td>Loads next page.</td>
+</tr>
+
+<tr>
+<td>hasNextPage</td>
+<td>Checks if more pages exist.</td>
+</tr>
+
+<tr>
+<td>isFetchingNextPage</td>
+<td>Loading state for next page.</td>
+</tr>
+
+<tr>
+<td>data.pages</td>
+<td>Contains all loaded pages.</td>
+</tr>
+</table>
+
+<h2>Loading Next Page</h2>
+
+<pre><code class="language-js">{isFetchingNextPage &&
+  &lt;p&gt;Loading More...&lt;/p&gt;
+}</code></pre>
+
+<p>
+User experience:
+</p>
+
+<div class="flow">
+Page 1 Loaded
+<br>
+↓
+<br>
+Click Load More
+<br>
+↓
+<br>
+Loading More...
+<br>
+↓
+<br>
+Page 2 Added
+</div>
+
+<h2>Infinite Scroll Example</h2>
+
+<p>
+Instead of a button, we can load automatically when user reaches the bottom.
+</p>
+
+<div class="flow">
+User Scrolls Down
+<br>
+↓
+<br>
+Bottom Reached
+<br>
+↓
+<br>
+fetchNextPage()
+<br>
+↓
+<br>
+More Data Loaded
+</div>
+
+<div class="success">
+This is how Instagram, Facebook and Twitter feeds work.
+</div>
+
+<h2>How Is It Different From useQuery?</h2>
+
+<table>
+<tr>
+<th>useQuery</th>
+<th>useInfiniteQuery</th>
+</tr>
+
+<tr>
+<td>Single result set.</td>
+<td>Multiple pages.</td>
+</tr>
+
+<tr>
+<td>One API request.</td>
+<td>Page-by-page requests.</td>
+</tr>
+
+<tr>
+<td>No pagination support.</td>
+<td>Built for pagination.</td>
+</tr>
+
+<tr>
+<td>Returns data.</td>
+<td>Returns pages array.</td>
+</tr>
+</table>
+
+<h2>Real Project Example</h2>
+
+<p>
+Suppose our application has 50,000 audit records.
+</p>
+
+<p>
+Bad approach:
+</p>
+
+<pre><code>/api/audits</code></pre>
+
+<div class="warning">
+Loads all records at once.
+</div>
+
+<p>
+Better approach:
+</p>
+
+<pre><code>/api/audits?page=1
+/api/audits?page=2
+/api/audits?page=3</code></pre>
+
+<div class="success">
+Load records only when the user needs them.
+</div>
+
+<h2>Common Interview Question</h2>
+
+<p>
+Why not use useQuery with page state?
+</p>
+
+<pre><code class="language-js">const [page, setPage] =
+  useState(1);
+
+useQuery({
+  queryKey: ['users', page],
+  queryFn: () => fetchUsers(page)
+});</code></pre>
+
+<p>
+This creates classic pagination:
+</p>
+
+<div class="flow">
+Page 1
+<br>
+↓
+<br>
+Page 2
+<br>
+↓
+<br>
+Page 3
+</div>
+
+<p>
+But:
+</p>
+
+<pre><code class="language-js">useInfiniteQuery()</code></pre>
+
+creates:
+
+<div class="flow">
+Page 1
+<br>
+↓
+<br>
+Page 1 + Page 2
+<br>
+↓
+<br>
+Page 1 + Page 2 + Page 3
+</div>
+
+<h2>Important Interview Points</h2>
+
+<ul>
+<li><code>useInfiniteQuery</code> is used for infinite scrolling and load-more functionality.</li>
+<li>Uses <code>pageParam</code> to determine which page to load.</li>
+<li><code>getNextPageParam</code> tells React Query what page to fetch next.</li>
+<li>Data is stored inside <code>data.pages</code>.</li>
+<li><code>fetchNextPage()</code> loads the next page.</li>
+<li><code>hasNextPage</code> indicates whether more data exists.</li>
+<li>Commonly used in feeds, chats, comments, and product listings.</li>
+</ul>
+
+<h2>Short Interview Answer</h2>
+
+<div class="highlight">
+useInfiniteQuery is a React Query hook used for paginated and infinite-scroll data. It loads data page-by-page using pageParam and stores all loaded pages in data.pages. The fetchNextPage function loads additional pages while preserving previously loaded data.
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+useInfiniteQuery loads paginated data incrementally for infinite scrolling and load-more interfaces.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+
+</body>
+</html>

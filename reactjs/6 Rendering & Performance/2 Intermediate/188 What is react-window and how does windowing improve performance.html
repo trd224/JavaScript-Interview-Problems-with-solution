@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>188 - What is react-window and how does windowing improve performance?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px;margin-bottom:10px}
+p{color:#cbd5e1}
+ul{padding-left:24px}
+li{margin-bottom:10px;color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left;vertical-align:top}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px;margin-top:15px}
+.warning{background:#1e1b4b;border-left:5px solid #fbbf24;padding:18px;border-radius:10px;margin-top:15px}
+.success{background:#052e16;padding:18px;border-left:5px solid #22c55e;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;margin-top:15px;text-align:center;line-height:2;font-size:18px}
+pre{border-radius:12px;overflow-x:auto}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>188. What is react-window and how does windowing improve performance?</h1>
+
+<h2>One-Line Definition</h2>
+
+<div class="highlight">
+react-window is a lightweight React library that implements list virtualization (windowing) by rendering only the visible items instead of the entire list.
+</div>
+
+<h2>What is react-window?</h2>
+
+<p>
+react-window is a performance optimization library created by:
+</p>
+
+<p>
+:contentReference[oaicite:0]{index=0}
+</p>
+
+<p>
+It is used when we need to display:
+</p>
+
+<ul>
+<li>Thousands of products</li>
+<li>Large tables</li>
+<li>Chat messages</li>
+<li>Transaction history</li>
+<li>Log files</li>
+<li>Admin dashboards</li>
+</ul>
+
+<p>
+Without rendering thousands of DOM elements.
+</p>
+
+<h2>Install</h2>
+
+<pre><code>npm install react-window</code></pre>
+
+<h2>The Problem</h2>
+
+<p>
+Suppose we have:
+</p>
+
+<pre><code>50,000 Products</code></pre>
+
+<p>
+and render them normally:
+</p>
+
+<pre><code class="language-jsx">products.map(product =&gt; (
+
+  &lt;ProductCard
+    key={product.id}
+    product={product}
+  /&gt;
+
+));</code></pre>
+
+<p>
+React creates:
+</p>
+
+<pre><code>
+50,000 Components
+50,000 DOM Elements
+</code></pre>
+
+<p>
+Even though the user can only see a few products on the screen.
+</p>
+
+<div class="warning">
+Most of the rendered DOM elements are invisible but still consume memory and rendering time.
+</div>
+
+<h2>What is Windowing?</h2>
+
+<p>
+Windowing means rendering only the visible part (window) of a large list.
+</p>
+
+<p>
+Instead of:
+</p>
+
+<pre><code>
+1
+2
+3
+4
+...
+50000
+</code></pre>
+
+<p>
+React renders only:
+</p>
+
+<pre><code>
+101
+102
+103
+104
+105
+106
+107
+108
+</code></pre>
+
+<p>
+which are currently visible.
+</p>
+
+<div class="success">
+Only visible items are rendered into the DOM.
+</div>
+
+<h2>How Windowing Improves Performance</h2>
+
+<div class="flow">
+50,000 Items
+<br>
+↓
+<br>
+User Can See Only 10 Items
+<br>
+↓
+<br>
+Render Only 10 Items
+<br>
+↓
+<br>
+Smaller DOM
+<br>
+↓
+<br>
+Faster Application
+</div>
+
+<h2>Real-World Example</h2>
+
+<pre><code class="language-jsx">import { FixedSizeList } from 'react-window';
+
+const products = Array.from(
+  { length: 50000 },
+  (_, index) =&gt; ({
+    id: index + 1,
+    name: `Product ${index + 1}`,
+    price: Math.floor(Math.random() * 10000)
+  })
+);
+
+function ProductRow({ index, style }) {
+
+  const product = products[index];
+
+  return (
+
+    &lt;div
+      style={{
+        ...style,
+        padding: '10px',
+        borderBottom: '1px solid #ddd',
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center'
+      }}
+    &gt;
+
+      &lt;span&gt;{product.name}&lt;/span&gt;
+
+      &lt;strong&gt;₹{product.price}&lt;/strong&gt;
+
+    &lt;/div&gt;
+
+  );
+
+}
+
+function App() {
+
+  return (
+
+    &lt;FixedSizeList
+      height={500}
+      width={800}
+      itemCount={products.length}
+      itemSize={60}
+    &gt;
+
+      {ProductRow}
+
+    &lt;/FixedSizeList&gt;
+
+  );
+
+}</code></pre>
+
+<h2>What Happens Internally?</h2>
+
+<p>
+Suppose:
+</p>
+
+<pre><code class="language-jsx">height={500}
+
+itemSize={60}</code></pre>
+
+<p>
+react-window calculates:
+</p>
+
+<pre><code>
+500 / 60
+≈ 8 Rows Visible
+</code></pre>
+
+<p>
+Instead of rendering:
+</p>
+
+<pre><code>
+50,000 Rows
+</code></pre>
+
+<p>
+it renders only:
+</p>
+
+<pre><code>
+8 - 15 Rows
+</code></pre>
+
+<div class="success">
+The DOM stays small no matter how large the dataset becomes.
+</div>
+
+<h2>How Can The Scrollbar Represent 50,000 Rows?</h2>
+
+<p>
+This is the trick many interviewers ask about.
+</p>
+
+<p>
+react-window creates a huge virtual container.
+</p>
+
+<p>
+Example:
+</p>
+
+<pre><code>
+itemCount = 50000
+
+itemSize = 60
+</code></pre>
+
+<p>
+Virtual height:
+</p>
+
+<pre><code>
+50000 × 60
+
+=
+
+3,000,000px
+</code></pre>
+
+<p>
+The browser sees:
+</p>
+
+<pre><code>
+height: 3,000,000px
+</code></pre>
+
+<p>
+and displays a huge scrollbar.
+</p>
+
+<p>
+However, only visible rows are actually rendered.
+</p>
+
+<h2>Why Is style Required?</h2>
+
+<p>
+react-window passes a style prop:
+</p>
+
+<pre><code class="language-jsx">function ProductRow({ index, style })</code></pre>
+
+<p>
+Example style:
+</p>
+
+<pre><code class="language-jsx">{
+  position: 'absolute',
+  top: 7200,
+  height: 60,
+  width: '100%'
+}</code></pre>
+
+<p>
+This positions rows correctly inside the virtual container.
+</p>
+
+<p>
+Without:
+</p>
+
+<pre><code class="language-jsx">style={style}</code></pre>
+
+<p>
+all rows would overlap.
+</p>
+
+<div class="warning">
+The style prop is mandatory when using react-window.
+</div>
+
+<h2>Scrolling Process</h2>
+
+<p>
+Initially:
+</p>
+
+<pre><code>
+101
+102
+103
+104
+105
+106
+107
+108
+</code></pre>
+
+<p>
+User scrolls.
+</p>
+
+<p>
+Now:
+</p>
+
+<pre><code>
+109
+110
+111
+112
+113
+114
+115
+116
+</code></pre>
+
+<p>
+react-window:
+</p>
+
+<ul>
+<li>Removes old rows.</li>
+<li>Creates new rows.</li>
+<li>Updates positions.</li>
+</ul>
+
+<div class="flow">
+Scroll
+<br>
+↓
+<br>
+Remove Old Rows
+<br>
+↓
+<br>
+Render New Rows
+<br>
+↓
+<br>
+Reuse DOM Efficiently
+</div>
+
+<h2>Performance Comparison</h2>
+
+<table>
+<tr>
+<th>Without Windowing</th>
+<th>With Windowing</th>
+</tr>
+
+<tr>
+<td>50,000 DOM Elements</td>
+<td>10-20 DOM Elements</td>
+</tr>
+
+<tr>
+<td>High Memory Usage</td>
+<td>Low Memory Usage</td>
+</tr>
+
+<tr>
+<td>Slow Initial Render</td>
+<td>Fast Initial Render</td>
+</tr>
+
+<tr>
+<td>Heavy Reconciliation</td>
+<td>Minimal Reconciliation</td>
+</tr>
+
+<tr>
+<td>Poor Scrolling Performance</td>
+<td>Smooth Scrolling</td>
+</tr>
+</table>
+
+<h2>react-window vs Normal Rendering</h2>
+
+<div class="flow">
+Normal Rendering
+
+<br><br>
+
+50,000 Items
+<br>
+↓
+<br>
+50,000 DOM Elements
+
+<br><br>
+
+react-window
+
+<br><br>
+
+50,000 Items
+<br>
+↓
+<br>
+10 Visible Items
+<br>
+↓
+<br>
+10 DOM Elements
+</div>
+
+<h2>Important Interview Points</h2>
+
+<ul>
+<li>react-window implements list virtualization.</li>
+<li>Also called windowing.</li>
+<li>Renders only visible items.</li>
+<li>Creates a large virtual container.</li>
+<li>Uses absolute positioning.</li>
+<li>Keeps DOM size small.</li>
+<li>Improves rendering and scrolling performance.</li>
+<li>Common alternatives: react-virtualized, TanStack Virtual.</li>
+</ul>
+
+<h2>Short Interview Answer</h2>
+
+<div class="highlight">
+react-window is a virtualization library that renders only the visible portion of a large list. Windowing improves performance by reducing the number of DOM elements, lowering memory usage, and keeping scrolling smooth even with very large datasets.
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+react-window improves performance by rendering only visible list items instead of the entire dataset.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+
+</body>
+</html>

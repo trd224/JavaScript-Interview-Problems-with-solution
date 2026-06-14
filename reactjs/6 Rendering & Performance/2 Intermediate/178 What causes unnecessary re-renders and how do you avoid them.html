@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>178 - What causes unnecessary re-renders and how do you avoid them?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px;margin-bottom:10px}
+p{color:#cbd5e1}
+ul{padding-left:24px}
+li{margin-bottom:10px;color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left;vertical-align:top}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px;margin-top:15px}
+.warning{background:#1e1b4b;border-left:5px solid #fbbf24;padding:18px;border-radius:10px;margin-top:15px}
+.success{background:#052e16;padding:18px;border-left:5px solid #22c55e;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;margin-top:15px;text-align:center;line-height:2;font-size:18px}
+pre{border-radius:12px;overflow-x:auto}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>178. What causes unnecessary re-renders and how do you avoid them?</h1>
+
+<h2>One-Line Definition</h2>
+
+<div class="highlight">
+Unnecessary re-render means a component renders again even though its visible output did not actually need to change.
+</div>
+
+<h2>When Does React Re-render?</h2>
+
+<p>
+A React component re-renders mainly when:
+</p>
+
+<ul>
+<li>Its state changes.</li>
+<li>Its props change.</li>
+<li>Its parent component re-renders.</li>
+<li>Context value changes.</li>
+</ul>
+
+<div class="warning">
+Re-render is not always bad. It becomes a problem only when expensive components render again without need.
+</div>
+
+<h2>Main Causes of Unnecessary Re-renders</h2>
+
+<ul>
+<li>Parent component re-renders.</li>
+<li>Passing new object or array props every render.</li>
+<li>Passing new function props every render.</li>
+<li>Updating state unnecessarily.</li>
+<li>Putting too much state in one parent component.</li>
+<li>Context value changes too often.</li>
+<li>Expensive calculations inside render.</li>
+</ul>
+
+<h2>Cause 1 - Parent Re-renders</h2>
+
+<p>
+When a parent component re-renders, its child components also re-render by default.
+</p>
+
+<pre><code class="language-jsx">function Parent() {
+
+  const [count, setCount] = useState(0);
+
+  return (
+    &lt;div&gt;
+      &lt;button onClick={() =&gt; setCount(count + 1)}&gt;
+        Increment
+      &lt;/button&gt;
+
+      &lt;Child /&gt;
+    &lt;/div&gt;
+  );
+
+}
+
+function Child() {
+
+  console.log('Child rendered');
+
+  return &lt;h2&gt;Child Component&lt;/h2&gt;;
+
+}</code></pre>
+
+<p>
+Even if Child does not use count, Child still renders when Parent renders.
+</p>
+
+<h2>How To Avoid It?</h2>
+
+<p>
+Use React.memo for child components that receive the same props.
+</p>
+
+<pre><code class="language-jsx">const Child = React.memo(function Child() {
+
+  console.log('Child rendered');
+
+  return &lt;h2&gt;Child Component&lt;/h2&gt;;
+
+});</code></pre>
+
+<div class="success">
+React.memo prevents child re-render when props are unchanged.
+</div>
+
+<h2>Cause 2 - New Function Prop Every Render</h2>
+
+<p>
+In JavaScript, a new function is created every time the parent renders.
+</p>
+
+<pre><code class="language-jsx">function Parent() {
+
+  const [count, setCount] = useState(0);
+
+  function handleClick() {
+    console.log('Clicked');
+  }
+
+  return (
+    &lt;div&gt;
+      &lt;button onClick={() =&gt; setCount(count + 1)}&gt;
+        Increment
+      &lt;/button&gt;
+
+      &lt;Child onClick={handleClick} /&gt;
+    &lt;/div&gt;
+  );
+
+}</code></pre>
+
+<p>
+Even with React.memo, Child may re-render because handleClick is a new function reference.
+</p>
+
+<h2>How To Avoid It?</h2>
+
+<p>
+Use useCallback to keep the same function reference.
+</p>
+
+<pre><code class="language-jsx">const handleClick = useCallback(() =&gt; {
+  console.log('Clicked');
+}, []);</code></pre>
+
+<p>
+Complete example:
+</p>
+
+<pre><code class="language-jsx">function Parent() {
+
+  const [count, setCount] = useState(0);
+
+  const handleClick = useCallback(() =&gt; {
+    console.log('Clicked');
+  }, []);
+
+  return (
+    &lt;div&gt;
+      &lt;button onClick={() =&gt; setCount(count + 1)}&gt;
+        Increment
+      &lt;/button&gt;
+
+      &lt;Child onClick={handleClick} /&gt;
+    &lt;/div&gt;
+  );
+
+}
+
+const Child = React.memo(function Child({ onClick }) {
+
+  console.log('Child rendered');
+
+  return &lt;button onClick={onClick}&gt;Child Button&lt;/button&gt;;
+
+});</code></pre>
+
+<h2>Cause 3 - New Object or Array Prop Every Render</h2>
+
+<p>
+Objects and arrays are compared by reference.
+</p>
+
+<pre><code class="language-jsx">&lt;Child user={{ name: 'Rizwan' }} /&gt;</code></pre>
+
+<p>
+This creates a new object on every render.
+</p>
+
+<p>
+So React sees it as a changed prop.
+</p>
+
+<h2>How To Avoid It?</h2>
+
+<p>
+Use useMemo to keep the same object reference.
+</p>
+
+<pre><code class="language-jsx">const user = useMemo(() =&gt; {
+  return { name: 'Rizwan' };
+}, []);
+
+return &lt;Child user={user} /&gt;;</code></pre>
+
+<div class="success">
+useMemo keeps object or array reference stable.
+</div>
+
+<h2>Cause 4 - Expensive Calculations Inside Render</h2>
+
+<p>
+If expensive logic runs on every render, the UI may become slow.
+</p>
+
+<pre><code class="language-jsx">const total = products.reduce((sum, item) =&gt; sum + item.price, 0);</code></pre>
+
+<p>
+This calculation runs every time the component renders.
+</p>
+
+<h2>How To Avoid It?</h2>
+
+<p>
+Use useMemo for expensive calculations.
+</p>
+
+<pre><code class="language-jsx">const total = useMemo(() =&gt; {
+  return products.reduce((sum, item) =&gt; sum + item.price, 0);
+}, [products]);</code></pre>
+
+<h2>Cause 5 - State Kept Too High</h2>
+
+<p>
+If state is placed in a top parent, many child components may re-render when that state changes.
+</p>
+
+<div class="flow">
+Parent State Changes
+<br>
+↓
+<br>
+Parent Re-renders
+<br>
+↓
+<br>
+All Children Re-render
+</div>
+
+<h2>How To Avoid It?</h2>
+
+<p>
+Keep state as close as possible to where it is used.
+</p>
+
+<div class="success">
+Do not keep every state in the top parent. Move local state into the component that actually needs it.
+</div>
+
+<h2>Cause 6 - Context Value Changes Too Often</h2>
+
+<p>
+When context value changes, all components consuming that context may re-render.
+</p>
+
+<pre><code class="language-jsx">&lt;UserContext.Provider value={{ user, logout }}&gt;
+  {children}
+&lt;/UserContext.Provider&gt;</code></pre>
+
+<p>
+Here value is a new object on every render.
+</p>
+
+<h2>How To Avoid It?</h2>
+
+<p>
+Memoize the context value.
+</p>
+
+<pre><code class="language-jsx">const value = useMemo(() =&gt; {
+  return { user, logout };
+}, [user, logout]);
+
+&lt;UserContext.Provider value={value}&gt;
+  {children}
+&lt;/UserContext.Provider&gt;</code></pre>
+
+<h2>Important Note</h2>
+
+<div class="warning">
+Do not blindly use React.memo, useMemo, and useCallback everywhere. Use them when there is an actual performance problem or stable reference is required.
+</div>
+
+<h2>Best Practices</h2>
+
+<ul>
+<li>Keep component state local when possible.</li>
+<li>Use React.memo for expensive child components.</li>
+<li>Use useCallback for function props passed to memoized children.</li>
+<li>Use useMemo for expensive calculations and stable objects.</li>
+<li>Avoid creating objects and arrays directly in JSX props.</li>
+<li>Split large components into smaller components.</li>
+<li>Use React DevTools Profiler to find real performance problems.</li>
+</ul>
+
+<h2>Quick Table</h2>
+
+<table>
+<tr>
+<th>Cause</th>
+<th>Solution</th>
+</tr>
+
+<tr>
+<td>Parent re-renders</td>
+<td>Use React.memo if child props are same.</td>
+</tr>
+
+<tr>
+<td>New function prop</td>
+<td>Use useCallback.</td>
+</tr>
+
+<tr>
+<td>New object or array prop</td>
+<td>Use useMemo.</td>
+</tr>
+
+<tr>
+<td>Expensive calculation</td>
+<td>Use useMemo.</td>
+</tr>
+
+<tr>
+<td>State too high</td>
+<td>Move state closer to where it is used.</td>
+</tr>
+
+<tr>
+<td>Context value changes</td>
+<td>Memoize context value or split context.</td>
+</tr>
+</table>
+
+<h2>Short Interview Answer</h2>
+
+<div class="highlight">
+Unnecessary re-renders are caused by parent re-renders, new object or function references, unnecessary state updates, broad context updates, and expensive calculations during render. We avoid them using React.memo, useCallback, useMemo, local state placement, and context optimization.
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+Avoid unnecessary re-renders by keeping props stable, memoizing expensive parts, placing state correctly, and preventing needless parent or context updates.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+
+</body>
+</html>

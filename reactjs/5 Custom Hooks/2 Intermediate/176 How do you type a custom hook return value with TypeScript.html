@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>176 - How do you type a custom hook return value with TypeScript?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px;margin-bottom:10px}
+p{color:#cbd5e1}
+ul{padding-left:24px}
+li{margin-bottom:10px;color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left;vertical-align:top}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px;margin-top:15px}
+.warning{background:#1e1b4b;border-left:5px solid #fbbf24;padding:18px;border-radius:10px;margin-top:15px}
+.success{background:#052e16;padding:18px;border-left:5px solid #22c55e;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;margin-top:15px;text-align:center;line-height:2;font-size:18px}
+pre{border-radius:12px;overflow-x:auto}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>176. How do you type a custom hook return value with TypeScript?</h1>
+
+<h2>One-Line Definition</h2>
+
+<div class="highlight">
+In TypeScript, we can explicitly define the type of data returned by a custom hook so TypeScript knows exactly what values and functions the hook provides.
+</div>
+
+<h2>Why Is It Needed?</h2>
+
+<p>
+Consider this custom hook:
+</p>
+
+<pre><code class="language-ts">function useCounter() {
+
+  const [count, setCount] = useState(0);
+
+  function increment() {
+    setCount(c => c + 1);
+  }
+
+  return {
+    count,
+    increment
+  };
+
+}</code></pre>
+
+<p>
+The hook returns:
+</p>
+
+<pre><code class="language-ts">{
+  count,
+  increment
+}</code></pre>
+
+<p>
+TypeScript tries to infer the type automatically.
+</p>
+
+<p>
+But in larger applications, explicitly defining the return type makes the code easier to understand and safer.
+</p>
+
+<div class="warning">
+Typing the return value clearly documents what the hook returns.
+</div>
+
+<h2>Method 1 - Type the Return Object</h2>
+
+<h3>Create Return Type</h3>
+
+<pre><code class="language-ts">type UseCounterReturn = {
+  count: number;
+  increment: () => void;
+};</code></pre>
+
+<h3>Apply It To The Hook</h3>
+
+<pre><code class="language-ts">function useCounter(): UseCounterReturn {
+
+  const [count, setCount] = useState(0);
+
+  function increment() {
+    setCount(c => c + 1);
+  }
+
+  return {
+    count,
+    increment
+  };
+
+}</code></pre>
+
+<div class="success">
+Now TypeScript knows exactly what the hook returns.
+</div>
+
+<h2>How TypeScript Reads This</h2>
+
+<pre><code class="language-ts">function useCounter(): UseCounterReturn</code></pre>
+
+<p>
+Meaning:
+</p>
+
+<pre><code class="language-ts">This function must return:
+
+{
+  count: number;
+  increment: () => void;
+}</code></pre>
+
+<p>
+Otherwise TypeScript will show an error.
+</p>
+
+<h2>Using The Hook</h2>
+
+<pre><code class="language-ts">const { count, increment } = useCounter();</code></pre>
+
+<p>
+TypeScript automatically knows:
+</p>
+
+<pre><code class="language-ts">count      // number
+
+increment  // function</code></pre>
+
+<h2>Method 2 - Return a Tuple</h2>
+
+<p>
+Some hooks return arrays instead of objects.
+</p>
+
+<p>
+Example:
+</p>
+
+<pre><code class="language-ts">return [count, increment];</code></pre>
+
+<h3>Type The Tuple</h3>
+
+<pre><code class="language-ts">type UseCounterReturn = [
+  number,
+  () => void
+];</code></pre>
+
+<h3>Apply It</h3>
+
+<pre><code class="language-ts">function useCounter(): UseCounterReturn {
+
+  const [count, setCount] = useState(0);
+
+  function increment() {
+    setCount(c => c + 1);
+  }
+
+  return [count, increment];
+
+}</code></pre>
+
+<h2>How TypeScript Reads This</h2>
+
+<pre><code class="language-ts">[
+  number,
+  () => void
+]</code></pre>
+
+<p>
+Meaning:
+</p>
+
+<pre><code class="language-ts">Index 0 -> number
+
+Index 1 -> function</code></pre>
+
+<p>
+Usage:
+</p>
+
+<pre><code class="language-ts">const [count, increment] = useCounter();</code></pre>
+
+<h2>Real-World Example</h2>
+
+<pre><code class="language-ts">type UseAuthReturn = {
+  user: string | null;
+  login: () => void;
+  logout: () => void;
+};
+
+function useAuth(): UseAuthReturn {
+
+  const user = 'Rizwan';
+
+  function login() {}
+
+  function logout() {}
+
+  return {
+    user,
+    login,
+    logout
+  };
+
+}</code></pre>
+
+<p>
+Now every developer immediately knows what the hook provides.
+</p>
+
+<h2>Why Not Let TypeScript Infer Everything?</h2>
+
+<p>
+TypeScript can often infer the return type automatically.
+</p>
+
+<pre><code class="language-ts">function useCounter() {
+
+  return {
+    count: 0,
+    increment: () => {}
+  };
+
+}</code></pre>
+
+<p>
+This works.
+</p>
+
+<p>
+However explicit return types:
+</p>
+
+<ul>
+<li>Improve readability.</li>
+<li>Act as documentation.</li>
+<li>Prevent accidental return changes.</li>
+<li>Make large codebases easier to maintain.</li>
+</ul>
+
+<div class="highlight">
+Small projects often rely on inference. Large projects usually define explicit return types.
+</div>
+
+<h2>Visual Flow</h2>
+
+<div class="flow">
+Custom Hook
+<br>
+↓
+<br>
+Returns Data
+<br>
+↓
+<br>
+Define Return Type
+<br>
+↓
+<br>
+TypeScript Verifies Return Value
+<br>
+↓
+<br>
+Safer Code
+</div>
+
+<h2>Important Interview Points</h2>
+
+<ul>
+<li>Custom hooks can return objects or tuples.</li>
+<li>Return types can be explicitly defined.</li>
+<li>Type aliases are commonly used.</li>
+<li>Tuple types are used for array returns.</li>
+<li>TypeScript can infer types but explicit types improve maintainability.</li>
+</ul>
+
+<h2>Short Interview Answer</h2>
+
+<div class="highlight">
+A custom hook return value can be typed by defining a return type or interface and applying it to the hook function's return type.
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+Type a custom hook return value by defining the shape of the returned object or tuple and using it as the hook's return type.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js"></script>
+
+</body>
+</html>

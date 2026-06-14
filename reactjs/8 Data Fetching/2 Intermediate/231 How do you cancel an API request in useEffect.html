@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>231 - How do you cancel an API request in useEffect?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px;margin-bottom:10px}
+p{color:#cbd5e1}
+ul{padding-left:24px}
+li{margin-bottom:10px;color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px;margin-top:15px}
+.warning{background:#3b0820;border-left:5px solid #ef4444;padding:18px;border-radius:10px;margin-top:15px}
+.success{background:#052e16;padding:18px;border-left:5px solid #22c55e;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;margin-top:15px;text-align:center;line-height:2;font-size:18px}
+pre{border-radius:12px;overflow-x:auto}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>231. How do you cancel an API request in useEffect?</h1>
+
+<h2>One-Line Definition</h2>
+
+<div class="highlight">
+An API request can be cancelled in useEffect by cleaning it up when the component unmounts or when the effect runs again.
+</div>
+
+<h2>Why Cancel API Requests?</h2>
+
+<p>
+Suppose a component starts an API request.
+</p>
+
+<p>
+Before the response arrives:
+</p>
+
+<ul>
+<li>User leaves the page.</li>
+<li>Component unmounts.</li>
+<li>A new request starts.</li>
+</ul>
+
+<p>
+The old request may still finish.
+</p>
+
+<div class="warning">
+This can cause memory leaks, stale data, and race conditions.
+</div>
+
+<h2>Visual Problem</h2>
+
+<div class="flow">
+Component Mounted
+<br>
+↓
+<br>
+API Request Started
+<br>
+↓
+<br>
+User Navigates Away
+<br>
+↓
+<br>
+Component Unmounted
+<br>
+↓
+<br>
+Response Arrives Later
+<br>
+↓
+<br>
+State Update Attempt
+</div>
+
+<h2>Most Common Solution - AbortController</h2>
+
+<p>
+The standard way is using AbortController.
+</p>
+
+<pre><code class="language-js">useEffect(() => {
+  const controller = new AbortController();
+
+  fetch('/api/user', {
+    signal: controller.signal
+  })
+    .then(res => res.json())
+    .then(data => setUser(data))
+    .catch(error => {
+      if (error.name !== 'AbortError') {
+        console.log(error);
+      }
+    });
+
+  return () => controller.abort();
+}, []);</code></pre>
+
+<div class="success">
+When the component unmounts, the request is cancelled automatically.
+</div>
+
+<h2>How It Works</h2>
+
+<table>
+<tr>
+<th>Step</th>
+<th>Description</th>
+</tr>
+
+<tr>
+<td>1</td>
+<td>Create AbortController.</td>
+</tr>
+
+<tr>
+<td>2</td>
+<td>Pass controller.signal to fetch.</td>
+</tr>
+
+<tr>
+<td>3</td>
+<td>Start API request.</td>
+</tr>
+
+<tr>
+<td>4</td>
+<td>Cleanup function runs.</td>
+</tr>
+
+<tr>
+<td>5</td>
+<td>controller.abort() cancels request.</td>
+</tr>
+</table>
+
+<h2>Compact Async/Await Version</h2>
+
+<pre><code class="language-js">useEffect(() => {
+  const controller = new AbortController();
+
+  async function getUser() {
+    try {
+      const res = await fetch('/api/user', {
+        signal: controller.signal
+      });
+
+      const data = await res.json();
+
+      setUser(data);
+    } catch (error) {
+      if (error.name !== 'AbortError') {
+        console.log(error);
+      }
+    }
+  }
+
+  getUser();
+
+  return () => controller.abort();
+}, []);</code></pre>
+
+<h2>Search Example</h2>
+
+<p>
+Race conditions commonly happen in search inputs.
+</p>
+
+<pre><code class="language-js">useEffect(() => {
+  const controller = new AbortController();
+
+  async function searchUsers() {
+    try {
+      const res = await fetch(
+        `/api/users?q=${search}`,
+        { signal: controller.signal }
+      );
+
+      const data = await res.json();
+
+      setUsers(data);
+    } catch (error) {
+      if (error.name !== 'AbortError') {
+        console.log(error);
+      }
+    }
+  }
+
+  searchUsers();
+
+  return () => controller.abort();
+}, [search]);</code></pre>
+
+<div class="success">
+Each new search cancels the previous request.
+</div>
+
+<h2>Alternative Solution - Ignore Old Responses</h2>
+
+<p>
+Sometimes requests cannot be cancelled.
+</p>
+
+<p>
+In that case we ignore stale responses.
+</p>
+
+<pre><code class="language-js">useEffect(() => {
+  let ignore = false;
+
+  async function loadUser() {
+    const res = await fetch('/api/user');
+    const data = await res.json();
+
+    if (!ignore) {
+      setUser(data);
+    }
+  }
+
+  loadUser();
+
+  return () => {
+    ignore = true;
+  };
+}, []);</code></pre>
+
+<div class="warning">
+The request still runs, but old responses cannot update state.
+</div>
+
+<h2>AbortController vs Ignore Flag</h2>
+
+<table>
+<tr>
+<th>Method</th>
+<th>Cancels Request?</th>
+<th>Prevents Stale Updates?</th>
+</tr>
+
+<tr>
+<td>AbortController</td>
+<td>✅ Yes</td>
+<td>✅ Yes</td>
+</tr>
+
+<tr>
+<td>Ignore Flag</td>
+<td>❌ No</td>
+<td>✅ Yes</td>
+</tr>
+</table>
+
+<div class="highlight">
+AbortController is the preferred solution because it actually stops the network request.
+</div>
+
+<h2>Real Project Example</h2>
+
+<p>
+In an Aadhaar Authentication screen:
+</p>
+
+<ul>
+<li>User selects Department A.</li>
+<li>API request starts.</li>
+<li>User quickly selects Department B.</li>
+<li>Another request starts.</li>
+</ul>
+
+<p>
+Without cancellation:
+</p>
+
+<ul>
+<li>Department A response may arrive later.</li>
+<li>Old data may overwrite Department B data.</li>
+</ul>
+
+<p>
+Using AbortController:
+</p>
+
+<pre><code class="language-js">return () => controller.abort();</code></pre>
+
+<p>
+ensures only the latest request survives.
+</p>
+
+<h2>Important Interview Points</h2>
+
+<ul>
+<li>API requests should be cleaned up in useEffect.</li>
+<li>AbortController is the standard solution.</li>
+<li>Pass controller.signal to fetch.</li>
+<li>Call controller.abort() in cleanup.</li>
+<li>Useful for preventing memory leaks.</li>
+<li>Useful for preventing race conditions.</li>
+<li>Ignore-flag pattern is a fallback when cancellation is not possible.</li>
+</ul>
+
+<h2>Short Interview Answer</h2>
+
+<div class="highlight">
+API requests can be cancelled in useEffect using AbortController. Create a controller, pass its signal to fetch, and call controller.abort() inside the cleanup function. This prevents memory leaks, stale updates, and race conditions.
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+Cancel API requests in useEffect by using AbortController and calling abort() in the cleanup function.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+
+</body>
+</html>

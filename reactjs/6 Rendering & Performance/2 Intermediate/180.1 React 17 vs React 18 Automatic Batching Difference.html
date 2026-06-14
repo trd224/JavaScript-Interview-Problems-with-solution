@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>180 - React 17 vs React 18 Automatic Batching Difference</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px;margin-bottom:10px}
+p{color:#cbd5e1}
+ul{padding-left:24px}
+li{margin-bottom:10px;color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left;vertical-align:top}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px;margin-top:15px}
+.warning{background:#1e1b4b;border-left:5px solid #fbbf24;padding:18px;border-radius:10px;margin-top:15px}
+.success{background:#052e16;padding:18px;border-left:5px solid #22c55e;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;margin-top:15px;text-align:center;line-height:2;font-size:18px}
+pre{border-radius:12px;overflow-x:auto}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>180. React 17 vs React 18 Automatic Batching Difference</h1>
+
+<h2>One-Line Definition</h2>
+
+<div class="highlight">
+Automatic batching means React groups multiple state updates together and performs only one re-render.
+</div>
+
+<h2>Your Main Confusion</h2>
+
+<p>
+You asked:
+</p>
+
+<div class="warning">
+If batching already happened before React 18, then what is the difference between React 17 and React 18?
+</div>
+
+<p>
+The answer is simple:
+</p>
+
+<div class="success">
+The difference is WHERE batching works.
+</div>
+
+<h2>React 17 Batching</h2>
+
+<p>
+In React 17, batching worked only inside React event handlers.
+</p>
+
+<h3>Example - React Click Event</h3>
+
+<pre><code class="language-jsx">function handleClick() {
+
+  setCount(c =&gt; c + 1);
+
+  setName('Rizwan');
+
+}</code></pre>
+
+<p>
+Both state updates happen inside the same React click event.
+</p>
+
+<p>
+React 17 batches them.
+</p>
+
+<div class="flow">
+Click Event
+<br>
+↓
+<br>
+setCount()
+<br>
++
+<br>
+setName()
+<br>
+↓
+<br>
+1 Render
+</div>
+
+<div class="success">
+React 17 already batched updates inside React events.
+</div>
+
+<h2>Where React 17 Did NOT Batch</h2>
+
+<p>
+React 17 did not automatically batch updates inside asynchronous code.
+</p>
+
+<p>
+Examples:
+</p>
+
+<ul>
+<li>setTimeout</li>
+<li>Promise</li>
+<li>fetch callback</li>
+<li>async / await</li>
+<li>native event listener</li>
+</ul>
+
+<h3>Example - setTimeout in React 17</h3>
+
+<pre><code class="language-jsx">setTimeout(() =&gt; {
+
+  setCount(c =&gt; c + 1);
+
+  setName('Rizwan');
+
+}, 1000);</code></pre>
+
+<p>
+React 17 result:
+</p>
+
+<div class="flow">
+setCount()
+<br>
+↓
+<br>
+Render #1
+
+<br><br>
+
+setName()
+<br>
+↓
+<br>
+Render #2
+</div>
+
+<div class="warning">
+In React 17, this caused 2 renders because it was outside a React event handler.
+</div>
+
+<h2>React 18 Automatic Batching</h2>
+
+<p>
+In React 18, batching works almost everywhere.
+</p>
+
+<p>
+The same setTimeout example:
+</p>
+
+<pre><code class="language-jsx">setTimeout(() =&gt; {
+
+  setCount(c =&gt; c + 1);
+
+  setName('Rizwan');
+
+}, 1000);</code></pre>
+
+<p>
+React 18 result:
+</p>
+
+<div class="flow">
+setCount()
+<br>
++
+<br>
+setName()
+<br>
+↓
+<br>
+1 Render
+</div>
+
+<div class="success">
+React 18 automatically batches state updates even inside setTimeout, Promise, async functions, and native events.
+</div>
+
+<h2>Promise Example</h2>
+
+<pre><code class="language-jsx">fetch('/api/users')
+
+  .then(() =&gt; {
+
+    setCount(c =&gt; c + 1);
+
+    setName('Rizwan');
+
+  });</code></pre>
+
+<h3>React 17</h3>
+
+<div class="flow">
+setCount()
+<br>
+↓
+<br>
+Render #1
+
+<br><br>
+
+setName()
+<br>
+↓
+<br>
+Render #2
+</div>
+
+<h3>React 18</h3>
+
+<div class="flow">
+setCount()
+<br>
++
+<br>
+setName()
+<br>
+↓
+<br>
+1 Render
+</div>
+
+<h2>Async / Await Example</h2>
+
+<pre><code class="language-jsx">async function loadData() {
+
+  await fetch('/api/users');
+
+  setCount(c =&gt; c + 1);
+
+  setName('Rizwan');
+
+}</code></pre>
+
+<h3>React 17</h3>
+
+<div class="warning">
+After await, React 17 treats the updates separately, so it may render twice.
+</div>
+
+<h3>React 18</h3>
+
+<div class="success">
+React 18 batches both updates and renders once.
+</div>
+
+<h2>Simple Comparison Table</h2>
+
+<table>
+<tr>
+<th>Place Where State Updates Happen</th>
+<th>React 17</th>
+<th>React 18</th>
+</tr>
+
+<tr>
+<td>React click event</td>
+<td>1 render</td>
+<td>1 render</td>
+</tr>
+
+<tr>
+<td>React onChange event</td>
+<td>1 render</td>
+<td>1 render</td>
+</tr>
+
+<tr>
+<td>setTimeout</td>
+<td>2 renders</td>
+<td>1 render</td>
+</tr>
+
+<tr>
+<td>Promise / fetch</td>
+<td>2 renders</td>
+<td>1 render</td>
+</tr>
+
+<tr>
+<td>async / await</td>
+<td>2 renders</td>
+<td>1 render</td>
+</tr>
+
+<tr>
+<td>Native event listener</td>
+<td>2 renders</td>
+<td>1 render</td>
+</tr>
+</table>
+
+<h2>Easy Way To Remember</h2>
+
+<div class="flow">
+React 17
+<br>
+↓
+<br>
+Batching only inside React events
+
+<br><br>
+
+React 18
+<br>
+↓
+<br>
+Batching almost everywhere
+</div>
+
+<h2>Important Correction</h2>
+
+<div class="highlight">
+React 18 did not introduce batching for React events. React events were already batched before React 18. React 18 expanded batching to asynchronous code like setTimeout, promises, fetch, async/await, and native events.
+</div>
+
+<h2>Short Interview Answer</h2>
+
+<div class="highlight">
+In React 17, batching happened only inside React event handlers. In React 18, automatic batching also works inside setTimeout, promises, async functions, fetch callbacks, and native event listeners.
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+React 17 batches updates only in React events, while React 18 automatically batches updates almost everywhere.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+
+</body>
+</html>

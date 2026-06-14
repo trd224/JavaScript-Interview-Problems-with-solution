@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>239 - What is Optimistic UI and How Do You Implement Rollback on Failure?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px;margin-bottom:10px}
+p{color:#cbd5e1}
+ul{padding-left:24px}
+li{margin-bottom:10px;color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left;vertical-align:top}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px;margin-top:15px}
+.success{background:#052e16;padding:18px;border-left:5px solid #22c55e;border-radius:10px;margin-top:15px}
+.warning{background:#3b0820;padding:18px;border-left:5px solid #ef4444;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;margin-top:15px;text-align:center;line-height:2;font-size:18px}
+pre{border-radius:12px;overflow-x:auto}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>239. What is Optimistic UI and How Do You Implement Rollback on Failure?</h1>
+
+<h2>One-Line Definition</h2>
+
+<div class="highlight">
+Optimistic UI means updating the UI immediately before the server confirms the action, and rollback means restoring the old UI if the server request fails.
+</div>
+
+<h2>Simple Meaning</h2>
+
+<p>
+Normally, when a user performs an action, we wait for the server response first.
+</p>
+
+<div class="flow">
+User Clicks Button
+<br>
+↓
+<br>
+API Request
+<br>
+↓
+<br>
+Wait For Server
+<br>
+↓
+<br>
+Update UI
+</div>
+
+<p>
+With optimistic UI, we update the UI first.
+</p>
+
+<div class="flow">
+User Clicks Button
+<br>
+↓
+<br>
+Update UI Immediately
+<br>
+↓
+<br>
+API Request In Background
+<br>
+↓
+<br>
+If Success → Keep UI
+<br>
+If Failure → Rollback UI
+</div>
+
+<div class="success">
+This makes the application feel very fast.
+</div>
+
+<h2>Real Example - Like Button</h2>
+
+<p>
+Current likes:
+</p>
+
+<pre><code>100</code></pre>
+
+<p>
+User clicks Like.
+</p>
+
+<h3>Normal UI</h3>
+
+<div class="flow">
+100 Likes
+<br>
+↓
+<br>
+API Request
+<br>
+↓
+<br>
+Wait...
+<br>
+↓
+<br>
+101 Likes
+</div>
+
+<h3>Optimistic UI</h3>
+
+<div class="flow">
+100 Likes
+<br>
+↓
+<br>
+User Clicks Like
+<br>
+↓
+<br>
+Immediately Show 101 Likes
+<br>
+↓
+<br>
+API Request
+</div>
+
+<p>
+If API succeeds:
+</p>
+
+<div class="success">
+Keep 101 likes.
+</div>
+
+<p>
+If API fails:
+</p>
+
+<div class="warning">
+Rollback to 100 likes.
+</div>
+
+<h2>What Is Rollback?</h2>
+
+<div class="highlight">
+Rollback means undoing the optimistic UI change when the server request fails.
+</div>
+
+<p>
+Example:
+</p>
+
+<div class="flow">
+100 Likes
+<br>
+↓
+<br>
+Optimistic Update
+<br>
+↓
+<br>
+101 Likes
+<br>
+↓
+<br>
+API Failed
+<br>
+↓
+<br>
+Rollback
+<br>
+↓
+<br>
+100 Likes
+</div>
+
+<h2>How React Query Helps</h2>
+
+<p>
+React Query provides mutation lifecycle callbacks:
+</p>
+
+<table>
+<tr>
+<th>Callback</th>
+<th>Use</th>
+</tr>
+
+<tr>
+<td>onMutate</td>
+<td>Runs before mutation request. Used for optimistic update.</td>
+</tr>
+
+<tr>
+<td>onError</td>
+<td>Runs if mutation fails. Used for rollback.</td>
+</tr>
+
+<tr>
+<td>onSettled</td>
+<td>Runs after success or failure. Used for refetch/invalidation.</td>
+</tr>
+</table>
+
+<h2>Complete Optimistic UI Example</h2>
+
+<h3>API Function</h3>
+
+<pre><code class="language-js">async function addTodo(newTodo) {
+  const res = await fetch('/api/todos', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(newTodo)
+  });
+
+  if (!res.ok) {
+    throw new Error('Failed to add todo');
+  }
+
+  return res.json();
+}</code></pre>
+
+<h3>useMutation With Rollback</h3>
+
+<pre><code class="language-js">const queryClient = useQueryClient();
+
+const addTodoMutation = useMutation({
+  mutationFn: addTodo,
+
+  onMutate: async (newTodo) => {
+    await queryClient.cancelQueries({ queryKey: ['todos'] });
+
+    const previousTodos = queryClient.getQueryData(['todos']);
+
+    queryClient.setQueryData(['todos'], (old = []) => [
+      ...old,
+      {
+        id: Date.now(),
+        title: newTodo.title,
+        pending: true
+      }
+    ]);
+
+    return { previousTodos };
+  },
+
+  onError: (error, newTodo, context) => {
+    queryClient.setQueryData(['todos'], context.previousTodos);
+  },
+
+  onSettled: () => {
+    queryClient.invalidateQueries({ queryKey: ['todos'] });
+  }
+});</code></pre>
+
+<h2>How This Code Works</h2>
+
+<h3>Step 1 - Cancel Existing Refetch</h3>
+
+<pre><code class="language-js">await queryClient.cancelQueries({ queryKey: ['todos'] });</code></pre>
+
+<p>
+This prevents an old background refetch from overwriting our optimistic update.
+</p>
+
+<h3>Step 2 - Save Previous Data</h3>
+
+<pre><code class="language-js">const previousTodos = queryClient.getQueryData(['todos']);</code></pre>
+
+<p>
+We save old data so we can restore it if the API fails.
+</p>
+
+<h3>Step 3 - Update UI Immediately</h3>
+
+<pre><code class="language-js">queryClient.setQueryData(['todos'], (old = []) => [
+  ...old,
+  {
+    id: Date.now(),
+    title: newTodo.title,
+    pending: true
+  }
+]);</code></pre>
+
+<p>
+React Query updates the cache immediately, so the UI updates immediately.
+</p>
+
+<h3>Step 4 - Return Old Data</h3>
+
+<pre><code class="language-js">return { previousTodos };</code></pre>
+
+<p>
+The returned object becomes <code>context</code> inside <code>onError</code>.
+</p>
+
+<h3>Step 5 - Rollback on Failure</h3>
+
+<pre><code class="language-js">onError: (error, newTodo, context) => {
+  queryClient.setQueryData(['todos'], context.previousTodos);
+}</code></pre>
+
+<p>
+If API fails, we restore old todos.
+</p>
+
+<h3>Step 6 - Refetch Final Data</h3>
+
+<pre><code class="language-js">onSettled: () => {
+  queryClient.invalidateQueries({ queryKey: ['todos'] });
+}</code></pre>
+
+<p>
+After success or failure, we refetch to make sure cache matches server.
+</p>
+
+<h2>Success Flow</h2>
+
+<div class="flow">
+User Adds Todo
+<br>
+↓
+<br>
+onMutate Runs
+<br>
+↓
+<br>
+Todo Appears Immediately
+<br>
+↓
+<br>
+API Success
+<br>
+↓
+<br>
+Invalidate Query
+<br>
+↓
+<br>
+Server Data Confirms UI
+</div>
+
+<h2>Failure Flow</h2>
+
+<div class="flow">
+User Adds Todo
+<br>
+↓
+<br>
+onMutate Runs
+<br>
+↓
+<br>
+Todo Appears Immediately
+<br>
+↓
+<br>
+API Failure
+<br>
+↓
+<br>
+onError Runs
+<br>
+↓
+<br>
+Rollback Previous Todos
+<br>
+↓
+<br>
+UI Reverts
+</div>
+
+<h2>Example Usage</h2>
+
+<pre><code class="language-js">function AddTodo() {
+  const [title, setTitle] = useState('');
+
+  function handleAdd() {
+    addTodoMutation.mutate({ title });
+    setTitle('');
+  }
+
+  return (
+    &lt;&gt;
+      &lt;input value={title} onChange={e => setTitle(e.target.value)} /&gt;
+      &lt;button onClick={handleAdd}&gt;Add Todo&lt;/button&gt;
+    &lt;/&gt;
+  );
+}</code></pre>
+
+<h2>Why Add pending: true?</h2>
+
+<p>
+Because the item is shown before server confirmation.
+</p>
+
+<pre><code class="language-js">{
+  id: Date.now(),
+  title: newTodo.title,
+  pending: true
+}</code></pre>
+
+<p>
+We can show UI like:
+</p>
+
+<pre><code>Learn React Query (Saving...)</code></pre>
+
+<div class="highlight">
+This tells the user that the change is temporary until the server confirms it.
+</div>
+
+<h2>When Optimistic UI Is Good</h2>
+
+<ul>
+<li>Like button</li>
+<li>Bookmark</li>
+<li>Todo add/remove</li>
+<li>Follow/unfollow</li>
+<li>Comments</li>
+<li>Chat messages</li>
+</ul>
+
+<div class="success">
+Use optimistic UI when failure is rare and instant feedback improves UX.
+</div>
+
+<h2>When Optimistic UI Is Risky</h2>
+
+<ul>
+<li>Payment success</li>
+<li>Bank balance</li>
+<li>Wallet transfer</li>
+<li>Order confirmation</li>
+<li>Critical financial status</li>
+</ul>
+
+<div class="warning">
+Do not show critical success before the server confirms it.
+</div>
+
+<h2>Optimistic UI vs Background Refetching</h2>
+
+<table>
+<tr>
+<th>Optimistic UI</th>
+<th>Background Refetching</th>
+</tr>
+
+<tr>
+<td>Used mostly with mutations.</td>
+<td>Used mostly with queries.</td>
+</tr>
+
+<tr>
+<td>UI updates before server response.</td>
+<td>Cached UI shows while fresh data loads.</td>
+</tr>
+
+<tr>
+<td>Rollback may be needed.</td>
+<td>Rollback usually not needed.</td>
+</tr>
+
+<tr>
+<td>Example: Like button updates instantly.</td>
+<td>Example: User list refreshes in background.</td>
+</tr>
+</table>
+
+<h2>Important Interview Points</h2>
+
+<ul>
+<li>Optimistic UI updates the UI before server confirmation.</li>
+<li>It improves perceived performance.</li>
+<li>Rollback restores previous state on failure.</li>
+<li>React Query uses <code>onMutate</code> for optimistic updates.</li>
+<li><code>onError</code> is used for rollback.</li>
+<li><code>onSettled</code> is used to refetch or invalidate the query.</li>
+<li>Save previous cache before modifying it.</li>
+<li>Avoid optimistic UI for critical financial operations.</li>
+</ul>
+
+<h2>Short Interview Answer</h2>
+
+<div class="highlight">
+Optimistic UI means updating the UI immediately before the server confirms the mutation. In React Query, we implement it in <code>onMutate</code> by saving the previous cache and updating the cache immediately. If the request fails, <code>onError</code> restores the previous cache as rollback. Finally, <code>onSettled</code> usually invalidates the query to sync with the server.
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+Optimistic UI updates the interface before server confirmation and rolls back to previous data if the request fails.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism-javascript.min.js"></script>
+
+</body>
+</html>

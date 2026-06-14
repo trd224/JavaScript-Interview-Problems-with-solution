@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>216 - What is the problem with putting everything in one Context?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px;margin-bottom:10px}
+p{color:#cbd5e1}
+ul{padding-left:24px}
+li{margin-bottom:10px;color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left;vertical-align:top}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px;margin-top:15px}
+.warning{background:#3b0820;border-left:5px solid #ef4444;padding:18px;border-radius:10px;margin-top:15px}
+.success{background:#052e16;padding:18px;border-left:5px solid #22c55e;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;margin-top:15px;text-align:center;line-height:2;font-size:18px}
+pre{border-radius:12px;overflow-x:auto}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>216. What is the problem with putting everything in one Context?</h1>
+
+<h2>One-Line Definition</h2>
+
+<div class="highlight">
+Putting everything in one Context causes unnecessary re-renders because every consumer re-renders whenever any value inside the Context changes.
+</div>
+
+<h2>Why Developers Do This</h2>
+
+<p>
+When learning Context API, many developers create a single global context and put all application state inside it.
+</p>
+
+<pre><code class="language-js">const AppContext = createContext();</code></pre>
+
+<pre><code class="language-js">function AppProvider({ children }) {
+  const [user, setUser] = useState(null);
+  const [theme, setTheme] = useState('light');
+  const [cart, setCart] = useState([]);
+  const [notifications, setNotifications] = useState([]);
+
+  return (
+    &lt;AppContext.Provider
+      value={{
+        user,
+        theme,
+        cart,
+        notifications,
+        setUser,
+        setTheme,
+        setCart,
+        setNotifications
+      }}
+    &gt;
+      {children}
+    &lt;/AppContext.Provider&gt;
+  );
+}</code></pre>
+
+<p>
+At first this looks convenient.
+</p>
+
+<div class="warning">
+As the application grows, this becomes a performance problem.
+</div>
+
+<h2>The Main Problem</h2>
+
+<p>
+Suppose we have:
+</p>
+
+<ul>
+<li>User information</li>
+<li>Theme settings</li>
+<li>Shopping cart</li>
+<li>Notifications</li>
+</ul>
+
+<p>
+All stored in one Context.
+</p>
+
+<div class="flow">
+One Context
+<br>
+↓
+<br>
+User
+Theme
+Cart
+Notifications
+<br>
+↓
+<br>
+Any Value Changes
+<br>
+↓
+<br>
+All Consumers Re-render
+</div>
+
+<h2>Example</h2>
+
+<h3>Header Component</h3>
+
+<pre><code class="language-js">function Header() {
+  const { user } = useContext(AppContext);
+
+  return &lt;h2&gt;{user.name}&lt;/h2&gt;;
+}</code></pre>
+
+<h3>Cart Component</h3>
+
+<pre><code class="language-js">function Cart() {
+  const { cart } = useContext(AppContext);
+
+  return &lt;h2&gt;Items: {cart.length}&lt;/h2&gt;;
+}</code></pre>
+
+<p>
+Now imagine:
+</p>
+
+<pre><code class="language-js">setCart([...cart, product]);</code></pre>
+
+<p>
+Only cart changed.
+</p>
+
+<p>
+But React creates a new Context value object.
+</p>
+
+<div class="warning">
+Header re-renders even though user data did not change.
+</div>
+
+<h2>Why Does This Happen?</h2>
+
+<p>
+React compares the Context value by reference.
+</p>
+
+<p>
+Every update creates a new object:
+</p>
+
+<pre><code class="language-js">value={{
+  user,
+  theme,
+  cart,
+  notifications
+}}</code></pre>
+
+<p>
+React sees:
+</p>
+
+<pre><code class="language-js">Old Object !== New Object</code></pre>
+
+<p>
+Therefore all consumers are notified.
+</p>
+
+<h2>Visual Example</h2>
+
+<div class="flow">
+Cart Updated
+<br>
+↓
+<br>
+Provider Creates New Value Object
+<br>
+↓
+<br>
+Context Changed
+<br>
+↓
+<br>
+Header Re-renders
+<br>
+↓
+<br>
+ThemePanel Re-renders
+<br>
+↓
+<br>
+Notifications Re-render
+<br>
+↓
+<br>
+Cart Re-renders
+</div>
+
+<p>
+Even though only Cart actually needed updating.
+</p>
+
+<h2>Real Project Example</h2>
+
+<p>
+Suppose our Aadhaar Authentication application stores:
+</p>
+
+<ul>
+<li>User details</li>
+<li>Department</li>
+<li>OTP state</li>
+<li>Theme</li>
+<li>Language</li>
+<li>Authentication status</li>
+<li>Error popup state</li>
+</ul>
+
+<p>
+inside one Context.
+</p>
+
+<p>
+When OTP changes:
+</p>
+
+<pre><code class="language-js">setOtp('123456');</code></pre>
+
+<p>
+All components consuming the Context may re-render:
+</p>
+
+<ul>
+<li>Header</li>
+<li>Department panel</li>
+<li>Language selector</li>
+<li>Error popup</li>
+<li>Theme panel</li>
+</ul>
+
+<div class="warning">
+Most of these renders are wasted renders.
+</div>
+
+<h2>Better Approach - Split Contexts</h2>
+
+<p>
+Create multiple contexts based on responsibility.
+</p>
+
+<pre><code class="language-js">const UserContext = createContext();
+const ThemeContext = createContext();
+const CartContext = createContext();
+const NotificationContext = createContext();</code></pre>
+
+<div class="flow">
+User Context
+<br>
+Theme Context
+<br>
+Cart Context
+<br>
+Notification Context
+<br>
+↓
+<br>
+Only Relevant Consumers Re-render
+</div>
+
+<h2>Example</h2>
+
+<pre><code class="language-js">function Header() {
+  const user = useContext(UserContext);
+
+  return &lt;h2&gt;{user.name}&lt;/h2&gt;;
+}</code></pre>
+
+<pre><code class="language-js">function Cart() {
+  const cart = useContext(CartContext);
+
+  return &lt;h2&gt;{cart.length}&lt;/h2&gt;;
+}</code></pre>
+
+<p>
+Now:
+</p>
+
+<pre><code class="language-js">setCart([...cart, product]);</code></pre>
+
+<div class="success">
+Only CartContext consumers re-render.
+</div>
+
+<h2>Can React.memo Fix This?</h2>
+
+<p>
+Many developers think:
+</p>
+
+<pre><code class="language-js">export default React.memo(Header);</code></pre>
+
+<p>
+will solve the problem.
+</p>
+
+<p>
+Unfortunately:
+</p>
+
+<div class="warning">
+React.memo does not stop re-renders caused by Context updates.
+</div>
+
+<p>
+If a component consumes Context:
+</p>
+
+<pre><code class="language-js">const { user } = useContext(AppContext);</code></pre>
+
+<p>
+it will re-render whenever the Context value changes.
+</p>
+
+<h2>Can useMemo Help?</h2>
+
+<p>
+You can memoize the Provider value:
+</p>
+
+<pre><code class="language-js">const value = useMemo(() => ({
+  user,
+  theme,
+  cart
+}), [user, theme, cart]);</code></pre>
+
+<p>
+This prevents unnecessary Provider updates.
+</p>
+
+<p>
+However:
+</p>
+
+<div class="warning">
+When cart changes, all consumers still receive the new Context value.
+</div>
+
+<p>
+So splitting Contexts is usually the better solution.
+</p>
+
+<h2>When Is One Context Acceptable?</h2>
+
+<p>
+One Context is usually fine when data changes rarely.
+</p>
+
+<p>
+Examples:
+</p>
+
+<ul>
+<li>Theme</li>
+<li>Language</li>
+<li>Application settings</li>
+</ul>
+
+<p>
+Because these values do not update frequently.
+</p>
+
+<h2>When Should You Split Contexts?</h2>
+
+<table>
+<tr>
+<th>State Type</th>
+<th>Separate Context?</th>
+</tr>
+
+<tr>
+<td>User</td>
+<td>Yes</td>
+</tr>
+
+<tr>
+<td>Cart</td>
+<td>Yes</td>
+</tr>
+
+<tr>
+<td>Notifications</td>
+<td>Yes</td>
+</tr>
+
+<tr>
+<td>Theme</td>
+<td>Usually Yes</td>
+</tr>
+
+<tr>
+<td>Language</td>
+<td>Usually Yes</td>
+</tr>
+
+<tr>
+<td>Frequently Changing Data</td>
+<td>Definitely Yes</td>
+</tr>
+</table>
+
+<h2>Important Interview Points</h2>
+
+<ul>
+<li>One large Context causes unnecessary re-renders.</li>
+<li>All consumers are notified when Context value changes.</li>
+<li>Context updates bypass React.memo.</li>
+<li>Frequently changing state should be separated.</li>
+<li>Split Contexts by responsibility.</li>
+<li>Use Context for global state, but avoid putting everything into one Context.</li>
+<li>Large applications often use multiple Contexts or state management libraries.</li>
+</ul>
+
+<h2>Short Interview Answer</h2>
+
+<div class="highlight">
+The main problem with putting everything in one Context is that every consumer re-renders whenever any part of the Context value changes. This causes unnecessary renders and performance issues in large applications. The recommended solution is to split state into multiple Contexts based on responsibility.
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+One large Context causes all consumers to re-render on every Context update, leading to unnecessary renders and performance problems.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+
+</body>
+</html>

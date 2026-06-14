@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>243 - What is Axios and How Does It Differ From Fetch?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px;margin-bottom:10px}
+p{color:#cbd5e1}
+ul{padding-left:24px}
+li{margin-bottom:10px;color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left;vertical-align:top}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px;margin-top:15px}
+.warning{background:#1e1b4b;border-left:5px solid #fbbf24;padding:18px;border-radius:10px;margin-top:15px}
+.success{background:#052e16;padding:18px;border-left:5px solid #22c55e;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;margin-top:15px;text-align:center;line-height:2;font-size:18px}
+pre{border-radius:12px;overflow-x:auto}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>243. What is Axios and How Does It Differ From Fetch?</h1>
+
+<h2>One-Line Definition</h2>
+
+<div class="highlight">
+Axios is a popular third-party HTTP client library used to make API requests in JavaScript applications.
+<br><br>
+fetch is the built-in browser API used for making HTTP requests.
+</div>
+
+<h2>Why Are They Used?</h2>
+
+<p>
+Both Axios and fetch allow our application to communicate with backend APIs.
+</p>
+
+<ul>
+<li>Call REST APIs</li>
+<li>Send GET, POST, PUT, DELETE requests</li>
+<li>Send request data to servers</li>
+<li>Receive response data from servers</li>
+</ul>
+
+<h3>Common API Request Types</h3>
+
+<pre><code class="language-jsx">GET /users
+POST /login
+PUT /profile
+DELETE /cart/1</code></pre>
+
+<h2>Fetch Example</h2>
+
+<pre><code class="language-jsx">fetch('/api/users')
+  .then(response =&gt; response.json())
+  .then(data =&gt; console.log(data))
+  .catch(error =&gt; console.log(error));</code></pre>
+
+<h2>Axios Example</h2>
+
+<pre><code class="language-jsx">import axios from 'axios';
+
+axios.get('/api/users')
+  .then(response =&gt; console.log(response.data))
+  .catch(error =&gt; console.log(error));</code></pre>
+
+<div class="success">
+Axios gives response data directly inside response.data, while fetch requires response.json().
+</div>
+
+<h2>Main Differences</h2>
+
+<table>
+<tr>
+<th>Feature</th>
+<th>Fetch</th>
+<th>Axios</th>
+</tr>
+
+<tr>
+<td>Installation Required</td>
+<td>No</td>
+<td>Yes, npm install axios</td>
+</tr>
+
+<tr>
+<td>Built Into Browser</td>
+<td>Yes</td>
+<td>No</td>
+</tr>
+
+<tr>
+<td>Automatic JSON Parsing</td>
+<td>No</td>
+<td>Yes</td>
+</tr>
+
+<tr>
+<td>Request Timeout</td>
+<td>Manual</td>
+<td>Built-in</td>
+</tr>
+
+<tr>
+<td>Request Interceptors</td>
+<td>No</td>
+<td>Yes</td>
+</tr>
+
+<tr>
+<td>Response Interceptors</td>
+<td>No</td>
+<td>Yes</td>
+</tr>
+
+<tr>
+<td>Error Handling</td>
+<td>Less convenient</td>
+<td>More convenient</td>
+</tr>
+
+<tr>
+<td>Request Cancellation</td>
+<td>Possible, but more manual</td>
+<td>Easier</td>
+</tr>
+
+<tr>
+<td>Upload Progress</td>
+<td>More work</td>
+<td>Built-in support</td>
+</tr>
+</table>
+
+<h2>JSON Parsing Difference</h2>
+
+<h3>Fetch</h3>
+
+<p>
+In fetch, we must manually convert the response into JSON.
+</p>
+
+<pre><code class="language-jsx">const response = await fetch('/api/users');
+const data = await response.json();</code></pre>
+
+<h3>Axios</h3>
+
+<p>
+Axios automatically parses JSON response data.
+</p>
+
+<pre><code class="language-jsx">const response = await axios.get('/api/users');
+const data = response.data;</code></pre>
+
+<h2>Error Handling Difference</h2>
+
+<h3>Fetch</h3>
+
+<p>
+Fetch only throws an error for network failures. Even if the API returns 404, 401, or 500, fetch does not automatically go to catch.
+</p>
+
+<pre><code class="language-jsx">const response = await fetch('/users');
+
+if (!response.ok) {
+  throw new Error('Request Failed');
+}
+
+const data = await response.json();</code></pre>
+
+<div class="warning">
+With fetch, we usually need to manually check response.ok.
+</div>
+
+<h3>Axios</h3>
+
+<p>
+Axios automatically treats failed HTTP status codes like 404, 401, and 500 as errors.
+</p>
+
+<pre><code class="language-jsx">try {
+  await axios.get('/users');
+} catch (error) {
+  console.log(error.response.status);
+}</code></pre>
+
+<div class="success">
+Axios error handling is easier in real projects because failed status codes go directly into catch.
+</div>
+
+<h2>Interceptors in Axios</h2>
+
+<p>
+Axios can run code before every request and after every response.
+</p>
+
+<pre><code class="language-jsx">axios.interceptors.request.use(config =&gt; {
+  config.headers.Authorization = `Bearer ${token}`;
+  return config;
+});</code></pre>
+
+<p>
+Interceptors are useful for:
+</p>
+
+<ul>
+<li>Adding JWT tokens</li>
+<li>Authentication handling</li>
+<li>Logging requests</li>
+<li>Handling global API errors</li>
+<li>Refreshing expired tokens</li>
+</ul>
+
+<h2>Timeout Difference</h2>
+
+<h3>Fetch</h3>
+
+<p>
+Fetch needs extra code for timeout.
+</p>
+
+<pre><code class="language-jsx">const controller = new AbortController();
+
+setTimeout(() =&gt; {
+  controller.abort();
+}, 5000);
+
+fetch('/users', {
+  signal: controller.signal
+});</code></pre>
+
+<h3>Axios</h3>
+
+<p>
+Axios has timeout support built in.
+</p>
+
+<pre><code class="language-jsx">axios.get('/users', {
+  timeout: 5000
+});</code></pre>
+
+<h2>React Example Using Axios</h2>
+
+<pre><code class="language-jsx">import { useEffect, useState } from 'react';
+import axios from 'axios';
+
+function Users() {
+  const [users, setUsers] = useState([]);
+
+  useEffect(() =&gt; {
+    axios.get('/api/users')
+      .then(res =&gt; setUsers(res.data))
+      .catch(err =&gt; console.log(err));
+  }, []);
+
+  return (
+    &lt;ul&gt;
+      {users.map(user =&gt; &lt;li key={user.id}&gt;{user.name}&lt;/li&gt;)}
+    &lt;/ul&gt;
+  );
+}
+
+export default Users;</code></pre>
+
+<section class="content-section">
+  <div class="section-header">
+    <span class="section-badge">Axios URL</span>
+    <h2>Frontend Port 3000 and Backend Port 4000</h2>
+  </div>
+
+  <div class="section-content">
+    <p>Suppose our React frontend is running on:</p>
+
+    <pre><code class="language-text">http://localhost:3000</code></pre>
+
+    <p>And our backend API is running on:</p>
+
+    <pre><code class="language-text">http://localhost:4000</code></pre>
+
+    <p>If we write:</p>
+
+    <pre><code class="language-js">axios.get('/api/users');</code></pre>
+
+    <p>
+      Then Axios will call the frontend origin, because
+      <code>/api/users</code> is a relative URL.
+    </p>
+
+    <div class="note-box warning">
+      <strong>Important:</strong>
+      It will call <code>http://localhost:3000/api/users</code>,
+      not <code>http://localhost:4000/api/users</code>.
+    </div>
+
+    <pre><code class="language-text">axios.get('/api/users')
+↓
+http://localhost:3000/api/users</code></pre>
+
+    <h3>Option 1: Use Full Backend URL</h3>
+
+    <pre><code class="language-js">axios.get('http://localhost:4000/api/users');</code></pre>
+
+    <p>This directly calls the backend server.</p>
+
+    <h3>Option 2: Configure Axios Base URL</h3>
+
+    <pre><code class="language-js">import axios from 'axios';
+
+const api = axios.create({
+  baseURL: 'http://localhost:4000'
+});
+
+export default api;</code></pre>
+
+    <p>Now call API like this:</p>
+
+    <pre><code class="language-js">api.get('/api/users');</code></pre>
+
+    <p>Axios will convert it to:</p>
+
+    <pre><code class="language-text">http://localhost:4000/api/users</code></pre>
+
+    <h3>Option 3: Use Proxy in Development</h3>
+
+    <p>
+      In development, we can configure a proxy so our frontend dev server
+      forwards API requests to the backend.
+    </p>
+
+    <pre><code class="language-json">{
+  "proxy": "http://localhost:4000"
+}</code></pre>
+
+    <p>Then this code:</p>
+
+    <pre><code class="language-js">axios.get('/api/users');</code></pre>
+
+    <p>Works like this:</p>
+
+    <pre><code class="language-text">Browser
+↓
+localhost:3000/api/users
+↓
+React Dev Server Proxy
+↓
+localhost:4000/api/users</code></pre>
+
+    <div class="note-box info">
+      Browser thinks it called port <code>3000</code>,
+      but the dev server forwards the request to port <code>4000</code>.
+    </div>
+
+    <h3>How To Check?</h3>
+
+    <p>Open browser DevTools → Network tab.</p>
+
+    <ul>
+      <li>
+        If you see <code>http://localhost:3000/api/users</code>,
+        then relative URL is being used.
+      </li>
+      <li>
+        If you see <code>http://localhost:4000/api/users</code>,
+        then backend is being called directly.
+      </li>
+    </ul>
+
+    <div class="interview-box">
+      <h4>Interview Answer</h4>
+      <p>
+        <code>axios.get('/api/users')</code> uses the current website origin.
+        If frontend and backend run on different ports, we need full backend URL,
+        Axios <code>baseURL</code>, or development proxy.
+      </p>
+    </div>
+  </div>
+</section>
+
+<h2>Which One Should You Use?</h2>
+
+<h3>Use Fetch When</h3>
+
+<ul>
+<li>Our project is small.</li>
+<li>We do not want an extra dependency.</li>
+<li>We only need basic API calls.</li>
+<li>We are comfortable handling JSON and errors manually.</li>
+</ul>
+
+<h3>Use Axios When</h3>
+
+<ul>
+<li>Our project is medium or large.</li>
+<li>We need authentication tokens.</li>
+<li>We need interceptors.</li>
+<li>We need better error handling.</li>
+<li>We need timeout support.</li>
+<li>We want cleaner API request code.</li>
+</ul>
+
+<div class="flow">
+Small Project
+<br>↓<br>
+fetch is enough
+<br><br>
+Large Project with Auth / Interceptors / Timeout
+<br>↓<br>
+Axios is more convenient
+</div>
+
+<h2>Important Interview Points</h2>
+
+<ul>
+<li>fetch is built into browsers.</li>
+<li>Axios is a third-party HTTP client library.</li>
+<li>Axios automatically parses JSON.</li>
+<li>Axios automatically throws errors for failed HTTP status codes.</li>
+<li>Axios supports request and response interceptors.</li>
+<li>Axios has built-in timeout support.</li>
+<li>fetch requires more manual code for common networking tasks.</li>
+</ul>
+
+<h2>Short Interview Answer</h2>
+
+<div class="highlight">
+Axios is a third-party HTTP client library, while fetch is the browser's built-in API for making HTTP requests. Axios provides automatic JSON parsing, better error handling, interceptors, request cancellation, and timeout support, whereas fetch requires more manual code for these features.
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+Axios is a feature-rich HTTP client library, whereas fetch is the browser's native API that requires more manual handling for common networking tasks.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+
+</body>
+</html>

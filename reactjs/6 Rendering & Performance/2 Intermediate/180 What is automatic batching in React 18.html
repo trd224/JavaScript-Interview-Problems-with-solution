@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>180 - What is Automatic Batching in React 18?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px;margin-bottom:10px}
+p{color:#cbd5e1}
+ul{padding-left:24px}
+li{margin-bottom:10px;color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left;vertical-align:top}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px;margin-top:15px}
+.warning{background:#1e1b4b;border-left:5px solid #fbbf24;padding:18px;border-radius:10px;margin-top:15px}
+.success{background:#052e16;padding:18px;border-left:5px solid #22c55e;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;margin-top:15px;text-align:center;line-height:2;font-size:18px}
+pre{border-radius:12px;overflow-x:auto}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>180. What is Automatic Batching in React 18?</h1>
+
+<h2>One-Line Definition</h2>
+
+<div class="highlight">
+Automatic Batching is a React 18 feature that groups multiple state updates into a single re-render to improve performance.
+</div>
+
+<h2>What Problem Does It Solve?</h2>
+
+<p>
+Every time state changes, React normally re-renders the component.
+</p>
+
+<p>
+Consider:
+</p>
+
+<pre><code class="language-jsx">setCount(c => c + 1);
+
+setName('Rizwan');</code></pre>
+
+<p>
+Without batching:
+</p>
+
+<div class="flow">
+setCount()
+<br>
+↓
+Render #1
+
+<br><br>
+
+setName()
+<br>
+↓
+Render #2
+</div>
+
+<p>
+Two state updates cause two renders.
+</p>
+
+<p>
+This is inefficient.
+</p>
+
+<div class="warning">
+Multiple renders mean extra work for React.
+</div>
+
+<h2>What Is Batching?</h2>
+
+<p>
+Batching means React groups multiple state updates together and performs only one render.
+</p>
+
+<div class="flow">
+setCount()
+<br>
++
+<br>
+setName()
+
+<br><br>
+
+Grouped Together
+<br>
+↓
+<br>
+Single Render
+</div>
+
+<div class="success">
+Fewer renders = better performance.
+</div>
+
+<h2>Example</h2>
+
+<pre><code class="language-jsx">function App() {
+
+  const [count, setCount] = useState(0);
+
+  const [name, setName] = useState('');
+
+  function handleClick() {
+
+    setCount(c => c + 1);
+
+    setName('Rizwan');
+
+  }
+
+}</code></pre>
+
+<p>
+React combines both updates:
+</p>
+
+<pre><code class="language-jsx">setCount(...)
+
+setName(...)</code></pre>
+
+<p>
+into:
+</p>
+
+<pre><code>One Render</code></pre>
+<div class="success">
+before React 18 batching mainly happened when updates occurred in the same React event.
+</div>
+
+
+<h2>Before React 18</h2>
+
+<p>
+React only batched updates inside React event handlers.
+</p>
+
+<h3>React Event Handler</h3>
+
+<pre><code class="language-jsx">function handleClick() {
+
+  setCount(c => c + 1);
+
+  setName('Rizwan');
+
+}</code></pre>
+
+<p>
+This was batched.
+</p>
+
+<div class="success">
+React 17:
+One render.
+</div>
+
+<h3>But Inside setTimeout</h3>
+
+<pre><code class="language-jsx">setTimeout(() => {
+
+  setCount(c => c + 1);
+
+  setName('Rizwan');
+
+}, 1000);</code></pre>
+
+<p>
+React 17 did NOT batch these updates.
+</p>
+
+<div class="flow">
+setCount()
+<br>
+↓
+Render #1
+
+<br><br>
+
+setName()
+<br>
+↓
+Render #2
+</div>
+
+<div class="warning">
+React 17 only batched inside React event handlers.
+</div>
+
+<h2>React 18 Automatic Batching</h2>
+
+<p>
+React 18 automatically batches updates almost everywhere.
+</p>
+
+<ul>
+<li>Click handlers</li>
+<li>setTimeout</li>
+<li>setInterval</li>
+<li>Promises</li>
+<li>fetch callbacks</li>
+<li>Async functions</li>
+<li>Native event listeners</li>
+</ul>
+
+<h3>Example</h3>
+
+<pre><code class="language-jsx">setTimeout(() => {
+
+  setCount(c => c + 1);
+
+  setName('Rizwan');
+
+}, 1000);</code></pre>
+
+<p>
+React 18 batches them:
+</p>
+
+<div class="flow">
+setCount()
+<br>
++
+<br>
+setName()
+
+<br><br>
+
+Single Render
+</div>
+
+<h2>Promise Example</h2>
+
+<pre><code class="language-jsx">fetch('/users')
+
+  .then(() => {
+
+    setCount(c => c + 1);
+
+    setName('Rizwan');
+
+  });</code></pre>
+
+<p>
+React 17:
+</p>
+
+<pre><code>Two Renders</code></pre>
+
+<p>
+React 18:
+</p>
+
+<pre><code>One Render</code></pre>
+
+<h2>How Does React Know?</h2>
+
+<p>
+React waits until the current task finishes.
+</p>
+
+<p>
+Then it combines all pending state updates and performs one render.
+</p>
+
+<div class="flow">
+State Update
+<br>
++
+<br>
+State Update
+<br>
++
+<br>
+State Update
+
+<br><br>
+
+React Waits
+<br>
+↓
+<br>
+Batch Updates
+<br>
+↓
+<br>
+Single Render
+</div>
+
+<h2>Real Example With Console</h2>
+
+<pre><code class="language-jsx">function App() {
+
+  const [count, setCount] = useState(0);
+
+  const [name, setName] = useState('');
+
+  console.log('Rendered');
+
+  function handleClick() {
+
+    setCount(c => c + 1);
+
+    setName('Rizwan');
+
+  }
+
+}</code></pre>
+
+<p>
+When clicked:
+</p>
+
+<pre><code>Rendered</code></pre>
+
+<p>
+appears only once.
+</p>
+
+<h2>Can We Disable Batching?</h2>
+
+<p>
+Yes.
+</p>
+
+<p>
+React provides:
+</p>
+
+<pre><code class="language-jsx">flushSync()</code></pre>
+
+<p>
+Example:
+</p>
+
+<pre><code class="language-jsx">import { flushSync } from 'react-dom';
+
+flushSync(() => {
+  setCount(c => c + 1);
+});
+
+flushSync(() => {
+  setName('Rizwan');
+});</code></pre>
+
+<p>
+Now React renders immediately after each update.
+</p>
+
+<div class="warning">
+Use flushSync only when absolutely necessary.
+</div>
+
+<h2>Before vs After React 18</h2>
+
+<table>
+<tr>
+<th>React 17</th>
+<th>React 18</th>
+</tr>
+
+<tr>
+<td>Batched only in React events.</td>
+<td>Batched almost everywhere.</td>
+</tr>
+
+<tr>
+<td>setTimeout not batched.</td>
+<td>setTimeout batched.</td>
+</tr>
+
+<tr>
+<td>Promises not batched.</td>
+<td>Promises batched.</td>
+</tr>
+
+<tr>
+<td>More renders.</td>
+<td>Fewer renders.</td>
+</tr>
+
+<tr>
+<td>Lower performance.</td>
+<td>Better performance.</td>
+</tr>
+</table>
+
+<h2>Relationship With Concurrent Rendering</h2>
+
+<p>
+Concurrent Rendering and Automatic Batching were both introduced in React 18.
+</p>
+
+<p>
+Concurrent Rendering focuses on:
+</p>
+
+<pre><code>Prioritizing Work</code></pre>
+
+<p>
+Automatic Batching focuses on:
+</p>
+
+<pre><code>Reducing Renders</code></pre>
+
+<h2>Easy Way To Remember</h2>
+
+<div class="flow">
+Many State Updates
+<br>
+↓
+<br>
+React Groups Them
+<br>
+↓
+<br>
+One Render
+<br>
+↓
+<br>
+Better Performance
+</div>
+
+<h2>Important Interview Points</h2>
+
+<ul>
+<li>Introduced in React 18.</li>
+<li>Groups multiple state updates into one render.</li>
+<li>Works in timeouts, promises, async functions, and events.</li>
+<li>Reduces unnecessary renders.</li>
+<li>Improves performance automatically.</li>
+<li>Can be bypassed using flushSync().</li>
+</ul>
+
+<h2>Short Interview Answer</h2>
+
+<div class="highlight">
+Automatic Batching is a React 18 optimization that groups multiple state updates into a single render, reducing unnecessary rendering and improving performance.
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+Automatic Batching combines multiple state updates into one render to make React applications faster.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+
+</body>
+</html>

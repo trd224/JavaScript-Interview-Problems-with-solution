@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>200 - What causes wasted renders and how do you find them with DevTools?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px;margin-bottom:10px}
+p{color:#cbd5e1}
+ul{padding-left:24px}
+li{margin-bottom:10px;color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left;vertical-align:top}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px;margin-top:15px}
+.warning{background:#1e1b4b;border-left:5px solid #fbbf24;padding:18px;border-radius:10px;margin-top:15px}
+.success{background:#052e16;padding:18px;border-left:5px solid #22c55e;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;margin-top:15px;text-align:center;line-height:2;font-size:18px}
+pre{border-radius:12px;overflow-x:auto}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>200. What causes wasted renders and how do you find them with DevTools?</h1>
+
+<h2>One-Line Definition</h2>
+
+<div class="highlight">
+A wasted render happens when a component renders again even though its visible output has not changed.
+</div>
+
+<h2>What Is a Wasted Render?</h2>
+
+<p>
+React rendering itself is not bad.
+</p>
+
+<p>
+React is designed to re-render when state or props change.
+</p>
+
+<p>
+The problem occurs when a component re-renders but produces exactly the same UI as before.
+</p>
+
+<div class="warning">
+React spent time rendering, but the user sees no actual change.
+</div>
+
+<h2>Simple Example</h2>
+
+<pre><code class="language-js">function Parent() {
+
+  const [count, setCount] = useState(0);
+
+  return (
+    &lt;&gt;
+      &lt;button onClick={() => setCount(count + 1)}&gt;
+        Increment
+      &lt;/button&gt;
+
+      &lt;Child /&gt;
+    &lt;/&gt;
+  );
+}
+
+function Child() {
+  console.log('Child Rendered');
+
+  return &lt;h2&gt;Child Component&lt;/h2&gt;;
+}</code></pre>
+
+<p>
+Every time count changes:
+</p>
+
+<ul>
+<li>Parent renders.</li>
+<li>Child renders.</li>
+</ul>
+
+<p>
+But Child does not use count.
+</p>
+
+<div class="warning">
+Child rendered unnecessarily. This is a wasted render.
+</div>
+
+<h2>Common Causes of Wasted Renders</h2>
+
+<table>
+<tr>
+<th>Cause</th>
+<th>Description</th>
+</tr>
+
+<tr>
+<td>Parent Re-render</td>
+<td>Child re-renders because parent rendered.</td>
+</tr>
+
+<tr>
+<td>New Object References</td>
+<td>Objects created on every render appear different.</td>
+</tr>
+
+<tr>
+<td>New Array References</td>
+<td>Arrays recreated on every render trigger updates.</td>
+</tr>
+
+<tr>
+<td>Inline Functions</td>
+<td>New function reference created every render.</td>
+</tr>
+
+<tr>
+<td>Context Updates</td>
+<td>All consumers may re-render when context changes.</td>
+</tr>
+
+<tr>
+<td>Incorrect State Placement</td>
+<td>State stored too high causes large tree re-renders.</td>
+</tr>
+</table>
+
+<h2>Cause 1 - Parent Re-render</h2>
+
+<pre><code class="language-js">function Parent() {
+
+  const [count, setCount] = useState(0);
+
+  return (
+    &lt;&gt;
+      &lt;button onClick={() => setCount(count + 1)}&gt;
+        Increment
+      &lt;/button&gt;
+
+      &lt;Child /&gt;
+    &lt;/&gt;
+  );
+}</code></pre>
+
+<p>
+Whenever Parent renders, Child renders too.
+</p>
+
+<h3>Fix</h3>
+
+<pre><code class="language-js">const Child = React.memo(function Child() {
+  return &lt;h2&gt;Child Component&lt;/h2&gt;;
+});</code></pre>
+
+<div class="success">
+React.memo skips rendering if props have not changed.
+</div>
+
+<h2>Cause 2 - Inline Functions</h2>
+
+<pre><code class="language-js">function Parent() {
+
+  return (
+    &lt;Child
+      onClick={() => console.log('Clicked')}
+    /&gt;
+  );
+}</code></pre>
+
+<p>
+Every render creates a brand-new function.
+</p>
+
+<p>
+React sees a new prop value.
+</p>
+
+<p>
+Child renders again.
+</p>
+
+<h3>Fix With useCallback</h3>
+
+<pre><code class="language-js">const handleClick = useCallback(() => {
+  console.log('Clicked');
+}, []);
+
+&lt;Child onClick={handleClick} /&gt;</code></pre>
+
+<div class="success">
+Function reference remains stable between renders.
+</div>
+
+<h2>Cause 3 - New Object References</h2>
+
+<pre><code class="language-js">function Parent() {
+
+  const settings = {
+    theme: 'dark'
+  };
+
+  return (
+    &lt;Child settings={settings} /&gt;
+  );
+}</code></pre>
+
+<p>
+settings is recreated every render.
+</p>
+
+<p>
+React sees a new object reference.
+</p>
+
+<h3>Fix With useMemo</h3>
+
+<pre><code class="language-js">const settings = useMemo(() => {
+  return {
+    theme: 'dark'
+  };
+}, []);</code></pre>
+
+<p>We are using useMemo here because useCallback is for functions, while useMemo is for values (objects, arrays, calculations).
+
+Your example creates an object, not a function:</p>
+
+<h2>Cause 4 - New Array References</h2>
+
+<pre><code class="language-js">const users = [
+  'Rizwan',
+  'Ali',
+  'Ahmed'
+];
+
+&lt;UserList users={users} /&gt;</code></pre>
+
+<p>
+A new array is created on every render.
+</p>
+
+<h3>Fix</h3>
+
+<pre><code class="language-js">const users = useMemo(() => {
+  return [
+    'Rizwan',
+    'Ali',
+    'Ahmed'
+  ];
+}, []);</code></pre>
+
+<h2>Cause 5 - Context Updates</h2>
+
+<pre><code class="language-js">const value = {
+  user,
+  theme
+};
+
+&lt;AppContext.Provider value={value}&gt;
+  &lt;Dashboard /&gt;
+&lt;/AppContext.Provider&gt;</code></pre>
+
+<p>
+If value changes:
+</p>
+
+<ul>
+<li>All context consumers can re-render.</li>
+</ul>
+
+<div class="warning">
+Large contexts often cause unnecessary re-renders.
+</div>
+
+<h3>Possible Fixes</h3>
+
+<ul>
+<li>Split context into smaller contexts.</li>
+<li>Memoize context value.</li>
+<li>Use selector-based state management.</li>
+</ul>
+
+<section class="content-section">
+
+  <h2>Cause 5 - Context Updates</h2>
+
+  <div class="definition-box">
+    <strong>Problem:</strong> When a Context value changes, every component consuming that Context can re-render, even if it only uses a small part of the data.
+  </div>
+
+  <pre><code class="language-js">const value = {
+  user,
+  theme
+};
+
+&lt;AppContext.Provider value={value}&gt;
+  &lt;Dashboard /&gt;
+&lt;/AppContext.Provider&gt;</code></pre>
+
+  <p>
+    If <code>value</code> changes, all context consumers can re-render.
+    Large contexts often cause unnecessary re-renders.
+  </p>
+
+  <h3>Possible Fixes</h3>
+
+  <ul>
+    <li>Split Context Into Smaller Contexts</li>
+    <li>Memoize Context Value</li>
+    <li>Use Selector-Based State Management</li>
+  </ul>
+
+  
+
+  <h2>1. Split Context Into Smaller Contexts</h2>
+
+  <p>
+    Instead of storing unrelated data inside one large context, create separate contexts.
+  </p>
+
+  <h3>Problem Example</h3>
+
+  <pre><code class="language-js">const AppContext = createContext();
+
+function AppProvider({ children }) {
+
+  const [user, setUser] = useState('Rizwan');
+  const [theme, setTheme] = useState('dark');
+
+  return (
+    &lt;AppContext.Provider value={{ user, theme }}&gt;
+      {children}
+    &lt;/AppContext.Provider&gt;
+  );
+
+}</code></pre>
+
+  <pre><code class="language-js">function UserProfile() {
+
+  const { user } = useContext(AppContext);
+
+  return &lt;h1&gt;{user}&lt;/h1&gt;;
+
+}</code></pre>
+
+  <pre><code class="language-js">function ThemeButton() {
+
+  const { theme } = useContext(AppContext);
+
+  return &lt;button&gt;{theme}&lt;/button&gt;;
+
+}</code></pre>
+
+  <div class="important">
+    If <code>theme</code> changes, both components can re-render because they are subscribed to the same context.
+  </div>
+
+  <h3>Better Solution</h3>
+
+  <pre><code class="language-js">const UserContext = createContext();
+const ThemeContext = createContext();
+
+function AppProvider({ children }) {
+
+  const [user, setUser] = useState('Rizwan');
+  const [theme, setTheme] = useState('dark');
+
+  return (
+    &lt;UserContext.Provider value={user}&gt;
+      &lt;ThemeContext.Provider value={theme}&gt;
+        {children}
+      &lt;/ThemeContext.Provider&gt;
+    &lt;/UserContext.Provider&gt;
+  );
+
+}</code></pre>
+
+  <pre><code class="language-js">function UserProfile() {
+
+  const user = useContext(UserContext);
+
+  return &lt;h1&gt;{user}&lt;/h1&gt;;
+
+}</code></pre>
+
+  <pre><code class="language-js">function ThemeButton() {
+
+  const theme = useContext(ThemeContext);
+
+  return &lt;button&gt;{theme}&lt;/button&gt;;
+
+}</code></pre>
+
+  <div class="tip">
+    Now changing theme only re-renders theme consumers. User consumers remain unaffected.
+  </div>
+
+  <hr>
+
+  <h2>2. Memoize Context Value</h2>
+
+  <p>
+    Every render creates a new object reference.
+  </p>
+
+  <pre><code class="language-js">const value = {
+  user,
+  theme
+};</code></pre>
+
+  <div class="important">
+    Even if user and theme remain the same, the object reference is new on every render.
+  </div>
+
+  <h3>Fix With useMemo</h3>
+
+  <pre><code class="language-js">const value = useMemo(() => {
+  return {
+    user,
+    theme
+  };
+}, [user, theme]);
+
+return (
+  &lt;AppContext.Provider value={value}&gt;
+    {children}
+  &lt;/AppContext.Provider&gt;
+);</code></pre>
+
+  <h3>Short Version</h3>
+
+  <pre><code class="language-js">const value = useMemo(
+  () => ({ user, theme }),
+  [user, theme]
+);</code></pre>
+
+  <div class="tip">
+    If the parent re-renders but user and theme are unchanged, React reuses the previous object reference.
+  </div>
+
+  <div class="definition-box">
+    <strong>Important:</strong> This optimization only helps when context data has not changed. If user or theme changes, consumers should re-render.
+  </div>
+
+  <hr>
+
+  <h2>3. Selector-Based State Management</h2>
+
+  <p>
+    Instead of subscribing to the entire state object, subscribe only to the piece of state you need.
+  </p>
+
+  <h3>Redux Example</h3>
+
+  <pre><code class="language-js">const user = useSelector(
+  state => state.user
+);
+
+const theme = useSelector(
+  state => state.theme
+);</code></pre>
+
+  <pre><code class="language-js">function UserProfile() {
+
+  const user = useSelector(
+    state => state.user
+  );
+
+  return &lt;h1&gt;{user}&lt;/h1&gt;;
+
+}</code></pre>
+
+  <pre><code class="language-js">function ThemeButton() {
+
+  const theme = useSelector(
+    state => state.theme
+  );
+
+  return &lt;button&gt;{theme}&lt;/button&gt;;
+
+}</code></pre>
+
+  <div class="tip">
+    If theme changes, only ThemeButton re-renders. UserProfile does not re-render because its selected state did not change.
+  </div>
+
+  <h3>Zustand Example</h3>
+
+  <pre><code class="language-js">const user = useStore(
+  state => state.user
+);
+
+const theme = useStore(
+  state => state.theme
+);</code></pre>
+
+  <div class="definition-box">
+    Redux and Zustand are efficient because components subscribe to specific slices of state instead of the entire state object.
+  </div>
+
+  <hr>
+
+  <h2>Interview Summary</h2>
+
+  <div class="tip">
+    <strong>Split Context:</strong> Create multiple contexts so unrelated consumers do not re-render.
+  </div>
+
+  <div class="tip">
+    <strong>Memoize Context Value:</strong> Use useMemo to preserve object references between renders.
+  </div>
+
+  <div class="tip">
+    <strong>Selector-Based State Management:</strong> Subscribe only to required state so unrelated changes do not trigger re-renders.
+  </div>
+
+  <h2>Best Order of Optimization</h2>
+
+  <pre><code>1. Split Contexts
+2. Memoize Context Value
+3. Redux / Zustand Selectors</code></pre>
+
+</section>
+<hr>
+
+<h2>How To Find Wasted Renders Using React DevTools</h2>
+
+<h3>Step 1 - Open React DevTools</h3>
+
+<p>
+Install React Developer Tools extension.
+</p>
+
+<p>
+Open browser DevTools.
+</p>
+
+<h2>Step 2 - Open Profiler Tab</h2>
+
+<p>
+Select:
+</p>
+
+<pre><code>Profiler</code></pre>
+
+<p>
+Then click:
+</p>
+
+<pre><code>Start Profiling</code></pre>
+
+<h2>Step 3 - Interact With The Application</h2>
+
+<p>
+Perform the action that feels slow.
+</p>
+
+<p>
+Examples:
+</p>
+
+<ul>
+<li>Type in a search box.</li>
+<li>Open a modal.</li>
+<li>Click a button.</li>
+<li>Navigate between pages.</li>
+</ul>
+
+<h2>Step 4 - Stop Profiling</h2>
+
+<p>
+React DevTools will show:
+</p>
+
+<ul>
+<li>Rendered components.</li>
+<li>Render duration.</li>
+<li>Commit duration.</li>
+<li>Why components rendered.</li>
+</ul>
+
+<h2>Profiler Example</h2>
+
+<table>
+<tr>
+<th>Component</th>
+<th>Render Count</th>
+</tr>
+
+<tr>
+<td>Parent</td>
+<td>10</td>
+</tr>
+
+<tr>
+<td>Child</td>
+<td>10</td>
+</tr>
+</table>
+
+<p>
+If Child does not use changed data:
+</p>
+
+<div class="warning">
+Those 10 renders are likely wasted renders.
+</div>
+
+<h2>Use "Why Did This Render?"</h2>
+
+<p>
+Modern React DevTools can show:
+</p>
+
+<pre><code>Why did this render?</code></pre>
+
+<p>
+Example output:
+</p>
+
+<pre><code>Props changed:
+onClick
+
+Previous:
+ƒ()
+
+Next:
+ƒ()</code></pre>
+
+<p>
+This tells us that a new function reference triggered the render.
+</p>
+
+<div class="success">
+This feature makes finding wasted renders much easier.
+</div>
+
+<h2>Flamegraph View</h2>
+
+<p>
+The Flamegraph shows:
+</p>
+
+<ul>
+<li>Which components rendered.</li>
+<li>Which components took the most time.</li>
+<li>How rendering propagated through the tree.</li>
+</ul>
+
+<div class="highlight">
+Large bars usually indicate expensive renders.
+</div>
+
+<h2>Ranked View</h2>
+
+<p>
+Ranked View sorts components by render cost.
+</p>
+
+<table>
+<tr>
+<th>Component</th>
+<th>Render Time</th>
+</tr>
+
+<tr>
+<td>UserTable</td>
+<td>48ms</td>
+</tr>
+
+<tr>
+<td>Dashboard</td>
+<td>24ms</td>
+</tr>
+
+<tr>
+<td>Header</td>
+<td>1ms</td>
+</tr>
+</table>
+
+<p>
+This helps find expensive components quickly.
+</p>
+
+<h2>Real Project Example</h2>
+
+<p>
+Suppose our Aadhaar Authentication page contains:
+</p>
+
+<ul>
+<li>Aadhaar input.</li>
+<li>Consent section.</li>
+<li>Authentication options.</li>
+<li>Device information.</li>
+<li>Error popup.</li>
+</ul>
+
+<p>
+Typing one digit into Aadhaar input may trigger:
+</p>
+
+<ul>
+<li>Consent section render.</li>
+<li>Device panel render.</li>
+<li>Error popup render.</li>
+<li>Authentication list render.</li>
+</ul>
+
+<div class="warning">
+Most of those renders are wasted because their UI did not change.
+</div>
+
+<p>
+Profiler helps identify them.
+</p>
+
+<p>
+Possible optimizations:
+</p>
+
+<ul>
+<li>React.memo</li>
+<li>useMemo</li>
+<li>useCallback</li>
+<li>Move state closer to where it is used</li>
+<li>Split large components</li>
+</ul>
+
+<h2>How To Reduce Wasted Renders</h2>
+
+<table>
+<tr>
+<th>Problem</th>
+<th>Solution</th>
+</tr>
+
+<tr>
+<td>Parent re-renders</td>
+<td>React.memo</td>
+</tr>
+
+<tr>
+<td>Inline function</td>
+<td>useCallback</td>
+</tr>
+
+<tr>
+<td>New object every render</td>
+<td>useMemo</td>
+</tr>
+
+<tr>
+<td>New array every render</td>
+<td>useMemo</td>
+</tr>
+
+<tr>
+<td>Large context updates</td>
+<td>Split context</td>
+</tr>
+
+<tr>
+<td>State too high</td>
+<td>Move state closer to usage</td>
+</tr>
+</table>
+
+<h2>Visual Flow</h2>
+
+<div class="flow">
+User Action
+<br>
+↓
+<br>
+Component Re-renders
+<br>
+↓
+<br>
+Profiler Records Activity
+<br>
+↓
+<br>
+Check Why Component Rendered
+<br>
+↓
+<br>
+Find Wasted Renders
+<br>
+↓
+<br>
+Apply Optimization
+</div>
+
+<h2>Important Interview Points</h2>
+
+<ul>
+<li>A wasted render occurs when a component renders without changing visible output.</li>
+<li>Common causes are parent renders, new objects, new arrays, inline functions, and context updates.</li>
+<li>React DevTools Profiler helps detect wasted renders.</li>
+<li>"Why did this render?" explains render causes.</li>
+<li>React.memo, useMemo, and useCallback help reduce wasted renders.</li>
+<li>State placement affects render frequency.</li>
+<li>Always measure before optimizing.</li>
+</ul>
+
+<h2>Short Interview Answer</h2>
+
+<div class="highlight">
+Wasted renders occur when components re-render even though their UI does not change. Common causes include parent re-renders, inline functions, recreated objects and arrays, context updates, and poor state placement. React DevTools Profiler helps identify these renders by showing render counts, render durations, and the reasons components rendered.
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+Wasted renders are unnecessary component re-renders, and React DevTools Profiler helps find them by showing when and why components rendered.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+
+</body>
+</html>

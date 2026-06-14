@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>187 - How does react-window implement virtual lists?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px;margin-bottom:10px}
+p{color:#cbd5e1}
+ul{padding-left:24px}
+li{margin-bottom:10px;color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left;vertical-align:top}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px;margin-top:15px}
+.warning{background:#1e1b4b;border-left:5px solid #fbbf24;padding:18px;border-radius:10px;margin-top:15px}
+.success{background:#052e16;padding:18px;border-left:5px solid #22c55e;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;margin-top:15px;text-align:center;line-height:2;font-size:18px}
+pre{border-radius:12px;overflow-x:auto}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>187. How does react-window implement virtual lists?</h1>
+
+<h2>One-Line Definition</h2>
+
+<div class="highlight">
+react-window implements virtual lists by rendering only the visible items and reusing DOM elements as the user scrolls.
+</div>
+
+<h2>The Main Problem</h2>
+
+<p>
+Suppose we have:
+</p>
+
+<pre><code>50,000 Products</code></pre>
+
+<p>
+Without virtualization:
+</p>
+
+<pre><code class="language-jsx">products.map(product =&gt; (
+
+  &lt;ProductCard
+    key={product.id}
+    product={product}
+  /&gt;
+
+));</code></pre>
+
+<p>
+React creates:
+</p>
+
+<pre><code>50,000 Components
+50,000 DOM Elements</code></pre>
+
+<p>
+Even though the user can only see a few rows.
+</p>
+
+<div class="warning">
+Most of those DOM elements are invisible but still consume memory and rendering time.
+</div>
+
+<h2>How react-window Solves It</h2>
+
+<p>
+Instead of rendering all items:
+</p>
+
+<pre><code>
+1
+2
+3
+4
+...
+50000
+</code></pre>
+
+<p>
+It renders only visible items.
+</p>
+
+<p>
+For example:
+</p>
+
+<pre><code>
+101
+102
+103
+104
+105
+106
+107
+108
+</code></pre>
+
+<div class="success">
+Only visible rows exist in the DOM.
+</div>
+
+<h2>The Secret Trick</h2>
+
+<p>
+Many developers ask:
+</p>
+
+<div class="warning">
+If only 8 rows are rendered, how can the scrollbar represent 50,000 rows?
+</div>
+
+<p>
+The answer is:
+</p>
+
+<p>
+react-window creates a huge invisible container.
+</p>
+
+<h2>Example</h2>
+
+<pre><code class="language-jsx">&lt;FixedSizeList
+  height={500}
+  itemSize={50}
+  itemCount={50000}
+/&gt;</code></pre>
+
+<p>
+react-window calculates:
+</p>
+
+<pre><code>
+50000 × 50
+=
+2,500,000px
+</code></pre>
+
+<p>
+Then it creates a container approximately:
+</p>
+
+<pre><code>
+height: 2,500,000px
+</code></pre>
+
+<p>
+The browser thinks:
+</p>
+
+<pre><code>
+Wow, this list is huge.
+</code></pre>
+
+<p>
+So it shows a huge scrollbar.
+</p>
+
+<h2>Visual Structure</h2>
+
+<div class="flow">
+Scrollable Container
+<br>
+↓
+<br>
+Height = 2,500,000px
+<br>
+↓
+<br>
+Huge Scrollbar
+<br>
+↓
+<br>
+Only Visible Rows Rendered
+</div>
+
+<h2>What Happens During Scroll?</h2>
+
+<p>
+Suppose currently visible rows are:
+</p>
+
+<pre><code>
+100
+101
+102
+103
+104
+105
+106
+107
+</code></pre>
+
+<p>
+User scrolls down.
+</p>
+
+<p>
+Now visible rows become:
+</p>
+
+<pre><code>
+108
+109
+110
+111
+112
+113
+114
+115
+</code></pre>
+
+<p>
+react-window:
+</p>
+
+<ul>
+<li>Removes old rows.</li>
+<li>Creates new rows.</li>
+<li>Updates their positions.</li>
+</ul>
+
+<div class="flow">
+Scroll
+<br>
+↓
+<br>
+Remove Old Rows
+<br>
+↓
+<br>
+Create New Rows
+<br>
+↓
+<br>
+Keep DOM Small
+</div>
+
+<h2>The Row Component</h2>
+
+<pre><code class="language-jsx">function Row({ index, style }) {
+
+  return (
+    &lt;div style={style}&gt;
+      Product {index}
+    &lt;/div&gt;
+  );
+
+}</code></pre>
+
+<p>
+Notice:
+</p>
+
+<pre><code class="language-jsx">style={style}</code></pre>
+
+<p>
+This is extremely important.
+</p>
+
+<h2>Why Does style Matter?</h2>
+
+<p>
+react-window sends:
+</p>
+
+<pre><code class="language-jsx">{
+  position: 'absolute',
+  top: 5000,
+  left: 0,
+  width: '100%',
+  height: 50
+}</code></pre>
+
+<p>
+for each row.
+</p>
+
+<p>
+This tells the row where it should appear.
+</p>
+
+<p>
+Without:
+</p>
+
+<pre><code class="language-jsx">style={style}</code></pre>
+
+<p>
+all rows would overlap each other.
+</p>
+
+<div class="warning">
+The style prop is mandatory for virtualization to work correctly.
+</div>
+
+<h2>How Visible Rows Are Calculated</h2>
+
+<p>
+Suppose:
+</p>
+
+<pre><code class="language-jsx">height={500}
+
+itemSize={50}</code></pre>
+
+<p>
+react-window calculates:
+</p>
+
+<pre><code>
+500 / 50
+=
+10 rows
+</code></pre>
+
+<p>
+So roughly:
+</p>
+
+<pre><code>
+10-15 rows
+</code></pre>
+
+<p>
+are rendered instead of:
+</p>
+
+<pre><code>
+50,000 rows
+</code></pre>
+
+<h2>Real Example</h2>
+
+<pre><code class="language-jsx">&lt;FixedSizeList
+  height={500}
+  width={800}
+  itemCount={50000}
+  itemSize={50}
+&gt;
+
+  {Row}
+
+&lt;/FixedSizeList&gt;</code></pre>
+
+<p>
+Internally:
+</p>
+
+<div class="flow">
+50,000 Records
+<br>
+↓
+<br>
+Huge Virtual Height
+<br>
+↓
+<br>
+Render Only Visible Rows
+<br>
+↓
+<br>
+Reuse DOM During Scroll
+</div>
+
+<h2>Why Is It Fast?</h2>
+
+<table>
+<tr>
+<th>Without react-window</th>
+<th>With react-window</th>
+</tr>
+
+<tr>
+<td>50,000 DOM Elements</td>
+<td>10-20 DOM Elements</td>
+</tr>
+
+<tr>
+<td>High Memory Usage</td>
+<td>Low Memory Usage</td>
+</tr>
+
+<tr>
+<td>Slow Initial Render</td>
+<td>Fast Initial Render</td>
+</tr>
+
+<tr>
+<td>Heavy Reconciliation</td>
+<td>Minimal Reconciliation</td>
+</tr>
+</table>
+
+<h2>Easy Way To Remember</h2>
+
+<div class="flow">
+Huge List
+<br>
+↓
+<br>
+Create Fake Tall Container
+<br>
+↓
+<br>
+Show Large Scrollbar
+<br>
+↓
+<br>
+Render Only Visible Rows
+<br>
+↓
+<br>
+Reuse Rows During Scroll
+</div>
+
+<h2>Important Interview Points</h2>
+
+<ul>
+<li>react-window uses list virtualization.</li>
+<li>Only visible items are rendered.</li>
+<li>Creates a large virtual container.</li>
+<li>Uses absolute positioning.</li>
+<li>Provides a style prop for each row.</li>
+<li>Reuses DOM elements during scrolling.</li>
+<li>Greatly improves performance for large lists.</li>
+</ul>
+
+<h2>Short Interview Answer</h2>
+
+<div class="highlight">
+react-window implements virtual lists by creating a large virtual scrollable area while rendering only the rows visible on screen. As the user scrolls, old rows are removed and new rows are rendered, keeping the DOM small and performant.
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+react-window renders only visible rows and reuses DOM elements while maintaining a large virtual scroll area.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+
+</body>
+</html>

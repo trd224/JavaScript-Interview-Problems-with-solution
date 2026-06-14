@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ways to Reuse Functionality Without Custom Hooks</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px;margin-bottom:10px}
+p{color:#cbd5e1}
+ul{padding-left:24px}
+li{margin-bottom:10px;color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px;margin-top:15px}
+.warning{background:#1e1b4b;border-left:5px solid #fbbf24;padding:18px;border-radius:10px;margin-top:15px}
+.success{background:#052e16;padding:18px;border-left:5px solid #22c55e;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;margin-top:15px;text-align:center;line-height:2;font-size:18px}
+pre{border-radius:12px;overflow-x:auto}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>Ways to Reuse Functionality Without Custom Hooks</h1>
+
+<h2>Question</h2>
+
+<div class="highlight">
+What are other ways to reuse the same functionality across multiple React components without using a Custom Hook?
+</div>
+
+<h2>1. Utility Functions</h2>
+
+<p>
+Utility functions are used to reuse pure JavaScript logic.
+</p>
+
+<pre><code class="language-jsx">function calculateTax(amount) {
+  return amount * 0.18;
+}</code></pre>
+
+<p>
+Used for:
+</p>
+
+<ul>
+<li>Calculations</li>
+<li>Formatting</li>
+<li>Validation</li>
+<li>Helper Functions</li>
+</ul>
+
+<div class="warning">
+Utility functions cannot use React hooks like useState or useEffect.
+</div>
+
+<h2>2. Services</h2>
+
+<p>
+Services are used to reuse business logic and API calls.
+</p>
+
+<pre><code class="language-jsx">// userService.js
+
+export async function getUsers() {
+
+  const response =
+    await fetch('/api/users');
+
+  return response.json();
+
+}</code></pre>
+
+<p>
+Used for:
+</p>
+
+<ul>
+<li>API Calls</li>
+<li>Business Logic</li>
+<li>Data Transformation</li>
+<li>Local Storage Access</li>
+<li>Authentication Logic</li>
+</ul>
+
+<div class="success">
+Services are one of the most common patterns used in large React applications.
+</div>
+
+<h2>3. Context API</h2>
+
+<p>
+Context API allows us to share state across multiple components.
+</p>
+
+<pre><code class="language-jsx">&lt;UserContext.Provider
+  value={user}
+&gt;
+  {children}
+&lt;/UserContext.Provider&gt;</code></pre>
+
+<p>
+Usage:
+</p>
+
+<pre><code class="language-jsx">const user =
+  useContext(UserContext);</code></pre>
+
+<p>
+Used for:
+</p>
+
+<ul>
+<li>Authentication</li>
+<li>Theme</li>
+<li>Language</li>
+<li>Shopping Cart</li>
+<li>Global State</li>
+</ul>
+
+<h2>4. Reusable Components</h2>
+
+<p>
+Sometimes functionality can be reused through components.
+</p>
+
+<pre><code class="language-jsx">&lt;Button variant="primary" /&gt;
+
+&lt;Button variant="danger" /&gt;</code></pre>
+
+<p>
+Used for:
+</p>
+
+<ul>
+<li>Buttons</li>
+<li>Forms</li>
+<li>Tables</li>
+<li>Cards</li>
+<li>Modals</li>
+</ul>
+
+<div class="highlight">
+Reusable components allow us to reuse both UI and behavior.
+</div>
+
+<h2>5. Higher Order Components (HOC)</h2>
+
+<p>
+A Higher Order Component wraps another component and adds functionality.
+</p>
+
+<pre><code class="language-jsx">function withLoading(Component) {
+
+  return function(props) {
+
+    if (props.loading) {
+      return &lt;p&gt;Loading...&lt;/p&gt;;
+    }
+
+    return &lt;Component {...props} /&gt;;
+
+  };
+
+}</code></pre>
+
+<p>
+Usage:
+</p>
+
+<pre><code class="language-jsx">const UserPage =
+  withLoading(UserPage);</code></pre>
+
+<div class="warning">
+HOCs were very popular before React Hooks were introduced.
+</div>
+
+<h2>6. Render Props</h2>
+
+<p>
+Render Props allow components to share logic through a function prop.
+</p>
+
+<pre><code class="language-jsx">&lt;DataFetcher
+  render={(data) =&gt; (
+    &lt;UserList data={data} /&gt;
+  )}
+/&gt;</code></pre>
+
+<div class="warning">
+Render Props were also commonly used before Hooks became available.
+</div>
+
+<h2>Comparison Table</h2>
+
+<table>
+<tr>
+<th>Technique</th>
+<th>Purpose</th>
+<th>Can Use Hooks?</th>
+</tr>
+
+<tr>
+<td>Utility Function</td>
+<td>Reuse JavaScript Logic</td>
+<td>❌ No</td>
+</tr>
+
+<tr>
+<td>Service</td>
+<td>Reuse Business Logic & API Calls</td>
+<td>❌ No</td>
+</tr>
+
+<tr>
+<td>Context API</td>
+<td>Share State</td>
+<td>✅ Yes</td>
+</tr>
+
+<tr>
+<td>Reusable Component</td>
+<td>Reuse UI + Behavior</td>
+<td>✅ Yes</td>
+</tr>
+
+<tr>
+<td>HOC</td>
+<td>Reuse Component Logic</td>
+<td>✅ Yes</td>
+</tr>
+
+<tr>
+<td>Render Props</td>
+<td>Reuse Component Logic</td>
+<td>✅ Yes</td>
+</tr>
+
+<tr>
+<td>Custom Hook</td>
+<td>Reuse Hook Logic</td>
+<td>✅ Yes</td>
+</tr>
+
+</table>
+
+<h2>Modern React Architecture</h2>
+
+<div class="flow">
+Service
+<br>↓<br>
+Business Logic / API Calls
+<br><br>
+
+Custom Hook
+<br>↓<br>
+React State + Effects
+<br><br>
+
+Component
+<br>↓<br>
+UI Rendering
+</div>
+
+<h3>Example Structure</h3>
+
+<pre><code class="language-text">src
+
+├── services
+│   └── userService.js
+
+├── hooks
+│   └── useUsers.js
+
+├── pages
+│   └── UsersPage.jsx</code></pre>
+
+<div class="success">
+In modern React applications, Services and Custom Hooks usually work together rather than replacing each other.
+</div>
+
+<h2>When Should We Use Each?</h2>
+
+<table>
+<tr>
+<th>Need</th>
+<th>Recommended Solution</th>
+</tr>
+
+<tr>
+<td>API Calls</td>
+<td>Service</td>
+</tr>
+
+<tr>
+<td>Business Logic</td>
+<td>Service</td>
+</tr>
+
+<tr>
+<td>Shared Global State</td>
+<td>Context API</td>
+</tr>
+
+<tr>
+<td>Reusable UI</td>
+<td>Reusable Component</td>
+</tr>
+
+<tr>
+<td>Reusable Hook Logic</td>
+<td>Custom Hook</td>
+</tr>
+
+<tr>
+<td>Legacy React Logic Sharing</td>
+<td>HOC / Render Props</td>
+</tr>
+
+</table>
+
+<h2>Easy Way To Remember</h2>
+
+<div class="flow">
+Utility Function
+<br>↓<br>
+Pure JavaScript Logic
+
+<br><br>
+
+Service
+<br>↓<br>
+Business Logic + API Calls
+
+<br><br>
+
+Context
+<br>↓<br>
+Shared State
+
+<br><br>
+
+Reusable Component
+<br>↓<br>
+Shared UI
+
+<br><br>
+
+Custom Hook
+<br>↓<br>
+Shared React Hook Logic
+</div>
+
+<h2>Interview Answer</h2>
+
+<div class="highlight">
+Without custom hooks, functionality can be reused using utility functions, services, Context API, reusable components, Higher Order Components (HOCs), and Render Props. Modern React applications most commonly use services for business logic, Context for shared state, and reusable components for UI reuse.
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+Besides custom hooks, React functionality can be reused through services, utility functions, Context API, reusable components, HOCs, and Render Props.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+
+</body>
+</html>

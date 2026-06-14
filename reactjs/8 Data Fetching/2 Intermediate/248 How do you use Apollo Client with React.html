@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>248 - How do you use Apollo Client with React?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px;margin-bottom:10px}
+p{color:#cbd5e1}
+ul{padding-left:24px}
+li{margin-bottom:10px;color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left;vertical-align:top}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px;margin-top:15px}
+.warning{background:#1e1b4b;border-left:5px solid #fbbf24;padding:18px;border-radius:10px;margin-top:15px}
+.success{background:#052e16;padding:18px;border-left:5px solid #22c55e;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;margin-top:15px;text-align:center;line-height:2;font-size:18px}
+pre{border-radius:12px;overflow-x:auto}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>248. How do you use Apollo Client with React?</h1>
+
+<h2>One-Line Definition</h2>
+
+<div class="highlight">
+Apollo Client is a GraphQL client library used in React to fetch, update, cache, and manage GraphQL API data.
+</div>
+
+<h2>Why Is Apollo Client Used?</h2>
+
+<p>
+Apollo Client helps our React application work with GraphQL APIs easily.
+</p>
+
+<ul>
+<li>Send GraphQL queries.</li>
+<li>Send GraphQL mutations.</li>
+<li>Manage loading state.</li>
+<li>Manage error state.</li>
+<li>Cache API responses.</li>
+<li>Update UI automatically.</li>
+</ul>
+
+<div class="success">
+Without Apollo Client, we need to manually use fetch, manage state, handle errors, and manage cache.
+</div>
+
+<h2>Install Apollo Client</h2>
+
+<pre><code class="language-bash">npm install @apollo/client graphql</code></pre>
+
+<h2>Step 1: Create Apollo Client</h2>
+
+<h3>src/apolloClient.js</h3>
+
+<pre><code class="language-javascript">import { ApolloClient, InMemoryCache } from '@apollo/client';
+
+const client = new ApolloClient({
+  uri: 'https://api.example.com/graphql',
+  cache: new InMemoryCache()
+});
+
+export default client;</code></pre>
+
+<h2>Step 2: Wrap App With ApolloProvider</h2>
+
+<h3>src/main.jsx</h3>
+
+<pre><code class="language-jsx">import React from 'react';
+import ReactDOM from 'react-dom/client';
+import { ApolloProvider } from '@apollo/client';
+import client from './apolloClient';
+import App from './App';
+
+ReactDOM.createRoot(document.getElementById('root')).render(
+  &lt;ApolloProvider client={client}&gt;
+    &lt;App /&gt;
+  &lt;/ApolloProvider&gt;
+);</code></pre>
+
+<div class="highlight">
+ApolloProvider makes Apollo Client available to all React components.
+</div>
+
+<h2>Step 3: Write GraphQL Query</h2>
+
+<h3>src/graphql/queries.js</h3>
+
+<pre><code class="language-javascript">import { gql } from '@apollo/client';
+
+export const GET_USERS = gql`
+  query GetUsers {
+    users {
+      id
+      name
+      email
+    }
+  }
+`;</code></pre>
+
+<h2>Step 4: Use Query in React Component</h2>
+
+<h3>src/components/Users.jsx</h3>
+
+<pre><code class="language-jsx">import { useQuery } from '@apollo/client';
+import { GET_USERS } from '../graphql/queries';
+
+function Users() {
+  const { data, loading, error } = useQuery(GET_USERS);
+
+  if (loading) return &lt;p&gt;Loading...&lt;/p&gt;;
+  if (error) return &lt;p&gt;Error: {error.message}&lt;/p&gt;;
+
+  return (
+    &lt;ul&gt;
+      {data.users.map(user =&gt; (
+        &lt;li key={user.id}&gt;
+          {user.name} - {user.email}
+        &lt;/li&gt;
+      ))}
+    &lt;/ul&gt;
+  );
+}
+
+export default Users;</code></pre>
+
+<h2>Apollo Query Flow</h2>
+
+<div class="flow">
+React Component
+<br>↓<br>
+useQuery(GET_USERS)
+<br>↓<br>
+Apollo Client
+<br>↓<br>
+GraphQL API
+<br>↓<br>
+Cache Response
+<br>↓<br>
+Update UI
+</div>
+
+<h2>Mutation Example</h2>
+
+<p>
+Mutation means changing data on the server.
+</p>
+
+<pre><code class="language-text">Create user
+Update user
+Delete user
+Login user</code></pre>
+
+<h3>src/graphql/mutations.js</h3>
+
+<pre><code class="language-javascript">import { gql } from '@apollo/client';
+
+export const ADD_USER = gql`
+  mutation AddUser($name: String!, $email: String!) {
+    addUser(name: $name, email: $email) {
+      id
+      name
+      email
+    }
+  }
+`;</code></pre>
+
+<h3>Use Mutation in React</h3>
+
+<pre><code class="language-jsx">import { useMutation } from '@apollo/client';
+import { ADD_USER } from '../graphql/mutations';
+
+function AddUser() {
+  const [addUser, { loading, error }] = useMutation(ADD_USER);
+
+  function handleAdd() {
+    addUser({
+      variables: {
+        name: 'Rizwan',
+        email: 'rizwan@gmail.com'
+      }
+    });
+  }
+
+  return (
+    &lt;&gt;
+      &lt;button onClick={handleAdd} disabled={loading}&gt;
+        Add User
+      &lt;/button&gt;
+
+      {error && &lt;p&gt;{error.message}&lt;/p&gt;}
+    &lt;/&gt;
+  );
+}
+
+export default AddUser;</code></pre>
+
+<h2>Query With Variables</h2>
+
+<pre><code class="language-javascript">import { gql } from '@apollo/client';
+
+const GET_USER = gql`
+  query GetUser($id: ID!) {
+    user(id: $id) {
+      id
+      name
+      email
+    }
+  }
+`;</code></pre>
+
+<pre><code class="language-jsx">const { data, loading, error } = useQuery(GET_USER, {
+  variables: {
+    id: 1
+  }
+});</code></pre>
+
+<h2>Refetch Data</h2>
+
+<pre><code class="language-jsx">const { data, loading, error, refetch } = useQuery(GET_USERS);
+
+&lt;button onClick={() =&gt; refetch()}&gt;
+  Refresh
+&lt;/button&gt;</code></pre>
+
+<h2>Apollo Cache</h2>
+
+<p>
+Apollo automatically stores query results in memory.
+</p>
+
+<div class="flow">
+First Request
+<br>↓<br>
+API Call
+<br>↓<br>
+Data Stored In Apollo Cache
+<br>↓<br>
+Next Time Data Can Come From Cache
+</div>
+
+<div class="success">
+Apollo cache improves performance and reduces repeated API calls.
+</div>
+
+<h2>Add Authorization Header</h2>
+
+<p>
+For protected GraphQL APIs, we can pass token headers.
+</p>
+
+<pre><code class="language-javascript">import { ApolloClient, InMemoryCache, createHttpLink } from '@apollo/client';
+import { setContext } from '@apollo/client/link/context';
+
+const httpLink = createHttpLink({
+  uri: 'https://api.example.com/graphql'
+});
+
+const authLink = setContext((_, { headers }) => {
+  const token = localStorage.getItem('token');
+
+  return {
+    headers: {
+      ...headers,
+      Authorization: token ? `Bearer ${token}` : ''
+    }
+  };
+});
+
+const client = new ApolloClient({
+  link: authLink.concat(httpLink),
+  cache: new InMemoryCache()
+});
+
+export default client;</code></pre>
+
+<h2>Important Interview Points</h2>
+
+<ul>
+<li>Apollo Client connects React with GraphQL APIs.</li>
+<li>ApolloProvider provides Apollo Client to the React app.</li>
+<li>useQuery is used to fetch data.</li>
+<li>useMutation is used to create, update, or delete data.</li>
+<li>gql is used to write GraphQL queries and mutations.</li>
+<li>Apollo manages loading, error, data, and cache.</li>
+<li>Apollo cache helps reduce unnecessary network calls.</li>
+</ul>
+
+<h2>Short Interview Answer</h2>
+
+<div class="highlight">
+Apollo Client is used in React by creating an ApolloClient instance with a GraphQL endpoint and cache, wrapping the app with ApolloProvider, and then using hooks like useQuery and useMutation inside components to fetch and update GraphQL data.
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+Apollo Client connects React to GraphQL APIs using ApolloProvider, useQuery, and useMutation while managing loading, errors, and cache automatically.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-graphql.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+
+</body>
+</html>

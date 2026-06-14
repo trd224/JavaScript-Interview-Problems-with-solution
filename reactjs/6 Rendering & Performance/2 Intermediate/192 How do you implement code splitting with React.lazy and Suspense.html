@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>192 - How do you implement code splitting with React.lazy and Suspense?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px;margin-bottom:10px}
+p{color:#cbd5e1}
+ul{padding-left:24px}
+li{margin-bottom:10px;color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left;vertical-align:top}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px;margin-top:15px}
+.warning{background:#1e1b4b;border-left:5px solid #fbbf24;padding:18px;border-radius:10px;margin-top:15px}
+.success{background:#052e16;padding:18px;border-left:5px solid #22c55e;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;margin-top:15px;text-align:center;line-height:2;font-size:18px}
+pre{border-radius:12px;overflow-x:auto}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>192. How do you implement code splitting with React.lazy and Suspense?</h1>
+
+<h2>One-Line Definition</h2>
+
+<div class="highlight">
+We implement code splitting in React by using React.lazy() to load components dynamically and Suspense to show fallback UI while the component is loading.
+</div>
+
+<h2>Why Do We Need It?</h2>
+
+<p>
+Without code splitting, all components are included in the main JavaScript bundle.
+</p>
+
+<div class="flow">
+Dashboard
+<br>
++
+<br>
+Products
+<br>
++
+<br>
+Reports
+<br>
++
+<br>
+Admin
+<br>
+↓
+<br>
+One Large Bundle
+</div>
+
+<p>
+This can make the initial page load slow.
+</p>
+
+<div class="warning">
+The user may download code for pages they have not visited yet.
+</div>
+
+<h2>Step 1 - Normal Import</h2>
+
+<p>
+In normal import, the component becomes part of the main bundle.
+</p>
+
+<pre><code class="language-jsx">import Dashboard from './pages/Dashboard';</code></pre>
+
+<p>
+This means Dashboard code loads immediately.
+</p>
+
+<h2>Step 2 - Lazy Import</h2>
+
+<p>
+With React.lazy, the component is loaded only when it is rendered.
+</p>
+
+<pre><code class="language-jsx">const Dashboard = React.lazy(() =&gt;
+  import('./pages/Dashboard')
+);</code></pre>
+
+<div class="success">
+This creates a separate JavaScript chunk for Dashboard.
+</div>
+
+<h2>Step 3 - Wrap Lazy Component With Suspense</h2>
+
+<p>
+React.lazy components must be rendered inside Suspense.
+</p>
+
+<pre><code class="language-jsx">import React, { Suspense } from 'react';
+
+const Dashboard = React.lazy(() =&gt;
+  import('./pages/Dashboard')
+);
+
+function App() {
+
+  return (
+
+    &lt;Suspense fallback={&lt;p&gt;Loading...&lt;/p&gt;}&gt;
+
+      &lt;Dashboard /&gt;
+
+    &lt;/Suspense&gt;
+
+  );
+
+}
+
+export default App;</code></pre>
+
+<p>
+While Dashboard is downloading, React shows:
+</p>
+
+<pre><code>Loading...</code></pre>
+
+<h2>Route-Based Code Splitting</h2>
+
+<p>
+In real projects, code splitting is usually done with routes.
+</p>
+
+<pre><code class="language-jsx">import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import React, { Suspense } from 'react';
+
+const Dashboard = React.lazy(() =&gt;
+  import('./pages/Dashboard')
+);
+
+const Products = React.lazy(() =&gt;
+  import('./pages/Products')
+);
+
+const Reports = React.lazy(() =&gt;
+  import('./pages/Reports')
+);
+
+function App() {
+
+  return (
+
+    &lt;BrowserRouter&gt;
+
+      &lt;Suspense fallback={&lt;h2&gt;Loading...&lt;/h2&gt;}&gt;
+
+        &lt;Routes&gt;
+
+          &lt;Route
+            path="/"
+            element={&lt;Dashboard /&gt;}
+          /&gt;
+
+          &lt;Route
+            path="/products"
+            element={&lt;Products /&gt;}
+          /&gt;
+
+          &lt;Route
+            path="/reports"
+            element={&lt;Reports /&gt;}
+          /&gt;
+
+        &lt;/Routes&gt;
+
+      &lt;/Suspense&gt;
+
+    &lt;/BrowserRouter&gt;
+
+  );
+
+}
+
+export default App;</code></pre>
+
+<h2>What Happens Here?</h2>
+
+<h3>User Opens Dashboard</h3>
+
+<pre><code>/</code></pre>
+
+<p>
+React downloads:
+</p>
+
+<pre><code>dashboard.chunk.js</code></pre>
+
+<h3>User Opens Products Page</h3>
+
+<pre><code>/products</code></pre>
+
+<p>
+React downloads:
+</p>
+
+<pre><code>products.chunk.js</code></pre>
+
+<p>
+for the first time.
+</p>
+
+<h3>User Opens Reports Page</h3>
+
+<pre><code>/reports</code></pre>
+
+<p>
+React downloads:
+</p>
+
+<pre><code>reports.chunk.js</code></pre>
+
+<p>
+for the first time.
+</p>
+
+<div class="success">
+Each route loads its own JavaScript chunk only when needed.
+</div>
+
+<h2>How It Works Internally</h2>
+
+<div class="flow">
+React.lazy()
+<br>
+↓
+<br>
+Dynamic import()
+<br>
+↓
+<br>
+Separate Chunk Created
+<br>
+↓
+<br>
+Suspense Shows Fallback
+<br>
+↓
+<br>
+Chunk Downloads
+<br>
+↓
+<br>
+Component Renders
+</div>
+
+<h2>Important Point About Suspense</h2>
+
+<p>
+Suspense does not split code by itself.
+</p>
+
+<p>
+React.lazy creates the lazy component.
+</p>
+
+<p>
+Suspense only handles the loading state.
+</p>
+
+<table>
+<tr>
+<th>API</th>
+<th>Role</th>
+</tr>
+
+<tr>
+<td>React.lazy()</td>
+<td>Loads component dynamically and creates code splitting.</td>
+</tr>
+
+<tr>
+<td>Suspense</td>
+<td>Shows fallback UI while lazy component is loading.</td>
+</tr>
+</table>
+
+<h2>Code Splitting vs Lazy Loading</h2>
+
+<table>
+<tr>
+<th>Code Splitting</th>
+<th>Lazy Loading</th>
+</tr>
+
+<tr>
+<td>Breaks bundle into smaller chunks.</td>
+<td>Loads chunk only when needed.</td>
+</tr>
+
+<tr>
+<td>Build output optimization.</td>
+<td>Runtime loading behavior.</td>
+</tr>
+
+<tr>
+<td>Done by dynamic import().</td>
+<td>Done using React.lazy().</td>
+</tr>
+</table>
+
+<h2>Common Mistake</h2>
+
+<div class="warning">
+React.lazy only supports default exports directly.
+</div>
+
+<p>
+This works:
+</p>
+
+<pre><code class="language-jsx">export default Dashboard;</code></pre>
+
+<p>
+Then:
+</p>
+
+<pre><code class="language-jsx">const Dashboard = React.lazy(() =&gt;
+  import('./pages/Dashboard')
+);</code></pre>
+
+<h2>If Component Uses Named Export</h2>
+
+<p>
+If the component is exported like:
+</p>
+
+<pre><code class="language-jsx">export function Dashboard() {
+
+  return &lt;h1&gt;Dashboard&lt;/h1&gt;;
+
+}</code></pre>
+
+<p>
+Then use:
+</p>
+
+<pre><code class="language-jsx">const Dashboard = React.lazy(() =&gt;
+  import('./pages/Dashboard').then(module =&gt; ({
+    default: module.Dashboard
+  }))
+);</code></pre>
+
+<h2>When Should You Use React.lazy?</h2>
+
+<ul>
+<li>Route components.</li>
+<li>Admin pages.</li>
+<li>Heavy dashboard pages.</li>
+<li>Chart components.</li>
+<li>Large modals opened rarely.</li>
+<li>Feature modules not needed initially.</li>
+</ul>
+
+<h2>When Should You Avoid It?</h2>
+
+<ul>
+<li>Small components used immediately.</li>
+<li>Components above the fold that are needed instantly.</li>
+<li>Very tiny components where extra network request is not worth it.</li>
+</ul>
+
+<h2>Easy Way To Remember</h2>
+
+<div class="flow">
+React.lazy
+<br>
+↓
+<br>
+Load Component Later
+
+<br><br>
+
+Suspense
+<br>
+↓
+<br>
+Show Loading UI
+
+<br><br>
+
+Together
+<br>
+↓
+<br>
+Code Splitting
+</div>
+
+<h2>Important Interview Points</h2>
+
+<ul>
+<li>Use React.lazy with dynamic import().</li>
+<li>Wrap lazy components in Suspense.</li>
+<li>Suspense fallback shows loading UI.</li>
+<li>Commonly used for route-based code splitting.</li>
+<li>Improves initial load performance.</li>
+<li>React.lazy expects default exports.</li>
+</ul>
+
+<h2>Short Interview Answer</h2>
+
+<div class="highlight">
+We implement code splitting by importing components with React.lazy and wrapping them with Suspense. React.lazy loads the component chunk only when needed, and Suspense displays fallback UI while that chunk is loading.
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+Use React.lazy() for dynamic component import and Suspense for loading UI while the split chunk downloads.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+
+</body>
+</html>

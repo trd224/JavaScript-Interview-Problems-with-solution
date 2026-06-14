@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>173 - Write a usePrevious Custom Hook</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px;margin-bottom:10px}
+p{color:#cbd5e1}
+ul{padding-left:24px}
+li{margin-bottom:10px;color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left;vertical-align:top}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px;margin-top:15px}
+.warning{background:#1e1b4b;border-left:5px solid #fbbf24;padding:18px;border-radius:10px;margin-top:15px}
+.success{background:#052e16;padding:18px;border-left:5px solid #22c55e;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;margin-top:15px;text-align:center;line-height:2;font-size:18px}
+pre{border-radius:12px;overflow-x:auto}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>173. Write a usePrevious Custom Hook</h1>
+
+<h2>One-Line Definition</h2>
+
+<div class="highlight">
+usePrevious is a custom hook that remembers and returns the value from the previous render.
+</div>
+
+<h2>Why Do We Need It?</h2>
+
+<p>
+React easily gives us the current value of state or props.
+</p>
+
+<pre><code class="language-jsx">const [count, setCount] = useState(0);</code></pre>
+
+<p>
+We can access the current value:
+</p>
+
+<pre><code class="language-jsx">count</code></pre>
+
+<p>
+But React does not automatically provide the previous value:
+</p>
+
+<pre><code class="language-jsx">previousCount</code></pre>
+
+<p>
+If we need to compare the old value with the new value, we can create a custom hook called usePrevious.
+</p>
+
+<div class="warning">
+usePrevious solves the problem of tracking the previous value from the last render.
+</div>
+
+<h2>Custom Hook Code</h2>
+
+<pre><code class="language-jsx">import { useRef, useEffect } from 'react';
+
+function usePrevious(value) {
+
+  const ref = useRef();
+
+  useEffect(() =&gt; {
+
+    ref.current = value;
+
+  });
+
+  return ref.current;
+
+}
+
+export default usePrevious;</code></pre>
+
+<h2>Important Confusion</h2>
+
+<p>
+You may think:
+</p>
+
+<pre><code class="language-jsx">const [count, setCount] = useState(0);
+
+const previousCount = usePrevious(count);</code></pre>
+
+<p>
+Because count is 0 on the first render, previousCount should also become 0.
+</p>
+
+<div class="warning">
+But previousCount does not become 0 on the first render. It becomes undefined.
+</div>
+
+<p>
+The reason is simple: usePrevious does not return count directly. It returns ref.current.
+</p>
+
+<pre><code class="language-jsx">return ref.current;</code></pre>
+
+<h2>Why Are We Using useRef Without Any HTML Element?</h2>
+
+<p>
+Most developers first learn useRef like this:
+</p>
+
+<pre><code class="language-jsx">const inputRef = useRef();
+
+return (
+  &lt;input ref={inputRef} /&gt;
+);</code></pre>
+
+<p>
+Here React stores the HTML input element inside:
+</p>
+
+<pre><code class="language-jsx">inputRef.current</code></pre>
+
+<p>
+Then we can use it like this:
+</p>
+
+<pre><code class="language-jsx">inputRef.current.focus();</code></pre>
+
+<div class="warning">
+Many developers think useRef can only be used with HTML elements. This is not true.
+</div>
+
+<h2>useRef Has Two Uses</h2>
+
+<table>
+<tr>
+<th>Use Case</th>
+<th>Purpose</th>
+</tr>
+
+<tr>
+<td>DOM Ref</td>
+<td>Stores a reference to an HTML element.</td>
+</tr>
+
+<tr>
+<td>Value Ref</td>
+<td>Stores any JavaScript value between renders.</td>
+</tr>
+</table>
+
+<h2>DOM Ref Example</h2>
+
+<pre><code class="language-jsx">const inputRef = useRef();
+
+return (
+  &lt;input ref={inputRef} /&gt;
+);</code></pre>
+
+<p>
+React stores:
+</p>
+
+<pre><code class="language-jsx">inputRef.current = HTMLInputElement</code></pre>
+
+<h2>Value Ref Example</h2>
+
+<pre><code class="language-jsx">const ref = useRef();
+
+ref.current = 10;
+ref.current = 'Rizwan';
+ref.current = true;</code></pre>
+
+<p>
+No HTML element is attached here. We are just using ref as a storage box.
+</p>
+
+<div class="success">
+In usePrevious, useRef is used as a storage box, not as an HTML element reference.
+</div>
+
+<h2>Easy Difference Between useState and useRef</h2>
+
+<table>
+<tr>
+<th>useState</th>
+<th>useRef</th>
+</tr>
+
+<tr>
+<td>Stores data.</td>
+<td>Stores data.</td>
+</tr>
+
+<tr>
+<td>Changing it causes re-render.</td>
+<td>Changing it does not cause re-render.</td>
+</tr>
+
+<tr>
+<td>Used for UI values.</td>
+<td>Used for values we want to remember silently.</td>
+</tr>
+</table>
+
+<div class="highlight">
+For usePrevious, we only need to remember the old value. We do not want an extra re-render. That is why useRef is the best choice.
+</div>
+
+<h2>What Actually Happens Line By Line?</h2>
+
+<pre><code class="language-jsx">const [count, setCount] = useState(0);
+
+const previousCount = usePrevious(count);</code></pre>
+
+<h3>First Render</h3>
+
+<p>
+This line runs first:
+</p>
+
+<pre><code class="language-jsx">const [count, setCount] = useState(0);</code></pre>
+
+<p>
+So count becomes:
+</p>
+
+<pre><code class="language-jsx">count = 0</code></pre>
+
+<p>
+Now count goes into the hook:
+</p>
+
+<pre><code class="language-jsx">const previousCount = usePrevious(count);</code></pre>
+
+<p>
+Inside the hook, value is 0:
+</p>
+
+<pre><code class="language-jsx">function usePrevious(value) {
+  // value = 0
+}</code></pre>
+
+<p>
+Then this line creates a ref:
+</p>
+
+<pre><code class="language-jsx">const ref = useRef();</code></pre>
+
+<p>
+Initially:
+</p>
+
+<pre><code class="language-jsx">ref.current = undefined</code></pre>
+
+<p>
+Now this useEffect is registered, but it does not run immediately:
+</p>
+
+<pre><code class="language-jsx">useEffect(() =&gt; {
+  ref.current = value;
+});</code></pre>
+
+<p>
+React continues and reaches the return line:
+</p>
+
+<pre><code class="language-jsx">return ref.current;</code></pre>
+
+<p>
+At this exact moment:
+</p>
+
+<pre><code class="language-jsx">ref.current = undefined</code></pre>
+
+<p>
+So:
+</p>
+
+<pre><code class="language-jsx">previousCount = undefined</code></pre>
+
+<div class="success">
+The hook returns ref.current first. After the render finishes, useEffect stores the current count for the next render.
+</div>
+
+<h2>After First Render Finishes</h2>
+
+<p>
+Now React runs useEffect:
+</p>
+
+<pre><code class="language-jsx">useEffect(() =&gt; {
+  ref.current = value;
+});</code></pre>
+
+<p>
+Since value is 0:
+</p>
+
+<pre><code class="language-jsx">ref.current = 0</code></pre>
+
+<p>
+This 0 is now saved for the next render.
+</p>
+
+<h2>Second Render</h2>
+
+<p>
+User clicks the button:
+</p>
+
+<pre><code class="language-jsx">setCount(count + 1)</code></pre>
+
+<p>
+Now count becomes:
+</p>
+
+<pre><code class="language-jsx">count = 1</code></pre>
+
+<p>
+Again this line runs:
+</p>
+
+<pre><code class="language-jsx">const previousCount = usePrevious(count);</code></pre>
+
+<p>
+Inside hook:
+</p>
+
+<pre><code class="language-jsx">value = 1</code></pre>
+
+<p>
+But ref.current already has the value stored from the previous render:
+</p>
+
+<pre><code class="language-jsx">ref.current = 0</code></pre>
+
+<p>
+So the hook returns:
+</p>
+
+<pre><code class="language-jsx">return ref.current;</code></pre>
+
+<p>
+Therefore:
+</p>
+
+<pre><code class="language-jsx">previousCount = 0</code></pre>
+
+<p>
+After this render finishes, useEffect runs again and stores the current value:
+</p>
+
+<pre><code class="language-jsx">ref.current = 1</code></pre>
+
+<h2>Third Render</h2>
+
+<p>
+User clicks again. Now:
+</p>
+
+<pre><code class="language-jsx">count = 2</code></pre>
+
+<p>
+The hook returns the old stored value:
+</p>
+
+<pre><code class="language-jsx">previousCount = 1</code></pre>
+
+<p>
+After render finishes:
+</p>
+
+<pre><code class="language-jsx">ref.current = 2</code></pre>
+
+<h2>Visual Timeline</h2>
+
+<div class="flow">
+Render #1
+<br><br>
+count = 0
+<br>
+ref.current = undefined
+<br>
+previousCount = undefined
+<br><br>
+After render: ref.current = 0
+<br><br>
+Render #2
+<br><br>
+count = 1
+<br>
+ref.current = 0
+<br>
+previousCount = 0
+<br><br>
+After render: ref.current = 1
+<br><br>
+Render #3
+<br><br>
+count = 2
+<br>
+ref.current = 1
+<br>
+previousCount = 1
+<br><br>
+After render: ref.current = 2
+</div>
+
+<h2>Complete usePrevious Hook</h2>
+
+<pre><code class="language-jsx">import { useRef, useEffect } from 'react';
+
+function usePrevious(value) {
+
+  const ref = useRef();
+
+  useEffect(() =&gt; {
+
+    ref.current = value;
+
+  });
+
+  return ref.current;
+
+}
+
+export default usePrevious;</code></pre>
+
+<h2>Complete App Example</h2>
+
+<pre><code class="language-jsx">import { useState } from 'react';
+import usePrevious from './usePrevious';
+
+function App() {
+
+  const [count, setCount] = useState(0);
+
+  const previousCount = usePrevious(count);
+
+  return (
+    &lt;div&gt;
+      &lt;h2&gt;Current Count: {count}&lt;/h2&gt;
+
+      &lt;h2&gt;Previous Count: {previousCount}&lt;/h2&gt;
+
+      &lt;button onClick={() =&gt; setCount(count + 1)}&gt;
+        Increment
+      &lt;/button&gt;
+    &lt;/div&gt;
+  );
+
+}
+
+export default App;</code></pre>
+
+<h2>Output</h2>
+
+<h3>Initial Render</h3>
+
+<pre><code>Current Count: 0
+Previous Count: undefined</code></pre>
+
+<h3>After First Click</h3>
+
+<pre><code>Current Count: 1
+Previous Count: 0</code></pre>
+
+<h3>After Second Click</h3>
+
+<pre><code>Current Count: 2
+Previous Count: 1</code></pre>
+
+<h2>Real-World Use Cases</h2>
+
+<ul>
+<li>Compare old and new values.</li>
+<li>Track previous props.</li>
+<li>Show whether a value increased or decreased.</li>
+<li>Build undo functionality.</li>
+<li>Run logic when a value changes from one value to another.</li>
+</ul>
+
+<h2>Example - Detect Price Change</h2>
+
+<pre><code class="language-jsx">const previousPrice = usePrevious(price);
+
+if (price &gt; previousPrice) {
+  console.log('Price Increased');
+}
+
+if (price &lt; previousPrice) {
+  console.log('Price Decreased');
+}</code></pre>
+
+<h2>Important Interview Points</h2>
+
+<ul>
+<li>usePrevious is not built into React.</li>
+<li>It is a custom hook.</li>
+<li>It uses useRef internally.</li>
+<li>useRef is not attached to any HTML element in this hook.</li>
+<li>useRef is used as a storage box.</li>
+<li>useEffect runs after render.</li>
+<li>That is why first previous value is undefined.</li>
+<li>It does not cause extra re-renders.</li>
+</ul>
+
+<h2>Short Interview Answer</h2>
+
+<div class="highlight">
+usePrevious is a custom hook that uses useRef to store the current value after rendering and returns the value from the previous render.
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+usePrevious lets us access the previous value of state or props in React.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+
+</body>
+</html>

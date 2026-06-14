@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>184 - What is the startTransition API?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px;margin-bottom:10px}
+p{color:#cbd5e1}
+ul{padding-left:24px}
+li{margin-bottom:10px;color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left;vertical-align:top}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px;margin-top:15px}
+.warning{background:#1e1b4b;border-left:5px solid #fbbf24;padding:18px;border-radius:10px;margin-top:15px}
+.success{background:#052e16;padding:18px;border-left:5px solid #22c55e;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;margin-top:15px;text-align:center;line-height:2;font-size:18px}
+pre{border-radius:12px;overflow-x:auto}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>184. What is the startTransition API?</h1>
+
+<h2>One-Line Definition</h2>
+
+<div class="highlight">
+startTransition is a React 18 API that marks state updates as low-priority so urgent updates can happen first.
+</div>
+
+<h2>Why Was It Introduced?</h2>
+
+<p>
+Sometimes a user action triggers:
+</p>
+
+<ul>
+<li>A fast update that should happen immediately.</li>
+<li>A slow update that can wait a little.</li>
+</ul>
+
+<p>
+Example:
+</p>
+
+<ul>
+<li>User types in a search box.</li>
+<li>React filters 10,000 products.</li>
+</ul>
+
+<p>
+Updating the input is important.
+</p>
+
+<p>
+Filtering thousands of products is less important.
+</p>
+
+<div class="warning">
+Without startTransition, expensive rendering can make typing feel slow.
+</div>
+
+<h2>Example Without startTransition</h2>
+
+<pre><code class="language-jsx">function handleChange(e) {
+
+  const value = e.target.value;
+
+  setInput(value);
+
+  setSearch(value);
+
+}</code></pre>
+
+<p>
+React treats both updates with the same priority.
+</p>
+
+<div class="flow">
+User Types
+<br>
+↓
+<br>
+Update Input
+<br>
++
+<br>
+Filter Large List
+<br>
+↓
+<br>
+Possible UI Lag
+</div>
+
+<h2>Using startTransition</h2>
+
+<pre><code class="language-jsx">import { startTransition } from 'react';
+
+function handleChange(e) {
+
+  const value = e.target.value;
+
+  setInput(value);
+
+  startTransition(() => {
+
+    setSearch(value);
+
+  });
+
+}</code></pre>
+
+<p>
+Now React treats:
+</p>
+
+<pre><code>setInput(value)</code></pre>
+
+<p>
+as high priority.
+</p>
+
+<p>
+And:
+</p>
+
+<pre><code>setSearch(value)</code></pre>
+
+<p>
+as low priority.
+</p>
+
+<div class="success">
+The input stays responsive even if filtering is expensive.
+</div>
+
+<h2>How React Thinks</h2>
+
+<div class="flow">
+Urgent Update
+<br>
+↓
+<br>
+Update Input Immediately
+
+<br><br>
+
+Low Priority Update
+<br>
+↓
+<br>
+Filter List Later
+</div>
+
+<h2>The Most Important Interview Point</h2>
+
+<p>
+startTransition does NOT make code faster.
+</p>
+
+<div class="warning">
+It changes priority, not speed.
+</div>
+
+<p>
+The expensive work still happens.
+</p>
+
+<p>
+React simply delays less important work so the UI remains responsive.
+</p>
+
+<h2>Real Example</h2>
+
+<pre><code class="language-jsx">function Search() {
+
+  const [input, setInput] = useState('');
+
+  const [search, setSearch] = useState('');
+
+  function handleChange(e) {
+
+    const value = e.target.value;
+
+    setInput(value);
+
+    startTransition(() => {
+
+      setSearch(value);
+
+    });
+
+  }
+
+}</code></pre>
+
+<p>
+Typing updates:
+</p>
+
+<pre><code>input</code></pre>
+
+<p>
+immediately.
+</p>
+
+<p>
+Filtering uses:
+</p>
+
+<pre><code>search</code></pre>
+
+<p>
+which updates with lower priority.
+</p>
+
+<h2>What Happens If User Types Again?</h2>
+
+<p>
+Suppose:
+</p>
+
+<pre><code>R
+Re
+Rea
+Reac
+React</code></pre>
+
+<p>
+React may discard old low-priority renders and keep only the latest one.
+</p>
+
+<div class="flow">
+Render "R"
+<br>
+↓
+<br>
+User Types Again
+<br>
+↓
+<br>
+Cancel Old Work
+<br>
+↓
+<br>
+Render "Re"
+
+<br><br>
+
+User Types Again
+<br>
+↓
+<br>
+Cancel Old Work
+<br>
+↓
+<br>
+Render "Rea"
+</div>
+
+<div class="success">
+React focuses on the newest user input.
+</div>
+
+<h2>startTransition vs Normal State Update</h2>
+
+<table>
+<tr>
+<th>Normal Update</th>
+<th>startTransition Update</th>
+</tr>
+
+<tr>
+<td>High Priority</td>
+<td>Low Priority</td>
+</tr>
+
+<tr>
+<td>Runs immediately</td>
+<td>Can be delayed</td>
+</tr>
+
+<tr>
+<td>User interactions</td>
+<td>Heavy UI updates</td>
+</tr>
+
+<tr>
+<td>Typing, clicks</td>
+<td>Filtering, sorting, rendering large lists</td>
+</tr>
+</table>
+
+<h2>Relationship With useTransition</h2>
+
+<p>
+There are two related APIs:
+</p>
+
+<h3>startTransition</h3>
+
+<pre><code class="language-jsx">import { startTransition } from 'react';</code></pre>
+
+<p>
+Only marks updates as low priority.
+</p>
+
+<h3>useTransition</h3>
+
+<pre><code class="language-jsx">const [isPending, startTransition] =
+  useTransition();</code></pre>
+
+<p>
+Provides:
+</p>
+
+<ul>
+<li>startTransition</li>
+<li>isPending loading state</li>
+</ul>
+
+<h2>Example Using useTransition</h2>
+
+<pre><code class="language-jsx">const [isPending, startTransition] =
+  useTransition();
+
+startTransition(() => {
+
+  setSearch(value);
+
+});</code></pre>
+
+<p>
+Now we can show:
+</p>
+
+<pre><code class="language-jsx">{isPending && &lt;p&gt;Loading...&lt;/p&gt;}</code></pre>
+
+<h2>When Should You Use startTransition?</h2>
+
+<ul>
+<li>Large list filtering.</li>
+<li>Heavy sorting operations.</li>
+<li>Expensive rendering work.</li>
+<li>Search interfaces.</li>
+<li>Charts and dashboards.</li>
+<li>Large table updates.</li>
+</ul>
+
+<h2>When Should You NOT Use It?</h2>
+
+<ul>
+<li>Button clicks that must update immediately.</li>
+<li>Form validation.</li>
+<li>Critical state updates.</li>
+<li>Small lightweight renders.</li>
+</ul>
+
+<div class="warning">
+Do not wrap every state update in startTransition.
+</div>
+
+<h2>Easy Way To Remember</h2>
+
+<div class="flow">
+Normal setState
+<br>
+↓
+<br>
+Important Update
+<br>
+↓
+<br>
+Run Immediately
+
+<br><br>
+
+startTransition
+<br>
+↓
+<br>
+Less Important Update
+<br>
+↓
+<br>
+Run Later If Needed
+</div>
+
+<h2>Important Interview Points</h2>
+
+<ul>
+<li>Introduced in React 18.</li>
+<li>Marks updates as low priority.</li>
+<li>Improves UI responsiveness.</li>
+<li>Works with Concurrent Features.</li>
+<li>Does not make code faster.</li>
+<li>Helps with expensive rendering.</li>
+<li>Related to useTransition.</li>
+</ul>
+
+<h2>Short Interview Answer</h2>
+
+<div class="highlight">
+startTransition is a React 18 API that marks state updates as non-urgent. React prioritizes user interactions first and processes transition updates later to keep the UI responsive.
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+startTransition tells React that a state update is low priority and can be delayed in favor of more important updates.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+
+</body>
+</html>

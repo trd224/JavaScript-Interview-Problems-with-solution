@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>236 - What is staleTime vs cacheTime in React Query?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px;margin-bottom:10px}
+p{color:#cbd5e1}
+ul{padding-left:24px}
+li{margin-bottom:10px;color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left;vertical-align:top}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px;margin-top:15px}
+.success{background:#052e16;padding:18px;border-left:5px solid #22c55e;border-radius:10px;margin-top:15px}
+.warning{background:#3b0820;padding:18px;border-left:5px solid #ef4444;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;margin-top:15px;text-align:center;line-height:2;font-size:18px}
+pre{border-radius:12px;overflow-x:auto}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>236. What is staleTime vs cacheTime in React Query?</h1>
+
+<h2>One-Line Difference</h2>
+
+<div class="highlight">
+<strong>staleTime</strong> controls when data becomes stale (old), while <strong>cacheTime</strong> controls when unused cached data is deleted from memory.
+</div>
+
+<h2>The Simplest Memory Trick</h2>
+
+<div class="flow">
+staleTime
+<br>
+=
+<br>
+Freshness Timer
+<br><br>
+cacheTime
+<br>
+=
+<br>
+Deletion Timer
+</div>
+
+<h2>Think About Two Questions</h2>
+
+<table>
+<tr>
+<th>Question</th>
+<th>Answer</th>
+</tr>
+
+<tr>
+<td>How long should I trust this data?</td>
+<td>staleTime</td>
+</tr>
+
+<tr>
+<td>How long should I keep unused data?</td>
+<td>cacheTime</td>
+</tr>
+</table>
+
+<h2>Example</h2>
+
+<pre><code class="language-js">useQuery({
+  queryKey: ['users'],
+  queryFn: fetchUsers,
+  staleTime: 60000,
+  cacheTime: 300000
+});</code></pre>
+
+<p>
+Meaning:
+</p>
+
+<ul>
+<li>staleTime = 1 minute</li>
+<li>cacheTime = 5 minutes</li>
+</ul>
+
+<h2>Timeline</h2>
+
+<div class="flow">
+12:00 PM
+<br>
+↓
+<br>
+API Call
+<br>
+↓
+<br>
+Data Cached
+<br><br>
+
+12:00 - 12:01
+<br>
+↓
+<br>
+Fresh Data
+<br>
+(staleTime)
+<br><br>
+
+12:01
+<br>
+↓
+<br>
+Data Becomes Stale
+<br>
+Still Cached
+<br><br>
+
+User Leaves Page
+<br>
+↓
+<br>
+cacheTime Starts
+<br><br>
+
+12:06
+<br>
+↓
+<br>
+Cache Deleted
+</div>
+
+<h2>What Happens When staleTime Expires?</h2>
+
+<p>
+At 12:01 PM:
+</p>
+
+<pre><code>staleTime expired
+↓
+Data becomes stale</code></pre>
+
+<div class="warning">
+Data is NOT deleted.
+</div>
+
+<div class="warning">
+API is NOT called immediately.
+</div>
+
+<p>
+React Query simply says:
+</p>
+
+<pre><code>I still have the data,
+but I am not sure it is fresh anymore.</code></pre>
+
+<h2>Case 1 - User Returns While Data Is Still Fresh</h2>
+
+<pre><code>12:00 API Call
+12:00:30 User Returns</code></pre>
+
+<div class="flow">
+Data Still Fresh
+<br>
+↓
+<br>
+Show Cached Data
+<br>
+↓
+<br>
+No API Call
+</div>
+
+<div class="success">
+Because staleTime has not expired.
+</div>
+
+<h2>Case 2 - User Returns After staleTime</h2>
+
+<pre><code>12:00 API Call
+12:01 Data Stale
+12:04 User Returns</code></pre>
+
+<div class="flow">
+Cache Still Exists
+<br>
+↓
+<br>
+Show Cached Data Immediately
+<br>
+↓
+<br>
+Background Refetch API
+<br>
+↓
+<br>
+Fresh Data Arrives
+<br>
+↓
+<br>
+UI Updates Again
+</div>
+
+<div class="warning">
+This may cause two UI updates.
+</div>
+
+<p>
+Example:
+</p>
+
+<pre><code>Old Cached Data
+↓
+User Sees It
+↓
+Fresh API Data Arrives
+↓
+UI Changes</code></pre>
+
+<h2>Why Is This Done?</h2>
+
+<p>
+React Query prefers:
+</p>
+
+<pre><code>Fast UI First
+↓
+Fresh Data Second</code></pre>
+
+<p>
+instead of:
+</p>
+
+<pre><code>Loading Spinner
+↓
+Wait For Server
+↓
+Show Data</code></pre>
+
+<h2>When Is This Good UX?</h2>
+
+<ul>
+<li>Department List</li>
+<li>Country List</li>
+<li>Categories</li>
+<li>Product List</li>
+<li>Static Master Data</li>
+</ul>
+
+<div class="success">
+Showing slightly old data for a moment is usually acceptable.
+</div>
+
+<h2>When Can This Be Bad UX?</h2>
+
+<ul>
+<li>Bank Balance</li>
+<li>Wallet Amount</li>
+<li>Payment Status</li>
+<li>Stock Price</li>
+<li>Live Score</li>
+</ul>
+
+<div class="warning">
+Users may briefly see an outdated value and then a new value.
+</div>
+
+<h2>What Happens When cacheTime Expires?</h2>
+
+<p>
+Suppose:
+</p>
+
+<pre><code>12:01 User Leaves
+12:06 cacheTime Expires
+12:10 User Returns</code></pre>
+
+<div class="flow">
+Cache Deleted
+<br>
+↓
+<br>
+User Returns
+<br>
+↓
+<br>
+No Cache Available
+<br>
+↓
+<br>
+Show Loading
+<br>
+↓
+<br>
+API Call
+<br>
+↓
+<br>
+Show Fresh Data
+</div>
+
+<div class="warning">
+Cache is deleted only if nobody uses that query until cacheTime finishes.
+</div>
+
+<h2>Case 3 - User Returns Before cacheTime Expires</h2>
+
+<pre><code>12:01 User Leaves
+12:04 User Returns</code></pre>
+
+<div class="flow">
+Cache Still Exists
+<br>
+↓
+<br>
+Query Becomes Active Again
+<br>
+↓
+<br>
+cacheTime Stops / Resets
+<br>
+↓
+<br>
+Cache Can Be Reused
+</div>
+
+<div class="success">
+Because cacheTime did not finish, the cached data survives.
+</div>
+
+<h2>Visual Comparison</h2>
+
+<table>
+<tr>
+<th>Situation</th>
+<th>User Sees</th>
+<th>API Call?</th>
+</tr>
+
+<tr>
+<td>Fresh Data</td>
+<td>Cached Data</td>
+<td>❌ No</td>
+</tr>
+
+<tr>
+<td>Stale Data + Cache Exists</td>
+<td>Cached Data → Fresh Data</td>
+<td>✅ Background Refetch</td>
+</tr>
+
+<tr>
+<td>Cache Deleted</td>
+<td>Loading → Fresh Data</td>
+<td>✅ Required</td>
+</tr>
+</table>
+
+<h2>Difference Table</h2>
+
+<table>
+<tr>
+<th>Feature</th>
+<th>staleTime</th>
+<th>cacheTime</th>
+</tr>
+
+<tr>
+<td>Purpose</td>
+<td>Controls Freshness</td>
+<td>Controls Deletion</td>
+</tr>
+
+<tr>
+<td>Starts When</td>
+<td>Data Is Fetched</td>
+<td>Query Becomes Inactive</td>
+</tr>
+
+<tr>
+<td>Expires Means</td>
+<td>Data Becomes Stale</td>
+<td>Cache Deleted</td>
+</tr>
+
+<tr>
+<td>Deletes Data?</td>
+<td>❌ No</td>
+<td>✅ Yes</td>
+</tr>
+
+<tr>
+<td>Calls API Immediately?</td>
+<td>❌ No</td>
+<td>❌ No</td>
+</tr>
+
+<tr>
+<td>Can Show Old Data?</td>
+<td>✅ Yes</td>
+<td>❌ No</td>
+</tr>
+</table>
+
+<h2>Interview Answer</h2>
+
+<div class="highlight">
+staleTime controls how long React Query considers data fresh. After staleTime expires, the data becomes stale but remains in cache. If the user revisits while the cache still exists, React Query can show cached data immediately and refetch fresh data in the background. cacheTime controls how long unused cached data remains in memory. If nobody uses the query before cacheTime expires, the cache is deleted and the next visit requires a fresh API call.
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+staleTime controls freshness, while cacheTime controls how long unused cached data stays before deletion.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+
+</body>
+</html>

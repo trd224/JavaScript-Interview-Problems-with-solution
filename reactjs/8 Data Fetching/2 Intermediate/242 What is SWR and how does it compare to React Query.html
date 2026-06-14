@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>242 - What is SWR and How Does It Compare to React Query?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px;margin-bottom:10px}
+p{color:#cbd5e1}
+ul{padding-left:24px}
+li{margin-bottom:10px;color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left;vertical-align:top}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px;margin-top:15px}
+.success{background:#052e16;padding:18px;border-left:5px solid #22c55e;border-radius:10px;margin-top:15px}
+.warning{background:#3b0820;padding:18px;border-left:5px solid #ef4444;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;margin-top:15px;text-align:center;line-height:2;font-size:18px}
+pre{border-radius:12px;overflow-x:auto}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>242. What is SWR and How Does It Compare to React Query?</h1>
+
+<h2>One-Line Definition</h2>
+
+<div class="highlight">
+SWR is a lightweight data-fetching library from Vercel that focuses on caching, revalidation, and background data updates using the Stale-While-Revalidate strategy.
+</div>
+
+<h2>What Does SWR Mean?</h2>
+
+<p>
+SWR stands for:
+</p>
+
+<div class="flow">
+Stale
+<br>
+While
+<br>
+Revalidate
+</div>
+
+<p>
+This is the same concept we discussed in React Query.
+</p>
+
+<h2>Simple Meaning</h2>
+
+<p>
+Instead of showing a loading spinner every time:
+</p>
+
+<div class="flow">
+Show Cached Data
+<br>
+↓
+<br>
+Fetch Fresh Data In Background
+<br>
+↓
+<br>
+Update UI
+</div>
+
+<p>
+SWR follows this pattern by default.
+</p>
+
+<h2>Example</h2>
+
+<pre><code class="language-js">const { data, error, isLoading } = useSWR(
+  '/api/users',
+  fetcher
+);</code></pre>
+
+<p>
+When the page loads:
+</p>
+
+<div class="flow">
+Check Cache
+<br>
+↓
+<br>
+Show Cached Data If Available
+<br>
+↓
+<br>
+Background Request
+<br>
+↓
+<br>
+Update Cache
+<br>
+↓
+<br>
+Update UI
+</div>
+
+<h2>What Problem Does SWR Solve?</h2>
+
+<p>
+Without SWR:
+</p>
+
+<pre><code class="language-js">useEffect(() => {
+  fetch('/api/users')
+    .then(res => res.json())
+    .then(setUsers);
+}, []);</code></pre>
+
+Problems:
+
+<ul>
+<li>No caching.</li>
+<li>No deduplication.</li>
+<li>No background refresh.</li>
+<li>No automatic revalidation.</li>
+<li>Repeated boilerplate code.</li>
+</ul>
+
+<p>
+SWR provides these features automatically.
+</p>
+
+<h2>Basic SWR Example</h2>
+
+<h3>Fetcher Function</h3>
+
+<pre><code class="language-js">const fetcher = url =>
+  fetch(url).then(res => res.json());</code></pre>
+
+<h3>Use SWR</h3>
+
+<pre><code class="language-js">const {
+  data,
+  error,
+  isLoading
+} = useSWR(
+  '/api/users',
+  fetcher
+);</code></pre>
+
+<h3>Render Data</h3>
+
+<pre><code class="language-js">if (isLoading) {
+  return &lt;h2&gt;Loading...&lt;/h2&gt;;
+}
+
+return (
+  &lt;ul&gt;
+    {data.map(user => (
+      &lt;li key={user.id}&gt;
+        {user.name}
+      &lt;/li&gt;
+    ))}
+  &lt;/ul&gt;
+);</code></pre>
+
+<h2>How SWR Works Internally</h2>
+
+<div class="flow">
+Check Cache
+<br>
+↓
+<br>
+Cached Data Found?
+<br>
+↓
+<br>
+Show Cached Data
+<br>
+↓
+<br>
+Background Request
+<br>
+↓
+<br>
+Fresh Data Arrives
+<br>
+↓
+<br>
+Update UI
+</div>
+
+<div class="success">
+This is why SWR applications feel very fast.
+</div>
+
+<h2>Wait... Isn't That Similar To React Query?</h2>
+
+<div class="highlight">
+Yes. Both libraries solve the same problem: server state management.
+</div>
+
+<h2>React Query Example</h2>
+
+<pre><code class="language-js">const { data } = useQuery({
+  queryKey: ['users'],
+  queryFn: fetchUsers
+});</code></pre>
+
+<h2>SWR Example</h2>
+
+<pre><code class="language-js">const { data } = useSWR(
+  '/api/users',
+  fetcher
+);</code></pre>
+
+<p>
+Both fetch data and cache it.
+</p>
+
+<h2>Major Differences</h2>
+
+<table>
+<tr>
+<th>Feature</th>
+<th>SWR</th>
+<th>React Query</th>
+</tr>
+
+<tr>
+<td>Learning Curve</td>
+<td>Simple</td>
+<td>More Advanced</td>
+</tr>
+
+<tr>
+<td>Caching</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+
+<tr>
+<td>Background Refetch</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+
+<tr>
+<td>Mutations</td>
+<td>Basic</td>
+<td>Advanced</td>
+</tr>
+
+<tr>
+<td>Optimistic Updates</td>
+<td>Limited</td>
+<td>Excellent</td>
+</tr>
+
+<tr>
+<td>Infinite Queries</td>
+<td>Basic</td>
+<td>Built-In</td>
+</tr>
+
+<tr>
+<td>DevTools</td>
+<td>Basic</td>
+<td>Excellent</td>
+</tr>
+
+<tr>
+<td>Query Invalidation</td>
+<td>Manual</td>
+<td>Powerful</td>
+</tr>
+
+<tr>
+<td>Pagination</td>
+<td>Basic</td>
+<td>Advanced</td>
+</tr>
+
+<tr>
+<td>Enterprise Features</td>
+<td>Fewer</td>
+<td>Many</td>
+</tr>
+</table>
+
+<h2>The Biggest Difference</h2>
+
+<div class="highlight">
+SWR focuses mainly on data fetching.
+</div>
+
+<div class="highlight">
+React Query focuses on complete server-state management.
+</div>
+
+<h2>Mutation Example</h2>
+
+<p>
+React Query:
+</p>
+
+<pre><code class="language-js">const mutation = useMutation({
+  mutationFn: addUser
+});</code></pre>
+
+<p>
+Built-in:
+</p>
+
+<ul>
+<li>Optimistic updates</li>
+<li>Rollback</li>
+<li>Invalidation</li>
+<li>Mutation states</li>
+</ul>
+
+<p>
+SWR:
+</p>
+
+<pre><code class="language-js">mutate('/api/users');</code></pre>
+
+<p>
+Much simpler but less powerful.
+</p>
+
+<h2>Connection To staleTime</h2>
+
+<p>
+We learned:
+</p>
+
+<div class="flow">
+Cached Data
+<br>
+↓
+<br>
+Background Refetch
+<br>
+↓
+<br>
+Fresh Data
+</div>
+
+<p>
+SWR was built around this exact concept.
+</p>
+
+<p>
+React Query later expanded the idea with:
+</p>
+
+<ul>
+<li>staleTime</li>
+<li>cacheTime</li>
+<li>Mutations</li>
+<li>Optimistic Updates</li>
+<li>Infinite Queries</li>
+<li>Query Invalidation</li>
+</ul>
+
+<h2>Real Project Example</h2>
+
+<h3>SWR Is Great For</h3>
+
+<ul>
+<li>User profile</li>
+<li>Settings</li>
+<li>Dashboard widgets</li>
+<li>Read-only APIs</li>
+</ul>
+
+<h3>React Query Is Better For</h3>
+
+<ul>
+<li>E-commerce</li>
+<li>Admin panels</li>
+<li>CRUD applications</li>
+<li>Complex server-state management</li>
+<li>Heavy mutations</li>
+</ul>
+
+<h2>Which One Should You Choose?</h2>
+
+<table>
+<tr>
+<th>Situation</th>
+<th>Recommended</th>
+</tr>
+
+<tr>
+<td>Simple data fetching</td>
+<td>SWR</td>
+</tr>
+
+<tr>
+<td>Next.js read-heavy app</td>
+<td>SWR</td>
+</tr>
+
+<tr>
+<td>Large React application</td>
+<td>React Query</td>
+</tr>
+
+<tr>
+<td>Lots of mutations</td>
+<td>React Query</td>
+</tr>
+
+<tr>
+<td>Optimistic updates required</td>
+<td>React Query</td>
+</tr>
+
+<tr>
+<td>Complex caching rules</td>
+<td>React Query</td>
+</tr>
+</table>
+
+<h2>Important Interview Points</h2>
+
+<ul>
+<li>SWR stands for Stale-While-Revalidate.</li>
+<li>Created by Vercel.</li>
+<li>Uses cache-first + background revalidation.</li>
+<li>Very lightweight and easy to learn.</li>
+<li>Excellent for read-heavy applications.</li>
+<li>React Query provides more advanced server-state features.</li>
+<li>React Query is usually preferred for complex CRUD applications.</li>
+</ul>
+
+<h2>Short Interview Answer</h2>
+
+<div class="highlight">
+SWR is a lightweight data-fetching library from Vercel based on the Stale-While-Revalidate pattern. It shows cached data immediately and fetches fresh data in the background. Compared to SWR, React Query provides more advanced features such as mutations, optimistic updates, query invalidation, infinite queries, and sophisticated caching controls.
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+SWR is a lightweight cache-and-revalidate library, while React Query is a full server-state management solution.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+
+</body>
+</html>

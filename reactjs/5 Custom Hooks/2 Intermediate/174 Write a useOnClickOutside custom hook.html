@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>174 - Write a useOnClickOutside Custom Hook</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px;margin-bottom:10px}
+p{color:#cbd5e1}
+ul{padding-left:24px}
+li{margin-bottom:10px;color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left;vertical-align:top}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px;margin-top:15px}
+.warning{background:#1e1b4b;border-left:5px solid #fbbf24;padding:18px;border-radius:10px;margin-top:15px}
+.success{background:#052e16;padding:18px;border-left:5px solid #22c55e;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;margin-top:15px;text-align:center;line-height:2;font-size:18px}
+pre{border-radius:12px;overflow-x:auto}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>174. Write a useOnClickOutside Custom Hook</h1>
+
+<h2>One-Line Definition</h2>
+
+<div class="highlight">
+useOnClickOutside is a custom hook that detects clicks outside a specific HTML element and executes a callback function.
+</div>
+
+<h2>Why Is It Used?</h2>
+
+<p>
+Many UI components should automatically close when the user clicks outside them.
+</p>
+
+<p>
+Examples:
+</p>
+
+<ul>
+<li>Dropdown menus</li>
+<li>Modal popups</li>
+<li>Sidebars</li>
+<li>Profile menus</li>
+<li>Tooltips</li>
+</ul>
+
+<div class="warning">
+Without this hook, we would need to write document click listeners in every component.
+</div>
+
+<h2>Custom Hook Code</h2>
+
+<pre><code class="language-jsx">import { useEffect } from 'react';
+
+function useOnClickOutside(ref, handler) {
+
+  useEffect(() => {
+
+    function handleClick(event) {
+
+      if (!ref.current) return;
+
+      if (!ref.current.contains(event.target)) {
+        handler();
+      }
+
+    }
+
+    document.addEventListener('mousedown', handleClick);
+
+    return () => {
+      document.removeEventListener('mousedown', handleClick);
+    };
+
+  }, [ref, handler]);
+
+}
+
+export default useOnClickOutside;</code></pre>
+
+<h2>Understanding The Parameters</h2>
+
+<pre><code class="language-jsx">useOnClickOutside(ref, handler);</code></pre>
+
+<table>
+<tr>
+<th>Parameter</th>
+<th>Purpose</th>
+</tr>
+
+<tr>
+<td>ref</td>
+<td>The element we want to monitor.</td>
+</tr>
+
+<tr>
+<td>handler</td>
+<td>Function to execute when clicked outside.</td>
+</tr>
+
+</table>
+
+<h2>Most Important Line</h2>
+
+<pre><code class="language-jsx">if (!ref.current.contains(event.target)) {
+  handler();
+}</code></pre>
+
+<p>
+This line checks:
+</p>
+
+<ul>
+<li>Was the click inside the element?</li>
+<li>Or outside the element?</li>
+</ul>
+
+<p>
+If the click happened outside:
+</p>
+
+<pre><code class="language-jsx">handler();</code></pre>
+
+<p>
+is executed.
+</p>
+
+<h2>Understanding contains()</h2>
+
+<p>
+Suppose:
+</p>
+
+<pre><code class="language-html">&lt;div ref={menuRef}&gt;
+  Menu
+&lt;/div&gt;</code></pre>
+
+<p>
+User clicks:
+</p>
+
+<pre><code class="language-html">&lt;button&gt;Item&lt;/button&gt;</code></pre>
+
+<p>
+inside the menu.
+</p>
+
+<pre><code class="language-jsx">menuRef.current.contains(clickedElement)</code></pre>
+
+<p>
+returns:
+</p>
+
+<pre><code class="language-jsx">true</code></pre>
+
+<p>
+User clicks somewhere else:
+</p>
+
+<pre><code class="language-html">&lt;body&gt;</code></pre>
+
+<p>
+Now:
+</p>
+
+<pre><code class="language-jsx">menuRef.current.contains(clickedElement)</code></pre>
+
+<p>
+returns:
+</p>
+
+<pre><code class="language-jsx">false</code></pre>
+
+<p>
+Therefore the menu closes.
+</p>
+
+<h2>Complete Example</h2>
+
+<pre><code class="language-jsx">import { useState, useRef } from 'react';
+import useOnClickOutside from './useOnClickOutside';
+
+function App() {
+
+  const [open, setOpen] = useState(false);
+
+  const menuRef = useRef();
+
+  useOnClickOutside(menuRef, () => {
+    setOpen(false);
+  });
+
+  return (
+
+    &lt;div&gt;
+
+      &lt;button onClick={() => setOpen(true)}&gt;
+        Open Menu
+      &lt;/button&gt;
+
+      {open && (
+
+        &lt;div ref={menuRef}&gt;
+
+          &lt;h3&gt;Dropdown Menu&lt;/h3&gt;
+
+          &lt;p&gt;Click outside to close me.&lt;/p&gt;
+
+        &lt;/div&gt;
+
+      )}
+
+    &lt;/div&gt;
+
+  );
+
+}
+
+export default App;</code></pre>
+
+<h2>Step-by-Step Flow</h2>
+
+<div class="flow">
+Click Open Menu
+<br>
+↓
+<br>
+Menu Opens
+<br>
+↓
+<br>
+menuRef points to menu div
+<br>
+↓
+<br>
+User clicks somewhere
+<br>
+↓
+<br>
+contains() checks location
+<br>
+↓
+<br>
+Outside Click?
+<br>
+↓
+<br>
+Yes
+<br>
+↓
+<br>
+handler()
+<br>
+↓
+<br>
+Menu Closes
+</div>
+
+<h2>How ref Works Here</h2>
+
+<p>
+Unlike usePrevious, here the ref IS attached to an HTML element.
+</p>
+
+<pre><code class="language-jsx">const menuRef = useRef();</code></pre>
+
+<p>
+Then:
+</p>
+
+<pre><code class="language-jsx">&lt;div ref={menuRef}&gt;</code></pre>
+
+<p>
+React stores:
+</p>
+
+<pre><code class="language-jsx">menuRef.current = HTMLDivElement</code></pre>
+
+<p>
+Now we can check:
+</p>
+
+<pre><code class="language-jsx">menuRef.current.contains(event.target)</code></pre>
+
+<p>
+to determine whether the click happened inside or outside.
+</p>
+
+<div class="success">
+This is a DOM ref because it points to a real HTML element.
+</div>
+
+<h2>Real-World Use Cases</h2>
+
+<ul>
+<li>Close dropdown menu.</li>
+<li>Close modal popup.</li>
+<li>Close sidebar.</li>
+<li>Close user profile menu.</li>
+<li>Close notification panel.</li>
+<li>Close tooltip.</li>
+</ul>
+
+<h2>Important Interview Points</h2>
+
+<ul>
+<li>Uses useEffect to register document events.</li>
+<li>Uses useRef to access a DOM element.</li>
+<li>Uses contains() to detect outside clicks.</li>
+<li>Automatically removes event listeners on unmount.</li>
+<li>Frequently used in dropdowns and modals.</li>
+</ul>
+
+<h2>Short Interview Answer</h2>
+
+<div class="highlight">
+useOnClickOutside is a custom hook that listens for document clicks and runs a callback when the clicked target is outside the referenced element.
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+useOnClickOutside helps close dropdowns, modals, and menus when the user clicks outside them.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+
+</body>
+</html>

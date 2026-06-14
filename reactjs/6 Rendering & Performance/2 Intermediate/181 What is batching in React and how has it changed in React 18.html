@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>181 - What is batching in React and how has it changed in React 18?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px;margin-bottom:10px}
+p{color:#cbd5e1}
+ul{padding-left:24px}
+li{margin-bottom:10px;color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left;vertical-align:top}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px;margin-top:15px}
+.warning{background:#1e1b4b;border-left:5px solid #fbbf24;padding:18px;border-radius:10px;margin-top:15px}
+.success{background:#052e16;padding:18px;border-left:5px solid #22c55e;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;margin-top:15px;text-align:center;line-height:2;font-size:18px}
+pre{border-radius:12px;overflow-x:auto}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>181. What is batching in React and how has it changed in React 18?</h1>
+
+<h2>One-Line Definition</h2>
+
+<div class="highlight">
+Batching means React groups multiple state updates together and performs only one re-render instead of rendering after every state update.
+</div>
+
+<h2>Why Is Batching Needed?</h2>
+
+<p>
+Every state update can cause a component to re-render.
+</p>
+
+<p>
+Example:
+</p>
+
+<pre><code class="language-jsx">setCount(c =&gt; c + 1);
+
+setName('Rizwan');</code></pre>
+
+<p>
+If React renders after every state update, the UI does extra work.
+</p>
+
+<div class="warning">
+Without batching, multiple state updates can cause multiple unnecessary renders.
+</div>
+
+<h2>What Batching Does</h2>
+
+<p>
+Instead of rendering like this:
+</p>
+
+<div class="flow">
+setCount()
+<br>
+↓
+<br>
+Render #1
+
+<br><br>
+
+setName()
+<br>
+↓
+<br>
+Render #2
+</div>
+
+<p>
+React batches the updates like this:
+</p>
+
+<div class="flow">
+setCount()
+<br>
++
+<br>
+setName()
+<br>
+↓
+<br>
+One Render
+</div>
+
+<div class="success">
+Batching improves performance because React renders fewer times.
+</div>
+
+<h2>Batching Before React 18</h2>
+
+<p>
+Before React 18, React already supported batching, but only inside React event handlers.
+</p>
+
+<h3>React Event Example</h3>
+
+<pre><code class="language-jsx">function handleClick() {
+
+  setCount(c =&gt; c + 1);
+
+  setName('Rizwan');
+
+}</code></pre>
+
+<p>
+In React 17, this already produced:
+</p>
+
+<div class="flow">
+Click Event
+<br>
+↓
+<br>
+setCount()
+<br>
++
+<br>
+setName()
+<br>
+↓
+<br>
+1 Render
+</div>
+
+<div class="success">
+React 17 already batched state updates inside React events like onClick and onChange.
+</div>
+
+<h2>Where React 17 Did Not Batch</h2>
+
+<p>
+React 17 did not automatically batch updates inside asynchronous code.
+</p>
+
+<p>
+Examples:
+</p>
+
+<ul>
+<li>setTimeout</li>
+<li>Promise</li>
+<li>fetch callback</li>
+<li>async / await</li>
+<li>native event listener</li>
+</ul>
+
+<h3>setTimeout Example in React 17</h3>
+
+<pre><code class="language-jsx">setTimeout(() =&gt; {
+
+  setCount(c =&gt; c + 1);
+
+  setName('Rizwan');
+
+}, 1000);</code></pre>
+
+<p>
+React 17 result:
+</p>
+
+<div class="flow">
+setCount()
+<br>
+↓
+<br>
+Render #1
+
+<br><br>
+
+setName()
+<br>
+↓
+<br>
+Render #2
+</div>
+
+<div class="warning">
+In React 17, updates inside setTimeout caused separate renders.
+</div>
+
+<h2>Batching In React 18</h2>
+
+<p>
+React 18 introduced automatic batching almost everywhere.
+</p>
+
+<p>
+Now React batches updates inside:
+</p>
+
+<ul>
+<li>React event handlers</li>
+<li>setTimeout</li>
+<li>Promises</li>
+<li>fetch callbacks</li>
+<li>async / await</li>
+<li>native event listeners</li>
+</ul>
+
+<h3>Same setTimeout Example in React 18</h3>
+
+<pre><code class="language-jsx">setTimeout(() =&gt; {
+
+  setCount(c =&gt; c + 1);
+
+  setName('Rizwan');
+
+}, 1000);</code></pre>
+
+<p>
+React 18 result:
+</p>
+
+<div class="flow">
+setCount()
+<br>
++
+<br>
+setName()
+<br>
+↓
+<br>
+1 Render
+</div>
+
+<div class="success">
+React 18 automatically batches these updates, even though they are inside setTimeout.
+</div>
+
+<h2>Promise / Fetch Example</h2>
+
+<pre><code class="language-jsx">fetch('/api/users')
+
+  .then(() =&gt; {
+
+    setCount(c =&gt; c + 1);
+
+    setName('Rizwan');
+
+  });</code></pre>
+
+<table>
+<tr>
+<th>Version</th>
+<th>Result</th>
+</tr>
+
+<tr>
+<td>React 17</td>
+<td>2 renders</td>
+</tr>
+
+<tr>
+<td>React 18</td>
+<td>1 render</td>
+</tr>
+</table>
+
+<h2>Simple Difference</h2>
+
+<table>
+<tr>
+<th>Where State Updates Happen</th>
+<th>React 17</th>
+<th>React 18</th>
+</tr>
+
+<tr>
+<td>React click event</td>
+<td>1 render</td>
+<td>1 render</td>
+</tr>
+
+<tr>
+<td>React onChange event</td>
+<td>1 render</td>
+<td>1 render</td>
+</tr>
+
+<tr>
+<td>setTimeout</td>
+<td>2 renders</td>
+<td>1 render</td>
+</tr>
+
+<tr>
+<td>Promise / fetch</td>
+<td>2 renders</td>
+<td>1 render</td>
+</tr>
+
+<tr>
+<td>async / await</td>
+<td>2 renders</td>
+<td>1 render</td>
+</tr>
+
+<tr>
+<td>Native event listener</td>
+<td>2 renders</td>
+<td>1 render</td>
+</tr>
+</table>
+
+<h2>Important Correction</h2>
+
+<div class="highlight">
+React 18 did not introduce batching for React events. React events were already batched before React 18. React 18 expanded batching to async code like setTimeout, Promise, fetch, async/await, and native event listeners.
+</div>
+
+<h2>Can We Force React To Render Immediately?</h2>
+
+<p>
+Yes. React provides:
+</p>
+
+<pre><code class="language-jsx">flushSync()</code></pre>
+
+<p>
+Example:
+</p>
+
+<pre><code class="language-jsx">import { flushSync } from 'react-dom';
+
+flushSync(() =&gt; {
+  setCount(c =&gt; c + 1);
+});
+
+flushSync(() =&gt; {
+  setName('Rizwan');
+});</code></pre>
+
+<p>
+This forces React to update immediately instead of batching.
+</p>
+
+<div class="warning">
+flushSync should be used rarely because it disables batching for that update.
+</div>
+
+<h2>Easy Way To Remember</h2>
+
+<div class="flow">
+React 17
+<br>
+↓
+<br>
+Batching only inside React events
+
+<br><br>
+
+React 18
+<br>
+↓
+<br>
+Batching almost everywhere
+</div>
+
+<h2>Important Interview Points</h2>
+
+<ul>
+<li>Batching means grouping multiple state updates into one render.</li>
+<li>React 17 batched updates inside React event handlers.</li>
+<li>React 18 batches updates almost everywhere.</li>
+<li>React 18 supports batching inside timers, promises, fetch, async/await, and native events.</li>
+<li>Automatic batching reduces unnecessary renders.</li>
+<li>flushSync can be used to force immediate rendering.</li>
+</ul>
+
+<h2>Short Interview Answer</h2>
+
+<div class="highlight">
+Batching in React means grouping multiple state updates into a single render. Before React 18, batching mainly worked inside React event handlers. In React 18, automatic batching works almost everywhere, including setTimeout, promises, fetch callbacks, async functions, and native event listeners.
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+React 18 expanded batching from only React events to almost all update sources, reducing unnecessary renders automatically.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+
+</body>
+</html>

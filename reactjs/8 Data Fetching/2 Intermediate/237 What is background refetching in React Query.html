@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>237 - What is Background Refetching in React Query?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px;margin-bottom:10px}
+p{color:#cbd5e1}
+ul{padding-left:24px}
+li{margin-bottom:10px;color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left;vertical-align:top}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px;margin-top:15px}
+.success{background:#052e16;padding:18px;border-left:5px solid #22c55e;border-radius:10px;margin-top:15px}
+.warning{background:#3b0820;padding:18px;border-left:5px solid #ef4444;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;margin-top:15px;text-align:center;line-height:2;font-size:18px}
+pre{border-radius:12px;overflow-x:auto}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>237. What is Background Refetching in React Query?</h1>
+
+<h2>One-Line Definition</h2>
+
+<div class="highlight">
+Background refetching is when React Query fetches fresh data from the server while continuing to display existing cached data to the user.
+</div>
+
+<h2>Why Does It Exist?</h2>
+
+<p>
+React Query prefers:
+</p>
+
+<div class="flow">
+Show Something Immediately
+<br>
+↓
+<br>
+Fetch Fresh Data In Background
+<br>
+↓
+<br>
+Update UI If Needed
+</div>
+
+<p>
+instead of:
+</p>
+
+<div class="flow">
+Show Loading Spinner
+<br>
+↓
+<br>
+Wait For API
+<br>
+↓
+<br>
+Show Data
+</div>
+
+<div class="success">
+This makes applications feel much faster.
+</div>
+
+<h2>Basic Example</h2>
+
+<pre><code class="language-js">useQuery({
+  queryKey: ['users'],
+  queryFn: fetchUsers,
+  staleTime: 60000
+});</code></pre>
+
+<p>
+Suppose:
+</p>
+
+<ul>
+<li>Data was fetched at 12:00 PM.</li>
+<li>staleTime is 1 minute.</li>
+<li>Data becomes stale at 12:01 PM.</li>
+<li>User returns at 12:04 PM.</li>
+</ul>
+
+<h2>What Happens?</h2>
+
+<div class="flow">
+Cached Data Exists
+<br>
+↓
+<br>
+Show Cached Data Immediately
+<br>
+↓
+<br>
+Background Refetch API
+<br>
+↓
+<br>
+Fresh Data Arrives
+<br>
+↓
+<br>
+Update Cache
+<br>
+↓
+<br>
+UI Updates
+</div>
+
+<h2>Real Example</h2>
+
+<p>
+Cached Data:
+</p>
+
+<pre><code class="language-js">[
+  { id: 1, name: 'Rizwan' }
+]</code></pre>
+
+<p>
+User opens page:
+</p>
+
+<div class="flow">
+Show Cached Data
+<br>
+↓
+<br>
+Rizwan
+</div>
+
+<p>
+Meanwhile API runs in background:
+</p>
+
+<pre><code class="language-js">[
+  { id: 1, name: 'Mohammad Rizwan' }
+]</code></pre>
+
+<p>
+React Query updates the cache:
+</p>
+
+<div class="flow">
+Old Data
+<br>
+↓
+<br>
+Rizwan
+<br><br>
+Fresh Data Arrives
+<br>
+↓
+<br>
+Mohammad Rizwan
+</div>
+
+<h2>Important Observation</h2>
+
+<div class="warning">
+Yes, background refetching can cause two UI updates.
+</div>
+
+<pre><code>UI Update #1
+↓
+Show Cached Data
+
+UI Update #2
+↓
+Show Fresh Data</code></pre>
+
+<p>
+This is exactly the behavior we discussed while learning staleTime and cacheTime.
+</p>
+
+<h2>When Does Background Refetching Happen?</h2>
+
+<h3>1. User Revisits A Page With Stale Data</h3>
+
+<pre><code>Cached Data Exists
+↓
+Data Is Stale
+↓
+User Returns
+↓
+Background Refetch</code></pre>
+
+<h3>2. Window Gets Focus Again</h3>
+
+<pre><code>Switch To Another Tab
+↓
+Come Back
+↓
+Data Is Stale
+↓
+Background Refetch</code></pre>
+
+<h3>3. Internet Reconnects</h3>
+
+<pre><code>Offline
+↓
+Online
+↓
+Data Is Stale
+↓
+Background Refetch</code></pre>
+
+<h3>4. Query Invalidation</h3>
+
+<pre><code class="language-js">queryClient.invalidateQueries({
+  queryKey: ['users']
+});</code></pre>
+
+<div class="flow">
+Invalidate Query
+<br>
+↓
+<br>
+Refetch In Background
+</div>
+
+<h2>How To Know A Background Refetch Is Running?</h2>
+
+<p>
+React Query provides:
+</p>
+
+<pre><code class="language-js">const {
+  data,
+  isLoading,
+  isFetching
+} = useQuery({
+  queryKey: ['users'],
+  queryFn: fetchUsers
+});</code></pre>
+
+<h3>isLoading</h3>
+
+<p>
+First request.
+</p>
+
+<pre><code>Nothing In Cache
+↓
+API Call
+↓
+isLoading = true</code></pre>
+
+<h3>isFetching</h3>
+
+<p>
+Any fetch, including background refetches.
+</p>
+
+<pre><code>Cached Data Exists
+↓
+Background Refetch
+↓
+isFetching = true</code></pre>
+
+<h2>Very Important Difference</h2>
+
+<table>
+<tr>
+<th>Property</th>
+<th>Meaning</th>
+</tr>
+
+<tr>
+<td>isLoading</td>
+<td>First load, no data available yet.</td>
+</tr>
+
+<tr>
+<td>isFetching</td>
+<td>Any fetch, including background refetches.</td>
+</tr>
+</table>
+
+<h2>Example UI</h2>
+
+<pre><code class="language-js">const {
+  data,
+  isLoading,
+  isFetching
+} = useQuery({
+  queryKey: ['users'],
+  queryFn: fetchUsers
+});
+
+if (isLoading) {
+  return &lt;h2&gt;Loading...&lt;/h2&gt;;
+}
+
+return (
+  &lt;&gt;
+    {isFetching && &lt;p&gt;Refreshing...&lt;/p&gt;}
+
+    {data.map(user =&gt; (
+      &lt;div key={user.id}&gt;
+        {user.name}
+      &lt;/div&gt;
+    ))}
+  &lt;/&gt;
+);</code></pre>
+
+<p>
+Result:
+</p>
+
+<div class="flow">
+Show Existing Data
+<br>
++
+<br>
+Show "Refreshing..."
+<br>
+↓
+<br>
+Fresh Data Arrives
+<br>
+↓
+<br>
+Remove Refresh Message
+</div>
+
+<h2>Can Background Refetching Be Bad UX?</h2>
+
+<p>
+Sometimes yes.
+</p>
+
+<p>
+Example:
+</p>
+
+<pre><code>Bank Balance
+↓
+₹10,000
+
+Background Refetch
+↓
+₹2,000</code></pre>
+
+<p>
+User briefly sees old data before new data arrives.
+</p>
+
+<div class="warning">
+For highly sensitive or real-time data, showing stale data first may not be ideal.
+</div>
+
+<h2>Can We Disable It?</h2>
+
+<p>
+Yes, by increasing staleTime.
+</p>
+
+<pre><code class="language-js">useQuery({
+  queryKey: ['departments'],
+  queryFn: fetchDepartments,
+  staleTime: 30 * 60 * 1000
+});</code></pre>
+
+<p>
+For 30 minutes:
+</p>
+
+<div class="flow">
+Data Is Fresh
+<br>
+↓
+<br>
+User Returns
+<br>
+↓
+<br>
+Use Cache Only
+<br>
+↓
+<br>
+No Background Refetch
+</div>
+
+<h2>Real Project Example</h2>
+
+<p>
+Department Master Data:
+</p>
+
+<pre><code class="language-js">useQuery({
+  queryKey: ['departments'],
+  queryFn: fetchDepartments,
+  staleTime: 30 * 60 * 1000
+});</code></pre>
+
+<p>
+Background refetching is usually unnecessary because department data changes very rarely.
+</p>
+
+<p>
+User List:
+</p>
+
+<pre><code class="language-js">useQuery({
+  queryKey: ['users'],
+  queryFn: fetchUsers,
+  staleTime: 60000
+});</code></pre>
+
+<p>
+Background refetching is useful because users may have been added or updated.
+</p>
+
+<h2>Interview Answer</h2>
+
+<div class="highlight">
+Background refetching is a React Query feature where cached data is shown immediately while a new request is sent to the server in the background. When fresh data arrives, React Query updates the cache and re-renders the UI. This improves perceived performance by avoiding unnecessary loading screens.
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+Background refetching means React Query shows cached data immediately and fetches fresh data in the background.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+
+</body>
+</html>

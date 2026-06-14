@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>189 - How do you implement a virtualized list for rendering thousands of rows?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px;margin-bottom:10px}
+p{color:#cbd5e1}
+ul{padding-left:24px}
+li{margin-bottom:10px;color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left;vertical-align:top}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px;margin-top:15px}
+.warning{background:#1e1b4b;border-left:5px solid #fbbf24;padding:18px;border-radius:10px;margin-top:15px}
+.success{background:#052e16;padding:18px;border-left:5px solid #22c55e;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;margin-top:15px;text-align:center;line-height:2;font-size:18px}
+pre{border-radius:12px;overflow-x:auto}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>189. How do you implement a virtualized list for rendering thousands of rows?</h1>
+
+<h2>One-Line Definition</h2>
+
+<div class="highlight">
+A virtualized list renders only the visible rows on the screen instead of rendering all rows at once.
+</div>
+
+<h2>Why Do We Need It?</h2>
+
+<p>
+Suppose we have 50,000 products.
+</p>
+
+<p>
+If we render normally:
+</p>
+
+<pre><code class="language-jsx">products.map(product =&gt; (
+  &lt;div key={product.id}&gt;
+    {product.name}
+  &lt;/div&gt;
+));</code></pre>
+
+<p>
+React creates 50,000 DOM elements.
+</p>
+
+<div class="warning">
+This can make the first render slow, increase memory usage, and make scrolling laggy.
+</div>
+
+<h2>Install react-window</h2>
+
+<pre><code>npm install react-window</code></pre>
+
+<h2>Step 1 - Import FixedSizeList</h2>
+
+<pre><code class="language-jsx">import { FixedSizeList } from 'react-window';</code></pre>
+
+<p>
+We use FixedSizeList when every row has the same height.
+</p>
+
+<h2>Step 2 - Create Large Data</h2>
+
+<pre><code class="language-jsx">const products = Array.from(
+  { length: 50000 },
+  (_, index) =&gt; ({
+    id: index + 1,
+    name: `Product ${index + 1}`,
+    price: Math.floor(Math.random() * 10000)
+  })
+);</code></pre>
+
+<h2>Step 3 - Create Row Component</h2>
+
+<pre><code class="language-jsx">function ProductRow({ index, style }) {
+
+  const product = products[index];
+
+  return (
+
+    &lt;div
+      style={{
+        ...style,
+        padding: '10px',
+        borderBottom: '1px solid #ddd',
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center'
+      }}
+    &gt;
+
+      &lt;span&gt;{product.name}&lt;/span&gt;
+
+      &lt;strong&gt;₹{product.price}&lt;/strong&gt;
+
+    &lt;/div&gt;
+
+  );
+
+}</code></pre>
+
+<div class="warning">
+The style prop is very important. react-window uses it to position each row correctly.
+</div>
+
+<h2>Step 4 - Render FixedSizeList</h2>
+
+<pre><code class="language-jsx">function App() {
+
+  return (
+
+    &lt;div&gt;
+
+      &lt;h2&gt;Products ({products.length})&lt;/h2&gt;
+
+      &lt;FixedSizeList
+        height={500}
+        width={800}
+        itemCount={products.length}
+        itemSize={60}
+      &gt;
+
+        {ProductRow}
+
+      &lt;/FixedSizeList&gt;
+
+    &lt;/div&gt;
+
+  );
+
+}
+
+export default App;</code></pre>
+
+<h2>Complete Example</h2>
+
+<pre><code class="language-jsx">import { FixedSizeList } from 'react-window';
+
+const products = Array.from(
+  { length: 50000 },
+  (_, index) =&gt; ({
+    id: index + 1,
+    name: `Product ${index + 1}`,
+    price: Math.floor(Math.random() * 10000)
+  })
+);
+
+function ProductRow({ index, style }) {
+
+  const product = products[index];
+
+  return (
+
+    &lt;div
+      style={{
+        ...style,
+        padding: '10px',
+        borderBottom: '1px solid #ddd',
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center'
+      }}
+    &gt;
+
+      &lt;span&gt;{product.name}&lt;/span&gt;
+
+      &lt;strong&gt;₹{product.price}&lt;/strong&gt;
+
+    &lt;/div&gt;
+
+  );
+
+}
+
+function App() {
+
+  return (
+
+    &lt;div&gt;
+
+      &lt;h2&gt;Products ({products.length})&lt;/h2&gt;
+
+      &lt;FixedSizeList
+        height={500}
+        width={800}
+        itemCount={products.length}
+        itemSize={60}
+      &gt;
+
+        {ProductRow}
+
+      &lt;/FixedSizeList&gt;
+
+    &lt;/div&gt;
+
+  );
+
+}
+
+export default App;</code></pre>
+
+<h2>Meaning of FixedSizeList Props</h2>
+
+<table>
+<tr>
+<th>Prop</th>
+<th>Meaning</th>
+</tr>
+
+<tr>
+<td>height</td>
+<td>Visible height of the list container.</td>
+</tr>
+
+<tr>
+<td>width</td>
+<td>Width of the list container.</td>
+</tr>
+
+<tr>
+<td>itemCount</td>
+<td>Total number of rows in the list.</td>
+</tr>
+
+<tr>
+<td>itemSize</td>
+<td>Height of each row.</td>
+</tr>
+</table>
+
+<h2>How Many Rows Render?</h2>
+
+<p>
+In this example:
+</p>
+
+<pre><code class="language-jsx">height={500}
+itemSize={60}</code></pre>
+
+<p>
+Visible rows:
+</p>
+
+<pre><code>500 / 60 = around 8 rows</code></pre>
+
+<p>
+So React renders only around 8 to 15 rows instead of 50,000 rows.
+</p>
+
+<div class="success">
+This keeps the DOM very small and fast.
+</div>
+
+<h2>How Scrollbar Still Works?</h2>
+
+<p>
+react-window internally creates a large virtual space.
+</p>
+
+<p>
+Example:
+</p>
+
+<pre><code>itemCount = 50000
+itemSize = 60</code></pre>
+
+<p>
+Total virtual height:
+</p>
+
+<pre><code>50000 × 60 = 3,000,000px</code></pre>
+
+<p>
+Because of this huge virtual height, the browser shows a scrollbar for the full list.
+</p>
+
+<div class="flow">
+3,000,000px Virtual Height
+<br>
+↓
+<br>
+Large Scrollbar
+<br>
+↓
+<br>
+Only Visible Rows Rendered
+</div>
+
+<h2>Why style={style} Is Required?</h2>
+
+<p>
+react-window passes a style object to every row.
+</p>
+
+<pre><code class="language-jsx">function ProductRow({ index, style })</code></pre>
+
+<p>
+Example:
+</p>
+
+<pre><code class="language-jsx">{
+  position: 'absolute',
+  top: 1200,
+  height: 60,
+  width: '100%'
+}</code></pre>
+
+<p>
+This tells each row where it should appear.
+</p>
+
+<p>
+So we must apply:
+</p>
+
+<pre><code class="language-jsx">style={style}</code></pre>
+
+<div class="warning">
+If we do not apply style={style}, rows can overlap or appear incorrectly.
+</div>
+
+<h2>What Happens While Scrolling?</h2>
+
+<div class="flow">
+User Scrolls
+<br>
+↓
+<br>
+react-window Calculates Visible Indexes
+<br>
+↓
+<br>
+Old Rows Removed
+<br>
+↓
+<br>
+New Rows Rendered
+<br>
+↓
+<br>
+DOM Remains Small
+</div>
+
+<h2>Without Virtualization vs With Virtualization</h2>
+
+<table>
+<tr>
+<th>Without Virtualization</th>
+<th>With Virtualization</th>
+</tr>
+
+<tr>
+<td>50,000 DOM elements.</td>
+<td>Only visible DOM elements.</td>
+</tr>
+
+<tr>
+<td>Slow initial render.</td>
+<td>Fast initial render.</td>
+</tr>
+
+<tr>
+<td>High memory usage.</td>
+<td>Low memory usage.</td>
+</tr>
+
+<tr>
+<td>Laggy scrolling.</td>
+<td>Smooth scrolling.</td>
+</tr>
+</table>
+
+<h2>Real-World Use Cases</h2>
+
+<ul>
+<li>Product catalog with thousands of products.</li>
+<li>Admin dashboard tables.</li>
+<li>Bank transaction history.</li>
+<li>Chat messages.</li>
+<li>Log viewer.</li>
+<li>CRM customer list.</li>
+<li>Excel-like grid interfaces.</li>
+</ul>
+
+<h2>Important Interview Points</h2>
+
+<ul>
+<li>Use react-window or react-virtualized.</li>
+<li>Use FixedSizeList when rows have equal height.</li>
+<li>Use VariableSizeList when rows have different heights.</li>
+<li>Only visible rows are rendered.</li>
+<li>The list still has full scroll height virtually.</li>
+<li>The style prop from react-window must be applied to each row.</li>
+<li>It improves performance by reducing DOM nodes.</li>
+</ul>
+
+<h2>Short Interview Answer</h2>
+
+<div class="highlight">
+We can implement a virtualized list using react-window. It renders only the visible rows and creates a virtual scrollable area for the full list. This keeps the DOM small and improves performance when rendering thousands of rows.
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+Use react-window's FixedSizeList to render only visible rows instead of thousands of DOM elements.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+
+</body>
+</html>

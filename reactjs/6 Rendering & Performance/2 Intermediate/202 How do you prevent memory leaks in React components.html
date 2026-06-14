@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>202 - How do you prevent memory leaks in React components?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px;margin-bottom:10px}
+p{color:#cbd5e1}
+ul{padding-left:24px}
+li{margin-bottom:10px;color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left;vertical-align:top}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px;margin-top:15px}
+.warning{background:#3b0820;border-left:5px solid #ef4444;padding:18px;border-radius:10px;margin-top:15px}
+.success{background:#052e16;padding:18px;border-left:5px solid #22c55e;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;margin-top:15px;text-align:center;line-height:2;font-size:18px}
+pre{border-radius:12px;overflow-x:auto}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>202. How do you prevent memory leaks in React components?</h1>
+
+<h2>One-Line Definition</h2>
+
+<div class="highlight">
+We prevent memory leaks in React components by cleaning up async tasks, timers, subscriptions, event listeners, and connections when the component unmounts.
+</div>
+
+<h2>Simple Meaning</h2>
+
+<p>
+A memory leak happens when something keeps running even after the component is removed from the UI.
+</p>
+
+<p>
+For example:
+</p>
+
+<ul>
+<li>Timer keeps running.</li>
+<li>API request finishes after component unmount.</li>
+<li>Event listener remains attached.</li>
+<li>WebSocket or SignalR connection remains active.</li>
+<li>Subscription keeps sending updates.</li>
+</ul>
+
+<div class="warning">
+If these things are not cleaned up, they can waste memory, update removed components, and slow down the application.
+</div>
+
+<h2>Visual Flow</h2>
+
+<div class="flow">
+Component Mounted
+<br>
+↓
+<br>
+Effect Starts Timer / API / Listener
+<br>
+↓
+<br>
+Component Unmounted
+<br>
+↓
+<br>
+Cleanup Function Runs
+<br>
+↓
+<br>
+Memory Leak Prevented
+</div>
+
+<h2>Main Rule</h2>
+
+<div class="highlight">
+Anything started inside useEffect should usually be stopped inside the cleanup function.
+</div>
+
+<h2>Basic Cleanup Syntax</h2>
+
+<pre><code class="language-js">useEffect(() => {
+  // start something
+
+  return () => {
+    // clean it here
+  };
+}, []);</code></pre>
+
+<h2>1. Clear setTimeout</h2>
+
+<h3>Problem</h3>
+
+<pre><code class="language-js">useEffect(() => {
+  setTimeout(() => setMessage('Done'), 3000);
+}, []);</code></pre>
+
+<p>
+If the component unmounts before 3 seconds, timeout still runs.
+</p>
+
+<h3>Solution</h3>
+
+<pre><code class="language-js">useEffect(() => {
+  const timeoutId = setTimeout(() => setMessage('Done'), 3000);
+
+  return () => clearTimeout(timeoutId);
+}, []);</code></pre>
+
+<div class="success">
+clearTimeout stops the pending timeout when the component unmounts.
+</div>
+
+<h2>2. Clear setInterval</h2>
+
+<h3>Problem</h3>
+
+<pre><code class="language-js">useEffect(() => {
+  setInterval(() => setCount(c => c + 1), 1000);
+}, []);</code></pre>
+
+<p>
+Interval continues forever if we do not clear it.
+</p>
+
+<h3>Solution</h3>
+
+<pre><code class="language-js">useEffect(() => {
+  const intervalId = setInterval(() => setCount(c => c + 1), 1000);
+
+  return () => clearInterval(intervalId);
+}, []);</code></pre>
+
+<h2>3. Remove Event Listeners</h2>
+
+<h3>Problem</h3>
+
+<pre><code class="language-js">useEffect(() => {
+  window.addEventListener('resize', handleResize);
+}, []);</code></pre>
+
+<p>
+The resize listener remains attached after component unmount.
+</p>
+
+<h3>Solution</h3>
+
+<pre><code class="language-js">useEffect(() => {
+  function handleResize() {
+    setWidth(window.innerWidth);
+  }
+
+  window.addEventListener('resize', handleResize);
+
+  return () => window.removeEventListener('resize', handleResize);
+}, []);</code></pre>
+
+<div class="success">
+The same function reference must be used for addEventListener and removeEventListener.
+</div>
+
+<h2>4. Cancel API Requests</h2>
+
+<p>
+If a component unmounts before an API response comes back, the response may still try to update state.
+</p>
+
+<h3>Solution With AbortController</h3>
+
+<pre><code class="language-js">useEffect(() => {
+  const controller = new AbortController();
+
+  fetch('/api/user', { signal: controller.signal })
+    .then(res => res.json())
+    .then(data => setUser(data))
+    .catch(error => {
+      if (error.name !== 'AbortError') console.log(error);
+    });
+
+  return () => controller.abort();
+}, []);</code></pre>
+
+<div class="success">
+AbortController cancels the fetch request when the component unmounts.
+</div>
+
+<h2>5. Cleanup WebSocket / SignalR Connections</h2>
+
+<h3>Example</h3>
+
+<pre><code class="language-js">useEffect(() => {
+  const connection = new signalR.HubConnectionBuilder()
+    .withUrl('/faceAuthHub')
+    .build();
+
+  connection.start();
+
+  connection.on('ReceiveMsg', message => {
+    setMessage(message);
+  });
+
+  return () => {
+    connection.off('ReceiveMsg');
+    connection.stop();
+  };
+}, []);</code></pre>
+
+<div class="success">
+Connections should be stopped when the component is removed.
+</div>
+
+<h2>6. Cleanup Subscriptions</h2>
+
+<pre><code class="language-js">useEffect(() => {
+  const subscription = userService.subscribe(data => {
+    setUser(data);
+  });
+
+  return () => subscription.unsubscribe();
+}, []);</code></pre>
+
+<p>
+This is common in observable-based APIs or custom subscription services.
+</p>
+
+<h2>7. Avoid State Updates After Unmount</h2>
+
+<p>
+Sometimes we cannot cancel an async task directly.
+</p>
+
+<p>
+In that case, we can ignore the result after unmount.
+</p>
+
+<pre><code class="language-js">useEffect(() => {
+  let isMounted = true;
+
+  fetch('/api/user')
+    .then(res => res.json())
+    .then(data => {
+      if (isMounted) setUser(data);
+    });
+
+  return () => {
+    isMounted = false;
+  };
+}, []);</code></pre>
+
+<div class="warning">
+Prefer AbortController for fetch. Use this pattern only when the async operation cannot be cancelled.
+</div>
+
+<h2>Real Project Example</h2>
+
+<p>
+Suppose our Aadhaar Authentication modal starts:
+</p>
+
+<ul>
+<li>OTP API request</li>
+<li>Face authentication SignalR connection</li>
+<li>Device capture callback</li>
+<li>Popup timer</li>
+</ul>
+
+<p>
+If the user closes the modal, all these operations should be cleaned.
+</p>
+
+<pre><code class="language-js">useEffect(() => {
+  const timerId = setTimeout(() => setShowError(false), 30000);
+
+  return () => clearTimeout(timerId);
+}, []);</code></pre>
+
+<div class="highlight">
+When modal closes or component unmounts, timers, connections, and pending async operations should not continue unnecessarily.
+</div>
+
+<h2>Common Memory Leak Sources</h2>
+
+<table>
+<tr>
+<th>Source</th>
+<th>Cleanup</th>
+</tr>
+
+<tr>
+<td>setTimeout</td>
+<td>clearTimeout</td>
+</tr>
+
+<tr>
+<td>setInterval</td>
+<td>clearInterval</td>
+</tr>
+
+<tr>
+<td>Event listener</td>
+<td>removeEventListener</td>
+</tr>
+
+<tr>
+<td>Fetch request</td>
+<td>AbortController</td>
+</tr>
+
+<tr>
+<td>WebSocket</td>
+<td>close connection</td>
+</tr>
+
+<tr>
+<td>SignalR</td>
+<td>off event and stop connection</td>
+</tr>
+
+<tr>
+<td>Subscription</td>
+<td>unsubscribe</td>
+</tr>
+</table>
+
+<h2>Important Interview Points</h2>
+
+<ul>
+<li>Memory leaks usually happen when async work continues after unmount.</li>
+<li>useEffect cleanup function is the main solution.</li>
+<li>Clear timers and intervals.</li>
+<li>Remove event listeners.</li>
+<li>Cancel API requests using AbortController.</li>
+<li>Unsubscribe from subscriptions.</li>
+<li>Close WebSocket or SignalR connections.</li>
+<li>Avoid calling setState after component unmount.</li>
+</ul>
+
+<h2>Short Interview Answer</h2>
+
+<div class="highlight">
+To prevent memory leaks in React, we clean up side effects in the cleanup function returned from useEffect. This includes clearing timers, removing event listeners, aborting API requests, unsubscribing from subscriptions, and closing WebSocket or SignalR connections when the component unmounts.
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+Prevent memory leaks by cleaning up all side effects in useEffect cleanup before the component unmounts.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+
+</body>
+</html>

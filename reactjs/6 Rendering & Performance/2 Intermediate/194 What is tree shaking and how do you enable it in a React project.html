@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>194 - What is tree shaking and how do you enable it in a React project?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px;margin-bottom:10px}
+p{color:#cbd5e1}
+ul{padding-left:24px}
+li{margin-bottom:10px;color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left;vertical-align:top}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px;margin-top:15px}
+.warning{background:#1e1b4b;border-left:5px solid #fbbf24;padding:18px;border-radius:10px;margin-top:15px}
+.success{background:#052e16;padding:18px;border-left:5px solid #22c55e;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;margin-top:15px;text-align:center;line-height:2;font-size:18px}
+pre{border-radius:12px;overflow-x:auto}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>194. What is tree shaking and how do you enable it in a React project?</h1>
+
+<h2>One-Line Definition</h2>
+
+<div class="highlight">
+Tree shaking is a build optimization technique that removes unused JavaScript code from the final production bundle.
+</div>
+
+<h2>Simple Meaning</h2>
+
+<p>
+In our React project, we may create or import many functions, components, or library features.
+</p>
+
+<p>
+But sometimes we use only a few of them.
+</p>
+
+<div class="highlight">
+Tree shaking removes the code that is imported nowhere or used nowhere.
+</div>
+
+<h2>Simple Example</h2>
+
+<h3>utils.js</h3>
+
+<pre><code class="language-js">export function add(a, b) {
+  return a + b;
+}
+
+export function subtract(a, b) {
+  return a - b;
+}
+
+export function multiply(a, b) {
+  return a * b;
+}</code></pre>
+
+<h3>App.js</h3>
+
+<pre><code class="language-js">import { add } from './utils';
+
+function App() {
+  return &lt;h1&gt;{add(10, 5)}&lt;/h1&gt;;
+}
+
+export default App;</code></pre>
+
+<p>
+Here our application uses only <strong>add()</strong>.
+</p>
+
+<div class="success">
+During production build, unused functions like subtract() and multiply() can be removed from the final bundle.
+</div>
+
+<h2>Why Is Tree Shaking Needed?</h2>
+
+<ul>
+<li>It reduces JavaScript bundle size.</li>
+<li>It removes unused code.</li>
+<li>It improves page loading speed.</li>
+<li>It improves application performance.</li>
+<li>It helps avoid sending unnecessary JavaScript to the browser.</li>
+</ul>
+
+<h2>How Tree Shaking Works</h2>
+
+<div class="flow">
+Source Code
+<br>
+↓
+<br>
+Bundler Checks Imports and Exports
+<br>
+↓
+<br>
+Finds Unused Code
+<br>
+↓
+<br>
+Removes Unused Code
+<br>
+↓
+<br>
+Creates Smaller Production Bundle
+</div>
+
+<h2>Important Requirement</h2>
+
+<div class="warning">
+Tree shaking works best with ES Modules, meaning import and export syntax.
+</div>
+
+<h3>Good Syntax</h3>
+
+<pre><code class="language-js">import { add } from './utils';
+
+export function add(a, b) {
+  return a + b;
+}</code></pre>
+
+<h3>Avoid CommonJS For Tree Shaking</h3>
+
+<pre><code class="language-js">const utils = require('./utils');</code></pre>
+
+<p>
+CommonJS is harder for bundlers to analyze statically, so tree shaking may not work properly.
+</p>
+
+<h2>How to Enable Tree Shaking in React?</h2>
+
+<h3>1. Use Production Build</h3>
+
+<pre><code class="language-bash">npm run build</code></pre>
+
+<p>
+Tree shaking usually runs automatically during the production build.
+</p>
+
+<h3>2. Use ES Module Import Export</h3>
+
+<pre><code class="language-js">import { add } from './utils';
+
+export function add(a, b) {
+  return a + b;
+}</code></pre>
+
+<h3>3. Import Only What You Need</h3>
+
+<p>Good:</p>
+
+<pre><code class="language-js">import { debounce } from 'lodash-es';</code></pre>
+
+<p>Avoid:</p>
+
+<pre><code class="language-js">import _ from 'lodash';</code></pre>
+
+<h3>4. Use Tree-Shakable Libraries</h3>
+
+<p>
+Some libraries are better for tree shaking because they provide ES module builds.
+</p>
+
+<table>
+<tr>
+<th>Library Style</th>
+<th>Tree Shaking Support</th>
+</tr>
+
+<tr>
+<td>ES Module library</td>
+<td>Good</td>
+</tr>
+
+<tr>
+<td>CommonJS library</td>
+<td>Limited</td>
+</tr>
+
+<tr>
+<td>Large full import</td>
+<td>Bad for bundle size</td>
+</tr>
+</table>
+
+<h3>5. Avoid Unnecessary Side Effects</h3>
+
+<p>
+A side effect means code that runs automatically when a file is imported.
+</p>
+
+<pre><code class="language-js">console.log('This file runs immediately');</code></pre>
+
+<p>
+Bundlers may keep such files because removing them can change application behavior.
+</p>
+
+<h2>React Project Example</h2>
+
+<h3>icons.js</h3>
+
+<pre><code class="language-js">export function UserIcon() {
+  return &lt;span&gt;👤&lt;/span&gt;;
+}
+
+export function CartIcon() {
+  return &lt;span&gt;🛒&lt;/span&gt;;
+}
+
+export function SearchIcon() {
+  return &lt;span&gt;🔍&lt;/span&gt;;
+}</code></pre>
+
+<h3>App.js</h3>
+
+<pre><code class="language-js">import { UserIcon } from './icons';
+
+function App() {
+  return &lt;UserIcon /&gt;;
+}
+
+export default App;</code></pre>
+
+<div class="success">
+Only UserIcon is used. CartIcon and SearchIcon can be removed from the final production bundle.
+</div>
+
+<h2>Tree Shaking in Vite or Create React App</h2>
+
+<p>
+Modern React build tools like Vite and Create React App already support tree shaking in production builds.
+</p>
+
+<pre><code class="language-bash">npm run build</code></pre>
+
+<p>
+The important thing is to write code in a tree-shakable way.
+</p>
+
+<h2>Wrong Practice</h2>
+
+<pre><code class="language-js">import * as utils from './utils';
+
+console.log(utils.add(10, 5));</code></pre>
+
+<p>
+This may make optimization harder in some cases because the bundler has to keep more information about the imported module.
+</p>
+
+<h2>Better Practice</h2>
+
+<pre><code class="language-js">import { add } from './utils';
+
+console.log(add(10, 5));</code></pre>
+
+<div class="highlight">
+Import only what our application actually needs.
+</div>
+
+<h2>Real Project Use Case</h2>
+
+<p>
+Suppose our React application uses an icon library with thousands of icons.
+</p>
+
+<p>
+But our page uses only one icon.
+</p>
+
+<pre><code class="language-js">import { FaUser } from 'react-icons/fa';
+
+function Profile() {
+  return &lt;FaUser /&gt;;
+}
+
+export default Profile;</code></pre>
+
+<p>
+Tree shaking helps keep unused icons out of the final bundle.
+</p>
+
+<h2>Important Interview Points</h2>
+
+<ul>
+<li>Tree shaking removes unused JavaScript code.</li>
+<li>It works during production build.</li>
+<li>It requires static ES module syntax.</li>
+<li>It reduces bundle size.</li>
+<li>It improves loading performance.</li>
+<li>Modern bundlers like Webpack, Rollup, Parcel, and Vite support it.</li>
+<li>CommonJS is less tree-shakable than ES Modules.</li>
+</ul>
+
+<h2>Short Interview Answer</h2>
+
+<div class="highlight">
+Tree shaking is a bundling optimization that removes unused code from the final JavaScript bundle. In React, it is enabled by using ES module import/export syntax and creating a production build with a modern bundler like Webpack or Vite.
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+Tree shaking removes unused JavaScript from the production bundle and is enabled by using ES modules with a production build.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+
+</body>
+</html>

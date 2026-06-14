@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>166 - Write a Custom Hook useFetch for Data Fetching</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px;margin-bottom:10px}
+p{color:#cbd5e1}
+ul{padding-left:24px}
+li{margin-bottom:10px;color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left;vertical-align:top}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px;margin-top:15px}
+.warning{background:#1e1b4b;border-left:5px solid #fbbf24;padding:18px;border-radius:10px;margin-top:15px}
+.success{background:#052e16;padding:18px;border-left:5px solid #22c55e;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;margin-top:15px;text-align:center;line-height:2;font-size:18px}
+pre{border-radius:12px;overflow-x:auto}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>166. Write a Custom Hook useFetch for Data Fetching</h1>
+
+<h2>One-Line Definition</h2>
+
+<div class="highlight">
+useFetch is a custom hook that reusable API fetching logic using useState and useEffect.
+</div>
+
+<h2>Why Do We Need useFetch?</h2>
+
+<p>
+Many components need API data.
+</p>
+
+<p>
+Without a custom hook, every component repeats the same logic:
+</p>
+
+<ul>
+<li>data state</li>
+<li>loading state</li>
+<li>error state</li>
+<li>useEffect</li>
+<li>fetch call</li>
+<li>try/catch</li>
+</ul>
+
+<div class="warning">
+If the same API loading and error logic is repeated in many components, we can move it into a custom hook.
+</div>
+
+<h2>Basic useFetch Hook</h2>
+
+<pre><code class="language-jsx">import { useState, useEffect } from 'react';
+
+function useFetch(url) {
+
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() =&gt; {
+
+    async function fetchData() {
+
+      try {
+        setLoading(true);
+        setError(null);
+
+        const response = await fetch(url);
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch data');
+        }
+
+        const result = await response.json();
+
+        setData(result);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+
+    }
+
+    fetchData();
+
+  }, [url]);
+
+  return { data, loading, error };
+
+}
+
+export default useFetch;</code></pre>
+
+<h2>How to Use useFetch</h2>
+
+<pre><code class="language-jsx">import useFetch from './useFetch';
+
+function Users() {
+
+  const { data: users, loading, error } = useFetch('https://jsonplaceholder.typicode.com/users');
+
+  if (loading) {
+    return &lt;p&gt;Loading...&lt;/p&gt;;
+  }
+
+  if (error) {
+    return &lt;p&gt;Error: {error}&lt;/p&gt;;
+  }
+
+  return (
+    &lt;ul&gt;
+      {users.map(user =&gt; (
+        &lt;li key={user.id}&gt;{user.name}&lt;/li&gt;
+      ))}
+    &lt;/ul&gt;
+  );
+
+}
+
+export default Users;</code></pre>
+
+<h2>What Does useFetch Return?</h2>
+
+<table>
+<tr>
+<th>Returned Value</th>
+<th>Meaning</th>
+</tr>
+
+<tr>
+<td><code>data</code></td>
+<td>The API response data.</td>
+</tr>
+
+<tr>
+<td><code>loading</code></td>
+<td>True while the API request is running.</td>
+</tr>
+
+<tr>
+<td><code>error</code></td>
+<td>Error message if the request fails.</td>
+</tr>
+</table>
+
+<h2>Flow</h2>
+
+<div class="flow">
+Component Mounts
+<br>↓<br>
+useFetch(url)
+<br>↓<br>
+loading = true
+<br>↓<br>
+API Request Starts
+<br>↓<br>
+Success or Error
+<br>↓<br>
+data or error updated
+<br>↓<br>
+loading = false
+</div>
+
+<h2>Important Point</h2>
+
+<div class="highlight">
+Custom hooks reuse logic, not state.
+</div>
+
+<p>
+If two components call <code>useFetch</code>, both get their own independent state.
+</p>
+
+<pre><code class="language-jsx">const users = useFetch('/api/users');
+
+const products = useFetch('/api/products');</code></pre>
+
+<div class="success">
+Each call has its own data, loading, and error state.
+</div>
+
+<h2>But In Real Projects, We Often Use Service + Custom Hook</h2>
+
+<p>
+In professional applications, we usually keep API calls inside a service file.
+</p>
+
+<div class="highlight">
+Service handles API logic. Custom hook handles React state and lifecycle.
+</div>
+
+<h2>Step 1 - Service File</h2>
+
+<pre><code class="language-jsx">// services/userService.js
+
+export async function getUsers() {
+
+  const response = await fetch('/api/users');
+
+  if (!response.ok) {
+    throw new Error('Failed to fetch users');
+  }
+
+  return response.json();
+
+}</code></pre>
+
+<h2>Step 2 - Custom Hook Uses Service</h2>
+
+<pre><code class="language-jsx">// hooks/useUsers.js
+
+import { useState, useEffect } from 'react';
+import { getUsers } from '../services/userService';
+
+function useUsers() {
+
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() =&gt; {
+
+    async function loadUsers() {
+
+      try {
+        setLoading(true);
+        setError(null);
+
+        const data = await getUsers();
+
+        setUsers(data);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+
+    }
+
+    loadUsers();
+
+  }, []);
+
+  return { users, loading, error };
+
+}
+
+export default useUsers;</code></pre>
+
+<h2>Step 3 - Component Uses Custom Hook</h2>
+
+<pre><code class="language-jsx">import useUsers from './useUsers';
+
+function UsersPage() {
+
+  const { users, loading, error } = useUsers();
+
+  if (loading) {
+    return &lt;p&gt;Loading...&lt;/p&gt;;
+  }
+
+  if (error) {
+    return &lt;p&gt;Error: {error}&lt;/p&gt;;
+  }
+
+  return (
+    &lt;ul&gt;
+      {users.map(user =&gt; (
+        &lt;li key={user.id}&gt;{user.name}&lt;/li&gt;
+      ))}
+    &lt;/ul&gt;
+  );
+
+}
+
+export default UsersPage;</code></pre>
+
+<h2>Service vs useFetch</h2>
+
+<table>
+<tr>
+<th>Service</th>
+<th>useFetch / Custom Hook</th>
+</tr>
+
+<tr>
+<td>Handles API call.</td>
+<td>Handles React state.</td>
+</tr>
+
+<tr>
+<td>Does not use React hooks.</td>
+<td>Uses useState and useEffect.</td>
+</tr>
+
+<tr>
+<td>Reusable outside React also.</td>
+<td>Reusable only inside React components/hooks.</td>
+</tr>
+
+<tr>
+<td>Example: <code>getUsers()</code></td>
+<td>Example: <code>useUsers()</code></td>
+</tr>
+</table>
+
+<h2>Real Project Structure</h2>
+
+<pre><code class="language-text">src
+├── services
+│   └── userService.js
+├── hooks
+│   └── useUsers.js
+└── components
+    └── UsersPage.jsx</code></pre>
+
+<div class="flow">
+Service
+<br>↓<br>
+API Call / Business Logic
+<br><br>
+Custom Hook
+<br>↓<br>
+React State + useEffect
+<br><br>
+Component
+<br>↓<br>
+UI Rendering
+</div>
+
+<h2>When Should You Write useFetch?</h2>
+
+<ul>
+<li>When many components need the same data-fetching pattern.</li>
+<li>When loading logic is repeated.</li>
+<li>When error handling is repeated.</li>
+<li>When API calls follow a common pattern.</li>
+</ul>
+
+<h2>When Should You NOT Write useFetch?</h2>
+
+<ul>
+<li>When the API call is used only once.</li>
+<li>When every API has very different logic.</li>
+<li>When using React Query or SWR.</li>
+<li>When the logic belongs only in a service.</li>
+</ul>
+
+<h2>Easy Way To Remember</h2>
+
+<div class="flow">
+Repeated API Fetching Logic
+<br>↓<br>
+Move State + Effect Logic Into useFetch
+<br>↓<br>
+Move API Call Logic Into Service
+<br>↓<br>
+Use Hook Inside Component
+</div>
+
+<h2>Interview Answer</h2>
+
+<div class="highlight">
+useFetch is a custom hook used to reuse data-fetching logic across components. It usually manages data, loading, and error states using useState and useEffect. In real-world projects, API calls are often placed inside a service file, and the custom hook uses that service while managing React state and lifecycle.
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+useFetch is a reusable custom hook for handling API data, loading state, and error state.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+
+</body>
+</html>

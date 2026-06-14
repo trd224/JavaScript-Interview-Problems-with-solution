@@ -70,6 +70,13 @@
   }
   .question-item:hover { border-color:#2a2a4e; background:#13131d; transform:translateX(3px); }
   .question-item.hidden { display:none !important; }
+  .question-item.duplicate{
+    opacity:.45;
+    filter:grayscale(35%);
+  }
+  .question-item.duplicate:hover{
+    opacity:.8;
+  }
   .q-num { font-family:'JetBrains Mono',monospace; font-size:0.65rem; color:var(--muted); min-width:28px; padding-top:2px; flex-shrink:0; }
   .q-text { font-size:0.9rem; line-height:1.55; flex:1; }
   .q-level {
@@ -82,6 +89,20 @@
 
   .topic-section.all-hidden { display:none; }
   .other-badge { color:#f59e0b !important; font-weight:700; }
+  .repeat-tag{
+    display:inline-flex;
+    align-items:center;
+    margin-left:8px;
+    padding:2px 7px;
+    border-radius:999px;
+    font-family:'JetBrains Mono',monospace;
+    font-size:0.62rem;
+    font-weight:700;
+    background:rgba(245,158,11,0.13);
+    color:#fcd34d;
+    border:1px solid rgba(245,158,11,0.45);
+    vertical-align:middle;
+  }
   .no-results-msg { text-align:center; color:var(--muted); font-family:'JetBrains Mono',monospace; padding:60px 0; }
 
   @media(max-width:600px){
@@ -920,6 +941,103 @@ const OTHER_QUESTIONS = [
 
 build();
 buildOther();
+
+setTimeout(markRepeatedQuestions,0);
+
+function cleanQuestionText(text){
+  return text.toLowerCase()
+    .replace(/\[[^\]]*\]/g,'')
+    .replace(/[“”"'’‘]/g,'')
+    .replace(/[()<>.,:;!?/+-]/g,' ')
+    .replace(/\s+/g,' ')
+    .trim();
+}
+
+function repeatKey(text){
+  let q = cleanQuestionText(text);
+
+  const versionMatch = q.match(/\breact\s+(18|19)\b/);
+  const version = versionMatch ? ':react' + versionMatch[1] : '';
+
+  // Same custom hook but different wording
+  const hookMatch = q.match(/\buse[a-z0-9]+\b/i);
+  if (hookMatch && q.includes('custom hook')) return 'custom-hook:' + hookMatch[0].toLowerCase();
+
+  // Built-in hook repeated in different wording
+  const builtInHookMatch = q.match(/\b(usecontext|useid|usetransition|usedeferredvalue|usesyncexternalstore|useinsertioneffect|useoptimistic|useactionstate)\b/i);
+  if (builtInHookMatch) return 'built-in-hook:' + builtInHookMatch[0].toLowerCase() + version;
+
+  // Avoid wrong matching: normal controlled component and controlled pattern are not same
+  if (q.includes('controlled component pattern')) return 'pattern:controlled-component';
+  if (q === 'what is a controlled component' || q === 'what is a controlled component in forms') return 'form:controlled-component';
+
+  q = q.replace(/^what is the /,'what is ');
+  q = q.replace(/^what are the /,'what are ');
+  q = q.replace(/^how do you /,'how ');
+  q = q.replace(/^how does /,'how ');
+  q = q.replace(/^write a custom hook /,'custom hook ');
+  q = q.replace(/^write a /,'write ');
+  q = q.replace(/^write /,'');
+
+  const replacements = [
+    [' and why is it used',''], [' and why use it',''], [' and why is it popular',''],
+    [' and when should you use it',''], [' and when is it used',''],
+    [' and how does it work',''], [' and how is it used',''],
+    [' and what problem does it solve',''], [' inside a react component',''],
+    [' in a react application',' in react app'], [' large react application',' large react app'],
+    [' introduced in react 18',''], [' in react 18',''], [' introduced in react 19',''], [' in react 19',''],
+    [' hook',''], [' api','']
+  ];
+
+  replacements.forEach(([a,b]) => q = q.replaceAll(a,b));
+  q = q.replace(/\s+/g,' ').trim();
+
+  if (q.includes('major new features')) return q + version;
+
+  return q + version;
+}
+
+function markRepeatedQuestions(){
+  const items=[...document.querySelectorAll('.question-item')];
+  const groups={};
+
+  items.forEach(item=>{
+    const num=item.querySelector('.q-num')?.textContent.trim();
+    const qTextEl=item.querySelector('.q-text');
+    const text=qTextEl?.childNodes[0]?.textContent.trim() || qTextEl?.textContent.trim();
+    const key=repeatKey(text);
+
+    if(!key || key.length<4) return;
+    groups[key]=groups[key]||[];
+    groups[key].push({item,num,text});
+  });
+
+  Object.values(groups).forEach(arr=>{
+    if(arr.length>1){
+      arr.forEach(cur=>{
+        const others=arr.filter(x=>x.num!==cur.num).map(x=>x.num);
+        const qTextEl=cur.item.querySelector('.q-text');
+        const old=qTextEl.querySelector('.repeat-tag');
+        if(old) old.remove();
+
+        const tag=document.createElement('span');
+        tag.className='repeat-tag';
+        tag.title='Repeated with question number '+others.join(', ');
+        
+const firstNum = Math.min(...arr.map(x => parseInt(x.num,10)));
+if(parseInt(cur.num,10)!==firstNum){
+  tag.textContent='Duplicate of '+firstNum;
+  cur.item.classList.add('duplicate');
+}
+
+        qTextEl.appendChild(tag);
+      });
+    }
+  });
+}
+
+
+
 
 function buildOther() {
   const main = document.getElementById('main');

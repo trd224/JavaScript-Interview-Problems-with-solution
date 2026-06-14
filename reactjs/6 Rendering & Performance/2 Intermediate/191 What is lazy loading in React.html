@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>191 - What is Lazy Loading in React?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px;margin-bottom:10px}
+p{color:#cbd5e1}
+ul{padding-left:24px}
+li{margin-bottom:10px;color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left;vertical-align:top}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px;margin-top:15px}
+.warning{background:#1e1b4b;border-left:5px solid #fbbf24;padding:18px;border-radius:10px;margin-top:15px}
+.success{background:#052e16;padding:18px;border-left:5px solid #22c55e;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;margin-top:15px;text-align:center;line-height:2;font-size:18px}
+pre{border-radius:12px;overflow-x:auto}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>191. What is Lazy Loading in React?</h1>
+
+<h2>One-Line Definition</h2>
+
+<div class="highlight">
+Lazy Loading is a technique where React loads a component only when it is actually needed instead of loading it during the initial page load.
+</div>
+
+<h2>Why Is It Needed?</h2>
+
+<p>
+Suppose our application contains:
+</p>
+
+<ul>
+<li>Dashboard</li>
+<li>Products Page</li>
+<li>Reports Page</li>
+<li>Settings Page</li>
+<li>Admin Panel</li>
+</ul>
+
+<p>
+Without lazy loading:
+</p>
+
+<pre><code>
+All Components
+↓
+Loaded Immediately
+↓
+Large Bundle
+↓
+Slow Initial Load
+</code></pre>
+
+<div class="warning">
+The user downloads code for pages they may never visit.
+</div>
+
+<h2>How Lazy Loading Helps</h2>
+
+<p>
+With lazy loading:
+</p>
+
+<div class="flow">
+Open Dashboard
+<br>
+↓
+<br>
+Load Dashboard Code Only
+
+<br><br>
+
+Visit Products Page
+<br>
+↓
+<br>
+Load Products Code
+
+<br><br>
+
+Visit Reports Page
+<br>
+↓
+<br>
+Load Reports Code
+</div>
+
+<div class="success">
+Components are downloaded only when they are needed.
+</div>
+
+<h2>Normal Import</h2>
+
+<p>
+Without lazy loading:
+</p>
+
+<pre><code class="language-jsx">import Dashboard from './Dashboard';</code></pre>
+
+<p>
+Dashboard becomes part of the main bundle.
+</p>
+
+<h2>Lazy Import</h2>
+
+<p>
+With lazy loading:
+</p>
+
+<pre><code class="language-jsx">const Dashboard = React.lazy(() =&gt;
+  import('./Dashboard')
+);</code></pre>
+
+<p>
+Dashboard is downloaded only when React renders it.
+</p>
+
+<h2>Using Suspense</h2>
+
+<p>
+React.lazy must be wrapped inside Suspense.
+</p>
+
+<pre><code class="language-jsx">import React, { Suspense } from 'react';
+
+const Dashboard = React.lazy(() =&gt;
+  import('./Dashboard')
+);
+
+function App() {
+
+  return (
+
+    &lt;Suspense fallback={&lt;p&gt;Loading...&lt;/p&gt;}&gt;
+
+      &lt;Dashboard /&gt;
+
+    &lt;/Suspense&gt;
+
+  );
+
+}</code></pre>
+
+<p>
+While Dashboard is downloading:
+</p>
+
+<pre><code>
+Loading...
+</code></pre>
+
+<p>
+is displayed.
+</p>
+
+<h2>How React.lazy Works Internally</h2>
+
+<div class="flow">
+User Requests Component
+<br>
+↓
+<br>
+Dynamic import()
+<br>
+↓
+<br>
+Download Component Chunk
+<br>
+↓
+<br>
+Render Component
+</div>
+
+<h2>Real Route-Based Example</h2>
+
+<pre><code class="language-jsx">import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import React, { Suspense } from 'react';
+
+const Dashboard = React.lazy(() =&gt;
+  import('./pages/Dashboard')
+);
+
+const Products = React.lazy(() =&gt;
+  import('./pages/Products')
+);
+
+function App() {
+
+  return (
+
+    &lt;BrowserRouter&gt;
+
+      &lt;Suspense fallback={&lt;h2&gt;Loading...&lt;/h2&gt;}&gt;
+
+        &lt;Routes&gt;
+
+          &lt;Route
+            path="/"
+            element={&lt;Dashboard /&gt;}
+          /&gt;
+
+          &lt;Route
+            path="/products"
+            element={&lt;Products /&gt;}
+          /&gt;
+
+        &lt;/Routes&gt;
+
+      &lt;/Suspense&gt;
+
+    &lt;/BrowserRouter&gt;
+
+  );
+
+}</code></pre>
+
+<h2>What Happens Here?</h2>
+
+<h3>User Opens</h3>
+
+<pre><code>
+/
+</code></pre>
+
+<p>
+React downloads:
+</p>
+
+<pre><code>
+Dashboard Chunk
+</code></pre>
+
+<h3>User Navigates To</h3>
+
+<pre><code>
+/products
+</code></pre>
+
+<p>
+React downloads:
+</p>
+
+<pre><code>
+Products Chunk
+</code></pre>
+
+<p>
+for the first time.
+</p>
+
+<div class="success">
+Only required page code is downloaded.
+</div>
+
+<h2>Lazy Loading vs Code Splitting</h2>
+
+<table>
+<tr>
+<th>Code Splitting</th>
+<th>Lazy Loading</th>
+</tr>
+
+<tr>
+<td>Creates separate chunks.</td>
+<td>Loads chunks when needed.</td>
+</tr>
+
+<tr>
+<td>Build-time optimization.</td>
+<td>Runtime optimization.</td>
+</tr>
+
+<tr>
+<td>Uses dynamic import().</td>
+<td>Uses React.lazy().</td>
+</tr>
+
+<tr>
+<td>Splits bundle.</td>
+<td>Delays downloading.</td>
+</tr>
+</table>
+
+<p>
+They usually work together.
+</p>
+
+<h2>Real-World Example</h2>
+
+<p>
+Imagine:
+</p>
+
+<pre><code>
+Dashboard = 200 KB
+
+Products = 300 KB
+
+Reports = 500 KB
+
+Admin = 700 KB
+</code></pre>
+
+<p>
+Without lazy loading:
+</p>
+
+<pre><code>
+1.7 MB Downloaded Immediately
+</code></pre>
+
+<p>
+With lazy loading:
+</p>
+
+<pre><code>
+Dashboard Only
+
+=
+
+200 KB Initially
+</code></pre>
+
+<div class="success">
+Much faster initial page load.
+</div>
+
+<h2>Common Use Cases</h2>
+
+<ul>
+<li>Route-based pages.</li>
+<li>Admin panels.</li>
+<li>Charts and dashboards.</li>
+<li>Heavy third-party libraries.</li>
+<li>Modals opened rarely.</li>
+<li>Settings screens.</li>
+</ul>
+
+<h2>Easy Way To Remember</h2>
+
+<div class="flow">
+Code Splitting
+<br>
+↓
+<br>
+Create Multiple Chunks
+
+<br><br>
+
+Lazy Loading
+<br>
+↓
+<br>
+Load Chunk Only When Needed
+</div>
+
+<h2>Important Interview Points</h2>
+
+<ul>
+<li>Lazy loading delays component loading.</li>
+<li>Implemented using React.lazy().</li>
+<li>Requires Suspense.</li>
+<li>Uses dynamic import().</li>
+<li>Improves initial page load performance.</li>
+<li>Often used with route-based code splitting.</li>
+<li>Reduces initial bundle size.</li>
+</ul>
+
+<h2>Short Interview Answer</h2>
+
+<div class="highlight">
+Lazy Loading is a technique where React loads components only when they are needed. It is implemented using React.lazy and Suspense, helping reduce initial bundle size and improve application performance.
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+Lazy Loading delays downloading a component until it is actually required by the user.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+
+</body>
+</html>

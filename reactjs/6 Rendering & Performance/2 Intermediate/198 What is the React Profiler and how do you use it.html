@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>198 - What is the React Profiler and how do you use it?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px;margin-bottom:10px}
+p{color:#cbd5e1}
+ul{padding-left:24px}
+li{margin-bottom:10px;color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left;vertical-align:top}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px;margin-top:15px}
+.warning{background:#1e1b4b;border-left:5px solid #fbbf24;padding:18px;border-radius:10px;margin-top:15px}
+.success{background:#052e16;padding:18px;border-left:5px solid #22c55e;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;margin-top:15px;text-align:center;line-height:2;font-size:18px}
+pre{border-radius:12px;overflow-x:auto}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>198. What is the React Profiler and how do you use it?</h1>
+
+<h2>One-Line Definition</h2>
+
+<div class="highlight">
+React Profiler is a performance analysis tool that helps us identify which components are rendering, how often they render, and how long each render takes.
+</div>
+
+<h2>Why Is React Profiler Needed?</h2>
+
+<p>
+Sometimes a React application feels slow.
+</p>
+
+<p>
+The problem is usually not React itself.
+</p>
+
+<p>
+The problem is often:
+</p>
+
+<ul>
+<li>Unnecessary re-renders.</li>
+<li>Heavy calculations during rendering.</li>
+<li>Large component trees.</li>
+<li>Incorrect use of state.</li>
+<li>Missing memoization.</li>
+</ul>
+
+<div class="warning">
+Without profiling, it is difficult to know which component is causing the slowdown.
+</div>
+
+<h2>What Does React Profiler Show?</h2>
+
+<table>
+<tr>
+<th>Information</th>
+<th>Description</th>
+</tr>
+
+<tr>
+<td>Render Count</td>
+<td>How many times a component rendered.</td>
+</tr>
+
+<tr>
+<td>Render Duration</td>
+<td>How long the render took.</td>
+</tr>
+
+<tr>
+<td>Component Tree</td>
+<td>Which components rendered.</td>
+</tr>
+
+<tr>
+<td>Commit Time</td>
+<td>How long React took to update the UI.</td>
+</tr>
+
+<tr>
+<td>Render Reason</td>
+<td>Why the component rendered.</td>
+</tr>
+</table>
+
+<h2>Visual Flow</h2>
+
+<div class="flow">
+User Action
+<br>
+↓
+<br>
+React Re-renders Components
+<br>
+↓
+<br>
+Profiler Records Activity
+<br>
+↓
+<br>
+Shows Render Time
+<br>
+↓
+<br>
+Find Slow Components
+<br>
+↓
+<br>
+Optimize Performance
+</div>
+
+<h2>Method 1 - Using React DevTools Profiler</h2>
+
+<h3>Step 1 - Install React DevTools</h3>
+
+<p>
+Install the React Developer Tools browser extension.
+</p>
+
+<h3>Step 2 - Open DevTools</h3>
+
+<p>
+Open browser DevTools and click the <strong>Profiler</strong> tab.
+</p>
+
+<h3>Step 3 - Start Recording</h3>
+
+<p>
+Click:
+</p>
+
+<pre><code>Start Profiling</code></pre>
+
+<p>
+Then interact with your application.
+</p>
+
+<ul>
+<li>Click buttons.</li>
+<li>Type in forms.</li>
+<li>Navigate pages.</li>
+<li>Open modals.</li>
+</ul>
+
+<h3>Step 4 - Stop Recording</h3>
+
+<p>
+Click:
+</p>
+
+<pre><code>Stop Profiling</code></pre>
+
+<p>
+React DevTools will display render information.
+</p>
+
+<div class="success">
+Now you can see exactly which components rendered and how much time they consumed.
+</div>
+
+<h2>Example Problem</h2>
+
+<pre><code class="language-js">function Parent() {
+
+  const [count, setCount] = useState(0);
+
+  return (
+    &lt;&gt;
+      &lt;button onClick={() => setCount(count + 1)}&gt;
+        Increment
+      &lt;/button&gt;
+
+      &lt;Child /&gt;
+    &lt;/&gt;
+  );
+}</code></pre>
+
+<p>
+Every time Parent renders:
+</p>
+
+<pre><code>Child also renders.</code></pre>
+
+<p>
+Profiler helps us detect this behavior.
+</p>
+
+<h2>Profiler Result</h2>
+
+<table>
+<tr>
+<th>Component</th>
+<th>Render Count</th>
+</tr>
+
+<tr>
+<td>Parent</td>
+<td>10</td>
+</tr>
+
+<tr>
+<td>Child</td>
+<td>10</td>
+</tr>
+</table>
+
+<p>
+Even if Child does not use count, it still re-renders.
+</p>
+
+<div class="warning">
+This is a common performance issue found using Profiler.
+</div>
+
+<h2>Optimization Using React.memo</h2>
+
+<pre><code class="language-js">const Child = React.memo(function Child() {
+
+  console.log('Child Rendered');
+
+  return &lt;h2&gt;Child Component&lt;/h2&gt;;
+
+});</code></pre>
+
+<p>
+After optimization:
+</p>
+
+<table>
+<tr>
+<th>Component</th>
+<th>Render Count</th>
+</tr>
+
+<tr>
+<td>Parent</td>
+<td>10</td>
+</tr>
+
+<tr>
+<td>Child</td>
+<td>1</td>
+</tr>
+</table>
+
+<div class="success">
+Profiler confirms that the optimization worked.
+</div>
+
+<h2>Method 2 - Using the Profiler Component</h2>
+
+<p>
+React also provides a special Profiler component.
+</p>
+
+<pre><code class="language-js">import { Profiler } from 'react';
+
+function onRender(
+  id,
+  phase,
+  actualDuration
+) {
+  console.log(
+    id,
+    phase,
+    actualDuration
+  );
+}
+
+function App() {
+  return (
+    &lt;Profiler
+      id="Dashboard"
+      onRender={onRender}
+    &gt;
+      &lt;Dashboard /&gt;
+    &lt;/Profiler&gt;
+  );
+}</code></pre>
+
+<h2>How It Works</h2>
+
+<table>
+<tr>
+<th>Parameter</th>
+<th>Meaning</th>
+</tr>
+
+<tr>
+<td>id</td>
+<td>Profiler identifier.</td>
+</tr>
+
+<tr>
+<td>phase</td>
+<td>Mount or update.</td>
+</tr>
+
+<tr>
+<td>actualDuration</td>
+<td>Time spent rendering.</td>
+</tr>
+</table>
+
+<h2>Example Output</h2>
+
+<pre><code>Dashboard mount 8.3
+Dashboard update 2.1
+Dashboard update 1.7</code></pre>
+
+<p>
+This shows exactly how long each render took.
+</p>
+
+<h2>Flamegraph View</h2>
+
+<p>
+React DevTools provides a Flamegraph.
+</p>
+
+<p>
+The Flamegraph helps us see:
+</p>
+
+<ul>
+<li>Which components rendered.</li>
+<li>Which components were slow.</li>
+<li>Where rendering time was spent.</li>
+</ul>
+
+<div class="highlight">
+Large bars usually indicate components that consume more rendering time.
+</div>
+
+<h2>Ranked View</h2>
+
+<p>
+Profiler also provides a Ranked View.
+</p>
+
+<p>
+This sorts components by render cost.
+</p>
+
+<table>
+<tr>
+<th>Component</th>
+<th>Render Time</th>
+</tr>
+
+<tr>
+<td>ChartDashboard</td>
+<td>42ms</td>
+</tr>
+
+<tr>
+<td>UserTable</td>
+<td>18ms</td>
+</tr>
+
+<tr>
+<td>Header</td>
+<td>1ms</td>
+</tr>
+</table>
+
+<p>
+This makes performance bottlenecks easy to identify.
+</p>
+
+<h2>Real Project Example</h2>
+
+<p>
+Suppose our Aadhaar Authentication page feels slow while typing.
+</p>
+
+<p>
+Using React Profiler we may discover:
+</p>
+
+<ul>
+<li>Typing in Aadhaar input causes 25 components to re-render.</li>
+<li>Consent section re-renders unnecessarily.</li>
+<li>Device information panel re-renders unnecessarily.</li>
+<li>Large validation functions run on every keystroke.</li>
+</ul>
+
+<p>
+After applying:
+</p>
+
+<ul>
+<li>React.memo</li>
+<li>useMemo</li>
+<li>useCallback</li>
+<li>Component splitting</li>
+</ul>
+
+<p>
+Profiler can verify the improvement.
+</p>
+
+<h2>When Should You Use React Profiler?</h2>
+
+<ul>
+<li>Application feels slow.</li>
+<li>Large component trees.</li>
+<li>Frequent re-renders.</li>
+<li>Performance optimization work.</li>
+<li>Before and after performance comparison.</li>
+</ul>
+
+<h2>Important Interview Points</h2>
+
+<ul>
+<li>React Profiler is a performance debugging tool.</li>
+<li>It shows render counts and render duration.</li>
+<li>Available inside React DevTools.</li>
+<li>Can identify unnecessary re-renders.</li>
+<li>Helps validate React.memo, useMemo, and useCallback optimizations.</li>
+<li>Provides Flamegraph and Ranked views.</li>
+<li>React also provides a &lt;Profiler&gt; component API.</li>
+</ul>
+
+<h2>Short Interview Answer</h2>
+
+<div class="highlight">
+React Profiler is a performance analysis tool that measures component render times and render frequency. It is commonly used through React DevTools to identify slow or unnecessary re-renders and verify performance optimizations such as React.memo, useMemo, and useCallback.
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+React Profiler helps identify slow and unnecessary component renders by measuring render frequency and render duration.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+
+</body>
+</html>

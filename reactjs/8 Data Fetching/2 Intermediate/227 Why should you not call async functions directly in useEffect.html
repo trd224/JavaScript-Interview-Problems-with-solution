@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>227 - Why should you not call async functions directly in useEffect?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px;margin-bottom:10px}
+p{color:#cbd5e1}
+ul{padding-left:24px}
+li{margin-bottom:10px;color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left;vertical-align:top}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px;margin-top:15px}
+.warning{background:#3b0820;border-left:5px solid #ef4444;padding:18px;border-radius:10px;margin-top:15px}
+.success{background:#052e16;padding:18px;border-left:5px solid #22c55e;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;margin-top:15px;text-align:center;line-height:2;font-size:18px}
+pre{border-radius:12px;overflow-x:auto}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>227. Why should you not call async functions directly in useEffect?</h1>
+
+<h2>One-Line Definition</h2>
+
+<div class="highlight">
+You should not make the useEffect callback async because React expects useEffect to return either nothing or a cleanup function, but an async function always returns a Promise.
+</div>
+
+<h2>The Common Mistake</h2>
+
+<p>
+Many developers try this:
+</p>
+
+<pre><code class="language-js">useEffect(async () => {
+  const res = await fetch('/api/users');
+  const data = await res.json();
+
+  setUsers(data);
+}, []);</code></pre>
+
+<div class="warning">
+This is incorrect and React will show a warning.
+</div>
+
+<h2>Why Is It Wrong?</h2>
+
+<p>
+React expects useEffect to return:
+</p>
+
+<ul>
+<li>Nothing (undefined)</li>
+<li>A cleanup function</li>
+</ul>
+
+<h3>Valid Returns</h3>
+
+<pre><code class="language-js">useEffect(() => {
+  console.log('Effect');
+}, []);</code></pre>
+
+<pre><code class="language-js">useEffect(() => {
+  return () => {
+    console.log('Cleanup');
+  };
+}, []);</code></pre>
+
+<h3>But Async Functions Return A Promise</h3>
+
+<pre><code class="language-js">async function getUsers() {
+  return [];
+}</code></pre>
+
+<p>
+Actually returns:
+</p>
+
+<pre><code class="language-js">Promise&lt;Array&gt;</code></pre>
+
+<p>
+Therefore:
+</p>
+
+<pre><code class="language-js">useEffect(async () => {
+  ...
+}, []);</code></pre>
+
+<p>
+becomes:
+</p>
+
+<pre><code class="language-js">useEffect(() => {
+  return Promise;
+}, []);</code></pre>
+
+<div class="warning">
+React cannot use a Promise as a cleanup function.
+</div>
+
+<h2>Visual Explanation</h2>
+
+<div class="flow">
+useEffect Runs
+<br>
+↓
+<br>
+React Expects
+<br>
+undefined
+or
+cleanup function
+<br>
+↓
+<br>
+async Function Returns Promise
+<br>
+↓
+<br>
+React Gets Promise Instead
+<br>
+↓
+<br>
+Problem
+</div>
+
+<h2>The Correct Pattern</h2>
+
+<p>
+Create an async function inside useEffect and call it.
+</p>
+
+<pre><code class="language-js">useEffect(() => {
+
+  async function getUsers() {
+    const res = await fetch('/api/users');
+    const data = await res.json();
+
+    setUsers(data);
+  }
+
+  getUsers();
+
+}, []);</code></pre>
+
+<div class="success">
+The effect itself is not async. Only the inner function is async.
+</div>
+
+<h2>Compact Version</h2>
+
+<pre><code class="language-js">useEffect(() => {
+  async function getUsers() {
+    const res = await fetch('/api/users');
+    const data = await res.json();
+
+    setUsers(data);
+  }
+
+  getUsers();
+}, []);</code></pre>
+
+<h2>Even More Compact</h2>
+
+<pre><code class="language-js">useEffect(() => {
+  (async () => {
+    const res = await fetch('/api/users');
+    const data = await res.json();
+
+    setUsers(data);
+  })();
+}, []);</code></pre>
+
+<p>
+This works but many teams prefer the named function version because it is easier to read.
+</p>
+
+<h2>What About Cleanup?</h2>
+
+<p>
+One big reason React requires a normal function is cleanup support.
+</p>
+
+<pre><code class="language-js">useEffect(() => {
+  const timerId = setInterval(() => {
+    console.log('Running...');
+  }, 1000);
+
+  return () => clearInterval(timerId);
+}, []);</code></pre>
+
+<p>
+React knows exactly how to execute the cleanup function.
+</p>
+
+<p>
+But if the effect returned a Promise:
+</p>
+
+<pre><code class="language-js">return Promise;</code></pre>
+
+<p>
+React would not know what cleanup to perform.
+</p>
+
+<h2>Real API Example</h2>
+
+<h3>Wrong</h3>
+
+<pre><code class="language-js">useEffect(async () => {
+  const res = await fetch('/api/user');
+  const data = await res.json();
+
+  setUser(data);
+}, []);</code></pre>
+
+<h3>Correct</h3>
+
+<pre><code class="language-js">useEffect(() => {
+  async function getUser() {
+    const res = await fetch('/api/user');
+    const data = await res.json();
+
+    setUser(data);
+  }
+
+  getUser();
+}, []);</code></pre>
+
+<h2>Correct Pattern With Cleanup</h2>
+
+<p>
+This is what you will commonly use in real projects:
+</p>
+
+<pre><code class="language-js">useEffect(() => {
+  const controller = new AbortController();
+
+  async function getUser() {
+    try {
+      const res = await fetch('/api/user', {
+        signal: controller.signal
+      });
+
+      const data = await res.json();
+
+      setUser(data);
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  getUser();
+
+  return () => controller.abort();
+}, []);</code></pre>
+
+<div class="success">
+This handles both async work and cleanup correctly.
+</div>
+
+<h2>Real Project Example</h2>
+
+<p>
+Suppose our Aadhaar Authentication page loads:
+</p>
+
+<ul>
+<li>User information</li>
+<li>Department list</li>
+<li>Authentication configuration</li>
+</ul>
+
+<p>
+We might write:
+</p>
+
+<pre><code class="language-js">useEffect(() => {
+  async function loadData() {
+    const res = await fetch('/api/config');
+    const data = await res.json();
+
+    setConfig(data);
+  }
+
+  loadData();
+}, []);</code></pre>
+
+<p>
+instead of:
+</p>
+
+<pre><code class="language-js">useEffect(async () => {
+  ...
+}, []);</code></pre>
+
+<h2>Interview Trap</h2>
+
+<p>
+Many interviewers ask:
+</p>
+
+<pre><code>Can useEffect be async?</code></pre>
+
+<p>
+Correct answer:
+</p>
+
+<div class="warning">
+No. The useEffect callback itself should not be async.
+</div>
+
+<p>
+Instead:
+</p>
+
+<ul>
+<li>Create an async function inside useEffect.</li>
+<li>Call that function.</li>
+<li>Return a cleanup function if needed.</li>
+</ul>
+
+<h2>Important Interview Points</h2>
+
+<ul>
+<li>useEffect expects undefined or a cleanup function.</li>
+<li>Async functions always return a Promise.</li>
+<li>React cannot use a Promise as a cleanup function.</li>
+<li>Do not make the useEffect callback async.</li>
+<li>Create an async function inside useEffect instead.</li>
+<li>AbortController is commonly used for cleanup of fetch requests.</li>
+<li>This is one of the most common React interview questions.</li>
+</ul>
+
+<h2>Short Interview Answer</h2>
+
+<div class="highlight">
+You should not call async functions directly in useEffect because the effect callback must return either nothing or a cleanup function, while an async function always returns a Promise. The correct approach is to define an async function inside useEffect and then call it.
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+The useEffect callback should not be async because React expects a cleanup function, but async functions return Promises.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+
+</body>
+</html>

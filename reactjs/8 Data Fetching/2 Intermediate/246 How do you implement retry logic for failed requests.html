@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>246 - How do you implement retry logic for failed requests?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px;margin-bottom:10px}
+p{color:#cbd5e1}
+ul{padding-left:24px}
+li{margin-bottom:10px;color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left;vertical-align:top}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px;margin-top:15px}
+.warning{background:#1e1b4b;border-left:5px solid #fbbf24;padding:18px;border-radius:10px;margin-top:15px}
+.success{background:#052e16;padding:18px;border-left:5px solid #22c55e;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;margin-top:15px;text-align:center;line-height:2;font-size:18px}
+pre{border-radius:12px;overflow-x:auto}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>246. How do you implement Retry Logic for Failed Requests?</h1>
+
+<h2>One-Line Definition</h2>
+
+<div class="highlight">
+Retry logic means automatically sending the same API request again when it fails due to a temporary problem.
+</div>
+
+<h2>Why Is Retry Logic Used?</h2>
+
+<p>
+Sometimes API requests fail because of temporary issues:
+</p>
+
+<pre><code class="language-text">Internet problem
+Server busy
+Timeout
+Network error
+Temporary 500 error</code></pre>
+
+<p>
+In these cases, retrying the request can fix the problem without requiring the user to click again.
+</p>
+
+<h2>Simple Retry Logic</h2>
+
+<pre><code class="language-javascript">async function fetchWithRetry(url, retries = 3) {
+
+  try {
+
+    const response = await axios.get(url);
+
+    return response.data;
+
+  } catch (error) {
+
+    if (retries === 0) {
+      throw error;
+    }
+
+    return fetchWithRetry(url, retries - 1);
+
+  }
+
+}</code></pre>
+
+<h2>Usage</h2>
+
+<pre><code class="language-javascript">fetchWithRetry('/users')
+  .then(data => console.log(data))
+  .catch(error => console.log(error));</code></pre>
+
+<h2>Retry Flow</h2>
+
+<div class="flow">
+API Request
+<br>↓<br>
+Failed
+<br>↓<br>
+Retry Again
+<br>↓<br>
+Failed Again
+<br>↓<br>
+Retry Again
+<br>↓<br>
+Still Failed
+<br>↓<br>
+Show Error
+</div>
+
+<h2>Better Retry With Delay</h2>
+
+<pre><code class="language-javascript">function delay(ms) {
+  return new Promise(resolve =>
+    setTimeout(resolve, ms)
+  );
+}
+
+async function fetchWithRetry(url, retries = 3, delayTime = 1000) {
+
+  try {
+
+    const response = await axios.get(url);
+
+    return response.data;
+
+  } catch (error) {
+
+    if (retries === 0) {
+      throw error;
+    }
+
+    await delay(delayTime);
+
+    return fetchWithRetry(url, retries - 1, delayTime);
+
+  }
+
+}</code></pre>
+
+<div class="success">
+Adding a delay prevents the client from immediately hammering the server with repeated requests.
+</div>
+
+<h2>Retry Only Specific Errors</h2>
+
+<p>
+We should not retry every failed request.
+</p>
+
+<h3>Usually Retry</h3>
+
+<pre><code class="language-text">Network error
+Timeout
+500 Internal Server Error
+502 Bad Gateway
+503 Service Unavailable
+504 Gateway Timeout</code></pre>
+
+<h3>Usually Do Not Retry</h3>
+
+<pre><code class="language-text">400 Bad Request
+401 Unauthorized
+403 Forbidden
+404 Not Found</code></pre>
+
+<div class="warning">
+These client-side errors are usually not temporary, so retrying rarely helps.
+</div>
+
+<h2>Axios Interceptor Retry Example</h2>
+
+<pre><code class="language-javascript">import axios from 'axios';
+
+const api = axios.create({
+  baseURL: 'https://api.example.com'
+});
+
+api.interceptors.response.use(
+  response => response,
+  async error => {
+    const config = error.config;
+
+    if (!config) return Promise.reject(error);
+
+    config.retryCount = config.retryCount || 0;
+
+    const shouldRetry = !error.response || [500, 502, 503, 504].includes(error.response.status);
+
+    if (shouldRetry && config.retryCount < 3) {
+      config.retryCount++;
+
+      await new Promise(resolve =>
+        setTimeout(resolve, 1000)
+      );
+
+      return api(config);
+    }
+
+    return Promise.reject(error);
+  }
+);
+
+export default api;</code></pre>
+
+<h2>How This Works</h2>
+
+<div class="flow">
+Request Failed
+<br>↓<br>
+Interceptor Catches Error
+<br>↓<br>
+Check Status Code
+<br>↓<br>
+Check Retry Count
+<br>↓<br>
+Wait 1 Second
+<br>↓<br>
+Send Request Again
+</div>
+
+<h2>Real Project Usage</h2>
+
+<pre><code class="language-javascript">import api from './api';
+
+async function getUsers() {
+
+  try {
+
+    const response =
+      await api.get('/users');
+
+    return response.data;
+
+  } catch (error) {
+
+    console.log(
+      'Request failed after retries'
+    );
+
+  }
+
+}</code></pre>
+
+<h2>Important Point</h2>
+
+<p>
+Retry logic is mostly safe for:
+</p>
+
+<pre><code class="language-text">GET Requests</code></pre>
+
+<p>
+Be careful with:
+</p>
+
+<pre><code class="language-text">POST
+PUT
+PATCH
+DELETE</code></pre>
+
+<p>
+Because retrying them may perform the same action multiple times.
+</p>
+
+<h3>Example Problem</h3>
+
+<pre><code class="language-text">POST /orders</code></pre>
+
+<p>
+If the request is retried incorrectly, the server may create two orders.
+</p>
+
+<h2>Best Practice</h2>
+
+<p>
+For POST requests, use idempotency keys when the backend supports them.
+</p>
+
+<pre><code class="language-javascript">api.post('/orders', orderData, {
+  headers: {
+    'Idempotency-Key':
+      uniqueRequestId
+  }
+});</code></pre>
+
+<div class="success">
+Idempotency keys help the backend identify duplicate requests and prevent duplicate actions.
+</div>
+
+<h2>Important Interview Points</h2>
+
+<ul>
+<li>Retry logic automatically retries failed requests.</li>
+<li>Useful for temporary network and server failures.</li>
+<li>Do not retry 400, 401, 403, or 404 errors.</li>
+<li>GET requests are generally safe to retry.</li>
+<li>Be careful when retrying POST requests.</li>
+<li>Axios interceptors are commonly used for global retry logic.</li>
+<li>Always maintain a retry count.</li>
+<li>Delays help avoid server overload.</li>
+</ul>
+
+<h2>Short Interview Answer</h2>
+
+<div class="highlight">
+Retry logic automatically resends failed requests when temporary issues occur. In Axios, it is commonly implemented using a response interceptor, a retry counter, and a delay to prevent infinite retry loops.
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+Retry logic automatically retries failed API requests using a retry count, delay, and typically an Axios response interceptor.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+
+</body>
+</html>

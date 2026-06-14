@@ -1,0 +1,275 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>244 - How do you set global headers in Axios?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px;margin-bottom:10px}
+p{color:#cbd5e1}
+ul{padding-left:24px}
+li{margin-bottom:10px;color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left;vertical-align:top}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px;margin-top:15px}
+.warning{background:#1e1b4b;border-left:5px solid #fbbf24;padding:18px;border-radius:10px;margin-top:15px}
+.success{background:#052e16;padding:18px;border-left:5px solid #22c55e;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;margin-top:15px;text-align:center;line-height:2;font-size:18px}
+pre{border-radius:12px;overflow-x:auto}
+code{font-size:15px}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>244. How do you set global headers in Axios?</h1>
+
+<h2>One-Line Definition</h2>
+
+<div class="highlight">
+Global headers in Axios allow us to automatically send the same HTTP headers with every request without repeating them.
+</div>
+
+<h2>Why Are Global Headers Used?</h2>
+
+<p>
+Many applications need to send headers with every API request.
+</p>
+
+<ul>
+<li>Authorization Token</li>
+<li>Content-Type</li>
+<li>Language Preference</li>
+<li>API Key</li>
+<li>Application Version</li>
+</ul>
+
+<p>
+Without global headers, we repeat the same header again and again.
+</p>
+
+<pre><code class="language-jsx">axios.get('/users', {
+  headers: { Authorization: 'Bearer token' }
+});
+
+axios.get('/products', {
+  headers: { Authorization: 'Bearer token' }
+});</code></pre>
+
+<div class="warning">
+This creates duplicate code and makes maintenance harder.
+</div>
+
+<h2>Setting Global Headers</h2>
+
+<p>
+Axios provides a global configuration object.
+</p>
+
+<pre><code class="language-jsx">axios.defaults.headers</code></pre>
+
+<h2>Set Authorization Header Globally</h2>
+
+<pre><code class="language-jsx">import axios from 'axios';
+
+axios.defaults.headers.common['Authorization'] = 'Bearer my-token';</code></pre>
+
+<p>
+Now every Axios request automatically sends this header.
+</p>
+
+<pre><code class="language-http">Authorization: Bearer my-token</code></pre>
+
+<h2>Example</h2>
+
+<pre><code class="language-jsx">import axios from 'axios';
+
+axios.defaults.headers.common['Authorization'] = 'Bearer my-token';
+
+axios.get('/users');
+axios.get('/products');
+axios.post('/orders');</code></pre>
+
+<div class="success">
+All requests will automatically include the Authorization header.
+</div>
+
+<h2>Set Content-Type Globally</h2>
+
+<pre><code class="language-jsx">axios.defaults.headers.common['Content-Type'] = 'application/json';</code></pre>
+
+<h2>Multiple Global Headers</h2>
+
+<pre><code class="language-jsx">axios.defaults.headers.common['Authorization'] = 'Bearer my-token';
+axios.defaults.headers.common['X-App-Version'] = '1.0.0';
+axios.defaults.headers.common['Accept-Language'] = 'en';</code></pre>
+
+<h2>Real Project Example</h2>
+
+<h3>api.js</h3>
+
+<pre><code class="language-jsx">import axios from 'axios';
+
+axios.defaults.baseURL = 'https://api.example.com';
+axios.defaults.headers.common['Authorization'] = `Bearer ${localStorage.getItem('token')}`;
+axios.defaults.headers.common['Content-Type'] = 'application/json';
+
+export default axios;</code></pre>
+
+<h3>Using Axios Anywhere</h3>
+
+<pre><code class="language-jsx">import axios from './api';
+
+axios.get('/users');
+
+axios.post('/orders', { productId: 1 });</code></pre>
+
+<div class="highlight">
+Now we do not need to add headers manually in every API call.
+</div>
+
+<h2>Better Approach - Axios Instance</h2>
+
+<p>
+In large applications, we usually create a custom Axios instance instead of changing the global Axios object directly.
+</p>
+
+<pre><code class="language-jsx">import axios from 'axios';
+
+const api = axios.create({
+  baseURL: 'https://api.example.com',
+  headers: {
+    Authorization: 'Bearer my-token',
+    'Content-Type': 'application/json'
+  }
+});
+
+export default api;</code></pre>
+
+<h3>Usage</h3>
+
+<pre><code class="language-jsx">import api from './api';
+
+api.get('/users');
+api.post('/orders', { productId: 1 });</code></pre>
+
+<div class="success">
+Axios instance keeps API configuration separate, clean, and reusable.
+</div>
+
+<h2>Dynamic Token Problem</h2>
+
+<p>
+Sometimes the token changes after login, logout, or refresh token flow.
+</p>
+
+<pre><code class="language-jsx">axios.defaults.headers.common['Authorization'] = 'Bearer old-token';</code></pre>
+
+<div class="warning">
+If the token changes, the old token may still be used unless we update it manually.
+</div>
+
+<h2>Best Solution - Request Interceptor</h2>
+
+<p>
+A request interceptor runs before every request. So we can read the latest token every time.
+</p>
+
+<pre><code class="language-jsx">import axios from 'axios';
+
+const api = axios.create({
+  baseURL: 'https://api.example.com'
+});
+
+api.interceptors.request.use(config => {
+  const token = localStorage.getItem('token');
+
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+
+  return config;
+});
+
+export default api;</code></pre>
+
+<div class="flow">
+Read Latest Token
+<br>↓<br>
+Add Authorization Header
+<br>↓<br>
+Send API Request
+</div>
+
+<h2>Global Headers vs Request Headers</h2>
+
+<table>
+<tr>
+<th>Global Headers</th>
+<th>Request Headers</th>
+</tr>
+
+<tr>
+<td>Applied to all requests.</td>
+<td>Applied to one request only.</td>
+</tr>
+
+<tr>
+<td>Defined once.</td>
+<td>Defined every time.</td>
+</tr>
+
+<tr>
+<td>Good for auth tokens, content type, language.</td>
+<td>Good for special request-specific headers.</td>
+</tr>
+
+<tr>
+<td>Reduces repeated code.</td>
+<td>Gives more control for one API call.</td>
+</tr>
+</table>
+
+<h2>Important Interview Points</h2>
+
+<ul>
+<li><code>axios.defaults.headers.common</code> sets headers globally.</li>
+<li>Global headers are automatically sent with every request.</li>
+<li>Common use cases are Authorization, Content-Type, and language headers.</li>
+<li>Large applications usually use <code>axios.create()</code>.</li>
+<li>Request interceptors are better for dynamic tokens.</li>
+<li>Global headers help avoid repetitive code.</li>
+</ul>
+
+<h2>Short Interview Answer</h2>
+
+<div class="highlight">
+Global headers in Axios are configured using <code>axios.defaults.headers.common</code>. They allow us to automatically send headers such as Authorization token or Content-Type with every request. In larger applications, we commonly use Axios instances and request interceptors for better control and dynamic token handling.
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+Global headers in Axios are set using <code>axios.defaults.headers.common</code> so the same headers are automatically included in every request.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-http.min.js"></script>
+
+</body>
+</html>

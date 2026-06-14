@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>167 - Write a Custom Hook useLocalStorage</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px;margin-bottom:10px}
+p{color:#cbd5e1}
+ul{padding-left:24px}
+li{margin-bottom:10px;color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px;margin-top:15px}
+.warning{background:#1e1b4b;border-left:5px solid #fbbf24;padding:18px;border-radius:10px;margin-top:15px}
+.success{background:#052e16;padding:18px;border-left:5px solid #22c55e;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;margin-top:15px;text-align:center;line-height:2;font-size:18px}
+pre{border-radius:12px;overflow-x:auto}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+<h1>167. Write a Custom Hook useLocalStorage</h1>
+
+<h2>One-Line Definition</h2>
+<div class="highlight">
+useLocalStorage is a custom hook that works like useState, but it also saves the value in browser localStorage.
+</div>
+
+<h2>Why Do We Need It?</h2>
+<p>
+Normal React state is temporary. When the page refreshes, the state becomes default again.
+</p>
+
+<pre><code class="language-jsx">const [theme, setTheme] = useState('light');</code></pre>
+
+<div class="flow">
+theme = light
+<br>↓<br>
+User changes theme to dark
+<br>↓<br>
+theme = dark
+<br>↓<br>
+Refresh page
+<br>↓<br>
+theme becomes light again
+</div>
+
+<div class="warning">
+This happens because useState stores data only in React memory.
+</div>
+
+<h2>What localStorage Does</h2>
+<p>
+localStorage saves data in the browser. So even after refresh, the value is still available.
+</p>
+
+<pre><code class="language-jsx">localStorage.setItem('theme', 'dark');</code></pre>
+
+<div class="success">
+localStorage remembers the value even after page refresh.
+</div>
+
+<h2>Create useLocalStorage Hook</h2>
+
+<pre><code class="language-jsx">import { useState, useEffect } from 'react';
+
+function useLocalStorage(key, initialValue) {
+
+  const [value, setValue] = useState(() => {
+
+    const storedValue = localStorage.getItem(key);
+
+    return storedValue ? JSON.parse(storedValue) : initialValue;
+
+  });
+
+  useEffect(() => {
+
+    localStorage.setItem(key, JSON.stringify(value));
+
+  }, [key, value]);
+
+  return [value, setValue];
+
+}
+
+export default useLocalStorage;</code></pre>
+
+<h2>Using useLocalStorage</h2>
+
+<pre><code class="language-jsx">import useLocalStorage from './useLocalStorage';
+
+function App() {
+
+  const [theme, setTheme] = useLocalStorage('theme', 'light');
+
+  return (
+    &lt;button onClick={() =&gt; setTheme(theme === 'light' ? 'dark' : 'light')}&gt;
+      Current Theme: {theme}
+    &lt;/button&gt;
+  );
+
+}
+
+export default App;</code></pre>
+
+<h2>Understand This Line</h2>
+
+<pre><code class="language-jsx">const [theme, setTheme] = useLocalStorage('theme', 'light');</code></pre>
+
+<p>
+Read this line like this:
+</p>
+
+<div class="highlight">
+Hey useLocalStorage hook, create one state for theme.  
+The localStorage key name is <b>theme</b>.  
+If no old value exists, use <b>light</b> as default value.
+</div>
+
+<h2>Step 1: App Component Starts</h2>
+
+<pre><code class="language-jsx">useLocalStorage('theme', 'light');</code></pre>
+
+<p>
+So inside the hook:
+</p>
+
+<pre><code class="language-jsx">key = 'theme'
+initialValue = 'light'</code></pre>
+
+<h2>Step 2: First Time Page Loads</h2>
+
+<p>
+Suppose localStorage is empty.
+</p>
+
+<pre><code class="language-jsx">localStorage = {}</code></pre>
+
+<p>
+This code runs:
+</p>
+
+<pre><code class="language-jsx">const storedValue = localStorage.getItem(key);</code></pre>
+
+<p>
+Because key is <b>theme</b>, it becomes:
+</p>
+
+<pre><code class="language-jsx">const storedValue = localStorage.getItem('theme');</code></pre>
+
+<p>
+Nothing is saved yet, so:
+</p>
+
+<pre><code class="language-jsx">storedValue = null</code></pre>
+
+<h2>Step 3: Initial Value Is Used</h2>
+
+<pre><code class="language-jsx">return storedValue ? JSON.parse(storedValue) : initialValue;</code></pre>
+
+<p>
+Now it becomes:
+</p>
+
+<pre><code class="language-jsx">return null ? JSON.parse(null) : 'light';</code></pre>
+
+<p>
+So result is:
+</p>
+
+<pre><code class="language-jsx">return 'light';</code></pre>
+
+<div class="success">
+Now React state value becomes light.
+</div>
+
+<pre><code class="language-jsx">value = 'light'</code></pre>
+
+<h2>Step 4: useEffect Saves Value</h2>
+
+<pre><code class="language-jsx">useEffect(() => {
+  localStorage.setItem(key, JSON.stringify(value));
+}, [key, value]);</code></pre>
+
+<p>
+Current values are:
+</p>
+
+<pre><code class="language-jsx">key = 'theme'
+value = 'light'</code></pre>
+
+<p>
+So this runs:
+</p>
+
+<pre><code class="language-jsx">localStorage.setItem('theme', JSON.stringify('light'));</code></pre>
+
+<p>
+Browser stores:
+</p>
+
+<pre><code class="language-text">theme = "light"</code></pre>
+
+<h2>Step 5: Hook Returns Value</h2>
+
+<pre><code class="language-jsx">return [value, setValue];</code></pre>
+
+<p>
+At this time:
+</p>
+
+<pre><code class="language-jsx">value = 'light'</code></pre>
+
+<p>
+So hook returns:
+</p>
+
+<pre><code class="language-jsx">return ['light', setValue];</code></pre>
+
+<h2>Step 6: App Receives It</h2>
+
+<pre><code class="language-jsx">const [theme, setTheme] = useLocalStorage('theme', 'light');</code></pre>
+
+<p>
+Actually becomes:
+</p>
+
+<pre><code class="language-jsx">const [theme, setTheme] = ['light', setValue];</code></pre>
+
+<p>
+So:
+</p>
+
+<pre><code class="language-jsx">theme = 'light'
+setTheme = setValue</code></pre>
+
+<div class="success">
+Now button shows Current Theme: light
+</div>
+
+<h2>Step 7: User Clicks Button</h2>
+
+<pre><code class="language-jsx">&lt;button onClick={() =&gt; setTheme(theme === 'light' ? 'dark' : 'light')}&gt;
+  Current Theme: {theme}
+&lt;/button&gt;</code></pre>
+
+<p>
+Current theme is:
+</p>
+
+<pre><code class="language-jsx">theme = 'light'</code></pre>
+
+<p>
+So this condition:
+</p>
+
+<pre><code class="language-jsx">theme === 'light' ? 'dark' : 'light'</code></pre>
+
+<p>
+returns:
+</p>
+
+<pre><code class="language-jsx">'dark'</code></pre>
+
+<p>
+So this runs:
+</p>
+
+<pre><code class="language-jsx">setTheme('dark');</code></pre>
+
+<h2>Step 8: State Changes</h2>
+
+<p>
+Because setTheme is actually setValue, value changes:
+</p>
+
+<pre><code class="language-jsx">value = 'dark'</code></pre>
+
+<h2>Step 9: useEffect Runs Again</h2>
+
+<p>
+Because value changed from light to dark, useEffect runs again.
+</p>
+
+<pre><code class="language-jsx">localStorage.setItem('theme', JSON.stringify('dark'));</code></pre>
+
+<p>
+Browser storage becomes:
+</p>
+
+<pre><code class="language-text">theme = "dark"</code></pre>
+
+<div class="success">
+Now button shows Current Theme: dark
+</div>
+
+<h2>Step 10: Page Refresh</h2>
+
+<p>
+After refresh, App starts again.
+</p>
+
+<pre><code class="language-jsx">useLocalStorage('theme', 'light');</code></pre>
+
+<p>
+Now localStorage already has:
+</p>
+
+<pre><code class="language-text">theme = "dark"</code></pre>
+
+<p>
+So this line:
+</p>
+
+<pre><code class="language-jsx">const storedValue = localStorage.getItem('theme');</code></pre>
+
+<p>
+returns:
+</p>
+
+<pre><code class="language-jsx">storedValue = '"dark"'</code></pre>
+
+<p>
+Now this condition runs:
+</p>
+
+<pre><code class="language-jsx">return storedValue ? JSON.parse(storedValue) : initialValue;</code></pre>
+
+<p>
+Because storedValue exists, it becomes:
+</p>
+
+<pre><code class="language-jsx">return JSON.parse('"dark"');</code></pre>
+
+<p>
+Result:
+</p>
+
+<pre><code class="language-jsx">return 'dark';</code></pre>
+
+<div class="success">
+After refresh, theme is still dark.
+</div>
+
+<h2>Complete Flow</h2>
+
+<div class="flow">
+First Load
+<br>↓<br>
+localStorage empty
+<br>↓<br>
+theme = light
+<br>↓<br>
+User clicks button
+<br>↓<br>
+theme = dark
+<br>↓<br>
+useEffect saves dark in localStorage
+<br>↓<br>
+Refresh page
+<br>↓<br>
+Hook reads dark from localStorage
+<br>↓<br>
+theme = dark
+</div>
+
+<h2>Why JSON.stringify?</h2>
+
+<p>
+localStorage stores only strings.
+</p>
+
+<pre><code class="language-jsx">localStorage.setItem('theme', JSON.stringify('dark'));</code></pre>
+
+<p>
+It saves:
+</p>
+
+<pre><code class="language-text">"dark"</code></pre>
+
+<h2>Why JSON.parse?</h2>
+
+<p>
+When we read from localStorage, we convert the stored string back to real JavaScript value.
+</p>
+
+<pre><code class="language-jsx">JSON.parse('"dark"')</code></pre>
+
+<p>
+Result:
+</p>
+
+<pre><code class="language-jsx">'dark'</code></pre>
+
+<h2>useState vs useLocalStorage</h2>
+
+<table>
+<tr>
+<th>Hook</th>
+<th>What It Does</th>
+</tr>
+<tr>
+<td>useState</td>
+<td>Stores value in React memory only.</td>
+</tr>
+<tr>
+<td>useLocalStorage</td>
+<td>Stores value in React memory and browser localStorage.</td>
+</tr>
+</table>
+
+<h2>Important Point</h2>
+
+<div class="highlight">
+useLocalStorage behaves like useState. The difference is that it automatically reads from localStorage first and saves changes back to localStorage.
+</div>
+
+<h2>Easy Interview Answer</h2>
+
+<div class="highlight">
+useLocalStorage is a custom React hook that stores state in localStorage so the value is not lost after page refresh.
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+useLocalStorage is like useState with browser persistence.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+</body>
+</html>

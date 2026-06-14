@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>234 - What is the difference between useQuery and useMutation in React Query?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px;margin-bottom:10px}
+p{color:#cbd5e1}
+ul{padding-left:24px}
+li{margin-bottom:10px;color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left;vertical-align:top}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px;margin-top:15px}
+.success{background:#052e16;padding:18px;border-left:5px solid #22c55e;border-radius:10px;margin-top:15px}
+.warning{background:#3b0820;border-left:5px solid #ef4444;padding:18px;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;margin-top:15px;text-align:center;line-height:2;font-size:18px}
+pre{border-radius:12px;overflow-x:auto}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>234. What is the Difference Between useQuery and useMutation in React Query?</h1>
+
+<h2>One-Line Definition</h2>
+
+<div class="highlight">
+<code>useQuery</code> is used to fetch data, while <code>useMutation</code> is used to create, update, or delete data.
+</div>
+
+<h2>The Easiest Way To Remember</h2>
+
+<div class="flow">
+GET Request
+<br>
+↓
+<br>
+useQuery
+<br><br>
+POST / PUT / PATCH / DELETE
+<br>
+↓
+<br>
+useMutation
+</div>
+
+<h2>Think About a Real Application</h2>
+
+<p>
+Suppose we have a Users page.
+</p>
+
+<ul>
+<li>Load all users → useQuery</li>
+<li>Create user → useMutation</li>
+<li>Update user → useMutation</li>
+<li>Delete user → useMutation</li>
+</ul>
+
+<h2>useQuery Purpose</h2>
+
+<p>
+useQuery is responsible for:
+</p>
+
+<ul>
+<li>Fetching data</li>
+<li>Caching data</li>
+<li>Refetching data</li>
+<li>Keeping data fresh</li>
+</ul>
+
+<h3>Example</h3>
+
+<pre><code class="language-js">const {
+  data,
+  isLoading,
+  error
+} = useQuery({
+  queryKey: ['users'],
+  queryFn: fetchUsers
+});</code></pre>
+
+<p>
+API:
+</p>
+
+<pre><code class="language-js">GET /api/users</code></pre>
+
+<div class="success">
+useQuery is mainly for reading data.
+</div>
+
+<h2>useMutation Purpose</h2>
+
+<p>
+useMutation is responsible for:
+</p>
+
+<ul>
+<li>Creating data</li>
+<li>Updating data</li>
+<li>Deleting data</li>
+<li>Triggering server-side changes</li>
+</ul>
+
+<h3>Example</h3>
+
+<pre><code class="language-js">const mutation = useMutation({
+  mutationFn: createUser
+});</code></pre>
+
+<p>
+API:
+</p>
+
+<pre><code class="language-js">POST /api/users</code></pre>
+
+<p>
+Execute:
+</p>
+
+<pre><code class="language-js">mutation.mutate({
+  name: 'Rizwan'
+});</code></pre>
+
+<div class="success">
+useMutation changes data on the server.
+</div>
+
+<h2>Visual Difference</h2>
+
+<div class="flow">
+Read Data
+<br>
+↓
+<br>
+GET
+<br>
+↓
+<br>
+useQuery
+</div>
+
+<br>
+
+<div class="flow">
+Change Data
+<br>
+↓
+<br>
+POST / PUT / PATCH / DELETE
+<br>
+↓
+<br>
+useMutation
+</div>
+
+<h2>Example - Fetch Users</h2>
+
+<h3>API Function</h3>
+
+<pre><code class="language-js">async function fetchUsers() {
+  const res = await fetch('/api/users');
+
+  return res.json();
+}</code></pre>
+
+<h3>Query</h3>
+
+<pre><code class="language-js">const {
+  data,
+  isLoading
+} = useQuery({
+  queryKey: ['users'],
+  queryFn: fetchUsers
+});</code></pre>
+
+<p>
+React Query automatically:
+</p>
+
+<ul>
+<li>Caches response.</li>
+<li>Refetches when needed.</li>
+<li>Manages loading state.</li>
+</ul>
+
+<section>
+
+  <h2>useMutation Example - POST (Create User)</h2>
+
+  <h3>API Function</h3>
+
+  <pre><code class="language-js">async function createUser(user) {
+  const res = await fetch('/api/users', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(user)
+  });
+
+  return res.json();
+}</code></pre>
+
+  <h3>Mutation</h3>
+
+  <pre><code class="language-js">const createUserMutation = useMutation({
+  mutationFn: createUser
+});</code></pre>
+
+  <h3>Execute</h3>
+
+  <pre><code class="language-js">createUserMutation.mutate({
+  name: 'Rizwan',
+  email: 'rizwan@gmail.com'
+});</code></pre>
+
+  <div class="highlight">
+    POST creates new data on the server.
+  </div>
+
+  <hr>
+
+  <h2>useMutation Example - PUT (Update User)</h2>
+
+  <h3>API Function</h3>
+
+  <pre><code class="language-js">async function updateUser(user) {
+  const res = await fetch(`/api/users/${user.id}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(user)
+  });
+
+  return res.json();
+}</code></pre>
+
+  <h3>Mutation</h3>
+
+  <pre><code class="language-js">const updateUserMutation = useMutation({
+  mutationFn: updateUser
+});</code></pre>
+
+  <h3>Execute</h3>
+
+  <pre><code class="language-js">updateUserMutation.mutate({
+  id: 1,
+  name: 'Mohammad Rizwan',
+  email: 'rizwan@gmail.com'
+});</code></pre>
+
+  <div class="highlight">
+    PUT usually replaces the entire resource.
+  </div>
+
+  <hr>
+
+  <h2>useMutation Example - PATCH (Partial Update)</h2>
+
+  <h3>API Function</h3>
+
+  <pre><code class="language-js">async function updateUserStatus(user) {
+  const res = await fetch(`/api/users/${user.id}`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      status: user.status
+    })
+  });
+
+  return res.json();
+}</code></pre>
+
+  <h3>Mutation</h3>
+
+  <pre><code class="language-js">const updateStatusMutation = useMutation({
+  mutationFn: updateUserStatus
+});</code></pre>
+
+  <h3>Execute</h3>
+
+  <pre><code class="language-js">updateStatusMutation.mutate({
+  id: 1,
+  status: 'active'
+});</code></pre>
+
+  <div class="highlight">
+    PATCH updates only specific fields instead of replacing the whole object.
+  </div>
+
+  <hr>
+
+  <h2>useMutation Example - DELETE (Delete User)</h2>
+
+  <h3>API Function</h3>
+
+  <pre><code class="language-js">async function deleteUser(id) {
+  const res = await fetch(`/api/users/${id}`, {
+    method: 'DELETE'
+  });
+
+  return res.json();
+}</code></pre>
+
+  <h3>Mutation</h3>
+
+  <pre><code class="language-js">const deleteUserMutation = useMutation({
+  mutationFn: deleteUser
+});</code></pre>
+
+  <h3>Execute</h3>
+
+  <pre><code class="language-js">deleteUserMutation.mutate(1);</code></pre>
+
+  <div class="highlight">
+    DELETE removes data from the server.
+  </div>
+
+  <hr>
+
+  <h2>Most Common Real-World Pattern</h2>
+
+  <pre><code class="language-js">const queryClient = useQueryClient();
+
+const createUserMutation = useMutation({
+  mutationFn: createUser,
+
+  onSuccess: () => {
+    queryClient.invalidateQueries({
+      queryKey: ['users']
+    });
+  }
+});</code></pre>
+
+  <p>
+    Flow:
+  </p>
+
+  <pre><code>Create User
+    ↓
+POST Success
+    ↓
+Invalidate ['users']
+    ↓
+Refetch Users List
+    ↓
+UI Updates Automatically</code></pre>
+
+  <h2>Quick Interview Rule</h2>
+
+  <table>
+    <tr>
+      <th>Operation</th>
+      <th>Hook</th>
+    </tr>
+    <tr>
+      <td>GET Users</td>
+      <td>useQuery</td>
+    </tr>
+    <tr>
+      <td>POST User</td>
+      <td>useMutation</td>
+    </tr>
+    <tr>
+      <td>PUT User</td>
+      <td>useMutation</td>
+    </tr>
+    <tr>
+      <td>PATCH User</td>
+      <td>useMutation</td>
+    </tr>
+    <tr>
+      <td>DELETE User</td>
+      <td>useMutation</td>
+    </tr>
+  </table>
+
+</section>
+
+<h2>Example - Create User</h2>
+
+<h3>API Function</h3>
+
+<pre><code class="language-js">async function createUser(user) {
+  const res = await fetch('/api/users', {
+    method: 'POST',
+    body: JSON.stringify(user)
+  });
+
+  return res.json();
+}</code></pre>
+
+<h3>Mutation</h3>
+
+<pre><code class="language-js">const createUserMutation = useMutation({
+  mutationFn: createUser
+});</code></pre>
+
+<h3>Run Mutation</h3>
+
+<pre><code class="language-js">createUserMutation.mutate({
+  name: 'Rizwan'
+});</code></pre>
+
+<h2>Why Not Use useQuery For POST?</h2>
+
+<p>
+Because queries are designed for reading.
+</p>
+
+<p>
+Queries may:
+</p>
+
+<ul>
+<li>Refetch automatically.</li>
+<li>Run on mount.</li>
+<li>Run on reconnect.</li>
+<li>Run on window focus.</li>
+</ul>
+
+<div class="warning">
+You do not want a POST request running automatically.
+</div>
+
+<p>
+Imagine:
+</p>
+
+<pre><code class="language-js">POST /api/users</code></pre>
+
+<p>
+running every time the page regains focus.
+</p>
+
+<p>
+That would create duplicate users.
+</p>
+
+<h2>Why Not Use useMutation For GET?</h2>
+
+<p>
+You can technically do it.
+</p>
+
+<p>
+But then you lose:
+</p>
+
+<ul>
+<li>Caching.</li>
+<li>Automatic refetching.</li>
+<li>Background updates.</li>
+<li>Query invalidation support.</li>
+</ul>
+
+<div class="warning">
+GET requests belong in useQuery.
+</div>
+
+<h2>Loading State Comparison</h2>
+
+<h3>useQuery</h3>
+
+<pre><code class="language-js">const {
+  data,
+  isLoading,
+  error
+} = useQuery(...);</code></pre>
+
+<h3>useMutation</h3>
+
+<pre><code class="language-js">const {
+  mutate,
+  isPending,
+  error
+} = useMutation(...);</code></pre>
+
+<h2>Automatic Execution</h2>
+
+<table>
+<tr>
+<th>Feature</th>
+<th>useQuery</th>
+<th>useMutation</th>
+</tr>
+
+<tr>
+<td>Runs Automatically</td>
+<td>✅ Yes</td>
+<td>❌ No</td>
+</tr>
+
+<tr>
+<td>Manual Trigger</td>
+<td>Optional</td>
+<td>✅ Yes</td>
+</tr>
+
+<tr>
+<td>Caching</td>
+<td>✅ Yes</td>
+<td>❌ No</td>
+</tr>
+
+<tr>
+<td>Refetching</td>
+<td>✅ Yes</td>
+<td>❌ No</td>
+</tr>
+
+<tr>
+<td>GET Requests</td>
+<td>✅ Yes</td>
+<td>❌ No</td>
+</tr>
+
+<tr>
+<td>POST Requests</td>
+<td>❌ No</td>
+<td>✅ Yes</td>
+</tr>
+
+<tr>
+<td>PUT Requests</td>
+<td>❌ No</td>
+<td>✅ Yes</td>
+</tr>
+
+<tr>
+<td>DELETE Requests</td>
+<td>❌ No</td>
+<td>✅ Yes</td>
+</tr>
+</table>
+
+<h2>Using Both Together</h2>
+
+<p>
+This is the most common pattern.
+</p>
+
+<h3>Load Users</h3>
+
+<pre><code class="language-js">const usersQuery = useQuery({
+  queryKey: ['users'],
+  queryFn: fetchUsers
+});</code></pre>
+
+<h3>Create User</h3>
+
+<pre><code class="language-js">const createUserMutation = useMutation({
+  mutationFn: createUser,
+  onSuccess: () => {
+    queryClient.invalidateQueries({
+      queryKey: ['users']
+    });
+  }
+});</code></pre>
+
+<p>
+Flow:
+</p>
+
+<div class="flow">
+Create User
+<br>
+↓
+<br>
+Mutation Success
+<br>
+↓
+<br>
+Invalidate Users Query
+<br>
+↓
+<br>
+Refetch Users
+<br>
+↓
+<br>
+UI Updates
+</div>
+
+<h2>Real Project Example</h2>
+
+<p>
+Suppose our Aadhaar Audit System has:
+</p>
+
+<h3>Load Audit Plans</h3>
+
+<pre><code class="language-js">useQuery({
+  queryKey: ['auditPlans'],
+  queryFn: fetchAuditPlans
+});</code></pre>
+
+<p>
+API:
+</p>
+
+<pre><code class="language-js">GET /api/auditPlans</code></pre>
+
+<h3>Create Audit Plan</h3>
+
+<pre><code class="language-js">useMutation({
+  mutationFn: createAuditPlan
+});</code></pre>
+
+<p>
+API:
+</p>
+
+<pre><code class="language-js">POST /api/auditPlans</code></pre>
+
+<div class="success">
+Fetching uses useQuery.
+Creating uses useMutation.
+</div>
+
+<h2>Simple Rule</h2>
+
+<div class="highlight">
+If the API reads data → useQuery.
+</div>
+
+<div class="highlight">
+If the API changes data → useMutation.
+</div>
+
+<h2>Important Interview Points</h2>
+
+<ul>
+<li>useQuery is for GET requests.</li>
+<li>useMutation is for POST, PUT, PATCH, DELETE requests.</li>
+<li>useQuery automatically caches data.</li>
+<li>useMutation runs only when mutate() is called.</li>
+<li>Queries are for reading.</li>
+<li>Mutations are for changing server state.</li>
+<li>Mutations often invalidate related queries after success.</li>
+</ul>
+
+<h2>Short Interview Answer</h2>
+
+<div class="highlight">
+useQuery is used for fetching and caching server data, typically through GET requests. useMutation is used for creating, updating, or deleting server data through POST, PUT, PATCH, or DELETE requests. Queries automatically manage caching and refetching, while mutations are manually triggered using mutate().
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+useQuery reads and caches server data, while useMutation changes server data and is triggered manually.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+
+</body>
+</html>

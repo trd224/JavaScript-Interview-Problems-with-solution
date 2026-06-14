@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>199 - How do you profile a React application for performance bottlenecks?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px;margin-bottom:10px}
+p{color:#cbd5e1}
+ul{padding-left:24px}
+li{margin-bottom:10px;color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left;vertical-align:top}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px;margin-top:15px}
+.warning{background:#1e1b4b;border-left:5px solid #fbbf24;padding:18px;border-radius:10px;margin-top:15px}
+.success{background:#052e16;padding:18px;border-left:5px solid #22c55e;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;margin-top:15px;text-align:center;line-height:2;font-size:18px}
+pre{border-radius:12px;overflow-x:auto}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>199. How do you profile a React application for performance bottlenecks?</h1>
+
+<h2>One-Line Definition</h2>
+
+<div class="highlight">
+Profiling a React application means measuring rendering behavior, component update cost, JavaScript execution, network loading, and bundle size to find what is making the application slow.
+</div>
+
+<h2>Simple Meaning</h2>
+
+<p>
+When our React application feels slow, we should not guess the problem.
+</p>
+
+<p>
+We profile the application to find the real bottleneck.
+</p>
+
+<div class="warning">
+Performance bottlenecks can come from unnecessary re-renders, heavy components, large bundles, slow API calls, expensive calculations, or poor asset loading.
+</div>
+
+<h2>Common Performance Bottlenecks</h2>
+
+<table>
+<tr>
+<th>Bottleneck</th>
+<th>Meaning</th>
+</tr>
+
+<tr>
+<td>Unnecessary re-renders</td>
+<td>Components render again even when their data did not change.</td>
+</tr>
+
+<tr>
+<td>Slow components</td>
+<td>Some components take too long to render.</td>
+</tr>
+
+<tr>
+<td>Large bundle size</td>
+<td>Too much JavaScript is downloaded initially.</td>
+</tr>
+
+<tr>
+<td>Expensive calculations</td>
+<td>Heavy logic runs during every render.</td>
+</tr>
+
+<tr>
+<td>Slow network requests</td>
+<td>APIs or assets take too long to load.</td>
+</tr>
+
+<tr>
+<td>Large images/assets</td>
+<td>Images, fonts, and files delay page loading.</td>
+</tr>
+</table>
+
+<h2>Visual Flow</h2>
+
+<div class="flow">
+Application Feels Slow
+<br>
+↓
+<br>
+Record Performance
+<br>
+↓
+<br>
+Find Slow Area
+<br>
+↓
+<br>
+Optimize Code
+<br>
+↓
+<br>
+Profile Again
+<br>
+↓
+<br>
+Compare Before and After
+</div>
+
+<h2>Step 1 - Use React DevTools Profiler</h2>
+
+<p>
+React DevTools Profiler helps us find component-level rendering issues.
+</p>
+
+<h3>How To Use</h3>
+
+<ul>
+<li>Install React Developer Tools browser extension.</li>
+<li>Open browser DevTools.</li>
+<li>Go to the <strong>Profiler</strong> tab.</li>
+<li>Click <strong>Record</strong>.</li>
+<li>Interact with the app.</li>
+<li>Stop recording.</li>
+<li>Check which components rendered and how long they took.</li>
+</ul>
+
+<div class="success">
+React Profiler is best for finding unnecessary re-renders and slow React components.
+</div>
+
+<h2>Step 2 - Check Render Count and Render Duration</h2>
+
+<p>
+Profiler shows which components rendered and how expensive those renders were.
+</p>
+
+<table>
+<tr>
+<th>Metric</th>
+<th>Meaning</th>
+</tr>
+
+<tr>
+<td>Render count</td>
+<td>How many times a component rendered.</td>
+</tr>
+
+<tr>
+<td>Actual duration</td>
+<td>How long the component took to render.</td>
+</tr>
+
+<tr>
+<td>Commit time</td>
+<td>How long React took to update the UI.</td>
+</tr>
+
+<tr>
+<td>Why rendered</td>
+<td>Reason why component rendered.</td>
+</tr>
+</table>
+
+<h2>Example Problem</h2>
+
+<pre><code class="language-js">function Parent() {
+  const [count, setCount] = useState(0);
+
+  return (
+    &lt;&gt;
+      &lt;button onClick={() => setCount(count + 1)}&gt;Increment&lt;/button&gt;
+      &lt;Child /&gt;
+    &lt;/&gt;
+  );
+}
+
+function Child() {
+  console.log('Child rendered');
+  return &lt;h2&gt;Child Component&lt;/h2&gt;;
+}</code></pre>
+
+<p>
+When count changes, Parent renders again.
+</p>
+
+<p>
+Because Child is inside Parent, Child also renders again.
+</p>
+
+<div class="warning">
+Profiler helps us see that Child is rendering even though it does not use count.
+</div>
+
+<h2>Possible Optimization</h2>
+
+<pre><code class="language-js">const Child = React.memo(function Child() {
+  console.log('Child rendered');
+  return &lt;h2&gt;Child Component&lt;/h2&gt;;
+});</code></pre>
+
+<div class="success">
+After React.memo, Child will not re-render unless its props change.
+</div>
+
+<h2>Step 3 - Use Chrome Performance Tab</h2>
+
+<p>
+React Profiler shows React rendering problems.
+</p>
+
+<p>
+Chrome Performance tab shows browser-level problems.
+</p>
+
+<ul>
+<li>Long JavaScript tasks.</li>
+<li>Layout shifts.</li>
+<li>Paint time.</li>
+<li>Blocking scripts.</li>
+<li>Slow event handlers.</li>
+<li>Main thread blocking.</li>
+</ul>
+
+<div class="highlight">
+Use React Profiler for component rendering and Chrome Performance for browser execution problems.
+</div>
+
+<h2>Step 4 - Analyze Bundle Size</h2>
+
+<p>
+A large JavaScript bundle can make the first load slow.
+</p>
+
+<p>
+Use bundle analyzer tools:
+</p>
+
+<ul>
+<li>Webpack Bundle Analyzer</li>
+<li>Source Map Explorer</li>
+<li>Vite Bundle Visualizer</li>
+<li>Lighthouse</li>
+</ul>
+
+<h3>Example</h3>
+
+<pre><code class="language-bash">npm run build
+npm run analyze</code></pre>
+
+<p>
+Look for:
+</p>
+
+<ul>
+<li>Large libraries.</li>
+<li>Duplicate dependencies.</li>
+<li>Unused packages.</li>
+<li>Heavy chart/editor/map libraries.</li>
+</ul>
+
+<h2>Step 5 - Check Network Tab</h2>
+
+<p>
+Use the Network tab to check loading problems.
+</p>
+
+<table>
+<tr>
+<th>Check</th>
+<th>Why</th>
+</tr>
+
+<tr>
+<td>API response time</td>
+<td>Slow API can delay UI.</td>
+</tr>
+
+<tr>
+<td>JavaScript file size</td>
+<td>Large JS files delay startup.</td>
+</tr>
+
+<tr>
+<td>Image size</td>
+<td>Large images delay page load.</td>
+</tr>
+
+<tr>
+<td>Font loading</td>
+<td>Too many fonts can slow rendering.</td>
+</tr>
+
+<tr>
+<td>Cache headers</td>
+<td>Bad caching causes repeated downloads.</td>
+</tr>
+</table>
+
+<h2>Step 6 - Use Lighthouse</h2>
+
+<p>
+Lighthouse gives performance suggestions.
+</p>
+
+<p>
+It can show:
+</p>
+
+<ul>
+<li>Unused JavaScript.</li>
+<li>Render-blocking resources.</li>
+<li>Large images.</li>
+<li>Slow initial load.</li>
+<li>Core Web Vitals issues.</li>
+</ul>
+
+<h2>Step 7 - Find Expensive Calculations</h2>
+
+<p>
+Sometimes slow performance happens because heavy logic runs on every render.
+</p>
+
+<pre><code class="language-js">function ProductList({ products }) {
+  const filteredProducts = products.filter(product => product.price > 1000);
+
+  return (
+    &lt;ul&gt;
+      {filteredProducts.map(product => (
+        &lt;li key={product.id}&gt;{product.name}&lt;/li&gt;
+      ))}
+    &lt;/ul&gt;
+  );
+}</code></pre>
+
+<p>
+If the product list is huge, filtering on every render can be expensive.
+</p>
+
+<h3>Optimization With useMemo</h3>
+
+<pre><code class="language-js">function ProductList({ products }) {
+  const filteredProducts = useMemo(() => {
+    return products.filter(product => product.price > 1000);
+  }, [products]);
+
+  return (
+    &lt;ul&gt;
+      {filteredProducts.map(product => (
+        &lt;li key={product.id}&gt;{product.name}&lt;/li&gt;
+      ))}
+    &lt;/ul&gt;
+  );
+}</code></pre>
+
+<div class="success">
+useMemo prevents expensive recalculation when products have not changed.
+</div>
+
+<h2>Step 8 - Check Large Lists</h2>
+
+<p>
+Rendering thousands of rows can slow the UI.
+</p>
+
+<p>
+Instead of rendering all rows:
+</p>
+
+<pre><code class="language-js">{items.map(item => (
+  &lt;Row key={item.id} item={item} /&gt;
+))}</code></pre>
+
+<p>
+Use virtualization:
+</p>
+
+<pre><code class="language-js">// Example libraries:
+// react-window
+// react-virtualized</code></pre>
+
+<div class="highlight">
+Virtualization renders only visible rows instead of rendering the full list.
+</div>
+
+<h2>Step 9 - Check State Placement</h2>
+
+<p>
+State placed too high in the component tree can cause many child components to re-render.
+</p>
+
+<h3>Bad Example</h3>
+
+<pre><code class="language-js">function App() {
+  const [input, setInput] = useState('');
+
+  return (
+    &lt;&gt;
+      &lt;SearchBox value={input} setInput={setInput} /&gt;
+      &lt;LargeDashboard /&gt;
+    &lt;/&gt;
+  );
+}</code></pre>
+
+<p>
+Typing in SearchBox may re-render LargeDashboard if it is inside the same parent render tree.
+</p>
+
+<h3>Better Approach</h3>
+
+<pre><code class="language-js">function SearchSection() {
+  const [input, setInput] = useState('');
+
+  return &lt;SearchBox value={input} setInput={setInput} /&gt;;
+}
+
+function App() {
+  return (
+    &lt;&gt;
+      &lt;SearchSection /&gt;
+      &lt;LargeDashboard /&gt;
+    &lt;/&gt;
+  );
+}</code></pre>
+
+<div class="success">
+Keep state close to where it is used to reduce unnecessary re-renders.
+</div>
+
+<h2>Step 10 - Profile Again After Optimization</h2>
+
+<p>
+After applying optimization, record again.
+</p>
+
+<table>
+<tr>
+<th>Before</th>
+<th>After</th>
+</tr>
+
+<tr>
+<td>Child rendered 20 times</td>
+<td>Child rendered 1 time</td>
+</tr>
+
+<tr>
+<td>Main bundle 900 KB</td>
+<td>Main bundle 420 KB</td>
+</tr>
+
+<tr>
+<td>Product list render 80ms</td>
+<td>Product list render 15ms</td>
+</tr>
+
+<tr>
+<td>Dashboard update 120ms</td>
+<td>Dashboard update 35ms</td>
+</tr>
+</table>
+
+<div class="highlight">
+Always measure before and after. Do not optimize only by guessing.
+</div>
+
+<h2>Real Project Use Case</h2>
+
+<p>
+Suppose our large admin dashboard becomes slow when typing in a search input.
+</p>
+
+<p>
+Profiling may show:
+</p>
+
+<ul>
+<li>Search input state is stored in the parent dashboard.</li>
+<li>Every keystroke re-renders the full dashboard.</li>
+<li>Large table re-renders unnecessarily.</li>
+<li>Filtering logic runs on every render.</li>
+</ul>
+
+<p>
+Possible fixes:
+</p>
+
+<ul>
+<li>Move search state closer to SearchBox.</li>
+<li>Memoize large table component using React.memo.</li>
+<li>Memoize filtered data using useMemo.</li>
+<li>Use virtualization for table rows.</li>
+<li>Debounce search input.</li>
+</ul>
+
+<h2>Profiling Checklist</h2>
+
+<ul>
+<li>Use React DevTools Profiler for render bottlenecks.</li>
+<li>Use Chrome Performance tab for main-thread issues.</li>
+<li>Use Lighthouse for page-level performance issues.</li>
+<li>Use Network tab for API and asset loading issues.</li>
+<li>Use bundle analyzer for large JavaScript bundles.</li>
+<li>Check render count and render duration.</li>
+<li>Find unnecessary re-renders.</li>
+<li>Check expensive calculations.</li>
+<li>Check large lists and tables.</li>
+<li>Profile again after optimization.</li>
+</ul>
+
+<h2>Important Interview Points</h2>
+
+<ul>
+<li>Profiling means measuring before optimizing.</li>
+<li>React DevTools Profiler helps find component render issues.</li>
+<li>Chrome Performance tab helps find browser-level bottlenecks.</li>
+<li>Bundle analyzer helps find large JavaScript dependencies.</li>
+<li>Network tab helps find slow APIs and heavy assets.</li>
+<li>Common fixes include React.memo, useMemo, useCallback, code splitting, lazy loading, virtualization, and better state placement.</li>
+<li>Always compare performance before and after optimization.</li>
+</ul>
+
+<h2>Short Interview Answer</h2>
+
+<div class="highlight">
+I profile a React application by using React DevTools Profiler to inspect render counts and render durations, Chrome Performance to find main-thread bottlenecks, Network tab to check API and asset loading, Lighthouse for page-level issues, and bundle analyzers for large JavaScript bundles. Then I optimize using memoization, code splitting, lazy loading, virtualization, better state placement, and dependency cleanup.
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+Profile React performance with React DevTools Profiler, Chrome Performance, Network, Lighthouse, and bundle analyzers, then optimize the measured bottlenecks.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+
+</body>
+</html>

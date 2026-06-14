@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>183 - What is flushSync and when is it needed?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px;margin-bottom:10px}
+p{color:#cbd5e1}
+ul{padding-left:24px}
+li{margin-bottom:10px;color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left;vertical-align:top}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px;margin-top:15px}
+.warning{background:#1e1b4b;border-left:5px solid #fbbf24;padding:18px;border-radius:10px;margin-top:15px}
+.success{background:#052e16;padding:18px;border-left:5px solid #22c55e;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;margin-top:15px;text-align:center;line-height:2;font-size:18px}
+pre{border-radius:12px;overflow-x:auto}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>183. What is flushSync and when is it needed?</h1>
+
+<h2>One-Line Definition</h2>
+
+<div class="highlight">
+flushSync is a React API that forces React to immediately process state updates and update the DOM synchronously.
+</div>
+
+<h2>How Does React 18 work?</h2>
+
+<p>
+React waits until the current task finishes.
+</p>
+
+<p>
+Then it combines all pending state updates and performs one render.
+</p>
+
+<div class="flow">
+State Update
+<br>
++
+<br>
+State Update
+<br>
++
+<br>
+State Update
+
+<br><br>
+
+React Waits
+<br>
+↓
+<br>
+Batch Updates
+<br>
+↓
+<br>
+Single Render
+</div>
+
+<h2>Why Does flushSync Exist?</h2>
+
+<p>
+In React 18, automatic batching groups multiple state updates together.
+</p>
+
+<p>
+React often delays rendering until the current task finishes.
+</p>
+
+<p>
+Normally this is good because it improves performance.
+</p>
+
+<div class="success">
+Most of the time we want React to batch updates automatically.
+</div>
+
+<p>
+However, sometimes we need the DOM updated immediately before running some code.
+</p>
+
+<p>
+That is where flushSync is useful.
+</p>
+
+<h2>Importing flushSync</h2>
+
+<pre><code class="language-jsx">import { flushSync } from 'react-dom';</code></pre>
+
+<h2>Normal React Behavior</h2>
+
+<pre><code class="language-jsx">function handleClick() {
+
+  setCount(c => c + 1);
+
+  console.log(count);
+
+}</code></pre>
+
+<p>
+Many developers expect:
+</p>
+
+<pre><code>1</code></pre>
+
+<p>
+But often see:
+</p>
+
+<pre><code>0</code></pre>
+
+<p>
+because React schedules the update and renders later.
+</p>
+
+<div class="warning">
+State updates are not applied immediately.
+</div>
+
+<h2>How flushSync Works</h2>
+
+<pre><code class="language-jsx">flushSync(() => {
+
+  setCount(c => c + 1);
+
+});</code></pre>
+
+<p>
+React immediately:
+</p>
+
+<div class="flow">
+Run State Update
+<br>
+↓
+<br>
+Render Component
+<br>
+↓
+<br>
+Update DOM
+<br>
+↓
+<br>
+Continue Remaining Code
+</div>
+
+<h2>Simple Example</h2>
+
+<pre><code class="language-jsx">import { flushSync } from 'react-dom';
+
+function handleClick() {
+
+  flushSync(() => {
+
+    setCount(c => c + 1);
+
+  });
+
+  console.log('DOM Updated');
+
+}</code></pre>
+
+<p>
+The component is rendered before the code continues.
+</p>
+
+<h2>The Most Common Real-World Example</h2>
+
+<p>
+Suppose we open a chat message:
+</p>
+
+<pre><code class="language-jsx">setMessages(newMessages);</code></pre>
+
+<p>
+Then we want to scroll to the bottom.
+</p>
+
+<pre><code class="language-jsx">listRef.current.scrollTop = listRef.current.scrollHeight;</code></pre>
+
+<p>
+Problem:
+</p>
+
+<p>
+The DOM may not have updated yet.
+</p>
+
+<p>
+So the scroll height can be wrong.
+</p>
+
+<h2>Without flushSync</h2>
+
+<pre><code class="language-jsx">function addMessage() {
+
+  setMessages(messages => [
+    ...messages,
+    'Hello'
+  ]);
+
+  listRef.current.scrollTop = listRef.current.scrollHeight;
+
+}</code></pre>
+
+<p>
+Sometimes scrolling happens before React updates the DOM.
+</p>
+
+<div class="warning">
+The new message may not be included in the height calculation.
+</div>
+
+<h2>With flushSync</h2>
+
+<pre><code class="language-jsx">function addMessage() {
+
+  flushSync(() => {
+
+    setMessages(messages => [
+      ...messages,
+      'Hello'
+    ]);
+
+  });
+
+  listRef.current.scrollTop =
+    listRef.current.scrollHeight;
+
+}</code></pre>
+
+<p>
+Now React updates the DOM first.
+</p>
+
+<p>
+Then scrolling happens.
+</p>
+
+<div class="success">
+The scroll calculation uses the latest DOM.
+</div>
+
+<h2>Another Example - Measuring DOM Size</h2>
+
+<pre><code class="language-jsx">flushSync(() => {
+
+  setOpen(true);
+
+});
+
+const height =
+  modalRef.current.offsetHeight;</code></pre>
+
+<p>
+Without flushSync:
+</p>
+
+<p>
+The modal may not exist in the DOM yet.
+</p>
+
+<p>
+With flushSync:
+</p>
+
+<p>
+The modal is guaranteed to be rendered before measuring.
+</p>
+
+<h2>Relationship With Automatic Batching</h2>
+
+<p>
+React 18 automatically batches updates:
+</p>
+
+<pre><code class="language-jsx">setCount(c => c + 1);
+
+setName('Rizwan');</code></pre>
+
+<p>
+React normally performs:
+</p>
+
+<pre><code>One Render</code></pre>
+
+<p>
+But flushSync tells React:
+</p>
+
+<pre><code>Render Right Now</code></pre>
+
+<div class="flow">
+Automatic Batching
+<br>
+↓
+<br>
+Wait
+<br>
+↓
+<br>
+Group Updates
+<br>
+↓
+<br>
+Render Later
+
+<br><br>
+
+flushSync
+<br>
+↓
+<br>
+Render Immediately
+</div>
+
+<h2>Multiple flushSync Calls</h2>
+
+<pre><code class="language-jsx">flushSync(() => {
+  setCount(c => c + 1);
+});
+
+flushSync(() => {
+  setName('Rizwan');
+});</code></pre>
+
+<p>
+This causes:
+</p>
+
+<div class="flow">
+flushSync #1
+<br>
+↓
+<br>
+Render #1
+
+<br><br>
+
+flushSync #2
+<br>
+↓
+<br>
+Render #2
+</div>
+
+<p>
+Batching is bypassed.
+</p>
+
+<div class="warning">
+Too many flushSync calls can hurt performance.
+</div>
+
+<h2>When Should You Use flushSync?</h2>
+
+<ul>
+<li>Before measuring DOM size.</li>
+<li>Before scrolling calculations.</li>
+<li>Before focusing newly created elements.</li>
+<li>When third-party libraries need the updated DOM immediately.</li>
+<li>When code must run after React has already updated the DOM.</li>
+</ul>
+
+<h2>When Should You NOT Use flushSync?</h2>
+
+<ul>
+<li>For normal state updates.</li>
+<li>To fix logic errors.</li>
+<li>As a replacement for useEffect.</li>
+<li>For routine rendering.</li>
+</ul>
+
+<div class="warning">
+flushSync is an escape hatch and should be used rarely.
+</div>
+
+<h2>Easy Way To Remember</h2>
+
+<div class="flow">
+Normal React
+
+<br><br>
+
+setState()
+<br>
+↓
+<br>
+React Decides When To Render
+
+<br><br>
+
+flushSync
+
+<br><br>
+
+setState()
+<br>
+↓
+<br>
+Render Immediately
+<br>
+↓
+<br>
+Update DOM Immediately
+</div>
+
+<h2>Important Interview Points</h2>
+
+<ul>
+<li>Imported from react-dom.</li>
+<li>Forces synchronous rendering.</li>
+<li>Bypasses automatic batching.</li>
+<li>Useful for DOM measurements and scrolling.</li>
+<li>Should be used sparingly.</li>
+<li>Can reduce performance if overused.</li>
+</ul>
+
+<h2>Short Interview Answer</h2>
+
+<div class="highlight">
+flushSync is a React API that forces React to immediately process state updates and update the DOM. It is mainly used when code depends on the DOM being updated right away, such as measuring element size or scrolling.
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+flushSync forces React to render immediately instead of waiting for automatic batching.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+
+</body>
+</html>

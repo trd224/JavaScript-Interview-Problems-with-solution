@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Axios Interceptor</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px;margin-bottom:10px}
+p{color:#cbd5e1}
+ul{padding-left:24px}
+li{margin-bottom:10px;color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px;margin-top:15px}
+.warning{background:#1e1b4b;border-left:5px solid #fbbf24;padding:18px;border-radius:10px;margin-top:15px}
+.success{background:#052e16;padding:18px;border-left:5px solid #22c55e;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;margin-top:15px;text-align:center;line-height:2;font-size:18px}
+pre{border-radius:12px;overflow-x:auto}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>245. What is an Axios Interceptor and When is it Useful?</h1>
+
+<h2>One-Line Definition</h2>
+
+<div class="highlight">
+An Axios interceptor is a function that runs automatically before an API request is sent or after an API response is received.
+</div>
+
+<h2>Simple Meaning</h2>
+
+<p>
+Interceptor means Axios gives us a common place where we can control all API requests and responses.
+</p>
+
+<div class="flow">
+Component Calls API
+<br>↓<br>
+Request Interceptor Runs
+<br>↓<br>
+API Request Goes To Server
+<br>↓<br>
+Server Sends Response
+<br>↓<br>
+Response Interceptor Runs
+<br>↓<br>
+Data Reaches Component
+</div>
+
+<h2>Why Two Interceptors?</h2>
+
+<table>
+<tr>
+<th>Interceptor</th>
+<th>When It Runs</th>
+<th>Common Use</th>
+</tr>
+
+<tr>
+<td>Request Interceptor</td>
+<td>Before API request goes to server</td>
+<td>Show loader, add token, add headers</td>
+</tr>
+
+<tr>
+<td>Response Interceptor</td>
+<td>After server sends response</td>
+<td>Hide loader, handle errors, handle logout</td>
+</tr>
+</table>
+
+<div class="highlight">
+Request interceptor is for before API call. Response interceptor is for after API call.
+</div>
+
+<h2>Project Structure</h2>
+
+<pre><code class="language-text">src
+
+├── api
+│   └── axios.js
+
+├── components
+│   └── Users.jsx
+
+├── App.jsx
+
+└── main.jsx</code></pre>
+
+<h2>File 1: src/api/axios.js</h2>
+
+<p>
+This file creates one reusable Axios instance. We add interceptors here only once.
+</p>
+
+<pre><code class="language-jsx">import axios from 'axios';
+
+const api = axios.create({
+  baseURL: 'https://jsonplaceholder.typicode.com'
+});
+
+function showLoader() {
+  console.log('Loader Started');
+}
+
+function hideLoader() {
+  console.log('Loader Stopped');
+}
+
+api.interceptors.request.use(config =&gt; {
+    showLoader();
+
+    const token = localStorage.getItem('token');
+
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+
+    return config;
+  },
+  error =&gt; {
+    hideLoader();
+    return Promise.reject(error);
+  }
+);
+
+api.interceptors.response.use(response =&gt; {
+    hideLoader();
+    return response;
+  },
+  error =&gt; {
+    hideLoader();
+
+    if (error.response?.status === 401) {
+      console.log('Unauthorized user');
+    }
+
+    return Promise.reject(error);
+  }
+);
+
+export default api;</code></pre>
+
+<h2>File 2: src/components/Users.jsx</h2>
+
+<p>
+This component only calls the API. Loader and token logic is already handled by interceptor.
+</p>
+
+<pre><code class="language-jsx">import { useEffect, useState } from 'react';
+import api from '../api/axios';
+
+function Users() {
+  const [users, setUsers] = useState([]);
+
+  useEffect(() =&gt; {
+    api.get('/users')
+      .then(res =&gt; setUsers(res.data))
+      .catch(error =&gt; console.log(error));
+  }, []);
+
+  return (
+    &lt;div&gt;
+      &lt;h2&gt;Users List&lt;/h2&gt;
+
+      &lt;ul&gt;
+        {users.map(user =&gt; (
+          &lt;li key={user.id}&gt;{user.name}&lt;/li&gt;
+        ))}
+      &lt;/ul&gt;
+    &lt;/div&gt;
+  );
+}
+
+export default Users;</code></pre>
+
+<h2>File 3: src/App.jsx</h2>
+
+<pre><code class="language-jsx">import Users from './components/Users';
+
+function App() {
+  return &lt;Users /&gt;;
+}
+
+export default App;</code></pre>
+
+<h2>Step By Step Execution</h2>
+
+<h3>Step 1: Component Calls API</h3>
+
+<pre><code class="language-jsx">api.get('/users');</code></pre>
+
+<h3>Step 2: Request Interceptor Runs</h3>
+
+<pre><code class="language-jsx">showLoader();
+
+config.headers.Authorization = `Bearer ${token}`;
+
+return config;</code></pre>
+
+<p>
+Axios shows loader and adds token before sending request to server.
+</p>
+
+<h3>Step 3: API Request Goes To Server</h3>
+
+<pre><code class="language-text">GET https://jsonplaceholder.typicode.com/users</code></pre>
+
+<h3>Step 4: Server Sends Response</h3>
+
+<p>
+Server returns users data.
+</p>
+
+<h3>Step 5: Response Interceptor Runs</h3>
+
+<pre><code class="language-jsx">hideLoader();
+
+return response;</code></pre>
+
+<h3>Step 6: Data Reaches Component</h3>
+
+<pre><code class="language-jsx">.then(res =&gt; setUsers(res.data));</code></pre>
+
+<h2>Complete Flow</h2>
+
+<div class="flow">
+Users.jsx
+<br>↓<br>
+api.get('/users')
+<br>↓<br>
+Request Interceptor
+<br>↓<br>
+Show Loader + Add Token
+<br>↓<br>
+Request Sent To Server
+<br>↓<br>
+Server Response
+<br>↓<br>
+Response Interceptor
+<br>↓<br>
+Hide Loader + Handle Error
+<br>↓<br>
+Users.jsx Receives Data
+</div>
+
+<h2>Why is Axios Interceptor Useful?</h2>
+
+<ul>
+<li>We can show loader globally.</li>
+<li>We can hide loader globally.</li>
+<li>We can add JWT token in every request automatically.</li>
+<li>We can handle 401 unauthorized error globally.</li>
+<li>We can avoid repeating same code in every component.</li>
+</ul>
+
+<h2>Without Interceptor</h2>
+
+<div class="warning">
+Without interceptor, we have to repeat loader and error handling code in every API call.
+</div>
+
+<pre><code class="language-jsx">showLoader();
+
+axios.get('/users')
+  .then(res =&gt; {
+    hideLoader();
+    setUsers(res.data);
+  })
+  .catch(error =&gt; {
+    hideLoader();
+    console.log(error);
+  });</code></pre>
+
+<h2>With Interceptor</h2>
+
+<div class="success">
+With interceptor, component code becomes clean. Common API logic is handled globally.
+</div>
+
+<pre><code class="language-jsx">api.get('/users')
+  .then(res =&gt; setUsers(res.data))
+  .catch(error =&gt; console.log(error));</code></pre>
+
+<h2>Real Project Use Case</h2>
+
+<p>
+Suppose our application has many API calls.
+</p>
+
+<pre><code class="language-jsx">api.get('/users');
+api.get('/products');
+api.post('/orders');
+api.get('/profile');</code></pre>
+
+<p>
+Instead of adding token and loader manually in every API call, we add that logic once inside Axios interceptor.
+</p>
+
+<div class="highlight">
+This makes our application clean, reusable, and easy to maintain.
+</div>
+
+<h2>Important Interview Points</h2>
+
+<ul>
+<li>Axios interceptor can intercept request and response.</li>
+<li>Request interceptor runs before request goes to server.</li>
+<li>Response interceptor runs after response comes from server.</li>
+<li>Request interceptor is useful for adding token and headers.</li>
+<li>Response interceptor is useful for global error handling.</li>
+<li>Interceptors reduce duplicate API-related code.</li>
+</ul>
+
+<h2>Short Interview Answer</h2>
+
+<div class="highlight">
+Axios interceptor is used to run common logic globally before requests or after responses. Request interceptor is useful for adding tokens, headers, and showing loaders. Response interceptor is useful for hiding loaders, handling errors, and managing unauthorized responses.
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+Axios interceptor helps us handle common API request and response logic globally from one place.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+
+</body>
+</html>

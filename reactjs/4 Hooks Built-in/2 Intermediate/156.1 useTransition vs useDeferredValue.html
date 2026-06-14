@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>useTransition vs useDeferredValue</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px;margin-bottom:10px}
+p{color:#cbd5e1}
+ul{padding-left:24px}
+li{margin-bottom:10px;color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left;vertical-align:top}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px;margin-top:15px}
+.warning{background:#1e1b4b;border-left:5px solid #fbbf24;padding:18px;border-radius:10px;margin-top:15px}
+.success{background:#052e16;padding:18px;border-left:5px solid #22c55e;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;margin-top:15px;text-align:center;line-height:2;font-size:18px}
+pre{border-radius:12px;overflow-x:auto}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>useTransition vs useDeferredValue</h1>
+
+<h2>Main Difference</h2>
+
+<div class="highlight">
+useTransition delays a state update, while useDeferredValue creates a delayed version of a value.
+</div>
+
+<h2>useTransition</h2>
+
+<p>
+In <code>useTransition</code>, we usually create two states.
+</p>
+
+<pre><code class="language-jsx">const [input, setInput] = useState('');
+const [query, setQuery] = useState('');</code></pre>
+
+<p>
+Then we manually tell React which update is urgent and which update is non-urgent.
+</p>
+
+<pre><code class="language-jsx">setInput(value);
+
+startTransition(() =&gt; {
+  setQuery(value);
+});</code></pre>
+
+<table>
+<tr>
+<th>State</th>
+<th>Purpose</th>
+</tr>
+
+<tr>
+<td><code>input</code></td>
+<td>Controls the textbox and updates immediately.</td>
+</tr>
+
+<tr>
+<td><code>query</code></td>
+<td>Controls expensive filtering and updates with lower priority.</td>
+</tr>
+</table>
+
+<div class="warning">
+In useTransition, we manually manage urgent and non-urgent state updates.
+</div>
+
+<h2>useDeferredValue</h2>
+
+<p>
+In <code>useDeferredValue</code>, we usually need only one real state.
+</p>
+
+<pre><code class="language-jsx">const [input, setInput] = useState('');</code></pre>
+
+<p>
+Then React creates a delayed version of that value.
+</p>
+
+<pre><code class="language-jsx">const deferredInput = useDeferredValue(input);</code></pre>
+
+<div class="success">
+We do not need to create a second state because React automatically gives us a deferred copy of the original value.
+</div>
+
+<h2>Why We Do Not Need Two States in useDeferredValue?</h2>
+
+<p>
+Because <code>useDeferredValue</code> already gives us the second value automatically.
+</p>
+
+<p>
+When we write:
+</p>
+
+<pre><code class="language-jsx">const [input, setInput] = useState('');
+
+const deferredInput = useDeferredValue(input);</code></pre>
+
+<p>
+React internally treats <code>deferredInput</code> like a delayed version of <code>input</code>.
+</p>
+
+<div class="flow">
+input
+<br>↓<br>
+Current Value
+<br><br>
+deferredInput
+<br>↓<br>
+Delayed Value
+</div>
+
+<p>
+So we already have two values:
+</p>
+
+<ul>
+<li><code>input</code> = latest value typed by the user.</li>
+<li><code>deferredInput</code> = delayed value used for expensive rendering.</li>
+</ul>
+
+<div class="highlight">
+That is why we do not need <code>const [query, setQuery] = useState('')</code> when using useDeferredValue.
+</div>
+
+<h2>Compare Side By Side</h2>
+
+<table>
+<tr>
+<th>useTransition</th>
+<th>useDeferredValue</th>
+</tr>
+
+<tr>
+<td>Delays a state update.</td>
+<td>Delays a value.</td>
+</tr>
+
+<tr>
+<td>Usually needs two states.</td>
+<td>Usually needs one state.</td>
+</tr>
+
+<tr>
+<td>We manually use <code>startTransition()</code>.</td>
+<td>React automatically creates a deferred value.</td>
+</tr>
+
+<tr>
+<td>Provides <code>isPending</code>.</td>
+<td>Does not provide <code>isPending</code>.</td>
+</tr>
+
+<tr>
+<td>Good when we want to control update priority.</td>
+<td>Good when we only need a delayed value.</td>
+</tr>
+
+<tr>
+<td>Example: tab switching, heavy state update, route update.</td>
+<td>Example: search box, large list filtering, autocomplete.</td>
+</tr>
+</table>
+
+<h2>useTransition Example</h2>
+
+<pre><code class="language-jsx">import { useState, useTransition } from 'react';
+
+function App() {
+
+  const [input, setInput] = useState('');
+  const [query, setQuery] = useState('');
+
+  const [isPending, startTransition] = useTransition();
+
+  function handleChange(e) {
+
+    const value = e.target.value;
+
+    setInput(value);
+
+    startTransition(() =&gt; {
+      setQuery(value);
+    });
+
+  }
+
+  return (
+    &lt;&gt;
+      &lt;input value={input} onChange={handleChange} /&gt;
+
+      {isPending &amp;&amp; &lt;p&gt;Searching...&lt;/p&gt;}
+
+      &lt;ProductList query={query} /&gt;
+    &lt;/&gt;
+  );
+
+}</code></pre>
+
+<div class="highlight">
+Here, <code>input</code> updates immediately and <code>query</code> updates with lower priority.
+</div>
+
+<h2>useDeferredValue Example</h2>
+
+<pre><code class="language-jsx">import { useState, useDeferredValue } from 'react';
+
+function App() {
+
+  const [input, setInput] = useState('');
+
+  const deferredInput = useDeferredValue(input);
+
+  return (
+    &lt;&gt;
+      &lt;input
+        value={input}
+        onChange={e =&gt; setInput(e.target.value)}
+      /&gt;
+
+      &lt;ProductList query={deferredInput} /&gt;
+    &lt;/&gt;
+  );
+
+}</code></pre>
+
+<div class="success">
+Here, we have only one state. React automatically creates <code>deferredInput</code> as a delayed version of <code>input</code>.
+</div>
+
+<h2>What Happens During Typing?</h2>
+
+<p>
+Suppose user types:
+</p>
+
+<pre><code class="language-text">React</code></pre>
+
+<p>
+Immediately:
+</p>
+
+<pre><code class="language-text">input = "React"</code></pre>
+
+<p>
+But for a short time:
+</p>
+
+<pre><code class="language-text">deferredInput = "Reac"</code></pre>
+
+<p>
+After React finishes the expensive rendering:
+</p>
+
+<pre><code class="language-text">deferredInput = "React"</code></pre>
+
+<div class="highlight">
+The textbox stays fast because it uses <code>input</code>, while the heavy list uses <code>deferredInput</code>.
+</div>
+
+<h2>Visual Difference</h2>
+
+<h3>useTransition</h3>
+
+<div class="flow">
+User Types
+<br>↓<br>
+input State
+<br>↓<br>
+setInput()
+<br><br>
+AND
+<br><br>
+startTransition()
+<br>↓<br>
+query State
+</div>
+
+<h3>useDeferredValue</h3>
+
+<div class="flow">
+User Types
+<br>↓<br>
+input State
+<br>↓<br>
+useDeferredValue(input)
+<br>↓<br>
+deferredInput
+</div>
+
+<h2>When Should We Use useTransition?</h2>
+
+<ul>
+<li>When we want to control which update is urgent and which update is non-urgent.</li>
+<li>When we need <code>isPending</code>.</li>
+<li>When switching tabs renders heavy UI.</li>
+<li>When updating a large component tree.</li>
+<li>When route or page update feels slow.</li>
+</ul>
+
+<h2>When Should We Use useDeferredValue?</h2>
+
+<ul>
+<li>When we already have a value and only need its delayed version.</li>
+<li>Search input.</li>
+<li>Large list filtering.</li>
+<li>Autocomplete.</li>
+<li>Live search result rendering.</li>
+</ul>
+
+<h2>Easy Way To Remember</h2>
+
+<div class="flow">
+useTransition
+<br>↓<br>
+I control the state update priority
+<br>↓<br>
+Usually two states
+<br>↓<br>
+Gives isPending
+<br><br>
+useDeferredValue
+<br>↓<br>
+React creates delayed value automatically
+<br>↓<br>
+Usually one state
+<br>↓<br>
+No isPending
+</div>
+
+<h2>Short Interview Answer</h2>
+
+<div class="highlight">
+useTransition delays state updates and usually requires two states because we manually separate urgent and non-urgent updates. useDeferredValue creates a delayed version of a value automatically, so we usually need only one state because React provides the deferred copy for us.
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+useTransition delays state updates, while useDeferredValue delays value consumption.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+
+</body>
+</html>

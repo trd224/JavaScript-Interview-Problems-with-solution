@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>179 - What is Concurrent Rendering in React 18?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px;margin-bottom:10px}
+p{color:#cbd5e1}
+ul{padding-left:24px}
+li{margin-bottom:10px;color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left;vertical-align:top}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px;margin-top:15px}
+.warning{background:#1e1b4b;border-left:5px solid #fbbf24;padding:18px;border-radius:10px;margin-top:15px}
+.success{background:#052e16;padding:18px;border-left:5px solid #22c55e;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;margin-top:15px;text-align:center;line-height:2;font-size:18px}
+pre{border-radius:12px;overflow-x:auto}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>179. What is Concurrent Rendering in React 18?</h1>
+
+<h2>One-Line Definition</h2>
+
+<div class="highlight">
+Concurrent Rendering is React 18's new rendering system that allows React to pause, interrupt, restart, and prioritize rendering work to keep the UI responsive.
+</div>
+
+<h2>The Problem Before React 18</h2>
+
+<p>
+Before React 18, rendering was synchronous.
+</p>
+
+<p>
+Once React started rendering, it had to finish everything before responding to user interactions.
+</p>
+
+<div class="flow">
+React Starts Rendering
+<br>
+↓
+<br>
+Must Finish Entire Render
+<br>
+↓
+<br>
+User Waits
+<br>
+↓
+<br>
+UI Updates
+</div>
+
+<p>
+For large applications, this could make the UI feel slow or frozen.
+</p>
+
+<h2>Example Problem</h2>
+
+<p>
+Suppose we have:
+</p>
+
+<ul>
+<li>A search box.</li>
+<li>A list containing 10,000 items.</li>
+</ul>
+
+<p>
+When the user types:
+</p>
+
+<pre><code>R
+Re
+Rea
+Reac
+React</code></pre>
+
+<p>
+React must:
+</p>
+
+<pre><code>Update Input
++
+Filter 10,000 Items
++
+Render 10,000 Items</code></pre>
+
+<p>
+In older React versions, everything happened immediately.
+</p>
+
+<p>
+The input could feel laggy.
+</p>
+
+<div class="warning">
+Heavy rendering work could block user interactions.
+</div>
+
+<h2>How Concurrent Rendering Helps</h2>
+
+<p>
+React can now split rendering work into smaller pieces.
+</p>
+
+<div class="flow">
+Start Rendering
+<br>
+↓
+<br>
+User Types
+<br>
+↓
+<br>
+Pause Current Work
+<br>
+↓
+<br>
+Handle User Interaction
+<br>
+↓
+<br>
+Continue Rendering Later
+</div>
+
+<p>
+The UI stays responsive because urgent work gets priority.
+</p>
+
+<h2>The Most Important Thing To Understand</h2>
+
+<p>
+Concurrent Rendering does NOT mean React renders multiple components at the same time.
+</p>
+
+<div class="warning">
+"Concurrent" does NOT mean parallel rendering.
+</div>
+
+<p>
+JavaScript still runs on a single thread.
+</p>
+
+<p>
+React simply becomes smarter about scheduling work.
+</p>
+
+<h2>What React Can Do Now</h2>
+
+<ul>
+<li>Pause rendering.</li>
+<li>Resume rendering.</li>
+<li>Restart rendering.</li>
+<li>Discard outdated renders.</li>
+<li>Prioritize important updates.</li>
+</ul>
+
+<div class="success">
+React can interrupt low-priority work when more important work arrives.
+</div>
+
+<h2>Real Example</h2>
+
+<p>
+User types in a search box:
+</p>
+
+<pre><code class="language-jsx">setSearch('React');</code></pre>
+
+<p>
+At the same time:
+</p>
+
+<pre><code class="language-jsx">renderLargeList();</code></pre>
+
+<p>
+React gives higher priority to:
+</p>
+
+<pre><code>User Typing</code></pre>
+
+<p>
+and lower priority to:
+</p>
+
+<pre><code>Large List Rendering</code></pre>
+
+<p>
+So the typing stays smooth.
+</p>
+
+<h2>How Do We Use Concurrent Rendering?</h2>
+
+<p>
+Most of the time we do not use it directly.
+</p>
+
+<p>
+React automatically uses the concurrent renderer when we create our app with:
+</p>
+
+<pre><code class="language-jsx">import ReactDOM from 'react-dom/client';
+
+const root = ReactDOM.createRoot(
+  document.getElementById('root')
+);
+
+root.render(&lt;App /&gt;);</code></pre>
+
+<div class="success">
+Using createRoot enables React 18's concurrent features.
+</div>
+
+<h2>Features Built On Top Of Concurrent Rendering</h2>
+
+<table>
+<tr>
+<th>Feature</th>
+<th>Purpose</th>
+</tr>
+
+<tr>
+<td>useTransition</td>
+<td>Mark updates as low priority.</td>
+</tr>
+
+<tr>
+<td>useDeferredValue</td>
+<td>Delay expensive updates.</td>
+</tr>
+
+<tr>
+<td>Suspense</td>
+<td>Show fallback UI while waiting.</td>
+</tr>
+
+<tr>
+<td>Automatic Batching</td>
+<td>Reduce unnecessary renders.</td>
+</tr>
+</table>
+
+<h2>Example Using useTransition</h2>
+
+<pre><code class="language-jsx">const [isPending, startTransition] = useTransition();
+
+function handleChange(e) {
+
+  const value = e.target.value;
+
+  setInput(value);
+
+  startTransition(() => {
+
+    setSearch(value);
+
+  });
+
+}</code></pre>
+
+<p>
+React treats:
+</p>
+
+<pre><code class="language-jsx">setInput(value);</code></pre>
+
+<p>
+as urgent work.
+</p>
+
+<p>
+And:
+</p>
+
+<pre><code class="language-jsx">setSearch(value);</code></pre>
+
+<p>
+as lower priority work.
+</p>
+
+<h2>Before vs After React 18</h2>
+
+<table>
+<tr>
+<th>Before React 18</th>
+<th>React 18</th>
+</tr>
+
+<tr>
+<td>Rendering was blocking.</td>
+<td>Rendering can be interrupted.</td>
+</tr>
+
+<tr>
+<td>No prioritization.</td>
+<td>Priority-based scheduling.</td>
+</tr>
+
+<tr>
+<td>UI could become unresponsive.</td>
+<td>UI stays responsive.</td>
+</tr>
+
+<tr>
+<td>All updates treated equally.</td>
+<td>Urgent and non-urgent updates separated.</td>
+</tr>
+</table>
+
+<h2>Easy Way To Remember</h2>
+
+<div class="flow">
+Old React
+
+<br><br>
+
+Start Render
+<br>
+↓
+<br>
+Finish Everything
+<br>
+↓
+<br>
+Respond To User
+
+<br><br>
+
+React 18
+
+<br><br>
+
+Start Render
+<br>
+↓
+<br>
+User Interaction?
+<br>
+↓
+<br>
+Pause Work
+<br>
+↓
+<br>
+Handle User First
+<br>
+↓
+<br>
+Continue Later
+</div>
+
+<h2>Important Interview Points</h2>
+
+<ul>
+<li>Introduced in React 18.</li>
+<li>Allows interruptible rendering.</li>
+<li>Improves responsiveness.</li>
+<li>Does not mean parallel rendering.</li>
+<li>Works behind useTransition and useDeferredValue.</li>
+<li>Enabled through createRoot().</li>
+<li>Allows React to prioritize updates.</li>
+</ul>
+
+<h2>Short Interview Answer</h2>
+
+<div class="highlight">
+Concurrent Rendering is React 18's rendering system that allows React to pause, interrupt, and prioritize rendering work so the UI remains responsive during expensive updates.
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+Concurrent Rendering lets React prioritize important updates and interrupt less important rendering work to keep the UI responsive.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+
+</body>
+</html>

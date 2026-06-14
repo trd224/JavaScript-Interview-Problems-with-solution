@@ -1,0 +1,334 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>168 - Write a Custom Hook useDebounce</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px;margin-bottom:10px}
+p{color:#cbd5e1}
+ul{padding-left:24px}
+li{margin-bottom:10px;color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left;vertical-align:top}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px;margin-top:15px}
+.warning{background:#1e1b4b;border-left:5px solid #fbbf24;padding:18px;border-radius:10px;margin-top:15px}
+.success{background:#052e16;padding:18px;border-left:5px solid #22c55e;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;margin-top:15px;text-align:center;line-height:2;font-size:18px}
+pre{border-radius:12px;overflow-x:auto}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>168. Write a Custom Hook useDebounce</h1>
+
+<h2>One-Line Definition</h2>
+
+<div class="highlight">
+<code>useDebounce</code> is a custom React hook that delays updating a value until the user stops changing it for a specified amount of time.
+</div>
+
+<h2>Why Is It Used?</h2>
+
+<p>
+Imagine a search box where the user types very fast.
+</p>
+
+<div class="flow">
+R
+<br>↓<br>
+Re
+<br>↓<br>
+Rea
+<br>↓<br>
+Reac
+<br>↓<br>
+React
+</div>
+
+<p>
+Without debounce, every letter can trigger an API call.
+</p>
+
+<div class="warning">
+Without debounce: typing <b>React</b> can create 5 API calls.
+</div>
+
+<p>
+With debounce, the API call happens only after the user stops typing.
+</p>
+
+<div class="success">
+With debounce: typing <b>React</b> creates only 1 API call after a small delay.
+</div>
+
+<h2>Custom Hook: useDebounce</h2>
+
+<pre><code class="language-jsx">import { useState, useEffect } from 'react';
+
+function useDebounce(value, delay) {
+
+  const [debouncedValue, setDebouncedValue] = useState(value);
+
+  useEffect(() => {
+
+    const timer = setTimeout(() => {
+      setDebouncedValue(value);
+    }, delay);
+
+    return () => clearTimeout(timer);
+
+  }, [value, delay]);
+
+  return debouncedValue;
+
+}
+
+export default useDebounce;</code></pre>
+
+<h2>Understanding Step-by-Step</h2>
+
+<h3>Step 1 - Store Delayed Value</h3>
+
+<pre><code class="language-jsx">const [debouncedValue, setDebouncedValue] = useState(value);</code></pre>
+
+<p>
+This state stores the final delayed value.
+</p>
+
+<div class="highlight">
+<code>value</code> changes immediately, but <code>debouncedValue</code> changes after delay.
+</div>
+
+<h3>Step 2 - Run Effect When Value Changes</h3>
+
+<pre><code class="language-jsx">useEffect(() => {
+
+}, [value, delay]);</code></pre>
+
+<p>
+This effect runs whenever <code>value</code> or <code>delay</code> changes.
+</p>
+
+<h3>Step 3 - Start Timer</h3>
+
+<pre><code class="language-jsx">const timer = setTimeout(() => {
+  setDebouncedValue(value);
+}, delay);</code></pre>
+
+<p>
+React waits for the delay time before updating <code>debouncedValue</code>.
+</p>
+
+<div class="flow">
+value changes
+<br>↓<br>
+Timer starts
+<br>↓<br>
+Wait 500ms
+<br>↓<br>
+debouncedValue updates
+</div>
+
+<h3>Step 4 - Clear Old Timer</h3>
+
+<pre><code class="language-jsx">return () => clearTimeout(timer);</code></pre>
+
+<p>
+This is the most important part.
+</p>
+
+<div class="warning">
+If the user types again before the delay ends, the old timer is removed.
+</div>
+
+<h2>Simple Timeline</h2>
+
+<div class="flow">
+User types R → timer starts
+<br>↓<br>
+User types Re → old timer removed, new timer starts
+<br>↓<br>
+User types Rea → old timer removed, new timer starts
+<br>↓<br>
+User stops typing
+<br>↓<br>
+500ms later
+<br>↓<br>
+debouncedValue becomes final value
+</div>
+
+<h2>Using useDebounce</h2>
+
+
+
+<pre><code class="language-jsx">import { useState } from 'react';
+import useDebounce from './useDebounce';
+
+function App() {
+
+  const [search, setSearch] = useState('');
+
+  const debouncedSearch = useDebounce(search, 500);
+
+  return (
+    &lt;div&gt;
+      &lt;input
+        type="text"
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+        placeholder="Search..."
+      /&gt;
+
+      &lt;p&gt;Typing: {search}&lt;/p&gt;
+
+      &lt;p&gt;Debounced: {debouncedSearch}&lt;/p&gt;
+    &lt;/div&gt;
+  );
+
+}
+
+export default App;</code></pre>
+
+<h2>What Happens Here?</h2>
+
+<table>
+<tr>
+<th>Value</th>
+<th>Meaning</th>
+</tr>
+
+<tr>
+<td><code>search</code></td>
+<td>Updates immediately on every key press.</td>
+</tr>
+
+<tr>
+<td><code>debouncedSearch</code></td>
+<td>Updates only after the user stops typing for 500ms.</td>
+</tr>
+</table>
+
+<h2>Real API Example</h2>
+
+<pre><code class="language-jsx">import { useState, useEffect } from 'react';
+import useDebounce from './useDebounce';
+
+function App() {
+
+  const [search, setSearch] = useState('');
+
+  const debouncedSearch = useDebounce(search, 500);
+
+  useEffect(() => {
+
+    if (!debouncedSearch) return;
+
+    console.log('API Call:', debouncedSearch);
+
+    // fetch(`/api/users?q=${debouncedSearch}`)
+
+  }, [debouncedSearch]);
+
+  return (
+    &lt;input
+      value={search}
+      onChange={(e) => setSearch(e.target.value)}
+      placeholder="Search Users"
+    /&gt;
+  );
+
+}
+
+export default App;</code></pre>
+
+<div class="success">
+Now the API call runs only when <code>debouncedSearch</code> changes, not on every key press.
+</div>
+
+<h2>Bad Way - API Directly Inside onChange</h2>
+
+<pre><code class="language-jsx">onChange={(e) => {
+  setSearch(e.target.value);
+  fetch('/api/search');
+}}</code></pre>
+
+<div class="warning">
+This can call the API again and again while the user is typing.
+</div>
+
+<h2>Good Way - API After Debounce</h2>
+
+<pre><code class="language-jsx">const debouncedSearch = useDebounce(search, 500);</code></pre>
+
+<div class="success">
+This waits until the user stops typing, then runs the final logic.
+</div>
+
+<h2>Real-World Use Cases</h2>
+
+<ul>
+<li>Search suggestions</li>
+<li>Product search</li>
+<li>Auto-save forms</li>
+<li>Username availability check</li>
+<li>Filter large tables</li>
+<li>API request optimization</li>
+</ul>
+
+<h2>Easy Way To Remember</h2>
+
+<div class="flow">
+User keeps typing
+<br>↓<br>
+Cancel old timer
+<br>↓<br>
+Start new timer
+<br>↓<br>
+User stops typing
+<br>↓<br>
+Final value updates
+</div>
+
+<h2>Important Interview Points</h2>
+
+<ul>
+<li><code>useDebounce</code> delays value updates.</li>
+<li>It uses <code>useState</code> to store the debounced value.</li>
+<li>It uses <code>useEffect</code> to start and clean timers.</li>
+<li><code>clearTimeout</code> prevents old timers from running.</li>
+<li>It is mostly used to reduce unnecessary API calls.</li>
+</ul>
+
+<h2>Short Interview Answer</h2>
+
+<div class="highlight">
+<code>useDebounce</code> is a custom hook that delays updating a value until a specified time has passed without further changes. It is commonly used to reduce unnecessary API calls while typing in search fields.
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+<code>useDebounce</code> delays value updates and helps optimize performance by preventing frequent operations such as API requests.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+
+</body>
+</html>

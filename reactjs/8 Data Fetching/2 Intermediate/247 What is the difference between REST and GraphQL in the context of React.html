@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>247 - REST vs GraphQL in React</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px;margin-bottom:10px}
+p{color:#cbd5e1}
+ul{padding-left:24px}
+li{margin-bottom:10px;color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left;vertical-align:top}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px;margin-top:15px}
+.warning{background:#1e1b4b;border-left:5px solid #fbbf24;padding:18px;border-radius:10px;margin-top:15px}
+.success{background:#052e16;padding:18px;border-left:5px solid #22c55e;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;margin-top:15px;text-align:center;line-height:2;font-size:18px}
+pre{border-radius:12px;overflow-x:auto}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>247. What is the Difference Between REST and GraphQL in React?</h1>
+
+<h2>One-Line Definition</h2>
+
+<div class="highlight">
+REST uses multiple API endpoints that return fixed data, while GraphQL uses one endpoint where React asks for exactly the data it needs.
+</div>
+
+<h2>Why Does React Care?</h2>
+
+<p>
+React applications need data from APIs.
+</p>
+
+<pre><code class="language-text">Users
+Products
+Orders
+Dashboard Stats
+Notifications</code></pre>
+
+<p>
+The way React fetches this data depends on whether the backend provides REST APIs or GraphQL APIs.
+</p>
+
+<h2>REST Example</h2>
+
+<p>
+Suppose React needs user data.
+</p>
+
+<h3>Request</h3>
+
+<pre><code class="language-http">GET /users/1</code></pre>
+
+<h3>Response</h3>
+
+<pre><code class="language-json">{
+  "id": 1,
+  "name": "Rizwan",
+  "email": "rizwan@gmail.com",
+  "address": "Jaipur",
+  "phone": "9999999999",
+  "createdAt": "2025-01-01"
+}</code></pre>
+
+<div class="warning">
+REST returns the full predefined response, even if React needs only name and email.
+</div>
+
+<h2>GraphQL Example</h2>
+
+<p>
+In GraphQL, React asks only for required fields.
+</p>
+
+<h3>Request</h3>
+
+<pre><code class="language-graphql">query {
+  user(id: 1) {
+    name
+    email
+  }
+}</code></pre>
+
+<h3>Response</h3>
+
+<pre><code class="language-json">{
+  "data": {
+    "user": {
+      "name": "Rizwan",
+      "email": "rizwan@gmail.com"
+    }
+  }
+}</code></pre>
+
+<div class="success">
+GraphQL returns only the data requested by the React application.
+</div>
+
+<h2>Main Difference</h2>
+
+<div class="flow">
+REST
+<br>↓<br>
+React calls fixed endpoint
+<br>↓<br>
+Server returns fixed data
+</div>
+
+<div class="flow">
+GraphQL
+<br>↓<br>
+React sends query
+<br>↓<br>
+Server returns only requested fields
+</div>
+
+<h2>REST Endpoints</h2>
+
+<p>
+REST usually has multiple endpoints.
+</p>
+
+<pre><code class="language-text">GET /users
+GET /users/1
+GET /products
+GET /orders
+GET /notifications</code></pre>
+
+<h2>GraphQL Endpoint</h2>
+
+<p>
+GraphQL usually has one endpoint.
+</p>
+
+<pre><code class="language-text">POST /graphql</code></pre>
+
+<p>
+Different queries are sent to the same endpoint.
+</p>
+
+<h2>Over Fetching in REST</h2>
+
+<p>
+React needs only:
+</p>
+
+<pre><code class="language-text">name
+email</code></pre>
+
+<p>
+But REST may return:
+</p>
+
+<pre><code class="language-text">id
+name
+email
+phone
+address
+city
+country
+createdAt
+updatedAt</code></pre>
+
+<div class="warning">
+This is called over fetching because extra unnecessary data is downloaded.
+</div>
+
+<h2>GraphQL Solves Over Fetching</h2>
+
+<pre><code class="language-graphql">query {
+  user(id: 1) {
+    name
+    email
+  }
+}</code></pre>
+
+<p>
+Only name and email come back.
+</p>
+
+<h2>Under Fetching in REST</h2>
+
+<p>
+Suppose dashboard needs:
+</p>
+
+<pre><code class="language-text">User
+Orders
+Notifications</code></pre>
+
+<p>
+REST may require multiple requests.
+</p>
+
+<pre><code class="language-http">GET /users/1
+GET /orders
+GET /notifications</code></pre>
+
+<div class="warning">
+This is called under fetching because one request is not enough to get all required data.
+</div>
+
+<h2>GraphQL Solves Under Fetching</h2>
+
+<pre><code class="language-graphql">query {
+  user(id: 1) {
+    name
+  }
+
+  orders {
+    id
+    total
+  }
+
+  notifications {
+    message
+  }
+}</code></pre>
+
+<p>
+One GraphQL request can return all related data.
+</p>
+
+<h2>React Example With REST</h2>
+
+<pre><code class="language-javascript">import axios from 'axios';
+
+async function getUser() {
+  const response = await axios.get('/users/1');
+  console.log(response.data);
+}</code></pre>
+
+<h2>React Example With GraphQL</h2>
+
+<pre><code class="language-javascript">const query = `
+  query {
+    user(id: 1) {
+      name
+      email
+    }
+  }
+`;
+
+async function getUser() {
+  const response = await fetch('/graphql', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ query })
+  });
+
+  const data = await response.json();
+  console.log(data);
+}</code></pre>
+
+<h2>Common React Libraries</h2>
+
+<table>
+<tr>
+<th>REST</th>
+<th>GraphQL</th>
+</tr>
+
+<tr>
+<td>Axios</td>
+<td>Apollo Client</td>
+</tr>
+
+<tr>
+<td>Fetch API</td>
+<td>Relay</td>
+</tr>
+
+<tr>
+<td>React Query</td>
+<td>urql</td>
+</tr>
+
+<tr>
+<td>SWR</td>
+<td>React Query + GraphQL</td>
+</tr>
+</table>
+
+<h2>REST vs GraphQL</h2>
+
+<table>
+<tr>
+<th>Feature</th>
+<th>REST</th>
+<th>GraphQL</th>
+</tr>
+
+<tr>
+<td>Endpoint</td>
+<td>Multiple endpoints</td>
+<td>Usually one endpoint</td>
+</tr>
+
+<tr>
+<td>Data Control</td>
+<td>Server decides response shape</td>
+<td>Client decides required fields</td>
+</tr>
+
+<tr>
+<td>Over Fetching</td>
+<td>Possible</td>
+<td>Avoided</td>
+</tr>
+
+<tr>
+<td>Under Fetching</td>
+<td>Possible</td>
+<td>Avoided</td>
+</tr>
+
+<tr>
+<td>Learning Curve</td>
+<td>Easier</td>
+<td>Harder</td>
+</tr>
+
+<tr>
+<td>Best For</td>
+<td>Simple CRUD apps</td>
+<td>Complex data-driven apps</td>
+</tr>
+</table>
+
+<h2>When To Use REST</h2>
+
+<ul>
+<li>Application is simple.</li>
+<li>Backend already provides REST APIs.</li>
+<li>Team is comfortable with REST.</li>
+<li>Data requirements are predictable.</li>
+<li>Project is CRUD-based.</li>
+</ul>
+
+<div class="success">
+REST is still very common and works perfectly for many React applications.
+</div>
+
+<h2>When To Use GraphQL</h2>
+
+<ul>
+<li>React needs many related resources.</li>
+<li>Different screens need different fields.</li>
+<li>Over fetching is a problem.</li>
+<li>Mobile bandwidth matters.</li>
+<li>Large frontend applications need flexible data fetching.</li>
+</ul>
+
+<div class="success">
+GraphQL is useful when the frontend needs more control over API data.
+</div>
+
+<h2>Important Interview Points</h2>
+
+<ul>
+<li>REST uses multiple endpoints.</li>
+<li>GraphQL usually uses one endpoint.</li>
+<li>REST returns predefined data.</li>
+<li>GraphQL returns only requested fields.</li>
+<li>GraphQL reduces over fetching and under fetching.</li>
+<li>React can work with both REST and GraphQL.</li>
+<li>Apollo Client is commonly used for GraphQL in React.</li>
+</ul>
+
+<h2>Short Interview Answer</h2>
+
+<div class="highlight">
+REST uses multiple endpoints and returns predefined resource data. GraphQL usually uses a single endpoint where React sends a query and asks for exactly the fields it needs. GraphQL is useful for complex applications because it reduces over fetching and under fetching.
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+REST gives fixed data from multiple endpoints, while GraphQL lets React request exactly the required data from one endpoint.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-graphql.min.js"></script>
+
+</body>
+</html>

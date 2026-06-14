@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>218 - When should you NOT use Context?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px;margin-bottom:10px}
+p{color:#cbd5e1}
+ul{padding-left:24px}
+li{margin-bottom:10px;color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left;vertical-align:top}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px;margin-top:15px}
+.warning{background:#3b0820;border-left:5px solid #ef4444;padding:18px;border-radius:10px;margin-top:15px}
+.success{background:#052e16;padding:18px;border-left:5px solid #22c55e;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;margin-top:15px;text-align:center;line-height:2;font-size:18px}
+pre{border-radius:12px;overflow-x:auto}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>218. When should you NOT use Context?</h1>
+
+<h2>One-Line Definition</h2>
+
+<div class="highlight">
+You should NOT use Context for local component state, frequently changing data, or complex global state where Context would cause unnecessary re-renders and maintenance problems.
+</div>
+
+<h2>A Common Misunderstanding</h2>
+
+<p>
+Many developers learn Context and think:
+</p>
+
+<pre><code class="language-js">Context = Global State Solution</code></pre>
+
+<p>
+Then they start putting everything into Context.
+</p>
+
+<p>
+Examples:
+</p>
+
+<ul>
+<li>Input values</li>
+<li>Form state</li>
+<li>Modal state</li>
+<li>Cart state</li>
+<li>Notifications</li>
+<li>Search text</li>
+<li>Table filters</li>
+</ul>
+
+<div class="warning">
+Context is useful, but it is not the answer to every state management problem.
+</div>
+
+<h2>When Context Works Well</h2>
+
+<p>
+Context is best for data that:
+</p>
+
+<ul>
+<li>Is needed in many places.</li>
+<li>Changes infrequently.</li>
+<li>Represents application-wide settings.</li>
+</ul>
+
+<p>
+Examples:
+</p>
+
+<ul>
+<li>Theme</li>
+<li>Language</li>
+<li>Authenticated user</li>
+<li>Application configuration</li>
+</ul>
+
+<h2>When You Should NOT Use Context</h2>
+
+<h2>1. For Local Component State</h2>
+
+<p>
+Bad:
+</p>
+
+<pre><code class="language-js">const SearchContext = createContext();</code></pre>
+
+<pre><code class="language-js">const [searchText, setSearchText] = useState('');</code></pre>
+
+<p>
+If only one page uses searchText, Context adds unnecessary complexity.
+</p>
+
+<h3>Better</h3>
+
+<pre><code class="language-js">function ProductPage() {
+  const [searchText, setSearchText] = useState('');
+
+  return (
+    &lt;SearchBox
+      value={searchText}
+      onChange={setSearchText}
+    /&gt;
+  );
+}</code></pre>
+
+<div class="success">
+Keep state close to where it is used.
+</div>
+
+<h2>2. For Parent → Child Data Passing</h2>
+
+<p>
+Some developers use Context immediately:
+</p>
+
+<pre><code class="language-js">App
+ ↓
+Header</code></pre>
+
+<p>
+But props are simpler.
+</p>
+
+<h3>Better</h3>
+
+<pre><code class="language-js">function App() {
+  return &lt;Header user={user} /&gt;;
+}</code></pre>
+
+<div class="highlight">
+If data only travels through a few levels, props are usually simpler than Context.
+</div>
+
+<h2>3. For Frequently Changing State</h2>
+
+<p>
+Imagine a search box:
+</p>
+
+<pre><code class="language-js">const [searchText, setSearchText] = useState('');</code></pre>
+
+<p>
+Every key press changes state.
+</p>
+
+<p>
+If stored in Context:
+</p>
+
+<pre><code class="language-js">setSearchText('R');
+setSearchText('Ri');
+setSearchText('Riz');
+setSearchText('Rizwa');
+setSearchText('Rizwan');</code></pre>
+
+<p>
+Context updates repeatedly.
+</p>
+
+<div class="warning">
+All Context consumers re-render on every keystroke.
+</div>
+
+<h3>Examples of Frequently Changing State</h3>
+
+<ul>
+<li>Search inputs</li>
+<li>Mouse position</li>
+<li>Drag and drop coordinates</li>
+<li>Animation state</li>
+<li>Live typing data</li>
+<li>Real-time counters</li>
+</ul>
+
+<h2>4. For Large Complex Global State</h2>
+
+<p>
+Suppose we store:
+</p>
+
+<pre><code class="language-js">{
+  user,
+  cart,
+  products,
+  filters,
+  notifications,
+  orders,
+  settings,
+  permissions
+}</code></pre>
+
+<p>
+inside one Context.
+</p>
+
+<div class="warning">
+Every update can trigger many unnecessary re-renders.
+</div>
+
+<p>
+For large applications, dedicated state libraries may be better:
+</p>
+
+<ul>
+<li>Redux Toolkit</li>
+<li>Zustand</li>
+<li>Jotai</li>
+<li>Recoil</li>
+</ul>
+
+<h2>5. For Server State</h2>
+
+<p>
+Server state means data coming from APIs.
+</p>
+
+<pre><code class="language-js">const users = await fetch('/api/users');</code></pre>
+
+<p>
+Many developers put API responses into Context.
+</p>
+
+<p>
+This becomes difficult because:
+</p>
+
+<ul>
+<li>Caching is manual.</li>
+<li>Refetching is manual.</li>
+<li>Loading state is manual.</li>
+<li>Error handling is manual.</li>
+</ul>
+
+<h3>Better Tools</h3>
+
+<ul>
+<li>TanStack Query (React Query)</li>
+<li>SWR</li>
+</ul>
+
+<div class="success">
+These libraries are designed specifically for server state.
+</div>
+
+<h2>Example - React Query Instead Of Context</h2>
+
+<p>
+Instead of:
+</p>
+
+<pre><code class="language-js">const UsersContext = createContext();</code></pre>
+
+<p>
+Use:
+</p>
+
+<pre><code class="language-js">const { data, isLoading } =
+  useQuery({
+    queryKey: ['users'],
+    queryFn: fetchUsers
+  });</code></pre>
+
+<h2>6. For Temporary UI State</h2>
+
+<p>
+Examples:
+</p>
+
+<ul>
+<li>Modal open/close</li>
+<li>Dropdown open/close</li>
+<li>Tooltip visibility</li>
+<li>Accordion expansion</li>
+</ul>
+
+<h3>Bad</h3>
+
+<pre><code class="language-js">ModalContext</code></pre>
+
+<p>
+for a modal used only on one page.
+</p>
+
+<h3>Better</h3>
+
+<pre><code class="language-js">const [isOpen, setIsOpen] = useState(false);</code></pre>
+
+<div class="success">
+Keep temporary UI state local whenever possible.
+</div>
+
+<h2>Real Project Example</h2>
+
+<p>
+Suppose our Aadhaar Authentication page contains:
+</p>
+
+<ul>
+<li>Aadhaar number</li>
+<li>OTP value</li>
+<li>Captcha value</li>
+<li>Loader state</li>
+<li>Error popup state</li>
+</ul>
+
+<p>
+Bad approach:
+</p>
+
+<pre><code class="language-js">AuthContext = {
+  aadhaar,
+  otp,
+  captcha,
+  loader,
+  error
+}</code></pre>
+
+<p>
+Typing one OTP digit:
+</p>
+
+<pre><code class="language-js">setOtp('1');</code></pre>
+
+<p>
+may trigger Context updates and unnecessary re-renders.
+</p>
+
+<h3>Better</h3>
+
+<ul>
+<li>Keep OTP local to the form.</li>
+<li>Keep captcha local to the form.</li>
+<li>Use Context only for shared authentication state.</li>
+</ul>
+
+<h2>Decision Guide</h2>
+
+<table>
+<tr>
+<th>Situation</th>
+<th>Use Context?</th>
+</tr>
+
+<tr>
+<td>Theme</td>
+<td>✅ Yes</td>
+</tr>
+
+<tr>
+<td>Language</td>
+<td>✅ Yes</td>
+</tr>
+
+<tr>
+<td>Logged-in User</td>
+<td>✅ Yes</td>
+</tr>
+
+<tr>
+<td>Search Input</td>
+<td>❌ No</td>
+</tr>
+
+<tr>
+<td>Modal Open State</td>
+<td>❌ Usually No</td>
+</tr>
+
+<tr>
+<td>Form Input Values</td>
+<td>❌ No</td>
+</tr>
+
+<tr>
+<td>API Data Cache</td>
+<td>❌ Use React Query/SWR</td>
+</tr>
+
+<tr>
+<td>Large App State</td>
+<td>❌ Consider Redux/Zustand</td>
+</tr>
+</table>
+
+<h2>Visual Flow</h2>
+
+<div class="flow">
+Is State Used Everywhere?
+<br>
+↓
+<br>
+Yes
+<br>
+↓
+<br>
+Changes Rarely?
+<br>
+↓
+<br>
+Yes
+<br>
+↓
+<br>
+Context Is Good
+<br><br>
+Otherwise
+<br>
+↓
+<br>
+Keep Local State
+<br>
+or
+<br>
+Use State Library
+</div>
+
+<h2>Important Interview Points</h2>
+
+<ul>
+<li>Do not use Context for local component state.</li>
+<li>Do not use Context when props are sufficient.</li>
+<li>Avoid Context for frequently changing values.</li>
+<li>Context updates re-render all consumers.</li>
+<li>Do not use Context as a replacement for React Query.</li>
+<li>Large applications may benefit from Redux or Zustand.</li>
+<li>Context is best for shared, infrequently changing state.</li>
+</ul>
+
+<h2>Short Interview Answer</h2>
+
+<div class="highlight">
+You should avoid Context for local component state, frequently changing values, temporary UI state, and server state. Context is best for shared application-wide data such as theme, language, and authenticated user information. For complex global state use Redux or Zustand, and for server state use React Query or SWR.
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+Do not use Context for local, frequently changing, or server state; use it only for shared application-wide state that changes infrequently.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+
+</body>
+</html>
