@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>340 - What is React Spring?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px;margin-bottom:10px}
+p{color:#cbd5e1}
+ul{padding-left:24px}
+li{margin-bottom:10px;color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px;margin-top:15px}
+.success{background:#052e16;padding:18px;border-left:5px solid #22c55e;border-radius:10px;margin-top:15px}
+.warning{background:#1e1b4b;padding:18px;border-left:5px solid #fbbf24;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;text-align:center;line-height:2;font-size:18px;margin-top:15px}
+.file-name{background:#111827;color:#93c5fd;padding:12px 16px;border-radius:10px;border:1px solid #1e293b;font-weight:bold;margin-top:20px;margin-bottom:10px}
+pre{border-radius:12px;overflow-x:auto}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>340. What is React Spring?</h1>
+
+<h2>One-Line Definition</h2>
+
+<div class="highlight">
+React Spring is a React animation library that creates smooth, physics-based animations using spring physics instead of traditional duration-based animations.
+</div>
+
+<h2>Why React Spring?</h2>
+
+<p>
+Traditional animations usually use:
+</p>
+
+<pre><code class="language-css">transition: all 0.5s ease;</code></pre>
+
+<p>
+React Spring uses:
+</p>
+
+<pre><code class="language-text">Mass
++
+Tension
++
+Friction
+=
+Natural Motion</code></pre>
+
+<div class="success">
+Animations feel more realistic because they behave like real-world springs.
+</div>
+
+<h2>Install React Spring</h2>
+
+<pre><code class="language-bash">npm install @react-spring/web</code></pre>
+
+<h2>Project Structure</h2>
+
+<pre><code class="language-text">src/
+│
+├── App.jsx
+└── components/
+    ├── FadeBox.jsx
+    ├── ToggleBox.jsx
+    └── ListAnimation.jsx</code></pre>
+
+<h2>How React Spring Works</h2>
+
+<div class="flow">
+State Changes
+<br>↓<br>
+useSpring()
+<br>↓<br>
+Spring Physics
+<br>↓<br>
+Animated Values
+<br>↓<br>
+Smooth Motion
+</div>
+
+<h2>Basic Fade Animation</h2>
+
+<div class="file-name">File: src/components/FadeBox.jsx</div>
+
+<pre><code class="language-jsx">import { useSpring, animated } from '@react-spring/web';
+
+function FadeBox() {
+  const styles = useSpring({
+    opacity: 1,
+    from: { opacity: 0 }
+  });
+
+  return &lt;animated.div style={styles}&gt;Hello React Spring&lt;/animated.div&gt;;
+}
+
+export default FadeBox;</code></pre>
+
+<h2>Understanding The Code</h2>
+
+<pre><code class="language-jsx">const styles = useSpring({
+  opacity: 1,
+  from: { opacity: 0 }
+});</code></pre>
+
+<div class="flow">
+Start opacity = 0
+<br>↓<br>
+Animate To opacity = 1
+<br>↓<br>
+Smooth Fade In
+</div>
+
+<h2>Why animated.div?</h2>
+
+<p>
+React Spring cannot animate a normal div.
+</p>
+
+<p>
+Instead of:
+</p>
+
+<pre><code class="language-jsx">&lt;div&gt;Hello&lt;/div&gt;</code></pre>
+
+<p>
+Use:
+</p>
+
+<pre><code class="language-jsx">&lt;animated.div&gt;Hello&lt;/animated.div&gt;</code></pre>
+
+<div class="success">
+animated.div can receive animated values.
+</div>
+
+<h2>Toggle Animation Example</h2>
+
+<div class="file-name">File: src/components/ToggleBox.jsx</div>
+
+<pre><code class="language-jsx">import { useState } from 'react';
+import { useSpring, animated } from '@react-spring/web';
+
+function ToggleBox() {
+  const [open, setOpen] = useState(false);
+
+  const styles = useSpring({
+    opacity: open ? 1 : 0,
+    transform: open ? 'translateY(0px)' : 'translateY(-50px)'
+  });
+
+  return (
+    &lt;&gt;
+      &lt;button onClick={() =&gt; setOpen(!open)}&gt;Toggle&lt;/button&gt;
+
+      &lt;animated.div style={styles}&gt;
+        Content
+      &lt;/animated.div&gt;
+    &lt;/&gt;
+  );
+}
+
+export default ToggleBox;</code></pre>
+
+<h2>Animation Flow</h2>
+
+<div class="flow">
+Click Button
+<br>↓<br>
+State Changes
+<br>↓<br>
+useSpring Recalculates
+<br>↓<br>
+Animated Values Update
+<br>↓<br>
+UI Animates
+</div>
+
+<h2>Spring Physics</h2>
+
+<p>
+React Spring animations are controlled using:
+</p>
+
+<ul>
+<li>Tension</li>
+<li>Friction</li>
+<li>Mass</li>
+</ul>
+
+<div class="file-name">File: src/components/FadeBox.jsx</div>
+
+<pre><code class="language-jsx">const styles = useSpring({
+  opacity: 1,
+  from: { opacity: 0 },
+  config: {
+    tension: 180,
+    friction: 12
+  }
+});</code></pre>
+
+<h2>What Do These Mean?</h2>
+
+<table>
+<tr>
+<th>Property</th>
+<th>Meaning</th>
+</tr>
+
+<tr>
+<td>tension</td>
+<td>Spring strength</td>
+</tr>
+
+<tr>
+<td>friction</td>
+<td>Resistance</td>
+</tr>
+
+<tr>
+<td>mass</td>
+<td>Object weight</td>
+</tr>
+</table>
+
+<h2>List Animation Example</h2>
+
+<div class="file-name">File: src/components/ListAnimation.jsx</div>
+
+<pre><code class="language-jsx">import { useTransition, animated } from '@react-spring/web';
+
+function ListAnimation({ items }) {
+  const transitions = useTransition(items, {
+    from: { opacity: 0, transform: 'translateY(-20px)' },
+    enter: { opacity: 1, transform: 'translateY(0px)' },
+    leave: { opacity: 0, transform: 'translateY(-20px)' }
+  });
+
+  return transitions((style, item) =&gt; (
+    &lt;animated.div style={style}&gt;
+      {item}
+    &lt;/animated.div&gt;
+  ));
+}
+
+export default ListAnimation;</code></pre>
+
+<h2>React Spring vs Framer Motion</h2>
+
+<table>
+<tr>
+<th>React Spring</th>
+<th>Framer Motion</th>
+</tr>
+
+<tr>
+<td>Physics-based</td>
+<td>Timeline-based</td>
+</tr>
+
+<tr>
+<td>Hook-driven</td>
+<td>Component-driven</td>
+</tr>
+
+<tr>
+<td>More flexible</td>
+<td>Easier API</td>
+</tr>
+
+<tr>
+<td>Great for complex motion</td>
+<td>Great for UI animations</td>
+</tr>
+
+<tr>
+<td>Steeper learning curve</td>
+<td>Easier to learn</td>
+</tr>
+</table>
+
+<h2>Framer Motion Example</h2>
+
+<div class="file-name">File: src/components/Card.jsx</div>
+
+<pre><code class="language-jsx">import { motion } from 'framer-motion';
+
+function Card() {
+  return (
+    &lt;motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+    &gt;
+      Card
+    &lt;/motion.div&gt;
+  );
+}
+
+export default Card;</code></pre>
+
+<div class="success">
+Framer Motion usually requires less code for common UI animations.
+</div>
+
+<h2>When Should You Use React Spring?</h2>
+
+<ul>
+<li>Physics-based animations</li>
+<li>Interactive dashboards</li>
+<li>Complex motion systems</li>
+<li>Gesture-driven interfaces</li>
+<li>Natural spring movement</li>
+</ul>
+
+<h2>When Should You Use Framer Motion Instead?</h2>
+
+<ul>
+<li>Page transitions</li>
+<li>Modal animations</li>
+<li>Hover effects</li>
+<li>Route transitions</li>
+<li>Typical UI animations</li>
+</ul>
+
+<h2>Most Important APIs</h2>
+
+<table>
+<tr>
+<th>API</th>
+<th>Purpose</th>
+</tr>
+
+<tr>
+<td>useSpring()</td>
+<td>Single animation</td>
+</tr>
+
+<tr>
+<td>useTransition()</td>
+<td>Enter / Leave animations</td>
+</tr>
+
+<tr>
+<td>useTrail()</td>
+<td>Staggered animations</td>
+</tr>
+
+<tr>
+<td>useChain()</td>
+<td>Sequence animations</td>
+</tr>
+
+<tr>
+<td>animated.div</td>
+<td>Animated element</td>
+</tr>
+</table>
+
+<h2>Easy Way To Remember</h2>
+
+<div class="flow">
+React Spring
+<br>↓<br>
+Spring Physics
+<br>↓<br>
+useSpring()
+<br>↓<br>
+animated.div
+<br>↓<br>
+Natural Motion
+</div>
+
+<h2>Interview Answer</h2>
+
+<div class="highlight">
+React Spring is a React animation library that uses spring physics to create smooth and natural animations. It provides hooks such as useSpring(), useTransition(), and useTrail() to animate React components based on state changes rather than fixed-duration timelines.
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+React Spring is a physics-based React animation library that creates smooth animations using spring mechanics instead of fixed durations.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+
+</body>
+</html>

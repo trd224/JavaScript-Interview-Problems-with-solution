@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>425 - What is the Difference Between interface and type for Props?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+p,li{color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px}
+.success{background:#052e16;padding:18px;border-left:5px solid #22c55e;border-radius:10px;margin-top:15px}
+.warning{background:#1e1b4b;padding:18px;border-left:5px solid #fbbf24;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;text-align:center;line-height:2;font-size:18px}
+.file-name{background:#111827;color:#93c5fd;padding:12px 16px;border-radius:10px;border:1px solid #1e293b;font-weight:bold;margin-top:20px;margin-bottom:10px}
+
+pre[class*="language-"],code[class*="language-"]{
+  color:#f8f8f2;
+  background:#1e1e1e;
+  text-shadow:none;
+  font-family:Consolas,Monaco,'Courier New',monospace;
+  font-size:15px;
+}
+
+.token.keyword{color:#c792ea}
+.token.string{color:#c3e88d}
+.token.function{color:#82aaff}
+.token.tag{color:#f07178}
+.token.attr-name{color:#ffcb6b}
+.token.attr-value{color:#c3e88d}
+.token.punctuation{color:#89ddff}
+.token.operator{color:#89ddff}
+.token.class-name{color:#ffcb6b}
+.token.number{color:#f78c6c}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>425. What is the Difference Between interface and type for Props?</h1>
+
+<h2>One-Line Definition</h2>
+
+<div class="highlight">
+Both interface and type can be used to define React component props. For most props they work the same, but interface supports declaration merging while type supports unions, intersections, and more advanced type operations.
+</div>
+
+<h2>Basic Example Using interface</h2>
+
+<div class="file-name">File: src/components/UserCard.tsx</div>
+
+<pre class="language-tsx"><code class="language-tsx">interface UserCardProps {
+  name: string;
+  age: number;
+}
+
+function UserCard({ name, age }: UserCardProps) {
+  return &lt;h2&gt;{name} - {age}&lt;/h2&gt;;
+}
+
+export default UserCard;</code></pre>
+
+<h2>Basic Example Using type</h2>
+
+<div class="file-name">File: src/components/UserCard.tsx</div>
+
+<pre class="language-tsx"><code class="language-tsx">type UserCardProps = {
+  name: string;
+  age: number;
+};
+
+function UserCard({ name, age }: UserCardProps) {
+  return &lt;h2&gt;{name} - {age}&lt;/h2&gt;;
+}
+
+export default UserCard;</code></pre>
+
+<div class="success">
+For normal React props, both approaches behave almost identically.
+</div>
+
+<h2>Key Differences</h2>
+
+<table>
+<tr>
+<th>Feature</th>
+<th>interface</th>
+<th>type</th>
+</tr>
+
+<tr>
+<td>Object Shapes</td>
+<td>✅ Yes</td>
+<td>✅ Yes</td>
+</tr>
+
+<tr>
+<td>Extending</td>
+<td>✅ extends</td>
+<td>✅ &amp;</td>
+</tr>
+
+<tr>
+<td>Union Types</td>
+<td>❌ No</td>
+<td>✅ Yes</td>
+</tr>
+
+<tr>
+<td>Tuple Types</td>
+<td>❌ No</td>
+<td>✅ Yes</td>
+</tr>
+
+<tr>
+<td>Primitive Aliases</td>
+<td>❌ No</td>
+<td>✅ Yes</td>
+</tr>
+
+<tr>
+<td>Declaration Merging</td>
+<td>✅ Yes</td>
+<td>❌ No</td>
+</tr>
+</table>
+
+<h2>Extending With interface</h2>
+
+<div class="file-name">File: src/types/user.ts</div>
+
+<pre class="language-tsx"><code class="language-tsx">interface Person {
+  name: string;
+}
+
+interface UserProps extends Person {
+  age: number;
+}</code></pre>
+
+<h2>Extending With type</h2>
+
+<div class="file-name">File: src/types/user.ts</div>
+
+<pre class="language-tsx"><code class="language-tsx">type Person = {
+  name: string;
+};
+
+type UserProps = Person & {
+  age: number;
+};</code></pre>
+
+<h2>Union Types (Only type)</h2>
+
+<div class="file-name">File: src/types/status.ts</div>
+
+<pre class="language-tsx"><code class="language-tsx">type Status = 'loading' | 'success' | 'error';</code></pre>
+
+<div class="warning">
+interface cannot create union types.
+</div>
+
+<h2>Tuple Types (Only type)</h2>
+
+<div class="file-name">File: src/types/point.ts</div>
+
+<pre class="language-tsx"><code class="language-tsx">type Point = [number, number];</code></pre>
+
+<h2>Primitive Aliases (Only type)</h2>
+
+<div class="file-name">File: src/types/id.ts</div>
+
+<pre class="language-tsx"><code class="language-tsx">type UserId = string;</code></pre>
+
+<h2>Declaration Merging (Only interface)</h2>
+
+<div class="file-name">File: src/types/user.ts</div>
+
+<pre class="language-tsx"><code class="language-tsx">interface User {
+  name: string;
+}
+
+interface User {
+  age: number;
+}</code></pre>
+
+<p>
+TypeScript automatically merges them:
+</p>
+
+<pre class="language-tsx"><code class="language-tsx">interface User {
+  name: string;
+  age: number;
+}</code></pre>
+
+<div class="warning">
+type aliases cannot be merged.
+</div>
+
+<h2>React Props Example</h2>
+
+<div class="file-name">File: src/components/Button.tsx</div>
+
+<pre class="language-tsx"><code class="language-tsx">interface ButtonProps {
+  text: string;
+  onClick: () =&gt; void;
+}
+
+function Button({ text, onClick }: ButtonProps) {
+  return &lt;button onClick={onClick}&gt;{text}&lt;/button&gt;;
+}
+
+export default Button;</code></pre>
+
+<div class="success">
+This is the style most React TypeScript projects use.
+</div>
+
+<h2>What Do Most Teams Prefer?</h2>
+
+<div class="flow">
+React Props
+<br>↓<br>
+interface
+<br>↓<br>
+Cleaner
+<br>↓<br>
+Easier To Extend
+</div>
+
+<p>
+Most React teams use:
+</p>
+
+<pre class="language-tsx"><code class="language-tsx">interface Props {
+  name: string;
+}</code></pre>
+
+<p>
+And use type for:
+</p>
+
+<pre class="language-tsx"><code class="language-tsx">type Status = 'loading' | 'success' | 'error';</code></pre>
+
+<h2>Recommended Rule</h2>
+
+<ul>
+<li>Use interface for React component props.</li>
+<li>Use type for unions, tuples, and complex type operations.</li>
+<li>Either is acceptable for props.</li>
+</ul>
+
+<h2>Easy Way To Remember</h2>
+
+<div class="flow">
+interface
+<br>↓<br>
+Props &amp; Objects
+
+<br><br>
+
+type
+<br>↓<br>
+Unions &amp; Advanced Types
+</div>
+
+<h2>Interview Answer</h2>
+
+<div class="highlight">
+Both interface and type can be used to define React props. interface is commonly preferred for component props because it supports extension and declaration merging. type is more flexible because it can represent unions, tuples, primitive aliases, and advanced type compositions.
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+Use interface for most React props and type for unions or advanced TypeScript type operations.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-tsx.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js"></script>
+
+</body>
+</html>

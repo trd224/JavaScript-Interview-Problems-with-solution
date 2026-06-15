@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>427 - How do you type useRef?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+p,li{color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px}
+.success{background:#052e16;padding:18px;border-left:5px solid #22c55e;border-radius:10px;margin-top:15px}
+.warning{background:#1e1b4b;padding:18px;border-left:5px solid #fbbf24;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;text-align:center;line-height:2;font-size:18px}
+.file-name{background:#111827;color:#93c5fd;padding:12px 16px;border-radius:10px;border:1px solid #1e293b;font-weight:bold;margin-top:20px;margin-bottom:10px}
+
+pre[class*="language-"],code[class*="language-"]{
+  color:#f8f8f2;
+  background:#1e1e1e;
+  text-shadow:none;
+  font-family:Consolas,Monaco,'Courier New',monospace;
+  font-size:15px;
+}
+
+.token.keyword{color:#c792ea}
+.token.string{color:#c3e88d}
+.token.function{color:#82aaff}
+.token.tag{color:#f07178}
+.token.attr-name{color:#ffcb6b}
+.token.attr-value{color:#c3e88d}
+.token.punctuation{color:#89ddff}
+.token.operator{color:#89ddff}
+.token.class-name{color:#ffcb6b}
+.token.number{color:#f78c6c}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>427. How do you type useRef?</h1>
+
+<h2>One-Line Definition</h2>
+
+<div class="highlight">
+In TypeScript, useRef is typed using a generic that specifies the type of value or DOM element the ref will hold.
+</div>
+
+<h2>Basic Syntax</h2>
+
+<pre class="language-tsx"><code class="language-tsx">const ref = useRef&lt;Type&gt;(initialValue);</code></pre>
+
+<div class="flow">
+useRef
+<br>↓<br>
+Provide Type
+<br>↓<br>
+Type Safe Ref
+</div>
+
+<h2>Project Structure</h2>
+
+<pre class="language-text"><code class="language-text">src/
+│
+├── App.tsx
+└── components/
+    ├── InputFocus.tsx
+    ├── Timer.tsx
+    └── VideoPlayer.tsx</code></pre>
+
+<h2>Typing An Input Ref</h2>
+
+<div class="file-name">File: src/components/InputFocus.tsx</div>
+
+<pre class="language-tsx"><code class="language-tsx">import { useRef } from 'react';
+
+function InputFocus() {
+  const inputRef = useRef&lt;HTMLInputElement&gt;(null);
+
+  function focusInput() {
+    inputRef.current?.focus();
+  }
+
+  return (
+    &lt;&gt;
+      &lt;input ref={inputRef} /&gt;
+      &lt;button onClick={focusInput}&gt;Focus&lt;/button&gt;
+    &lt;/&gt;
+  );
+}
+
+export default InputFocus;</code></pre>
+
+<h2>Why null?</h2>
+
+<p>
+On the first render, React has not attached the DOM element yet.
+</p>
+
+<pre class="language-tsx"><code class="language-tsx">const inputRef = useRef&lt;HTMLInputElement&gt;(null);</code></pre>
+
+<div class="flow">
+Component Render
+<br>↓<br>
+current = null
+<br>↓<br>
+DOM Created
+<br>↓<br>
+current = HTMLInputElement
+</div>
+
+<h2>Typing A Div Ref</h2>
+
+<div class="file-name">File: src/components/Card.tsx</div>
+
+<pre class="language-tsx"><code class="language-tsx">const cardRef = useRef&lt;HTMLDivElement&gt;(null);</code></pre>
+
+<h2>Typing A Button Ref</h2>
+
+<div class="file-name">File: src/components/Button.tsx</div>
+
+<pre class="language-tsx"><code class="language-tsx">const buttonRef = useRef&lt;HTMLButtonElement&gt;(null);</code></pre>
+
+<h2>Typing A Form Ref</h2>
+
+<div class="file-name">File: src/components/LoginForm.tsx</div>
+
+<pre class="language-tsx"><code class="language-tsx">const formRef = useRef&lt;HTMLFormElement&gt;(null);</code></pre>
+
+<h2>Typing A Video Ref</h2>
+
+<div class="file-name">File: src/components/VideoPlayer.tsx</div>
+
+<pre class="language-tsx"><code class="language-tsx">import { useRef } from 'react';
+
+function VideoPlayer() {
+  const videoRef = useRef&lt;HTMLVideoElement&gt;(null);
+
+  function playVideo() {
+    videoRef.current?.play();
+  }
+
+  return (
+    &lt;&gt;
+      &lt;video ref={videoRef} /&gt;
+      &lt;button onClick={playVideo}&gt;Play&lt;/button&gt;
+    &lt;/&gt;
+  );
+}
+
+export default VideoPlayer;</code></pre>
+
+<h2>Typing A Ref For Mutable Values</h2>
+
+<p>
+useRef is not only for DOM elements.
+</p>
+
+<div class="file-name">File: src/components/Counter.tsx</div>
+
+<pre class="language-tsx"><code class="language-tsx">import { useRef } from 'react';
+
+function Counter() {
+  const renderCount = useRef&lt;number&gt;(0);
+
+  renderCount.current++;
+
+  return &lt;h2&gt;{renderCount.current}&lt;/h2&gt;;
+}
+
+export default Counter;</code></pre>
+
+<div class="success">
+No DOM element involved. The ref stores a number.
+</div>
+
+<h2>Typing A Timer ID</h2>
+
+<div class="file-name">File: src/components/Timer.tsx</div>
+
+<pre class="language-tsx"><code class="language-tsx">import { useRef } from 'react';
+
+function Timer() {
+  const timerRef = useRef&lt;ReturnType&lt;typeof setInterval&gt; | null&gt;(null);
+
+  function start() {
+    timerRef.current = setInterval(() =&gt; {
+        console.log('Tick');
+      }, 1000);
+  }
+
+  return &lt;button onClick={start}&gt;Start&lt;/button&gt;;
+}
+
+export default Timer;</code></pre>
+
+<h2>Common DOM Types</h2>
+
+<table>
+<tr>
+<th>Element</th>
+<th>Type</th>
+</tr>
+
+<tr>
+<td>input</td>
+<td>HTMLInputElement</td>
+</tr>
+
+<tr>
+<td>button</td>
+<td>HTMLButtonElement</td>
+</tr>
+
+<tr>
+<td>div</td>
+<td>HTMLDivElement</td>
+</tr>
+
+<tr>
+<td>form</td>
+<td>HTMLFormElement</td>
+</tr>
+
+<tr>
+<td>video</td>
+<td>HTMLVideoElement</td>
+</tr>
+
+<tr>
+<td>audio</td>
+<td>HTMLAudioElement</td>
+</tr>
+
+<tr>
+<td>textarea</td>
+<td>HTMLTextAreaElement</td>
+</tr>
+
+<tr>
+<td>select</td>
+<td>HTMLSelectElement</td>
+</tr>
+</table>
+
+<h2>Why Optional Chaining?</h2>
+
+<p>
+This can fail:
+</p>
+
+<pre class="language-tsx"><code class="language-tsx">inputRef.current.focus();</code></pre>
+
+<p>
+Because current might be null.
+</p>
+
+<p>
+Use:
+</p>
+
+<pre class="language-tsx"><code class="language-tsx">inputRef.current?.focus();</code></pre>
+
+<div class="success">
+Prevents runtime errors.
+</div>
+
+<h2>Real World Example</h2>
+
+<div class="file-name">File: src/components/Search.tsx</div>
+
+<pre class="language-tsx"><code class="language-tsx">import { useRef } from 'react';
+
+function Search() {
+  const inputRef = useRef&lt;HTMLInputElement&gt;(null);
+
+  function clearAndFocus() {
+    if (inputRef.current) {
+      inputRef.current.value = '';
+      inputRef.current.focus();
+    }
+  }
+
+  return (
+    &lt;&gt;
+      &lt;input ref={inputRef} /&gt;
+      &lt;button onClick={clearAndFocus}&gt;
+        Clear
+      &lt;/button&gt;
+    &lt;/&gt;
+  );
+}
+
+export default Search;</code></pre>
+
+<h2>Most Common useRef Types</h2>
+
+<table>
+<tr>
+<th>Usage</th>
+<th>Type</th>
+</tr>
+
+<tr>
+<td>Input Ref</td>
+<td>useRef&lt;HTMLInputElement&gt;(null)</td>
+</tr>
+
+<tr>
+<td>Div Ref</td>
+<td>useRef&lt;HTMLDivElement&gt;(null)</td>
+</tr>
+
+<tr>
+<td>Button Ref</td>
+<td>useRef&lt;HTMLButtonElement&gt;(null)</td>
+</tr>
+
+<tr>
+<td>Form Ref</td>
+<td>useRef&lt;HTMLFormElement&gt;(null)</td>
+</tr>
+
+<tr>
+<td>Number Ref</td>
+<td>useRef&lt;number&gt;(0)</td>
+</tr>
+
+<tr>
+<td>Timer Ref</td>
+<td>useRef&lt;ReturnType&lt;typeof setInterval&gt; | null&gt;(null)</td>
+</tr>
+</table>
+
+<h2>Easy Way To Remember</h2>
+
+<div class="flow">
+DOM Element?
+<br>↓<br>
+HTMLInputElement
+<br>HTMLDivElement
+<br>HTMLButtonElement
+
+<br><br>
+
+Value?
+<br>↓<br>
+number
+<br>string
+<br>boolean
+</div>
+
+<h2>Interview Answer</h2>
+
+<div class="highlight">
+useRef is typed using TypeScript generics. For DOM elements, pass the appropriate HTML element type such as HTMLInputElement or HTMLDivElement. For mutable values, pass the value type such as number or string. Example: useRef&lt;HTMLInputElement&gt;(null).
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+Type useRef using generics like useRef&lt;HTMLInputElement&gt;(null) for DOM elements or useRef&lt;number&gt;(0) for mutable values.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-tsx.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>290 - What is the formState Object in React Hook Form?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px;margin-bottom:10px}
+p{color:#cbd5e1}
+ul{padding-left:24px}
+li{margin-bottom:10px;color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px;margin-top:15px}
+.success{background:#052e16;padding:18px;border-left:5px solid #22c55e;border-radius:10px;margin-top:15px}
+.warning{background:#1e1b4b;border-left:5px solid #fbbf24;padding:18px;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;margin-top:15px;text-align:center;line-height:2;font-size:18px}
+.file-name{background:#111827;color:#93c5fd;padding:12px 16px;border-radius:10px;margin-top:20px;margin-bottom:10px;border:1px solid #1e293b;font-weight:bold}
+pre{border-radius:12px;overflow-x:auto}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>290. What is the formState Object in React Hook Form?</h1>
+
+<h2>One-Line Definition</h2>
+
+<div class="highlight">
+formState is an object provided by React Hook Form that contains information about the current state of the form such as errors, touched fields, dirty fields, submission status, and validation status.
+</div>
+
+<h2>Why Do We Need formState?</h2>
+
+<p>
+React Hook Form tracks much more than just field values.
+</p>
+
+<p>
+It also tracks:
+</p>
+
+<ul>
+<li>Validation errors</li>
+<li>Whether a field was touched</li>
+<li>Whether a field was modified</li>
+<li>Whether the form is valid</li>
+<li>Whether the form is submitting</li>
+<li>Whether submission succeeded</li>
+</ul>
+
+<h2>How It Works</h2>
+
+<div class="flow">
+User Interacts With Form
+<br>↓<br>
+React Hook Form Tracks Changes
+<br>↓<br>
+Updates formState
+<br>↓<br>
+UI Reacts To Changes
+</div>
+
+<h2>Basic Syntax</h2>
+
+<div class="file-name">File: src/components/LoginForm.jsx</div>
+
+<pre><code class="language-jsx">import { useForm } from 'react-hook-form';
+
+function LoginForm() {
+  const { register, handleSubmit, formState } = useForm();
+
+  console.log(formState);
+
+  return (
+    &lt;form&gt;
+      &lt;input {...register('email')} /&gt;
+    &lt;/form&gt;
+  );
+}
+
+export default LoginForm;</code></pre>
+
+<h2>Most Common Usage</h2>
+
+<div class="file-name">File: src/components/LoginForm.jsx</div>
+
+<pre><code class="language-jsx">const { register, handleSubmit, formState: { errors } } = useForm();</code></pre>
+
+<p>
+Most developers use formState to access validation errors.
+</p>
+
+<h2>Validation Error Example</h2>
+
+<div class="file-name">File: src/components/LoginForm.jsx</div>
+
+<pre><code class="language-jsx">import { useForm } from 'react-hook-form';
+
+function LoginForm() {
+  const { register, handleSubmit, formState: { errors } } = useForm();
+
+  function onSubmit(data) {
+    console.log(data);
+  }
+
+  return (
+    &lt;form onSubmit={handleSubmit(onSubmit)}&gt;
+      &lt;input placeholder="Email" {...register('email', { required: 'Email is required' })} /&gt;
+      {errors.email && &lt;p&gt;{errors.email.message}&lt;/p&gt;}
+      &lt;button type="submit"&gt;Submit&lt;/button&gt;
+    &lt;/form&gt;
+  );
+}
+
+export default LoginForm;</code></pre>
+
+<h2>What Does formState Contain?</h2>
+
+<pre><code class="language-jsx">formState = {
+  errors,
+  touchedFields,
+  dirtyFields,
+  isDirty,
+  isValid,
+  isSubmitting,
+  isSubmitSuccessful,
+  submitCount
+}</code></pre>
+
+<h2>errors</h2>
+
+<p>
+Contains validation errors.
+</p>
+
+<pre><code class="language-jsx">const { formState: { errors } } = useForm();</code></pre>
+
+<p>
+Example:
+</p>
+
+<pre><code class="language-jsx">{
+  email: {
+    message: 'Email is required'
+  }
+}</code></pre>
+
+<h2>touchedFields</h2>
+
+<p>
+Tracks fields the user has focused and left.
+</p>
+
+<pre><code class="language-jsx">const { formState: { touchedFields } } = useForm();
+
+console.log(touchedFields);</code></pre>
+
+<p>
+Output:
+</p>
+
+<pre><code class="language-jsx">{
+  email: true
+}</code></pre>
+
+<div class="success">
+Useful for showing validation only after user interaction.
+</div>
+
+<h2>dirtyFields</h2>
+
+<p>
+Tracks fields whose values have changed.
+</p>
+
+<pre><code class="language-jsx">const { formState: { dirtyFields } } = useForm();</code></pre>
+
+<p>
+Output:
+</p>
+
+<pre><code class="language-jsx">{
+  email: true
+}</code></pre>
+
+<h2>isDirty</h2>
+
+<p>
+Checks if any field has changed.
+</p>
+
+<pre><code class="language-jsx">const { formState: { isDirty } } = useForm();</code></pre>
+
+<p>
+Output:
+</p>
+
+<pre><code class="language-jsx">true</code></pre>
+
+<h3>Real World Example</h3>
+
+<pre><code class="language-jsx">&lt;button disabled={!isDirty}&gt;Save&lt;/button&gt;</code></pre>
+
+<p>
+Save button becomes enabled only after changes are made.
+</p>
+
+<h2>isValid</h2>
+
+<p>
+Indicates whether the form currently passes validation.
+</p>
+
+<pre><code class="language-jsx">const { formState: { isValid } } = useForm({
+  mode: 'onChange'
+});</code></pre>
+
+<h3>Example</h3>
+
+<pre><code class="language-jsx">&lt;button disabled={!isValid}&gt;Submit&lt;/button&gt;</code></pre>
+
+<h2>isSubmitting</h2>
+
+<p>
+Becomes true while the form is being submitted.
+</p>
+
+<div class="file-name">File: src/components/LoginForm.jsx</div>
+
+<pre><code class="language-jsx">import { useForm } from 'react-hook-form';
+
+function LoginForm() {
+  const { register, handleSubmit, formState: { isSubmitting } } = useForm();
+
+  async function onSubmit(data) {
+    await new Promise(resolve =&gt; setTimeout(resolve, 2000));
+    console.log(data);
+  }
+
+  return (
+    &lt;form onSubmit={handleSubmit(onSubmit)}&gt;
+      &lt;input {...register('email')} /&gt;
+      &lt;button disabled={isSubmitting}&gt;
+        {isSubmitting ? 'Submitting...' : 'Submit'}
+      &lt;/button&gt;
+    &lt;/form&gt;
+  );
+}
+
+export default LoginForm;</code></pre>
+
+<h2>isSubmitSuccessful</h2>
+
+<p>
+Becomes true after successful form submission.
+</p>
+
+<pre><code class="language-jsx">const { formState: { isSubmitSuccessful } } = useForm();</code></pre>
+
+<p>
+Output:
+</p>
+
+<pre><code class="language-jsx">true</code></pre>
+
+<h2>submitCount</h2>
+
+<p>
+Tracks how many times the form was submitted.
+</p>
+
+<pre><code class="language-jsx">const { formState: { submitCount } } = useForm();
+
+console.log(submitCount);</code></pre>
+
+<p>
+Output:
+</p>
+
+<pre><code class="language-jsx">3</code></pre>
+
+<h2>Real World Example</h2>
+
+<div class="file-name">File: src/components/ProfileForm.jsx</div>
+
+<pre><code class="language-jsx">import { useForm } from 'react-hook-form';
+
+function ProfileForm() {
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isDirty, isSubmitting }
+  } = useForm();
+
+  function onSubmit(data) {
+    console.log(data);
+  }
+
+  return (
+    &lt;form onSubmit={handleSubmit(onSubmit)}&gt;
+      &lt;input placeholder="Name" {...register('name', { required: 'Name is required' })} /&gt;
+      {errors.name && &lt;p&gt;{errors.name.message}&lt;/p&gt;}
+
+      &lt;button disabled={!isDirty || isSubmitting}&gt;
+        Save Changes
+      &lt;/button&gt;
+    &lt;/form&gt;
+  );
+}
+
+export default ProfileForm;</code></pre>
+
+<h2>Most Important formState Properties</h2>
+
+<table>
+<tr>
+<th>Property</th>
+<th>Purpose</th>
+</tr>
+
+<tr>
+<td>errors</td>
+<td>Validation errors</td>
+</tr>
+
+<tr>
+<td>touchedFields</td>
+<td>Fields user interacted with</td>
+</tr>
+
+<tr>
+<td>dirtyFields</td>
+<td>Fields that changed</td>
+</tr>
+
+<tr>
+<td>isDirty</td>
+<td>Any field changed?</td>
+</tr>
+
+<tr>
+<td>isValid</td>
+<td>Form valid?</td>
+</tr>
+
+<tr>
+<td>isSubmitting</td>
+<td>Currently submitting?</td>
+</tr>
+
+<tr>
+<td>isSubmitSuccessful</td>
+<td>Submission successful?</td>
+</tr>
+
+<tr>
+<td>submitCount</td>
+<td>Submission count</td>
+</tr>
+</table>
+
+<h2>Easy Way To Remember</h2>
+
+<div class="flow">
+formState
+<br>↓<br>
+Errors
+<br>Dirty Status
+<br>Touched Status
+<br>Valid Status
+<br>Submitting Status
+</div>
+
+<h2>Interview Answer</h2>
+
+<div class="highlight">
+The formState object contains information about the current state of a React Hook Form. It provides properties such as errors, touchedFields, dirtyFields, isDirty, isValid, and isSubmitting, which help developers manage validation, UI behavior, and submission status.
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+formState is an object that provides validation, interaction, and submission status information for a React Hook Form.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+
+</body>
+</html>

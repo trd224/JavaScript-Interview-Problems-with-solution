@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>287 - What is the register Function in React Hook Form?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px;margin-bottom:10px}
+p{color:#cbd5e1}
+ul{padding-left:24px}
+li{margin-bottom:10px;color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px;margin-top:15px}
+.success{background:#052e16;padding:18px;border-left:5px solid #22c55e;border-radius:10px;margin-top:15px}
+.warning{background:#1e1b4b;border-left:5px solid #fbbf24;padding:18px;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;margin-top:15px;text-align:center;line-height:2;font-size:18px}
+.file-name{background:#111827;color:#93c5fd;padding:12px 16px;border-radius:10px;margin-top:20px;margin-bottom:10px;border:1px solid #1e293b;font-weight:bold}
+pre{border-radius:12px;overflow-x:auto}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>287. What is the register Function in React Hook Form?</h1>
+
+<h2>One-Line Definition</h2>
+
+<div class="highlight">
+register() is a React Hook Form function used to connect an input field to the form so RHF can track its value, validation, and submission data.
+</div>
+
+<h2>Why Do We Need register()?</h2>
+
+<p>
+React Hook Form cannot automatically know which inputs belong to the form.
+</p>
+
+<p>
+We must register each field.
+</p>
+
+<div class="flow">
+Input Field
+<br>↓<br>
+register()
+<br>↓<br>
+React Hook Form Tracks It
+<br>↓<br>
+Validation
+<br>↓<br>
+Form Data
+</div>
+
+<h2>Without register()</h2>
+
+<div class="file-name">File: src/components/LoginForm.jsx</div>
+
+<pre><code class="language-jsx">import { useForm } from 'react-hook-form';
+
+function LoginForm() {
+  const { handleSubmit } = useForm();
+
+  function onSubmit(data) {
+    console.log(data);
+  }
+
+  return (
+    &lt;form onSubmit={handleSubmit(onSubmit)}&gt;
+      &lt;input placeholder="Email" /&gt;
+      &lt;button&gt;Submit&lt;/button&gt;
+    &lt;/form&gt;
+  );
+}
+
+export default LoginForm;</code></pre>
+
+<p>
+Result:
+</p>
+
+<pre><code class="language-jsx">{}</code></pre>
+
+<div class="warning">
+React Hook Form does not know about the input because it was never registered.
+</div>
+
+<h2>With register()</h2>
+
+<div class="file-name">File: src/components/LoginForm.jsx</div>
+
+<pre><code class="language-jsx">import { useForm } from 'react-hook-form';
+
+function LoginForm() {
+  const { register, handleSubmit } = useForm();
+
+  function onSubmit(data) {
+    console.log(data);
+  }
+
+  return (
+    &lt;form onSubmit={handleSubmit(onSubmit)}&gt;
+      &lt;input placeholder="Email" {...register('email')} /&gt;
+      &lt;button&gt;Submit&lt;/button&gt;
+    &lt;/form&gt;
+  );
+}
+
+export default LoginForm;</code></pre>
+
+<p>
+Result:
+</p>
+
+<pre><code class="language-jsx">{
+  email: 'rizwan@gmail.com'
+}</code></pre>
+
+<h2>What Does register('email') Mean?</h2>
+
+<pre><code class="language-jsx">{...register('email')}</code></pre>
+
+<p>
+This tells React Hook Form:
+</p>
+
+<ul>
+<li>Track this field</li>
+<li>Store its value</li>
+<li>Validate it</li>
+<li>Include it in submitted data</li>
+</ul>
+
+<h2>How register() Works Internally</h2>
+
+<div class="flow">
+register('email')
+<br>↓<br>
+Adds ref
+<br>↓<br>
+Adds onChange
+<br>↓<br>
+Adds onBlur
+<br>↓<br>
+Tracks Value
+</div>
+
+<p>
+register() returns an object similar to:
+</p>
+
+<pre><code class="language-jsx">{
+  name: 'email',
+  onChange: fn,
+  onBlur: fn,
+  ref: fn
+}</code></pre>
+
+<p>
+That object is spread into the input.
+</p>
+
+<pre><code class="language-jsx">&lt;input {...register('email')} /&gt;</code></pre>
+
+<h2>Register Multiple Fields</h2>
+
+<div class="file-name">File: src/components/LoginForm.jsx</div>
+
+<pre><code class="language-jsx">import { useForm } from 'react-hook-form';
+
+function LoginForm() {
+  const { register, handleSubmit } = useForm();
+
+  function onSubmit(data) {
+    console.log(data);
+  }
+
+  return (
+    &lt;form onSubmit={handleSubmit(onSubmit)}&gt;
+      &lt;input placeholder="Name" {...register('name')} /&gt;
+      &lt;input placeholder="Email" {...register('email')} /&gt;
+      &lt;input type="password" placeholder="Password" {...register('password')} /&gt;
+      &lt;button&gt;Submit&lt;/button&gt;
+    &lt;/form&gt;
+  );
+}
+
+export default LoginForm;</code></pre>
+
+<p>
+Result:
+</p>
+
+<pre><code class="language-jsx">{
+  name: 'Rizwan',
+  email: 'rizwan@gmail.com',
+  password: '123456'
+}</code></pre>
+
+<h2>Validation Using register()</h2>
+
+<div class="file-name">File: src/components/LoginForm.jsx</div>
+
+<pre><code class="language-jsx">import { useForm } from 'react-hook-form';
+
+function LoginForm() {
+  const { register, handleSubmit, formState: { errors } } = useForm();
+
+  function onSubmit(data) {
+    console.log(data);
+  }
+
+  return (
+    &lt;form onSubmit={handleSubmit(onSubmit)}&gt;
+      &lt;input placeholder="Email" {...register('email', { required: 'Email is required' })} /&gt;
+      {errors.email && &lt;p&gt;{errors.email.message}&lt;/p&gt;}
+
+      &lt;button&gt;Submit&lt;/button&gt;
+    &lt;/form&gt;
+  );
+}
+
+export default LoginForm;</code></pre>
+
+<h2>Common Validation Rules</h2>
+
+<pre><code class="language-jsx">&lt;input
+  {...register('email', {
+    required: 'Email is required',
+    minLength: {
+      value: 5,
+      message: 'Minimum 5 characters'
+    }
+  })}
+/&gt;</code></pre>
+
+<h2>Compact Style Version</h2>
+
+<pre><code class="language-jsx">&lt;input {...register('email', { required: 'Email is required' })} /&gt;</code></pre>
+
+<h2>What Happens On Submit?</h2>
+
+<div class="flow">
+User Types
+<br>↓<br>
+register()
+<br>↓<br>
+Tracks Value
+<br>↓<br>
+handleSubmit()
+<br>↓<br>
+Creates Data Object
+<br>↓<br>
+onSubmit(data)
+</div>
+
+<h2>register() vs name Attribute</h2>
+
+<table>
+<tr>
+<th>Normal HTML</th>
+<th>React Hook Form</th>
+</tr>
+
+<tr>
+<td>&lt;input name="email" /&gt;</td>
+<td>&lt;input {...register('email')} /&gt;</td>
+</tr>
+
+<tr>
+<td>Only identifies field</td>
+<td>Tracks + validates field</td>
+</tr>
+
+<tr>
+<td>No automatic data collection</td>
+<td>Automatic data collection</td>
+</tr>
+</table>
+
+<h2>Real World Example</h2>
+
+<p>
+Registration Form:
+</p>
+
+<pre><code class="language-jsx">&lt;input {...register('firstName')} /&gt;
+&lt;input {...register('lastName')} /&gt;
+&lt;input {...register('email')} /&gt;
+&lt;input {...register('mobile')} /&gt;</code></pre>
+
+<p>
+React Hook Form automatically creates:
+</p>
+
+<pre><code class="language-jsx">{
+  firstName: 'Mohammad',
+  lastName: 'Rizwan',
+  email: 'rizwan@gmail.com',
+  mobile: '9876543210'
+}</code></pre>
+
+<h2>Easy Way To Remember</h2>
+
+<div class="flow">
+register()
+<br>↓<br>
+Connect Input
+<br>↓<br>
+Track Value
+<br>↓<br>
+Validate
+<br>↓<br>
+Include In Form Data
+</div>
+
+<h2>Interview Answer</h2>
+
+<div class="highlight">
+The register() function is used to connect an input field to React Hook Form. It allows React Hook Form to track the field's value, perform validation, manage events, and include the field in the submitted form data.
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+register() registers an input with React Hook Form so it can track, validate, and submit that field's value.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+
+</body>
+</html>

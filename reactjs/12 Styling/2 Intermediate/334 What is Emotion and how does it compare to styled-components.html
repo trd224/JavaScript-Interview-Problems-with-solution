@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>334 - What is Emotion and How Does it Compare to styled-components?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px;margin-bottom:10px}
+p{color:#cbd5e1}
+ul{padding-left:24px}
+li{margin-bottom:10px;color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px;margin-top:15px}
+.success{background:#052e16;padding:18px;border-left:5px solid #22c55e;border-radius:10px;margin-top:15px}
+.warning{background:#1e1b4b;padding:18px;border-left:5px solid #fbbf24;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;text-align:center;line-height:2;font-size:18px;margin-top:15px}
+.file-name{background:#111827;color:#93c5fd;padding:12px 16px;border-radius:10px;border:1px solid #1e293b;font-weight:bold;margin-top:20px;margin-bottom:10px}
+pre{border-radius:12px;overflow-x:auto}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>334. What is Emotion and How Does it Compare to styled-components?</h1>
+
+<h2>One-Line Definition</h2>
+
+<div class="highlight">
+Emotion is a CSS-in-JS library for React that allows you to write styles inside JavaScript. It is very similar to styled-components but offers additional styling approaches and slightly better performance.
+</div>
+
+<h2>What is Emotion?</h2>
+
+<p>
+Emotion is a modern CSS-in-JS library that supports:
+</p>
+
+<ul>
+<li>Styled Components API</li>
+<li>css Prop API</li>
+<li>Dynamic Styling</li>
+<li>Theming</li>
+<li>Server Side Rendering</li>
+<li>TypeScript Support</li>
+</ul>
+
+<div class="success">
+If you know styled-components, learning Emotion takes only a few minutes because the syntax is almost identical.
+</div>
+
+<h2>Install Emotion</h2>
+
+<pre><code class="language-bash">npm install @emotion/react @emotion/styled</code></pre>
+
+<h2>Project Structure</h2>
+
+<pre><code class="language-text">src/
+│
+├── App.jsx
+└── components/
+    └── Button.jsx</code></pre>
+
+<h2>Emotion Styled Component Example</h2>
+
+<div class="file-name">File: src/components/Button.jsx</div>
+
+<pre><code class="language-jsx">import styled from '@emotion/styled';
+
+const Button = styled.button`
+  background: royalblue;
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 8px;
+`;
+
+export default Button;</code></pre>
+
+<div class="file-name">File: src/App.jsx</div>
+
+<pre><code class="language-jsx">import Button from './components/Button';
+
+function App() {
+  return &lt;Button&gt;Save&lt;/Button&gt;;
+}
+
+export default App;</code></pre>
+
+<h2>styled-components Version</h2>
+
+<div class="file-name">File: src/components/Button.jsx</div>
+
+<pre><code class="language-jsx">import styled from 'styled-components';
+
+const Button = styled.button`
+  background: royalblue;
+  color: white;
+`;
+
+export default Button;</code></pre>
+
+<div class="success">
+The syntax is almost identical.
+</div>
+
+<h2>How Emotion Works</h2>
+
+<div class="flow">
+Write CSS In JS
+<br>↓<br>
+Emotion Parses Styles
+<br>↓<br>
+Generates Unique Class Name
+<br>↓<br>
+Injects CSS Into DOM
+<br>↓<br>
+Component Gets Style
+</div>
+
+<h2>Unique Feature - css Prop</h2>
+
+<p>
+Emotion supports the css prop.
+</p>
+
+<div class="file-name">File: src/App.jsx</div>
+
+<pre><code class="language-jsx">/** @jsxImportSource @emotion/react */
+
+function App() {
+  return (
+    &lt;button
+      css={{
+        background: 'royalblue',
+        color: 'white',
+        padding: '12px'
+      }}
+    &gt;
+      Save
+    &lt;/button&gt;
+  );
+}
+
+export default App;</code></pre>
+
+<div class="warning">
+styled-components does not provide a built-in css prop like Emotion.
+</div>
+
+<h2>Dynamic Styling</h2>
+
+<div class="file-name">File: src/components/Button.jsx</div>
+
+<pre><code class="language-jsx">import styled from '@emotion/styled';
+
+const Button = styled.button`
+  background: ${props => props.primary ? 'royalblue' : 'gray'};
+  color: white;
+`;
+
+export default Button;</code></pre>
+
+<p>
+Usage:
+</p>
+
+<pre><code class="language-jsx">&lt;Button primary&gt;Primary&lt;/Button&gt;
+&lt;Button&gt;Secondary&lt;/Button&gt;</code></pre>
+
+<h2>Theming Example</h2>
+
+<div class="file-name">File: src/theme.js</div>
+
+<pre><code class="language-js">export const theme = {
+  colors: {
+    primary: 'royalblue'
+  }
+};</code></pre>
+
+<div class="file-name">File: src/App.jsx</div>
+
+<pre><code class="language-jsx">import { ThemeProvider } from '@emotion/react';
+import { theme } from './theme';
+
+function App() {
+  return (
+    &lt;ThemeProvider theme={theme}&gt;
+      &lt;Button&gt;Save&lt;/Button&gt;
+    &lt;/ThemeProvider&gt;
+  );
+}
+
+export default App;</code></pre>
+
+<h2>Emotion vs styled-components</h2>
+
+<table>
+<tr>
+<th>Feature</th>
+<th>Emotion</th>
+<th>styled-components</th>
+</tr>
+
+<tr>
+<td>CSS-in-JS</td>
+<td>Yes</td>
+<td>Yes</td>
+</tr>
+
+<tr>
+<td>Styled API</td>
+<td>Yes</td>
+<td>Yes</td>
+</tr>
+
+<tr>
+<td>css Prop</td>
+<td>Yes</td>
+<td>No</td>
+</tr>
+
+<tr>
+<td>Theming</td>
+<td>Yes</td>
+<td>Yes</td>
+</tr>
+
+<tr>
+<td>SSR Support</td>
+<td>Excellent</td>
+<td>Excellent</td>
+</tr>
+
+<tr>
+<td>Performance</td>
+<td>Slightly Better</td>
+<td>Good</td>
+</tr>
+
+<tr>
+<td>Bundle Size</td>
+<td>Smaller</td>
+<td>Larger</td>
+</tr>
+
+<tr>
+<td>Learning Curve</td>
+<td>Easy</td>
+<td>Easy</td>
+</tr>
+</table>
+
+<h2>Generated Output</h2>
+
+<p>
+Emotion generates:
+</p>
+
+<pre><code class="language-html">&lt;button class="css-1abcde"&gt;
+  Save
+&lt;/button&gt;</code></pre>
+
+<p>
+And injects:
+</p>
+
+<pre><code class="language-css">.css-1abcde {
+  background: royalblue;
+  color: white;
+}</code></pre>
+
+<h2>Advantages of Emotion</h2>
+
+<ul>
+<li>Supports styled API</li>
+<li>Supports css prop</li>
+<li>Smaller bundle size</li>
+<li>Excellent TypeScript support</li>
+<li>Good SSR support</li>
+<li>Dynamic styling with props</li>
+</ul>
+
+<h2>Disadvantages of Emotion</h2>
+
+<ul>
+<li>Runtime styling cost</li>
+<li>More JavaScript execution</li>
+<li>Larger bundle than plain CSS</li>
+<li>Still CSS-in-JS overhead</li>
+</ul>
+
+<h2>Real World Usage</h2>
+
+<div class="flow">
+Material UI (MUI)
+<br>↓<br>
+Uses Emotion By Default
+</div>
+
+<div class="success">
+If you work with MUI v5+, you are already using Emotion internally.
+</div>
+
+<h2>Current Industry Trend</h2>
+
+<div class="highlight">
+Emotion and styled-components are still popular, but many modern projects now prefer Tailwind CSS, CSS Modules, or build-time CSS solutions because they avoid runtime styling costs.
+</div>
+
+<h2>When Should You Use Emotion?</h2>
+
+<ul>
+<li>Using Material UI.</li>
+<li>Need css prop support.</li>
+<li>Want styled-components style syntax.</li>
+<li>Need excellent TypeScript support.</li>
+</ul>
+
+<h2>Easy Way To Remember</h2>
+
+<div class="flow">
+Emotion
+<br>↓<br>
+styled-components +
+<br>css Prop +
+<br>Smaller Bundle +
+<br>Used By MUI
+</div>
+
+<h2>Interview Answer</h2>
+
+<div class="highlight">
+Emotion is a CSS-in-JS library that allows developers to write styles directly in JavaScript. It provides a styled API similar to styled-components but also includes a powerful css prop API. Compared to styled-components, Emotion generally offers a smaller bundle size, slightly better performance, and tighter integration with libraries such as Material UI.
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+Emotion is a CSS-in-JS library similar to styled-components, but it also supports a css prop API and is used internally by Material UI.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js"></script>
+
+</body>
+</html>

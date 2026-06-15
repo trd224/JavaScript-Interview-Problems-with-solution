@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>297 - What is a FieldArray in Formik?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px;margin-bottom:10px}
+p{color:#cbd5e1}
+ul{padding-left:24px}
+li{margin-bottom:10px;color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px;margin-top:15px}
+.success{background:#052e16;padding:18px;border-left:5px solid #22c55e;border-radius:10px;margin-top:15px}
+.warning{background:#1e1b4b;padding:18px;border-left:5px solid #fbbf24;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;text-align:center;line-height:2;font-size:18px;margin-top:15px}
+.file-name{background:#111827;color:#93c5fd;padding:12px 16px;border-radius:10px;border:1px solid #1e293b;font-weight:bold;margin-top:20px;margin-bottom:10px}
+pre{border-radius:12px;overflow-x:auto}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>297. What is a FieldArray in Formik?</h1>
+
+<h2>One-Line Definition</h2>
+
+<div class="highlight">
+FieldArray is a Formik component used to manage dynamic arrays of form fields such as skills, phone numbers, addresses, education records, or work experience.
+</div>
+
+<h2>Why Do We Need FieldArray?</h2>
+
+<p>
+Sometimes we don't know how many fields a user will need.
+</p>
+
+<p>
+Examples:
+</p>
+
+<ul>
+<li>Multiple Skills</li>
+<li>Multiple Phone Numbers</li>
+<li>Multiple Addresses</li>
+<li>Work Experience List</li>
+<li>Education History</li>
+</ul>
+
+<div class="warning">
+Normal Field components work well for fixed inputs. FieldArray is needed for dynamic inputs.
+</div>
+
+<h2>Without FieldArray</h2>
+
+<div class="flow">
+Skill 1
+<br>Skill 2
+<br>Skill 3
+<br>↓
+<br>
+Hardcoded Fields
+</div>
+
+<p>
+Problem:
+</p>
+
+<ul>
+<li>Cannot add new fields dynamically.</li>
+<li>Cannot remove fields dynamically.</li>
+</ul>
+
+<h2>With FieldArray</h2>
+
+<div class="flow">
+Add Skill
+<br>↓
+<br>
+FieldArray Adds New Input
+<br>↓
+<br>
+Remove Skill
+<br>↓
+<br>
+FieldArray Removes Input
+</div>
+
+<h2>Install Formik</h2>
+
+<pre><code class="language-bash">npm install formik</code></pre>
+
+<h2>Project Structure</h2>
+
+<pre><code class="language-text">src/
+│
+├── App.jsx
+│
+└── components/
+    └── SkillsForm.jsx</code></pre>
+
+<h2>Basic FieldArray Example</h2>
+
+<div class="file-name">File: src/components/SkillsForm.jsx</div>
+
+<pre><code class="language-jsx">import { Formik, Form, Field, FieldArray } from 'formik';
+
+function SkillsForm() {
+  return (
+    &lt;Formik
+      initialValues={{ skills: [''] }}
+      onSubmit={values => console.log(values)}
+    &gt;
+      {() => (
+        &lt;Form&gt;
+
+          &lt;FieldArray name="skills"&gt;
+            {({ push, remove, form }) => (
+              &lt;&gt;
+
+                {form.values.skills.map((skill, index) => (
+                  &lt;div key={index}&gt;
+                    &lt;Field name={`skills.${index}`} placeholder="Skill" /&gt;
+
+                    &lt;button type="button" onClick={() => remove(index)}&gt;
+                      Remove
+                    &lt;/button&gt;
+                  &lt;/div&gt;
+                ))}
+
+                &lt;button type="button" onClick={() => push('')}&gt;
+                  Add Skill
+                &lt;/button&gt;
+
+              &lt;/&gt;
+            )}
+          &lt;/FieldArray&gt;
+
+          &lt;button type="submit"&gt;
+            Save
+          &lt;/button&gt;
+
+        &lt;/Form&gt;
+      )}
+    &lt;/Formik&gt;
+  );
+}
+
+export default SkillsForm;</code></pre>
+
+<h2>How FieldArray Works</h2>
+
+<div class="flow">
+skills = ['React']
+<br>↓
+<br>
+push('')
+<br>↓
+<br>
+skills = ['React', '']
+<br>↓
+<br>
+New Input Appears
+</div>
+
+<h2>What Does push() Do?</h2>
+
+<p>
+Adds a new item to the array.
+</p>
+
+<pre><code class="language-jsx">push('');</code></pre>
+
+<p>
+Before:
+</p>
+
+<pre><code class="language-js">['React']</code></pre>
+
+<p>
+After:
+</p>
+
+<pre><code class="language-js">['React', '']</code></pre>
+
+<h2>What Does remove() Do?</h2>
+
+<p>
+Removes an item from the array.
+</p>
+
+<pre><code class="language-jsx">remove(1);</code></pre>
+
+<p>
+Before:
+</p>
+
+<pre><code class="language-js">['React', 'Node.js']</code></pre>
+
+<p>
+After:
+</p>
+
+<pre><code class="language-js">['React']</code></pre>
+
+<h2>FieldArray Helpers</h2>
+
+<table>
+<tr>
+<th>Method</th>
+<th>Purpose</th>
+</tr>
+
+<tr>
+<td>push()</td>
+<td>Add item</td>
+</tr>
+
+<tr>
+<td>remove()</td>
+<td>Remove item</td>
+</tr>
+
+<tr>
+<td>insert()</td>
+<td>Insert item at position</td>
+</tr>
+
+<tr>
+<td>replace()</td>
+<td>Replace item</td>
+</tr>
+
+<tr>
+<td>swap()</td>
+<td>Swap items</td>
+</tr>
+
+<tr>
+<td>move()</td>
+<td>Move item</td>
+</tr>
+</table>
+
+<h2>Real World Example - Phone Numbers</h2>
+
+<div class="file-name">File: src/components/PhoneForm.jsx</div>
+
+<pre><code class="language-jsx">import { Formik, Form, Field, FieldArray } from 'formik';
+
+function PhoneForm() {
+  return (
+    &lt;Formik
+      initialValues={{ phones: [''] }}
+      onSubmit={values => console.log(values)}
+    &gt;
+      {() => (
+        &lt;Form&gt;
+          &lt;FieldArray name="phones"&gt;
+            {({ push, remove, form }) => (
+              &lt;&gt;
+
+                {form.values.phones.map((phone, index) => (
+                  &lt;div key={index}&gt;
+                    &lt;Field name={`phones.${index}`} placeholder="Phone Number" /&gt;
+                    &lt;button type="button" onClick={() => remove(index)}&gt;Remove&lt;/button&gt;
+                  &lt;/div&gt;
+                ))}
+
+                &lt;button type="button" onClick={() => push('')}&gt;
+                  Add Phone
+                &lt;/button&gt;
+
+              &lt;/&gt;
+            )}
+          &lt;/FieldArray&gt;
+
+          &lt;button type="submit"&gt;Save&lt;/button&gt;
+        &lt;/Form&gt;
+      )}
+    &lt;/Formik&gt;
+  );
+}
+
+export default PhoneForm;</code></pre>
+
+<h2>Submitted Data</h2>
+
+<pre><code class="language-js">{
+  phones: [
+    '9876543210',
+    '9999999999'
+  ]
+}</code></pre>
+
+<h2>Real World Example - Education Records</h2>
+
+<div class="file-name">File: src/components/EducationForm.jsx</div>
+
+<pre><code class="language-jsx">initialValues={{
+  education: [
+    {
+      degree: '',
+      college: ''
+    }
+  ]
+}}</code></pre>
+
+<p>
+Output:
+</p>
+
+<pre><code class="language-js">{
+  education: [
+    {
+      degree: 'BCA',
+      college: 'ABC College'
+    },
+    {
+      degree: 'MCA',
+      college: 'XYZ University'
+    }
+  ]
+}</code></pre>
+
+<div class="success">
+FieldArray is heavily used in resume builders, profile forms, and admin panels.
+</div>
+
+<h2>FieldArray vs Field</h2>
+
+<table>
+<tr>
+<th>Field</th>
+<th>FieldArray</th>
+</tr>
+
+<tr>
+<td>Single input</td>
+<td>Multiple dynamic inputs</td>
+</tr>
+
+<tr>
+<td>Fixed fields</td>
+<td>Dynamic fields</td>
+</tr>
+
+<tr>
+<td>No add/remove</td>
+<td>Add/remove supported</td>
+</tr>
+
+<tr>
+<td>Simple forms</td>
+<td>Complex forms</td>
+</tr>
+</table>
+
+<h2>Easy Way To Remember</h2>
+
+<div class="flow">
+Field
+<br>↓
+<br>
+One Input
+
+<br><br>
+
+FieldArray
+<br>↓
+<br>
+Array Of Inputs
+<br>↓
+<br>
+Add / Remove Dynamically
+</div>
+
+<h2>Interview Answer</h2>
+
+<div class="highlight">
+FieldArray is a Formik component used for managing arrays of dynamic form fields. It provides helper methods such as push(), remove(), insert(), and swap() to add, remove, or modify items in an array. It is commonly used for skills, phone numbers, addresses, education records, and work experience forms.
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+FieldArray is a Formik component used to create and manage dynamic arrays of form fields.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-js.min.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>265 - What is Lazy Loading a Route?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px;margin-bottom:10px}
+p{color:#cbd5e1}
+ul{padding-left:24px}
+li{margin-bottom:10px;color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left;vertical-align:top}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px;margin-top:15px}
+.warning{background:#1e1b4b;border-left:5px solid #fbbf24;padding:18px;border-radius:10px;margin-top:15px}
+.success{background:#052e16;padding:18px;border-left:5px solid #22c55e;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;margin-top:15px;text-align:center;line-height:2;font-size:18px}
+.file-name{background:#111827;color:#93c5fd;padding:12px 16px;border-radius:10px;margin-top:20px;margin-bottom:10px;border:1px solid #1e293b;font-weight:bold}
+pre{border-radius:12px;overflow-x:auto}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>265. What is Lazy Loading a Route?</h1>
+
+<h2>One-Line Definition</h2>
+
+<div class="highlight">
+Lazy loading a route means loading a page's JavaScript code only when the user visits that route instead of downloading it during the initial application load.
+</div>
+
+<h2>Why Do We Need Lazy Loading?</h2>
+
+<p>
+By default, React bundles all pages together.
+</p>
+
+<p>
+Suppose your application has:
+</p>
+
+<ul>
+<li>Dashboard</li>
+<li>Products</li>
+<li>Reports</li>
+<li>Settings</li>
+<li>Admin Panel</li>
+</ul>
+
+<p>
+Without lazy loading, all page code is downloaded immediately.
+</p>
+
+<div class="warning">
+Users may never visit some pages, but they still download their code.
+</div>
+
+<h2>Without Lazy Loading</h2>
+
+<div class="flow">
+Application Starts
+<br>↓<br>
+Download Dashboard
+<br>↓<br>
+Download Products
+<br>↓<br>
+Download Reports
+<br>↓<br>
+Download Settings
+<br>↓<br>
+Download Admin
+<br>↓<br>
+Large Bundle
+</div>
+
+<h2>With Lazy Loading</h2>
+
+<div class="flow">
+Application Starts
+<br>↓<br>
+Download Home Page Only
+<br>↓<br>
+User Visits Reports
+<br>↓<br>
+Download Reports Page
+<br>↓<br>
+Faster Initial Load
+</div>
+
+<div class="success">
+Lazy loading reduces initial bundle size and improves application startup performance.
+</div>
+
+<h2>Project Structure</h2>
+
+<pre><code class="language-text">src/
+│
+├── App.jsx
+│
+└── pages/
+    ├── Dashboard.jsx
+    ├── Products.jsx
+    └── Reports.jsx</code></pre>
+
+<h2>Step 1 - Import React.lazy</h2>
+
+<div class="file-name">
+File: src/App.jsx
+</div>
+
+<pre><code class="language-jsx">import { lazy } from 'react';
+
+const Dashboard = lazy(() => import('./pages/Dashboard'));
+const Products = lazy(() => import('./pages/Products'));
+const Reports = lazy(() => import('./pages/Reports'));</code></pre>
+
+<p>
+React.lazy loads components only when needed.
+</p>
+
+<h2>Step 2 - Wrap Routes With Suspense</h2>
+
+<div class="file-name">
+File: src/App.jsx
+</div>
+
+<pre><code class="language-jsx">import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { lazy, Suspense } from 'react';
+
+const Dashboard = lazy(() => import('./pages/Dashboard'));
+const Products = lazy(() => import('./pages/Products'));
+const Reports = lazy(() => import('./pages/Reports'));
+
+function App() {
+  return (
+    &lt;BrowserRouter&gt;
+
+      &lt;Suspense fallback={&lt;h2&gt;Loading...&lt;/h2&gt;}&gt;
+
+        &lt;Routes&gt;
+
+          &lt;Route path="/" element={&lt;Dashboard /&gt;} /&gt;
+
+          &lt;Route path="/products" element={&lt;Products /&gt;} /&gt;
+
+          &lt;Route path="/reports" element={&lt;Reports /&gt;} /&gt;
+
+        &lt;/Routes&gt;
+
+      &lt;/Suspense&gt;
+
+    &lt;/BrowserRouter&gt;
+  );
+}
+
+export default App;</code></pre>
+
+<h2>Step 3 - Create Route Components</h2>
+
+<div class="file-name">
+File: src/pages/Dashboard.jsx
+</div>
+
+<pre><code class="language-jsx">function Dashboard() {
+  return &lt;h1&gt;Dashboard Page&lt;/h1&gt;;
+}
+
+export default Dashboard;</code></pre>
+
+<div class="file-name">
+File: src/pages/Products.jsx
+</div>
+
+<pre><code class="language-jsx">function Products() {
+  return &lt;h1&gt;Products Page&lt;/h1&gt;;
+}
+
+export default Products;</code></pre>
+
+<div class="file-name">
+File: src/pages/Reports.jsx
+</div>
+
+<pre><code class="language-jsx">function Reports() {
+  return &lt;h1&gt;Reports Page&lt;/h1&gt;;
+}
+
+export default Reports;</code></pre>
+
+<h2>What Does Suspense Do?</h2>
+
+<pre><code class="language-jsx">&lt;Suspense fallback={&lt;h2&gt;Loading...&lt;/h2&gt;}&gt;
+  ...
+&lt;/Suspense&gt;</code></pre>
+
+<p>
+Suspense shows fallback content while React downloads the lazy-loaded page.
+</p>
+
+<table>
+<tr>
+<th>Before Download</th>
+<th>After Download</th>
+</tr>
+
+<tr>
+<td>Loading...</td>
+<td>Actual Component</td>
+</tr>
+</table>
+
+<h2>How Route Lazy Loading Works</h2>
+
+<div class="flow">
+User Opens App
+<br>↓<br>
+Dashboard Bundle Loads
+<br>↓<br>
+User Clicks Reports
+<br>↓<br>
+Reports Bundle Downloads
+<br>↓<br>
+Reports Page Renders
+</div>
+
+<h2>Network Example</h2>
+
+<h3>Without Lazy Loading</h3>
+
+<pre><code class="language-text">main.js
+dashboard.js
+products.js
+reports.js
+settings.js
+
+Downloaded Immediately</code></pre>
+
+<h3>With Lazy Loading</h3>
+
+<pre><code class="language-text">main.js
+
+Downloaded Immediately
+
+↓
+
+reports.js
+
+Downloaded Only When Needed</code></pre>
+
+<h2>Real World Example</h2>
+
+<p>
+Large pages are ideal candidates for lazy loading:
+</p>
+
+<ul>
+<li>Admin Panel</li>
+<li>Reports</li>
+<li>Analytics</li>
+<li>Charts</li>
+<li>Settings</li>
+</ul>
+
+<p>
+Users may never open these pages during a session.
+</p>
+
+<h2>Advantages</h2>
+
+<ul>
+<li>Smaller initial bundle size</li>
+<li>Faster first load</li>
+<li>Better performance</li>
+<li>Less JavaScript downloaded</li>
+<li>Improved user experience</li>
+</ul>
+
+<h2>React.lazy vs Normal Import</h2>
+
+<table>
+<tr>
+<th>Normal Import</th>
+<th>React.lazy</th>
+</tr>
+
+<tr>
+<td>Loads immediately.</td>
+<td>Loads when needed.</td>
+</tr>
+
+<tr>
+<td>In main bundle.</td>
+<td>Separate chunk.</td>
+</tr>
+
+<tr>
+<td>Larger initial download.</td>
+<td>Smaller initial download.</td>
+</tr>
+</table>
+
+<h2>Easy Way To Remember</h2>
+
+<div class="flow">
+User Opens App
+<br>↓<br>
+Load Only Required Route
+<br>↓<br>
+User Visits New Route
+<br>↓<br>
+Download Route Code
+<br>↓<br>
+Render Page
+</div>
+
+<h2>Interview Answer</h2>
+
+<div class="highlight">
+Lazy loading a route means loading a page component only when the user navigates to that route. React Router commonly uses React.lazy and Suspense to split route code into separate chunks, reducing the initial bundle size and improving application performance.
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+Lazy loading a route loads the route's code only when the user visits that route instead of during the initial application load.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+
+</body>
+</html>

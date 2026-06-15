@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>294 - What is Formik and How Does it Compare to React Hook Form?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px;margin-bottom:10px}
+p{color:#cbd5e1}
+ul{padding-left:24px}
+li{margin-bottom:10px;color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px;margin-top:15px}
+.success{background:#052e16;padding:18px;border-left:5px solid #22c55e;border-radius:10px;margin-top:15px}
+.warning{background:#1e1b4b;padding:18px;border-left:5px solid #fbbf24;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;text-align:center;line-height:2;font-size:18px;margin-top:15px}
+.file-name{background:#111827;color:#93c5fd;padding:12px 16px;border-radius:10px;border:1px solid #1e293b;font-weight:bold;margin-top:20px;margin-bottom:10px}
+pre{border-radius:12px;overflow-x:auto}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>294. What is Formik and How Does it Compare to React Hook Form?</h1>
+
+<h2>One-Line Definition</h2>
+
+<div class="highlight">
+Formik is a React form library used to manage form state, validation, and submission. React Hook Form is a newer form library that provides better performance with fewer re-renders.
+</div>
+
+<h2>Why Do We Need Form Libraries?</h2>
+
+<p>
+Managing forms manually becomes repetitive.
+</p>
+
+<ul>
+<li>Form state management</li>
+<li>Validation</li>
+<li>Error handling</li>
+<li>Form submission</li>
+<li>Reset functionality</li>
+</ul>
+
+<div class="warning">
+Both Formik and React Hook Form solve these problems, but they work differently internally.
+</div>
+
+<h2>How Formik Works</h2>
+
+<div class="flow">
+Input Change
+<br>↓<br>
+Formik State Update
+<br>↓<br>
+Component Re-render
+<br>↓<br>
+UI Update
+</div>
+
+<h2>How React Hook Form Works</h2>
+
+<div class="flow">
+Input Change
+<br>↓<br>
+DOM Stores Value
+<br>↓<br>
+Minimal Re-renders
+<br>↓<br>
+UI Update
+</div>
+
+<h2>Install Formik</h2>
+
+<pre><code class="language-bash">npm install formik</code></pre>
+
+<h2>Project Structure</h2>
+
+<pre><code class="language-text">src/
+│
+├── App.jsx
+│
+└── components/
+    ├── FormikLoginForm.jsx
+    └── RHFLoginForm.jsx</code></pre>
+
+<h2>Formik Example</h2>
+
+<div class="file-name">File: src/components/FormikLoginForm.jsx</div>
+
+<pre><code class="language-jsx">import { Formik, Form, Field } from 'formik';
+
+function FormikLoginForm() {
+  return (
+    &lt;Formik
+      initialValues={{ email: '', password: '' }}
+      onSubmit={values =&gt; console.log(values)}
+    &gt;
+      &lt;Form&gt;
+        &lt;Field name="email" placeholder="Email" /&gt;
+        &lt;Field name="password" type="password" placeholder="Password" /&gt;
+        &lt;button type="submit"&gt;Login&lt;/button&gt;
+      &lt;/Form&gt;
+    &lt;/Formik&gt;
+  );
+}
+
+export default FormikLoginForm;</code></pre>
+
+<h2>React Hook Form Example</h2>
+
+<div class="file-name">File: src/components/RHFLoginForm.jsx</div>
+
+<pre><code class="language-jsx">import { useForm } from 'react-hook-form';
+
+function RHFLoginForm() {
+  const { register, handleSubmit } = useForm();
+
+  function onSubmit(data) {
+    console.log(data);
+  }
+
+  return (
+    &lt;form onSubmit={handleSubmit(onSubmit)}&gt;
+      &lt;input placeholder="Email" {...register('email')} /&gt;
+      &lt;input type="password" placeholder="Password" {...register('password')} /&gt;
+      &lt;button type="submit"&gt;Login&lt;/button&gt;
+    &lt;/form&gt;
+  );
+}
+
+export default RHFLoginForm;</code></pre>
+
+<h2>Formik Validation Example</h2>
+
+<div class="file-name">File: src/components/FormikLoginForm.jsx</div>
+
+<pre><code class="language-jsx">import { Formik, Form, Field, ErrorMessage } from 'formik';
+
+function FormikLoginForm() {
+  return (
+    &lt;Formik
+      initialValues={{ email: '' }}
+      validate={values =&gt; {
+        const errors = {};
+
+        if (!values.email) {
+          errors.email = 'Email is required';
+        }
+
+        return errors;
+      }}
+      onSubmit={values =&gt; console.log(values)}
+    &gt;
+      &lt;Form&gt;
+        &lt;Field name="email" placeholder="Email" /&gt;
+        &lt;ErrorMessage name="email" component="p" /&gt;
+        &lt;button type="submit"&gt;Submit&lt;/button&gt;
+      &lt;/Form&gt;
+    &lt;/Formik&gt;
+  );
+}
+
+export default FormikLoginForm;</code></pre>
+
+<h2>React Hook Form + Zod Validation</h2>
+
+<div class="file-name">File: src/components/RHFLoginForm.jsx</div>
+
+<pre><code class="language-jsx">import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { loginSchema } from '../schemas/loginSchema';
+
+function RHFLoginForm() {
+  const { register, handleSubmit, formState: { errors } } = useForm({
+    resolver: zodResolver(loginSchema)
+  });
+
+  function onSubmit(data) {
+    console.log(data);
+  }
+
+  return (
+    &lt;form onSubmit={handleSubmit(onSubmit)}&gt;
+      &lt;input placeholder="Email" {...register('email')} /&gt;
+      {errors.email && &lt;p className="error"&gt;{errors.email.message}&lt;/p&gt;}
+
+      &lt;button type="submit"&gt;Submit&lt;/button&gt;
+    &lt;/form&gt;
+  );
+}
+
+export default RHFLoginForm;</code></pre>
+
+<h2>Performance Difference</h2>
+
+<table>
+<tr>
+<th>Formik</th>
+<th>React Hook Form</th>
+</tr>
+
+<tr>
+<td>Uses controlled inputs</td>
+<td>Uses uncontrolled inputs</td>
+</tr>
+
+<tr>
+<td>More re-renders</td>
+<td>Fewer re-renders</td>
+</tr>
+
+<tr>
+<td>Larger bundle size</td>
+<td>Smaller bundle size</td>
+</tr>
+
+<tr>
+<td>Older library</td>
+<td>Modern library</td>
+</tr>
+
+<tr>
+<td>Slower on large forms</td>
+<td>Faster on large forms</td>
+</tr>
+</table>
+
+<h2>Formik vs React Hook Form</h2>
+
+<table>
+<tr>
+<th>Feature</th>
+<th>Formik</th>
+<th>React Hook Form</th>
+</tr>
+
+<tr>
+<td>Release</td>
+<td>Older</td>
+<td>Newer</td>
+</tr>
+
+<tr>
+<td>Performance</td>
+<td>Good</td>
+<td>Excellent</td>
+</tr>
+
+<tr>
+<td>Bundle Size</td>
+<td>Larger</td>
+<td>Smaller</td>
+</tr>
+
+<tr>
+<td>Re-renders</td>
+<td>More</td>
+<td>Fewer</td>
+</tr>
+
+<tr>
+<td>TypeScript Support</td>
+<td>Good</td>
+<td>Excellent</td>
+</tr>
+
+<tr>
+<td>Zod Support</td>
+<td>Possible</td>
+<td>Excellent</td>
+</tr>
+
+<tr>
+<td>Popularity Today</td>
+<td>Declining</td>
+<td>Growing</td>
+</tr>
+</table>
+
+<h2>When Should You Use Formik?</h2>
+
+<ul>
+<li>Existing project already uses Formik.</li>
+<li>Team is familiar with Formik.</li>
+<li>Maintaining legacy applications.</li>
+</ul>
+
+<h2>When Should You Use React Hook Form?</h2>
+
+<ul>
+<li>New projects.</li>
+<li>Large forms.</li>
+<li>Better performance required.</li>
+<li>Zod integration needed.</li>
+<li>TypeScript-heavy applications.</li>
+</ul>
+
+<div class="success">
+Today, React Hook Form + Zod is generally the preferred combination for new React applications.
+</div>
+
+<h2>Easy Way To Remember</h2>
+
+<div class="flow">
+Formik
+<br>↓<br>
+Older
+<br>↓<br>
+Controlled Inputs
+<br>↓<br>
+More Re-renders
+
+<br><br>
+
+React Hook Form
+<br>↓<br>
+Modern
+<br>↓<br>
+Uncontrolled Inputs
+<br>↓<br>
+Fewer Re-renders
+</div>
+
+<h2>Interview Answer</h2>
+
+<div class="highlight">
+Formik is a React form library used for handling form state, validation, and submission. Compared to React Hook Form, Formik relies more on controlled inputs and causes more re-renders. React Hook Form is generally faster, has a smaller bundle size, and integrates very well with validation libraries such as Zod.
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+Formik is an older form library, while React Hook Form is a newer, faster, and more performant alternative that is preferred in most modern React projects.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-js.min.js"></script>
+
+</body>
+</html>

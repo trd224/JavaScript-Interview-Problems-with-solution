@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>295 - What is Formik and How Does it Manage Form State?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px;margin-bottom:10px}
+p{color:#cbd5e1}
+ul{padding-left:24px}
+li{margin-bottom:10px;color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px;margin-top:15px}
+.success{background:#052e16;padding:18px;border-left:5px solid #22c55e;border-radius:10px;margin-top:15px}
+.warning{background:#1e1b4b;padding:18px;border-left:5px solid #fbbf24;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;text-align:center;line-height:2;font-size:18px;margin-top:15px}
+.file-name{background:#111827;color:#93c5fd;padding:12px 16px;border-radius:10px;border:1px solid #1e293b;font-weight:bold;margin-top:20px;margin-bottom:10px}
+pre{border-radius:12px;overflow-x:auto}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>295. What is Formik and How Does it Manage Form State?</h1>
+
+<h2>One-Line Definition</h2>
+
+<div class="highlight">
+Formik is a React form library that manages form values, validation, errors, touched fields, and submission state using React state internally.
+</div>
+
+<h2>The Problem Formik Solves</h2>
+
+<p>
+Without Formik, we manually create state and handlers for every field.
+</p>
+
+<div class="file-name">File: src/components/LoginForm.jsx</div>
+
+<pre><code class="language-jsx">import { useState } from 'react';
+
+function LoginForm() {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+
+  return (
+    &lt;&gt;
+      &lt;input value={email} onChange={e => setEmail(e.target.value)} /&gt;
+      &lt;input value={password} onChange={e => setPassword(e.target.value)} /&gt;
+    &lt;/&gt;
+  );
+}
+
+export default LoginForm;</code></pre>
+
+<p>
+As forms grow, state management becomes repetitive.
+</p>
+
+<h2>Formik Solution</h2>
+
+<div class="flow">
+Formik
+<br>↓<br>
+values
+<br>errors
+<br>touched
+<br>isSubmitting
+<br>↓<br>
+Single Form State Manager
+</div>
+
+<h2>Install Formik</h2>
+
+<pre><code class="language-bash">npm install formik</code></pre>
+
+<h2>Project Structure</h2>
+
+<pre><code class="language-text">src/
+│
+├── App.jsx
+│
+└── components/
+    └── LoginForm.jsx</code></pre>
+
+<h2>Basic Formik Example</h2>
+
+<div class="file-name">File: src/components/LoginForm.jsx</div>
+
+<pre><code class="language-jsx">import { Formik, Form, Field } from 'formik';
+
+function LoginForm() {
+  return (
+    &lt;Formik
+      initialValues={{ email: '', password: '' }}
+      onSubmit={values => console.log(values)}
+    &gt;
+      &lt;Form&gt;
+        &lt;Field name="email" placeholder="Email" /&gt;
+        &lt;Field name="password" type="password" placeholder="Password" /&gt;
+        &lt;button type="submit"&gt;Login&lt;/button&gt;
+      &lt;/Form&gt;
+    &lt;/Formik&gt;
+  );
+}
+
+export default LoginForm;</code></pre>
+
+<h2>How Formik Manages State</h2>
+
+<p>
+Formik internally creates a state object similar to:
+</p>
+
+<pre><code class="language-js">{
+  values: {
+    email: '',
+    password: ''
+  },
+
+  errors: {},
+
+  touched: {},
+
+  isSubmitting: false
+}</code></pre>
+
+<h2>values Object</h2>
+
+<p>
+Stores all field values.
+</p>
+
+<pre><code class="language-js">{
+  values: {
+    email: 'rizwan@gmail.com',
+    password: '123456'
+  }
+}</code></pre>
+
+<div class="flow">
+User Types
+<br>↓<br>
+Formik Updates values
+<br>↓<br>
+Component Re-renders
+</div>
+
+<h2>Accessing values</h2>
+
+<div class="file-name">File: src/components/LoginForm.jsx</div>
+
+<pre><code class="language-jsx">import { Formik } from 'formik';
+
+function LoginForm() {
+  return (
+    &lt;Formik
+      initialValues={{ email: '' }}
+      onSubmit={values => console.log(values)}
+    &gt;
+      {({ values }) => (
+        &lt;div&gt;
+          {values.email}
+        &lt;/div&gt;
+      )}
+    &lt;/Formik&gt;
+  );
+}
+
+export default LoginForm;</code></pre>
+
+<h2>errors Object</h2>
+
+<p>
+Stores validation errors.
+</p>
+
+<pre><code class="language-js">{
+  errors: {
+    email: 'Email is required'
+  }
+}</code></pre>
+
+<h2>touched Object</h2>
+
+<p>
+Tracks fields the user has visited.
+</p>
+
+<pre><code class="language-js">{
+  touched: {
+    email: true
+  }
+}</code></pre>
+
+<div class="success">
+Useful for showing validation messages only after user interaction.
+</div>
+
+<h2>isSubmitting</h2>
+
+<p>
+Tracks form submission status.
+</p>
+
+<pre><code class="language-js">{
+  isSubmitting: true
+}</code></pre>
+
+<h2>Complete Example</h2>
+
+<div class="file-name">File: src/components/LoginForm.jsx</div>
+
+<pre><code class="language-jsx">import { Formik, Form, Field, ErrorMessage } from 'formik';
+
+function LoginForm() {
+  return (
+    &lt;Formik
+      initialValues={{ email: '', password: '' }}
+      validate={values => {
+        const errors = {};
+
+        if (!values.email) {
+          errors.email = 'Email is required';
+        }
+
+        return errors;
+      }}
+      onSubmit={values => console.log(values)}
+    &gt;
+      {({ isSubmitting }) => (
+        &lt;Form&gt;
+          &lt;Field name="email" placeholder="Email" /&gt;
+          &lt;ErrorMessage name="email" component="p" /&gt;
+
+          &lt;Field name="password" type="password" placeholder="Password" /&gt;
+
+          &lt;button type="submit" disabled={isSubmitting}&gt;
+            Login
+          &lt;/button&gt;
+        &lt;/Form&gt;
+      )}
+    &lt;/Formik&gt;
+  );
+}
+
+export default LoginForm;</code></pre>
+
+<h2>What Happens When User Types?</h2>
+
+<div class="flow">
+User Types Email
+<br>↓<br>
+Formik Updates values.email
+<br>↓<br>
+React State Changes
+<br>↓<br>
+Component Re-renders
+<br>↓<br>
+UI Updates
+</div>
+
+<h2>Why Is Formik Slower Than React Hook Form?</h2>
+
+<p>
+Formik stores field values inside React state.
+</p>
+
+<pre><code class="language-js">values.email = 'rizwan@gmail.com';</code></pre>
+
+<p>
+Every change updates state.
+</p>
+
+<p>
+Every state update triggers a re-render.
+</p>
+
+<div class="flow">
+Typing
+<br>↓<br>
+State Update
+<br>↓<br>
+Re-render
+<br>↓<br>
+UI Update
+</div>
+
+<div class="warning">
+This is why Formik can become slower in very large forms.
+</div>
+
+<h2>Formik State vs React Hook Form State</h2>
+
+<table>
+<tr>
+<th>Formik</th>
+<th>React Hook Form</th>
+</tr>
+
+<tr>
+<td>Stores values in React state</td>
+<td>Stores values in DOM refs</td>
+</tr>
+
+<tr>
+<td>More re-renders</td>
+<td>Fewer re-renders</td>
+</tr>
+
+<tr>
+<td>Controlled inputs</td>
+<td>Uncontrolled inputs</td>
+</tr>
+
+<tr>
+<td>Larger bundle</td>
+<td>Smaller bundle</td>
+</tr>
+</table>
+
+<h2>Most Important Formik State Properties</h2>
+
+<table>
+<tr>
+<th>Property</th>
+<th>Purpose</th>
+</tr>
+
+<tr>
+<td>values</td>
+<td>Form field values</td>
+</tr>
+
+<tr>
+<td>errors</td>
+<td>Validation errors</td>
+</tr>
+
+<tr>
+<td>touched</td>
+<td>Visited fields</td>
+</tr>
+
+<tr>
+<td>isSubmitting</td>
+<td>Submission status</td>
+</tr>
+
+<tr>
+<td>dirty</td>
+<td>Form changed?</td>
+</tr>
+
+<tr>
+<td>isValid</td>
+<td>Form valid?</td>
+</tr>
+</table>
+
+<h2>Easy Way To Remember</h2>
+
+<div class="flow">
+Formik
+<br>↓<br>
+Stores Everything In React State
+<br>↓<br>
+values
+<br>errors
+<br>touched
+<br>isSubmitting
+</div>
+
+<h2>Interview Answer</h2>
+
+<div class="highlight">
+Formik is a React form library that manages form state using React state internally. It keeps track of values, errors, touched fields, and submission status. Whenever a field changes, Formik updates its internal state and re-renders the component to keep the UI synchronized.
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+Formik manages form state by storing values, errors, touched fields, and submission status inside React state.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-js.min.js"></script>
+
+</body>
+</html>

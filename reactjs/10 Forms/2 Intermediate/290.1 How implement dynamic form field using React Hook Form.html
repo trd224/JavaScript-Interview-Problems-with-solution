@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>290.1 - How implement dynamic form field using React Hook Form?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+p{color:#cbd5e1}
+ul{padding-left:24px}
+li{margin-bottom:10px;color:#cbd5e1}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px}
+.success{background:#052e16;padding:18px;border-left:5px solid #22c55e;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;text-align:center;line-height:2;font-size:18px;margin-top:15px}
+.file-name{background:#111827;color:#93c5fd;padding:12px 16px;border-radius:10px;border:1px solid #1e293b;font-weight:bold;margin-top:20px;margin-bottom:10px}
+pre{border-radius:12px;overflow-x:auto}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>290.1 How implement dynamic form field using React Hook Form?</h1>
+
+<h2>One-Line Definition</h2>
+
+<div class="highlight">
+React Hook Form provides the useFieldArray() hook to create dynamic fields that can be added or removed at runtime.
+</div>
+
+<h2>When Do We Need Dynamic Fields?</h2>
+
+<ul>
+<li>Multiple Skills</li>
+<li>Multiple Phone Numbers</li>
+<li>Multiple Addresses</li>
+<li>Education Records</li>
+<li>Work Experience</li>
+</ul>
+
+<h2>Flow</h2>
+
+<div class="flow">
+useForm()
+<br>↓<br>
+useFieldArray()
+<br>↓<br>
+fields.map()
+<br>↓<br>
+append()
+<br>↓<br>
+remove()
+<br>↓<br>
+Dynamic Form
+</div>
+
+<h2>Project Structure</h2>
+
+<pre><code class="language-text">src/
+│
+├── App.jsx
+└── components/
+    └── SkillsForm.jsx</code></pre>
+
+<h2>Complete Example</h2>
+
+<div class="file-name">File: src/components/SkillsForm.jsx</div>
+
+<pre><code class="language-jsx">import { useForm, useFieldArray } from 'react-hook-form';
+
+function SkillsForm() {
+  const { register, control, handleSubmit } = useForm({
+    defaultValues: {
+      skills: [{ name: '' }]
+    }
+  });
+
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: 'skills'
+  });
+
+  function onSubmit(data) {
+    console.log(data);
+  }
+
+  return (
+    &lt;form onSubmit={handleSubmit(onSubmit)}&gt;
+
+      {fields.map((field, index) =&gt; (
+        &lt;div key={field.id}&gt;
+          &lt;input placeholder="Skill" {...register(`skills.${index}.name`)} /&gt;
+
+          &lt;button type="button" onClick={() =&gt; remove(index)}&gt;
+            Remove
+          &lt;/button&gt;
+        &lt;/div&gt;
+      ))}
+
+      &lt;button type="button" onClick={() =&gt; append({ name: '' })}&gt;
+        Add Skill
+      &lt;/button&gt;
+
+      &lt;button type="submit"&gt;
+        Submit
+      &lt;/button&gt;
+
+    &lt;/form&gt;
+  );
+}
+
+export default SkillsForm;</code></pre>
+
+<h2>Use Component</h2>
+
+<div class="file-name">File: src/App.jsx</div>
+
+<pre><code class="language-jsx">import SkillsForm from './components/SkillsForm';
+
+function App() {
+  return &lt;SkillsForm /&gt;;
+}
+
+export default App;</code></pre>
+
+<h2>Understanding useFieldArray()</h2>
+
+<pre><code class="language-jsx">const { fields, append, remove } = useFieldArray({
+  control,
+  name: 'skills'
+});</code></pre>
+
+<table style="width:100%;border-collapse:collapse;margin-top:15px">
+<tr>
+<th style="border:1px solid #1e293b;padding:12px">Property</th>
+<th style="border:1px solid #1e293b;padding:12px">Purpose</th>
+</tr>
+<tr>
+<td style="border:1px solid #1e293b;padding:12px">fields</td>
+<td style="border:1px solid #1e293b;padding:12px">Current array items</td>
+</tr>
+<tr>
+<td style="border:1px solid #1e293b;padding:12px">append()</td>
+<td style="border:1px solid #1e293b;padding:12px">Add new item</td>
+</tr>
+<tr>
+<td style="border:1px solid #1e293b;padding:12px">remove()</td>
+<td style="border:1px solid #1e293b;padding:12px">Delete item</td>
+</tr>
+</table>
+
+<h2>What Happens When Add Skill Is Clicked?</h2>
+
+<pre><code class="language-jsx">append({ name: '' });</code></pre>
+
+<div class="flow">
+skills = [
+  { name: 'React' }
+]
+
+<br>↓<br>
+
+append({ name: '' })
+
+<br>↓<br>
+
+skills = [
+  { name: 'React' },
+  { name: '' }
+]
+</div>
+
+<h2>What Happens When Remove Is Clicked?</h2>
+
+<pre><code class="language-jsx">remove(index);</code></pre>
+
+<div class="flow">
+[
+  { name: 'React' },
+  { name: 'Node.js' }
+]
+
+<br>↓<br>
+
+remove(1)
+
+<br>↓<br>
+
+[
+  { name: 'React' }
+]
+</div>
+
+<h2>Submitted Data</h2>
+
+<pre><code class="language-js">{
+  skills: [
+    { name: 'React' },
+    { name: 'Node.js' },
+    { name: 'Next.js' }
+  ]
+}</code></pre>
+
+<h2>Real World Example - Phone Numbers</h2>
+
+<div class="file-name">File: src/components/PhoneForm.jsx</div>
+
+<pre><code class="language-jsx">const { fields, append, remove } = useFieldArray({
+  control,
+  name: 'phones'
+});
+
+append({ number: '' });</code></pre>
+
+<p>
+Output:
+</p>
+
+<pre><code class="language-js">{
+  phones: [
+    { number: '9876543210' },
+    { number: '9999999999' }
+  ]
+}</code></pre>
+
+<div class="success">
+React Hook Form uses useFieldArray() for dynamic fields, while Formik uses FieldArray.
+</div>
+
+<h2>Interview Answer</h2>
+
+<div class="highlight">
+Dynamic form fields in React Hook Form are implemented using the useFieldArray() hook. It provides fields, append(), remove(), and other helper methods to dynamically add or remove form fields while keeping them connected to React Hook Form state.
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+Use useFieldArray() to create dynamic add/remove form fields in React Hook Form.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+
+</body>
+</html>

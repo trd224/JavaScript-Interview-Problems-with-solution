@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>298 - How do you implement dynamic form fields in React?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px;margin-bottom:10px}
+p{color:#cbd5e1}
+ul{padding-left:24px}
+li{margin-bottom:10px;color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px;margin-top:15px}
+.success{background:#052e16;padding:18px;border-left:5px solid #22c55e;border-radius:10px;margin-top:15px}
+.warning{background:#1e1b4b;padding:18px;border-left:5px solid #fbbf24;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;text-align:center;line-height:2;font-size:18px;margin-top:15px}
+.file-name{background:#111827;color:#93c5fd;padding:12px 16px;border-radius:10px;border:1px solid #1e293b;font-weight:bold;margin-top:20px;margin-bottom:10px}
+pre{border-radius:12px;overflow-x:auto}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>298. How do you implement dynamic form fields in React?</h1>
+
+<h2>One-Line Definition</h2>
+
+<div class="highlight">
+Dynamic form fields are implemented by storing fields in an array state and adding, updating, or removing items from that array.
+</div>
+
+<h2>Why Do We Need Dynamic Fields?</h2>
+
+<ul>
+<li>Multiple phone numbers</li>
+<li>Multiple skills</li>
+<li>Multiple addresses</li>
+<li>Education records</li>
+<li>Work experience entries</li>
+</ul>
+
+<h2>How It Works</h2>
+
+<div class="flow">
+Array State
+<br>↓<br>
+map() Fields
+<br>↓<br>
+Add New Object
+<br>↓<br>
+Update By Index
+<br>↓<br>
+Remove By Index
+</div>
+
+<h2>Project Structure</h2>
+
+<pre><code class="language-text">src/
+│
+├── App.jsx
+└── components/
+    └── SkillsForm.jsx</code></pre>
+
+<h2>Complete Example</h2>
+
+<div class="file-name">File: src/components/SkillsForm.jsx</div>
+
+<pre><code class="language-jsx">import { useState } from 'react';
+
+function SkillsForm() {
+  const [skills, setSkills] = useState(['']);
+
+  function addSkill() {
+    setSkills([...skills, '']);
+  }
+
+  function updateSkill(index, value) {
+    const updatedSkills = [...skills];
+    updatedSkills[index] = value;
+    setSkills(updatedSkills);
+  }
+
+  function removeSkill(index) {
+    setSkills(skills.filter((skill, i) =&gt; i !== index));
+  }
+
+  function handleSubmit(e) {
+    e.preventDefault();
+    console.log(skills);
+  }
+
+  return (
+    &lt;form onSubmit={handleSubmit}&gt;
+      {skills.map((skill, index) =&gt; (
+        &lt;div key={index}&gt;
+          &lt;input value={skill} onChange={e =&gt; updateSkill(index, e.target.value)} placeholder="Skill" /&gt;
+          &lt;button type="button" onClick={() =&gt; removeSkill(index)}&gt;Remove&lt;/button&gt;
+        &lt;/div&gt;
+      ))}
+
+      &lt;button type="button" onClick={addSkill}&gt;Add Skill&lt;/button&gt;
+      &lt;button type="submit"&gt;Submit&lt;/button&gt;
+    &lt;/form&gt;
+  );
+}
+
+export default SkillsForm;</code></pre>
+
+<h2>Use Component</h2>
+
+<div class="file-name">File: src/App.jsx</div>
+
+<pre><code class="language-jsx">import SkillsForm from './components/SkillsForm';
+
+function App() {
+  return &lt;SkillsForm /&gt;;
+}
+
+export default App;</code></pre>
+
+<h2>Initial State</h2>
+
+<pre><code class="language-jsx">const [skills, setSkills] = useState(['']);</code></pre>
+
+<p>
+This means the form starts with one empty skill input.
+</p>
+
+<h2>Add Field</h2>
+
+<pre><code class="language-jsx">function addSkill() {
+  setSkills([...skills, '']);
+}</code></pre>
+
+<div class="flow">
+['React']
+<br>↓<br>
+Add Skill
+<br>↓<br>
+['React', '']
+</div>
+
+<h2>Update Field</h2>
+
+<pre><code class="language-jsx">function updateSkill(index, value) {
+  const updatedSkills = [...skills];
+  updatedSkills[index] = value;
+  setSkills(updatedSkills);
+}</code></pre>
+
+<div class="flow">
+User Types
+<br>↓<br>
+Find Field By Index
+<br>↓<br>
+Update That Value
+<br>↓<br>
+Set New State
+</div>
+
+<h2>Remove Field</h2>
+
+<pre><code class="language-jsx">function removeSkill(index) {
+  setSkills(skills.filter((skill, i) =&gt; i !== index));
+}</code></pre>
+
+<div class="flow">
+['React', 'Node']
+<br>↓<br>
+Remove Index 1
+<br>↓<br>
+['React']
+</div>
+
+<h2>Dynamic Object Fields Example</h2>
+
+<div class="file-name">File: src/components/EducationForm.jsx</div>
+
+<pre><code class="language-jsx">import { useState } from 'react';
+
+function EducationForm() {
+  const [education, setEducation] = useState([{ degree: '', college: '' }]);
+
+  function addEducation() {
+    setEducation([...education, { degree: '', college: '' }]);
+  }
+
+  function updateEducation(index, field, value) {
+    const updatedEducation = [...education];
+    updatedEducation[index][field] = value;
+    setEducation(updatedEducation);
+  }
+
+  function removeEducation(index) {
+    setEducation(education.filter((item, i) =&gt; i !== index));
+  }
+
+  return (
+    &lt;&gt;
+      {education.map((item, index) =&gt; (
+        &lt;div key={index}&gt;
+          &lt;input value={item.degree} onChange={e =&gt; updateEducation(index, 'degree', e.target.value)} placeholder="Degree" /&gt;
+          &lt;input value={item.college} onChange={e =&gt; updateEducation(index, 'college', e.target.value)} placeholder="College" /&gt;
+          &lt;button type="button" onClick={() =&gt; removeEducation(index)}&gt;Remove&lt;/button&gt;
+        &lt;/div&gt;
+      ))}
+
+      &lt;button type="button" onClick={addEducation}&gt;Add Education&lt;/button&gt;
+    &lt;/&gt;
+  );
+}
+
+export default EducationForm;</code></pre>
+
+<h2>Submitted Data Example</h2>
+
+<pre><code class="language-js">[
+  {
+    degree: 'BCA',
+    college: 'ABC College'
+  },
+  {
+    degree: 'MCA',
+    college: 'XYZ University'
+  }
+]</code></pre>
+
+<h2>Important Point</h2>
+
+<div class="warning">
+Never directly mutate state like skills[index] = value without creating a new array copy first.
+</div>
+
+<h2>Correct State Update</h2>
+
+<pre><code class="language-jsx">const updatedSkills = [...skills];
+updatedSkills[index] = value;
+setSkills(updatedSkills);</code></pre>
+
+<h2>Dynamic Fields With Formik</h2>
+
+<p>
+In Formik, dynamic fields are usually handled with FieldArray.
+</p>
+
+<pre><code class="language-jsx">&lt;FieldArray name="skills"&gt;
+  {({ push, remove }) =&gt; (
+    &lt;&gt;
+      &lt;button type="button" onClick={() =&gt; push('')}&gt;Add&lt;/button&gt;
+      &lt;button type="button" onClick={() =&gt; remove(0)}&gt;Remove&lt;/button&gt;
+    &lt;/&gt;
+  )}
+&lt;/FieldArray&gt;</code></pre>
+
+<h2>Dynamic Fields With React Hook Form</h2>
+
+<p>
+In React Hook Form, dynamic fields are usually handled with useFieldArray().
+</p>
+
+<pre><code class="language-jsx">const { fields, append, remove } = useFieldArray({
+  control,
+  name: 'skills'
+});</code></pre>
+
+<h2>Real World Examples</h2>
+
+<ul>
+<li>Resume builder skills section</li>
+<li>Checkout multiple addresses</li>
+<li>Profile multiple phone numbers</li>
+<li>Education history form</li>
+<li>Work experience form</li>
+</ul>
+
+<h2>Easy Way To Remember</h2>
+
+<div class="flow">
+Dynamic Fields
+<br>↓<br>
+Store In Array
+<br>↓<br>
+map()
+<br>↓<br>
+Add / Update / Remove
+<br>↓<br>
+Submit Array Data
+</div>
+
+<h2>Interview Answer</h2>
+
+<div class="highlight">
+Dynamic form fields in React are implemented by storing field values in an array state. We render fields using map(), add new fields by pushing new values into the array, update fields by index, and remove fields using filter(). Libraries like Formik provide FieldArray and React Hook Form provides useFieldArray for this purpose.
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+Dynamic form fields are created by storing fields in an array and rendering them with map(), then adding or removing items from that array.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-js.min.js"></script>
+
+</body>
+</html>

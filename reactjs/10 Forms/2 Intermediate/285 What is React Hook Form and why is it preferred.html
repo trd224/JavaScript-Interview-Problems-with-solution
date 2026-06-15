@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>285 - What is React Hook Form and Why is it Preferred?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px;margin-bottom:10px}
+p{color:#cbd5e1}
+ul{padding-left:24px}
+li{margin-bottom:10px;color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px;margin-top:15px}
+.warning{background:#1e1b4b;border-left:5px solid #fbbf24;padding:18px;border-radius:10px;margin-top:15px}
+.success{background:#052e16;padding:18px;border-left:5px solid #22c55e;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;margin-top:15px;text-align:center;line-height:2;font-size:18px}
+.file-name{background:#111827;color:#93c5fd;padding:12px 16px;border-radius:10px;margin-top:20px;margin-bottom:10px;border:1px solid #1e293b;font-weight:bold}
+pre{border-radius:12px;overflow-x:auto}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>285. What is React Hook Form and Why is it Preferred?</h1>
+
+<h2>One-Line Definition</h2>
+
+<div class="highlight">
+React Hook Form (RHF) is a lightweight form library that simplifies form handling, validation, and submission while reducing unnecessary re-renders.
+</div>
+
+<h2>Why Was React Hook Form Created?</h2>
+
+<p>
+Managing forms with useState becomes repetitive for large forms.
+</p>
+
+<h3>Without React Hook Form</h3>
+
+<div class="file-name">File: src/components/LoginForm.jsx</div>
+
+<pre><code class="language-jsx">import { useState } from 'react';
+
+function LoginForm() {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+
+  function handleSubmit(e) {
+    e.preventDefault();
+    console.log({ email, password });
+  }
+
+  return (
+    &lt;form onSubmit={handleSubmit}&gt;
+      &lt;input value={email} onChange={e =&gt; setEmail(e.target.value)} /&gt;
+      &lt;input value={password} onChange={e =&gt; setPassword(e.target.value)} /&gt;
+      &lt;button&gt;Login&lt;/button&gt;
+    &lt;/form&gt;
+  );
+}
+
+export default LoginForm;</code></pre>
+
+<p>
+Problems:
+</p>
+
+<ul>
+<li>Many state variables</li>
+<li>Many onChange handlers</li>
+<li>Manual validation</li>
+<li>More re-renders</li>
+<li>More boilerplate code</li>
+</ul>
+
+<div class="warning">
+Large forms become difficult to maintain using only useState.
+</div>
+
+<h2>With React Hook Form</h2>
+
+<div class="file-name">File: src/components/LoginForm.jsx</div>
+
+<pre><code class="language-jsx">import { useForm } from 'react-hook-form';
+
+function LoginForm() {
+  const { register, handleSubmit } = useForm();
+
+  function onSubmit(data) {
+    console.log(data);
+  }
+
+  return (
+    &lt;form onSubmit={handleSubmit(onSubmit)}&gt;
+      &lt;input {...register('email')} /&gt;
+      &lt;input {...register('password')} /&gt;
+      &lt;button&gt;Login&lt;/button&gt;
+    &lt;/form&gt;
+  );
+}
+
+export default LoginForm;</code></pre>
+
+<h2>How It Works</h2>
+
+<div class="flow">
+useForm()
+<br>↓<br>
+register()
+<br>↓<br>
+Track Inputs
+<br>↓<br>
+Validation
+<br>↓<br>
+handleSubmit()
+<br>↓<br>
+Get Form Data
+</div>
+
+<h2>Installation</h2>
+
+<pre><code class="language-bash">npm install react-hook-form</code></pre>
+
+<h2>Project Structure</h2>
+
+<pre><code class="language-text">src/
+│
+├── App.jsx
+│
+└── components/
+    └── LoginForm.jsx</code></pre>
+
+<h2>Basic Example</h2>
+
+<div class="file-name">File: src/components/LoginForm.jsx</div>
+
+<pre><code class="language-jsx">import { useForm } from 'react-hook-form';
+
+function LoginForm() {
+  const { register, handleSubmit } = useForm();
+
+  function onSubmit(data) {
+    console.log(data);
+  }
+
+  return (
+    &lt;form onSubmit={handleSubmit(onSubmit)}&gt;
+      &lt;input placeholder="Email" {...register('email')} /&gt;
+      &lt;input type="password" placeholder="Password" {...register('password')} /&gt;
+      &lt;button type="submit"&gt;Login&lt;/button&gt;
+    &lt;/form&gt;
+  );
+}
+
+export default LoginForm;</code></pre>
+
+<h2>What Does register() Do?</h2>
+
+<pre><code class="language-jsx">&lt;input {...register('email')} /&gt;</code></pre>
+
+<p>
+register():
+</p>
+
+<ul>
+<li>Registers the field</li>
+<li>Tracks field value</li>
+<li>Handles validation</li>
+<li>Collects form data</li>
+</ul>
+
+<h2>Validation Example</h2>
+
+<div class="file-name">File: src/components/LoginForm.jsx</div>
+
+<pre><code class="language-jsx">import { useForm } from 'react-hook-form';
+
+function LoginForm() {
+  const { register, handleSubmit, formState: { errors } } = useForm();
+
+  function onSubmit(data) {
+    console.log(data);
+  }
+
+  return (
+    &lt;form onSubmit={handleSubmit(onSubmit)}&gt;
+      &lt;input placeholder="Email" {...register('email', { required: 'Email is required' })} /&gt;
+      {errors.email && &lt;p&gt;{errors.email.message}&lt;/p&gt;}
+      &lt;button type="submit"&gt;Submit&lt;/button&gt;
+    &lt;/form&gt;
+  );
+}
+
+export default LoginForm;</code></pre>
+
+<h2>Submitted Data</h2>
+
+<pre><code class="language-jsx">{
+  email: 'rizwan@gmail.com',
+  password: '123456'
+}</code></pre>
+
+<h2>Why Is React Hook Form Faster?</h2>
+
+<p>
+Traditional forms store values in React state:
+</p>
+
+<pre><code class="language-jsx">const [email, setEmail] = useState('');</code></pre>
+
+<p>
+Every key press causes a component re-render.
+</p>
+
+<p>
+React Hook Form primarily uses uncontrolled inputs.
+</p>
+
+<div class="flow">
+Typing
+<br>↓<br>
+DOM Stores Value
+<br>↓<br>
+No State Update
+<br>↓<br>
+Fewer Re-renders
+<br>↓<br>
+Better Performance
+</div>
+
+<div class="success">
+This performance benefit is the main reason React Hook Form is preferred.
+</div>
+
+<h2>React Hook Form vs useState</h2>
+
+<table>
+<tr>
+<th>useState Forms</th>
+<th>React Hook Form</th>
+</tr>
+
+<tr>
+<td>Many states</td>
+<td>Single useForm()</td>
+</tr>
+
+<tr>
+<td>Many handlers</td>
+<td>register()</td>
+</tr>
+
+<tr>
+<td>Manual validation</td>
+<td>Built-in validation</td>
+</tr>
+
+<tr>
+<td>More re-renders</td>
+<td>Fewer re-renders</td>
+</tr>
+
+<tr>
+<td>More code</td>
+<td>Less code</td>
+</tr>
+</table>
+
+<h2>Important Methods</h2>
+
+<table>
+<tr>
+<th>Method</th>
+<th>Purpose</th>
+</tr>
+
+<tr>
+<td>useForm()</td>
+<td>Create form</td>
+</tr>
+
+<tr>
+<td>register()</td>
+<td>Register inputs</td>
+</tr>
+
+<tr>
+<td>handleSubmit()</td>
+<td>Handle submission</td>
+</tr>
+
+<tr>
+<td>watch()</td>
+<td>Watch values</td>
+</tr>
+
+<tr>
+<td>reset()</td>
+<td>Reset form</td>
+</tr>
+
+<tr>
+<td>setValue()</td>
+<td>Update field value</td>
+</tr>
+</table>
+
+<h2>Real World Example</h2>
+
+<ul>
+<li>Login Forms</li>
+<li>Registration Forms</li>
+<li>Checkout Forms</li>
+<li>Profile Forms</li>
+<li>Admin Panels</li>
+</ul>
+
+<h2>Easy Way To Remember</h2>
+
+<div class="flow">
+useForm()
+<br>↓<br>
+register()
+<br>↓<br>
+Validation
+<br>↓<br>
+handleSubmit()
+<br>↓<br>
+Form Data
+</div>
+
+<h2>Interview Answer</h2>
+
+<div class="highlight">
+React Hook Form is a popular React library used to manage forms, validation, and submission. It is preferred because it reduces boilerplate code, provides built-in validation, uses uncontrolled inputs internally, and minimizes unnecessary re-renders, resulting in better performance.
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+React Hook Form is a lightweight form library that provides simpler form handling and better performance than managing forms entirely with useState.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+
+</body>
+</html>

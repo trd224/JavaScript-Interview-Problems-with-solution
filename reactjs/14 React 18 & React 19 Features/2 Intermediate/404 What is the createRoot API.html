@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>404 - What is the createRoot API?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px;margin-bottom:10px}
+p{color:#cbd5e1}
+ul{padding-left:24px}
+li{margin-bottom:10px;color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px;margin-top:15px}
+.success{background:#052e16;padding:18px;border-left:5px solid #22c55e;border-radius:10px;margin-top:15px}
+.warning{background:#1e1b4b;padding:18px;border-left:5px solid #fbbf24;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;text-align:center;line-height:2;font-size:18px;margin-top:15px}
+.file-name{background:#111827;color:#93c5fd;padding:12px 16px;border-radius:10px;border:1px solid #1e293b;font-weight:bold;margin-top:20px;margin-bottom:10px}
+pre{border-radius:12px;overflow-x:auto}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>404. What is the createRoot API?</h1>
+
+<h2>One-Line Definition</h2>
+
+<div class="highlight">
+createRoot() is the new React 18 API used to render a React application. It enables React 18 features such as Concurrent Rendering, Automatic Batching, Transitions, and other performance improvements.
+</div>
+
+<h2>Why Was createRoot Introduced?</h2>
+
+<p>
+Before React 18, applications were rendered using ReactDOM.render().
+</p>
+
+<div class="flow">
+React 17
+<br>↓<br>
+ReactDOM.render()
+<br>↓<br>
+Legacy Rendering Engine
+</div>
+
+<p>
+React 18 introduced a new rendering engine.
+</p>
+
+<div class="flow">
+React 18
+<br>↓<br>
+createRoot()
+<br>↓<br>
+Concurrent Rendering Engine
+</div>
+
+<div class="success">
+Without createRoot(), React 18 features will not work.
+</div>
+
+<h2>React 17 (Old Way)</h2>
+
+<div class="file-name">File: src/index.js</div>
+
+<pre><code class="language-jsx">import ReactDOM from 'react-dom';
+import App from './App';
+
+ReactDOM.render(
+  &lt;App /&gt;,
+  document.getElementById('root')
+);</code></pre>
+
+<h2>React 18 (New Way)</h2>
+
+<div class="file-name">File: src/main.jsx</div>
+
+<pre><code class="language-jsx">import ReactDOM from 'react-dom/client';
+import App from './App';
+
+const root = ReactDOM.createRoot(
+  document.getElementById('root')
+);
+
+root.render(&lt;App /&gt;);</code></pre>
+
+<h2>Project Structure</h2>
+
+<pre><code class="language-text">src/
+│
+├── main.jsx
+├── App.jsx
+└── index.css</code></pre>
+
+<h2>What Happens Internally?</h2>
+
+<div class="flow">
+createRoot()
+<br>↓<br>
+Create React Root
+<br>↓<br>
+Enable Concurrent Features
+<br>↓<br>
+root.render()
+<br>↓<br>
+Render App
+</div>
+
+<h2>Understanding Step By Step</h2>
+
+<h3>Step 1</h3>
+
+<pre><code class="language-jsx">const root = ReactDOM.createRoot(
+  document.getElementById('root')
+);</code></pre>
+
+<p>
+Creates a React root container.
+</p>
+
+<h3>Step 2</h3>
+
+<pre><code class="language-jsx">root.render(&lt;App /&gt;);</code></pre>
+
+<p>
+Mounts the React application into that root.
+</p>
+
+<h2>Where Does root Come From?</h2>
+
+<div class="file-name">File: public/index.html</div>
+
+<pre><code class="language-html">&lt;body&gt;
+  &lt;div id="root"&gt;&lt;/div&gt;
+&lt;/body&gt;</code></pre>
+
+<p>
+React finds:
+</p>
+
+<pre><code class="language-jsx">document.getElementById('root')</code></pre>
+
+<p>
+and mounts the entire application inside that div.
+</p>
+
+<div class="flow">
+index.html
+<br>↓<br>
+&lt;div id="root"&gt;
+<br>↓<br>
+createRoot()
+<br>↓<br>
+React App Mounted
+</div>
+
+<h2>Why Not Use ReactDOM.render()?</h2>
+
+<p>
+ReactDOM.render() still works in React 18 but runs the app in legacy mode.
+</p>
+
+<div class="warning">
+You lose React 18 concurrent features when using ReactDOM.render().
+</div>
+
+<h2>Features Enabled By createRoot()</h2>
+
+<table>
+<tr>
+<th>Feature</th>
+<th>Available With createRoot?</th>
+</tr>
+
+<tr>
+<td>Automatic Batching</td>
+<td>✅ Yes</td>
+</tr>
+
+<tr>
+<td>Concurrent Rendering</td>
+<td>✅ Yes</td>
+</tr>
+
+<tr>
+<td>useTransition()</td>
+<td>✅ Yes</td>
+</tr>
+
+<tr>
+<td>startTransition()</td>
+<td>✅ Yes</td>
+</tr>
+
+<tr>
+<td>useDeferredValue()</td>
+<td>✅ Yes</td>
+</tr>
+
+<tr>
+<td>Streaming SSR Support</td>
+<td>✅ Yes</td>
+</tr>
+
+<tr>
+<td>ReactDOM.render()</td>
+<td>❌ Legacy Mode</td>
+</tr>
+</table>
+
+<h2>Real World Example</h2>
+
+<div class="file-name">File: src/main.jsx</div>
+
+<pre><code class="language-jsx">import React from 'react';
+import ReactDOM from 'react-dom/client';
+import App from './App';
+import './index.css';
+
+const root = ReactDOM.createRoot(
+  document.getElementById('root')
+);
+
+root.render(
+  &lt;React.StrictMode&gt;
+    &lt;App /&gt;
+  &lt;/React.StrictMode&gt;
+);</code></pre>
+
+<h2>React 17 vs React 18</h2>
+
+<table>
+<tr>
+<th>React 17</th>
+<th>React 18</th>
+</tr>
+
+<tr>
+<td>ReactDOM.render()</td>
+<td>createRoot()</td>
+</tr>
+
+<tr>
+<td>Legacy Rendering</td>
+<td>Concurrent Rendering</td>
+</tr>
+
+<tr>
+<td>Limited Batching</td>
+<td>Automatic Batching</td>
+</tr>
+
+<tr>
+<td>No Transitions</td>
+<td>Transitions Support</td>
+</tr>
+
+<tr>
+<td>Older Engine</td>
+<td>New Engine</td>
+</tr>
+</table>
+
+<h2>Common Interview Confusion</h2>
+
+<div class="warning">
+createRoot() does NOT render the app.
+<br><br>
+createRoot() only creates the root container.
+<br><br>
+root.render() actually renders the application.
+</div>
+
+<h2>Easy Way To Remember</h2>
+
+<div class="flow">
+createRoot()
+<br>↓<br>
+Create React Root
+<br>↓<br>
+root.render()
+<br>↓<br>
+Render Application
+<br>↓<br>
+Enable React 18 Features
+</div>
+
+<h2>Interview Answer</h2>
+
+<div class="highlight">
+createRoot() is the new React 18 API used to create a React root container. It replaces ReactDOM.render() and enables React 18 features such as Concurrent Rendering, Automatic Batching, Transitions, and improved performance. After creating the root, the application is rendered using root.render().
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+createRoot() is the React 18 API that replaces ReactDOM.render() and enables React 18's concurrent features.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+
+</body>
+</html>

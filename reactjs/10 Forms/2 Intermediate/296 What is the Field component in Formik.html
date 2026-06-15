@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>296 - What is the Field Component in Formik?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px;margin-bottom:10px}
+p{color:#cbd5e1}
+ul{padding-left:24px}
+li{margin-bottom:10px;color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px;margin-top:15px}
+.success{background:#052e16;padding:18px;border-left:5px solid #22c55e;border-radius:10px;margin-top:15px}
+.warning{background:#1e1b4b;padding:18px;border-left:5px solid #fbbf24;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;text-align:center;line-height:2;font-size:18px;margin-top:15px}
+.file-name{background:#111827;color:#93c5fd;padding:12px 16px;border-radius:10px;border:1px solid #1e293b;font-weight:bold;margin-top:20px;margin-bottom:10px}
+pre{border-radius:12px;overflow-x:auto}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>296. What is the Field Component in Formik?</h1>
+
+<h2>One-Line Definition</h2>
+
+<div class="highlight">
+Field is a Formik component that automatically connects an input element to Formik form state, handling value, onChange, and onBlur for you.
+</div>
+
+<h2>Why Do We Need Field?</h2>
+
+<p>
+Without Field, we must manually connect inputs to Formik.
+</p>
+
+<div class="file-name">File: src/components/LoginForm.jsx</div>
+
+<pre><code class="language-jsx">import { Formik } from 'formik';
+
+function LoginForm() {
+  return (
+    &lt;Formik initialValues={{ email: '' }} onSubmit={values => console.log(values)}&gt;
+      {({ values, handleChange, handleBlur }) => (
+        &lt;form&gt;
+          &lt;input
+            name="email"
+            value={values.email}
+            onChange={handleChange}
+            onBlur={handleBlur}
+          /&gt;
+        &lt;/form&gt;
+      )}
+    &lt;/Formik&gt;
+  );
+}
+
+export default LoginForm;</code></pre>
+
+<div class="warning">
+Too much boilerplate code.
+</div>
+
+<h2>Using Field Component</h2>
+
+<div class="file-name">File: src/components/LoginForm.jsx</div>
+
+<pre><code class="language-jsx">import { Formik, Form, Field } from 'formik';
+
+function LoginForm() {
+  return (
+    &lt;Formik initialValues={{ email: '' }} onSubmit={values => console.log(values)}&gt;
+      &lt;Form&gt;
+        &lt;Field name="email" placeholder="Email" /&gt;
+      &lt;/Form&gt;
+    &lt;/Formik&gt;
+  );
+}
+
+export default LoginForm;</code></pre>
+
+<div class="success">
+Field automatically handles value, onChange, and onBlur.
+</div>
+
+<h2>How Field Works Internally</h2>
+
+<div class="flow">
+&lt;Field name="email" /&gt;
+<br>↓<br>
+Formik Finds values.email
+<br>↓<br>
+Adds value
+<br>↓<br>
+Adds onChange
+<br>↓<br>
+Adds onBlur
+<br>↓<br>
+Connected To Form State
+</div>
+
+<h2>Field vs Normal Input</h2>
+
+<table>
+<tr>
+<th>Normal Input</th>
+<th>Formik Field</th>
+</tr>
+
+<tr>
+<td>Manual value binding</td>
+<td>Automatic binding</td>
+</tr>
+
+<tr>
+<td>Manual onChange</td>
+<td>Automatic onChange</td>
+</tr>
+
+<tr>
+<td>Manual onBlur</td>
+<td>Automatic onBlur</td>
+</tr>
+
+<tr>
+<td>More code</td>
+<td>Less code</td>
+</tr>
+</table>
+
+<h2>Basic Example</h2>
+
+<div class="file-name">File: src/components/LoginForm.jsx</div>
+
+<pre><code class="language-jsx">import { Formik, Form, Field } from 'formik';
+
+function LoginForm() {
+  return (
+    &lt;Formik
+      initialValues={{ email: '', password: '' }}
+      onSubmit={values => console.log(values)}
+    &gt;
+      &lt;Form&gt;
+        &lt;Field name="email" placeholder="Email" /&gt;
+        &lt;Field name="password" type="password" placeholder="Password" /&gt;
+        &lt;button type="submit"&gt;Login&lt;/button&gt;
+      &lt;/Form&gt;
+    &lt;/Formik&gt;
+  );
+}
+
+export default LoginForm;</code></pre>
+
+<h2>Submitted Data</h2>
+
+<pre><code class="language-js">{
+  email: 'rizwan@gmail.com',
+  password: '123456'
+}</code></pre>
+
+<h2>Field With ErrorMessage</h2>
+
+<div class="file-name">File: src/components/LoginForm.jsx</div>
+
+<pre><code class="language-jsx">import { Formik, Form, Field, ErrorMessage } from 'formik';
+
+function LoginForm() {
+  return (
+    &lt;Formik
+      initialValues={{ email: '' }}
+      validate={values => {
+        const errors = {};
+
+        if (!values.email) {
+          errors.email = 'Email is required';
+        }
+
+        return errors;
+      }}
+      onSubmit={values => console.log(values)}
+    &gt;
+      &lt;Form&gt;
+        &lt;Field name="email" placeholder="Email" /&gt;
+        &lt;ErrorMessage name="email" component="p" /&gt;
+        &lt;button type="submit"&gt;Submit&lt;/button&gt;
+      &lt;/Form&gt;
+    &lt;/Formik&gt;
+  );
+}
+
+export default LoginForm;</code></pre>
+
+<h2>Field as Select</h2>
+
+<div class="file-name">File: src/components/ProfileForm.jsx</div>
+
+<pre><code class="language-jsx">import { Formik, Form, Field } from 'formik';
+
+function ProfileForm() {
+  return (
+    &lt;Formik initialValues={{ city: '' }} onSubmit={values => console.log(values)}&gt;
+      &lt;Form&gt;
+        &lt;Field as="select" name="city"&gt;
+          &lt;option value=""&gt;Select City&lt;/option&gt;
+          &lt;option value="kota"&gt;Kota&lt;/option&gt;
+          &lt;option value="jaipur"&gt;Jaipur&lt;/option&gt;
+        &lt;/Field&gt;
+      &lt;/Form&gt;
+    &lt;/Formik&gt;
+  );
+}
+
+export default ProfileForm;</code></pre>
+
+<h2>Field as Textarea</h2>
+
+<div class="file-name">File: src/components/ProfileForm.jsx</div>
+
+<pre><code class="language-jsx">import { Formik, Form, Field } from 'formik';
+
+function ProfileForm() {
+  return (
+    &lt;Formik initialValues={{ bio: '' }} onSubmit={values => console.log(values)}&gt;
+      &lt;Form&gt;
+        &lt;Field as="textarea" name="bio" placeholder="Enter Bio" /&gt;
+      &lt;/Form&gt;
+    &lt;/Formik&gt;
+  );
+}
+
+export default ProfileForm;</code></pre>
+
+<h2>Field Rendered HTML</h2>
+
+<p>
+This:
+</p>
+
+<pre><code class="language-jsx">&lt;Field name="email" /&gt;</code></pre>
+
+<p>
+Behaves roughly like:
+</p>
+
+<pre><code class="language-jsx">&lt;input
+  name="email"
+  value={values.email}
+  onChange={handleChange}
+  onBlur={handleBlur}
+/&gt;</code></pre>
+
+<h2>Real World Example</h2>
+
+<div class="file-name">File: src/components/RegisterForm.jsx</div>
+
+<pre><code class="language-jsx">import { Formik, Form, Field, ErrorMessage } from 'formik';
+
+function RegisterForm() {
+  return (
+    &lt;Formik initialValues={{ name: '', email: '', mobile: '' }} onSubmit={values => console.log(values)}&gt;
+      &lt;Form&gt;
+        &lt;Field name="name" placeholder="Name" /&gt;
+        &lt;ErrorMessage name="name" component="p" /&gt;
+
+        &lt;Field name="email" placeholder="Email" /&gt;
+        &lt;ErrorMessage name="email" component="p" /&gt;
+
+        &lt;Field name="mobile" placeholder="Mobile" /&gt;
+        &lt;ErrorMessage name="mobile" component="p" /&gt;
+
+        &lt;button type="submit"&gt;Register&lt;/button&gt;
+      &lt;/Form&gt;
+    &lt;/Formik&gt;
+  );
+}
+
+export default RegisterForm;</code></pre>
+
+<h2>Easy Way To Remember</h2>
+
+<div class="flow">
+Field
+<br>↓<br>
+Automatic Formik Input
+<br>↓<br>
+value
+<br>onChange
+<br>onBlur
+<br>↓<br>
+Less Boilerplate
+</div>
+
+<h2>Interview Answer</h2>
+
+<div class="highlight">
+The Field component is a Formik component that automatically connects an input element to Formik's form state. It handles value binding, change events, and blur events automatically, reducing boilerplate code and simplifying form creation.
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+Field is a Formik component that automatically connects an input to Formik form state.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-js.min.js"></script>
+
+</body>
+</html>

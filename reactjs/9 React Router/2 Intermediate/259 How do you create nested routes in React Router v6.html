@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>259 - How Do You Create Nested Routes in React Router v6?</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px;margin-bottom:10px}
+p{color:#cbd5e1}
+ul{padding-left:24px}
+li{margin-bottom:10px;color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left;vertical-align:top}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px;margin-top:15px}
+.warning{background:#1e1b4b;border-left:5px solid #fbbf24;padding:18px;border-radius:10px;margin-top:15px}
+.success{background:#052e16;padding:18px;border-left:5px solid #22c55e;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;margin-top:15px;text-align:center;line-height:2;font-size:18px}
+.file-name{background:#111827;color:#93c5fd;padding:12px 16px;border-radius:10px;margin-top:18px;margin-bottom:10px;border:1px solid #1e293b;font-weight:bold}
+pre{border-radius:12px;overflow-x:auto}
+code{font-size:15px}
+</style>
+</head>
+<body>
+<div class="container">
+
+<h1>259. How Do You Create Nested Routes in React Router v6?</h1>
+
+<h2>One-Line Definition</h2>
+<div class="highlight">
+Nested routes allow child pages to render inside a parent layout using the <strong>&lt;Outlet /&gt;</strong> component.
+</div>
+
+<h2>Why Do We Use Nested Routes?</h2>
+<p>
+Nested routes are useful when multiple pages share the same layout, such as a dashboard, admin panel, profile section, or settings area.
+</p>
+
+<div class="success">
+The parent route renders the common layout, and the child route renders inside <strong>&lt;Outlet /&gt;</strong>.
+</div>
+
+<h2>Project Structure</h2>
+<pre><code class="language-text">src/
+│
+├── App.jsx
+├── layouts/
+│   └── DashboardLayout.jsx
+│
+└── pages/
+    ├── DashboardHome.jsx
+    ├── Profile.jsx
+    └── Settings.jsx</code></pre>
+
+<h2>Complete Example With Separate Files</h2>
+
+<div class="file-name">File: src/App.jsx</div>
+<pre><code class="language-jsx">import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import DashboardLayout from './layouts/DashboardLayout';
+import DashboardHome from './pages/DashboardHome';
+import Profile from './pages/Profile';
+import Settings from './pages/Settings';
+
+function App() {
+  return (
+    &lt;BrowserRouter&gt;
+      &lt;Routes&gt;
+        &lt;Route path="/dashboard" element={&lt;DashboardLayout /&gt;}&gt;
+          &lt;Route index element={&lt;DashboardHome /&gt;} /&gt;
+          &lt;Route path="profile" element={&lt;Profile /&gt;} /&gt;
+          &lt;Route path="settings" element={&lt;Settings /&gt;} /&gt;
+        &lt;/Route&gt;
+      &lt;/Routes&gt;
+    &lt;/BrowserRouter&gt;
+  );
+}
+
+export default App;</code></pre>
+
+<div class="file-name">File: src/layouts/DashboardLayout.jsx</div>
+<pre><code class="language-jsx">import { Link, Outlet } from 'react-router-dom';
+
+function DashboardLayout() {
+  return (
+    &lt;&gt;
+      &lt;h1&gt;Dashboard Layout&lt;/h1&gt;
+
+      &lt;nav&gt;
+        &lt;Link to="/dashboard"&gt;Home&lt;/Link&gt;
+        {' | '}
+        &lt;Link to="/dashboard/profile"&gt;Profile&lt;/Link&gt;
+        {' | '}
+        &lt;Link to="/dashboard/settings"&gt;Settings&lt;/Link&gt;
+      &lt;/nav&gt;
+
+      &lt;hr /&gt;
+
+      &lt;Outlet /&gt;
+    &lt;/&gt;
+  );
+}
+
+export default DashboardLayout;</code></pre>
+
+<div class="file-name">File: src/pages/DashboardHome.jsx</div>
+<pre><code class="language-jsx">function DashboardHome() {
+  return &lt;h2&gt;Dashboard Home&lt;/h2&gt;;
+}
+
+export default DashboardHome;</code></pre>
+
+<div class="file-name">File: src/pages/Profile.jsx</div>
+<pre><code class="language-jsx">function Profile() {
+  return &lt;h2&gt;Profile Page&lt;/h2&gt;;
+}
+
+export default Profile;</code></pre>
+
+<div class="file-name">File: src/pages/Settings.jsx</div>
+<pre><code class="language-jsx">function Settings() {
+  return &lt;h2&gt;Settings Page&lt;/h2&gt;;
+}
+
+export default Settings;</code></pre>
+
+<h2>What is &lt;Outlet /&gt;?</h2>
+<p>
+<strong>&lt;Outlet /&gt;</strong> is a placeholder where React Router renders the matched child route component.
+</p>
+
+<div class="file-name">Example: Outlet Placeholder</div>
+<pre><code class="language-jsx">function DashboardLayout() {
+  return (
+    &lt;&gt;
+      &lt;h1&gt;Dashboard&lt;/h1&gt;
+      &lt;Outlet /&gt;
+    &lt;/&gt;
+  );
+}</code></pre>
+
+<div class="warning">
+Without <strong>&lt;Outlet /&gt;</strong>, nested child routes will match, but their components will not be visible on the page.
+</div>
+
+<h2>How Routing Works</h2>
+
+<div class="flow">
+/dashboard
+<br>↓<br>
+DashboardLayout
+<br>↓<br>
+Outlet
+<br>↓<br>
+DashboardHome
+</div>
+
+<div class="flow">
+/dashboard/profile
+<br>↓<br>
+DashboardLayout
+<br>↓<br>
+Outlet
+<br>↓<br>
+Profile
+</div>
+
+<div class="flow">
+/dashboard/settings
+<br>↓<br>
+DashboardLayout
+<br>↓<br>
+Outlet
+<br>↓<br>
+Settings
+</div>
+
+<h2>URL Mapping</h2>
+<table>
+<tr>
+<th>URL</th>
+<th>Components Rendered</th>
+</tr>
+<tr>
+<td>/dashboard</td>
+<td>DashboardLayout + DashboardHome</td>
+</tr>
+<tr>
+<td>/dashboard/profile</td>
+<td>DashboardLayout + Profile</td>
+</tr>
+<tr>
+<td>/dashboard/settings</td>
+<td>DashboardLayout + Settings</td>
+</tr>
+</table>
+
+<h2>Important Point About Child Path</h2>
+<p>
+Inside a parent route, child route paths are usually written as relative paths.
+</p>
+
+<div class="highlight">
+Use <strong>path="profile"</strong>, not <strong>path="/dashboard/profile"</strong>, inside the child route.
+</div>
+
+<pre><code class="language-jsx">&lt;Route path="/dashboard" element={&lt;DashboardLayout /&gt;}&gt;
+  &lt;Route path="profile" element={&lt;Profile /&gt;} /&gt;
+&lt;/Route&gt;</code></pre>
+
+<h2>What is Index Route?</h2>
+<p>
+An index route is the default child route. It renders when the parent path matches exactly.
+</p>
+
+<pre><code class="language-jsx">&lt;Route path="/dashboard" element={&lt;DashboardLayout /&gt;}&gt;
+  &lt;Route index element={&lt;DashboardHome /&gt;} /&gt;
+&lt;/Route&gt;</code></pre>
+
+<div class="success">
+When the user visits <strong>/dashboard</strong>, React Router renders <strong>DashboardHome</strong> inside <strong>DashboardLayout</strong>.
+</div>
+
+<h2>Why Nested Routes Are Better</h2>
+
+<h3>Without Nested Routes</h3>
+<pre><code class="language-jsx">&lt;Route path="/dashboard" element={&lt;Dashboard /&gt;} /&gt;
+&lt;Route path="/dashboard/profile" element={&lt;Profile /&gt;} /&gt;
+&lt;Route path="/dashboard/settings" element={&lt;Settings /&gt;} /&gt;</code></pre>
+
+<p>
+In this approach, the common dashboard layout may need to be repeated in multiple pages.
+</p>
+
+<h3>With Nested Routes</h3>
+<pre><code class="language-jsx">&lt;Route path="/dashboard" element={&lt;DashboardLayout /&gt;}&gt;
+  &lt;Route index element={&lt;DashboardHome /&gt;} /&gt;
+  &lt;Route path="profile" element={&lt;Profile /&gt;} /&gt;
+  &lt;Route path="settings" element={&lt;Settings /&gt;} /&gt;
+&lt;/Route&gt;</code></pre>
+
+<div class="success">
+The layout is written only once, and only the child page changes inside <strong>&lt;Outlet /&gt;</strong>.
+</div>
+
+<h2>Real-World Example</h2>
+<pre><code class="language-text">/admin
+/admin/users
+/admin/products
+/admin/orders</code></pre>
+
+<p>
+All these pages can share one <strong>AdminLayout</strong>. Sidebar, header, and footer remain common. Only the content section changes.
+</p>
+
+<div class="flow">
+AdminLayout
+<br>↓<br>
+Header + Sidebar
+<br>↓<br>
+Outlet
+<br>↓<br>
+Users / Products / Orders
+</div>
+
+<h2>Easy Way To Remember</h2>
+<div class="flow">
+Parent Route
+<br>↓<br>
+Common Layout
+<br>↓<br>
+Outlet
+<br>↓<br>
+Child Page
+</div>
+
+<h2>Interview Answer</h2>
+<div class="highlight">
+Nested routes in React Router v6 allow child routes to render inside a parent route. The parent component uses <strong>&lt;Outlet /&gt;</strong> as a placeholder where the matched child component is displayed. This is useful for shared layouts like dashboards, admin panels, profile pages, and settings sections.
+</div>
+
+<h2>One-Line Interview Answer</h2>
+<div class="highlight">
+Nested routes render child pages inside a parent layout using React Router v6's <strong>&lt;Outlet /&gt;</strong> component.
+</div>
+
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+</body>
+</html>

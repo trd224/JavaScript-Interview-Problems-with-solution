@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>429 - How do you type event handlers in React?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+p,li{color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px}
+.success{background:#052e16;padding:18px;border-left:5px solid #22c55e;border-radius:10px;margin-top:15px}
+.warning{background:#1e1b4b;padding:18px;border-left:5px solid #fbbf24;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;text-align:center;line-height:2;font-size:18px}
+.file-name{background:#111827;color:#93c5fd;padding:12px 16px;border-radius:10px;border:1px solid #1e293b;font-weight:bold;margin-top:20px;margin-bottom:10px}
+
+pre[class*="language-"],code[class*="language-"]{
+color:#f8f8f2;
+background:#1e1e1e;
+font-family:Consolas,Monaco,'Courier New',monospace;
+font-size:15px;
+}
+
+.token.keyword{color:#c792ea}
+.token.string{color:#c3e88d}
+.token.function{color:#82aaff}
+.token.class-name{color:#ffcb6b}
+.token.number{color:#f78c6c}
+.token.operator{color:#89ddff}
+.token.punctuation{color:#89ddff}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>429. How do you type event handlers in React?</h1>
+
+<h2>One-Line Definition</h2>
+
+<div class="highlight">
+In React TypeScript, event handlers are typed using React's built-in event types such as ChangeEvent, MouseEvent, KeyboardEvent, FormEvent, and FocusEvent.
+</div>
+
+<h2>Basic Syntax</h2>
+
+<pre class="language-tsx"><code class="language-tsx">function handleEvent(
+  event: React.EventType&lt;HTMLElement&gt;
+) {
+  // logic
+}</code></pre>
+
+<div class="flow">
+User Action
+<br>↓<br>
+React Event
+<br>↓<br>
+TypeScript Event Type
+<br>↓<br>
+Type Safe Handler
+</div>
+
+<h2>Project Structure</h2>
+
+<pre class="language-text"><code class="language-text">src/
+│
+├── App.tsx
+└── components/
+    ├── LoginForm.tsx
+    ├── SearchInput.tsx
+    └── Button.tsx</code></pre>
+
+<h2>Typing onChange For Input</h2>
+
+<div class="file-name">File: src/components/SearchInput.tsx</div>
+
+<pre class="language-tsx"><code class="language-tsx">import { ChangeEvent } from 'react';
+
+function SearchInput() {
+
+  function handleChange(
+    event: ChangeEvent&lt;HTMLInputElement&gt;
+  ) {
+    console.log(event.target.value);
+  }
+
+  return (
+    &lt;input
+      onChange={handleChange}
+    /&gt;
+  );
+}
+
+export default SearchInput;</code></pre>
+
+<div class="success">
+Most commonly used event type in React forms.
+</div>
+
+<h2>Compact Style (Recommended)</h2>
+
+<div class="file-name">File: src/components/SearchInput.tsx</div>
+
+<pre class="language-tsx"><code class="language-tsx">function handleChange(
+  e: React.ChangeEvent&lt;HTMLInputElement&gt;
+) {
+  console.log(e.target.value);
+}</code></pre>
+
+<h2>Typing onClick</h2>
+
+<div class="file-name">File: src/components/Button.tsx</div>
+
+<pre class="language-tsx"><code class="language-tsx">function handleClick(
+  e: React.MouseEvent&lt;HTMLButtonElement&gt;
+) {
+  console.log('Clicked');
+}
+
+function Button() {
+  return (
+    &lt;button onClick={handleClick}&gt;
+      Click
+    &lt;/button&gt;
+  );
+}
+
+export default Button;</code></pre>
+
+<h2>Typing Form Submit</h2>
+
+<div class="file-name">File: src/components/LoginForm.tsx</div>
+
+<pre class="language-tsx"><code class="language-tsx">function handleSubmit(
+  e: React.FormEvent&lt;HTMLFormElement&gt;
+) {
+  e.preventDefault();
+}
+
+function LoginForm() {
+  return (
+    &lt;form onSubmit={handleSubmit}&gt;
+      &lt;button&gt;Submit&lt;/button&gt;
+    &lt;/form&gt;
+  );
+}
+
+export default LoginForm;</code></pre>
+
+<h2>Typing Keyboard Events</h2>
+
+<div class="file-name">File: src/components/SearchInput.tsx</div>
+
+<pre class="language-tsx"><code class="language-tsx">function handleKeyDown(
+  e: React.KeyboardEvent&lt;HTMLInputElement&gt;
+) {
+  console.log(e.key);
+}</code></pre>
+
+<pre class="language-tsx"><code class="language-tsx">&lt;input onKeyDown={handleKeyDown} /&gt;</code></pre>
+
+<h2>Typing Focus Events</h2>
+
+<div class="file-name">File: src/components/SearchInput.tsx</div>
+
+<pre class="language-tsx"><code class="language-tsx">function handleFocus(
+  e: React.FocusEvent&lt;HTMLInputElement&gt;
+) {
+  console.log('Focused');
+}</code></pre>
+
+<pre class="language-tsx"><code class="language-tsx">&lt;input onFocus={handleFocus} /&gt;</code></pre>
+
+<h2>Typing Select Change Event</h2>
+
+<div class="file-name">File: src/components/CountrySelect.tsx</div>
+
+<pre class="language-tsx"><code class="language-tsx">function handleChange(
+  e: React.ChangeEvent&lt;HTMLSelectElement&gt;
+) {
+  console.log(e.target.value);
+}</code></pre>
+
+<h2>Typing Textarea Change Event</h2>
+
+<div class="file-name">File: src/components/CommentBox.tsx</div>
+
+<pre class="language-tsx"><code class="language-tsx">function handleChange(
+  e: React.ChangeEvent&lt;HTMLTextAreaElement&gt;
+) {
+  console.log(e.target.value);
+}</code></pre>
+
+<h2>Typing Checkbox Change Event</h2>
+
+<div class="file-name">File: src/components/Terms.tsx</div>
+
+<pre class="language-tsx"><code class="language-tsx">function handleChange(
+  e: React.ChangeEvent&lt;HTMLInputElement&gt;
+) {
+  console.log(e.target.checked);
+}</code></pre>
+
+<h2>Inline Event Typing</h2>
+
+<div class="file-name">File: src/App.tsx</div>
+
+<pre class="language-tsx"><code class="language-tsx">&lt;input
+  onChange={(
+    e: React.ChangeEvent&lt;HTMLInputElement&gt;
+  ) =&gt; {
+    console.log(e.target.value);
+  }}
+/&gt;</code></pre>
+
+<div class="warning">
+Use named functions for better readability in large applications.
+</div>
+
+<h2>How To Discover Event Type Quickly</h2>
+
+<div class="file-name">File: src/App.tsx</div>
+
+<pre class="language-tsx"><code class="language-tsx">&lt;input
+  onChange={e =&gt; {
+    console.log(e);
+  }}
+/&gt;</code></pre>
+
+<p>
+Hover over <strong>e</strong> in VS Code.
+</p>
+
+<p>
+TypeScript will show:
+</p>
+
+<pre class="language-text"><code class="language-text">React.ChangeEvent&lt;HTMLInputElement&gt;</code></pre>
+
+<div class="success">
+This is the fastest way to discover event types.
+</div>
+
+<h2>Most Common React Event Types</h2>
+
+<table>
+<tr>
+<th>Event</th>
+<th>Type</th>
+</tr>
+
+<tr>
+<td>onChange (input)</td>
+<td>React.ChangeEvent&lt;HTMLInputElement&gt;</td>
+</tr>
+
+<tr>
+<td>onChange (select)</td>
+<td>React.ChangeEvent&lt;HTMLSelectElement&gt;</td>
+</tr>
+
+<tr>
+<td>onChange (textarea)</td>
+<td>React.ChangeEvent&lt;HTMLTextAreaElement&gt;</td>
+</tr>
+
+<tr>
+<td>onClick</td>
+<td>React.MouseEvent&lt;HTMLButtonElement&gt;</td>
+</tr>
+
+<tr>
+<td>onSubmit</td>
+<td>React.FormEvent&lt;HTMLFormElement&gt;</td>
+</tr>
+
+<tr>
+<td>onKeyDown</td>
+<td>React.KeyboardEvent&lt;HTMLInputElement&gt;</td>
+</tr>
+
+<tr>
+<td>onFocus</td>
+<td>React.FocusEvent&lt;HTMLInputElement&gt;</td>
+</tr>
+
+<tr>
+<td>onBlur</td>
+<td>React.FocusEvent&lt;HTMLInputElement&gt;</td>
+</tr>
+</table>
+
+<h2>Real World Example</h2>
+
+<div class="file-name">File: src/components/LoginForm.tsx</div>
+
+<pre class="language-tsx"><code class="language-tsx">import { useState } from 'react';
+
+function LoginForm() {
+
+  const [email, setEmail] = useState('');
+
+  function handleChange(
+    e: React.ChangeEvent&lt;HTMLInputElement&gt;
+  ) {
+    setEmail(e.target.value);
+  }
+
+  function handleSubmit(
+    e: React.FormEvent&lt;HTMLFormElement&gt;
+  ) {
+    e.preventDefault();
+    console.log(email);
+  }
+
+  return (
+    &lt;form onSubmit={handleSubmit}&gt;
+      &lt;input
+        value={email}
+        onChange={handleChange}
+      /&gt;
+
+      &lt;button&gt;Login&lt;/button&gt;
+    &lt;/form&gt;
+  );
+}
+
+export default LoginForm;</code></pre>
+
+<h2>Easy Way To Remember</h2>
+
+<div class="flow">
+Input
+<br>↓<br>
+ChangeEvent
+
+<br><br>
+
+Button
+<br>↓<br>
+MouseEvent
+
+<br><br>
+
+Form
+<br>↓<br>
+FormEvent
+
+<br><br>
+
+Keyboard
+<br>↓<br>
+KeyboardEvent
+</div>
+
+<h2>Interview Answer</h2>
+
+<div class="highlight">
+Event handlers in React TypeScript are typed using React's event types such as ChangeEvent, MouseEvent, FormEvent, KeyboardEvent, and FocusEvent. The element type is passed as a generic, for example React.ChangeEvent&lt;HTMLInputElement&gt; for input change events.
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+Type React event handlers using built-in event types like React.ChangeEvent&lt;HTMLInputElement&gt; and React.MouseEvent&lt;HTMLButtonElement&gt;.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-tsx.min.js"></script>
+
+</body>
+</html>

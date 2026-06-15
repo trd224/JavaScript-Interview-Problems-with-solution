@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>333 - What are the Pros and Cons of CSS-in-JS?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px;margin-bottom:10px}
+p{color:#cbd5e1}
+ul{padding-left:24px}
+li{margin-bottom:10px;color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px;margin-top:15px}
+.success{background:#052e16;padding:18px;border-left:5px solid #22c55e;border-radius:10px;margin-top:15px}
+.warning{background:#1e1b4b;padding:18px;border-left:5px solid #fbbf24;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;text-align:center;line-height:2;font-size:18px;margin-top:15px}
+.file-name{background:#111827;color:#93c5fd;padding:12px 16px;border-radius:10px;border:1px solid #1e293b;font-weight:bold;margin-top:20px;margin-bottom:10px}
+pre{border-radius:12px;overflow-x:auto}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>333. What are the Pros and Cons of CSS-in-JS?</h1>
+
+<h2>One-Line Definition</h2>
+
+<div class="highlight">
+CSS-in-JS is a styling approach where CSS is written inside JavaScript files. It provides component-scoped styling and dynamic styles, but adds runtime overhead and larger bundle sizes.
+</div>
+
+<h2>Popular CSS-in-JS Libraries</h2>
+
+<ul>
+<li>styled-components</li>
+<li>Emotion</li>
+<li>JSS</li>
+<li>Stitches</li>
+<li>Linaria</li>
+</ul>
+
+<h2>How CSS-in-JS Works</h2>
+
+<div class="flow">
+Write CSS In JavaScript
+<br>↓<br>
+Library Generates CSS
+<br>↓<br>
+Creates Unique Class Names
+<br>↓<br>
+Injects CSS Into DOM
+<br>↓<br>
+Component Gets Styles
+</div>
+
+<h2>Example</h2>
+
+<div class="file-name">File: src/components/Button.jsx</div>
+
+<pre><code class="language-jsx">import styled from 'styled-components';
+
+const Button = styled.button`
+  background: royalblue;
+  color: white;
+  padding: 12px;
+`;
+
+export default Button;</code></pre>
+
+<h2>Pros of CSS-in-JS</h2>
+
+<h3>1. No Class Name Conflicts</h3>
+
+<p>
+Traditional CSS:
+</p>
+
+<pre><code class="language-css">.button {
+  background: red;
+}</code></pre>
+
+<p>
+Another developer:
+</p>
+
+<pre><code class="language-css">.button {
+  background: green;
+}</code></pre>
+
+<p>
+Conflict occurs.
+</p>
+
+<p>
+CSS-in-JS generates unique class names automatically.
+</p>
+
+<div class="success">
+No naming collisions.
+</div>
+
+<h3>2. Component Scoped Styles</h3>
+
+<div class="file-name">File: src/components/UserCard.jsx</div>
+
+<pre><code class="language-jsx">const Card = styled.div`
+  padding: 20px;
+`;</code></pre>
+
+<p>
+Styles belong only to that component.
+</p>
+
+<div class="flow">
+UserCard
+<br>↓<br>
+Own CSS
+<br>↓<br>
+No Global Pollution
+</div>
+
+<h3>3. Dynamic Styling With Props</h3>
+
+<div class="file-name">File: src/components/Button.jsx</div>
+
+<pre><code class="language-jsx">const Button = styled.button`
+  background: ${props => props.primary ? 'royalblue' : 'gray'};
+`;</code></pre>
+
+<p>
+Usage:
+</p>
+
+<pre><code class="language-jsx">&lt;Button primary&gt;Save&lt;/Button&gt;
+&lt;Button&gt;Cancel&lt;/Button&gt;</code></pre>
+
+<div class="success">
+Styles can change based on component props.
+</div>
+
+<h3>4. Easier Reusability</h3>
+
+<div class="file-name">File: src/components/Button.jsx</div>
+
+<pre><code class="language-jsx">export const Button = styled.button`
+  padding: 12px;
+`;
+
+export const DangerButton = styled(Button)`
+  background: crimson;
+`;</code></pre>
+
+<p>
+Reuse styles by extending components.
+</p>
+
+<h3>5. Better Component Encapsulation</h3>
+
+<div class="flow">
+Component
+<br>↓<br>
+JS Logic
+<br>+
+<br>Styles
+<br>↓<br>
+Single File
+</div>
+
+<p>
+Everything related to a component stays together.
+</p>
+
+<h2>Cons of CSS-in-JS</h2>
+
+<h3>1. Runtime Performance Cost</h3>
+
+<p>
+Many CSS-in-JS libraries generate styles in the browser.
+</p>
+
+<div class="flow">
+Render Component
+<br>↓<br>
+Generate CSS
+<br>↓<br>
+Inject Into DOM
+<br>↓<br>
+Extra Work
+</div>
+
+<div class="warning">
+This can be slower than static CSS.
+</div>
+
+<h3>2. Larger Bundle Size</h3>
+
+<p>
+Extra styling library must be downloaded.
+</p>
+
+<pre><code class="language-text">React App
++
+styled-components
+=
+Larger Bundle</code></pre>
+
+<h3>3. More JavaScript Execution</h3>
+
+<p>
+Styles are now part of JavaScript.
+</p>
+
+<div class="flow">
+Load JS
+<br>↓<br>
+Execute JS
+<br>↓<br>
+Generate CSS
+<br>↓<br>
+Render UI
+</div>
+
+<h3>4. Harder Browser DevTools Debugging</h3>
+
+<p>
+Generated class names may look like:
+</p>
+
+<pre><code class="language-html">sc-a1b2c3
+sc-k8x4m9
+sc-p7q9r2</code></pre>
+
+<p>
+Not as readable as:
+</p>
+
+<pre><code class="language-css">.user-card
+.login-button</code></pre>
+
+<h3>5. Less Popular Today</h3>
+
+<p>
+Many modern projects prefer:
+</p>
+
+<ul>
+<li>Tailwind CSS</li>
+<li>CSS Modules</li>
+<li>Vanilla Extract</li>
+<li>CSS Variables</li>
+</ul>
+
+<p>
+Because they avoid runtime styling costs.
+</p>
+
+<h2>Pros vs Cons Summary</h2>
+
+<table>
+<tr>
+<th>Pros</th>
+<th>Cons</th>
+</tr>
+
+<tr>
+<td>No class conflicts</td>
+<td>Runtime overhead</td>
+</tr>
+
+<tr>
+<td>Scoped styles</td>
+<td>Larger bundle</td>
+</tr>
+
+<tr>
+<td>Dynamic styling</td>
+<td>More JavaScript</td>
+</tr>
+
+<tr>
+<td>Reusable components</td>
+<td>Can affect performance</td>
+</tr>
+
+<tr>
+<td>Great DX</td>
+<td>Generated class names</td>
+</tr>
+</table>
+
+<h2>CSS-in-JS vs CSS Modules</h2>
+
+<table>
+<tr>
+<th>CSS-in-JS</th>
+<th>CSS Modules</th>
+</tr>
+
+<tr>
+<td>Runtime styles</td>
+<td>Build-time styles</td>
+</tr>
+
+<tr>
+<td>Dynamic props support</td>
+<td>Limited</td>
+</tr>
+
+<tr>
+<td>More JavaScript</td>
+<td>More CSS</td>
+</tr>
+
+<tr>
+<td>Larger bundle</td>
+<td>Smaller bundle</td>
+</tr>
+</table>
+
+<h2>CSS-in-JS vs Tailwind</h2>
+
+<table>
+<tr>
+<th>CSS-in-JS</th>
+<th>Tailwind</th>
+</tr>
+
+<tr>
+<td>Write CSS</td>
+<td>Use utility classes</td>
+</tr>
+
+<tr>
+<td>Runtime generation</td>
+<td>Pre-generated CSS</td>
+</tr>
+
+<tr>
+<td>More flexible</td>
+<td>Usually faster</td>
+</tr>
+
+<tr>
+<td>Component-based styles</td>
+<td>Utility-first styles</td>
+</tr>
+</table>
+
+<h2>Current Industry Trend</h2>
+
+<div class="highlight">
+Around 2018-2021, styled-components and Emotion were extremely popular. Today many teams prefer Tailwind CSS, CSS Modules, or build-time CSS solutions because they provide better performance and smaller bundles.
+</div>
+
+<h2>When Should You Use CSS-in-JS?</h2>
+
+<ul>
+<li>Need dynamic styling based on props.</li>
+<li>Want component-scoped styles.</li>
+<li>Already using styled-components or Emotion.</li>
+<li>Medium-sized applications.</li>
+</ul>
+
+<h2>When Should You Avoid CSS-in-JS?</h2>
+
+<ul>
+<li>Performance-critical applications.</li>
+<li>Very large applications.</li>
+<li>Need smallest bundle size.</li>
+<li>Using Tailwind or CSS Modules already.</li>
+</ul>
+
+<h2>Easy Way To Remember</h2>
+
+<div class="flow">
+CSS-in-JS
+<br>↓<br>
+Great Developer Experience
+<br>↓<br>
+Dynamic Styling
+<br>↓<br>
+But
+<br>↓<br>
+Runtime Cost
+</div>
+
+<h2>Interview Answer</h2>
+
+<div class="highlight">
+The main advantages of CSS-in-JS are component-scoped styles, automatic class name generation, dynamic styling through props, and improved reusability. The disadvantages are runtime performance overhead, larger bundle sizes, additional JavaScript execution, and increased complexity compared to static CSS solutions such as CSS Modules or Tailwind.
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+CSS-in-JS provides scoped and dynamic styling, but it adds runtime overhead and larger bundle sizes.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js"></script>
+
+</body>
+</html>

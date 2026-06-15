@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>339 - What is the AnimatePresence Component in Framer Motion?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px;margin-bottom:10px}
+p{color:#cbd5e1}
+ul{padding-left:24px}
+li{margin-bottom:10px;color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px;margin-top:15px}
+.success{background:#052e16;padding:18px;border-left:5px solid #22c55e;border-radius:10px;margin-top:15px}
+.warning{background:#1e1b4b;padding:18px;border-left:5px solid #fbbf24;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;text-align:center;line-height:2;font-size:18px;margin-top:15px}
+.file-name{background:#111827;color:#93c5fd;padding:12px 16px;border-radius:10px;border:1px solid #1e293b;font-weight:bold;margin-top:20px;margin-bottom:10px}
+pre{border-radius:12px;overflow-x:auto}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>339. What is the AnimatePresence Component in Framer Motion?</h1>
+
+<h2>One-Line Definition</h2>
+
+<div class="highlight">
+AnimatePresence is a Framer Motion component that enables exit animations when React components are removed from the DOM.
+</div>
+
+<h2>The Problem It Solves</h2>
+
+<p>
+Normally when React removes a component, it disappears immediately.
+</p>
+
+<div class="file-name">File: src/components/Modal.jsx</div>
+
+<pre><code class="language-jsx">function Modal({ show }) {
+  return (
+    &lt;&gt;
+      {show && &lt;div&gt;Modal&lt;/div&gt;}
+    &lt;/&gt;
+  );
+}
+
+export default Modal;</code></pre>
+
+<div class="flow">
+show = true
+<br>↓<br>
+Modal Visible
+<br>↓<br>
+show = false
+<br>↓<br>
+React Removes Component Immediately
+</div>
+
+<div class="warning">
+No fade out animation is possible because React removes the component instantly.
+</div>
+
+<h2>Solution: AnimatePresence</h2>
+
+<div class="flow">
+show = true
+<br>↓<br>
+Modal Visible
+<br>↓<br>
+show = false
+<br>↓<br>
+AnimatePresence Delays Removal
+<br>↓<br>
+exit Animation Runs
+<br>↓<br>
+Component Removed
+</div>
+
+<h2>Project Structure</h2>
+
+<pre><code class="language-text">src/
+│
+├── App.jsx
+└── components/
+    └── Modal.jsx</code></pre>
+
+<h2>Basic Example</h2>
+
+<div class="file-name">File: src/components/Modal.jsx</div>
+
+<pre><code class="language-jsx">import { motion, AnimatePresence } from 'framer-motion';
+
+function Modal({ show }) {
+  return (
+    &lt;AnimatePresence&gt;
+      {show && (
+        &lt;motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+        &gt;
+          Modal Content
+        &lt;/motion.div&gt;
+      )}
+    &lt;/AnimatePresence&gt;
+  );
+}
+
+export default Modal;</code></pre>
+
+<h2>Use Component</h2>
+
+<div class="file-name">File: src/App.jsx</div>
+
+<pre><code class="language-jsx">import { useState } from 'react';
+import Modal from './components/Modal';
+
+function App() {
+  const [show, setShow] = useState(false);
+
+  return (
+    &lt;&gt;
+      &lt;button onClick={() =&gt; setShow(!show)}&gt;
+        Toggle Modal
+      &lt;/button&gt;
+
+      &lt;Modal show={show} /&gt;
+    &lt;/&gt;
+  );
+}
+
+export default App;</code></pre>
+
+<h2>Understanding The Animation</h2>
+
+<pre><code class="language-jsx">initial={{ opacity: 0 }}</code></pre>
+
+<p>
+Start hidden.
+</p>
+
+<pre><code class="language-jsx">animate={{ opacity: 1 }}</code></pre>
+
+<p>
+Fade in.
+</p>
+
+<pre><code class="language-jsx">exit={{ opacity: 0 }}</code></pre>
+
+<p>
+Fade out before removal.
+</p>
+
+<h2>Without AnimatePresence</h2>
+
+<div class="file-name">File: src/components/Modal.jsx</div>
+
+<pre><code class="language-jsx">import { motion } from 'framer-motion';
+
+function Modal({ show }) {
+  return (
+    &lt;&gt;
+      {show && (
+        &lt;motion.div
+          exit={{ opacity: 0 }}
+        &gt;
+          Modal
+        &lt;/motion.div&gt;
+      )}
+    &lt;/&gt;
+  );
+}
+
+export default Modal;</code></pre>
+
+<div class="warning">
+exit animation will NOT run.
+</div>
+
+<p>
+Reason:
+</p>
+
+<div class="flow">
+show = false
+<br>↓<br>
+React Removes Component
+<br>↓<br>
+No Time For exit Animation
+</div>
+
+<h2>With AnimatePresence</h2>
+
+<div class="flow">
+show = false
+<br>↓<br>
+AnimatePresence Detects Removal
+<br>↓<br>
+Runs exit Animation
+<br>↓<br>
+Animation Finishes
+<br>↓<br>
+Component Removed
+</div>
+
+<h2>Slide Out Example</h2>
+
+<div class="file-name">File: src/components/Sidebar.jsx</div>
+
+<pre><code class="language-jsx">import { motion, AnimatePresence } from 'framer-motion';
+
+function Sidebar({ open }) {
+  return (
+    &lt;AnimatePresence&gt;
+      {open && (
+        &lt;motion.div
+          initial={{ x: -300 }}
+          animate={{ x: 0 }}
+          exit={{ x: -300 }}
+        &gt;
+          Sidebar
+        &lt;/motion.div&gt;
+      )}
+    &lt;/AnimatePresence&gt;
+  );
+}
+
+export default Sidebar;</code></pre>
+
+<h2>Scale Out Example</h2>
+
+<div class="file-name">File: src/components/Dialog.jsx</div>
+
+<pre><code class="language-jsx">import { motion, AnimatePresence } from 'framer-motion';
+
+function Dialog({ open }) {
+  return (
+    &lt;AnimatePresence&gt;
+      {open && (
+        &lt;motion.div
+          initial={{ scale: 0 }}
+          animate={{ scale: 1 }}
+          exit={{ scale: 0 }}
+        &gt;
+          Dialog
+        &lt;/motion.div&gt;
+      )}
+    &lt;/AnimatePresence&gt;
+  );
+}
+
+export default Dialog;</code></pre>
+
+<h2>Real World Example</h2>
+
+<p>
+Commonly used for:
+</p>
+
+<ul>
+<li>Modals</li>
+<li>Sidebars</li>
+<li>Dropdowns</li>
+<li>Notifications</li>
+<li>Toast Messages</li>
+<li>Route/Page Transitions</li>
+</ul>
+
+<h2>Page Transition Example</h2>
+
+<div class="file-name">File: src/pages/Home.jsx</div>
+
+<pre><code class="language-jsx">import { motion } from 'framer-motion';
+
+function Home() {
+  return (
+    &lt;motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+    &gt;
+      Home Page
+    &lt;/motion.div&gt;
+  );
+}
+
+export default Home;</code></pre>
+
+<p>
+Wrapped by:
+</p>
+
+<pre><code class="language-jsx">&lt;AnimatePresence&gt;
+  &lt;Routes /&gt;
+&lt;/AnimatePresence&gt;</code></pre>
+
+<h2>Important Rule</h2>
+
+<div class="warning">
+AnimatePresence must wrap the component that is conditionally rendered.
+</div>
+
+<p>
+Correct:
+</p>
+
+<pre><code class="language-jsx">&lt;AnimatePresence&gt;
+  {show && &lt;motion.div exit={{ opacity: 0 }} /&gt;}
+&lt;/AnimatePresence&gt;</code></pre>
+
+<p>
+Wrong:
+</p>
+
+<pre><code class="language-jsx">{show && (
+  &lt;AnimatePresence&gt;
+    &lt;motion.div exit={{ opacity: 0 }} /&gt;
+  &lt;/AnimatePresence&gt;
+)}</code></pre>
+
+<h2>Most Important Props Used With AnimatePresence</h2>
+
+<table>
+<tr>
+<th>Prop</th>
+<th>Purpose</th>
+</tr>
+
+<tr>
+<td>initial</td>
+<td>Start state</td>
+</tr>
+
+<tr>
+<td>animate</td>
+<td>Visible state</td>
+</tr>
+
+<tr>
+<td>exit</td>
+<td>Leave state</td>
+</tr>
+
+<tr>
+<td>transition</td>
+<td>Animation timing</td>
+</tr>
+</table>
+
+<h2>Easy Way To Remember</h2>
+
+<div class="flow">
+React Removes Component
+<br>↓<br>
+AnimatePresence Stops Removal
+<br>↓<br>
+Runs exit Animation
+<br>↓<br>
+Then Removes Component
+</div>
+
+<h2>Interview Answer</h2>
+
+<div class="highlight">
+AnimatePresence is a Framer Motion component that enables exit animations for components being removed from the React tree. It works by temporarily keeping the component mounted, running the exit animation, and only removing the component after the animation completes.
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+AnimatePresence allows Framer Motion exit animations to run before React removes a component from the DOM.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+
+</body>
+</html>

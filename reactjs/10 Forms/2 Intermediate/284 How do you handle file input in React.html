@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>284 - How do you handle file input in React?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px;margin-bottom:10px}
+p{color:#cbd5e1}
+ul{padding-left:24px}
+li{margin-bottom:10px;color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px;margin-top:15px}
+.warning{background:#1e1b4b;border-left:5px solid #fbbf24;padding:18px;border-radius:10px;margin-top:15px}
+.success{background:#052e16;padding:18px;border-left:5px solid #22c55e;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;margin-top:15px;text-align:center;line-height:2;font-size:18px}
+.file-name{background:#111827;color:#93c5fd;padding:12px 16px;border-radius:10px;margin-top:20px;margin-bottom:10px;border:1px solid #1e293b;font-weight:bold}
+pre{border-radius:12px;overflow-x:auto}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>284. How do you handle file input in React?</h1>
+
+<h2>One-Line Definition</h2>
+
+<div class="highlight">
+File input is handled using <strong>&lt;input type="file" /&gt;</strong> and accessing selected files through <strong>event.target.files</strong>.
+</div>
+
+<h2>How It Works</h2>
+
+<div class="flow">
+User Selects File
+<br>↓<br>
+onChange Event
+<br>↓<br>
+event.target.files
+<br>↓<br>
+Get File Object
+<br>↓<br>
+Preview / Upload
+</div>
+
+<h2>Project Structure</h2>
+
+<pre><code class="language-text">src/
+│
+├── App.jsx
+│
+└── components/
+    ├── FileUpload.jsx
+    └── ImageUpload.jsx</code></pre>
+
+<h2>Basic Example</h2>
+
+<div class="file-name">File: src/components/FileUpload.jsx</div>
+
+<pre><code class="language-jsx">import { useState } from 'react';
+
+function FileUpload() {
+  const [file, setFile] = useState(null);
+
+  return (
+    &lt;&gt;
+      &lt;input type="file" onChange={e =&gt; setFile(e.target.files[0])} /&gt;
+      {file && &lt;h3&gt;{file.name}&lt;/h3&gt;}
+    &lt;/&gt;
+  );
+}
+
+export default FileUpload;</code></pre>
+
+<h2>What is event.target.files?</h2>
+
+<pre><code class="language-jsx">function handleFileChange(e) {
+  console.log(e.target.files);
+}</code></pre>
+
+<p>Output:</p>
+
+<pre><code class="language-jsx">FileList(1) [File]</code></pre>
+
+<p>Get first file:</p>
+
+<pre><code class="language-jsx">const file = e.target.files[0];</code></pre>
+
+<div class="success">
+files is a FileList object even when only one file is selected.
+</div>
+
+<h2>Display File Information</h2>
+
+<div class="file-name">File: src/components/FileUpload.jsx</div>
+
+<pre><code class="language-jsx">import { useState } from 'react';
+
+function FileUpload() {
+  const [file, setFile] = useState(null);
+
+  return (
+    &lt;&gt;
+      &lt;input type="file" onChange={e =&gt; setFile(e.target.files[0])} /&gt;
+
+      {file && (
+        &lt;&gt;
+          &lt;h3&gt;Name: {file.name}&lt;/h3&gt;
+          &lt;h3&gt;Size: {file.size}&lt;/h3&gt;
+          &lt;h3&gt;Type: {file.type}&lt;/h3&gt;
+        &lt;/&gt;
+      )}
+    &lt;/&gt;
+  );
+}
+
+export default FileUpload;</code></pre>
+
+<h2>Restrict File Types</h2>
+
+<h3>Images Only</h3>
+
+<pre><code class="language-jsx">&lt;input type="file" accept="image/*" /&gt;</code></pre>
+
+<h3>PDF Only</h3>
+
+<pre><code class="language-jsx">&lt;input type="file" accept=".pdf" /&gt;</code></pre>
+
+<h3>Excel Only</h3>
+
+<pre><code class="language-jsx">&lt;input type="file" accept=".xlsx,.xls" /&gt;</code></pre>
+
+<h2>Multiple File Upload</h2>
+
+<div class="file-name">File: src/components/FileUpload.jsx</div>
+
+<pre><code class="language-jsx">function FileUpload() {
+  function handleFileChange(e) {
+    const files = Array.from(e.target.files);
+    console.log(files);
+  }
+
+  return &lt;input type="file" multiple onChange={handleFileChange} /&gt;;
+}
+
+export default FileUpload;</code></pre>
+
+<h2>Image Preview Example</h2>
+
+<div class="file-name">File: src/components/ImageUpload.jsx</div>
+
+<pre><code class="language-jsx">import { useState } from 'react';
+
+function ImageUpload() {
+  const [preview, setPreview] = useState('');
+
+  function handleFileChange(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    setPreview(URL.createObjectURL(file));
+  }
+
+  return (
+    &lt;&gt;
+      &lt;input type="file" accept="image/*" onChange={handleFileChange} /&gt;
+      {preview && &lt;img src={preview} alt="Preview" width="200" /&gt;}
+    &lt;/&gt;
+  );
+}
+
+export default ImageUpload;</code></pre>
+
+<h2>Upload File To API</h2>
+
+<div class="file-name">File: src/components/FileUpload.jsx</div>
+
+<pre><code class="language-jsx">import axios from 'axios';
+import { useState } from 'react';
+
+function FileUpload() {
+  const [file, setFile] = useState(null);
+
+  async function uploadFile() {
+    const formData = new FormData();
+    formData.append('file', file);
+    await axios.post('/api/upload', formData);
+  }
+
+  return (
+    &lt;&gt;
+      &lt;input type="file" onChange={e =&gt; setFile(e.target.files[0])} /&gt;
+      &lt;button onClick={uploadFile}&gt;Upload&lt;/button&gt;
+    &lt;/&gt;
+  );
+}
+
+export default FileUpload;</code></pre>
+
+<h2>Why Use FormData?</h2>
+
+<div class="flow">
+File Object
+<br>↓<br>
+FormData
+<br>↓<br>
+multipart/form-data
+<br>↓<br>
+Server
+</div>
+
+<p>
+Files cannot be sent as normal JSON.
+</p>
+
+<h2>Common Mistake</h2>
+
+<pre><code class="language-jsx">const [file, setFile] = useState('');
+
+&lt;input value={file} type="file" /&gt;</code></pre>
+
+<div class="warning">
+File inputs cannot be controlled. Never use the value prop on a file input.
+</div>
+
+<h2>File Input vs Text Input</h2>
+
+<table>
+<tr>
+<th>Text Input</th>
+<th>File Input</th>
+</tr>
+
+<tr>
+<td>event.target.value</td>
+<td>event.target.files</td>
+</tr>
+
+<tr>
+<td>String Value</td>
+<td>File Object</td>
+</tr>
+
+<tr>
+<td>Can Be Controlled</td>
+<td>Cannot Be Controlled</td>
+</tr>
+</table>
+
+<h2>Interview Answer</h2>
+
+<div class="highlight">
+File input is handled in React using an input element with type="file". Selected files are accessed through event.target.files, stored in state if needed, previewed using URL.createObjectURL(), and uploaded using FormData.
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+Use &lt;input type="file" /&gt; and access selected files using event.target.files.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+
+</body>
+</html>

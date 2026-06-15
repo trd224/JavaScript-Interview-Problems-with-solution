@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>267 - What is the Difference Between Client-Side and Server-Side Routing?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px;margin-bottom:10px}
+p{color:#cbd5e1}
+ul{padding-left:24px}
+li{margin-bottom:10px;color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left;vertical-align:top}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px;margin-top:15px}
+.warning{background:#1e1b4b;border-left:5px solid #fbbf24;padding:18px;border-radius:10px;margin-top:15px}
+.success{background:#052e16;padding:18px;border-left:5px solid #22c55e;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;margin-top:15px;text-align:center;line-height:2;font-size:18px}
+.file-name{background:#111827;color:#93c5fd;padding:12px 16px;border-radius:10px;margin-top:20px;margin-bottom:10px;border:1px solid #1e293b;font-weight:bold}
+pre{border-radius:12px;overflow-x:auto}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>267. What is the Difference Between Client-Side and Server-Side Routing?</h1>
+
+<h2>One-Line Definition</h2>
+
+<div class="highlight">
+Client-side routing is handled by JavaScript in the browser, while server-side routing is handled by the web server.
+</div>
+
+<h2>Why Does Routing Exist?</h2>
+
+<p>
+Routing determines which page should be displayed when a user visits a URL.
+</p>
+
+<p>
+Examples:
+</p>
+
+<pre><code class="language-text">/
+/products
+/orders
+/contact</code></pre>
+
+<p>
+The question is:
+</p>
+
+<div class="warning">
+Who decides what page to show?
+<br><br>
+Browser JavaScript?
+<br>
+OR
+<br>
+Server?
+</div>
+
+<h2>Client-Side Routing</h2>
+
+<p>
+In React applications, routing is usually handled by React Router inside the browser.
+</p>
+
+<div class="flow">
+User Clicks Link
+<br>↓<br>
+React Router Handles URL
+<br>↓<br>
+Browser Does NOT Reload
+<br>↓<br>
+Component Changes
+</div>
+
+<h3>Example</h3>
+
+<div class="file-name">
+File: src/App.jsx
+</div>
+
+<pre><code class="language-jsx">import { BrowserRouter, Routes, Route } from 'react-router-dom';
+
+function App() {
+  return (
+    &lt;Routes&gt;
+      &lt;Route path="/" element={&lt;Home /&gt;} /&gt;
+      &lt;Route path="/products" element={&lt;Products /&gt;} /&gt;
+      &lt;Route path="/orders" element={&lt;Orders /&gt;} /&gt;
+    &lt;/Routes&gt;
+  );
+}</code></pre>
+
+<p>
+React Router decides which component should render.
+</p>
+
+<h2>How Client-Side Routing Works</h2>
+
+<div class="flow">
+User Opens App
+<br>↓<br>
+index.html Downloads
+<br>↓<br>
+React App Loads
+<br>↓<br>
+User Navigates
+<br>↓<br>
+React Router Updates UI
+<br>↓<br>
+No Full Page Reload
+</div>
+
+<div class="success">
+Only the UI changes. The browser does not request a new HTML page from the server.
+</div>
+
+<h2>Server-Side Routing</h2>
+
+<p>
+In traditional websites, every route is handled by the server.
+</p>
+
+<div class="flow">
+User Opens URL
+<br>↓<br>
+Request Sent To Server
+<br>↓<br>
+Server Chooses Page
+<br>↓<br>
+Returns New HTML
+<br>↓<br>
+Browser Reloads
+</div>
+
+<h3>Example</h3>
+
+<div class="file-name">
+File: server.js (Express)</div>
+
+<pre><code class="language-js">app.get('/', (req, res) => {
+  res.send('Home Page');
+});
+
+app.get('/products', (req, res) => {
+  res.send('Products Page');
+});
+
+app.get('/orders', (req, res) => {
+  res.send('Orders Page');
+});</code></pre>
+
+<p>
+The server decides which page to return.
+</p>
+
+<h2>Visual Comparison</h2>
+
+<h3>Client-Side Routing</h3>
+
+<div class="flow">
+/products
+<br>↓<br>
+React Router
+<br>↓<br>
+Products Component
+</div>
+
+<h3>Server-Side Routing</h3>
+
+<div class="flow">
+/products
+<br>↓<br>
+Server
+<br>↓<br>
+Products HTML Page
+</div>
+
+<h2>What Happens When You Click a Link?</h2>
+
+<table>
+<tr>
+<th>Client-Side Routing</th>
+<th>Server-Side Routing</th>
+</tr>
+
+<tr>
+<td>User clicks link.</td>
+<td>User clicks link.</td>
+</tr>
+
+<tr>
+<td>JavaScript handles route.</td>
+<td>Request sent to server.</td>
+</tr>
+
+<tr>
+<td>No page reload.</td>
+<td>Full page reload.</td>
+</tr>
+
+<tr>
+<td>Only component changes.</td>
+<td>Entire HTML page changes.</td>
+</tr>
+</table>
+
+<h2>React Router Example</h2>
+
+<div class="file-name">
+File: Navigation.jsx
+</div>
+
+<pre><code class="language-jsx">import { Link } from 'react-router-dom';
+
+function Navigation() {
+  return (
+    &lt;&gt;
+      &lt;Link to="/"&gt;Home&lt;/Link&gt;
+      &lt;Link to="/products"&gt;Products&lt;/Link&gt;
+    &lt;/&gt;
+  );
+}</code></pre>
+
+<p>
+Clicking Link updates the URL without refreshing the page.
+</p>
+
+<h2>Server Refresh Problem</h2>
+
+<p>
+You previously asked:
+</p>
+
+<pre><code class="language-text">Why does BrowserRouter need server support?</code></pre>
+
+<p>
+Because when the user refreshes:
+</p>
+
+<pre><code class="language-text">/products</code></pre>
+
+<div class="flow">
+Browser Refresh
+<br>↓<br>
+Request Goes To Server
+<br>↓<br>
+Server Must Return index.html
+<br>↓<br>
+React Router Takes Over
+</div>
+
+<div class="warning">
+If the server is not configured correctly, refreshing a React route often results in a 404 error.
+</div>
+
+<h2>Real World Examples</h2>
+
+<table>
+<tr>
+<th>Client-Side Routing</th>
+<th>Server-Side Routing</th>
+</tr>
+
+<tr>
+<td>React SPA</td>
+<td>PHP Websites</td>
+</tr>
+
+<tr>
+<td>Angular</td>
+<td>ASP.NET MVC</td>
+</tr>
+
+<tr>
+<td>Vue SPA</td>
+<td>Express Server Pages</td>
+</tr>
+
+<tr>
+<td>React Router</td>
+<td>Traditional Websites</td>
+</tr>
+</table>
+
+<h2>Advantages of Client-Side Routing</h2>
+
+<ul>
+<li>Fast navigation.</li>
+<li>No full page reload.</li>
+<li>Better user experience.</li>
+<li>Less server work.</li>
+<li>Feels like a desktop app.</li>
+</ul>
+
+<h2>Advantages of Server-Side Routing</h2>
+
+<ul>
+<li>Works without JavaScript.</li>
+<li>Better initial page load.</li>
+<li>SEO friendly by default.</li>
+<li>Simple server control.</li>
+</ul>
+
+<h2>Client-Side vs Server-Side Routing</h2>
+
+<table>
+<tr>
+<th>Feature</th>
+<th>Client-Side Routing</th>
+<th>Server-Side Routing</th>
+</tr>
+
+<tr>
+<td>Who handles routes?</td>
+<td>Browser JavaScript</td>
+<td>Server</td>
+</tr>
+
+<tr>
+<td>Page Reload?</td>
+<td>No</td>
+<td>Yes</td>
+</tr>
+
+<tr>
+<td>Speed</td>
+<td>Faster after load</td>
+<td>Slower navigation</td>
+</tr>
+
+<tr>
+<td>Uses React Router?</td>
+<td>Yes</td>
+<td>No</td>
+</tr>
+
+<tr>
+<td>Needs Server Support?</td>
+<td>Yes (BrowserRouter)</td>
+<td>No</td>
+</tr>
+</table>
+
+<h2>Easy Way To Remember</h2>
+
+<div class="flow">
+Client-Side Routing
+<br>↓<br>
+Browser Decides
+<br><br>
+Server-Side Routing
+<br>↓<br>
+Server Decides
+</div>
+
+<h2>Interview Answer</h2>
+
+<div class="highlight">
+Client-side routing is handled by JavaScript in the browser using libraries such as React Router. Navigation updates the UI without reloading the page. Server-side routing is handled by the web server, which returns a new HTML page for every route request. Client-side routing provides faster navigation, while server-side routing relies on the server to determine which page to render.
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+Client-side routing is handled by the browser using JavaScript, while server-side routing is handled by the web server and usually causes a full page reload.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+
+</body>
+</html>

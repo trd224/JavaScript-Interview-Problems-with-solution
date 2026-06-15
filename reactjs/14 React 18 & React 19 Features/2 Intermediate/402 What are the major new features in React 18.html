@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>402 - What are the Major New Features in React 18?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px;margin-bottom:10px}
+p{color:#cbd5e1}
+ul{padding-left:24px}
+li{margin-bottom:10px;color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px}
+.success{background:#052e16;padding:18px;border-left:5px solid #22c55e;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;text-align:center;line-height:2;font-size:18px}
+.file-name{background:#111827;color:#93c5fd;padding:12px 16px;border-radius:10px;border:1px solid #1e293b;font-weight:bold;margin-top:20px;margin-bottom:10px}
+pre{border-radius:12px;overflow-x:auto}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>402. What are the Major New Features in React 18?</h1>
+
+<h2>One-Line Definition</h2>
+
+<div class="highlight">
+React 18 introduced Concurrent Rendering, Automatic Batching, Transitions, Suspense improvements, Streaming SSR, new hooks, and the new createRoot API to improve performance and user experience.
+</div>
+
+<h2>Why React 18 Was Released?</h2>
+
+<div class="flow">
+Better Performance
+<br>↓<br>
+More Responsive UI
+<br>↓<br>
+Faster Rendering
+<br>↓<br>
+Better SSR
+<br>↓<br>
+Future React Features
+</div>
+
+<h2>Major React 18 Features</h2>
+
+<table>
+<tr>
+<th>Feature</th>
+<th>Purpose</th>
+</tr>
+
+<tr>
+<td>Concurrent Rendering</td>
+<td>Interruptible rendering</td>
+</tr>
+
+<tr>
+<td>Automatic Batching</td>
+<td>Fewer re-renders</td>
+</tr>
+
+<tr>
+<td>startTransition()</td>
+<td>Low-priority updates</td>
+</tr>
+
+<tr>
+<td>useTransition()</td>
+<td>Track transition state</td>
+</tr>
+
+<tr>
+<td>useDeferredValue()</td>
+<td>Delay expensive updates</td>
+</tr>
+
+<tr>
+<td>Suspense Improvements</td>
+<td>Better loading states</td>
+</tr>
+
+<tr>
+<td>Streaming SSR</td>
+<td>Faster server rendering</td>
+</tr>
+
+<tr>
+<td>createRoot()</td>
+<td>New rendering API</td>
+</tr>
+
+<tr>
+<td>Strict Mode Updates</td>
+<td>Detect unsafe code</td>
+</tr>
+
+<tr>
+<td>useId()</td>
+<td>Stable unique IDs</td>
+</tr>
+</table>
+
+<h2>1. Concurrent Rendering</h2>
+
+<p>
+React can now pause, resume, or abandon rendering work when necessary.
+</p>
+
+<div class="flow">
+Large Render
+<br>↓<br>
+User Clicks Button
+<br>↓<br>
+React Pauses Render
+<br>↓<br>
+Handles Click First
+<br>↓<br>
+Resumes Render
+</div>
+
+<div class="success">
+UI stays responsive during heavy work.
+</div>
+
+<h2>2. Automatic Batching</h2>
+
+<p>
+Before React 18:
+</p>
+
+<pre><code class="language-jsx">setCount(c => c + 1);
+setLoading(true);</code></pre>
+
+<p>
+Two state updates could cause two renders.
+</p>
+
+<p>
+React 18 automatically batches them into a single render. :contentReference[oaicite:0]{index=0}
+</p>
+
+<div class="flow">
+Multiple State Updates
+<br>↓<br>
+One Render
+<br>↓<br>
+Better Performance
+</div>
+
+<h2>3. startTransition()</h2>
+
+<div class="file-name">File: App.jsx</div>
+
+<pre><code class="language-jsx">import { startTransition } from 'react';
+
+function handleSearch(value) {
+  startTransition(() => {
+    setResults(value);
+  });
+}</code></pre>
+
+<p>
+Marks updates as non-urgent so React can prioritize important interactions. :contentReference[oaicite:1]{index=1}
+</p>
+
+<h2>4. useTransition()</h2>
+
+<div class="file-name">File: App.jsx</div>
+
+<pre><code class="language-jsx">const [isPending, startTransition] = useTransition();</code></pre>
+
+<p>
+Allows showing loading indicators while a transition is running.
+</p>
+
+<pre><code class="language-jsx">{
+  isPending && &lt;p&gt;Loading...&lt;/p&gt;
+}</code></pre>
+
+<h2>5. useDeferredValue()</h2>
+
+<div class="file-name">File: Search.jsx</div>
+
+<pre><code class="language-jsx">const deferredSearch = useDeferredValue(searchText);</code></pre>
+
+<div class="flow">
+User Types
+<br>↓<br>
+Input Updates Immediately
+<br>↓<br>
+Expensive UI Updates Later
+</div>
+
+<p>
+Useful for large search results and filtering operations. :contentReference[oaicite:2]{index=2}
+</p>
+
+<h2>6. Suspense Improvements</h2>
+
+<p>
+React 18 greatly improved Suspense and enabled better integration with server rendering. :contentReference[oaicite:3]{index=3}
+</p>
+
+<div class="file-name">File: App.jsx</div>
+
+<pre><code class="language-jsx">import React, { Suspense } from 'react';
+
+&lt;Suspense fallback={&lt;h2&gt;Loading...&lt;/h2&gt;}&gt;
+  &lt;Products /&gt;
+&lt;/Suspense&gt;</code></pre>
+
+<h2>7. Streaming Server Side Rendering (SSR)</h2>
+
+<p>
+Before React 18, the server waited for the whole page before sending HTML.
+</p>
+
+<p>
+React 18 can stream HTML in chunks. :contentReference[oaicite:4]{index=4}
+</p>
+
+<div class="flow">
+Server Starts Rendering
+<br>↓<br>
+Send First HTML Chunk
+<br>↓<br>
+User Sees Content Earlier
+<br>↓<br>
+Remaining HTML Streams Later
+</div>
+
+<h2>8. New createRoot() API</h2>
+
+<p>
+React 17:
+</p>
+
+<div class="file-name">File: index.js</div>
+
+<pre><code class="language-jsx">import ReactDOM from 'react-dom';
+
+ReactDOM.render(&lt;App /&gt;, document.getElementById('root'));</code></pre>
+
+<p>
+React 18:
+</p>
+
+<div class="file-name">File: main.jsx</div>
+
+<pre><code class="language-jsx">import ReactDOM from 'react-dom/client';
+
+const root = ReactDOM.createRoot(document.getElementById('root'));
+
+root.render(&lt;App /&gt;);</code></pre>
+
+<div class="success">
+Required to enable React 18 features. :contentReference[oaicite:5]{index=5}
+</div>
+
+<h2>9. useId()</h2>
+
+<div class="file-name">File: Login.jsx</div>
+
+<pre><code class="language-jsx">import { useId } from 'react';
+
+function Login() {
+  const id = useId();
+
+  return (
+    &lt;&gt;
+      &lt;label htmlFor={id}&gt;Email&lt;/label&gt;
+      &lt;input id={id} /&gt;
+    &lt;/&gt;
+  );
+}</code></pre>
+
+<p>
+Generates stable IDs for forms and SSR. :contentReference[oaicite:6]{index=6}
+</p>
+
+<h2>10. Strict Mode Improvements</h2>
+
+<p>
+React 18 Strict Mode intentionally mounts components twice in development.
+</p>
+
+<div class="flow">
+Mount Component
+<br>↓<br>
+Unmount
+<br>↓<br>
+Mount Again
+<br>↓<br>
+Detect Side Effects
+</div>
+
+<p>
+Helps identify unsafe code before production. :contentReference[oaicite:7]{index=7}
+</p>
+
+<h2>Most Important Features For Interviews</h2>
+
+<ol>
+<li>Automatic Batching</li>
+<li>Concurrent Rendering</li>
+<li>startTransition()</li>
+<li>useTransition()</li>
+<li>useDeferredValue()</li>
+<li>Suspense Improvements</li>
+<li>Streaming SSR</li>
+<li>createRoot()</li>
+<li>useId()</li>
+</ol>
+
+<h2>Easy Way To Remember</h2>
+
+<div class="flow">
+Concurrent Rendering
+<br>+
+<br>
+Automatic Batching
+<br>+
+<br>
+Transitions
+<br>+
+<br>
+Suspense
+<br>+
+<br>
+Streaming SSR
+<br>+
+<br>
+New Hooks
+</div>
+
+<h2>Interview Answer</h2>
+
+<div class="highlight">
+The major features introduced in React 18 are Concurrent Rendering, Automatic Batching, startTransition(), useTransition(), useDeferredValue(), Suspense improvements, Streaming Server-Side Rendering, createRoot(), useId(), and enhanced Strict Mode behavior. These features improve performance, responsiveness, and server rendering capabilities. :contentReference[oaicite:8]{index=8}
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+React 18 introduced Concurrent Rendering, Automatic Batching, Transitions, Suspense improvements, Streaming SSR, createRoot(), and several new hooks for better performance and user experience. :contentReference[oaicite:9]{index=9}
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+</body>
+</html>

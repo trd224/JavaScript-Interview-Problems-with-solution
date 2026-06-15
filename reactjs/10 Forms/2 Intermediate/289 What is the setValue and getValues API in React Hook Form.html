@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>289 - What is the setValue and getValues API in React Hook Form?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px;margin-bottom:10px}
+p{color:#cbd5e1}
+ul{padding-left:24px}
+li{margin-bottom:10px;color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px;margin-top:15px}
+.success{background:#052e16;padding:18px;border-left:5px solid #22c55e;border-radius:10px;margin-top:15px}
+.warning{background:#1e1b4b;border-left:5px solid #fbbf24;padding:18px;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;margin-top:15px;text-align:center;line-height:2;font-size:18px}
+.file-name{background:#111827;color:#93c5fd;padding:12px 16px;border-radius:10px;margin-top:20px;margin-bottom:10px;border:1px solid #1e293b;font-weight:bold}
+pre{border-radius:12px;overflow-x:auto}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>289. What is the setValue and getValues API in React Hook Form?</h1>
+
+<h2>One-Line Definition</h2>
+
+<div class="highlight">
+setValue() is used to programmatically update a field value, while getValues() is used to read current form values without causing a re-render.
+</div>
+
+<h2>Why Do We Need Them?</h2>
+
+<p>
+Sometimes values must be updated or read outside normal user typing.
+</p>
+
+<p>
+Examples:
+</p>
+
+<ul>
+<li>Load user data from API</li>
+<li>Auto-fill forms</li>
+<li>Copy address fields</li>
+<li>Read form values inside custom logic</li>
+<li>Generate previews</li>
+</ul>
+
+<h2>How They Work</h2>
+
+<div class="flow">
+API Response
+<br>↓<br>
+setValue()
+<br>↓<br>
+Update Form Field
+
+<br><br>
+
+Need Current Value
+<br>↓<br>
+getValues()
+<br>↓<br>
+Read Form Data
+</div>
+
+<h2>Project Structure</h2>
+
+<pre><code class="language-text">src/
+│
+├── App.jsx
+│
+└── components/
+    └── ProfileForm.jsx</code></pre>
+
+<h2>What is setValue()?</h2>
+
+<p>
+setValue() updates a field programmatically.
+</p>
+
+<div class="file-name">File: src/components/ProfileForm.jsx</div>
+
+<pre><code class="language-jsx">import { useForm } from 'react-hook-form';
+
+function ProfileForm() {
+  const { register, setValue } = useForm();
+
+  function loadData() {
+    setValue('name', 'Rizwan');
+  }
+
+  return (
+    &lt;&gt;
+      &lt;input placeholder="Name" {...register('name')} /&gt;
+      &lt;button onClick={loadData}&gt;Load Data&lt;/button&gt;
+    &lt;/&gt;
+  );
+}
+
+export default ProfileForm;</code></pre>
+
+<p>
+When the button is clicked:
+</p>
+
+<pre><code class="language-text">Name Input
+↓
+Rizwan</code></pre>
+
+<h2>setValue() Syntax</h2>
+
+<pre><code class="language-jsx">setValue(fieldName, value);</code></pre>
+
+<h3>Examples</h3>
+
+<pre><code class="language-jsx">setValue('name', 'Rizwan');
+setValue('email', 'rizwan@gmail.com');
+setValue('age', 39);</code></pre>
+
+<h2>Set Multiple Fields</h2>
+
+<div class="file-name">File: src/components/ProfileForm.jsx</div>
+
+<pre><code class="language-jsx">function loadData() {
+  setValue('name', 'Rizwan');
+  setValue('email', 'rizwan@gmail.com');
+  setValue('city', 'Kota');
+}</code></pre>
+
+<h2>Real World API Example</h2>
+
+<div class="file-name">File: src/components/ProfileForm.jsx</div>
+
+<pre><code class="language-jsx">import { useEffect } from 'react';
+import { useForm } from 'react-hook-form';
+
+function ProfileForm() {
+  const { register, setValue } = useForm();
+
+  useEffect(() => {
+    const user = {
+      name: 'Rizwan',
+      email: 'rizwan@gmail.com'
+    };
+
+    setValue('name', user.name);
+    setValue('email', user.email);
+  }, []);
+
+  return (
+    &lt;&gt;
+      &lt;input {...register('name')} /&gt;
+      &lt;input {...register('email')} /&gt;
+    &lt;/&gt;
+  );
+}
+
+export default ProfileForm;</code></pre>
+
+<h2>What is getValues()?</h2>
+
+<p>
+getValues() returns current form values immediately.
+</p>
+
+<div class="file-name">File: src/components/ProfileForm.jsx</div>
+
+<pre><code class="language-jsx">import { useForm } from 'react-hook-form';
+
+function ProfileForm() {
+  const { register, getValues } = useForm();
+
+  function showData() {
+    console.log(getValues());
+  }
+
+  return (
+    &lt;&gt;
+      &lt;input placeholder="Name" {...register('name')} /&gt;
+      &lt;button onClick={showData}&gt;Show Data&lt;/button&gt;
+    &lt;/&gt;
+  );
+}
+
+export default ProfileForm;</code></pre>
+
+<p>
+Output:
+</p>
+
+<pre><code class="language-jsx">{
+  name: 'Rizwan'
+}</code></pre>
+
+<h2>Get Single Field Value</h2>
+
+<pre><code class="language-jsx">const email = getValues('email');
+
+console.log(email);</code></pre>
+
+<p>
+Output:
+</p>
+
+<pre><code class="language-jsx">rizwan@gmail.com</code></pre>
+
+<h2>Get Entire Form</h2>
+
+<pre><code class="language-jsx">const data = getValues();
+
+console.log(data);</code></pre>
+
+<p>
+Output:
+</p>
+
+<pre><code class="language-jsx">{
+  name: 'Rizwan',
+  email: 'rizwan@gmail.com'
+}</code></pre>
+
+<h2>getValues() vs watch()</h2>
+
+<table>
+<tr>
+<th>getValues()</th>
+<th>watch()</th>
+</tr>
+
+<tr>
+<td>Snapshot of values</td>
+<td>Live values</td>
+</tr>
+
+<tr>
+<td>No re-render</td>
+<td>Can trigger re-render</td>
+</tr>
+
+<tr>
+<td>Used in logic</td>
+<td>Used in UI</td>
+</tr>
+
+<tr>
+<td>Reads once</td>
+<td>Continuously watches</td>
+</tr>
+</table>
+
+<h2>Real World Example - Copy Address</h2>
+
+<div class="file-name">File: src/components/CheckoutForm.jsx</div>
+
+<pre><code class="language-jsx">import { useForm } from 'react-hook-form';
+
+function CheckoutForm() {
+  const { register, getValues, setValue } = useForm();
+
+  function copyAddress() {
+    const address = getValues('shippingAddress');
+    setValue('billingAddress', address);
+  }
+
+  return (
+    &lt;&gt;
+      &lt;input placeholder="Shipping Address" {...register('shippingAddress')} /&gt;
+      &lt;input placeholder="Billing Address" {...register('billingAddress')} /&gt;
+      &lt;button onClick={copyAddress}&gt;Same As Shipping&lt;/button&gt;
+    &lt;/&gt;
+  );
+}
+
+export default CheckoutForm;</code></pre>
+
+<h2>Most Common Use Cases</h2>
+
+<table>
+<tr>
+<th>API</th>
+<th>Use Case</th>
+</tr>
+
+<tr>
+<td>setValue()</td>
+<td>Auto-fill forms</td>
+</tr>
+
+<tr>
+<td>setValue()</td>
+<td>Load API data</td>
+</tr>
+
+<tr>
+<td>setValue()</td>
+<td>Update dependent fields</td>
+</tr>
+
+<tr>
+<td>getValues()</td>
+<td>Read form data</td>
+</tr>
+
+<tr>
+<td>getValues()</td>
+<td>Custom validation</td>
+</tr>
+
+<tr>
+<td>getValues()</td>
+<td>Business logic</td>
+</tr>
+</table>
+
+<h2>Easy Way To Remember</h2>
+
+<div class="flow">
+setValue()
+<br>↓<br>
+Write Value
+
+<br><br>
+
+getValues()
+<br>↓<br>
+Read Value
+</div>
+
+<h2>Interview Answer</h2>
+
+<div class="highlight">
+setValue() is used to programmatically update a field value in React Hook Form, while getValues() is used to retrieve the current form values without triggering a re-render. They are commonly used for auto-filling forms, reading values for custom logic, and handling API data.
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+setValue() writes values into form fields, while getValues() reads current form values.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+
+</body>
+</html>

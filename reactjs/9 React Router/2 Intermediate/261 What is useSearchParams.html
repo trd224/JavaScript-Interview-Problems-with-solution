@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>261 - What is useSearchParams?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px;margin-bottom:10px}
+p{color:#cbd5e1}
+ul{padding-left:24px}
+li{margin-bottom:10px;color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left;vertical-align:top}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px;margin-top:15px}
+.warning{background:#1e1b4b;border-left:5px solid #fbbf24;padding:18px;border-radius:10px;margin-top:15px}
+.success{background:#052e16;padding:18px;border-left:5px solid #22c55e;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;margin-top:15px;text-align:center;line-height:2;font-size:18px}
+.file-name{background:#111827;color:#93c5fd;padding:12px 16px;border-radius:10px;margin-top:20px;margin-bottom:10px;border:1px solid #1e293b;font-weight:bold}
+pre{border-radius:12px;overflow-x:auto}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>261. What is useSearchParams?</h1>
+
+<h2>One-Line Definition</h2>
+
+<div class="highlight">
+useSearchParams is a React Router hook used to read and update query string parameters in the URL.
+</div>
+
+<h2>Why Do We Need useSearchParams?</h2>
+
+<p>
+Sometimes application state should be stored in the URL instead of React state.
+</p>
+
+<p>
+Examples:
+</p>
+
+<ul>
+<li>Pagination</li>
+<li>Search keywords</li>
+<li>Product filters</li>
+<li>Sorting options</li>
+<li>Category selection</li>
+</ul>
+
+<p>
+This allows users to refresh the page, bookmark it, or share the URL without losing state.
+</p>
+
+<div class="warning">
+Without useSearchParams, you would need to manually read and update the query string using the browser APIs.
+</div>
+
+<h2>Example URL</h2>
+
+<pre><code class="language-text">/products?page=2&category=mobile&sort=price</code></pre>
+
+<h2>Project Structure</h2>
+
+<pre><code class="language-text">src/
+│
+├── App.jsx
+│
+└── pages/
+    └── Products.jsx</code></pre>
+
+<h2>Complete Example With Separate Files</h2>
+
+<div class="file-name">
+File: src/App.jsx
+</div>
+
+<pre><code class="language-jsx">import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import Products from './pages/Products';
+
+function App() {
+  return (
+    &lt;BrowserRouter&gt;
+      &lt;Routes&gt;
+        &lt;Route path="/products" element={&lt;Products /&gt;} /&gt;
+      &lt;/Routes&gt;
+    &lt;/BrowserRouter&gt;
+  );
+}
+
+export default App;</code></pre>
+
+<div class="file-name">
+File: src/pages/Products.jsx
+</div>
+
+<pre><code class="language-jsx">import { useSearchParams } from 'react-router-dom';
+
+function Products() {
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const page = searchParams.get('page');
+  const category = searchParams.get('category');
+  const sort = searchParams.get('sort');
+
+  function changeFilters() {
+    setSearchParams({
+      page: '3',
+      category: 'laptop',
+      sort: 'rating'
+    });
+  }
+
+  return (
+    &lt;&gt;
+      &lt;h2&gt;Page: {page}&lt;/h2&gt;
+      &lt;h2&gt;Category: {category}&lt;/h2&gt;
+      &lt;h2&gt;Sort: {sort}&lt;/h2&gt;
+
+      &lt;button onClick={changeFilters}&gt;
+        Change Filters
+      &lt;/button&gt;
+    &lt;/&gt;
+  );
+}
+
+export default Products;</code></pre>
+
+<h2>What Does useSearchParams Return?</h2>
+
+<pre><code class="language-jsx">const [searchParams, setSearchParams] = useSearchParams();</code></pre>
+
+<table>
+<tr>
+<th>Variable</th>
+<th>Purpose</th>
+</tr>
+
+<tr>
+<td>searchParams</td>
+<td>Read query string values.</td>
+</tr>
+
+<tr>
+<td>setSearchParams</td>
+<td>Update query string values.</td>
+</tr>
+</table>
+
+<h2>Reading Query Parameters</h2>
+
+<pre><code class="language-jsx">const page = searchParams.get('page');
+const category = searchParams.get('category');
+const sort = searchParams.get('sort');</code></pre>
+
+<p>
+For URL:
+</p>
+
+<pre><code class="language-text">/products?page=2&category=mobile&sort=price</code></pre>
+
+<p>
+Values:
+</p>
+
+<pre><code class="language-jsx">page === '2'
+category === 'mobile'
+sort === 'price'</code></pre>
+
+<h2>Updating Query Parameters</h2>
+
+<pre><code class="language-jsx">setSearchParams({
+  page: '3',
+  category: 'laptop',
+  sort: 'rating'
+});</code></pre>
+
+<p>
+URL becomes:
+</p>
+
+<pre><code class="language-text">/products?page=3&category=laptop&sort=rating</code></pre>
+
+<div class="success">
+React Router updates the URL without refreshing the page.
+</div>
+
+<h2>How It Works</h2>
+
+<div class="flow">
+URL
+<br>↓<br>
+/products?page=2&category=mobile
+<br>↓<br>
+useSearchParams()
+<br>↓<br>
+Read Query Values
+<br>↓<br>
+Display Data
+</div>
+
+<h2>Useful Methods</h2>
+
+<pre><code class="language-jsx">searchParams.get('page');
+
+searchParams.has('page');
+
+setSearchParams({ page: '2' });
+
+setSearchParams({
+  page: '2',
+  sort: 'price'
+});</code></pre>
+
+<h2>Real World Example</h2>
+
+<p>
+E-commerce websites commonly store filters inside query parameters.
+</p>
+
+<pre><code class="language-text">/products?
+category=laptop&
+brand=dell&
+price=50000&
+sort=rating</code></pre>
+
+<p>
+When users share the URL, other users see the same filtered results.
+</p>
+
+<h2>useSearchParams vs useParams</h2>
+
+<table>
+<tr>
+<th>useParams</th>
+<th>useSearchParams</th>
+</tr>
+
+<tr>
+<td>/users/101</td>
+<td>?page=2</td>
+</tr>
+
+<tr>
+<td>Reads route params.</td>
+<td>Reads query params.</td>
+</tr>
+
+<tr>
+<td>Path based.</td>
+<td>URL query string based.</td>
+</tr>
+</table>
+
+<h2>Easy Way To Remember</h2>
+
+<div class="flow">
+Query String
+<br>↓<br>
+useSearchParams()
+<br>↓<br>
+Read Values
+<br>↓<br>
+Update Values
+<br>↓<br>
+URL Changes Automatically
+</div>
+
+<h2>Interview Answer</h2>
+
+<div class="highlight">
+useSearchParams is a React Router hook that allows us to read and update query string parameters in the URL. It is commonly used for pagination, filters, sorting, and search functionality while keeping application state synchronized with the URL.
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+useSearchParams is used to read and update URL query parameters in React Router.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+
+</body>
+</html>

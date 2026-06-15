@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>424 - How do you type a functional component's props?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+p,li{color:#cbd5e1}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px}
+.success{background:#052e16;padding:18px;border-left:5px solid #22c55e;border-radius:10px;margin-top:15px}
+.warning{background:#1e1b4b;padding:18px;border-left:5px solid #fbbf24;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;text-align:center;line-height:2;font-size:18px}
+.file-name{background:#111827;color:#93c5fd;padding:12px 16px;border-radius:10px;border:1px solid #1e293b;font-weight:bold;margin-top:20px;margin-bottom:10px}
+
+pre[class*="language-"],code[class*="language-"]{
+  color:#f8f8f2;
+  background:#1e1e1e;
+  text-shadow:none;
+  font-family:Consolas,Monaco,'Courier New',monospace;
+  font-size:15px;
+}
+
+.token.keyword{color:#c792ea}
+.token.string{color:#c3e88d}
+.token.function{color:#82aaff}
+.token.tag{color:#f07178}
+.token.attr-name{color:#ffcb6b}
+.token.attr-value{color:#c3e88d}
+.token.punctuation{color:#89ddff}
+.token.operator{color:#89ddff}
+.token.class-name{color:#ffcb6b}
+.token.number{color:#f78c6c}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>424. How do you type a functional component's props?</h1>
+
+<h2>One-Line Definition</h2>
+
+<div class="highlight">
+In TypeScript, you type a functional component's props by creating a Props interface or type and using it as the component parameter type.
+</div>
+
+<h2>Project Structure</h2>
+
+<pre class="language-text"><code class="language-text">src/
+│
+├── App.tsx
+└── components/
+    └── UserCard.tsx</code></pre>
+
+<h2>Recommended Approach (Interface)</h2>
+
+<div class="file-name">File: src/components/UserCard.tsx</div>
+
+<pre class="language-tsx"><code class="language-tsx">interface UserCardProps {
+  name: string;
+  age: number;
+  isAdmin: boolean;
+}
+
+function UserCard({ name, age, isAdmin }: UserCardProps) {
+  return (
+    &lt;div&gt;
+      &lt;h2&gt;{name}&lt;/h2&gt;
+      &lt;p&gt;Age: {age}&lt;/p&gt;
+      &lt;p&gt;Admin: {isAdmin ? 'Yes' : 'No'}&lt;/p&gt;
+    &lt;/div&gt;
+  );
+}
+
+export default UserCard;</code></pre>
+
+<div class="file-name">File: src/App.tsx</div>
+
+<pre class="language-tsx"><code class="language-tsx">import UserCard from './components/UserCard';
+
+function App() {
+  return &lt;UserCard name="Rizwan" age={39} isAdmin={true} /&gt;;
+}
+
+export default App;</code></pre>
+
+<h2>Optional Props</h2>
+
+<div class="file-name">File: src/components/UserCard.tsx</div>
+
+<pre class="language-tsx"><code class="language-tsx">interface UserCardProps {
+  name: string;
+  age?: number;
+}
+
+function UserCard({ name, age = 18 }: UserCardProps) {
+  return &lt;h2&gt;{name} - {age}&lt;/h2&gt;;
+}
+
+export default UserCard;</code></pre>
+
+<h2>Function Prop</h2>
+
+<div class="file-name">File: src/components/Button.tsx</div>
+
+<pre class="language-tsx"><code class="language-tsx">interface ButtonProps {
+  onClick: () =&gt; void;
+}
+
+function Button({ onClick }: ButtonProps) {
+  return &lt;button onClick={onClick}&gt;Click&lt;/button&gt;;
+}
+
+export default Button;</code></pre>
+
+<h2>Function Prop With Parameters</h2>
+
+<div class="file-name">File: src/components/UserList.tsx</div>
+
+<pre class="language-tsx"><code class="language-tsx">interface UserListProps {
+  onSelect: (id: number) =&gt; void;
+}
+
+function UserList({ onSelect }: UserListProps) {
+  return (
+    &lt;button onClick={() =&gt; onSelect(1)}&gt;
+      Select User
+    &lt;/button&gt;
+  );
+}
+
+export default UserList;</code></pre>
+
+<h2>Array Prop</h2>
+
+<div class="file-name">File: src/components/UserList.tsx</div>
+
+<pre class="language-tsx"><code class="language-tsx">interface UserListProps {
+  users: string[];
+}
+
+function UserList({ users }: UserListProps) {
+  return (
+    &lt;ul&gt;
+      {users.map(user =&gt; &lt;li key={user}&gt;{user}&lt;/li&gt;)}
+    &lt;/ul&gt;
+  );
+}
+
+export default UserList;</code></pre>
+
+<h2>Object Prop</h2>
+
+<div class="file-name">File: src/components/Profile.tsx</div>
+
+<pre class="language-tsx"><code class="language-tsx">interface User {
+  id: number;
+  name: string;
+}
+
+interface ProfileProps {
+  user: User;
+}
+
+function Profile({ user }: ProfileProps) {
+  return &lt;h2&gt;{user.name}&lt;/h2&gt;;
+}
+
+export default Profile;</code></pre>
+
+<h2>Children Prop</h2>
+
+<div class="file-name">File: src/components/Card.tsx</div>
+
+<pre class="language-tsx"><code class="language-tsx">import { ReactNode } from 'react';
+
+interface CardProps {
+  children: ReactNode;
+}
+
+function Card({ children }: CardProps) {
+  return &lt;div&gt;{children}&lt;/div&gt;;
+}
+
+export default Card;</code></pre>
+
+<h2>React.FC Style</h2>
+
+<div class="file-name">File: src/components/UserCard.tsx</div>
+
+<pre class="language-tsx"><code class="language-tsx">interface UserCardProps {
+  name: string;
+}
+
+const UserCard: React.FC&lt;UserCardProps&gt; = ({ name }) =&gt; {
+  return &lt;h2&gt;{name}&lt;/h2&gt;;
+};
+
+export default UserCard;</code></pre>
+
+<div class="warning">
+Most modern React projects prefer normal function components over React.FC.
+</div>
+
+<h2>Modern Recommended Style</h2>
+
+<div class="file-name">File: src/components/UserCard.tsx</div>
+
+<pre class="language-tsx"><code class="language-tsx">interface UserCardProps {
+  name: string;
+}
+
+function UserCard({ name }: UserCardProps) {
+  return &lt;h2&gt;{name}&lt;/h2&gt;;
+}
+
+export default UserCard;</code></pre>
+
+<h2>Easy Way To Remember</h2>
+
+<div class="flow">
+Create Interface
+<br>↓<br>
+Define Props
+<br>↓<br>
+Apply Interface To Component
+<br>↓<br>
+Type Safe Component
+</div>
+
+<h2>Interview Answer</h2>
+
+<div class="highlight">
+A functional component's props are typed by creating an interface or type alias that defines the expected props and then using that type as the component parameter. This provides compile-time checking, IntelliSense, and safer React code.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-tsx.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js"></script>
+
+</body>
+</html>

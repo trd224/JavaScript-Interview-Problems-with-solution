@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>331 - What is styled-components and How Does it Work?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px;margin-bottom:10px}
+p{color:#cbd5e1}
+ul{padding-left:24px}
+li{margin-bottom:10px;color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px;margin-top:15px}
+.success{background:#052e16;padding:18px;border-left:5px solid #22c55e;border-radius:10px;margin-top:15px}
+.warning{background:#1e1b4b;padding:18px;border-left:5px solid #fbbf24;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;text-align:center;line-height:2;font-size:18px;margin-top:15px}
+.file-name{background:#111827;color:#93c5fd;padding:12px 16px;border-radius:10px;border:1px solid #1e293b;font-weight:bold;margin-top:20px;margin-bottom:10px}
+pre{border-radius:12px;overflow-x:auto}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>331. What is styled-components and How Does it Work?</h1>
+
+<h2>One-Line Definition</h2>
+
+<div class="highlight">
+styled-components is a CSS-in-JS library that allows you to write CSS directly inside JavaScript and create reusable styled React components.
+</div>
+
+<h2>Why Was styled-components Created?</h2>
+
+<p>
+Traditional React styling often uses:
+</p>
+
+<ul>
+<li>CSS files</li>
+<li>CSS Modules</li>
+<li>Inline styles</li>
+</ul>
+
+<p>
+These approaches can cause:
+</p>
+
+<ul>
+<li>Class name conflicts</li>
+<li>Large CSS files</li>
+<li>Difficulty finding component styles</li>
+</ul>
+
+<div class="success">
+styled-components keeps component code and styles together.
+</div>
+
+<h2>Install Package</h2>
+
+<pre><code class="language-bash">npm install styled-components</code></pre>
+
+<h2>Project Structure</h2>
+
+<pre><code class="language-text">src/
+│
+├── App.jsx
+└── components/
+    └── Button.jsx</code></pre>
+
+<h2>Basic Example</h2>
+
+<div class="file-name">File: src/components/Button.jsx</div>
+
+<pre><code class="language-jsx">import styled from 'styled-components';
+
+const Button = styled.button`
+  background: royalblue;
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 8px;
+`;
+
+export default Button;</code></pre>
+
+<h2>Use Component</h2>
+
+<div class="file-name">File: src/App.jsx</div>
+
+<pre><code class="language-jsx">import Button from './components/Button';
+
+function App() {
+  return &lt;Button&gt;Click Me&lt;/Button&gt;;
+}
+
+export default App;</code></pre>
+
+<h2>How It Works</h2>
+
+<div class="flow">
+styled.button
+<br>↓<br>
+Creates React Component
+<br>↓<br>
+Generates Unique CSS Class
+<br>↓<br>
+Injects CSS Into DOM
+<br>↓<br>
+Applies Style Automatically
+</div>
+
+<h2>What Happens Internally?</h2>
+
+<p>
+You write:
+</p>
+
+<pre><code class="language-jsx">const Button = styled.button`
+  background: royalblue;
+`;</code></pre>
+
+<p>
+styled-components generates something like:
+</p>
+
+<pre><code class="language-html">&lt;button class="sc-a1b2c3"&gt;
+  Click Me
+&lt;/button&gt;</code></pre>
+
+<p>
+And injects:
+</p>
+
+<pre><code class="language-css">.sc-a1b2c3 {
+  background: royalblue;
+}</code></pre>
+
+<div class="success">
+Class names are automatically unique, preventing CSS conflicts.
+</div>
+
+<h2>Passing Props To Styles</h2>
+
+<div class="file-name">File: src/components/Button.jsx</div>
+
+<pre><code class="language-jsx">import styled from 'styled-components';
+
+const Button = styled.button`
+  background: ${props => props.primary ? 'royalblue' : 'gray'};
+  color: white;
+  padding: 12px 20px;
+`;
+
+export default Button;</code></pre>
+
+<div class="file-name">File: src/App.jsx</div>
+
+<pre><code class="language-jsx">import Button from './components/Button';
+
+function App() {
+  return (
+    &lt;&gt;
+      &lt;Button primary&gt;Primary&lt;/Button&gt;
+      &lt;Button&gt;Secondary&lt;/Button&gt;
+    &lt;/&gt;
+  );
+}
+
+export default App;</code></pre>
+
+<h2>Conditional Styling</h2>
+
+<div class="file-name">File: src/components/Button.jsx</div>
+
+<pre><code class="language-jsx">import styled from 'styled-components';
+
+const Button = styled.button`
+  background: ${props => props.danger ? 'crimson' : 'green'};
+`;
+
+export default Button;</code></pre>
+
+<h2>Extending Existing Styles</h2>
+
+<div class="file-name">File: src/components/Button.jsx</div>
+
+<pre><code class="language-jsx">import styled from 'styled-components';
+
+export const Button = styled.button`
+  padding: 12px;
+`;
+
+export const DangerButton = styled(Button)`
+  background: crimson;
+  color: white;
+`;</code></pre>
+
+<h2>Styled Input Example</h2>
+
+<div class="file-name">File: src/components/Input.jsx</div>
+
+<pre><code class="language-jsx">import styled from 'styled-components';
+
+const Input = styled.input`
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ccc;
+`;
+
+export default Input;</code></pre>
+
+<h2>Real World Example</h2>
+
+<div class="file-name">File: src/components/LoginForm.jsx</div>
+
+<pre><code class="language-jsx">import styled from 'styled-components';
+
+const Wrapper = styled.div`
+  max-width: 400px;
+`;
+
+const Input = styled.input`
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 10px;
+`;
+
+const Button = styled.button`
+  background: royalblue;
+  color: white;
+  padding: 12px;
+  border: none;
+`;
+
+function LoginForm() {
+  return (
+    &lt;Wrapper&gt;
+      &lt;Input placeholder="Email" /&gt;
+      &lt;Input type="password" placeholder="Password" /&gt;
+      &lt;Button&gt;Login&lt;/Button&gt;
+    &lt;/Wrapper&gt;
+  );
+}
+
+export default LoginForm;</code></pre>
+
+<h2>Advantages</h2>
+
+<ul>
+<li>Component-scoped styles</li>
+<li>No class name conflicts</li>
+<li>Dynamic styling with props</li>
+<li>Reusable components</li>
+<li>Styles and component together</li>
+</ul>
+
+<h2>Disadvantages</h2>
+
+<ul>
+<li>Extra runtime overhead</li>
+<li>Larger bundle size</li>
+<li>Can be slower than plain CSS</li>
+<li>Less popular today than Tailwind</li>
+</ul>
+
+<h2>styled-components vs CSS Modules</h2>
+
+<table>
+<tr>
+<th>styled-components</th>
+<th>CSS Modules</th>
+</tr>
+
+<tr>
+<td>CSS inside JS</td>
+<td>Separate CSS file</td>
+</tr>
+
+<tr>
+<td>Supports dynamic props</td>
+<td>Limited dynamic styling</td>
+</tr>
+
+<tr>
+<td>Runtime CSS generation</td>
+<td>Build-time CSS</td>
+</tr>
+
+<tr>
+<td>More JavaScript</td>
+<td>More CSS</td>
+</tr>
+</table>
+
+<h2>styled-components vs Tailwind</h2>
+
+<table>
+<tr>
+<th>styled-components</th>
+<th>Tailwind</th>
+</tr>
+
+<tr>
+<td>Write CSS</td>
+<td>Use utility classes</td>
+</tr>
+
+<tr>
+<td>Runtime styling</td>
+<td>Build-time styling</td>
+</tr>
+
+<tr>
+<td>More flexible</td>
+<td>Usually faster</td>
+</tr>
+
+<tr>
+<td>Component style files</td>
+<td>Utility-first approach</td>
+</tr>
+</table>
+
+<h2>Easy Way To Remember</h2>
+
+<div class="flow">
+styled.button
+<br>↓<br>
+Write CSS In JavaScript
+<br>↓<br>
+Create Styled React Component
+<br>↓<br>
+Automatic Unique Class Names
+</div>
+
+<h2>Interview Answer</h2>
+
+<div class="highlight">
+styled-components is a CSS-in-JS library that allows developers to create styled React components using JavaScript template literals. It generates unique class names automatically, supports dynamic styling through props, and keeps styles scoped to individual components.
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+styled-components is a CSS-in-JS library that lets you write CSS directly inside React components and automatically generates unique class names.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>337 - What are CSS Variables and How Do You Use Them in React for Theming?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px;margin-bottom:10px}
+p{color:#cbd5e1}
+ul{padding-left:24px}
+li{margin-bottom:10px;color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px;margin-top:15px}
+.success{background:#052e16;padding:18px;border-left:5px solid #22c55e;border-radius:10px;margin-top:15px}
+.warning{background:#1e1b4b;padding:18px;border-left:5px solid #fbbf24;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;text-align:center;line-height:2;font-size:18px;margin-top:15px}
+.file-name{background:#111827;color:#93c5fd;padding:12px 16px;border-radius:10px;border:1px solid #1e293b;font-weight:bold;margin-top:20px;margin-bottom:10px}
+pre{border-radius:12px;overflow-x:auto}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>337. What are CSS Variables and How Do You Use Them in React for Theming?</h1>
+
+<h2>One-Line Definition</h2>
+
+<div class="highlight">
+CSS Variables (Custom Properties) are reusable CSS values that can be defined once and used throughout an application. They are commonly used in React for light mode, dark mode, and application-wide theming.
+</div>
+
+<h2>What Problem Do CSS Variables Solve?</h2>
+
+<p>
+Without CSS variables:
+</p>
+
+<pre><code class="language-css">.header {
+  background: #2563eb;
+}
+
+.button {
+  background: #2563eb;
+}
+
+.card {
+  border-color: #2563eb;
+}</code></pre>
+
+<p>
+If the primary color changes, every occurrence must be updated manually.
+</p>
+
+<div class="warning">
+Large applications can contain hundreds of repeated colors.
+</div>
+
+<h2>Using CSS Variables</h2>
+
+<pre><code class="language-css">:root {
+  --primary-color: #2563eb;
+}
+
+.header {
+  background: var(--primary-color);
+}
+
+.button {
+  background: var(--primary-color);
+}</code></pre>
+
+<div class="success">
+Now changing one variable updates the entire application.
+</div>
+
+<h2>How CSS Variables Work</h2>
+
+<div class="flow">
+Define Variable
+<br>↓<br>
+--primary-color
+<br>↓<br>
+Use var(--primary-color)
+<br>↓<br>
+All Components Share Same Value
+</div>
+
+<h2>Project Structure</h2>
+
+<pre><code class="language-text">src/
+│
+├── App.jsx
+├── App.css
+└── components/
+    └── ThemeToggle.jsx</code></pre>
+
+<h2>Step 1 - Define Theme Variables</h2>
+
+<div class="file-name">File: src/App.css</div>
+
+<pre><code class="language-css">:root {
+  --bg: #ffffff;
+  --text: #111827;
+  --card: #f3f4f6;
+  --button: #2563eb;
+}</code></pre>
+
+<h2>Step 2 - Use Variables</h2>
+
+<div class="file-name">File: src/App.css</div>
+
+<pre><code class="language-css">body {
+  background: var(--bg);
+  color: var(--text);
+}
+
+.card {
+  background: var(--card);
+  padding: 20px;
+  border-radius: 10px;
+}
+
+button {
+  background: var(--button);
+  color: white;
+}</code></pre>
+
+<h2>What Does var() Mean?</h2>
+
+<pre><code class="language-css">background: var(--bg);</code></pre>
+
+<p>
+Means:
+</p>
+
+<pre><code class="language-text">Take the value stored in --bg
+and use it here.</code></pre>
+
+<h2>Using CSS Variables for Dark Mode</h2>
+
+<div class="file-name">File: src/App.css</div>
+
+<pre><code class="language-css">:root {
+  --bg: #ffffff;
+  --text: #111827;
+  --card: #f3f4f6;
+}
+
+[data-theme="dark"] {
+  --bg: #111827;
+  --text: #f9fafb;
+  --card: #1f2937;
+}</code></pre>
+
+<div class="flow">
+Light Theme
+<br>↓<br>
+--bg = white
+
+<br><br>
+
+Dark Theme
+<br>↓<br>
+--bg = dark
+</div>
+
+<h2>Step 3 - Toggle Theme in React</h2>
+
+<div class="file-name">File: src/components/ThemeToggle.jsx</div>
+
+<pre><code class="language-jsx">function ThemeToggle({ theme, toggleTheme }) {
+  return &lt;button onClick={toggleTheme}&gt;{theme === 'dark' ? 'Light Mode' : 'Dark Mode'}&lt;/button&gt;;
+}
+
+export default ThemeToggle;</code></pre>
+
+<h2>Step 4 - Apply Theme Attribute</h2>
+
+<div class="file-name">File: src/App.jsx</div>
+
+<pre><code class="language-jsx">import { useEffect, useState } from 'react';
+import ThemeToggle from './components/ThemeToggle';
+import './App.css';
+
+function App() {
+  const [theme, setTheme] = useState(() =&gt; localStorage.getItem('theme') || 'light');
+
+  function toggleTheme() {
+    setTheme(prev =&gt; prev === 'light' ? 'dark' : 'light');
+  }
+
+  useEffect(() =&gt; {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('theme', theme);
+  }, [theme]);
+
+  return (
+    &lt;div className="app"&gt;
+      &lt;ThemeToggle theme={theme} toggleTheme={toggleTheme} /&gt;
+
+      &lt;div className="card"&gt;
+        &lt;h2&gt;Dashboard&lt;/h2&gt;
+        &lt;p&gt;Current Theme: {theme}&lt;/p&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  );
+}
+
+export default App;</code></pre>
+
+<h2>What Happens When User Clicks Toggle?</h2>
+
+<div class="flow">
+Click Toggle
+<br>↓<br>
+theme = dark
+<br>↓<br>
+data-theme="dark"
+<br>↓<br>
+Dark Variables Activated
+<br>↓<br>
+UI Changes Automatically
+</div>
+
+<h2>Real World Theme File</h2>
+
+<div class="file-name">File: src/styles/theme.css</div>
+
+<pre><code class="language-css">:root {
+  --primary: #2563eb;
+  --secondary: #7c3aed;
+  --background: #ffffff;
+  --text: #111827;
+  --border: #d1d5db;
+}
+
+[data-theme="dark"] {
+  --primary: #38bdf8;
+  --secondary: #a855f7;
+  --background: #111827;
+  --text: #f9fafb;
+  --border: #374151;
+}</code></pre>
+
+<h2>Using Theme Variables Anywhere</h2>
+
+<div class="file-name">File: src/App.css</div>
+
+<pre><code class="language-css">.navbar {
+  background: var(--primary);
+}
+
+.card {
+  background: var(--background);
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+
+.button {
+  background: var(--secondary);
+}</code></pre>
+
+<h2>Advantages of CSS Variables</h2>
+
+<ul>
+<li>Easy theming</li>
+<li>Dark mode support</li>
+<li>Reusable values</li>
+<li>Less duplicated CSS</li>
+<li>Easy maintenance</li>
+<li>Works without extra libraries</li>
+</ul>
+
+<h2>CSS Variables vs CSS Classes</h2>
+
+<table>
+<tr>
+<th>CSS Variables</th>
+<th>CSS Classes</th>
+</tr>
+
+<tr>
+<td>Store values</td>
+<td>Store styles</td>
+</tr>
+
+<tr>
+<td>Great for theming</td>
+<td>Great for layouts</td>
+</tr>
+
+<tr>
+<td>Can change globally</td>
+<td>Need multiple classes</td>
+</tr>
+
+<tr>
+<td>Reusable colors/tokens</td>
+<td>Reusable style rules</td>
+</tr>
+</table>
+
+<h2>Why CSS Variables Are Preferred For Theming?</h2>
+
+<div class="flow">
+Change One Variable
+<br>↓<br>
+Every Component Updates
+<br>↓<br>
+Perfect For Dark Mode
+</div>
+
+<div class="success">
+Most modern React applications use CSS Variables for light/dark themes because they are simple, fast, and scalable.
+</div>
+
+<h2>Easy Way To Remember</h2>
+
+<div class="flow">
+CSS Variable
+<br>↓<br>
+--primary-color
+<br>↓<br>
+var(--primary-color)
+<br>↓<br>
+Reusable Theme Value
+</div>
+
+<h2>Interview Answer</h2>
+
+<div class="highlight">
+CSS Variables are custom CSS properties defined using the -- syntax. They are accessed using var(). In React applications, CSS Variables are commonly used for theming by defining light and dark theme values and switching them using a class or data-theme attribute. This allows the entire application's colors to change by updating only a few variables.
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+CSS Variables are reusable CSS values that are commonly used in React to implement themes such as light mode and dark mode.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js"></script>
+
+</body>
+</html>

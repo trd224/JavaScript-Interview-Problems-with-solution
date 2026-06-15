@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>335 - How do you implement dark mode in React?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px;margin-bottom:10px}
+p{color:#cbd5e1}
+ul{padding-left:24px}
+li{margin-bottom:10px;color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px;margin-top:15px}
+.success{background:#052e16;padding:18px;border-left:5px solid #22c55e;border-radius:10px;margin-top:15px}
+.warning{background:#1e1b4b;padding:18px;border-left:5px solid #fbbf24;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;text-align:center;line-height:2;font-size:18px;margin-top:15px}
+.file-name{background:#111827;color:#93c5fd;padding:12px 16px;border-radius:10px;border:1px solid #1e293b;font-weight:bold;margin-top:20px;margin-bottom:10px}
+pre{border-radius:12px;overflow-x:auto}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>336 How do you implement dark mode in a React application?</h1>
+
+<h2>One-Line Definition</h2>
+
+<div class="highlight">
+Dark mode in React is implemented by storing the selected theme in state, applying a CSS class or data attribute, and optionally saving the preference in localStorage.
+</div>
+
+<h2>How It Works</h2>
+
+<div class="flow">
+User Clicks Toggle
+<br>↓<br>
+Update Theme State
+<br>↓<br>
+Add dark / light Class
+<br>↓<br>
+CSS Variables Change Colors
+<br>↓<br>
+Save Theme In localStorage
+</div>
+
+<h2>Project Structure</h2>
+
+<pre><code class="language-text">src/
+│
+├── App.jsx
+├── App.css
+└── components/
+    └── ThemeToggle.jsx</code></pre>
+
+<h2>Step 1 - Create Theme Toggle Component</h2>
+
+<div class="file-name">File: src/components/ThemeToggle.jsx</div>
+
+<pre><code class="language-jsx">function ThemeToggle({ theme, toggleTheme }) {
+  return &lt;button onClick={toggleTheme}&gt;{theme === 'dark' ? 'Light Mode' : 'Dark Mode'}&lt;/button&gt;;
+}
+
+export default ThemeToggle;</code></pre>
+
+<h2>Step 2 - Use Theme State</h2>
+
+<div class="file-name">File: src/App.jsx</div>
+
+<pre><code class="language-jsx">import { useEffect, useState } from 'react';
+import ThemeToggle from './components/ThemeToggle';
+import './App.css';
+
+function App() {
+  const [theme, setTheme] = useState('light');
+
+  function toggleTheme() {
+    setTheme(theme === 'light' ? 'dark' : 'light');
+  }
+
+  useEffect(() =&gt; {
+    document.body.className = theme;
+    localStorage.setItem('theme', theme);
+  }, [theme]);
+
+  return (
+    &lt;div className="app"&gt;
+      &lt;ThemeToggle theme={theme} toggleTheme={toggleTheme} /&gt;
+      &lt;h1&gt;Dark Mode Example&lt;/h1&gt;
+      &lt;p&gt;Current theme: {theme}&lt;/p&gt;
+    &lt;/div&gt;
+  );
+}
+
+export default App;</code></pre>
+
+<h2>Step 3 - Add CSS</h2>
+
+<div class="file-name">File: src/App.css</div>
+
+<pre><code class="language-css">body.light {
+  background: #ffffff;
+  color: #111827;
+}
+
+body.dark {
+  background: #111827;
+  color: #f9fafb;
+}
+
+.app {
+  min-height: 100vh;
+  padding: 40px;
+}
+
+button {
+  padding: 10px 16px;
+  cursor: pointer;
+}</code></pre>
+
+<h2>Problem With This Version</h2>
+
+<div class="warning">
+The theme resets to light after page refresh because the initial state is always 'light'.
+</div>
+
+<h2>Better Version With localStorage</h2>
+
+<div class="file-name">File: src/App.jsx</div>
+
+<pre><code class="language-jsx">import { useEffect, useState } from 'react';
+import ThemeToggle from './components/ThemeToggle';
+import './App.css';
+
+function App() {
+  const [theme, setTheme] = useState(() =&gt; localStorage.getItem('theme') || 'light');
+
+  function toggleTheme() {
+    setTheme(prev =&gt; prev === 'light' ? 'dark' : 'light');
+  }
+
+  useEffect(() =&gt; {
+    document.body.className = theme;
+    localStorage.setItem('theme', theme);
+  }, [theme]);
+
+  return (
+    &lt;div className="app"&gt;
+      &lt;ThemeToggle theme={theme} toggleTheme={toggleTheme} /&gt;
+      &lt;h1&gt;Dark Mode Example&lt;/h1&gt;
+      &lt;p&gt;Current theme: {theme}&lt;/p&gt;
+    &lt;/div&gt;
+  );
+}
+
+export default App;</code></pre>
+
+<div class="success">
+Now the selected theme stays saved even after page refresh.
+</div>
+
+<h2>Recommended Approach - CSS Variables</h2>
+
+<p>
+Instead of writing separate styles everywhere, use CSS variables.
+</p>
+
+<div class="file-name">File: src/App.css</div>
+
+<pre><code class="language-css">body.light {
+  --bg: #ffffff;
+  --text: #111827;
+  --card: #f3f4f6;
+  --button: #2563eb;
+}
+
+body.dark {
+  --bg: #111827;
+  --text: #f9fafb;
+  --card: #1f2937;
+  --button: #38bdf8;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+}
+
+.card {
+  background: var(--card);
+  padding: 20px;
+  border-radius: 10px;
+}
+
+button {
+  background: var(--button);
+  color: white;
+  border: none;
+  padding: 10px 16px;
+}</code></pre>
+
+<h2>Using CSS Variables In Component</h2>
+
+<div class="file-name">File: src/App.jsx</div>
+
+<pre><code class="language-jsx">import { useEffect, useState } from 'react';
+import ThemeToggle from './components/ThemeToggle';
+import './App.css';
+
+function App() {
+  const [theme, setTheme] = useState(() =&gt; localStorage.getItem('theme') || 'light');
+
+  function toggleTheme() {
+    setTheme(prev =&gt; prev === 'light' ? 'dark' : 'light');
+  }
+
+  useEffect(() =&gt; {
+    document.body.className = theme;
+    localStorage.setItem('theme', theme);
+  }, [theme]);
+
+  return (
+    &lt;div className="app"&gt;
+      &lt;ThemeToggle theme={theme} toggleTheme={toggleTheme} /&gt;
+
+      &lt;div className="card"&gt;
+        &lt;h2&gt;User Card&lt;/h2&gt;
+        &lt;p&gt;This card changes color based on theme.&lt;/p&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  );
+}
+
+export default App;</code></pre>
+
+<h2>Dark Mode With data-theme</h2>
+
+<p>
+Many projects prefer data-theme instead of body class.
+</p>
+
+<div class="file-name">File: src/App.jsx</div>
+
+<pre><code class="language-jsx">useEffect(() =&gt; {
+  document.documentElement.setAttribute('data-theme', theme);
+  localStorage.setItem('theme', theme);
+}, [theme]);</code></pre>
+
+<div class="file-name">File: src/App.css</div>
+
+<pre><code class="language-css">:root {
+  --bg: #ffffff;
+  --text: #111827;
+}
+
+[data-theme="dark"] {
+  --bg: #111827;
+  --text: #f9fafb;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+}</code></pre>
+
+<h2>Why localStorage?</h2>
+
+<div class="flow">
+User Selects Dark Mode
+<br>↓<br>
+Save "dark" In localStorage
+<br>↓<br>
+User Refreshes Page
+<br>↓<br>
+Read localStorage
+<br>↓<br>
+Apply Dark Mode Again
+</div>
+
+<h2>Common Approaches</h2>
+
+<table>
+<tr>
+<th>Approach</th>
+<th>Use Case</th>
+</tr>
+
+<tr>
+<td>State + CSS class</td>
+<td>Simple apps</td>
+</tr>
+
+<tr>
+<td>localStorage</td>
+<td>Remember user preference</td>
+</tr>
+
+<tr>
+<td>CSS variables</td>
+<td>Best scalable approach</td>
+</tr>
+
+<tr>
+<td>Context API</td>
+<td>Theme needed across many components</td>
+</tr>
+
+<tr>
+<td>Tailwind dark class</td>
+<td>Tailwind projects</td>
+</tr>
+</table>
+
+<h2>Real World Example</h2>
+
+<p>
+Most real projects use:
+</p>
+
+<ul>
+<li>Theme state</li>
+<li>CSS variables</li>
+<li>localStorage</li>
+<li>Context API if many components need theme</li>
+</ul>
+
+<h2>Easy Way To Remember</h2>
+
+<div class="flow">
+theme State
+<br>↓<br>
+Toggle Button
+<br>↓<br>
+Add Class / data-theme
+<br>↓<br>
+CSS Variables
+<br>↓<br>
+Save In localStorage
+</div>
+
+<h2>Interview Answer</h2>
+
+<div class="highlight">
+Dark mode in React can be implemented by keeping the current theme in state, toggling between light and dark themes, applying a class or data-theme attribute to the document, and using CSS variables to change colors. localStorage is commonly used to persist the user's selected theme after refresh.
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+Dark mode is implemented by toggling theme state, applying a CSS class or data-theme attribute, and saving the preference in localStorage.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js"></script>
+
+</body>
+</html>

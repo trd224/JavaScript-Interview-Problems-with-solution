@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>431 - How do you type the children prop?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+p,li{color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px}
+.success{background:#052e16;padding:18px;border-left:5px solid #22c55e;border-radius:10px;margin-top:15px}
+.warning{background:#1e1b4b;padding:18px;border-left:5px solid #fbbf24;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;text-align:center;line-height:2;font-size:18px}
+.file-name{background:#111827;color:#93c5fd;padding:12px 16px;border-radius:10px;border:1px solid #1e293b;font-weight:bold;margin-top:20px;margin-bottom:10px}
+
+pre[class*="language-"],code[class*="language-"]{
+color:#f8f8f2;
+background:#1e1e1e;
+font-family:Consolas,Monaco,'Courier New',monospace;
+font-size:15px;
+}
+
+.token.keyword{color:#c792ea}
+.token.string{color:#c3e88d}
+.token.function{color:#82aaff}
+.token.class-name{color:#ffcb6b}
+.token.number{color:#f78c6c}
+.token.operator{color:#89ddff}
+.token.punctuation{color:#89ddff}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>431. How do you type the children prop?</h1>
+
+<h2>One-Line Definition</h2>
+
+<div class="highlight">
+In React TypeScript, the children prop is usually typed using ReactNode because it can represent anything React can render.
+</div>
+
+<h2>What is children?</h2>
+
+<p>
+Anything placed between a component's opening and closing tags becomes the children prop.
+</p>
+
+<div class="file-name">File: src/App.tsx</div>
+
+<pre class="language-tsx"><code class="language-tsx">&lt;Card&gt;
+  &lt;h2&gt;Hello&lt;/h2&gt;
+&lt;/Card&gt;</code></pre>
+
+<p>
+React converts this into:
+</p>
+
+<pre class="language-tsx"><code class="language-tsx">&lt;Card
+  children={&lt;h2&gt;Hello&lt;/h2&gt;}
+/&gt;</code></pre>
+
+<h2>Project Structure</h2>
+
+<pre class="language-text"><code class="language-text">src/
+│
+├── App.tsx
+└── components/
+    └── Card.tsx</code></pre>
+
+<h2>Recommended Approach - ReactNode</h2>
+
+<div class="file-name">File: src/components/Card.tsx</div>
+
+<pre class="language-tsx"><code class="language-tsx">import { ReactNode } from 'react';
+
+interface CardProps {
+  children: ReactNode;
+}
+
+function Card({ children }: CardProps) {
+  return &lt;div&gt;{children}&lt;/div&gt;;
+}
+
+export default Card;</code></pre>
+
+<div class="success">
+This is the most common and recommended approach.
+</div>
+
+<h2>Using The Component</h2>
+
+<div class="file-name">File: src/App.tsx</div>
+
+<pre class="language-tsx"><code class="language-tsx">import Card from './components/Card';
+
+function App() {
+  return (
+    &lt;Card&gt;
+      &lt;h2&gt;Welcome&lt;/h2&gt;
+    &lt;/Card&gt;
+  );
+}
+
+export default App;</code></pre>
+
+<h2>What Can ReactNode Contain?</h2>
+
+<table>
+<tr>
+<th>Value</th>
+<th>Supported</th>
+</tr>
+
+<tr>
+<td>String</td>
+<td>✅</td>
+</tr>
+
+<tr>
+<td>Number</td>
+<td>✅</td>
+</tr>
+
+<tr>
+<td>JSX</td>
+<td>✅</td>
+</tr>
+
+<tr>
+<td>Array of JSX</td>
+<td>✅</td>
+</tr>
+
+<tr>
+<td>null</td>
+<td>✅</td>
+</tr>
+
+<tr>
+<td>undefined</td>
+<td>✅</td>
+</tr>
+
+<tr>
+<td>boolean</td>
+<td>✅</td>
+</tr>
+</table>
+
+<h2>Examples Of Valid ReactNode Values</h2>
+
+<pre class="language-tsx"><code class="language-tsx">children: 'Hello'</code></pre>
+
+<pre class="language-tsx"><code class="language-tsx">children: 100</code></pre>
+
+<pre class="language-tsx"><code class="language-tsx">children: &lt;h1&gt;Title&lt;/h1&gt;</code></pre>
+
+<pre class="language-tsx"><code class="language-tsx">children: [
+  &lt;h1 key="1"&gt;One&lt;/h1&gt;,
+  &lt;h1 key="2"&gt;Two&lt;/h1&gt;
+]</code></pre>
+
+<h2>Using PropsWithChildren</h2>
+
+<div class="file-name">File: src/components/Card.tsx</div>
+
+<pre class="language-tsx"><code class="language-tsx">import { PropsWithChildren } from 'react';
+
+type CardProps = PropsWithChildren&lt;{
+  title: string;
+}&gt;;
+
+function Card({ title, children }: CardProps) {
+  return (
+    &lt;div&gt;
+      &lt;h2&gt;{title}&lt;/h2&gt;
+      {children}
+    &lt;/div&gt;
+  );
+}
+
+export default Card;</code></pre>
+
+<p>
+PropsWithChildren automatically adds:
+</p>
+
+<pre class="language-tsx"><code class="language-tsx">children?: ReactNode;</code></pre>
+
+<h2>Equivalent Version</h2>
+
+<div class="file-name">File: src/components/Card.tsx</div>
+
+<pre class="language-tsx"><code class="language-tsx">import { ReactNode } from 'react';
+
+interface CardProps {
+  title: string;
+  children?: ReactNode;
+}</code></pre>
+
+<h2>Typing Only JSX Elements</h2>
+
+<div class="file-name">File: src/components/Layout.tsx</div>
+
+<pre class="language-tsx"><code class="language-tsx">import { JSX } from 'react';
+
+interface LayoutProps {
+  children: JSX.Element;
+}</code></pre>
+
+<p>
+Only a single JSX element is allowed.
+</p>
+
+<div class="warning">
+This is more restrictive than ReactNode.
+</div>
+
+<h2>Typing Multiple JSX Elements</h2>
+
+<div class="file-name">File: src/components/Layout.tsx</div>
+
+<pre class="language-tsx"><code class="language-tsx">interface LayoutProps {
+  children: JSX.Element[];
+}</code></pre>
+
+<h2>Typing Function As Children</h2>
+
+<div class="file-name">File: src/components/DataProvider.tsx</div>
+
+<pre class="language-tsx"><code class="language-tsx">interface DataProviderProps {
+  children: (name: string) =&gt; React.ReactNode;
+}</code></pre>
+
+<p>
+Usage:
+</p>
+
+<pre class="language-tsx"><code class="language-tsx">&lt;DataProvider&gt;
+  {name =&gt; &lt;h2&gt;{name}&lt;/h2&gt;}
+&lt;/DataProvider&gt;</code></pre>
+
+<h2>Most Common Pattern</h2>
+
+<div class="file-name">File: src/components/Card.tsx</div>
+
+<pre class="language-tsx"><code class="language-tsx">import { ReactNode } from 'react';
+
+interface CardProps {
+  children: ReactNode;
+}
+
+function Card({ children }: CardProps) {
+  return &lt;div&gt;{children}&lt;/div&gt;;
+}
+
+export default Card;</code></pre>
+
+<div class="success">
+This is what you will see in most React TypeScript codebases.
+</div>
+
+<h2>React.FC And children</h2>
+
+<div class="file-name">File: src/components/Card.tsx</div>
+
+<pre class="language-tsx"><code class="language-tsx">const Card: React.FC = ({ children }) =&gt; {
+  return &lt;div&gt;{children}&lt;/div&gt;;
+};</code></pre>
+
+<div class="warning">
+Modern React projects usually avoid React.FC and type children explicitly.
+</div>
+
+<h2>Easy Way To Remember</h2>
+
+<div class="flow">
+children
+<br>↓<br>
+ReactNode
+<br>↓<br>
+Can Render Anything
+<br>↓<br>
+Recommended Approach
+</div>
+
+<h2>Interview Answer</h2>
+
+<div class="highlight">
+The children prop is typically typed as ReactNode because it can represent anything React can render, including strings, numbers, JSX elements, arrays, null, and undefined. Another common approach is using PropsWithChildren, which automatically adds a typed children prop.
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+Type the children prop as ReactNode or use PropsWithChildren for automatic children typing.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-tsx.min.js"></script>
+
+</body>
+</html>

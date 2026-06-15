@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>269 - How do you pass state through navigation with useNavigate?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px;margin-bottom:10px}
+p{color:#cbd5e1}
+ul{padding-left:24px}
+li{margin-bottom:10px;color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left;vertical-align:top}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px;margin-top:15px}
+.warning{background:#1e1b4b;border-left:5px solid #fbbf24;padding:18px;border-radius:10px;margin-top:15px}
+.success{background:#052e16;padding:18px;border-left:5px solid #22c55e;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;margin-top:15px;text-align:center;line-height:2;font-size:18px}
+.file-name{background:#111827;color:#93c5fd;padding:12px 16px;border-radius:10px;margin-top:20px;margin-bottom:10px;border:1px solid #1e293b;font-weight:bold}
+pre{border-radius:12px;overflow-x:auto}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>269. How do you pass state through navigation with useNavigate?</h1>
+
+<h2>One-Line Definition</h2>
+
+<div class="highlight">
+useNavigate allows us to navigate to another route and pass temporary state data along with the navigation.
+</div>
+
+<h2>Why Pass State Through Navigation?</h2>
+
+<p>
+Sometimes we need to send data to another page without:
+</p>
+
+<ul>
+<li>Using URL parameters</li>
+<li>Using query strings</li>
+<li>Using Context</li>
+<li>Using Redux</li>
+</ul>
+
+<p>
+Examples:
+</p>
+
+<ul>
+<li>Selected user details</li>
+<li>Product information</li>
+<li>Order summary</li>
+<li>Success messages</li>
+</ul>
+
+<div class="warning">
+Navigation state is temporary. It disappears after a page refresh.
+</div>
+
+<h2>How It Works</h2>
+
+<div class="flow">
+Current Page
+<br>↓<br>
+useNavigate()
+<br>↓<br>
+Pass State Object
+<br>↓<br>
+Navigate To Route
+<br>↓<br>
+useLocation()
+<br>↓<br>
+Read State
+</div>
+
+<h2>Project Structure</h2>
+
+<pre><code class="language-text">src/
+│
+├── App.jsx
+│
+└── pages/
+    ├── Home.jsx
+    └── Profile.jsx</code></pre>
+
+<h2>Step 1 - Configure Routes</h2>
+
+<div class="file-name">
+File: src/App.jsx
+</div>
+
+<pre><code class="language-jsx">import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import Home from './pages/Home';
+import Profile from './pages/Profile';
+
+function App() {
+  return (
+    &lt;BrowserRouter&gt;
+      &lt;Routes&gt;
+        &lt;Route path="/" element={&lt;Home /&gt;} /&gt;
+        &lt;Route path="/profile" element={&lt;Profile /&gt;} /&gt;
+      &lt;/Routes&gt;
+    &lt;/BrowserRouter&gt;
+  );
+}
+
+export default App;</code></pre>
+
+<h2>Step 2 - Pass State Using useNavigate</h2>
+
+<div class="file-name">
+File: src/pages/Home.jsx
+</div>
+
+<pre><code class="language-jsx">import { useNavigate } from 'react-router-dom';
+
+function Home() {
+  const navigate = useNavigate();
+
+  function openProfile() {
+    navigate('/profile', {
+      state: {
+        id: 101,
+        name: 'Rizwan',
+        role: 'Software Engineer'
+      }
+    });
+  }
+
+  return (
+    &lt;button onClick={openProfile}&gt;
+      Open Profile
+    &lt;/button&gt;
+  );
+}
+
+export default Home;</code></pre>
+
+<h3>State Being Passed</h3>
+
+<pre><code class="language-jsx">{
+  id: 101,
+  name: 'Rizwan',
+  role: 'Software Engineer'
+}</code></pre>
+
+<h2>Step 3 - Read State Using useLocation</h2>
+
+<div class="file-name">
+File: src/pages/Profile.jsx
+</div>
+
+<pre><code class="language-jsx">import { useLocation } from 'react-router-dom';
+
+function Profile() {
+  const location = useLocation();
+
+  const { id, name, role } = location.state;
+
+  return (
+    &lt;&gt;
+      &lt;h2&gt;ID: {id}&lt;/h2&gt;
+      &lt;h2&gt;Name: {name}&lt;/h2&gt;
+      &lt;h2&gt;Role: {role}&lt;/h2&gt;
+    &lt;/&gt;
+  );
+}
+
+export default Profile;</code></pre>
+
+<h2>What Actually Happens?</h2>
+
+<div class="flow">
+Home Page
+<br>↓<br>
+navigate('/profile', {
+  state: user
+})
+<br>↓<br>
+Profile Route
+<br>↓<br>
+location.state
+<br>↓<br>
+User Data Available
+</div>
+
+<h2>Real URL</h2>
+
+<p>
+Notice that the URL remains:
+</p>
+
+<pre><code class="language-text">/profile</code></pre>
+
+<p>
+No query string appears:
+</p>
+
+<pre><code class="language-text">/profile?id=101</code></pre>
+
+<p>
+No route parameter appears:
+</p>
+
+<pre><code class="language-text">/profile/101</code></pre>
+
+<div class="success">
+The data is passed internally through React Router navigation state.
+</div>
+
+<h2>Safer Production Example</h2>
+
+<p>
+location.state may be undefined if the user directly opens the URL or refreshes the page.
+</p>
+
+<div class="file-name">
+File: src/pages/Profile.jsx
+</div>
+
+<pre><code class="language-jsx">import { useLocation } from 'react-router-dom';
+
+function Profile() {
+  const location = useLocation();
+
+  const user = location.state;
+
+  if (!user) {
+    return &lt;h2&gt;No User Data Found&lt;/h2&gt;;
+  }
+
+  return &lt;h2&gt;{user.name}&lt;/h2&gt;;
+}
+
+export default Profile;</code></pre>
+
+<div class="warning">
+Always handle the case where location.state is undefined.
+</div>
+
+<h2>Common Real-World Examples</h2>
+
+<ul>
+<li>Product Details Page</li>
+<li>Checkout Page</li>
+<li>Order Confirmation</li>
+<li>User Profile</li>
+<li>Success Messages</li>
+</ul>
+
+<h2>useNavigate State vs URL Params</h2>
+
+<table>
+<tr>
+<th>Navigation State</th>
+<th>URL Params</th>
+</tr>
+
+<tr>
+<td>Hidden from URL.</td>
+<td>Visible in URL.</td>
+</tr>
+
+<tr>
+<td>Temporary.</td>
+<td>Persistent.</td>
+</tr>
+
+<tr>
+<td>Lost on refresh.</td>
+<td>Available after refresh.</td>
+</tr>
+
+<tr>
+<td>Good for temporary data.</td>
+<td>Good for shareable URLs.</td>
+</tr>
+</table>
+
+<h2>Example With Product Data</h2>
+
+<pre><code class="language-jsx">navigate('/product', {
+  state: {
+    id: 1,
+    name: 'Laptop',
+    price: 50000
+  }
+});</code></pre>
+
+<p>
+Receiving page:
+</p>
+
+<pre><code class="language-jsx">const location = useLocation();
+
+console.log(location.state.name);
+// Laptop</code></pre>
+
+<h2>Easy Way To Remember</h2>
+
+<div class="flow">
+useNavigate()
+<br>↓<br>
+Pass State
+<br>↓<br>
+Navigate
+<br>↓<br>
+useLocation()
+<br>↓<br>
+Read State
+</div>
+
+<h2>Interview Answer</h2>
+
+<div class="highlight">
+State can be passed through navigation by using the state option of useNavigate. The receiving component can access that state using useLocation(). This is useful for passing temporary data between routes without exposing it in the URL.
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+Pass state using navigate('/route', { state: data }) and read it using useLocation().state.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+
+</body>
+</html>

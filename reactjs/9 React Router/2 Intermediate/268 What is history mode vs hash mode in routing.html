@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>268 - What is History Mode vs Hash Mode in Routing?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px;margin-bottom:10px}
+p{color:#cbd5e1}
+ul{padding-left:24px}
+li{margin-bottom:10px;color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left;vertical-align:top}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px;margin-top:15px}
+.warning{background:#1e1b4b;border-left:5px solid #fbbf24;padding:18px;border-radius:10px;margin-top:15px}
+.success{background:#052e16;padding:18px;border-left:5px solid #22c55e;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;margin-top:15px;text-align:center;line-height:2;font-size:18px}
+.file-name{background:#111827;color:#93c5fd;padding:12px 16px;border-radius:10px;margin-top:20px;margin-bottom:10px;border:1px solid #1e293b;font-weight:bold}
+pre{border-radius:12px;overflow-x:auto}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>268. What is History Mode vs Hash Mode in Routing?</h1>
+
+<h2>One-Line Definition</h2>
+
+<div class="highlight">
+History Mode uses normal URLs and requires server support, while Hash Mode uses a # in the URL and works without server configuration.
+</div>
+
+<h2>What Problem Are They Solving?</h2>
+
+<p>
+Single Page Applications (SPA) need routing without reloading the page.
+</p>
+
+<p>
+Examples:
+</p>
+
+<pre><code class="language-text">/products
+/orders
+/profile</code></pre>
+
+<p>
+The browser URL changes, but React stays on the same page.
+</p>
+
+<p>
+There are two common ways to achieve this:
+</p>
+
+<ul>
+<li>History Mode</li>
+<li>Hash Mode</li>
+</ul>
+
+<h2>History Mode</h2>
+
+<p>
+History Mode uses the browser History API.
+</p>
+
+<p>
+URLs look like normal website URLs.
+</p>
+
+<pre><code class="language-text">https://example.com/products
+
+https://example.com/orders
+
+https://example.com/profile</code></pre>
+
+<div class="success">
+Clean and professional URLs.
+</div>
+
+<h3>React Router Example</h3>
+
+<div class="file-name">
+File: src/main.jsx
+</div>
+
+<pre><code class="language-jsx">import ReactDOM from 'react-dom/client';
+import { BrowserRouter } from 'react-router-dom';
+import App from './App';
+
+ReactDOM.createRoot(
+  document.getElementById('root')
+).render(
+  &lt;BrowserRouter&gt;
+    &lt;App /&gt;
+  &lt;/BrowserRouter&gt;
+);</code></pre>
+
+<p>
+BrowserRouter uses History Mode.
+</p>
+
+<h2>How History Mode Works</h2>
+
+<div class="flow">
+User Opens
+/products
+<br>↓<br>
+Browser Sends Request
+<br>↓<br>
+Server Must Return
+index.html
+<br>↓<br>
+React Router Handles Route
+</div>
+
+<div class="warning">
+History Mode requires server configuration.
+</div>
+
+<h2>Refresh Problem</h2>
+
+<p>
+Suppose the user refreshes:
+</p>
+
+<pre><code class="language-text">https://example.com/products</code></pre>
+
+<div class="flow">
+Refresh
+<br>↓<br>
+Request Goes To Server
+<br>↓<br>
+Server Looks For
+/products
+<br>↓<br>
+May Return 404
+</div>
+
+<p>
+To fix this, the server must return:
+</p>
+
+<pre><code class="language-text">index.html</code></pre>
+
+<p>
+for every route.
+</p>
+
+<h2>Hash Mode</h2>
+
+<p>
+Hash Mode stores the route after the # symbol.
+</p>
+
+<pre><code class="language-text">https://example.com/#/products
+
+https://example.com/#/orders
+
+https://example.com/#/profile</code></pre>
+
+<div class="success">
+No server configuration required.
+</div>
+
+<h3>React Router Example</h3>
+
+<div class="file-name">
+File: src/main.jsx
+</div>
+
+<pre><code class="language-jsx">import ReactDOM from 'react-dom/client';
+import { HashRouter } from 'react-router-dom';
+import App from './App';
+
+ReactDOM.createRoot(
+  document.getElementById('root')
+).render(
+  &lt;HashRouter&gt;
+    &lt;App /&gt;
+  &lt;/HashRouter&gt;
+);</code></pre>
+
+<p>
+HashRouter uses Hash Mode.
+</p>
+
+<h2>How Hash Mode Works</h2>
+
+<div class="flow">
+User Opens
+/#/products
+<br>↓<br>
+Server Ignores Everything
+After #
+<br>↓<br>
+Returns index.html
+<br>↓<br>
+React Router Reads Hash
+<br>↓<br>
+Products Page
+</div>
+
+<p>
+The server never sees:
+</p>
+
+<pre><code class="language-text">#/products</code></pre>
+
+<p>
+because hashes are handled entirely by the browser.
+</p>
+
+<h2>Why Hash Mode Never Gets 404?</h2>
+
+<p>
+Server only receives:
+</p>
+
+<pre><code class="language-text">https://example.com/</code></pre>
+
+<p>
+Everything after # stays inside the browser.
+</p>
+
+<div class="flow">
+https://example.com/#/products
+
+<br>↓<br>
+
+Server Receives
+
+<br>↓<br>
+
+https://example.com/
+
+<br>↓<br>
+
+Always Returns index.html
+</div>
+
+<h2>Visual Comparison</h2>
+
+<h3>History Mode</h3>
+
+<pre><code class="language-text">https://example.com/products</code></pre>
+
+<h3>Hash Mode</h3>
+
+<pre><code class="language-text">https://example.com/#/products</code></pre>
+
+<h2>Project Structure</h2>
+
+<pre><code class="language-text">src/
+│
+├── main.jsx
+├── App.jsx
+│
+└── pages/
+    ├── Home.jsx
+    └── Products.jsx</code></pre>
+
+<h2>App Component</h2>
+
+<div class="file-name">
+File: src/App.jsx
+</div>
+
+<pre><code class="language-jsx">import { Routes, Route } from 'react-router-dom';
+import Home from './pages/Home';
+import Products from './pages/Products';
+
+function App() {
+  return (
+    &lt;Routes&gt;
+      &lt;Route path="/" element={&lt;Home /&gt;} /&gt;
+      &lt;Route path="/products" element={&lt;Products /&gt;} /&gt;
+    &lt;/Routes&gt;
+  );
+}
+
+export default App;</code></pre>
+
+<h2>Real World Usage</h2>
+
+<table>
+<tr>
+<th>Use History Mode</th>
+<th>Use Hash Mode</th>
+</tr>
+
+<tr>
+<td>Production React Apps</td>
+<td>Static Hosting</td>
+</tr>
+
+<tr>
+<td>Next.js</td>
+<td>Legacy Applications</td>
+</tr>
+
+<tr>
+<td>Professional Websites</td>
+<td>Quick Demos</td>
+</tr>
+
+<tr>
+<td>When Server Access Exists</td>
+<td>When Server Cannot Be Configured</td>
+</tr>
+</table>
+
+<h2>BrowserRouter vs HashRouter</h2>
+
+<table>
+<tr>
+<th>BrowserRouter</th>
+<th>HashRouter</th>
+</tr>
+
+<tr>
+<td>History Mode</td>
+<td>Hash Mode</td>
+</tr>
+
+<tr>
+<td>Clean URLs</td>
+<td># in URL</td>
+</tr>
+
+<tr>
+<td>Needs Server Support</td>
+<td>No Server Support Needed</td>
+</tr>
+
+<tr>
+<td>Can Refresh Fail</td>
+<td>Refresh Always Works</td>
+</tr>
+
+<tr>
+<td>Preferred</td>
+<td>Fallback Option</td>
+</tr>
+</table>
+
+<h2>Which One Should You Use?</h2>
+
+<div class="highlight">
+Use BrowserRouter (History Mode) whenever possible.
+<br><br>
+Use HashRouter only when you cannot configure the server.
+</div>
+
+<h2>Easy Way To Remember</h2>
+
+<div class="flow">
+History Mode
+<br>↓<br>
+Clean URLs
+<br>↓<br>
+Needs Server Support
+
+<br><br>
+
+Hash Mode
+<br>↓<br>
+#/ URLs
+<br>↓<br>
+No Server Support Needed
+</div>
+
+<h2>Interview Answer</h2>
+
+<div class="highlight">
+History Mode uses the browser History API to create clean URLs such as /products. It requires server support because refreshing a page sends the route to the server. Hash Mode stores the route after the # symbol, such as #/products. Since the server never receives the hash portion, it works without server configuration but produces less clean URLs.
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+History Mode uses clean URLs and requires server support, while Hash Mode uses # in the URL and works without server configuration.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+
+</body>
+</html>

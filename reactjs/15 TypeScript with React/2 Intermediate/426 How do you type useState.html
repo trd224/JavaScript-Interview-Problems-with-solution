@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>426 - How do you type useState?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+p,li{color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px}
+.success{background:#052e16;padding:18px;border-left:5px solid #22c55e;border-radius:10px;margin-top:15px}
+.warning{background:#1e1b4b;padding:18px;border-left:5px solid #fbbf24;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;text-align:center;line-height:2;font-size:18px}
+.file-name{background:#111827;color:#93c5fd;padding:12px 16px;border-radius:10px;border:1px solid #1e293b;font-weight:bold;margin-top:20px;margin-bottom:10px}
+
+pre[class*="language-"],code[class*="language-"]{
+  color:#f8f8f2;
+  background:#1e1e1e;
+  text-shadow:none;
+  font-family:Consolas,Monaco,'Courier New',monospace;
+  font-size:15px;
+}
+
+.token.keyword{color:#c792ea}
+.token.string{color:#c3e88d}
+.token.function{color:#82aaff}
+.token.tag{color:#f07178}
+.token.attr-name{color:#ffcb6b}
+.token.attr-value{color:#c3e88d}
+.token.punctuation{color:#89ddff}
+.token.operator{color:#89ddff}
+.token.class-name{color:#ffcb6b}
+.token.number{color:#f78c6c}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>426. How do you type useState?</h1>
+
+<h2>One-Line Definition</h2>
+
+<div class="highlight">
+In TypeScript, useState can automatically infer the type from the initial value, or you can explicitly provide the type using generics.
+</div>
+
+<h2>Basic Syntax</h2>
+
+<pre class="language-tsx"><code class="language-tsx">const [state, setState] = useState&lt;Type&gt;(initialValue);</code></pre>
+
+<div class="flow">
+useState
+<br>↓<br>
+Provide Type
+<br>↓<br>
+Type Safe State
+</div>
+
+<h2>Project Structure</h2>
+
+<pre class="language-text"><code class="language-text">src/
+│
+├── App.tsx
+└── components/
+    └── UserProfile.tsx</code></pre>
+
+<h2>Type Inference (Most Common)</h2>
+
+<div class="file-name">File: src/App.tsx</div>
+
+<pre class="language-tsx"><code class="language-tsx">import { useState } from 'react';
+
+function App() {
+  const [count, setCount] = useState(0);
+
+  return (
+    &lt;button onClick={() =&gt; setCount(count + 1)}&gt;
+      {count}
+    &lt;/button&gt;
+  );
+}
+
+export default App;</code></pre>
+
+<p>
+TypeScript automatically infers:
+</p>
+
+<pre class="language-tsx"><code class="language-tsx">count: number</code></pre>
+
+<div class="success">
+No generic needed because TypeScript already knows the type.
+</div>
+
+<h2>Explicit Type</h2>
+
+<div class="file-name">File: src/App.tsx</div>
+
+<pre class="language-tsx"><code class="language-tsx">const [count, setCount] = useState&lt;number&gt;(0);</code></pre>
+
+<p>
+Equivalent to:
+</p>
+
+<pre class="language-tsx"><code class="language-tsx">const [count, setCount] = useState(0);</code></pre>
+
+<h2>String State</h2>
+
+<div class="file-name">File: src/App.tsx</div>
+
+<pre class="language-tsx"><code class="language-tsx">const [name, setName] = useState&lt;string&gt;('Rizwan');</code></pre>
+
+<h2>Boolean State</h2>
+
+<div class="file-name">File: src/App.tsx</div>
+
+<pre class="language-tsx"><code class="language-tsx">const [loading, setLoading] = useState&lt;boolean&gt;(false);</code></pre>
+
+<h2>Why Generics Are Sometimes Required?</h2>
+
+<p>
+Problem:
+</p>
+
+<pre class="language-tsx"><code class="language-tsx">const [user, setUser] = useState(null);</code></pre>
+
+<p>
+TypeScript infers:
+</p>
+
+<pre class="language-tsx"><code class="language-tsx">user: null</code></pre>
+
+<p>
+Later:
+</p>
+
+<pre class="language-tsx"><code class="language-tsx">setUser({ id: 1, name: 'Rizwan' });</code></pre>
+
+<p>
+Error:
+</p>
+
+<pre class="language-text"><code class="language-text">Type '{ id: number; name: string; }'
+is not assignable to type 'null'</code></pre>
+
+<h2>Correct Solution</h2>
+
+<div class="file-name">File: src/App.tsx</div>
+
+<pre class="language-tsx"><code class="language-tsx">interface User {
+  id: number;
+  name: string;
+}
+
+const [user, setUser] = useState&lt;User | null&gt;(null);</code></pre>
+
+<div class="success">
+Now user can be either a User object or null.
+</div>
+
+<h2>Object State</h2>
+
+<div class="file-name">File: src/components/UserProfile.tsx</div>
+
+<pre class="language-tsx"><code class="language-tsx">interface User {
+  name: string;
+  age: number;
+}
+
+const [user, setUser] = useState&lt;User&gt;({
+  name: 'Rizwan',
+  age: 39
+});</code></pre>
+
+<h2>Array State</h2>
+
+<div class="file-name">File: src/App.tsx</div>
+
+<pre class="language-tsx"><code class="language-tsx">const [users, setUsers] = useState&lt;string[]&gt;([]);</code></pre>
+
+<h2>Array Of Objects</h2>
+
+<div class="file-name">File: src/App.tsx</div>
+
+<pre class="language-tsx"><code class="language-tsx">interface User {
+  id: number;
+  name: string;
+}
+
+const [users, setUsers] = useState&lt;User[]&gt;([]);</code></pre>
+
+<h2>Union Types</h2>
+
+<div class="file-name">File: src/App.tsx</div>
+
+<pre class="language-tsx"><code class="language-tsx">const [status, setStatus] = useState&lt;'loading' | 'success' | 'error'&gt;('loading');</code></pre>
+
+<h2>Optional State</h2>
+
+<div class="file-name">File: src/App.tsx</div>
+
+<pre class="language-tsx"><code class="language-tsx">const [token, setToken] = useState&lt;string | undefined&gt;();</code></pre>
+
+<h2>Real World Example</h2>
+
+<div class="file-name">File: src/components/Login.tsx</div>
+
+<pre class="language-tsx"><code class="language-tsx">import { useState } from 'react';
+
+interface User {
+  id: number;
+  name: string;
+}
+
+function Login() {
+  const [email, setEmail] = useState&lt;string&gt;('');
+  const [loading, setLoading] = useState&lt;boolean&gt;(false);
+  const [user, setUser] = useState&lt;User | null&gt;(null);
+
+  return (
+    &lt;div&gt;
+      &lt;input
+        value={email}
+        onChange={e =&gt; setEmail(e.target.value)}
+      /&gt;
+    &lt;/div&gt;
+  );
+}
+
+export default Login;</code></pre>
+
+<h2>Most Common Types</h2>
+
+<table>
+<tr>
+<th>State</th>
+<th>Type</th>
+</tr>
+
+<tr>
+<td>Number</td>
+<td>useState&lt;number&gt;(0)</td>
+</tr>
+
+<tr>
+<td>String</td>
+<td>useState&lt;string&gt;('')</td>
+</tr>
+
+<tr>
+<td>Boolean</td>
+<td>useState&lt;boolean&gt;(false)</td>
+</tr>
+
+<tr>
+<td>Array</td>
+<td>useState&lt;User[]&gt;([])</td>
+</tr>
+
+<tr>
+<td>Object</td>
+<td>useState&lt;User&gt;(...)</td>
+</tr>
+
+<tr>
+<td>Nullable</td>
+<td>useState&lt;User | null&gt;(null)</td>
+</tr>
+
+<tr>
+<td>Optional</td>
+<td>useState&lt;string | undefined&gt;()</td>
+</tr>
+</table>
+
+<h2>When Can You Skip The Generic?</h2>
+
+<div class="flow">
+Initial Value Exists
+<br>↓<br>
+TypeScript Infers Type
+<br>↓<br>
+Generic Optional
+</div>
+
+<p>Examples:</p>
+
+<pre class="language-tsx"><code class="language-tsx">useState(0);
+useState('');
+useState(false);</code></pre>
+
+<h2>When Should You Add The Generic?</h2>
+
+<div class="flow">
+null
+<br>or
+<br>
+undefined
+<br>or
+<br>
+Complex Objects
+<br>↓<br>
+Add Generic Type
+</div>
+
+<h2>Easy Way To Remember</h2>
+
+<div class="flow">
+useState&lt;Type&gt;(Value)
+<br>↓<br>
+number
+<br>string
+<br>boolean
+<br>object
+<br>array
+</div>
+
+<h2>Interview Answer</h2>
+
+<div class="highlight">
+useState is typed using TypeScript generics. In simple cases, TypeScript can infer the type from the initial value. For nullable, optional, object, array, or union states, you should explicitly provide a type such as useState&lt;User | null&gt;(null).
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+Type useState using generics like useState&lt;Type&gt;(initialValue), especially when the state can be null, undefined, or a complex object.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-tsx.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js"></script>
+
+</body>
+</html>

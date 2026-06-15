@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>288 - What is the watch Function in React Hook Form?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px;margin-bottom:10px}
+p{color:#cbd5e1}
+ul{padding-left:24px}
+li{margin-bottom:10px;color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px;margin-top:15px}
+.success{background:#052e16;padding:18px;border-left:5px solid #22c55e;border-radius:10px;margin-top:15px}
+.warning{background:#1e1b4b;border-left:5px solid #fbbf24;padding:18px;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;margin-top:15px;text-align:center;line-height:2;font-size:18px}
+.file-name{background:#111827;color:#93c5fd;padding:12px 16px;border-radius:10px;margin-top:20px;margin-bottom:10px;border:1px solid #1e293b;font-weight:bold}
+pre{border-radius:12px;overflow-x:auto}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>288. What is the watch Function in React Hook Form?</h1>
+
+<h2>One-Line Definition</h2>
+
+<div class="highlight">
+watch() is a React Hook Form function used to read and monitor field values in real time as the user types.
+</div>
+
+<h2>Why Do We Need watch()?</h2>
+
+<p>
+Sometimes we need the current value of a field before form submission.
+</p>
+
+<p>
+Examples:
+</p>
+
+<ul>
+<li>Show live preview</li>
+<li>Enable/disable fields</li>
+<li>Show password strength</li>
+<li>Confirm password validation</li>
+<li>Conditional form fields</li>
+</ul>
+
+<h2>How watch() Works</h2>
+
+<div class="flow">
+User Types
+<br>↓<br>
+watch()
+<br>↓<br>
+Gets Current Value
+<br>↓<br>
+UI Updates
+</div>
+
+<h2>Project Structure</h2>
+
+<pre><code class="language-text">src/
+│
+├── App.jsx
+│
+└── components/
+    └── LoginForm.jsx</code></pre>
+
+<h2>Basic Example</h2>
+
+<div class="file-name">File: src/components/LoginForm.jsx</div>
+
+<pre><code class="language-jsx">import { useForm } from 'react-hook-form';
+
+function LoginForm() {
+  const { register, watch } = useForm();
+
+  const email = watch('email');
+
+  return (
+    &lt;&gt;
+      &lt;input placeholder="Email" {...register('email')} /&gt;
+      &lt;p&gt;Current Value: {email}&lt;/p&gt;
+    &lt;/&gt;
+  );
+}
+
+export default LoginForm;</code></pre>
+
+<p>
+As the user types, the paragraph updates automatically.
+</p>
+
+<h2>What Happens Internally?</h2>
+
+<div class="flow">
+Type "r"
+<br>↓<br>
+watch('email')
+<br>↓<br>
+"r"
+
+<br><br>
+
+Type "ri"
+<br>↓<br>
+watch('email')
+<br>↓<br>
+"ri"
+
+<br><br>
+
+Type "riz"
+<br>↓<br>
+watch('email')
+<br>↓<br>
+"riz"
+</div>
+
+<h2>Watch Multiple Fields</h2>
+
+<div class="file-name">File: src/components/RegisterForm.jsx</div>
+
+<pre><code class="language-jsx">import { useForm } from 'react-hook-form';
+
+function RegisterForm() {
+  const { register, watch } = useForm();
+
+  const name = watch('name');
+  const email = watch('email');
+
+  return (
+    &lt;&gt;
+      &lt;input placeholder="Name" {...register('name')} /&gt;
+      &lt;input placeholder="Email" {...register('email')} /&gt;
+
+      &lt;p&gt;Name: {name}&lt;/p&gt;
+      &lt;p&gt;Email: {email}&lt;/p&gt;
+    &lt;/&gt;
+  );
+}
+
+export default RegisterForm;</code></pre>
+
+<h2>Watch Entire Form</h2>
+
+<div class="file-name">File: src/components/RegisterForm.jsx</div>
+
+<pre><code class="language-jsx">import { useForm } from 'react-hook-form';
+
+function RegisterForm() {
+  const { register, watch } = useForm();
+
+  const formValues = watch();
+
+  console.log(formValues);
+
+  return (
+    &lt;&gt;
+      &lt;input placeholder="Name" {...register('name')} /&gt;
+      &lt;input placeholder="Email" {...register('email')} /&gt;
+    &lt;/&gt;
+  );
+}
+
+export default RegisterForm;</code></pre>
+
+<p>
+Output:
+</p>
+
+<pre><code class="language-jsx">{
+  name: 'Rizwan',
+  email: 'rizwan@gmail.com'
+}</code></pre>
+
+<h2>Watch Multiple Fields Together</h2>
+
+<div class="file-name">File: src/components/RegisterForm.jsx</div>
+
+<pre><code class="language-jsx">const [name, email] = watch(['name', 'email']);</code></pre>
+
+<p>
+Output:
+</p>
+
+<pre><code class="language-jsx">name  = 'Rizwan'
+email = 'rizwan@gmail.com'</code></pre>
+
+<h2>Real World Example - Password Confirmation</h2>
+
+<div class="file-name">File: src/components/RegisterForm.jsx</div>
+
+<pre><code class="language-jsx">import { useForm } from 'react-hook-form';
+
+function RegisterForm() {
+  const { register, watch } = useForm();
+
+  const password = watch('password');
+
+  return (
+    &lt;&gt;
+      &lt;input type="password" placeholder="Password" {...register('password')} /&gt;
+      &lt;p&gt;Length: {password?.length || 0}&lt;/p&gt;
+    &lt;/&gt;
+  );
+}
+
+export default RegisterForm;</code></pre>
+
+<h2>Real World Example - Live Preview</h2>
+
+<div class="file-name">File: src/components/ProfileForm.jsx</div>
+
+<pre><code class="language-jsx">import { useForm } from 'react-hook-form';
+
+function ProfileForm() {
+  const { register, watch } = useForm();
+
+  const name = watch('name');
+
+  return (
+    &lt;&gt;
+      &lt;input placeholder="Name" {...register('name')} /&gt;
+
+      &lt;h3&gt;Preview:&lt;/h3&gt;
+      &lt;p&gt;{name}&lt;/p&gt;
+    &lt;/&gt;
+  );
+}
+
+export default ProfileForm;</code></pre>
+
+<h2>watch() vs getValues()</h2>
+
+<table>
+<tr>
+<th>watch()</th>
+<th>getValues()</th>
+</tr>
+
+<tr>
+<td>Live updates</td>
+<td>Snapshot only</td>
+</tr>
+
+<tr>
+<td>Re-renders UI</td>
+<td>No re-render</td>
+</tr>
+
+<tr>
+<td>Tracks changes</td>
+<td>Gets current value once</td>
+</tr>
+
+<tr>
+<td>Used for UI updates</td>
+<td>Used for logic</td>
+</tr>
+</table>
+
+<h2>Common Uses</h2>
+
+<ul>
+<li>Live previews</li>
+<li>Password strength meter</li>
+<li>Conditional fields</li>
+<li>Dynamic forms</li>
+<li>Real-time validation</li>
+</ul>
+
+<h2>Easy Way To Remember</h2>
+
+<div class="flow">
+register()
+<br>↓<br>
+User Types
+<br>↓<br>
+watch()
+<br>↓<br>
+Current Value
+<br>↓<br>
+Update UI
+</div>
+
+<h2>Interview Answer</h2>
+
+<div class="highlight">
+The watch() function is used to monitor form field values in real time. It allows React Hook Form to provide the current value of one or more fields and is commonly used for live previews, conditional rendering, and dynamic form behavior.
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+watch() is used to observe and retrieve form field values in real time as the user types.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+
+</body>
+</html>

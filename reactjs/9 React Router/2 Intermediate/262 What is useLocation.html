@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>262 - What is useLocation?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px;margin-bottom:10px}
+p{color:#cbd5e1}
+ul{padding-left:24px}
+li{margin-bottom:10px;color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left;vertical-align:top}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px;margin-top:15px}
+.warning{background:#1e1b4b;border-left:5px solid #fbbf24;padding:18px;border-radius:10px;margin-top:15px}
+.success{background:#052e16;padding:18px;border-left:5px solid #22c55e;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;margin-top:15px;text-align:center;line-height:2;font-size:18px}
+.file-name{background:#111827;color:#93c5fd;padding:12px 16px;border-radius:10px;margin-top:20px;margin-bottom:10px;border:1px solid #1e293b;font-weight:bold}
+pre{border-radius:12px;overflow-x:auto}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>262. What is useLocation?</h1>
+
+<h2>One-Line Definition</h2>
+
+<div class="highlight">
+useLocation is a React Router hook that gives access to the current URL information.
+</div>
+
+<h2>Why Do We Need useLocation?</h2>
+
+<p>
+Sometimes a component needs to know:
+</p>
+
+<ul>
+<li>Current pathname</li>
+<li>Current query string</li>
+<li>Current hash value</li>
+<li>Navigation state data</li>
+</ul>
+
+<p>
+useLocation provides all of this information.
+</p>
+
+<div class="warning">
+Without useLocation, you would need to manually read information from the browser URL.
+</div>
+
+<h2>Example URL</h2>
+
+<pre><code class="language-text">http://localhost:3000/products?page=2#reviews</code></pre>
+
+<h2>Project Structure</h2>
+
+<pre><code class="language-text">src/
+│
+├── App.jsx
+│
+└── pages/
+    └── Products.jsx</code></pre>
+
+<h2>Complete Example With Separate Files</h2>
+
+<div class="file-name">
+File: src/App.jsx
+</div>
+
+<pre><code class="language-jsx">import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import Products from './pages/Products';
+
+function App() {
+  return (
+    &lt;BrowserRouter&gt;
+      &lt;Routes&gt;
+        &lt;Route path="/products" element={&lt;Products /&gt;} /&gt;
+      &lt;/Routes&gt;
+    &lt;/BrowserRouter&gt;
+  );
+}
+
+export default App;</code></pre>
+
+<div class="file-name">
+File: src/pages/Products.jsx
+</div>
+
+<pre><code class="language-jsx">import { useLocation } from 'react-router-dom';
+
+function Products() {
+  const location = useLocation();
+
+  return (
+    &lt;&gt;
+      &lt;h2&gt;Pathname: {location.pathname}&lt;/h2&gt;
+      &lt;h2&gt;Search: {location.search}&lt;/h2&gt;
+      &lt;h2&gt;Hash: {location.hash}&lt;/h2&gt;
+    &lt;/&gt;
+  );
+}
+
+export default Products;</code></pre>
+
+<h2>What Does useLocation Return?</h2>
+
+<pre><code class="language-jsx">const location = useLocation();</code></pre>
+
+<p>
+Location object:
+</p>
+
+<pre><code class="language-jsx">{
+  pathname: '/products',
+  search: '?page=2',
+  hash: '#reviews',
+  state: null,
+  key: 'abc123'
+}</code></pre>
+
+<h2>Important Properties</h2>
+
+<table>
+<tr>
+<th>Property</th>
+<th>Description</th>
+</tr>
+
+<tr>
+<td>pathname</td>
+<td>Current route path.</td>
+</tr>
+
+<tr>
+<td>search</td>
+<td>Query string.</td>
+</tr>
+
+<tr>
+<td>hash</td>
+<td>URL fragment.</td>
+</tr>
+
+<tr>
+<td>state</td>
+<td>Data passed during navigation.</td>
+</tr>
+
+<tr>
+<td>key</td>
+<td>Unique route identifier.</td>
+</tr>
+</table>
+
+<h2>Reading Current Path</h2>
+
+<pre><code class="language-jsx">const location = useLocation();
+
+console.log(location.pathname);</code></pre>
+
+<p>
+Output:
+</p>
+
+<pre><code class="language-text">/products</code></pre>
+
+<h2>Reading Query String</h2>
+
+<pre><code class="language-jsx">const location = useLocation();
+
+console.log(location.search);</code></pre>
+
+<p>
+Output:
+</p>
+
+<pre><code class="language-text">?page=2</code></pre>
+
+<h2>Reading Hash</h2>
+
+<pre><code class="language-jsx">const location = useLocation();
+
+console.log(location.hash);</code></pre>
+
+<p>
+Output:
+</p>
+
+<pre><code class="language-text">#reviews</code></pre>
+
+<h2>Using Navigation State</h2>
+
+<div class="file-name">
+File: src/pages/Home.jsx
+</div>
+
+<pre><code class="language-jsx">import { useNavigate } from 'react-router-dom';
+
+function Home() {
+  const navigate = useNavigate();
+
+  return (
+    &lt;button
+      onClick={() =>
+        navigate('/profile', {
+          state: {
+            username: 'Rizwan'
+          }
+        })
+      }
+    &gt;
+      Open Profile
+    &lt;/button&gt;
+  );
+}
+
+export default Home;</code></pre>
+
+<div class="file-name">
+File: src/pages/Profile.jsx
+</div>
+
+<pre><code class="language-jsx">import { useLocation } from 'react-router-dom';
+
+function Profile() {
+  const location = useLocation();
+
+  return (
+    &lt;h2&gt;
+      {location.state.username}
+    &lt;/h2&gt;
+  );
+}
+
+export default Profile;</code></pre>
+
+<h2>How It Works</h2>
+
+<div class="flow">
+Current URL
+<br>↓<br>
+useLocation()
+<br>↓<br>
+Location Object
+<br>↓<br>
+pathname
+search
+hash
+state
+</div>
+
+<h2>Common Use Cases</h2>
+
+<ul>
+<li>Highlight active menu links</li>
+<li>Analytics tracking</li>
+<li>Breadcrumb generation</li>
+<li>Route-based UI changes</li>
+<li>Reading navigation state</li>
+</ul>
+
+<h2>Real World Example</h2>
+
+<p>
+Most dashboards highlight the active menu item based on the current pathname.
+</p>
+
+<pre><code class="language-jsx">const location = useLocation();
+
+const isUsersPage =
+  location.pathname === '/users';</code></pre>
+
+<div class="success">
+This is one of the most common real-world uses of useLocation.
+</div>
+
+<h2>useLocation vs useSearchParams</h2>
+
+<table>
+<tr>
+<th>useLocation</th>
+<th>useSearchParams</th>
+</tr>
+
+<tr>
+<td>Returns complete URL information.</td>
+<td>Works specifically with query params.</td>
+</tr>
+
+<tr>
+<td>pathname, search, hash, state.</td>
+<td>Read/update query strings.</td>
+</tr>
+
+<tr>
+<td>Read-only URL details.</td>
+<td>Can update query params.</td>
+</tr>
+</table>
+
+<h2>Easy Way To Remember</h2>
+
+<div class="flow">
+Current URL
+<br>↓<br>
+useLocation()
+<br>↓<br>
+Get URL Information
+<br>↓<br>
+pathname
+search
+hash
+state
+</div>
+
+<h2>Interview Answer</h2>
+
+<div class="highlight">
+useLocation is a React Router hook that provides information about the current URL. It returns a location object containing pathname, search query, hash, and navigation state, which is useful for route-based UI logic and reading URL details.
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+useLocation is used to access information about the current URL in React Router.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+
+</body>
+</html>

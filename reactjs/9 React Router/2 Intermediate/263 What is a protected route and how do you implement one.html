@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>263 - What is a Protected Route and How Do You Implement One?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px;margin-bottom:10px}
+p{color:#cbd5e1}
+ul{padding-left:24px}
+li{margin-bottom:10px;color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left;vertical-align:top}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px;margin-top:15px}
+.warning{background:#1e1b4b;border-left:5px solid #fbbf24;padding:18px;border-radius:10px;margin-top:15px}
+.success{background:#052e16;padding:18px;border-left:5px solid #22c55e;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;margin-top:15px;text-align:center;line-height:2;font-size:18px}
+.file-name{background:#111827;color:#93c5fd;padding:12px 16px;border-radius:10px;margin-top:20px;margin-bottom:10px;border:1px solid #1e293b;font-weight:bold}
+pre{border-radius:12px;overflow-x:auto}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>263. What is a Protected Route and How Do You Implement One?</h1>
+
+<h2>One-Line Definition</h2>
+
+<div class="highlight">
+A Protected Route restricts access to specific pages and allows only authenticated users to view them.
+</div>
+
+<h2>Why Do We Need Protected Routes?</h2>
+
+<p>
+Some pages should only be accessible after login.
+</p>
+
+<p>
+Examples:
+</p>
+
+<ul>
+<li>User Dashboard</li>
+<li>Profile Page</li>
+<li>Order History</li>
+<li>Admin Panel</li>
+<li>Settings Page</li>
+</ul>
+
+<p>
+If a user is not logged in, they should be redirected to the login page.
+</p>
+
+<div class="warning">
+Protected Routes are a frontend convenience only. Real security must always be enforced by the backend API.
+</div>
+
+<h2>How It Works</h2>
+
+<div class="flow">
+User Opens Protected Page
+<br>↓<br>
+Check Authentication
+<br>↓<br>
+Logged In ?
+<br>↓<br>
+YES → Show Page
+<br>↓<br>
+NO → Redirect To Login
+</div>
+
+<h2>Project Structure</h2>
+
+<pre><code class="language-text">src/
+│
+├── App.jsx
+│
+├── components/
+│   └── ProtectedRoute.jsx
+│
+└── pages/
+    ├── Login.jsx
+    ├── Dashboard.jsx
+    └── Home.jsx</code></pre>
+
+<h2>Complete Example With Separate Files</h2>
+
+<div class="file-name">
+File: src/App.jsx
+</div>
+
+<pre><code class="language-jsx">import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import Home from './pages/Home';
+import Login from './pages/Login';
+import Dashboard from './pages/Dashboard';
+import ProtectedRoute from './components/ProtectedRoute';
+
+function App() {
+  return (
+    &lt;BrowserRouter&gt;
+      &lt;Routes&gt;
+
+        &lt;Route path="/" element={&lt;Home /&gt;} /&gt;
+
+        &lt;Route path="/login" element={&lt;Login /&gt;} /&gt;
+
+        &lt;Route
+          path="/dashboard"
+          element={
+            &lt;ProtectedRoute&gt;
+              &lt;Dashboard /&gt;
+            &lt;/ProtectedRoute&gt;
+          }
+        /&gt;
+
+      &lt;/Routes&gt;
+    &lt;/BrowserRouter&gt;
+  );
+}
+
+export default App;</code></pre>
+
+<div class="file-name">
+File: src/components/ProtectedRoute.jsx
+</div>
+
+<pre><code class="language-jsx">import { Navigate } from 'react-router-dom';
+
+function ProtectedRoute({ children }) {
+  const isAuthenticated = localStorage.getItem('token');
+
+  if (!isAuthenticated) {
+    return &lt;Navigate to="/login" replace /&gt;;
+  }
+
+  return children;
+}
+
+export default ProtectedRoute;</code></pre>
+
+<div class="file-name">
+File: src/pages/Login.jsx
+</div>
+
+<pre><code class="language-jsx">function Login() {
+
+  function handleLogin() {
+    localStorage.setItem('token', 'abc123');
+    window.location.href = '/dashboard';
+  }
+
+  return (
+    &lt;&gt;
+      &lt;h1&gt;Login Page&lt;/h1&gt;
+
+      &lt;button onClick={handleLogin}&gt;
+        Login
+      &lt;/button&gt;
+    &lt;/&gt;
+  );
+}
+
+export default Login;</code></pre>
+
+<div class="file-name">
+File: src/pages/Dashboard.jsx
+</div>
+
+<pre><code class="language-jsx">function Dashboard() {
+  return &lt;h1&gt;Dashboard Page&lt;/h1&gt;;
+}
+
+export default Dashboard;</code></pre>
+
+<div class="file-name">
+File: src/pages/Home.jsx
+</div>
+
+<pre><code class="language-jsx">function Home() {
+  return &lt;h1&gt;Home Page&lt;/h1&gt;;
+}
+
+export default Home;</code></pre>
+
+<h2>What Does Navigate Do?</h2>
+
+<pre><code class="language-jsx">return &lt;Navigate to="/login" replace /&gt;;</code></pre>
+
+<p>
+Navigate redirects the user to another route.
+</p>
+
+<p>
+If the user is not authenticated:
+</p>
+
+<pre><code class="language-text">/dashboard
+    ↓
+ProtectedRoute
+    ↓
+Not Logged In
+    ↓
+/login</code></pre>
+
+<div class="success">
+Navigate is the modern replacement for Redirect in React Router v6.
+</div>
+
+<h2>Real-World Example</h2>
+
+<p>
+Most e-commerce websites protect pages like:
+</p>
+
+<pre><code class="language-text">/profile
+/orders
+/wishlist
+/checkout</code></pre>
+
+<p>
+Unauthenticated users are redirected to:
+</p>
+
+<pre><code class="language-text">/login</code></pre>
+
+<h2>Better Production Example</h2>
+
+<p>
+Instead of localStorage directly, authentication state is usually stored in:
+</p>
+
+<ul>
+<li>Context API</li>
+<li>Redux</li>
+<li>Zustand</li>
+<li>React Query</li>
+</ul>
+
+<pre><code class="language-jsx">const { user } = useAuth();
+
+if (!user) {
+  return &lt;Navigate to="/login" replace /&gt;;
+}
+
+return children;</code></pre>
+
+<h2>Protected Route vs Public Route</h2>
+
+<table>
+<tr>
+<th>Public Route</th>
+<th>Protected Route</th>
+</tr>
+
+<tr>
+<td>/home</td>
+<td>/dashboard</td>
+</tr>
+
+<tr>
+<td>/about</td>
+<td>/profile</td>
+</tr>
+
+<tr>
+<td>/contact</td>
+<td>/orders</td>
+</tr>
+
+<tr>
+<td>Accessible by everyone.</td>
+<td>Requires login.</td>
+</tr>
+</table>
+
+<h2>Easy Way To Remember</h2>
+
+<div class="flow">
+Protected Route
+<br>↓<br>
+Check Login Status
+<br>↓<br>
+Logged In ?
+<br>↓<br>
+YES → Render Page
+<br>↓<br>
+NO → Redirect Login
+</div>
+
+<h2>Interview Answer</h2>
+
+<div class="highlight">
+A Protected Route is a route that only authenticated users can access. In React Router v6, it is commonly implemented using a wrapper component that checks authentication status and either renders the requested page or redirects the user to the login page using Navigate.
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+A Protected Route restricts access to authenticated users and redirects unauthenticated users to the login page.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+
+</body>
+</html>

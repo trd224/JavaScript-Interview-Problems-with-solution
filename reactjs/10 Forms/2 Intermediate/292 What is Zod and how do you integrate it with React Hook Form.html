@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>292 - What is Zod and How Do You Integrate It With React Hook Form?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px;margin-bottom:10px}
+p{color:#cbd5e1}
+ul{padding-left:24px}
+li{margin-bottom:10px;color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px;margin-top:15px}
+.success{background:#052e16;padding:18px;border-left:5px solid #22c55e;border-radius:10px;margin-top:15px}
+.warning{background:#1e1b4b;padding:18px;border-left:5px solid #fbbf24;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;text-align:center;line-height:2;font-size:18px;margin-top:15px}
+.file-name{background:#111827;color:#93c5fd;padding:12px 16px;border-radius:10px;border:1px solid #1e293b;font-weight:bold;margin-top:20px;margin-bottom:10px}
+pre{border-radius:12px;overflow-x:auto}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>292. What is Zod and How Do You Integrate It With React Hook Form?</h1>
+
+<h2>One-Line Definition</h2>
+
+<div class="highlight">
+Zod is a schema validation library used to define validation rules in one place and integrate them with React Hook Form using zodResolver().
+</div>
+
+<h2>Why Use Zod With React Hook Form?</h2>
+
+<ul>
+<li>Validation rules stay in one schema file.</li>
+<li>Code becomes cleaner.</li>
+<li>Validation is reusable.</li>
+<li>Works well with TypeScript.</li>
+<li>Supports advanced validation like password match.</li>
+</ul>
+
+<div class="warning">
+React Hook Form handles the form, while Zod handles the validation rules.
+</div>
+
+<h2>Validation Flow</h2>
+
+<div class="flow">
+User Submits Form
+<br>↓<br>
+React Hook Form
+<br>↓<br>
+zodResolver()
+<br>↓<br>
+Zod Schema
+<br>↓<br>
+Valid Data Or Errors
+</div>
+
+<h2>Install Packages</h2>
+
+<pre><code class="language-bash">npm install react-hook-form zod @hookform/resolvers</code></pre>
+
+<h2>Project Structure</h2>
+
+<pre><code class="language-text">src/
+│
+├── App.jsx
+├── schemas/
+│   └── loginSchema.js
+└── components/
+    └── LoginForm.jsx</code></pre>
+
+<h2>Step 1 - Create Zod Schema</h2>
+
+<div class="file-name">File: src/schemas/loginSchema.js</div>
+
+<pre><code class="language-js">import { z } from 'zod';
+
+export const loginSchema = z.object({
+  email: z.string().min(1, 'Email is required').email('Invalid email address'),
+  password: z.string().min(6, 'Password must be at least 6 characters')
+});</code></pre>
+
+<h2>Step 2 - Use zodResolver With useForm()</h2>
+
+<div class="file-name">File: src/components/LoginForm.jsx</div>
+
+<pre><code class="language-jsx">import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { loginSchema } from '../schemas/loginSchema';
+
+function LoginForm() {
+  const { register, handleSubmit, formState: { errors } } = useForm({ resolver: zodResolver(loginSchema) });
+
+  function onSubmit(data) {
+    console.log(data);
+  }
+
+  return (
+    &lt;form onSubmit={handleSubmit(onSubmit)}&gt;
+      &lt;input placeholder="Email" {...register('email')} /&gt;
+      {errors.email && &lt;p className="error"&gt;{errors.email.message}&lt;/p&gt;}
+
+      &lt;input type="password" placeholder="Password" {...register('password')} /&gt;
+      {errors.password && &lt;p className="error"&gt;{errors.password.message}&lt;/p&gt;}
+
+      &lt;button type="submit"&gt;Login&lt;/button&gt;
+    &lt;/form&gt;
+  );
+}
+
+export default LoginForm;</code></pre>
+
+<h2>Step 3 - Add Error Color</h2>
+
+<div class="file-name">File: src/App.css</div>
+
+<pre><code class="language-css">.error {
+  color: #ef4444;
+  font-size: 14px;
+  margin-top: 6px;
+}</code></pre>
+
+<div class="success">
+Zod creates the error message. CSS gives the error message color.
+</div>
+
+<h2>Step 4 - Use Form Component</h2>
+
+<div class="file-name">File: src/App.jsx</div>
+
+<pre><code class="language-jsx">import LoginForm from './components/LoginForm';
+import './App.css';
+
+function App() {
+  return &lt;LoginForm /&gt;;
+}
+
+export default App;</code></pre>
+
+<h2>What is zodResolver?</h2>
+
+<div class="highlight">
+zodResolver() connects a Zod schema with React Hook Form.
+</div>
+
+<pre><code class="language-jsx">useForm({ resolver: zodResolver(loginSchema) });</code></pre>
+
+<p>
+This means React Hook Form will validate form data using the Zod schema before calling onSubmit().
+</p>
+
+<h2>What Happens If Validation Fails?</h2>
+
+<div class="flow">
+Invalid Email
+<br>↓<br>
+Zod Checks Schema
+<br>↓<br>
+Creates Error Message
+<br>↓<br>
+React Hook Form Stores It In errors
+<br>↓<br>
+UI Shows Error Message
+</div>
+
+<h2>Example Error Object</h2>
+
+<pre><code class="language-js">{
+  email: {
+    message: 'Invalid email address'
+  },
+  password: {
+    message: 'Password must be at least 6 characters'
+  }
+}</code></pre>
+
+<h2>Password Confirm Example</h2>
+
+<div class="file-name">File: src/schemas/registerSchema.js</div>
+
+<pre><code class="language-js">import { z } from 'zod';
+
+export const registerSchema = z.object({
+  password: z.string().min(6, 'Password must be at least 6 characters'),
+  confirmPassword: z.string().min(1, 'Confirm password is required')
+}).refine(data => data.password === data.confirmPassword, {
+  message: 'Passwords do not match',
+  path: ['confirmPassword']
+});</code></pre>
+
+<div class="success">
+refine() is used when validation depends on multiple fields.
+</div>
+
+<h2>React Hook Form Validation vs Zod Validation</h2>
+
+<table>
+<tr>
+<th>React Hook Form Rules</th>
+<th>Zod Schema</th>
+</tr>
+
+<tr>
+<td>Validation is written near inputs.</td>
+<td>Validation is written in one schema.</td>
+</tr>
+
+<tr>
+<td>Good for small forms.</td>
+<td>Better for large forms.</td>
+</tr>
+
+<tr>
+<td>Less reusable.</td>
+<td>Reusable across forms and APIs.</td>
+</tr>
+
+<tr>
+<td>Basic validation.</td>
+<td>Advanced schema validation.</td>
+</tr>
+</table>
+
+<h2>Easy Way To Remember</h2>
+
+<div class="flow">
+Zod
+<br>↓<br>
+Validation Schema
+<br>↓<br>
+zodResolver()
+<br>↓<br>
+React Hook Form
+<br>↓<br>
+errors Object
+</div>
+
+<h2>Interview Answer</h2>
+
+<div class="highlight">
+Zod is a schema validation library used to define validation rules in one place. It is integrated with React Hook Form using zodResolver from @hookform/resolvers/zod. React Hook Form manages the form, while Zod validates the form data and returns error messages through the errors object.
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+Zod is integrated with React Hook Form by passing zodResolver(schema) to useForm().
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-js.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js"></script>
+
+</body>
+</html>

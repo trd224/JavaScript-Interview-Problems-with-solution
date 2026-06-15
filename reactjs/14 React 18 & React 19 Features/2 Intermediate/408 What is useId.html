@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>408 - What is useId?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px;margin-bottom:10px}
+p{color:#cbd5e1}
+ul{padding-left:24px}
+li{margin-bottom:10px;color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px}
+.success{background:#052e16;padding:18px;border-left:5px solid #22c55e;border-radius:10px;margin-top:15px}
+.warning{background:#1e1b4b;padding:18px;border-left:5px solid #fbbf24;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;text-align:center;line-height:2;font-size:18px}
+.file-name{background:#111827;color:#93c5fd;padding:12px 16px;border-radius:10px;border:1px solid #1e293b;font-weight:bold;margin-top:20px;margin-bottom:10px}
+pre{border-radius:12px;overflow-x:auto}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>408. What is useId?</h1>
+
+<h2>One-Line Definition</h2>
+
+<div class="highlight">
+useId() is a React 18 hook that generates unique and stable IDs for components, especially useful for form accessibility and Server-Side Rendering (SSR).
+</div>
+
+<h2>Why Do We Need useId?</h2>
+
+<p>
+Consider a form:
+</p>
+
+<pre><code class="language-jsx">&lt;label htmlFor="email"&gt;
+  Email
+&lt;/label&gt;
+
+&lt;input id="email" /&gt;</code></pre>
+
+<p>
+This works for a single input.
+</p>
+
+<p>
+But imagine rendering multiple forms:
+</p>
+
+<pre><code class="language-jsx">&lt;LoginForm /&gt;
+&lt;LoginForm /&gt;
+&lt;LoginForm /&gt;</code></pre>
+
+<p>
+Now all inputs may use the same id:
+</p>
+
+<pre><code class="language-html">&lt;input id="email" /&gt;
+&lt;input id="email" /&gt;
+&lt;input id="email" /&gt;</code></pre>
+
+<div class="warning">
+HTML IDs must be unique.
+</div>
+
+<h2>Solution: useId()</h2>
+
+<div class="flow">
+Component Render
+<br>↓<br>
+useId()
+<br>↓<br>
+Generate Unique ID
+<br>↓<br>
+Attach To Label + Input
+<br>↓<br>
+No ID Conflicts
+</div>
+
+<h2>Basic Example</h2>
+
+<div class="file-name">File: src/components/LoginForm.jsx</div>
+
+<pre><code class="language-jsx">import { useId } from 'react';
+
+function LoginForm() {
+  const id = useId();
+
+  return (
+    &lt;&gt;
+      &lt;label htmlFor={id}&gt;
+        Email
+      &lt;/label&gt;
+
+      &lt;input id={id} /&gt;
+    &lt;/&gt;
+  );
+}
+
+export default LoginForm;</code></pre>
+
+<h2>Use Component</h2>
+
+<div class="file-name">File: src/App.jsx</div>
+
+<pre><code class="language-jsx">import LoginForm from './components/LoginForm';
+
+function App() {
+  return (
+    &lt;&gt;
+      &lt;LoginForm /&gt;
+      &lt;LoginForm /&gt;
+      &lt;LoginForm /&gt;
+    &lt;/&gt;
+  );
+}
+
+export default App;</code></pre>
+
+<h2>Generated IDs</h2>
+
+<p>
+React automatically creates unique IDs:
+</p>
+
+<pre><code class="language-text">:r0:
+:r1:
+:r2:</code></pre>
+
+<div class="success">
+Every component gets its own unique ID.
+</div>
+
+<h2>Real World Form Example</h2>
+
+<div class="file-name">File: src/components/RegisterForm.jsx</div>
+
+<pre><code class="language-jsx">import { useId } from 'react';
+
+function RegisterForm() {
+  const emailId = useId();
+  const passwordId = useId();
+
+  return (
+    &lt;form&gt;
+
+      &lt;label htmlFor={emailId}&gt;
+        Email
+      &lt;/label&gt;
+
+      &lt;input id={emailId} type="email" /&gt;
+
+      &lt;label htmlFor={passwordId}&gt;
+        Password
+      &lt;/label&gt;
+
+      &lt;input id={passwordId} type="password" /&gt;
+
+    &lt;/form&gt;
+  );
+}
+
+export default RegisterForm;</code></pre>
+
+<h2>Accessibility Benefit</h2>
+
+<div class="flow">
+Label
+<br>↓<br>
+htmlFor
+<br>↓<br>
+Input ID
+<br>↓<br>
+Screen Readers Understand Relationship
+</div>
+
+<p>
+This improves accessibility (a11y).
+</p>
+
+<h2>Without useId()</h2>
+
+<pre><code class="language-jsx">function LoginForm() {
+  return (
+    &lt;&gt;
+      &lt;label htmlFor="email"&gt;Email&lt;/label&gt;
+      &lt;input id="email" /&gt;
+    &lt;/&gt;
+  );
+}</code></pre>
+
+<p>
+Multiple forms create duplicate IDs.
+</p>
+
+<h2>With useId()</h2>
+
+<pre><code class="language-jsx">const id = useId();
+
+&lt;label htmlFor={id}&gt;Email&lt;/label&gt;
+&lt;input id={id} /&gt;</code></pre>
+
+<p>
+Every form gets a unique ID.
+</p>
+
+<h2>Why Not Use Math.random()?</h2>
+
+<p>
+Some developers do:
+</p>
+
+<pre><code class="language-jsx">const id = Math.random();</code></pre>
+
+<div class="warning">
+Bad idea for React SSR.
+</div>
+
+<p>
+Because:
+</p>
+
+<div class="flow">
+Server Generates ID
+<br>↓<br>
+Client Generates Different ID
+<br>↓<br>
+Hydration Mismatch
+</div>
+
+<h2>Why useId Is Better?</h2>
+
+<div class="flow">
+Server Render
+<br>↓<br>
+Generate ID
+<br>↓<br>
+Client Hydration
+<br>↓<br>
+Same ID
+<br>↓<br>
+No Mismatch
+</div>
+
+<div class="success">
+useId was specifically designed to work with SSR.
+</div>
+
+<h2>Common Interview Question</h2>
+
+<h3>Can useId Be Used As React Keys?</h3>
+
+<p>
+No.
+</p>
+
+❌ Wrong:
+
+<pre><code class="language-jsx">items.map(item => (
+  &lt;li key={useId()}&gt;
+    {item}
+  &lt;/li&gt;
+))</code></pre>
+
+✅ Correct:
+
+<pre><code class="language-jsx">items.map(item => (
+  &lt;li key={item.id}&gt;
+    {item.name}
+  &lt;/li&gt;
+))</code></pre>
+
+<div class="warning">
+useId is for accessibility IDs, not list keys.
+</div>
+
+<h2>React 17 vs React 18</h2>
+
+<table>
+<tr>
+<th>React 17</th>
+<th>React 18</th>
+</tr>
+
+<tr>
+<td>No useId</td>
+<td>useId available</td>
+</tr>
+
+<tr>
+<td>Manual IDs</td>
+<td>Automatic IDs</td>
+</tr>
+
+<tr>
+<td>SSR issues possible</td>
+<td>SSR-safe IDs</td>
+</tr>
+
+<tr>
+<td>More boilerplate</td>
+<td>Simpler forms</td>
+</tr>
+</table>
+
+<h2>When Should You Use useId?</h2>
+
+<ul>
+<li>Form labels and inputs</li>
+<li>Accessibility attributes</li>
+<li>ARIA relationships</li>
+<li>SSR applications</li>
+<li>Reusable form components</li>
+</ul>
+
+<h2>When Should You NOT Use useId?</h2>
+
+<ul>
+<li>List keys</li>
+<li>Database IDs</li>
+<li>API IDs</li>
+<li>Persistent IDs</li>
+</ul>
+
+<h2>Easy Way To Remember</h2>
+
+<div class="flow">
+useId()
+<br>↓<br>
+Unique ID
+<br>↓<br>
+Label + Input
+<br>↓<br>
+Accessibility
+<br>↓<br>
+SSR Safe
+</div>
+
+<h2>Interview Answer</h2>
+
+<div class="highlight">
+useId is a React 18 hook that generates unique, stable IDs for components. It is primarily used for linking labels and form controls, improving accessibility, and avoiding hydration mismatches in Server-Side Rendered applications.
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+useId is a React 18 hook that generates unique SSR-safe IDs for accessibility and form elements.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+
+</body>
+</html>

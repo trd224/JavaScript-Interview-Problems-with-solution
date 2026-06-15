@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>286 - How do you use React Hook Form?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px;margin-bottom:10px}
+p{color:#cbd5e1}
+ul{padding-left:24px}
+li{margin-bottom:10px;color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px;margin-top:15px}
+.success{background:#052e16;padding:18px;border-left:5px solid #22c55e;border-radius:10px;margin-top:15px}
+.warning{background:#1e1b4b;border-left:5px solid #fbbf24;padding:18px;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;margin-top:15px;text-align:center;line-height:2;font-size:18px}
+.file-name{background:#111827;color:#93c5fd;padding:12px 16px;border-radius:10px;margin-top:20px;margin-bottom:10px;border:1px solid #1e293b;font-weight:bold}
+pre{border-radius:12px;overflow-x:auto}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>286. How do you use React Hook Form?</h1>
+
+<h2>One-Line Definition</h2>
+
+<div class="highlight">
+React Hook Form is used by calling useForm(), registering inputs with register(), and handling form submission with handleSubmit().
+</div>
+
+<h2>Step-by-Step Process</h2>
+
+<div class="flow">
+Install React Hook Form
+<br>↓<br>
+Call useForm()
+<br>↓<br>
+Register Inputs
+<br>↓<br>
+Add Validation
+<br>↓<br>
+Handle Submit
+<br>↓<br>
+Get Form Data
+</div>
+
+<h2>Step 1 - Install React Hook Form</h2>
+
+<pre><code class="language-bash">npm install react-hook-form</code></pre>
+
+<h2>Project Structure</h2>
+
+<pre><code class="language-text">src/
+│
+├── App.jsx
+│
+└── components/
+    └── LoginForm.jsx</code></pre>
+
+<h2>Step 2 - Create Form</h2>
+
+<div class="file-name">File: src/components/LoginForm.jsx</div>
+
+<pre><code class="language-jsx">import { useForm } from 'react-hook-form';
+
+function LoginForm() {
+  const { register, handleSubmit } = useForm();
+
+  function onSubmit(data) {
+    console.log(data);
+  }
+
+  return (
+    &lt;form onSubmit={handleSubmit(onSubmit)}&gt;
+      &lt;input placeholder="Email" {...register('email')} /&gt;
+      &lt;input type="password" placeholder="Password" {...register('password')} /&gt;
+      &lt;button type="submit"&gt;Login&lt;/button&gt;
+    &lt;/form&gt;
+  );
+}
+
+export default LoginForm;</code></pre>
+
+<h2>What Happens Here?</h2>
+
+<table>
+<tr>
+<th>Code</th>
+<th>Purpose</th>
+</tr>
+
+<tr>
+<td>useForm()</td>
+<td>Creates form controller.</td>
+</tr>
+
+<tr>
+<td>register()</td>
+<td>Registers inputs.</td>
+</tr>
+
+<tr>
+<td>handleSubmit()</td>
+<td>Handles form submission.</td>
+</tr>
+
+<tr>
+<td>onSubmit()</td>
+<td>Receives form data.</td>
+</tr>
+</table>
+
+<h2>Step 3 - Add Validation</h2>
+
+<div class="file-name">File: src/components/LoginForm.jsx</div>
+
+<pre><code class="language-jsx">import { useForm } from 'react-hook-form';
+
+function LoginForm() {
+  const { register, handleSubmit, formState: { errors } } = useForm();
+
+  function onSubmit(data) {
+    console.log(data);
+  }
+
+  return (
+    &lt;form onSubmit={handleSubmit(onSubmit)}&gt;
+
+      &lt;input placeholder="Email" {...register('email', { required: 'Email is required' })} /&gt;
+      {errors.email && &lt;p&gt;{errors.email.message}&lt;/p&gt;}
+
+      &lt;input
+        type="password"
+        placeholder="Password"
+        {...register('password', {
+          required: 'Password is required',
+          minLength: {
+            value: 6,
+            message: 'Minimum 6 characters'
+          }
+        })}
+      /&gt;
+
+      {errors.password && &lt;p&gt;{errors.password.message}&lt;/p&gt;}
+
+      &lt;button type="submit"&gt;Login&lt;/button&gt;
+
+    &lt;/form&gt;
+  );
+}
+
+export default LoginForm;</code></pre>
+
+<h2>Submitted Data</h2>
+
+<p>
+If the user enters:
+</p>
+
+<pre><code class="language-text">Email: rizwan@gmail.com
+Password: 123456</code></pre>
+
+<p>
+React Hook Form returns:
+</p>
+
+<pre><code class="language-jsx">{
+  email: 'rizwan@gmail.com',
+  password: '123456'
+}</code></pre>
+
+<h2>Step 4 - Reset Form</h2>
+
+<div class="file-name">File: src/components/LoginForm.jsx</div>
+
+<pre><code class="language-jsx">const { register, handleSubmit, reset } = useForm();
+
+function onSubmit(data) {
+  console.log(data);
+  reset();
+}</code></pre>
+
+<p>
+After successful submission all fields become empty.
+</p>
+
+<h2>Step 5 - Watch Field Values</h2>
+
+<div class="file-name">File: src/components/LoginForm.jsx</div>
+
+<pre><code class="language-jsx">const { register, watch } = useForm();
+
+const email = watch('email');
+
+console.log(email);</code></pre>
+
+<p>
+watch() tracks field changes in real time.
+</p>
+
+<h2>Step 6 - Set Value Programmatically</h2>
+
+<div class="file-name">File: src/components/LoginForm.jsx</div>
+
+<pre><code class="language-jsx">const { register, setValue } = useForm();
+
+setValue('email', 'rizwan@gmail.com');</code></pre>
+
+<p>
+Useful when loading data from APIs.
+</p>
+
+<h2>Most Common Methods</h2>
+
+<table>
+<tr>
+<th>Method</th>
+<th>Purpose</th>
+</tr>
+
+<tr>
+<td>register()</td>
+<td>Register input.</td>
+</tr>
+
+<tr>
+<td>handleSubmit()</td>
+<td>Submit form.</td>
+</tr>
+
+<tr>
+<td>watch()</td>
+<td>Watch values.</td>
+</tr>
+
+<tr>
+<td>reset()</td>
+<td>Reset form.</td>
+</tr>
+
+<tr>
+<td>setValue()</td>
+<td>Update field value.</td>
+</tr>
+
+<tr>
+<td>getValues()</td>
+<td>Get form values.</td>
+</tr>
+</table>
+
+<h2>Complete Real-World Example</h2>
+
+<div class="file-name">File: src/components/RegisterForm.jsx</div>
+
+<pre><code class="language-jsx">import { useForm } from 'react-hook-form';
+
+function RegisterForm() {
+  const { register, handleSubmit, formState: { errors } } = useForm();
+
+  function onSubmit(data) {
+    console.log(data);
+  }
+
+  return (
+    &lt;form onSubmit={handleSubmit(onSubmit)}&gt;
+
+      &lt;input placeholder="Name" {...register('name', { required: 'Name is required' })} /&gt;
+      {errors.name && &lt;p&gt;{errors.name.message}&lt;/p&gt;}
+
+      &lt;input placeholder="Email" {...register('email', { required: 'Email is required' })} /&gt;
+      {errors.email && &lt;p&gt;{errors.email.message}&lt;/p&gt;}
+
+      &lt;input type="password" placeholder="Password" {...register('password', { required: 'Password is required' })} /&gt;
+      {errors.password && &lt;p&gt;{errors.password.message}&lt;/p&gt;}
+
+      &lt;button type="submit"&gt;Register&lt;/button&gt;
+
+    &lt;/form&gt;
+  );
+}
+
+export default RegisterForm;</code></pre>
+
+<h2>Why Developers Prefer React Hook Form</h2>
+
+<ul>
+<li>Less code</li>
+<li>Built-in validation</li>
+<li>Better performance</li>
+<li>Fewer re-renders</li>
+<li>Easy integration with APIs</li>
+<li>Works well with Yup and Zod</li>
+</ul>
+
+<div class="success">
+React Hook Form is currently the most popular form library in React applications.
+</div>
+
+<h2>Easy Way To Remember</h2>
+
+<div class="flow">
+useForm()
+<br>↓<br>
+register()
+<br>↓<br>
+Validation
+<br>↓<br>
+handleSubmit()
+<br>↓<br>
+Get Form Data
+</div>
+
+<h2>Interview Answer</h2>
+
+<div class="highlight">
+To use React Hook Form, first call useForm(), then register inputs using register(), handle form submission with handleSubmit(), and optionally add validation rules. React Hook Form automatically collects values, validates fields, and provides the submitted data object.
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+Use React Hook Form by calling useForm(), registering inputs with register(), and handling submission with handleSubmit().
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+
+</body>
+</html>

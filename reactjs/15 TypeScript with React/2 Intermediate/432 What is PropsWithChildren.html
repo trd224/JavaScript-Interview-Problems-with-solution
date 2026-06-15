@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>432 - What is PropsWithChildren?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+p,li{color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px}
+.success{background:#052e16;padding:18px;border-left:5px solid #22c55e;border-radius:10px;margin-top:15px}
+.warning{background:#1e1b4b;padding:18px;border-left:5px solid #fbbf24;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;text-align:center;line-height:2;font-size:18px}
+.file-name{background:#111827;color:#93c5fd;padding:12px 16px;border-radius:10px;border:1px solid #1e293b;font-weight:bold;margin-top:20px;margin-bottom:10px}
+
+pre[class*="language-"],code[class*="language-"]{
+color:#f8f8f2;
+background:#1e1e1e;
+font-family:Consolas,Monaco,'Courier New',monospace;
+font-size:15px;
+}
+
+.token.keyword{color:#c792ea}
+.token.string{color:#c3e88d}
+.token.function{color:#82aaff}
+.token.class-name{color:#ffcb6b}
+.token.number{color:#f78c6c}
+.token.operator{color:#89ddff}
+.token.punctuation{color:#89ddff}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>432. What is PropsWithChildren?</h1>
+
+<h2>One-Line Definition</h2>
+
+<div class="highlight">
+PropsWithChildren is a utility type provided by React that automatically adds a typed children prop to your component props.
+</div>
+
+<h2>Why Do We Need It?</h2>
+
+<p>
+Normally, if a component accepts children, we must type it manually.
+</p>
+
+<div class="file-name">File: src/components/Card.tsx</div>
+
+<pre class="language-tsx"><code class="language-tsx">import { ReactNode } from 'react';
+
+interface CardProps {
+  title: string;
+  children?: ReactNode;
+}</code></pre>
+
+<p>
+PropsWithChildren saves us from writing:
+</p>
+
+<pre class="language-tsx"><code class="language-tsx">children?: ReactNode;</code></pre>
+
+<h2>What Does PropsWithChildren Actually Do?</h2>
+
+<p>
+Internally it is roughly equivalent to:
+</p>
+
+<pre class="language-tsx"><code class="language-tsx">type PropsWithChildren&lt;P&gt; = P & {
+  children?: React.ReactNode;
+};</code></pre>
+
+<div class="flow">
+Your Props
+<br>+
+<br>
+children?: ReactNode
+<br>↓<br>
+PropsWithChildren
+</div>
+
+<h2>Project Structure</h2>
+
+<pre class="language-text"><code class="language-text">src/
+│
+├── App.tsx
+└── components/
+    └── Card.tsx</code></pre>
+
+<h2>Without PropsWithChildren</h2>
+
+<div class="file-name">File: src/components/Card.tsx</div>
+
+<pre class="language-tsx"><code class="language-tsx">import { ReactNode } from 'react';
+
+interface CardProps {
+  title: string;
+  children?: ReactNode;
+}
+
+function Card({ title, children }: CardProps) {
+  return (
+    &lt;div&gt;
+      &lt;h2&gt;{title}&lt;/h2&gt;
+      {children}
+    &lt;/div&gt;
+  );
+}
+
+export default Card;</code></pre>
+
+<h2>With PropsWithChildren</h2>
+
+<div class="file-name">File: src/components/Card.tsx</div>
+
+<pre class="language-tsx"><code class="language-tsx">import { PropsWithChildren } from 'react';
+
+type CardProps = PropsWithChildren&lt;{
+    title: string;
+  }&gt;;
+
+function Card({ title, children }: CardProps) {
+  return (
+    &lt;div&gt;
+      &lt;h2&gt;{title}&lt;/h2&gt;
+      {children}
+    &lt;/div&gt;
+  );
+}
+
+export default Card;</code></pre>
+
+<div class="success">
+children is automatically available and correctly typed.
+</div>
+
+<h2>Using The Component</h2>
+
+<div class="file-name">File: src/App.tsx</div>
+
+<pre class="language-tsx"><code class="language-tsx">import Card from './components/Card';
+
+function App() {
+  return (
+    &lt;Card title="Profile"&gt;
+      &lt;h3&gt;Rizwan&lt;/h3&gt;
+    &lt;/Card&gt;
+  );
+}
+
+export default App;</code></pre>
+
+<h2>What Type Does children Get?</h2>
+
+<p>
+PropsWithChildren automatically adds:
+</p>
+
+<pre class="language-tsx"><code class="language-tsx">children?: ReactNode;</code></pre>
+
+<p>
+ReactNode supports:
+</p>
+
+<table>
+<tr>
+<th>Value</th>
+<th>Supported</th>
+</tr>
+
+<tr>
+<td>String</td>
+<td>✅</td>
+</tr>
+
+<tr>
+<td>Number</td>
+<td>✅</td>
+</tr>
+
+<tr>
+<td>JSX</td>
+<td>✅</td>
+</tr>
+
+<tr>
+<td>Array</td>
+<td>✅</td>
+</tr>
+
+<tr>
+<td>null</td>
+<td>✅</td>
+</tr>
+
+<tr>
+<td>undefined</td>
+<td>✅</td>
+</tr>
+
+<tr>
+<td>boolean</td>
+<td>✅</td>
+</tr>
+</table>
+
+<h2>Real World Layout Example</h2>
+
+<div class="file-name">File: src/components/Layout.tsx</div>
+
+<pre class="language-tsx"><code class="language-tsx">import { PropsWithChildren } from 'react';
+
+type LayoutProps = PropsWithChildren&lt;{
+    title: string;
+  }&gt;;
+
+function Layout({ title, children }: LayoutProps) {
+  return (
+    &lt;&gt;
+      &lt;header&gt;{title}&lt;/header&gt;
+      &lt;main&gt;{children}&lt;/main&gt;
+    &lt;/&gt;
+  );
+}
+
+export default Layout;</code></pre>
+
+<h2>Equivalent Manual Version</h2>
+
+<div class="file-name">File: src/components/Layout.tsx</div>
+
+<pre class="language-tsx"><code class="language-tsx">import { ReactNode } from 'react';
+
+interface LayoutProps {
+  title: string;
+  children?: ReactNode;
+}</code></pre>
+
+<p>
+Both versions are exactly the same.
+</p>
+
+<h2>Should You Use It?</h2>
+
+<table>
+<tr>
+<th>Approach</th>
+<th>Recommendation</th>
+</tr>
+
+<tr>
+<td>children: ReactNode</td>
+<td>✅ Most Common</td>
+</tr>
+
+<tr>
+<td>PropsWithChildren</td>
+<td>✅ Also Good</td>
+</tr>
+
+<tr>
+<td>React.FC</td>
+<td>⚠ Less Preferred</td>
+</tr>
+</table>
+
+<h2>What Do Most Teams Prefer?</h2>
+
+<p>
+Most React TypeScript projects today prefer:
+</p>
+
+<div class="file-name">File: src/components/Card.tsx</div>
+
+<pre class="language-tsx"><code class="language-tsx">interface CardProps {
+  title: string;
+  children: React.ReactNode;
+}</code></pre>
+
+<p>
+because it is more explicit.
+</p>
+
+<div class="warning">
+PropsWithChildren is useful, but many teams prefer explicitly declaring children so it is visible immediately in the props definition.
+</div>
+
+<h2>Easy Way To Remember</h2>
+
+<div class="flow">
+Props
+<br>+
+<br>
+children?: ReactNode
+<br>↓<br>
+PropsWithChildren
+</div>
+
+<h2>Interview Answer</h2>
+
+<div class="highlight">
+PropsWithChildren is a React utility type that automatically adds a typed children prop to a component's props. It is equivalent to combining your props with children?: ReactNode and is useful when creating components that render nested content.
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+PropsWithChildren automatically adds a typed children prop (children?: ReactNode) to your component props.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-tsx.min.js"></script>
+
+</body>
+</html>

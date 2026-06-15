@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>430 - What is React.FC and why do some people avoid it?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+p,li{color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px}
+.success{background:#052e16;padding:18px;border-left:5px solid #22c55e;border-radius:10px;margin-top:15px}
+.warning{background:#1e1b4b;padding:18px;border-left:5px solid #fbbf24;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;text-align:center;line-height:2;font-size:18px}
+.file-name{background:#111827;color:#93c5fd;padding:12px 16px;border-radius:10px;border:1px solid #1e293b;font-weight:bold;margin-top:20px;margin-bottom:10px}
+
+pre[class*="language-"],code[class*="language-"]{
+color:#f8f8f2;
+background:#1e1e1e;
+font-family:Consolas,Monaco,'Courier New',monospace;
+font-size:15px;
+}
+
+.token.keyword{color:#c792ea}
+.token.string{color:#c3e88d}
+.token.function{color:#82aaff}
+.token.class-name{color:#ffcb6b}
+.token.number{color:#f78c6c}
+.token.operator{color:#89ddff}
+.token.punctuation{color:#89ddff}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>430. What is React.FC and why do some people avoid it?</h1>
+
+<h2>One-Line Definition</h2>
+
+<div class="highlight">
+React.FC (React Functional Component) is a TypeScript type used to define React function components. Modern React projects often avoid it because it provides little benefit and can introduce unnecessary complexity.
+</div>
+
+<h2>What is React.FC?</h2>
+
+<div class="file-name">File: src/components/UserCard.tsx</div>
+
+<pre class="language-tsx"><code class="language-tsx">interface UserCardProps {
+  name: string;
+}
+
+const UserCard: React.FC&lt;UserCardProps&gt; = ({ name }) =&gt; {
+  return &lt;h2&gt;{name}&lt;/h2&gt;;
+};
+
+export default UserCard;</code></pre>
+
+<p>
+Here:
+</p>
+
+<pre class="language-tsx"><code class="language-tsx">React.FC&lt;UserCardProps&gt;</code></pre>
+
+<p>
+means:
+</p>
+
+<pre class="language-text"><code class="language-text">This is a React Function Component
+and its props are UserCardProps.</code></pre>
+
+<h2>Modern Recommended Style</h2>
+
+<div class="file-name">File: src/components/UserCard.tsx</div>
+
+<pre class="language-tsx"><code class="language-tsx">interface UserCardProps {
+  name: string;
+}
+
+function UserCard({ name }: UserCardProps) {
+  return &lt;h2&gt;{name}&lt;/h2&gt;;
+}
+
+export default UserCard;</code></pre>
+
+<div class="success">
+This is the style recommended by most modern React TypeScript projects.
+</div>
+
+<h2>Why React.FC Became Popular?</h2>
+
+<div class="flow">
+React.FC
+<br>↓<br>
+Automatically Types Component
+<br>↓<br>
+Types Return Value
+<br>↓<br>
+Easy To Understand
+</div>
+
+<h2>Benefit 1 - Explicit Component Type</h2>
+
+<div class="file-name">File: src/components/UserCard.tsx</div>
+
+<pre class="language-tsx"><code class="language-tsx">const UserCard: React.FC&lt;UserCardProps&gt; =
+  ({ name }) =&gt; {
+    return &lt;h2&gt;{name}&lt;/h2&gt;;
+  };</code></pre>
+
+<p>
+Immediately tells readers:
+</p>
+
+<pre class="language-text"><code class="language-text">This variable is a React component.</code></pre>
+
+<h2>Benefit 2 - Return Type Checking</h2>
+
+<p>
+React.FC ensures the component returns valid JSX.
+</p>
+
+<pre class="language-tsx"><code class="language-tsx">const UserCard: React.FC = () =&gt; {
+  return &lt;div&gt;Hello&lt;/div&gt;;
+};</code></pre>
+
+<h2>The Main Problem</h2>
+
+<p>
+React.FC adds extra typing that often isn't needed.
+</p>
+
+<div class="flow">
+TypeScript Already Knows
+<br>↓<br>
+Function Is Component
+<br>↓<br>
+React.FC Adds Little Value
+</div>
+
+<h2>Old React.FC Behavior</h2>
+
+<p>
+Historically React.FC automatically included children.
+</p>
+
+<pre class="language-tsx"><code class="language-tsx">const Card: React.FC = ({ children }) =&gt; {
+  return &lt;div&gt;{children}&lt;/div&gt;;
+};</code></pre>
+
+<p>
+Many developers found this confusing because:
+</p>
+
+<pre class="language-text"><code class="language-text">children appeared automatically
+even when not intended.</code></pre>
+
+<div class="warning">
+React 18 typings changed this behavior, but the reputation remained.
+</div>
+
+<h2>Explicit Children Is Better</h2>
+
+<div class="file-name">File: src/components/Card.tsx</div>
+
+<pre class="language-tsx"><code class="language-tsx">import { ReactNode } from 'react';
+
+interface CardProps {
+  children: ReactNode;
+}
+
+function Card({ children }: CardProps) {
+  return &lt;div&gt;{children}&lt;/div&gt;;
+}
+
+export default Card;</code></pre>
+
+<div class="success">
+Much clearer. You can immediately see that children is supported.
+</div>
+
+<h2>Generic Components Become Harder</h2>
+
+<div class="file-name">File: src/components/List.tsx</div>
+
+<pre class="language-tsx"><code class="language-tsx">interface ListProps&lt;T&gt; {
+  items: T[];
+}
+
+function List&lt;T&gt;({ items }: ListProps&lt;T&gt;) {
+  return (
+    &lt;ul&gt;
+      {items.map((item, index) =&gt; (
+        &lt;li key={index}&gt;{String(item)}&lt;/li&gt;
+      ))}
+    &lt;/ul&gt;
+  );
+}</code></pre>
+
+<p>
+This is simple with normal functions.
+</p>
+
+<p>
+Using React.FC with generics becomes more complicated.
+</p>
+
+<h2>Comparison</h2>
+
+<table>
+<tr>
+<th>React.FC</th>
+<th>Normal Function</th>
+</tr>
+
+<tr>
+<td>More typing</td>
+<td>Less typing</td>
+</tr>
+
+<tr>
+<td>Extra abstraction</td>
+<td>Simple</td>
+</tr>
+
+<tr>
+<td>Can complicate generics</td>
+<td>Works naturally</td>
+</tr>
+
+<tr>
+<td>Historically children confusion</td>
+<td>Explicit children</td>
+</tr>
+
+<tr>
+<td>Still works</td>
+<td>Recommended</td>
+</tr>
+</table>
+
+<h2>What Most Teams Use Today?</h2>
+
+<div class="flow">
+React + TypeScript
+<br>↓<br>
+Normal Function Components
+<br>↓<br>
+Props Interface
+<br>↓<br>
+No React.FC
+</div>
+
+<h2>Recommended Pattern</h2>
+
+<div class="file-name">File: src/components/UserCard.tsx</div>
+
+<pre class="language-tsx"><code class="language-tsx">interface UserCardProps {
+  name: string;
+}
+
+function UserCard({ name }: UserCardProps) {
+  return &lt;h2&gt;{name}&lt;/h2&gt;;
+}
+
+export default UserCard;</code></pre>
+
+<h2>Should You Avoid React.FC?</h2>
+
+<p>
+Not necessarily.
+</p>
+
+<ul>
+<li>React.FC is not wrong.</li>
+<li>React.FC still works perfectly.</li>
+<li>Many existing codebases use React.FC.</li>
+<li>Most new codebases prefer normal functions.</li>
+</ul>
+
+<div class="success">
+You should be comfortable reading and writing both styles.
+</div>
+
+<h2>Easy Way To Remember</h2>
+
+<div class="flow">
+React.FC
+<br>↓<br>
+Works Fine
+<br>↓<br>
+Extra Typing
+
+<br><br>
+
+Normal Function
+<br>↓<br>
+Simpler
+<br>↓<br>
+Modern Recommendation
+</div>
+
+<h2>Interview Answer</h2>
+
+<div class="highlight">
+React.FC is a TypeScript type for React function components. It provides component typing and return type checking, but many developers avoid it because it adds unnecessary abstraction, can complicate generic components, and historically caused confusion around children props. Modern React TypeScript projects typically prefer normal function components with explicitly typed props.
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+React.FC is a type for React function components, but many developers prefer normal function components because they are simpler and work better with modern TypeScript patterns.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-tsx.min.js"></script>
+
+</body>
+</html>

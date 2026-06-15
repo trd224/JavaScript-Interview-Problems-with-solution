@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>293 - What is Yup and How Does it Compare to Zod?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px;margin-bottom:10px}
+p{color:#cbd5e1}
+ul{padding-left:24px}
+li{margin-bottom:10px;color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px;margin-top:15px}
+.success{background:#052e16;padding:18px;border-left:5px solid #22c55e;border-radius:10px;margin-top:15px}
+.warning{background:#1e1b4b;padding:18px;border-left:5px solid #fbbf24;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;text-align:center;line-height:2;font-size:18px;margin-top:15px}
+.file-name{background:#111827;color:#93c5fd;padding:12px 16px;border-radius:10px;border:1px solid #1e293b;font-weight:bold;margin-top:20px;margin-bottom:10px}
+pre{border-radius:12px;overflow-x:auto}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>293. What is Yup and How Does it Compare to Zod?</h1>
+
+<h2>One-Line Definition</h2>
+
+<div class="highlight">
+Yup is a JavaScript schema validation library used to validate form data. Zod is also a schema validation library, but it is more TypeScript-friendly and modern.
+</div>
+
+<h2>Why Do We Need Yup or Zod?</h2>
+
+<p>
+In forms, we need to validate user input.
+</p>
+
+<ul>
+<li>Email should be valid.</li>
+<li>Password should have minimum length.</li>
+<li>Name should be required.</li>
+<li>Confirm password should match password.</li>
+</ul>
+
+<div class="warning">
+Yup and Zod both help us keep validation rules in one schema instead of writing validation directly inside every input.
+</div>
+
+<h2>Validation Flow</h2>
+
+<div class="flow">
+User Submits Form
+<br>↓<br>
+React Hook Form
+<br>↓<br>
+Resolver
+<br>↓<br>
+Yup / Zod Schema
+<br>↓<br>
+Errors or Valid Data
+</div>
+
+<h2>Install Packages</h2>
+
+<pre><code class="language-bash">npm install react-hook-form yup @hookform/resolvers</code></pre>
+
+<pre><code class="language-bash">npm install react-hook-form zod @hookform/resolvers</code></pre>
+
+<h2>Project Structure</h2>
+
+<pre><code class="language-text">src/
+│
+├── App.jsx
+├── schemas/
+│   ├── yupLoginSchema.js
+│   └── zodLoginSchema.js
+└── components/
+    └── LoginForm.jsx</code></pre>
+
+<h2>Yup Schema Example</h2>
+
+<div class="file-name">File: src/schemas/yupLoginSchema.js</div>
+
+<pre><code class="language-js">import * as yup from 'yup';
+
+export const yupLoginSchema = yup.object({
+  email: yup.string().required('Email is required').email('Invalid email'),
+  password: yup.string().required('Password is required').min(6, 'Minimum 6 characters')
+});</code></pre>
+
+<h2>Zod Schema Example</h2>
+
+<div class="file-name">File: src/schemas/zodLoginSchema.js</div>
+
+<pre><code class="language-js">import { z } from 'zod';
+
+export const zodLoginSchema = z.object({
+  email: z.string().min(1, 'Email is required').email('Invalid email'),
+  password: z.string().min(6, 'Minimum 6 characters')
+});</code></pre>
+
+<h2>Using Yup With React Hook Form</h2>
+
+<div class="file-name">File: src/components/LoginForm.jsx</div>
+
+<pre><code class="language-jsx">import { useForm } from 'react-hook-form';
+import { yupResolver } from '@hookform/resolvers/yup';
+import { yupLoginSchema } from '../schemas/yupLoginSchema';
+
+function LoginForm() {
+  const { register, handleSubmit, formState: { errors } } = useForm({ resolver: yupResolver(yupLoginSchema) });
+
+  function onSubmit(data) {
+    console.log(data);
+  }
+
+  return (
+    &lt;form onSubmit={handleSubmit(onSubmit)}&gt;
+      &lt;input placeholder="Email" {...register('email')} /&gt;
+      {errors.email && &lt;p className="error"&gt;{errors.email.message}&lt;/p&gt;}
+
+      &lt;input type="password" placeholder="Password" {...register('password')} /&gt;
+      {errors.password && &lt;p className="error"&gt;{errors.password.message}&lt;/p&gt;}
+
+      &lt;button type="submit"&gt;Login&lt;/button&gt;
+    &lt;/form&gt;
+  );
+}
+
+export default LoginForm;</code></pre>
+
+<h2>Using Zod With React Hook Form</h2>
+
+<div class="file-name">File: src/components/LoginForm.jsx</div>
+
+<pre><code class="language-jsx">import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { zodLoginSchema } from '../schemas/zodLoginSchema';
+
+function LoginForm() {
+  const { register, handleSubmit, formState: { errors } } = useForm({ resolver: zodResolver(zodLoginSchema) });
+
+  function onSubmit(data) {
+    console.log(data);
+  }
+
+  return (
+    &lt;form onSubmit={handleSubmit(onSubmit)}&gt;
+      &lt;input placeholder="Email" {...register('email')} /&gt;
+      {errors.email && &lt;p className="error"&gt;{errors.email.message}&lt;/p&gt;}
+
+      &lt;input type="password" placeholder="Password" {...register('password')} /&gt;
+      {errors.password && &lt;p className="error"&gt;{errors.password.message}&lt;/p&gt;}
+
+      &lt;button type="submit"&gt;Login&lt;/button&gt;
+    &lt;/form&gt;
+  );
+}
+
+export default LoginForm;</code></pre>
+
+<h2>Error Color</h2>
+
+<div class="file-name">File: src/App.css</div>
+
+<pre><code class="language-css">.error {
+  color: #ef4444;
+  font-size: 14px;
+  margin-top: 6px;
+}</code></pre>
+
+<div class="success">
+Yup/Zod create validation messages. CSS gives color to those messages.
+</div>
+
+<h2>Yup vs Zod Comparison</h2>
+
+<table>
+<tr>
+<th>Feature</th>
+<th>Yup</th>
+<th>Zod</th>
+</tr>
+
+<tr>
+<td>Main Purpose</td>
+<td>Schema validation</td>
+<td>Schema validation</td>
+</tr>
+
+<tr>
+<td>TypeScript Support</td>
+<td>Good, but not TypeScript-first</td>
+<td>Excellent, TypeScript-first</td>
+</tr>
+
+<tr>
+<td>Syntax</td>
+<td>Older style</td>
+<td>Cleaner modern style</td>
+</tr>
+
+<tr>
+<td>Type Inference</td>
+<td>Limited</td>
+<td>Strong type inference</td>
+</tr>
+
+<tr>
+<td>React Hook Form</td>
+<td>Works with yupResolver</td>
+<td>Works with zodResolver</td>
+</tr>
+
+<tr>
+<td>Popularity</td>
+<td>Older and widely used</td>
+<td>Modern and increasingly preferred</td>
+</tr>
+</table>
+
+<h2>Password Confirm Example With Yup</h2>
+
+<div class="file-name">File: src/schemas/yupRegisterSchema.js</div>
+
+<pre><code class="language-js">import * as yup from 'yup';
+
+export const yupRegisterSchema = yup.object({
+  password: yup.string().required('Password is required').min(6, 'Minimum 6 characters'),
+  confirmPassword: yup.string().required('Confirm password is required').oneOf([yup.ref('password')], 'Passwords do not match')
+});</code></pre>
+
+<h2>Password Confirm Example With Zod</h2>
+
+<div class="file-name">File: src/schemas/zodRegisterSchema.js</div>
+
+<pre><code class="language-js">import { z } from 'zod';
+
+export const zodRegisterSchema = z.object({
+  password: z.string().min(6, 'Minimum 6 characters'),
+  confirmPassword: z.string().min(1, 'Confirm password is required')
+}).refine(data => data.password === data.confirmPassword, {
+  message: 'Passwords do not match',
+  path: ['confirmPassword']
+});</code></pre>
+
+<h2>Which One Should You Use?</h2>
+
+<table>
+<tr>
+<th>Use Yup When</th>
+<th>Use Zod When</th>
+</tr>
+
+<tr>
+<td>Project already uses Yup.</td>
+<td>You are starting a new project.</td>
+</tr>
+
+<tr>
+<td>You are maintaining older code.</td>
+<td>You want better TypeScript support.</td>
+</tr>
+
+<tr>
+<td>Your team already knows Yup.</td>
+<td>You want modern schema validation.</td>
+</tr>
+</table>
+
+<div class="highlight">
+For new React + TypeScript projects, Zod is usually preferred. For older projects, Yup is still fine.
+</div>
+
+<h2>Easy Way To Remember</h2>
+
+<div class="flow">
+Yup
+<br>↓<br>
+Older Popular Validation Library
+<br><br>
+Zod
+<br>↓<br>
+Modern TypeScript-Friendly Validation Library
+</div>
+
+<h2>Interview Answer</h2>
+
+<div class="highlight">
+Yup and Zod are schema validation libraries used to validate form data. Yup is older and widely used, while Zod is more modern and TypeScript-first. Both can integrate with React Hook Form using resolvers, but Zod is generally preferred in modern TypeScript projects because it provides better type inference and cleaner schema validation.
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+Yup is an older schema validation library, while Zod is a modern TypeScript-first validation library commonly preferred in new React projects.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-js.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js"></script>
+
+</body>
+</html>
