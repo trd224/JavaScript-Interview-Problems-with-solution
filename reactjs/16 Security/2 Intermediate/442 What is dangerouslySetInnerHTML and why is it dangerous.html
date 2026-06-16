@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>442 - What is dangerouslySetInnerHTML and why is it dangerous?</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px;margin-bottom:10px;font-size:22px}
+p,li{color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px}
+.success{background:#052e16;padding:18px;border-left:5px solid #22c55e;border-radius:10px;margin-top:15px}
+.warning{background:#1e1b4b;padding:18px;border-left:5px solid #fbbf24;border-radius:10px;margin-top:15px}
+.danger{background:#3b0a0a;padding:18px;border-left:5px solid #ef4444;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;text-align:center;line-height:2;font-size:18px}
+.file-name{background:#111827;color:#93c5fd;padding:12px 16px;border-radius:10px;border:1px solid #1e293b;font-weight:bold;margin-top:20px;margin-bottom:10px}
+pre[class*="language-"],code[class*="language-"]{color:#f8f8f2;background:#1e1e1e;font-family:Consolas,Monaco,'Courier New',monospace;font-size:15px}
+.token.keyword{color:#c792ea}.token.string{color:#c3e88d}.token.function{color:#82aaff}.token.class-name{color:#ffcb6b}.token.number{color:#f78c6c}.token.operator{color:#89ddff}.token.punctuation{color:#89ddff}.token.tag{color:#ff5370}.token.attr-name{color:#ffcb6b}.token.attr-value{color:#c3e88d}
+</style>
+</head>
+<body>
+<div class="container">
+<h1>442. What is dangerouslySetInnerHTML and Why Is It Dangerous?</h1>
+
+<h2>One-Line Definition</h2>
+<div class="highlight">dangerouslySetInnerHTML is a React prop used to insert raw HTML directly into the DOM, and it is dangerous because untrusted HTML can execute malicious JavaScript and cause XSS attacks.</div>
+
+<h2>First Understand Normal React Rendering</h2>
+<p>In React, when you render text inside JSX, React treats it as text, not real HTML.</p>
+
+<div class="file-name">Safe Example</div>
+<pre class="language-jsx"><code class="language-jsx">const comment = "&lt;script&gt;alert('Hacked')&lt;/script&gt;";
+
+function App() {
+  return &lt;div&gt;{comment}&lt;/div&gt;;
+}</code></pre>
+
+<p>React escapes the HTML characters.</p>
+
+<pre class="language-html"><code class="language-html">&lt;div&gt;
+  &amp;lt;script&amp;gt;alert('Hacked')&amp;lt;/script&amp;gt;
+&lt;/div&gt;</code></pre>
+
+<div class="success">The browser displays the script as plain text. It does not execute it.</div>
+
+<h2>What dangerouslySetInnerHTML Does</h2>
+<p>dangerouslySetInnerHTML tells React:</p>
+
+<div class="warning">Do not escape this value. Insert it as real HTML inside the page.</div>
+
+<div class="file-name">Unsafe Example</div>
+<pre class="language-jsx"><code class="language-jsx">const comment = "&lt;script&gt;alert('Hacked')&lt;/script&gt;";
+
+function App() {
+  return &lt;div dangerouslySetInnerHTML={{ __html: comment }} /&gt;;
+}</code></pre>
+
+<p>Now React directly inserts the HTML.</p>
+
+<pre class="language-html"><code class="language-html">&lt;div&gt;
+  &lt;script&gt;alert('Hacked')&lt;/script&gt;
+&lt;/div&gt;</code></pre>
+
+<div class="danger">Now the browser can treat the input as real HTML or JavaScript. This can create an XSS vulnerability.</div>
+
+<h2>Why Is It Called Dangerous?</h2>
+<p>React intentionally uses a long and scary name:</p>
+
+<pre class="language-jsx"><code class="language-jsx">dangerouslySetInnerHTML</code></pre>
+
+<p>Because it is similar to JavaScript's innerHTML:</p>
+
+<pre class="language-javascript"><code class="language-javascript">element.innerHTML = userInput;</code></pre>
+
+<div class="warning">Both can be dangerous when the value comes from users, APIs, comments, reviews, profiles, or database content.</div>
+
+<h2>Real-World Example</h2>
+<p>Suppose your website has a comment box.</p>
+
+<div class="flow">Attacker<br>↓<br>Comment Box<br>↓<br>Database<br>↓<br>React Component<br>↓<br>dangerouslySetInnerHTML<br>↓<br>Browser Executes Code</div>
+
+<h3>Attacker Input</h3>
+<pre class="language-html"><code class="language-html">&lt;img src="x" onerror="alert('Hacked')"&gt;</code></pre>
+
+<h3>Unsafe React Rendering</h3>
+<pre class="language-jsx"><code class="language-jsx">function Comment({ comment }) {
+  return &lt;div dangerouslySetInnerHTML={{ __html: comment }} /&gt;;
+}</code></pre>
+
+<div class="danger">If comment contains malicious HTML, the browser may execute attacker-controlled code.</div>
+
+<h2>Safe vs Unsafe</h2>
+<table>
+<tr><th>Approach</th><th>Code</th><th>Result</th></tr>
+<tr><td>Safe</td><td>&lt;div&gt;{comment}&lt;/div&gt;</td><td>React escapes HTML</td></tr>
+<tr><td>Unsafe</td><td>dangerouslySetInnerHTML</td><td>Raw HTML is inserted</td></tr>
+</table>
+
+<h2>When Do Developers Use It?</h2>
+<p>Sometimes data already contains HTML and developers want to render it as HTML.</p>
+
+<ul>
+<li>Blog content from CMS</li>
+<li>Rich text editor output</li>
+<li>Formatted article content</li>
+<li>Email template preview</li>
+<li>HTML returned from trusted backend</li>
+</ul>
+
+<div class="warning">But before rendering HTML, the content must be sanitized.</div>
+
+<h2>What Is Sanitization?</h2>
+<p>Sanitization means removing dangerous HTML and JavaScript before rendering.</p>
+
+<div class="file-name">Example With DOMPurify</div>
+<pre class="language-jsx"><code class="language-jsx">import DOMPurify from 'dompurify';
+
+function Article({ html }) {
+  const cleanHtml = DOMPurify.sanitize(html);
+  return &lt;div dangerouslySetInnerHTML={{ __html: cleanHtml }} /&gt;;
+}</code></pre>
+
+<div class="success">DOMPurify removes dangerous scripts, event handlers, and unsafe HTML before rendering.</div>
+
+<h2>Best Practice</h2>
+<div class="flow">Prefer JSX Text<br>↓<br>Avoid Raw HTML<br>↓<br>If HTML Is Required<br>↓<br>Sanitize First<br>↓<br>Then Use dangerouslySetInnerHTML</div>
+
+<h2>Simple Rule</h2>
+<div class="highlight">Use &lt;div&gt;{value}&lt;/div&gt; for normal text. Use dangerouslySetInnerHTML only when you must render real HTML, and only after sanitizing the content.</div>
+
+<h2>Interview Answer</h2>
+<div class="highlight">dangerouslySetInnerHTML is a React prop that allows developers to insert raw HTML directly into the DOM. It is dangerous because React does not escape that HTML, so if the content contains malicious scripts or unsafe attributes from user input, it can lead to XSS attacks. React normally escapes JSX values, but dangerouslySetInnerHTML bypasses that protection. It should only be used with trusted or sanitized HTML.</div>
+
+<h2>One-Line Interview Answer</h2>
+<div class="highlight">dangerouslySetInnerHTML renders raw HTML in React, and it is dangerous because untrusted HTML can execute malicious JavaScript and cause XSS.</div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+</body>
+</html>

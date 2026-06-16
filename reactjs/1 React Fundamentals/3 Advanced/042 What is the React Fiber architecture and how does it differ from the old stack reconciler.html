@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>042 - React Fiber Architecture vs Old Stack Reconciler</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px}
+p,li{color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px}
+.success{background:#052e16;padding:18px;border-left:5px solid #22c55e;border-radius:10px;margin-top:15px}
+.warning{background:#1e1b4b;padding:18px;border-left:5px solid #fbbf24;border-radius:10px;margin-top:15px}
+.danger{background:#2a0f12;padding:18px;border-left:5px solid #ef4444;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;text-align:center;line-height:2;font-size:18px}
+.file-name{background:#111827;color:#93c5fd;padding:12px 16px;border-radius:10px;border:1px solid #1e293b;font-weight:bold;margin-top:20px;margin-bottom:10px}
+.badge{display:inline-block;background:#312e81;color:#ddd6fe;padding:4px 10px;border-radius:999px;font-size:13px;margin:4px 6px 4px 0}
+pre[class*="language-"],code[class*="language-"]{color:#f8f8f2;background:#1e1e1e;font-family:Consolas,Monaco,'Courier New',monospace;font-size:15px}
+.token.keyword{color:#c792ea}
+.token.string{color:#c3e88d}
+.token.function{color:#82aaff}
+.token.class-name{color:#ffcb6b}
+.token.number{color:#f78c6c}
+.token.operator{color:#89ddff}
+.token.punctuation{color:#89ddff}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>042. What is the React Fiber architecture and how does it differ from the old stack reconciler?</h1>
+
+<h2>One-Line Definition</h2>
+
+<div class="highlight">
+React Fiber architecture is React's rewritten reconciliation system introduced in React 16. It represents rendering work as Fiber objects instead of relying only on the JavaScript call stack, making React more flexible for scheduling, prioritization, error recovery, and future concurrent rendering.
+</div>
+
+<h2>Simple Meaning</h2>
+
+<p>
+React needs to compare the old UI and the new UI to decide what should change in the DOM. This process is called reconciliation.
+</p>
+
+<div class="flow">
+Old UI
+<br>↓<br>
+New UI
+<br>↓<br>
+React Compares Both
+<br>↓<br>
+Finds Changes
+<br>↓<br>
+Updates DOM
+</div>
+
+<h2>What Was The Old Stack Reconciler?</h2>
+
+<div class="highlight">
+The old Stack Reconciler was React's earlier reconciliation system. It worked using recursive rendering and depended heavily on the JavaScript call stack.
+</div>
+
+<div class="flow">
+Component A
+<br>↓<br>
+Component B
+<br>↓<br>
+Component C
+<br>↓<br>
+Component D
+<br>↓<br>
+Finish Entire Tree
+</div>
+
+<div class="warning">
+Once the old stack reconciler started rendering, it generally had to finish the whole work before the browser could handle other important tasks.
+</div>
+
+<h2>Problem With Old Stack Reconciler</h2>
+
+<p>
+If the app was large, rendering could block the main thread.
+</p>
+
+<div class="flow">
+Large State Update
+<br>↓<br>
+Old Reconciler Starts Work
+<br>↓<br>
+Processes Entire Component Tree
+<br>↓<br>
+Main Thread Blocked
+<br>↓<br>
+Typing / Clicking / Animation Can Feel Slow
+</div>
+
+<h2>What Is React Fiber Architecture?</h2>
+
+<div class="highlight">
+Fiber architecture represents each component's work as a Fiber object. These objects form a Fiber tree that React can manage more flexibly.
+</div>
+
+<div class="file-name">Simplified Fiber Object</div>
+
+<pre class="language-js"><code class="language-js">{
+  type: Component,
+  props: {},
+  stateNode: {},
+  child: Fiber,
+  sibling: Fiber,
+  return: Fiber,
+  pendingProps: {},
+  memoizedProps: {},
+  memoizedState: {}
+}</code></pre>
+
+<h2>Component Tree To Fiber Tree</h2>
+
+<div class="file-name">React Component Tree</div>
+
+<pre class="language-jsx"><code class="language-jsx">&lt;App&gt;
+  &lt;Header /&gt;
+  &lt;Main /&gt;
+  &lt;Footer /&gt;
+&lt;/App&gt;</code></pre>
+
+<div class="flow">
+Fiber(App)
+<br>│
+<br>├── Fiber(Header)
+<br>│
+<br>├── Fiber(Main)
+<br>│
+<br>└── Fiber(Footer)
+</div>
+
+<div class="success">
+React Fiber architecture gives React its own internal structure to store and manage rendering work.
+</div>
+
+<h2>Fiber Engine vs Fiber Object</h2>
+
+<table>
+<tr>
+<th>Term</th>
+<th>Meaning</th>
+</tr>
+
+<tr>
+<td>Fiber Architecture</td>
+<td>The new reconciliation system</td>
+</tr>
+
+<tr>
+<td>Fiber Object</td>
+<td>One internal object representing a component and its work</td>
+</tr>
+
+<tr>
+<td>Fiber Tree</td>
+<td>Many Fiber objects connected together</td>
+</tr>
+</table>
+
+<div class="flow">
+Fiber Architecture
+<br>↓<br>
+Uses Fiber Objects
+<br>↓<br>
+Builds Fiber Tree
+<br>↓<br>
+Reconciles UI
+</div>
+
+<h2>Main Difference</h2>
+
+<div class="highlight">
+The old stack reconciler processed work like one continuous recursive task. Fiber breaks rendering work into units that React can track and manage.
+</div>
+
+<table>
+<tr>
+<th>Old Stack Reconciler</th>
+<th>React Fiber Architecture</th>
+</tr>
+
+<tr>
+<td>Recursive call-stack based</td>
+<td>Fiber object based</td>
+</tr>
+
+<tr>
+<td>Rigid rendering flow</td>
+<td>Flexible rendering flow</td>
+</tr>
+
+<tr>
+<td>Hard to pause or resume</td>
+<td>Foundation for pause/resume work</td>
+</tr>
+
+<tr>
+<td>No strong priority model</td>
+<td>Foundation for scheduling and priority</td>
+</tr>
+
+<tr>
+<td>Harder error recovery</td>
+<td>Enabled better error boundaries</td>
+</tr>
+
+<tr>
+<td>Not suitable for future concurrent rendering</td>
+<td>Foundation for React 18 concurrent rendering</td>
+</tr>
+</table>
+
+<h2>Old Stack Reconciler Flow</h2>
+
+<div class="flow">
+Start Rendering
+<br>↓<br>
+Use JavaScript Call Stack
+<br>↓<br>
+Go Deep Into Component Tree
+<br>↓<br>
+Complete Entire Work
+<br>↓<br>
+Return Control To Browser
+</div>
+
+<h2>Fiber Architecture Flow</h2>
+
+<div class="flow">
+Start Rendering
+<br>↓<br>
+Create / Update Fiber Objects
+<br>↓<br>
+Process Work Unit By Unit
+<br>↓<br>
+Track Progress In Fiber Tree
+<br>↓<br>
+Commit Final Changes To DOM
+</div>
+
+<h2>Render Phase And Commit Phase</h2>
+
+<p>
+Fiber architecture separates work into phases.
+</p>
+
+<table>
+<tr>
+<th>Phase</th>
+<th>What Happens</th>
+</tr>
+
+<tr>
+<td>Render Phase</td>
+<td>React calculates what needs to change</td>
+</tr>
+
+<tr>
+<td>Commit Phase</td>
+<td>React applies changes to the real DOM</td>
+</tr>
+</table>
+
+<div class="flow">
+Render Phase
+<br>↓<br>
+Prepare / Compare / Build Work
+<br>↓<br>
+Commit Phase
+<br>↓<br>
+Apply DOM Changes
+</div>
+
+<div class="warning">
+In modern React, render work can be interruptible in concurrent rendering cases, but commit phase must be completed because it changes the real DOM.
+</div>
+
+<h2>Important React 16 vs React 18 Point</h2>
+
+<div class="warning">
+Fiber came in React 16. Full concurrent rendering behavior came later in React 18.
+</div>
+
+<div class="flow">
+React 16
+<br>↓<br>
+Fiber Architecture Introduced
+<br>↓<br>
+Internal Foundation Created
+<br><br>
+React 18
+<br>↓<br>
+Concurrent Rendering Built On Fiber
+<br>↓<br>
+Transitions / Prioritization / Interruptible Work
+</div>
+
+<h2>What Fiber Improved In React 16</h2>
+
+<h3>1. Better Error Recovery</h3>
+
+<p>
+React 16 introduced Error Boundaries, which became possible because Fiber gave React better control over the component tree.
+</p>
+
+<div class="file-name">Error Boundary Example</div>
+
+<pre class="language-jsx"><code class="language-jsx">class ErrorBoundary extends React.Component {
+  state = { hasError: false };
+
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return &lt;h2&gt;Something went wrong&lt;/h2&gt;;
+    }
+
+    return this.props.children;
+  }
+}</code></pre>
+
+<h3>2. Better Internal Work Tracking</h3>
+
+<div class="flow">
+Work Stored In Fiber Objects
+<br>↓<br>
+React Knows Current Work
+<br>↓<br>
+React Knows Next Work
+<br>↓<br>
+React Can Manage Updates Better
+</div>
+
+<h3>3. Foundation For Scheduling</h3>
+
+<div class="flow">
+Urgent Work
+<br>↓<br>
+Typing / Clicking
+<br><br>
+Less Urgent Work
+<br>↓<br>
+Large UI Update
+</div>
+
+<div class="success">
+Fiber created the architecture needed for prioritizing different types of updates.
+</div>
+
+<h2>Why Was It Rewritten From Scratch?</h2>
+
+<p>
+The old Stack Reconciler could not easily support React's future goals.
+</p>
+
+<ul>
+<li>Interruptible rendering</li>
+<li>Scheduling</li>
+<li>Prioritized updates</li>
+<li>Error boundaries</li>
+<li>Suspense improvements</li>
+<li>Concurrent rendering</li>
+<li>Selective hydration</li>
+</ul>
+
+<div class="highlight">
+React needed a new foundation. That foundation was Fiber.
+</div>
+
+<h2>Simple Analogy</h2>
+
+<table>
+<tr>
+<th>Analogy</th>
+<th>React Meaning</th>
+</tr>
+
+<tr>
+<td>Old single road</td>
+<td>Old Stack Reconciler</td>
+</tr>
+
+<tr>
+<td>New road system with signals and lanes</td>
+<td>Fiber Architecture</td>
+</tr>
+
+<tr>
+<td>Advanced traffic control added later</td>
+<td>React 18 Concurrent Rendering</td>
+</tr>
+</table>
+
+<h2>Easy Way To Remember</h2>
+
+<div class="flow">
+Old Stack Reconciler
+<br>↓<br>
+One Continuous Stack-Based Work
+<br>↓<br>
+Rigid
+</div>
+
+<br>
+
+<div class="flow">
+Fiber Architecture
+<br>↓<br>
+Work Stored As Fiber Objects
+<br>↓<br>
+Flexible Foundation
+</div>
+
+<br>
+
+<div class="flow">
+React 18 Concurrent Rendering
+<br>↓<br>
+Uses Fiber Foundation
+<br>↓<br>
+Interruptible And Prioritized Rendering
+</div>
+
+<h2>Interview Answer</h2>
+
+<div class="highlight">
+React Fiber architecture is the rewritten reconciliation system introduced in React 16. The old Stack Reconciler used a recursive call-stack based approach where rendering work was processed as one continuous task. Fiber replaced this with Fiber objects that represent components and their work, forming a Fiber tree. This made React's internal rendering system more flexible, improved error recovery, and created the foundation for scheduling, prioritization, and React 18 concurrent rendering features.
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+React Fiber differs from the old stack reconciler by representing rendering work as Fiber objects instead of one rigid recursive call-stack process, making React more flexible and ready for scheduling and concurrent rendering.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+
+</body>
+</html>

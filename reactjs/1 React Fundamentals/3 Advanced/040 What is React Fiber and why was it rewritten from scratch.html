@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>041 - What is React Fiber and why was it rewritten from scratch?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px}
+p,li{color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px}
+.success{background:#052e16;padding:18px;border-left:5px solid #22c55e;border-radius:10px;margin-top:15px}
+.warning{background:#1e1b4b;padding:18px;border-left:5px solid #fbbf24;border-radius:10px;margin-top:15px}
+.danger{background:#2a0f12;padding:18px;border-left:5px solid #ef4444;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;text-align:center;line-height:2;font-size:18px}
+.file-name{background:#111827;color:#93c5fd;padding:12px 16px;border-radius:10px;border:1px solid #1e293b;font-weight:bold;margin-top:20px;margin-bottom:10px}
+.badge{display:inline-block;background:#312e81;color:#ddd6fe;padding:4px 10px;border-radius:999px;font-size:13px;margin:4px 6px 4px 0}
+pre[class*="language-"],code[class*="language-"]{color:#f8f8f2;background:#1e1e1e;font-family:Consolas,Monaco,'Courier New',monospace;font-size:15px}
+.token.keyword{color:#c792ea}
+.token.string{color:#c3e88d}
+.token.function{color:#82aaff}
+.token.class-name{color:#ffcb6b}
+.token.number{color:#f78c6c}
+.token.operator{color:#89ddff}
+.token.punctuation{color:#89ddff}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>041. What is React Fiber and why was it rewritten from scratch?</h1>
+
+<h2>One-Line Definition</h2>
+
+<div class="highlight">
+React Fiber is the rewritten <b>reconciliation architecture(React's reconciliation engine)</b> introduced in React 16. It replaced the old <b>Stack Reconciler</b> and created the foundation for better error handling, scheduling, prioritization, and future concurrent rendering features.
+</div>
+
+<h2>Very Important Correction</h2>
+
+<div class="warning">
+React Fiber came in <b>React 16</b>. Full Concurrent Rendering behavior came later in <b>React 18</b>.
+</div>
+
+<div class="flow">
+React 16
+<br>↓<br>
+Fiber Architecture Introduced
+<br>↓<br>
+Rendering Work Became Fiber-Based
+<br>↓<br>
+Foundation Ready
+<br><br>
+React 18
+<br>↓<br>
+Concurrent Rendering Built On Fiber
+<br>↓<br>
+Interruptible / Prioritized Rendering Features Exposed
+</div>
+
+<h2>Why Was React Fiber Needed?</h2>
+
+<p>
+Before Fiber, React used the old <b>Stack Reconciler</b>. It used a recursive call stack style rendering approach.
+</p>
+
+<div class="flow">
+State Change
+<br>↓<br>
+React Starts Rendering
+<br>↓<br>
+Old Stack Reconciler Processes Tree
+<br>↓<br>
+Must Finish Work
+<br>↓<br>
+Cannot Easily Pause Or Resume
+</div>
+
+<div class="warning">
+The old architecture was rigid. It was hard to pause work, resume work, assign priorities, or recover from errors properly.
+</div>
+
+<h2>Main Purpose Of Fiber In React 16</h2>
+
+<div class="highlight">
+The main purpose of Fiber in React 16 was not to give developers full Concurrent Rendering immediately. Its main purpose was to replace the old reconciliation engine with a more flexible architecture.
+</div>
+
+<div class="flow">
+Old Stack Reconciler
+<br>↓<br>
+Hard To Pause / Resume / Prioritize
+<br>↓<br>
+React 16 Fiber Rewrite
+<br>↓<br>
+Work Stored As Fiber Objects
+<br>↓<br>
+Future Scheduling And Concurrent Features Became Possible
+</div>
+
+<h2>Fiber Engine vs Fiber Object</h2>
+
+<div class="warning">
+React Fiber, the engine, and a Fiber object are related, but they are not the same thing.
+</div>
+
+<table>
+<tr>
+<th>Term</th>
+<th>Meaning</th>
+</tr>
+
+<tr>
+<td>React Fiber</td>
+<td>The rewritten reconciliation architecture / engine</td>
+</tr>
+
+<tr>
+<td>Fiber Object</td>
+<td>A JavaScript object representing one component and its work</td>
+</tr>
+
+<tr>
+<td>Fiber Tree</td>
+<td>A tree made from many Fiber objects</td>
+</tr>
+</table>
+
+<div class="flow">
+React Fiber Engine
+<br>↓<br>
+Uses Many Fiber Objects
+<br>↓<br>
+Builds Fiber Tree
+<br>↓<br>
+Performs Reconciliation
+</div>
+
+<h2>What Is A Fiber Object?</h2>
+
+<div class="highlight">
+A Fiber object is an internal JavaScript object that stores information about a component, its props, state, child, sibling, parent, and pending work.
+</div>
+
+<div class="file-name">Simplified Fiber Object</div>
+
+<pre class="language-js"><code class="language-js">{
+  type: Component,
+  props: {},
+  stateNode: {},
+  child: Fiber,
+  sibling: Fiber,
+  return: Fiber
+}</code></pre>
+
+<h2>Component Tree To Fiber Tree</h2>
+
+<div class="file-name">React Component Tree</div>
+
+<pre class="language-jsx"><code class="language-jsx">&lt;App&gt;
+  &lt;Header /&gt;
+  &lt;Dashboard /&gt;
+&lt;/App&gt;</code></pre>
+
+<div class="flow">
+Fiber(App)
+<br>│
+<br>├── Fiber(Header)
+<br>│
+<br>└── Fiber(Dashboard)
+</div>
+
+<div class="success">
+React creates Fiber objects for components. Many Fiber objects together create the Fiber tree.
+</div>
+
+<h2>Why Fiber Objects Helped</h2>
+
+<p>
+Old React depended heavily on the JavaScript call stack. Fiber gave React its own internal work structure.
+</p>
+
+<div class="flow">
+Old React
+<br>↓<br>
+Call Stack Based Work
+<br>↓<br>
+Hard To Control
+</div>
+
+<br>
+
+<div class="flow">
+React Fiber
+<br>↓<br>
+Work Stored In Fiber Objects
+<br>↓<br>
+React Can Track Progress
+<br>↓<br>
+React Can Support Scheduling
+</div>
+
+<h2>What React 16 Got Immediately From Fiber</h2>
+
+<h3>1. Better Error Handling</h3>
+
+<p>
+React 16 introduced Error Boundaries. Fiber made it easier for React to recover from rendering errors.
+</p>
+
+<div class="file-name">Error Boundary Example</div>
+
+<pre class="language-jsx"><code class="language-jsx">class ErrorBoundary extends React.Component {
+  state = { hasError: false };
+
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return &lt;h2&gt;Something went wrong&lt;/h2&gt;;
+    }
+
+    return this.props.children;
+  }
+}</code></pre>
+
+<div class="flow">
+Component Crashes
+<br>↓<br>
+Error Boundary Catches Error
+<br>↓<br>
+Fallback UI Shows
+<br>↓<br>
+Whole App Does Not Crash
+</div>
+
+<h3>2. More Flexible Reconciliation</h3>
+
+<div class="highlight">
+Fiber changed reconciliation from one rigid recursive process into a system where work could be represented, tracked, and managed as units.
+</div>
+
+<div class="flow">
+Rendering Work
+<br>↓<br>
+Fiber Object
+<br>↓<br>
+Track What To Do
+<br>↓<br>
+Move To Next Fiber
+</div>
+
+<h3>3. Foundation For Priority System</h3>
+
+<p>
+Fiber introduced the foundation for prioritizing different types of work.
+</p>
+
+<div class="flow">
+Urgent Work
+<br>↓<br>
+User Typing / Clicking
+<br><br>
+Less Urgent Work
+<br>↓<br>
+Large UI Update
+</div>
+
+<div class="warning">
+In React 16, this was mostly internal foundation. React 18 later exposed modern concurrent behavior more clearly.
+</div>
+
+<h3>4. Foundation For Future Features</h3>
+
+<p>
+Many modern React features became possible because of Fiber architecture.
+</p>
+
+<ul>
+<li>Concurrent Rendering</li>
+<li>Suspense improvements</li>
+<li>Transitions</li>
+<li>Selective Hydration</li>
+<li>Better scheduling</li>
+<li>Improved error recovery</li>
+</ul>
+
+<h2>React 16 Fiber vs React 18 Concurrent Rendering</h2>
+
+<table>
+<tr>
+<th>Version</th>
+<th>Main Point</th>
+</tr>
+
+<tr>
+<td>React 16</td>
+<td>Introduced Fiber architecture and replaced Stack Reconciler</td>
+</tr>
+
+<tr>
+<td>React 17</td>
+<td>Mostly a stepping-stone release with gradual upgrade improvements</td>
+</tr>
+
+<tr>
+<td>React 18</td>
+<td>Used Fiber foundation for Concurrent Rendering features</td>
+</tr>
+</table>
+
+<div class="highlight">
+Simple line: <b>Fiber was the foundation in React 16; React 18 used that foundation for Concurrent Rendering.</b>
+</div>
+
+<h2>Old Stack Reconciler vs React Fiber</h2>
+
+<table>
+<tr>
+<th>Old Stack Reconciler</th>
+<th>React Fiber</th>
+</tr>
+
+<tr>
+<td>Old reconciliation engine</td>
+<td>New reconciliation architecture</td>
+</tr>
+
+<tr>
+<td>Recursive stack-based work</td>
+<td>Fiber object based work</td>
+</tr>
+
+<tr>
+<td>Rigid rendering flow</td>
+<td>More flexible rendering flow</td>
+</tr>
+
+<tr>
+<td>Harder to recover from errors</td>
+<td>Enabled better error boundaries</td>
+</tr>
+
+<tr>
+<td>Not suitable for future concurrent features</td>
+<td>Foundation for future concurrent features</td>
+</tr>
+</table>
+
+<h2>Simple Analogy</h2>
+
+<div class="flow">
+React 16 Fiber
+<br>↓<br>
+New Strong Foundation
+<br>↓<br>
+React 18 Concurrent Rendering
+<br>↓<br>
+New Floors Built On That Foundation
+</div>
+
+<div class="success">
+React 16 Fiber did not mean every app got full pause/resume concurrent rendering immediately. It means React's internal architecture became ready for that future.
+</div>
+
+<h2>Easy Way To Remember</h2>
+
+<div class="flow">
+React 15 And Before
+<br>↓<br>
+Old Stack Reconciler
+<br>↓<br>
+Rigid Rendering
+</div>
+
+<br>
+
+<div class="flow">
+React 16
+<br>↓<br>
+Fiber Reconciler
+<br>↓<br>
+New Foundation
+</div>
+
+<br>
+
+<div class="flow">
+React 18
+<br>↓<br>
+Concurrent Rendering
+<br>↓<br>
+Uses Fiber Foundation
+</div>
+
+<h2>Most Important Interview Point</h2>
+
+<div class="warning">
+Do not say React 16 Fiber and React 18 Concurrent Rendering are exactly the same thing.
+<br><br>
+Say: Fiber was introduced in React 16 as the internal architecture. React 18 later exposed concurrent rendering capabilities built on top of Fiber.
+</div>
+
+<h2>Interview Answer</h2>
+
+<div class="highlight">
+React Fiber is the rewritten reconciliation architecture introduced in React 16. It replaced the old Stack Reconciler, which was rigid and stack-based. Fiber represents rendering work using Fiber objects, allowing React to track work more flexibly, improve error handling, and build a foundation for scheduling and prioritization. The main use of Fiber in React 16 was to create this new internal architecture, while React 18 later used the Fiber foundation to enable Concurrent Rendering features like interruptible rendering, transitions, and better prioritization.
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+React Fiber is React 16's rewritten reconciliation architecture that replaced the old Stack Reconciler and created the foundation for React 18 concurrent rendering.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+
+</body>
+</html>

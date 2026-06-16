@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>040 - Element Type in Reconciliation</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px}
+p,li{color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px}
+.success{background:#052e16;padding:18px;border-left:5px solid #22c55e;border-radius:10px;margin-top:15px}
+.warning{background:#1e1b4b;padding:18px;border-left:5px solid #fbbf24;border-radius:10px;margin-top:15px}
+.danger{background:#2a0f12;padding:18px;border-left:5px solid #ef4444;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;text-align:center;line-height:2;font-size:18px}
+.file-name{background:#111827;color:#93c5fd;padding:12px 16px;border-radius:10px;border:1px solid #1e293b;font-weight:bold;margin-top:20px;margin-bottom:10px}
+.badge{display:inline-block;background:#312e81;color:#ddd6fe;padding:4px 10px;border-radius:999px;font-size:13px;margin:4px 6px 4px 0}
+pre[class*="language-"],code[class*="language-"]{color:#f8f8f2;background:#1e1e1e;font-family:Consolas,Monaco,'Courier New',monospace;font-size:15px}
+.token.keyword{color:#c792ea}
+.token.string{color:#c3e88d}
+.token.function{color:#82aaff}
+.token.class-name{color:#ffcb6b}
+.token.number{color:#f78c6c}
+.token.operator{color:#89ddff}
+.token.punctuation{color:#89ddff}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>040. What is the significance of element type in the reconciliation process?</h1>
+
+<h2>One-Line Definition</h2>
+
+<div class="highlight">
+During reconciliation, React first compares the <b>element type</b>. If the type is the same, React reuses the existing DOM/component. If the type changes, React removes the old tree and creates a new one.
+</div>
+
+<h2>Simple Meaning</h2>
+
+<p>
+Reconciliation means React compares the previous UI with the new UI and decides what should change in the real DOM.
+</p>
+
+<div class="flow">
+Previous Render
+<br>↓<br>
+New Render
+<br>↓<br>
+React Compares Elements
+<br>↓<br>
+Element Type Same Or Different?
+<br>↓<br>
+Reuse Or Recreate
+</div>
+
+<h2>What Is Element Type?</h2>
+
+<p>
+Element type means what kind of element React is seeing.
+</p>
+
+<table>
+<tr>
+<th>Example</th>
+<th>Element Type</th>
+</tr>
+<tr>
+<td>&lt;div&gt;Hello&lt;/div&gt;</td>
+<td>div</td>
+</tr>
+<tr>
+<td>&lt;span&gt;Hello&lt;/span&gt;</td>
+<td>span</td>
+</tr>
+<tr>
+<td>&lt;Button /&gt;</td>
+<td>Button component</td>
+</tr>
+<tr>
+<td>&lt;UserProfile /&gt;</td>
+<td>UserProfile component</td>
+</tr>
+</table>
+
+<h2>Rule 1 - Same Element Type</h2>
+
+<div class="highlight">
+If the element type is the same, React keeps the old DOM node and only updates changed props, attributes, or text.
+</div>
+
+<div class="file-name">First Render</div>
+
+<pre class="language-jsx"><code class="language-jsx">&lt;div className="box"&gt;Hello&lt;/div&gt;</code></pre>
+
+<div class="file-name">Second Render</div>
+
+<pre class="language-jsx"><code class="language-jsx">&lt;div className="box"&gt;Welcome&lt;/div&gt;</code></pre>
+
+<div class="success">
+Both elements are div. React reuses the existing div and only changes the text from Hello to Welcome.
+</div>
+
+<div class="flow">
+Old Type: div
+<br>↓<br>
+New Type: div
+<br>↓<br>
+Same Type
+<br>↓<br>
+Reuse DOM Node
+<br>↓<br>
+Update Only Changed Text / Props
+</div>
+
+<h2>Rule 2 - Different Element Type</h2>
+
+<div class="highlight">
+If the element type changes, React assumes the old and new trees are completely different.
+</div>
+
+<div class="file-name">First Render</div>
+
+<pre class="language-jsx"><code class="language-jsx">&lt;div&gt;Hello&lt;/div&gt;</code></pre>
+
+<div class="file-name">Second Render</div>
+
+<pre class="language-jsx"><code class="language-jsx">&lt;span&gt;Hello&lt;/span&gt;</code></pre>
+
+<div class="warning">
+The type changed from div to span. React removes the old div and creates a new span.
+</div>
+
+<div class="flow">
+Old Type: div
+<br>↓<br>
+New Type: span
+<br>↓<br>
+Different Type
+<br>↓<br>
+Remove Old DOM
+<br>↓<br>
+Create New DOM
+</div>
+
+<h2>Why Does React Do This?</h2>
+
+<p>
+React uses this rule for performance and predictability.
+</p>
+
+<div class="highlight">
+Different element types usually mean different structure, different behavior, and different state. So React does not try to patch them deeply.
+</div>
+
+<h2>Component Type Example</h2>
+
+<div class="file-name">First Render</div>
+
+<pre class="language-jsx"><code class="language-jsx">function App() {
+  return &lt;UserProfile /&gt;;
+}</code></pre>
+
+<div class="file-name">Second Render</div>
+
+<pre class="language-jsx"><code class="language-jsx">function App() {
+  return &lt;AdminProfile /&gt;;
+}</code></pre>
+
+<div class="warning">
+UserProfile and AdminProfile are different component types, so React unmounts UserProfile and mounts AdminProfile.
+</div>
+
+<div class="flow">
+UserProfile
+<br>↓<br>
+AdminProfile
+<br>↓<br>
+Different Component Type
+<br>↓<br>
+Unmount Old Component
+<br>↓<br>
+Mount New Component
+</div>
+
+<h2>What Happens When Component Type Changes?</h2>
+
+<table>
+<tr>
+<th>Thing</th>
+<th>Result</th>
+</tr>
+<tr>
+<td>Old component</td>
+<td>Unmounted</td>
+</tr>
+<tr>
+<td>Old state</td>
+<td>Lost</td>
+</tr>
+<tr>
+<td>Old effects</td>
+<td>Cleanup runs</td>
+</tr>
+<tr>
+<td>New component</td>
+<td>Mounted fresh</td>
+</tr>
+</table>
+
+<h2>State Preservation Example</h2>
+
+<p>
+If the same component type remains, React usually preserves its state.
+</p>
+
+<div class="file-name">Same Component Type</div>
+
+<pre class="language-jsx"><code class="language-jsx">{isEditing ? &lt;Input label="Edit Name" /&gt; : &lt;Input label="Add Name" /&gt;}</code></pre>
+
+<div class="success">
+Both branches render Input. React keeps the same component type and updates props.
+</div>
+
+<div class="file-name">Different Component Type</div>
+
+<pre class="language-jsx"><code class="language-jsx">{isLoggedIn ? &lt;Dashboard /&gt; : &lt;Login /&gt;}</code></pre>
+
+<div class="warning">
+Dashboard and Login are different types. React replaces one with the other.
+</div>
+
+<h2>DOM Element Example With Attributes</h2>
+
+<div class="file-name">First Render</div>
+
+<pre class="language-jsx"><code class="language-jsx">&lt;button className="primary"&gt;Save&lt;/button&gt;</code></pre>
+
+<div class="file-name">Second Render</div>
+
+<pre class="language-jsx"><code class="language-jsx">&lt;button className="danger"&gt;Delete&lt;/button&gt;</code></pre>
+
+<div class="success">
+The type is still button, so React keeps the button DOM node and updates className and text.
+</div>
+
+<h2>Same Type vs Different Type</h2>
+
+<table>
+<tr>
+<th>Previous Render</th>
+<th>Next Render</th>
+<th>React Action</th>
+</tr>
+<tr>
+<td>&lt;div&gt;</td>
+<td>&lt;div&gt;</td>
+<td>Reuse DOM and update changes</td>
+</tr>
+<tr>
+<td>&lt;div&gt;</td>
+<td>&lt;span&gt;</td>
+<td>Remove div and create span</td>
+</tr>
+<tr>
+<td>&lt;Button /&gt;</td>
+<td>&lt;Button /&gt;</td>
+<td>Reuse component and update props</td>
+</tr>
+<tr>
+<td>&lt;User /&gt;</td>
+<td>&lt;Admin /&gt;</td>
+<td>Unmount User and mount Admin</td>
+</tr>
+</table>
+
+<h2>Important Note About Keys</h2>
+
+<p>
+Element type is one major rule. For lists, React also uses keys to understand which item changed, moved, or was removed.
+</p>
+
+<div class="flow">
+Reconciliation Uses
+<br>↓<br>
+Element Type
+<br>+<br>
+Key
+<br>↓<br>
+Decide Reuse Or Recreate
+</div>
+
+<h2>Easy Way To Remember</h2>
+
+<div class="flow">
+Same Type
+<br>↓<br>
+React Reuses
+<br>↓<br>
+State Preserved
+</div>
+
+<br>
+
+<div class="flow">
+Different Type
+<br>↓<br>
+React Recreates
+<br>↓<br>
+State Lost
+</div>
+
+<h2>Interview Answer</h2>
+
+<div class="highlight">
+Element type is significant in React reconciliation because React uses it to decide whether to reuse an existing DOM node or component. If the previous and next elements have the same type, React updates only the changed props, attributes, or children. If the type changes, React treats them as different trees, unmounts the old tree, loses its state, runs cleanup effects, and creates a new tree from scratch.
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+In reconciliation, same element type means React reuses and updates; different element type means React destroys the old tree and creates a new one.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+
+</body>
+</html>

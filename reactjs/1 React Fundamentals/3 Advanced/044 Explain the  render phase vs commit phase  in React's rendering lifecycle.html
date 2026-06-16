@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>044 - Commit Phase vs Render Phase</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px}
+p,li{color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px}
+.success{background:#052e16;padding:18px;border-left:5px solid #22c55e;border-radius:10px;margin-top:15px}
+.warning{background:#1e1b4b;padding:18px;border-left:5px solid #fbbf24;border-radius:10px;margin-top:15px}
+.danger{background:#2a0f12;padding:18px;border-left:5px solid #ef4444;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;text-align:center;line-height:2;font-size:18px}
+.file-name{background:#111827;color:#93c5fd;padding:12px 16px;border-radius:10px;border:1px solid #1e293b;font-weight:bold;margin-top:20px;margin-bottom:10px}
+pre[class*="language-"],code[class*="language-"]{background:#1e1e1e}
+</style>
+</head>
+<body>
+<div class="container">
+
+<h1>044. Explain the render phase vs commit phase in React's rendering lifecycle.</h1>
+
+<h2>One-Line Definition</h2>
+<div class="highlight">
+React rendering happens in two phases: <b>Render Phase</b> calculates what should change, and <b>Commit Phase</b> applies those changes to the real DOM.
+</div>
+
+<h2>Big Picture</h2>
+<div class="flow">
+State Change
+<br>↓<br>
+Render Phase
+<br>↓<br>
+Calculate Changes
+<br>↓<br>
+Commit Phase
+<br>↓<br>
+Update Real DOM
+</div>
+
+<h2>Render Phase</h2>
+
+<div class="highlight">
+During Render Phase, React runs components, builds the Fiber tree, compares old UI with new UI, and determines what changes are needed.
+</div>
+
+<div class="flow">
+Run Components
+<br>↓<br>
+Create React Elements
+<br>↓<br>
+Compare Trees
+<br>↓<br>
+Build Work In Fiber Tree
+<br>↓<br>
+Prepare Changes
+</div>
+
+<div class="file-name">Example</div>
+<pre class="language-jsx"><code class="language-jsx">function Counter() {
+  const [count, setCount] = useState(0);
+
+  return &lt;h1&gt;{count}&lt;/h1&gt;;
+}</code></pre>
+
+<div class="warning">
+Render Phase does not update the real DOM. It only calculates what should change.
+</div>
+
+<h2>Commit Phase</h2>
+
+<div class="highlight">
+Commit Phase applies the work prepared during Render Phase to the real DOM.
+</div>
+
+<div class="flow">
+Render Finished
+<br>↓<br>
+React Knows Required Changes
+<br>↓<br>
+Update Real DOM
+<br>↓<br>
+Browser Paints UI
+</div>
+
+<div class="success">
+Users see UI changes only after Commit Phase completes.
+</div>
+
+<h2>Example</h2>
+
+<div class="file-name">Before</div>
+<pre>&lt;h1&gt;0&lt;/h1&gt;</pre>
+
+<div class="file-name">After</div>
+<pre>&lt;h1&gt;1&lt;/h1&gt;</pre>
+
+<p>Render Phase discovers the difference. Commit Phase updates the actual DOM node.</p>
+
+<h2>Can Render Phase Be Interrupted?</h2>
+
+<div class="success">
+Yes. In React 18 concurrent rendering, Render Phase can be paused, interrupted, resumed, or restarted.
+</div>
+
+<div class="flow">
+Render Some Work
+<br>↓<br>
+User Types
+<br>↓<br>
+Pause Render
+<br>↓<br>
+Handle Input
+<br>↓<br>
+Resume Render
+</div>
+
+<h2>Can Commit Phase Be Interrupted?</h2>
+
+<div class="danger">
+No. Once Commit Phase starts, React must finish it because it is modifying the real DOM.
+</div>
+
+<div class="flow">
+Commit Starts
+<br>↓<br>
+Update DOM
+<br>↓<br>
+Finish Commit
+</div>
+
+<h2>Render vs Commit</h2>
+
+<table>
+<tr><th>Render Phase</th><th>Commit Phase</th></tr>
+<tr><td>Runs components</td><td>Updates DOM</td></tr>
+<tr><td>Builds Fiber tree</td><td>Applies changes</td></tr>
+<tr><td>No visible changes</td><td>User sees updates</td></tr>
+<tr><td>Can be interrupted</td><td>Cannot be interrupted</td></tr>
+<tr><td>Calculates work</td><td>Executes work</td></tr>
+</table>
+
+<h2>useEffect vs useLayoutEffect</h2>
+
+<div class="file-name">useEffect</div>
+<pre class="language-js"><code class="language-js">useEffect(() => {
+  console.log('effect');
+}, []);</code></pre>
+
+<div class="flow">
+Render
+<br>↓<br>
+Commit
+<br>↓<br>
+Browser Paint
+<br>↓<br>
+useEffect Runs
+</div>
+
+<div class="file-name">useLayoutEffect</div>
+<pre class="language-js"><code class="language-js">useLayoutEffect(() => {
+  console.log('layout');
+}, []);</code></pre>
+
+<div class="flow">
+Render
+<br>↓<br>
+Commit
+<br>↓<br>
+useLayoutEffect Runs
+<br>↓<br>
+Browser Paint
+</div>
+
+<h2>React Fiber Connection</h2>
+
+<div class="highlight">
+Fiber architecture introduced in React 16 stores rendering work in Fiber objects. React 18 uses that Fiber foundation to make the Render Phase interruptible and prioritizable.
+</div>
+
+<div class="flow">
+Fiber Architecture
+<br>↓<br>
+Render Work Stored In Fibers
+<br>↓<br>
+Concurrent Rendering
+<br>↓<br>
+Interruptible Render Phase
+</div>
+
+<h2>Easy Way To Remember</h2>
+
+<div class="flow">
+Render Phase
+<br>↓<br>
+Think
+<br>↓<br>
+Calculate
+<br>↓<br>
+Prepare
+</div>
+
+<br>
+
+<div class="flow">
+Commit Phase
+<br>↓<br>
+Apply
+<br>↓<br>
+Update DOM
+<br>↓<br>
+Show Changes
+</div>
+
+<h2>Interview Answer</h2>
+
+<div class="highlight">
+React's rendering lifecycle has two phases. During the Render Phase, React runs components, builds the Fiber tree, compares old and new UI, and calculates what changes are needed. No DOM updates happen here. During the Commit Phase, React applies those calculated changes to the real DOM. In React 18, the Render Phase can be interrupted and resumed, but the Commit Phase cannot be interrupted because it modifies the DOM.
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+Render Phase calculates changes; Commit Phase applies those changes to the real DOM.
+</div>
+
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+</body>
+</html>

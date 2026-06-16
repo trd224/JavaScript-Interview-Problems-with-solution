@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>449 - Dependency vulnerabilities in npm and how to audit them</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px}
+p,li{color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px}
+.success{background:#052e16;padding:18px;border-left:5px solid #22c55e;border-radius:10px;margin-top:15px}
+.warning{background:#1e1b4b;padding:18px;border-left:5px solid #fbbf24;border-radius:10px;margin-top:15px}
+.danger{background:#2a0f12;padding:18px;border-left:5px solid #ef4444;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;text-align:center;line-height:2;font-size:18px}
+.file-name{background:#111827;color:#93c5fd;padding:12px 16px;border-radius:10px;border:1px solid #1e293b;font-weight:bold;margin-top:20px;margin-bottom:10px}
+.badge{display:inline-block;background:#312e81;color:#ddd6fe;padding:4px 10px;border-radius:999px;font-size:13px;margin:4px 6px 4px 0}
+pre[class*="language-"],code[class*="language-"]{color:#f8f8f2;background:#1e1e1e;font-family:Consolas,Monaco,'Courier New',monospace;font-size:15px}
+.token.keyword{color:#c792ea}
+.token.string{color:#c3e88d}
+.token.function{color:#82aaff}
+.token.class-name{color:#ffcb6b}
+.token.number{color:#f78c6c}
+.token.operator{color:#89ddff}
+.token.punctuation{color:#89ddff}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>449. What are dependency vulnerabilities in npm and how do you audit them?</h1>
+
+<h2>One-Line Definition</h2>
+
+<div class="highlight">
+Dependency vulnerabilities are security issues found inside npm packages used by your project. You audit them using commands like <b>npm audit</b> and fix them using updates, patches, or package replacement.
+</div>
+
+<h2>Simple Meaning</h2>
+
+<p>
+In a React or Node project, we install many packages from npm.
+</p>
+
+<div class="file-name">Example</div>
+
+<pre class="language-bash"><code class="language-bash">npm install axios react-router-dom lodash</code></pre>
+
+<p>
+These packages may also install their own internal packages.
+</p>
+
+<div class="flow">
+Your Project
+<br>↓<br>
+Direct Dependencies
+<br>↓<br>
+Indirect Dependencies
+<br>↓<br>
+Hundreds Of Packages
+</div>
+
+<h2>What Is A Dependency Vulnerability?</h2>
+
+<div class="highlight">
+A dependency vulnerability means one of your installed npm packages has a known security problem.
+</div>
+
+<p>
+Example problems:
+</p>
+
+<p>
+<span class="badge">XSS</span>
+<span class="badge">Prototype Pollution</span>
+<span class="badge">Remote Code Execution</span>
+<span class="badge">ReDoS</span>
+<span class="badge">Path Traversal</span>
+</p>
+
+<h2>Direct vs Transitive Dependency</h2>
+
+<table>
+<tr>
+<th>Type</th>
+<th>Meaning</th>
+<th>Example</th>
+</tr>
+
+<tr>
+<td>Direct Dependency</td>
+<td>You installed it manually</td>
+<td>axios</td>
+</tr>
+
+<tr>
+<td>Transitive Dependency</td>
+<td>Installed by another package</td>
+<td>small package used inside axios or build tools</td>
+</tr>
+</table>
+
+<div class="flow">
+You Install Package A
+<br>↓<br>
+Package A Installs Package B
+<br>↓<br>
+Package B Has Vulnerability
+<br>↓<br>
+Your Project Is Affected
+</div>
+
+<h2>Why Are They Dangerous?</h2>
+
+<p>
+A vulnerable package can affect your application depending on where and how it is used.
+</p>
+
+<table>
+<tr>
+<th>Vulnerability</th>
+<th>Possible Risk</th>
+</tr>
+
+<tr>
+<td>XSS</td>
+<td>Malicious script can run in browser</td>
+</tr>
+
+<tr>
+<td>Prototype Pollution</td>
+<td>Object behavior can be changed unexpectedly</td>
+</tr>
+
+<tr>
+<td>Remote Code Execution</td>
+<td>Attacker may run code on server</td>
+</tr>
+
+<tr>
+<td>ReDoS</td>
+<td>Regex can slow or crash app</td>
+</tr>
+
+<tr>
+<td>Path Traversal</td>
+<td>Unauthorized file access</td>
+</tr>
+</table>
+
+<h2>How To Audit npm Dependencies</h2>
+
+<div class="file-name">Terminal</div>
+
+<pre class="language-bash"><code class="language-bash">npm audit</code></pre>
+
+<p>
+This scans your installed packages and reports known vulnerabilities.
+</p>
+
+<h2>Example npm audit Output</h2>
+
+<div class="file-name">Terminal Output</div>
+
+<pre class="language-text"><code class="language-text">3 vulnerabilities found
+
+Severity:
+1 moderate
+1 high
+1 critical
+
+Run npm audit fix to fix them.</code></pre>
+
+<h2>Severity Levels</h2>
+
+<table>
+<tr>
+<th>Severity</th>
+<th>Meaning</th>
+</tr>
+
+<tr>
+<td>Low</td>
+<td>Small risk, usually not urgent</td>
+</tr>
+
+<tr>
+<td>Moderate</td>
+<td>Should be reviewed</td>
+</tr>
+
+<tr>
+<td>High</td>
+<td>Should be fixed soon</td>
+</tr>
+
+<tr>
+<td>Critical</td>
+<td>Fix immediately if your project is affected</td>
+</tr>
+</table>
+
+<h2>How To Fix Vulnerabilities</h2>
+
+<h3>1. Automatic Safe Fix</h3>
+
+<div class="file-name">Terminal</div>
+
+<pre class="language-bash"><code class="language-bash">npm audit fix</code></pre>
+
+<div class="success">
+This applies compatible package updates without breaking major versions.
+</div>
+
+<h3>2. Force Fix</h3>
+
+<div class="file-name">Terminal</div>
+
+<pre class="language-bash"><code class="language-bash">npm audit fix --force</code></pre>
+
+<div class="warning">
+Be careful. This can upgrade major versions and may break your project.
+</div>
+
+<h3>3. Manually Update Package</h3>
+
+<div class="file-name">Terminal</div>
+
+<pre class="language-bash"><code class="language-bash">npm install package-name@latest</code></pre>
+
+<h3>4. Check Outdated Packages</h3>
+
+<div class="file-name">Terminal</div>
+
+<pre class="language-bash"><code class="language-bash">npm outdated</code></pre>
+
+<h3>5. Replace Unsafe Package</h3>
+
+<p>
+If a package is abandoned or not fixed, replace it with a safer maintained package.
+</p>
+
+<div class="flow">
+Package Vulnerable
+<br>↓<br>
+No Fix Available
+<br>↓<br>
+Package Not Maintained
+<br>↓<br>
+Replace Package
+</div>
+
+<h2>Useful npm Commands</h2>
+
+<table>
+<tr>
+<th>Command</th>
+<th>Use</th>
+</tr>
+
+<tr>
+<td>npm audit</td>
+<td>Show vulnerabilities</td>
+</tr>
+
+<tr>
+<td>npm audit fix</td>
+<td>Apply safe fixes</td>
+</tr>
+
+<tr>
+<td>npm audit fix --force</td>
+<td>Apply aggressive fixes, may break app</td>
+</tr>
+
+<tr>
+<td>npm outdated</td>
+<td>Show old packages</td>
+</tr>
+
+<tr>
+<td>npm ls package-name</td>
+<td>Find why package is installed</td>
+</tr>
+</table>
+
+<h2>Find Which Package Is Bringing Vulnerable Dependency</h2>
+
+<div class="file-name">Terminal</div>
+
+<pre class="language-bash"><code class="language-bash">npm ls vulnerable-package-name</code></pre>
+
+<div class="file-name">Example Output</div>
+
+<pre class="language-text"><code class="language-text">my-app
+└─┬ react-scripts
+  └── vulnerable-package-name</code></pre>
+
+<p>
+This means the vulnerable package came through <b>react-scripts</b>.
+</p>
+
+<h2>Important: Not Every Audit Warning Means Immediate Danger</h2>
+
+<div class="warning">
+A package may be vulnerable, but your app may not be affected if the vulnerable code path is never used.
+</div>
+
+<p>
+Still, you should review and fix high/critical issues seriously.
+</p>
+
+<h2>Good Security Practice</h2>
+
+<ul>
+<li>Run <b>npm audit</b> regularly.</li>
+<li>Keep dependencies updated.</li>
+<li>Commit package-lock.json.</li>
+<li>Avoid abandoned packages.</li>
+<li>Use trusted packages with active maintenance.</li>
+<li>Review high and critical vulnerabilities first.</li>
+<li>Run tests after updating packages.</li>
+</ul>
+
+<h2>CI/CD Example</h2>
+
+<p>
+In real projects, npm audit can run during build pipeline.
+</p>
+
+<div class="file-name">Terminal</div>
+
+<pre class="language-bash"><code class="language-bash">npm audit --audit-level=high</code></pre>
+
+<div class="success">
+This can fail the build only for high or critical vulnerabilities.
+</div>
+
+<h2>Simple Audit Flow</h2>
+
+<div class="flow">
+Install Packages
+<br>↓<br>
+Run npm audit
+<br>↓<br>
+Read Vulnerability Report
+<br>↓<br>
+Run npm audit fix
+<br>↓<br>
+Test Application
+<br>↓<br>
+Manually Fix Remaining Issues
+</div>
+
+<h2>Interview Answer</h2>
+
+<div class="highlight">
+Dependency vulnerabilities in npm are known security issues in packages installed by a project, including both direct and transitive dependencies. They can cause issues like XSS, prototype pollution, ReDoS, or remote code execution. We audit them using npm audit, fix safe updates with npm audit fix, manually update or replace vulnerable packages, and carefully test the application after updates.
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+npm dependency vulnerabilities are security flaws in installed packages, and we audit them using npm audit, then fix them by updating, patching, or replacing affected packages.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+
+</body>
+</html>

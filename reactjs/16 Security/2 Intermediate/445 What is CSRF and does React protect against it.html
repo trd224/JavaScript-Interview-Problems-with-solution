@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>445 - What is CSRF and does React protect against it?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+p,li{color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px}
+.success{background:#052e16;padding:18px;border-left:5px solid #22c55e;border-radius:10px;margin-top:15px}
+.warning{background:#1e1b4b;padding:18px;border-left:5px solid #fbbf24;border-radius:10px;margin-top:15px}
+.danger{background:#2a0f12;padding:18px;border-left:5px solid #ef4444;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;text-align:center;line-height:2;font-size:18px}
+.file-name{background:#111827;color:#93c5fd;padding:12px 16px;border-radius:10px;border:1px solid #1e293b;font-weight:bold;margin-top:20px;margin-bottom:10px}
+.badge{display:inline-block;background:#312e81;color:#ddd6fe;padding:4px 10px;border-radius:999px;font-size:13px;margin:4px 6px 4px 0}
+pre[class*="language-"],code[class*="language-"]{color:#f8f8f2;background:#1e1e1e;font-family:Consolas,Monaco,'Courier New',monospace;font-size:15px}
+.token.keyword{color:#c792ea}
+.token.string{color:#c3e88d}
+.token.function{color:#82aaff}
+.token.class-name{color:#ffcb6b}
+.token.number{color:#f78c6c}
+.token.operator{color:#89ddff}
+.token.punctuation{color:#89ddff}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>445. What is CSRF and does React protect against it?</h1>
+
+<h2>One-Line Definition</h2>
+
+<div class="highlight">
+CSRF means <b>Cross-Site Request Forgery</b>. It is an attack where a malicious website tricks a logged-in user's browser into sending a request to another website.
+</div>
+
+<h2>Simple Meaning</h2>
+
+<p>
+CSRF does not mean the attacker steals your password directly. The attacker uses your already logged-in browser to perform an action.
+</p>
+
+<div class="flow">
+User Logged In
+<br>↓<br>
+Browser Has Login Cookie
+<br>↓<br>
+User Opens Evil Website
+<br>↓<br>
+Evil Website Sends Request
+<br>↓<br>
+Browser Automatically Sends Cookie
+<br>↓<br>
+Real Website Thinks Request Came From User
+</div>
+
+<h2>Simple Real-Life Example</h2>
+
+<p>
+Imagine you are already logged in to a banking website. Your browser has a session cookie for that bank.
+</p>
+
+<div class="success">
+Bank website remembers you because your browser has a login cookie.
+</div>
+
+<p>
+Now you open another dangerous website in a different tab. That dangerous website secretly tries to submit a money transfer request to the bank.
+</p>
+
+<div class="danger">
+The dangerous website cannot directly see your bank data, but it may try to make your browser send a request to the bank.
+</div>
+
+<h2>CSRF Attack Example</h2>
+
+<div class="file-name">Malicious Website HTML</div>
+
+<pre class="language-html"><code class="language-html">&lt;form action="https://bank.com/transfer" method="POST"&gt;
+  &lt;input name="amount" value="10000"&gt;
+  &lt;input name="to" value="attacker"&gt;
+&lt;/form&gt;
+
+&lt;script&gt;
+document.forms[0].submit();
+&lt;/script&gt;</code></pre>
+
+<p>
+If the user is logged in to the bank, the browser may automatically attach the bank cookie with this request.
+</p>
+
+<h2>Why Does CSRF Work?</h2>
+
+<div class="flow">
+Request Sent To Bank
+<br>+<br>
+Browser Automatically Adds Cookie
+<br>↓<br>
+Bank Sees Valid Login Session
+<br>↓<br>
+Bank May Accept Request
+</div>
+
+<div class="warning">
+Important: CSRF happens mainly when authentication depends on cookies that browsers automatically send with requests.
+</div>
+
+<h2>Does React Protect Against CSRF?</h2>
+
+<div class="danger">
+No. React does not automatically protect against CSRF.
+</div>
+
+<p>
+React is a frontend UI library. It renders components and handles UI logic. CSRF protection is mainly handled by the server, backend API, and cookie configuration.
+</p>
+
+<h2>Why React Cannot Fully Protect It Alone</h2>
+
+<table>
+<tr>
+<th>React Responsibility</th>
+<th>Backend Responsibility</th>
+</tr>
+
+<tr>
+<td>Render UI</td>
+<td>Validate requests</td>
+</tr>
+
+<tr>
+<td>Call API</td>
+<td>Check CSRF token</td>
+</tr>
+
+<tr>
+<td>Manage frontend state</td>
+<td>Set secure cookies</td>
+</tr>
+
+<tr>
+<td>Show forms/buttons</td>
+<td>Reject fake requests</td>
+</tr>
+</table>
+
+<h2>How To Protect Against CSRF</h2>
+
+<p>
+Common protections are:
+</p>
+
+<p>
+<span class="badge">CSRF Token</span>
+<span class="badge">SameSite Cookie</span>
+<span class="badge">Origin Check</span>
+<span class="badge">Referer Check</span>
+</p>
+
+<h2>1. CSRF Token</h2>
+
+<div class="highlight">
+A CSRF token is a secret random value generated by the server. React sends it with the request, and the server verifies it.
+</div>
+
+<div class="flow">
+Server Creates Token
+<br>↓<br>
+React Receives Token
+<br>↓<br>
+React Sends Token With POST Request
+<br>↓<br>
+Server Checks Token
+<br>↓<br>
+Request Accepted Or Rejected
+</div>
+
+<div class="file-name">React Fetch Example</div>
+
+<pre class="language-jsx"><code class="language-jsx">fetch('/api/update-profile', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': csrfToken },
+  body: JSON.stringify({ name: 'Rizwan' })
+});</code></pre>
+
+<h2>2. SameSite Cookie</h2>
+
+<p>
+SameSite tells the browser when cookies should be sent with cross-site requests.
+</p>
+
+<div class="file-name">Server Cookie Example</div>
+
+<pre class="language-http"><code class="language-http">Set-Cookie: sessionId=abc123; HttpOnly; Secure; SameSite=Lax</code></pre>
+
+<div class="success">
+SameSite=Lax or SameSite=Strict can reduce CSRF risk because cookies are not freely sent in every cross-site situation.
+</div>
+
+<h2>3. Origin Validation</h2>
+
+<p>
+The backend can check where the request came from.
+</p>
+
+<div class="file-name">Backend Logic Idea</div>
+
+<pre class="language-js"><code class="language-js">if (request.headers.origin !== 'https://myapp.com') {
+  return response.status(403).json({ message: 'Invalid origin' });
+}</code></pre>
+
+<h2>CSRF vs XSS</h2>
+
+<table>
+<tr>
+<th>Topic</th>
+<th>XSS</th>
+<th>CSRF</th>
+</tr>
+
+<tr>
+<td>Main Idea</td>
+<td>Attacker injects JavaScript into page</td>
+<td>Attacker tricks browser to send request</td>
+</tr>
+
+<tr>
+<td>Problem</td>
+<td>Malicious script runs</td>
+<td>Unauthorized request happens</td>
+</tr>
+
+<tr>
+<td>React Default Protection</td>
+<td>Yes, React escapes JSX values</td>
+<td>No, React does not automatically stop CSRF</td>
+</tr>
+
+<tr>
+<td>Common Protection</td>
+<td>Avoid raw HTML, sanitize HTML</td>
+<td>CSRF token, SameSite cookie, origin check</td>
+</tr>
+</table>
+
+<h2>Easy Way To Remember</h2>
+
+<div class="flow">
+XSS
+<br>↓<br>
+Attacker Runs Code In Your Page
+</div>
+
+<br>
+
+<div class="flow">
+CSRF
+<br>↓<br>
+Attacker Makes Your Browser Send A Request
+</div>
+
+<h2>Important React Point</h2>
+
+<div class="warning">
+React protects against many XSS cases by escaping JSX values, but React does not automatically protect against CSRF. CSRF protection must be added in backend/API security.
+</div>
+
+<h2>Interview Answer</h2>
+
+<div class="highlight">
+CSRF, or Cross-Site Request Forgery, is an attack where a malicious website tricks a logged-in user's browser into sending an unwanted request to another website. It works because browsers automatically send cookies with requests. React does not automatically protect against CSRF because React is only a UI library. CSRF protection should be implemented using server-side CSRF tokens, SameSite cookies, and origin validation.
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+CSRF tricks a logged-in browser into sending unwanted requests, and React does not protect against it by default; backend CSRF tokens and cookie security are needed.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-http.min.js"></script>
+
+</body>
+</html>

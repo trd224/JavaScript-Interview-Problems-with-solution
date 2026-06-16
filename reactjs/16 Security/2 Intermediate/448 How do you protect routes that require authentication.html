@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>448 - How do you protect routes that require authentication?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px}
+p,li{color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px}
+.success{background:#052e16;padding:18px;border-left:5px solid #22c55e;border-radius:10px;margin-top:15px}
+.warning{background:#1e1b4b;padding:18px;border-left:5px solid #fbbf24;border-radius:10px;margin-top:15px}
+.danger{background:#2a0f12;padding:18px;border-left:5px solid #ef4444;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;text-align:center;line-height:2;font-size:18px}
+.file-name{background:#111827;color:#93c5fd;padding:12px 16px;border-radius:10px;border:1px solid #1e293b;font-weight:bold;margin-top:20px;margin-bottom:10px}
+.badge{display:inline-block;background:#312e81;color:#ddd6fe;padding:4px 10px;border-radius:999px;font-size:13px;margin:4px 6px 4px 0}
+pre[class*="language-"],code[class*="language-"]{color:#f8f8f2;background:#1e1e1e;font-family:Consolas,Monaco,'Courier New',monospace;font-size:15px}
+.token.keyword{color:#c792ea}
+.token.string{color:#c3e88d}
+.token.function{color:#82aaff}
+.token.class-name{color:#ffcb6b}
+.token.number{color:#f78c6c}
+.token.operator{color:#89ddff}
+.token.punctuation{color:#89ddff}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>448. How do you protect routes that require authentication?</h1>
+
+<h2>One-Line Definition</h2>
+
+<div class="highlight">
+In React, protected routes check whether the user is authenticated before showing a page. If the user is not authenticated, the app redirects them to the login page.
+</div>
+
+<h2>Very Important Point</h2>
+
+<div class="warning">
+ProtectedRoute in React is mainly for <b>user experience</b>. Real security must be done on the <b>backend</b>.
+</div>
+
+<p>
+Why? Because frontend code runs in the user's browser. A user can open DevTools and manually create a fake token.
+</p>
+
+<h2>Basic Protected Route Example</h2>
+
+<div class="file-name">File: src/components/ProtectedRoute.jsx</div>
+
+<pre class="language-jsx"><code class="language-jsx">import { Navigate } from 'react-router-dom';
+
+function ProtectedRoute({ children }) {
+  const token = localStorage.getItem('token');
+
+  if (!token) {
+    return &lt;Navigate to="/login" replace /&gt;;
+  }
+
+  return children;
+}
+
+export default ProtectedRoute;</code></pre>
+
+<div class="success">
+This checks if token exists. If token does not exist, user goes to login page.
+</div>
+
+<h2>But There Is A Problem</h2>
+
+<p>
+A user can open browser DevTools and add a fake token.
+</p>
+
+<div class="file-name">Browser Console</div>
+
+<pre class="language-js"><code class="language-js">localStorage.setItem('token', 'fake-token');</code></pre>
+
+<p>
+Now this condition becomes true:
+</p>
+
+<div class="file-name">ProtectedRoute Check</div>
+
+<pre class="language-js"><code class="language-js">const token = localStorage.getItem('token');
+
+if (token) {
+  // React thinks user is logged in
+}</code></pre>
+
+<div class="danger">
+So checking only token existence on frontend is not real security.
+</div>
+
+<h2>What Happens With Fake Token?</h2>
+
+<div class="flow">
+User Creates Fake Token
+<br>↓<br>
+ProtectedRoute Sees Token Exists
+<br>↓<br>
+Dashboard Page Opens
+<br>↓<br>
+Dashboard Calls Protected API
+<br>↓<br>
+Backend Verifies Token
+<br>↓<br>
+Fake Token Fails
+<br>↓<br>
+401 Unauthorized
+</div>
+
+<h2>So What Is Real Security?</h2>
+
+<div class="highlight">
+Real security means backend must verify the token/session before sending protected data.
+</div>
+
+<div class="file-name">Backend Example</div>
+
+<pre class="language-js"><code class="language-js">app.get('/api/profile', authenticate, (req, res) =&gt; {
+  res.json({ name: 'Rizwan', role: 'user' });
+});</code></pre>
+
+<div class="file-name">Backend Auth Middleware</div>
+
+<pre class="language-js"><code class="language-js">function authenticate(req, res, next) {
+  const token = req.headers.authorization;
+
+  if (!token || !verifyToken(token)) {
+    return res.status(401).json({ message: 'Unauthorized' });
+  }
+
+  next();
+}</code></pre>
+
+<div class="success">
+Even if the dashboard opens using a fake token, backend will not return protected data.
+</div>
+
+<h2>Why Use ProtectedRoute Then?</h2>
+
+<p>
+ProtectedRoute gives better user experience.
+</p>
+
+<table>
+<tr>
+<th>Without ProtectedRoute</th>
+<th>With ProtectedRoute</th>
+</tr>
+
+<tr>
+<td>User opens dashboard</td>
+<td>User opens dashboard</td>
+</tr>
+
+<tr>
+<td>Dashboard loads first</td>
+<td>Auth checked first</td>
+</tr>
+
+<tr>
+<td>API fails with 401</td>
+<td>User redirected to login</td>
+</tr>
+
+<tr>
+<td>Bad UX</td>
+<td>Better UX</td>
+</tr>
+</table>
+
+<h2>Correct Mental Model</h2>
+
+<div class="flow">
+React ProtectedRoute
+<br>↓<br>
+UX Protection
+<br>↓<br>
+Redirect Unauthenticated User
+</div>
+
+<br>
+
+<div class="flow">
+Backend Authentication
+<br>↓<br>
+Real Security
+<br>↓<br>
+Verify Token Before Sending Data
+</div>
+
+<h2>Better Production Approach</h2>
+
+<p>
+Instead of trusting only localStorage, call a backend API like <b>/me</b> when the app starts.
+</p>
+
+<div class="flow">
+App Starts
+<br>↓<br>
+Call /api/me
+<br>↓<br>
+Backend Verifies Token / Cookie
+<br>↓<br>
+If Valid → Return User
+<br>↓<br>
+Set User State
+<br>↓<br>
+ProtectedRoute Uses User State
+</div>
+
+<h2>Auth Context Example</h2>
+
+<div class="file-name">File: src/context/AuthContext.jsx</div>
+
+<pre class="language-jsx"><code class="language-jsx">import { createContext, useContext, useEffect, useState } from 'react';
+
+const AuthContext = createContext(null);
+
+export function AuthProvider({ children }) {
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() =&gt; {
+    fetch('/api/me')
+      .then(res =&gt; res.ok ? res.json() : null)
+      .then(data =&gt; setUser(data))
+      .finally(() =&gt; setLoading(false));
+  }, []);
+
+  return &lt;AuthContext.Provider value={{ user, loading, setUser }}&gt;{children}&lt;/AuthContext.Provider&gt;;
+}
+
+export function useAuth() {
+  return useContext(AuthContext);
+}</code></pre>
+
+<h2>ProtectedRoute Using Auth Context</h2>
+
+<div class="file-name">File: src/components/ProtectedRoute.jsx</div>
+
+<pre class="language-jsx"><code class="language-jsx">import { Navigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+
+function ProtectedRoute({ children }) {
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return &lt;h2&gt;Checking authentication...&lt;/h2&gt;;
+  }
+
+  if (!user) {
+    return &lt;Navigate to="/login" replace /&gt;;
+  }
+
+  return children;
+}
+
+export default ProtectedRoute;</code></pre>
+
+<div class="success">
+Now React trusts the backend response, not only localStorage token existence.
+</div>
+
+<h2>Use ProtectedRoute In App</h2>
+
+<div class="file-name">File: src/App.jsx</div>
+
+<pre class="language-jsx"><code class="language-jsx">import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { AuthProvider } from './context/AuthContext';
+import Login from './pages/Login';
+import Dashboard from './pages/Dashboard';
+import ProtectedRoute from './components/ProtectedRoute';
+
+function App() {
+  return (
+    &lt;AuthProvider&gt;
+      &lt;BrowserRouter&gt;
+        &lt;Routes&gt;
+          &lt;Route path="/login" element={&lt;Login /&gt;} /&gt;
+          &lt;Route path="/dashboard" element={&lt;ProtectedRoute&gt;&lt;Dashboard /&gt;&lt;/ProtectedRoute&gt;} /&gt;
+        &lt;/Routes&gt;
+      &lt;/BrowserRouter&gt;
+    &lt;/AuthProvider&gt;
+  );
+}
+
+export default App;</code></pre>
+
+<h2>Preserve Requested Page After Login</h2>
+
+<p>
+If user tries to open <b>/dashboard</b> without login, redirect to login and remember the requested page.
+</p>
+
+<div class="file-name">File: src/components/ProtectedRoute.jsx</div>
+
+<pre class="language-jsx"><code class="language-jsx">import { Navigate, useLocation } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+
+function ProtectedRoute({ children }) {
+  const { user, loading } = useAuth();
+  const location = useLocation();
+
+  if (loading) {
+    return &lt;h2&gt;Checking authentication...&lt;/h2&gt;;
+  }
+
+  if (!user) {
+    return &lt;Navigate to="/login" state={{ from: location }} replace /&gt;;
+  }
+
+  return children;
+}
+
+export default ProtectedRoute;</code></pre>
+
+<div class="file-name">File: src/pages/Login.jsx</div>
+
+<pre class="language-jsx"><code class="language-jsx">import { useLocation, useNavigate } from 'react-router-dom';
+
+function Login() {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const from = location.state?.from?.pathname || '/dashboard';
+
+  function handleLogin() {
+    // call login API first
+    navigate(from, { replace: true });
+  }
+
+  return &lt;button onClick={handleLogin}&gt;Login&lt;/button&gt;;
+}
+
+export default Login;</code></pre>
+
+<h2>Role-Based Route Protection</h2>
+
+<p>
+For admin pages, check the role returned by the backend.
+</p>
+
+<div class="file-name">File: src/components/AdminRoute.jsx</div>
+
+<pre class="language-jsx"><code class="language-jsx">import { Navigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+
+function AdminRoute({ children }) {
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return &lt;h2&gt;Checking authentication...&lt;/h2&gt;;
+  }
+
+  if (!user) {
+    return &lt;Navigate to="/login" replace /&gt;;
+  }
+
+  if (user.role !== 'admin') {
+    return &lt;Navigate to="/dashboard" replace /&gt;;
+  }
+
+  return children;
+}
+
+export default AdminRoute;</code></pre>
+
+<h2>Frontend vs Backend Responsibility</h2>
+
+<table>
+<tr>
+<th>Layer</th>
+<th>Purpose</th>
+<th>Security Level</th>
+</tr>
+
+<tr>
+<td>ProtectedRoute</td>
+<td>Redirect user if not logged in</td>
+<td>UX only</td>
+</tr>
+
+<tr>
+<td>Auth Context</td>
+<td>Store current user in React state</td>
+<td>UX + app state</td>
+</tr>
+
+<tr>
+<td>Backend Middleware</td>
+<td>Verify token/session</td>
+<td>Real security</td>
+</tr>
+
+<tr>
+<td>Database/API</td>
+<td>Return protected data only after auth check</td>
+<td>Real security</td>
+</tr>
+</table>
+
+<h2>Important Warning</h2>
+
+<div class="danger">
+Never depend only on frontend route protection. Users can change localStorage, modify frontend state, or directly call APIs. Always protect backend APIs.
+</div>
+
+<h2>Easy Way To Remember</h2>
+
+<div class="flow">
+ProtectedRoute
+<br>↓<br>
+Can Hide Page
+<br>↓<br>
+Cannot Protect Data Alone
+</div>
+
+<br>
+
+<div class="flow">
+Backend Auth Check
+<br>↓<br>
+Verifies Token
+<br>↓<br>
+Protects Real Data
+</div>
+
+<h2>Interview Answer</h2>
+
+<div class="highlight">
+In React, protected routes are usually implemented using a ProtectedRoute component. It checks whether the user is authenticated and either renders the page or redirects to login using Navigate from React Router. However, checking only localStorage token existence is not real security because users can create fake tokens in DevTools. ProtectedRoute is mainly for user experience. Real security must be enforced on the backend by verifying the token or session before returning protected data.
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+Use ProtectedRoute for frontend UX redirection, but always verify authentication on the backend because frontend checks can be bypassed.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+
+</body>
+</html>

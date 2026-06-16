@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>048 - Scheduler Package in React</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px}
+p,li{color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px}
+.success{background:#052e16;padding:18px;border-left:5px solid #22c55e;border-radius:10px;margin-top:15px}
+.warning{background:#1e1b4b;padding:18px;border-left:5px solid #fbbf24;border-radius:10px;margin-top:15px}
+.danger{background:#2a0f12;padding:18px;border-left:5px solid #ef4444;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;text-align:center;line-height:2;font-size:18px}
+.file-name{background:#111827;color:#93c5fd;padding:12px 16px;border-radius:10px;border:1px solid #1e293b;font-weight:bold;margin-top:20px;margin-bottom:10px}
+pre[class*="language-"],code[class*="language-"]{background:#1e1e1e}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>048. What is the Scheduler package in React and how does it work?</h1>
+
+<h2>One-Line Definition</h2>
+
+<div class="highlight">
+The Scheduler package is React's internal task scheduling system. It helps React decide <b>what work should run first</b>, <b>what can wait</b>, and <b>when React should yield control back to the browser</b>.
+</div>
+
+<h2>Simple Meaning</h2>
+
+<p>
+React may have many updates waiting at the same time.
+</p>
+
+<div class="flow">
+User Typing
+<br>↓<br>
+Button Click
+<br>↓<br>
+Large List Render
+<br>↓<br>
+Background Update
+</div>
+
+<p>
+The Scheduler helps React decide which update is more urgent.
+</p>
+
+<div class="success">
+Scheduler is like a traffic controller for React work.
+</div>
+
+<h2>Where Scheduler Fits</h2>
+
+<div class="flow">
+Fiber
+<br>↓<br>
+Stores Work
+<br><br>
+Lanes
+<br>↓<br>
+Assign Priority
+<br><br>
+Scheduler
+<br>↓<br>
+Decides When Work Runs
+</div>
+
+<h2>Why React Needs Scheduler</h2>
+
+<p>
+JavaScript runs on the browser main thread. If React does too much work at once, the page can feel frozen.
+</p>
+
+<div class="flow">
+Huge Render Work
+<br>↓<br>
+Main Thread Busy
+<br>↓<br>
+Browser Cannot Handle Input
+<br>↓<br>
+UI Feels Slow
+</div>
+
+<div class="warning">
+Scheduler helps React avoid blocking the browser for too long.
+</div>
+
+<h2>What Scheduler Does</h2>
+
+<table>
+<tr>
+<th>Task</th>
+<th>Meaning</th>
+</tr>
+
+<tr>
+<td>Schedules work</td>
+<td>Decides when React work should run</td>
+</tr>
+
+<tr>
+<td>Prioritizes work</td>
+<td>Runs urgent updates before less urgent updates</td>
+</tr>
+
+<tr>
+<td>Yields to browser</td>
+<td>Lets browser handle input, paint, and events</td>
+</tr>
+
+<tr>
+<td>Resumes work</td>
+<td>Continues unfinished work later</td>
+</tr>
+</table>
+
+<h2>Priority Levels</h2>
+
+<p>
+Scheduler works with priority levels internally.
+</p>
+
+<table>
+<tr>
+<th>Priority</th>
+<th>Example</th>
+</tr>
+
+<tr>
+<td>Immediate</td>
+<td>Urgent synchronous work</td>
+</tr>
+
+<tr>
+<td>User Blocking</td>
+<td>Typing, clicking, dragging</td>
+</tr>
+
+<tr>
+<td>Normal</td>
+<td>Normal UI updates</td>
+</tr>
+
+<tr>
+<td>Low</td>
+<td>Less important updates</td>
+</tr>
+
+<tr>
+<td>Idle</td>
+<td>Work that can wait</td>
+</tr>
+</table>
+
+<h2>Scheduler Flow</h2>
+
+<div class="flow">
+Update Happens
+<br>↓<br>
+React Assigns Lane / Priority
+<br>↓<br>
+Scheduler Receives Work
+<br>↓<br>
+Scheduler Runs Highest Priority Work
+<br>↓<br>
+If Time Is Over, Yield To Browser
+<br>↓<br>
+Resume Later
+</div>
+
+<h2>What Does Yield Mean?</h2>
+
+<div class="highlight">
+Yield means React stops its current work temporarily and gives control back to the browser.
+</div>
+
+<div class="flow">
+React Rendering
+<br>↓<br>
+Time Slice Ends
+<br>↓<br>
+React Yields
+<br>↓<br>
+Browser Handles Input / Paint
+<br>↓<br>
+React Continues Later
+</div>
+
+<h2>Example Without Scheduler</h2>
+
+<div class="flow">
+User Types
+<br>↓<br>
+Large UI Render Starts
+<br>↓<br>
+React Blocks Main Thread
+<br>↓<br>
+Input Feels Laggy
+</div>
+
+<h2>Example With Scheduler</h2>
+
+<div class="flow">
+User Types
+<br>↓<br>
+Scheduler Gives Input High Priority
+<br>↓<br>
+Large Render Can Wait
+<br>↓<br>
+Input Stays Responsive
+</div>
+
+<h2>Scheduler And startTransition</h2>
+
+<div class="file-name">Example</div>
+
+<pre class="language-js"><code class="language-js">import { startTransition } from 'react';
+
+function handleSearch(value) {
+  setInput(value);
+
+  startTransition(() => {
+    setResults(value);
+  });
+}</code></pre>
+
+<div class="flow">
+setInput()
+<br>↓<br>
+Urgent Update
+<br><br>
+setResults()
+<br>↓<br>
+Transition Update
+<br><br>
+Scheduler Prioritizes Input First
+</div>
+
+<h2>Scheduler Is Mostly Internal</h2>
+
+<div class="warning">
+Most React developers do not use the Scheduler package directly. React uses it internally.
+</div>
+
+<p>
+You usually interact with Scheduler indirectly through React features like:
+</p>
+
+<ul>
+<li>startTransition</li>
+<li>useTransition</li>
+<li>useDeferredValue</li>
+<li>Suspense</li>
+<li>Concurrent rendering</li>
+</ul>
+
+<h2>Scheduler vs Fiber vs Lanes</h2>
+
+<table>
+<tr>
+<th>Part</th>
+<th>Role</th>
+</tr>
+
+<tr>
+<td>Fiber</td>
+<td>Stores rendering work as Fiber objects</td>
+</tr>
+
+<tr>
+<td>Lanes</td>
+<td>Assign priority to updates</td>
+</tr>
+
+<tr>
+<td>Scheduler</td>
+<td>Decides when work should run and when to yield</td>
+</tr>
+</table>
+
+<h2>React 16 vs React 18</h2>
+
+<div class="warning">
+Fiber was introduced in React 16. Scheduler and priority ideas existed internally, but React 18 made concurrent rendering features more visible to developers.
+</div>
+
+<div class="flow">
+React 16
+<br>↓<br>
+Fiber Foundation
+<br><br>
+React 18
+<br>↓<br>
+Concurrent Rendering
+<br>↓<br>
+Scheduler + Lanes Used More Clearly
+</div>
+
+<h2>Easy Way To Remember</h2>
+
+<div class="flow">
+Fiber
+<br>↓<br>
+What Work Exists?
+</div>
+
+<br>
+
+<div class="flow">
+Lanes
+<br>↓<br>
+How Important Is The Work?
+</div>
+
+<br>
+
+<div class="flow">
+Scheduler
+<br>↓<br>
+When Should The Work Run?
+</div>
+
+<h2>Interview Answer</h2>
+
+<div class="highlight">
+The Scheduler package is React's internal scheduling system that helps decide when rendering work should run and when React should yield control back to the browser. Fiber stores the work, lanes assign priority to updates, and Scheduler decides which work should run first based on priority and available time. It allows urgent updates like typing and clicking to stay responsive while less urgent work can be delayed or resumed later. Most developers do not use Scheduler directly; they use it indirectly through React 18 features like startTransition, useTransition, Suspense, and concurrent rendering.
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+Scheduler is React's internal system that decides when prioritized Fiber work should run and when React should yield to the browser.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+
+</body>
+</html>

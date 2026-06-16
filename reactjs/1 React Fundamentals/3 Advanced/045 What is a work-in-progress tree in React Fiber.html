@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>045 - Work-In-Progress Tree in React Fiber</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc}h2{color:#c084fc}h3{color:#38bdf8}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px}
+.success{background:#052e16;padding:18px;border-left:5px solid #22c55e;border-radius:10px;margin-top:15px}
+.warning{background:#1e1b4b;padding:18px;border-left:5px solid #fbbf24;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;text-align:center;line-height:2}
+.file-name{background:#111827;color:#93c5fd;padding:12px 16px;border-radius:10px;border:1px solid #1e293b;font-weight:bold;margin:20px 0 10px}
+table{width:100%;border-collapse:collapse}th,td{border:1px solid #1e293b;padding:12px;text-align:left}th{background:#0f172a;color:#38bdf8}
+pre{background:#1e1e1e;color:#f8f8f2;padding:14px;border-radius:10px;overflow:auto}
+</style>
+</head>
+<body>
+<div class="container">
+
+<h1>045. What is a Work-In-Progress (WIP) Tree in React Fiber?</h1>
+
+<h2>One-Line Definition</h2>
+
+<div class="highlight">
+A Work-In-Progress (WIP) Tree is a temporary Fiber tree that React builds while calculating the next UI update. The currently visible UI stays unchanged until React finishes the WIP tree and commits it.
+</div>
+
+<h2>Why Does React Need It?</h2>
+
+<p>
+React should not modify the screen while it is still calculating updates.
+</p>
+
+<div class="flow">
+Current UI Visible
+<br>↓<br>
+User Triggers Update
+<br>↓<br>
+React Builds WIP Tree
+<br>↓<br>
+Work Completed
+<br>↓<br>
+Commit New UI
+</div>
+
+<h2>Current Tree vs WIP Tree</h2>
+
+<table>
+<tr><th>Tree</th><th>Purpose</th></tr>
+<tr><td>Current Tree</td><td>Represents the UI currently visible on screen</td></tr>
+<tr><td>Work-In-Progress Tree</td><td>Represents the next UI React is preparing</td></tr>
+</table>
+
+<h2>Simple Example</h2>
+
+<div class="file-name">Current Screen</div>
+
+<pre>&lt;h1&gt;Count: 0&lt;/h1&gt;</pre>
+
+<p>User clicks Increment.</p>
+
+<div class="flow">
+Current Tree
+<br>Count = 0
+<br><br>
+React Creates WIP Tree
+<br>Count = 1
+<br><br>
+Commit
+<br>↓<br>
+Screen Shows Count = 1
+</div>
+
+<h2>Double Buffering Concept</h2>
+
+<div class="highlight">
+React Fiber uses a technique similar to double buffering.
+</div>
+
+<div class="flow">
+Current Fiber Tree
+<br>↓<br>
+Visible To User
+<br><br>
+Work-In-Progress Tree
+<br>↓<br>
+Built In Background
+<br><br>
+Swap Trees During Commit
+</div>
+
+<h2>How React Builds the WIP Tree</h2>
+
+<div class="flow">
+State Update
+<br>↓<br>
+Clone Current Fiber Tree
+<br>↓<br>
+Create Work-In-Progress Fibers
+<br>↓<br>
+Calculate New UI
+<br>↓<br>
+Finish Render Phase
+</div>
+
+<h2>Relationship With Render Phase</h2>
+
+<div class="highlight">
+The Render Phase mainly works on the Work-In-Progress Tree.
+</div>
+
+<div class="flow">
+Render Phase
+<br>↓<br>
+Build WIP Tree
+<br>↓<br>
+Calculate Changes
+<br>↓<br>
+Prepare Effects
+</div>
+
+<h2>Relationship With Commit Phase</h2>
+
+<div class="flow">
+Render Phase Complete
+<br>↓<br>
+WIP Tree Ready
+<br>↓<br>
+Commit Phase
+<br>↓<br>
+WIP Tree Becomes Current Tree
+</div>
+
+<div class="success">
+After commit, the old current tree is replaced by the completed Work-In-Progress Tree.
+</div>
+
+<h2>Why Is WIP Tree Important For Fiber?</h2>
+
+<p>
+Fiber can pause, resume, restart, or discard work because updates are stored inside the Work-In-Progress Tree instead of directly changing the DOM.
+</p>
+
+<div class="flow">
+Build WIP Tree
+<br>↓<br>
+Pause Work
+<br>↓<br>
+Resume Later
+<br>↓<br>
+Finish Tree
+<br>↓<br>
+Commit
+</div>
+
+<h2>React 16 vs React 18 Connection</h2>
+
+<div class="warning">
+React 16 introduced Fiber and the Work-In-Progress Tree architecture.
+<br><br>
+React 18 uses this architecture to support concurrent rendering features.
+</div>
+
+<h2>Easy Way To Remember</h2>
+
+<div class="flow">
+Current Tree
+<br>↓<br>
+What User Sees
+</div>
+
+<br>
+
+<div class="flow">
+Work-In-Progress Tree
+<br>↓<br>
+What React Is Preparing
+</div>
+
+<h2>Interview Answer</h2>
+
+<div class="highlight">
+A Work-In-Progress Tree is the temporary Fiber tree React builds during the Render Phase. It contains the next version of the UI while the current tree continues to represent what the user sees. Once React finishes building the WIP tree, the Commit Phase swaps it with the current tree, making the new UI visible. This architecture allows React Fiber to support scheduling, pausing, resuming, and concurrent rendering features.
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+The Work-In-Progress Tree is React Fiber's temporary tree that stores the next UI state before it is committed to the screen.
+</div>
+
+</div>
+</body>
+</html>

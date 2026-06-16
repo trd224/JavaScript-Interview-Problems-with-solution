@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>043 - How does React Fiber enable time slicing and interruptible rendering?</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc}h2{color:#c084fc}h3{color:#38bdf8}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px}
+.success{background:#052e16;padding:18px;border-left:5px solid #22c55e;border-radius:10px;margin-top:15px}
+.warning{background:#1e1b4b;padding:18px;border-left:5px solid #fbbf24;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;text-align:center;line-height:2}
+.file-name{background:#111827;color:#93c5fd;padding:12px 16px;border-radius:10px;border:1px solid #1e293b;font-weight:bold;margin:20px 0 10px}
+table{width:100%;border-collapse:collapse}th,td{border:1px solid #1e293b;padding:12px;text-align:left}th{background:#0f172a;color:#38bdf8}
+pre{background:#1e1e1e;color:#f8f8f2;padding:14px;border-radius:10px;overflow:auto}
+</style>
+</head>
+<body>
+<div class="container">
+
+<h1>043. How does React Fiber enable time slicing and interruptible rendering?</h1>
+
+<h2>One-Line Definition</h2>
+
+<div class="highlight">
+React Fiber stores rendering work inside Fiber objects, allowing React to split large rendering tasks into small units. This architecture made time slicing and interruptible rendering possible in React 18 concurrent rendering.
+</div>
+
+<h2>Important Correction</h2>
+
+<div class="warning">
+Fiber was introduced in React 16.<br>
+Time slicing and interruptible rendering became available through concurrent rendering features built on top of Fiber in React 18.
+</div>
+
+<h2>Before Fiber</h2>
+
+<div class="flow">
+State Update
+<br>↓<br>
+Start Rendering
+<br>↓<br>
+Process Entire Tree
+<br>↓<br>
+Must Finish Everything
+<br>↓<br>
+Browser Waits
+</div>
+
+<p>
+The old Stack Reconciler used the JavaScript call stack. Once rendering started, React generally had to finish the entire work.
+</p>
+
+<h2>The Problem</h2>
+
+<div class="flow">
+User Types
+<br>↓<br>
+Huge Component Tree Re-renders
+<br>↓<br>
+Main Thread Busy
+<br>↓<br>
+Typing Feels Laggy
+</div>
+
+<h2>How Fiber Changed This</h2>
+
+<div class="highlight">
+Fiber represents work as Fiber objects. Instead of one huge rendering task, React can process work one Fiber at a time.
+</div>
+
+<div class="file-name">Conceptual Fiber Tree</div>
+
+<pre>Fiber(App)
+├── Fiber(Header)
+├── Fiber(SearchBox)
+└── Fiber(ProductList)</pre>
+
+<h2>Time Slicing</h2>
+
+<div class="highlight">
+Time slicing means React can split a large render into smaller chunks of work instead of doing everything at once.
+</div>
+
+<div class="flow">
+Large Render
+<br>↓<br>
+Fiber A
+<br>↓<br>
+Fiber B
+<br>↓<br>
+Pause
+<br>↓<br>
+Browser Handles Input
+<br>↓<br>
+Resume Fiber C
+<br>↓<br>
+Continue Work
+</div>
+
+<h2>Interruptible Rendering</h2>
+
+<div class="highlight">
+Interruptible rendering means React can stop low-priority rendering work and handle more important work first.
+</div>
+
+<div class="flow">
+Rendering Product List
+<br>↓<br>
+User Starts Typing
+<br>↓<br>
+Typing Is Higher Priority
+<br>↓<br>
+React Pauses List Work
+<br>↓<br>
+Updates Input First
+<br>↓<br>
+Resumes List Later
+</div>
+
+<h2>Real Example</h2>
+
+<div class="file-name">Search UI</div>
+
+<pre>Search Box
+↓
+10000 Products
+↓
+Filter Results</pre>
+
+<p>
+Without Fiber-based concurrent rendering, filtering a huge list could block typing.</p>
+
+<p>
+With Fiber-based concurrent rendering:</p>
+
+<div class="flow">
+User Types
+<br>↓<br>
+Input Update Gets Priority
+<br>↓<br>
+List Rendering Can Wait
+<br>↓<br>
+UI Feels Responsive
+</div>
+
+<h2>Why Fiber Makes This Possible</h2>
+
+<table>
+<tr><th>Old Stack Reconciler</th><th>Fiber Architecture</th></tr>
+<tr><td>Work stored in JS call stack</td><td>Work stored in Fiber objects</td></tr>
+<tr><td>Hard to pause</td><td>Can track progress</td></tr>
+<tr><td>Rigid flow</td><td>Flexible scheduling</td></tr>
+<tr><td>No foundation for concurrency</td><td>Foundation for concurrency</td></tr>
+</table>
+
+<h2>React 16 vs React 18</h2>
+
+<div class="flow">
+React 16
+<br>↓<br>
+Fiber Architecture
+<br>↓<br>
+Stores Work As Fiber Objects
+<br><br>
+React 18
+<br>↓<br>
+Concurrent Rendering
+<br>↓<br>
+Uses Fiber Foundation
+<br>↓<br>
+Time Slicing & Interruptible Rendering
+</div>
+
+<h2>Easy Way To Remember</h2>
+
+<div class="flow">
+Old React
+<br>↓<br>
+Finish Everything
+<br>↓<br>
+Then Respond
+</div>
+
+<br>
+
+<div class="flow">
+Fiber + Concurrent Rendering
+<br>↓<br>
+Do Some Work
+<br>↓<br>
+Pause
+<br>↓<br>
+Handle Important Work
+<br>↓<br>
+Resume Later
+</div>
+
+<h2>Interview Answer</h2>
+
+<div class="highlight">
+React Fiber enables time slicing and interruptible rendering by representing rendering work as Fiber objects instead of relying solely on the JavaScript call stack. This allows React to break rendering into smaller units, track progress, and schedule work more flexibly. Fiber was introduced in React 16 as the foundation, and React 18 used that foundation to provide concurrent rendering features such as time slicing, interruptible rendering, transitions, and better update prioritization.
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+Fiber enables time slicing and interruptible rendering by storing work in Fiber objects that React can pause, prioritize, and resume, a capability fully utilized by React 18 concurrent rendering.
+</div>
+
+</div>
+</body>
+</html>

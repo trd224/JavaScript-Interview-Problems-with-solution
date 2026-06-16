@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>047 - React Fiber Lanes and Priority</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px}
+p,li{color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px}
+.success{background:#052e16;padding:18px;border-left:5px solid #22c55e;border-radius:10px;margin-top:15px}
+.warning{background:#1e1b4b;padding:18px;border-left:5px solid #fbbf24;border-radius:10px;margin-top:15px}
+.danger{background:#2a0f12;padding:18px;border-left:5px solid #ef4444;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;text-align:center;line-height:2;font-size:18px}
+.file-name{background:#111827;color:#93c5fd;padding:12px 16px;border-radius:10px;border:1px solid #1e293b;font-weight:bold;margin-top:20px;margin-bottom:10px}
+pre[class*="language-"],code[class*="language-"]{background:#1e1e1e}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>047. What are lanes in React Fiber and how do they manage priority?</h1>
+
+<h2>One-Line Definition</h2>
+
+<div class="highlight">
+Lanes are React Fiber's priority system. They help React decide which updates should run first and which updates can wait until later.
+</div>
+
+<h2>Why Do We Need Lanes?</h2>
+
+<p>
+Not all updates are equally important.
+</p>
+
+<div class="flow">
+User Typing
+<br>↓<br>
+Very Important
+<br><br>
+Background Data Refresh
+<br>↓<br>
+Less Important
+</div>
+
+<p>
+If React treated every update the same, typing could become slow whenever large UI updates happen.
+</p>
+
+<h2>Before Lanes</h2>
+
+<div class="highlight">
+Older versions of Fiber used an expiration-time based priority system.
+</div>
+
+<div class="flow">
+Update A
+<br>↓<br>
+Update B
+<br>↓<br>
+Update C
+<br>↓<br>
+Expiration Time Logic
+</div>
+
+<div class="warning">
+The expiration-time model became difficult to manage as React's scheduling system grew more complex.
+</div>
+
+<h2>React 18 Introduced Lanes</h2>
+
+<div class="highlight">
+React introduced lanes as a more flexible priority system where updates are grouped into priority buckets.
+</div>
+
+<div class="flow">
+Update
+<br>↓<br>
+Assign Lane
+<br>↓<br>
+Determine Priority
+<br>↓<br>
+Scheduler Chooses Work
+</div>
+
+<h2>What Is A Lane?</h2>
+
+<div class="highlight">
+A lane is simply a bucket of work with a specific priority level.
+</div>
+
+<div class="flow">
+Lane
+<br>↓<br>
+Contains Updates
+<br>↓<br>
+Represents Priority
+</div>
+
+<h2>Simple Highway Analogy</h2>
+
+<div class="flow">
+Emergency Lane
+<br>↓<br>
+Ambulance
+<br><br>
+Normal Lane
+<br>↓<br>
+Cars
+<br><br>
+Slow Lane
+<br>↓<br>
+Heavy Trucks
+</div>
+
+<p>
+React treats updates similarly. Urgent updates get faster lanes, while less important updates can wait.
+</p>
+
+<h2>Common Lane Categories</h2>
+
+<table>
+<tr>
+<th>Lane</th>
+<th>Purpose</th>
+</tr>
+
+<tr>
+<td>Sync Lane</td>
+<td>Immediate updates</td>
+</tr>
+
+<tr>
+<td>Input Continuous Lane</td>
+<td>Typing, dragging, scrolling</td>
+</tr>
+
+<tr>
+<td>Default Lane</td>
+<td>Normal updates</td>
+</tr>
+
+<tr>
+<td>Transition Lane</td>
+<td>startTransition work</td>
+</tr>
+
+<tr>
+<td>Idle Lane</td>
+<td>Can wait a long time</td>
+</tr>
+</table>
+
+<h2>How Lanes Fit Into Fiber</h2>
+
+<div class="flow">
+Fiber Tree
+<br>↓<br>
+Updates Arrive
+<br>↓<br>
+Lane Assigned
+<br>↓<br>
+Priority Determined
+<br>↓<br>
+Scheduler Chooses Work
+<br>↓<br>
+Render Phase
+<br>↓<br>
+Commit Phase
+</div>
+
+<div class="success">
+Fiber stores the work. Lanes decide the priority of that work.
+</div>
+
+<h2>Example Without Lanes</h2>
+
+<div class="flow">
+User Types
+<br>+
+<br>
+Huge Product List Re-renders
+<br>↓<br>
+Everything Competes Equally
+<br>↓<br>
+Input May Feel Slow
+</div>
+
+<h2>Example With Lanes</h2>
+
+<div class="flow">
+User Types
+<br>↓<br>
+Input Lane
+<br><br>
+Large Product List Update
+<br>↓<br>
+Transition Lane
+<br><br>
+React Processes Input First
+</div>
+
+<div class="success">
+This keeps typing responsive even when expensive rendering is happening.
+</div>
+
+<h2>startTransition Example</h2>
+
+<div class="file-name">Transition Update</div>
+
+<pre class="language-js"><code class="language-js">import { startTransition } from 'react';
+
+function handleSearch(value) {
+
+  setInput(value);
+
+  startTransition(() => {
+
+    setFilteredProducts(value);
+
+  });
+
+}</code></pre>
+
+<div class="flow">
+setInput()
+<br>↓<br>
+High Priority Lane
+<br><br>
+setFilteredProducts()
+<br>↓<br>
+Transition Lane
+</div>
+
+<p>
+React updates the input immediately and allows the expensive filtering work to wait.
+</p>
+
+<h2>Multiple Lanes At The Same Time</h2>
+
+<div class="highlight">
+One of the biggest advantages of lanes is that multiple priorities can exist simultaneously.
+</div>
+
+<div class="flow">
+Typing Update
+<br>↓<br>
+Input Lane
+<br><br>
+Search Results Update
+<br>↓<br>
+Transition Lane
+<br><br>
+Background Refresh
+<br>↓<br>
+Low Priority Lane
+</div>
+
+<p>
+React can process these updates independently instead of forcing them into one priority level.
+</p>
+
+<h2>How React Chooses Work</h2>
+
+<div class="flow">
+Many Updates Arrive
+<br>↓<br>
+Assign Lanes
+<br>↓<br>
+Find Highest Priority Lane
+<br>↓<br>
+Process It First
+<br>↓<br>
+Continue Remaining Lanes
+</div>
+
+<h2>Fiber + Scheduler + Lanes</h2>
+
+<div class="flow">
+Fiber
+<br>↓<br>
+Stores Work
+<br><br>
+Lanes
+<br>↓<br>
+Assign Priority
+<br><br>
+Scheduler
+<br>↓<br>
+Chooses What Runs First
+</div>
+
+<h2>Relationship With Concurrent Rendering</h2>
+
+<div class="warning">
+Fiber was introduced in React 16.
+<br><br>
+Lanes are heavily used by React 18's concurrent rendering system.
+</div>
+
+<div class="flow">
+Fiber Architecture
+<br>↓<br>
+Work Stored In Fibers
+<br>↓<br>
+Lanes Assign Priority
+<br>↓<br>
+Concurrent Rendering Chooses Work
+</div>
+
+<h2>Why Lanes Are Better Than Expiration Times</h2>
+
+<table>
+<tr>
+<th>Expiration Times</th>
+<th>Lanes</th>
+</tr>
+
+<tr>
+<td>Single priority approach</td>
+<td>Multiple priority buckets</td>
+</tr>
+
+<tr>
+<td>Harder to coordinate</td>
+<td>More flexible</td>
+</tr>
+
+<tr>
+<td>Less suitable for concurrent rendering</td>
+<td>Designed for concurrent rendering</td>
+</tr>
+
+<tr>
+<td>Complex scheduling</td>
+<td>Clear scheduling model</td>
+</tr>
+</table>
+
+<h2>Easy Way To Remember</h2>
+
+<div class="flow">
+Fiber
+<br>↓<br>
+Stores Work
+</div>
+
+<br>
+
+<div class="flow">
+Lanes
+<br>↓<br>
+Assign Priority
+</div>
+
+<br>
+
+<div class="flow">
+Scheduler
+<br>↓<br>
+Runs Important Work First
+</div>
+
+<h2>Interview Answer</h2>
+
+<div class="highlight">
+Lanes are React Fiber's priority mechanism used to categorize updates based on importance. Each update is assigned to a lane, and React processes higher-priority lanes before lower-priority ones. This allows urgent updates such as typing and user interactions to remain responsive while less important work, such as transitions and background updates, can be delayed. Lanes work together with Fiber and the Scheduler to support efficient concurrent rendering in modern React.
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+Lanes are React Fiber's priority buckets that help React process important updates first and defer less urgent work.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+</script>
+
+</body>
+</html>

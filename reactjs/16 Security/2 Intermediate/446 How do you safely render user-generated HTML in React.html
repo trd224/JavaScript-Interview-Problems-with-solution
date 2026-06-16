@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>446 - How do you safely render user-generated HTML in React?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+p,li{color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px}
+.success{background:#052e16;padding:18px;border-left:5px solid #22c55e;border-radius:10px;margin-top:15px}
+.warning{background:#1e1b4b;padding:18px;border-left:5px solid #fbbf24;border-radius:10px;margin-top:15px}
+.danger{background:#2a0f12;padding:18px;border-left:5px solid #ef4444;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;text-align:center;line-height:2;font-size:18px}
+.file-name{background:#111827;color:#93c5fd;padding:12px 16px;border-radius:10px;border:1px solid #1e293b;font-weight:bold;margin-top:20px;margin-bottom:10px}
+.badge{display:inline-block;background:#312e81;color:#ddd6fe;padding:4px 10px;border-radius:999px;font-size:13px;margin:4px 6px 4px 0}
+pre[class*="language-"],code[class*="language-"]{color:#f8f8f2;background:#1e1e1e;font-family:Consolas,Monaco,'Courier New',monospace;font-size:15px}
+.token.keyword{color:#c792ea}
+.token.string{color:#c3e88d}
+.token.function{color:#82aaff}
+.token.class-name{color:#ffcb6b}
+.token.number{color:#f78c6c}
+.token.operator{color:#89ddff}
+.token.punctuation{color:#89ddff}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>446. How do you safely render user-generated HTML in React?</h1>
+
+<h2>One-Line Definition</h2>
+
+<div class="highlight">
+To safely render user-generated HTML in React, first sanitize the HTML using a trusted sanitizer like DOMPurify, then render the sanitized output with dangerouslySetInnerHTML.
+</div>
+
+<h2>Simple Meaning</h2>
+
+<p>
+User-generated HTML means HTML that comes from users, database, CMS, blog editor, comment box, or API response.
+</p>
+
+<div class="warning">
+Never trust HTML that comes from users directly.
+</div>
+
+<h2>Why Is It Dangerous?</h2>
+
+<p>
+An attacker can submit HTML that contains JavaScript.
+</p>
+
+<div class="file-name">Attacker Input</div>
+
+<pre class="language-html"><code class="language-html">&lt;img src="x" onerror="alert('Hacked')"&gt;</code></pre>
+
+<p>
+If you render this directly, the browser may execute the JavaScript.
+</p>
+
+<div class="danger">
+Directly rendering user HTML can create XSS vulnerabilities.
+</div>
+
+<h2>Unsafe Way</h2>
+
+<div class="file-name">Bad React Example</div>
+
+<pre class="language-jsx"><code class="language-jsx">function Comment({ html }) {
+  return &lt;div dangerouslySetInnerHTML={{ __html: html }} /&gt;;
+}</code></pre>
+
+<div class="danger">
+This is unsafe if html comes from a user, database, CMS, or external API without sanitization.
+</div>
+
+<h2>Safe Flow</h2>
+
+<div class="flow">
+User HTML
+<br>↓<br>
+Sanitize HTML
+<br>↓<br>
+Remove Dangerous Code
+<br>↓<br>
+Render Sanitized HTML
+<br>↓<br>
+Safe Output
+</div>
+
+<h2>Install DOMPurify</h2>
+
+<div class="file-name">Terminal</div>
+
+<pre class="language-bash"><code class="language-bash">npm install dompurify</code></pre>
+
+<h2>Safe Way Using DOMPurify</h2>
+
+<div class="file-name">File: SafeHtml.jsx</div>
+
+<pre class="language-jsx"><code class="language-jsx">import DOMPurify from 'dompurify';
+
+function SafeHtml({ html }) {
+  const cleanHtml = DOMPurify.sanitize(html);
+  return &lt;div dangerouslySetInnerHTML={{ __html: cleanHtml }} /&gt;;
+}
+
+export default SafeHtml;</code></pre>
+
+<div class="success">
+DOMPurify removes dangerous attributes like onerror, onclick, and script tags.
+</div>
+
+<h2>Example</h2>
+
+<div class="file-name">Input From User</div>
+
+<pre class="language-html"><code class="language-html">&lt;h2&gt;Hello&lt;/h2&gt;
+&lt;img src="x" onerror="alert('Hacked')"&gt;
+&lt;script&gt;alert('Bad')&lt;/script&gt;</code></pre>
+
+<div class="file-name">After Sanitization</div>
+
+<pre class="language-html"><code class="language-html">&lt;h2&gt;Hello&lt;/h2&gt;
+&lt;img src="x"&gt;</code></pre>
+
+<p>
+Dangerous JavaScript is removed.
+</p>
+
+<h2>Use Component</h2>
+
+<div class="file-name">File: App.jsx</div>
+
+<pre class="language-jsx"><code class="language-jsx">import SafeHtml from './SafeHtml';
+
+function App() {
+  const blogContent = '&lt;h2&gt;Hello&lt;/h2&gt;&lt;p&gt;This is safe after sanitize.&lt;/p&gt;';
+  return &lt;SafeHtml html={blogContent} /&gt;;
+}
+
+export default App;</code></pre>
+
+<h2>When Should You Use This?</h2>
+
+<p>
+Use sanitized HTML rendering only when you really need to show HTML formatting.
+</p>
+
+<table>
+<tr>
+<th>Use Case</th>
+<th>Need Sanitization?</th>
+</tr>
+
+<tr>
+<td>Blog content from CMS</td>
+<td>Yes</td>
+</tr>
+
+<tr>
+<td>Rich text editor content</td>
+<td>Yes</td>
+</tr>
+
+<tr>
+<td>User bio with HTML</td>
+<td>Yes</td>
+</tr>
+
+<tr>
+<td>Comment with plain text only</td>
+<td>No, use normal JSX</td>
+</tr>
+</table>
+
+<h2>Best Option For Plain Text</h2>
+
+<p>
+If you do not need HTML formatting, do not use dangerouslySetInnerHTML.
+</p>
+
+<div class="file-name">Safe Plain Text Rendering</div>
+
+<pre class="language-jsx"><code class="language-jsx">function Comment({ text }) {
+  return &lt;p&gt;{text}&lt;/p&gt;;
+}</code></pre>
+
+<div class="success">
+This is safest because React escapes text automatically.
+</div>
+
+<h2>Safe vs Unsafe</h2>
+
+<table>
+<tr>
+<th>Approach</th>
+<th>Safe?</th>
+<th>Reason</th>
+</tr>
+
+<tr>
+<td>&lt;div&gt;{text}&lt;/div&gt;</td>
+<td>Yes</td>
+<td>React escapes it automatically</td>
+</tr>
+
+<tr>
+<td>dangerouslySetInnerHTML with raw user HTML</td>
+<td>No</td>
+<td>Can execute malicious HTML/JS</td>
+</tr>
+
+<tr>
+<td>dangerouslySetInnerHTML with sanitized HTML</td>
+<td>Better</td>
+<td>Dangerous parts are removed first</td>
+</tr>
+</table>
+
+<h2>Extra Safety Tips</h2>
+
+<ul>
+<li>Sanitize HTML before rendering.</li>
+<li>Prefer plain text rendering when possible.</li>
+<li>Do not trust API, database, or CMS content blindly.</li>
+<li>Use Content Security Policy for extra protection.</li>
+<li>Validate and sanitize on backend also.</li>
+</ul>
+
+<h2>Easy Way To Remember</h2>
+
+<div class="flow">
+Need Plain Text?
+<br>↓<br>
+Use {text}
+<br>↓<br>
+Safe
+</div>
+
+<br>
+
+<div class="flow">
+Need HTML?
+<br>↓<br>
+Sanitize First
+<br>↓<br>
+Use dangerouslySetInnerHTML
+<br>↓<br>
+Safer
+</div>
+
+<h2>Interview Answer</h2>
+
+<div class="highlight">
+To safely render user-generated HTML in React, avoid rendering raw HTML directly. If HTML rendering is required, sanitize the content using a library like DOMPurify and then pass the sanitized HTML to dangerouslySetInnerHTML. For plain text, use normal JSX interpolation because React escapes it automatically.
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+Use normal JSX for plain text, and if HTML is required, sanitize it first with DOMPurify before using dangerouslySetInnerHTML.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+
+</body>
+</html>

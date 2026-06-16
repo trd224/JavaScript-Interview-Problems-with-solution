@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>046 - Double Buffering and Current/WIP Trees</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc}h2{color:#c084fc}h3{color:#38bdf8}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px}
+.success{background:#052e16;padding:18px;border-left:5px solid #22c55e;border-radius:10px;margin-top:15px}
+.warning{background:#1e1b4b;padding:18px;border-left:5px solid #fbbf24;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;text-align:center;line-height:2}
+.file-name{background:#111827;color:#93c5fd;padding:12px 16px;border-radius:10px;border:1px solid #1e293b;font-weight:bold;margin:20px 0 10px}
+table{width:100%;border-collapse:collapse}th,td{border:1px solid #1e293b;padding:12px;text-align:left}th{background:#0f172a;color:#38bdf8}
+pre{background:#1e1e1e;color:#f8f8f2;padding:14px;border-radius:10px;overflow:auto}
+</style>
+</head>
+<body>
+<div class="container">
+
+<h1>046. What are double buffering and current/work-in-progress trees in Fiber?</h1>
+
+<h2>One-Line Definition</h2>
+
+<div class="highlight">
+React Fiber uses a technique called <b>double buffering</b>. It maintains two Fiber trees: the <b>Current Tree</b> (what the user sees) and the <b>Work-In-Progress Tree</b> (what React is preparing next).
+</div>
+
+<h2>Why Does React Need Two Trees?</h2>
+
+<p>
+React should not change the visible UI while it is still calculating updates.
+</p>
+
+<div class="flow">
+Current UI Visible
+<br>↓<br>
+User Triggers Update
+<br>↓<br>
+React Builds New Tree
+<br>↓<br>
+Work Completes
+<br>↓<br>
+Swap Trees
+</div>
+
+<h2>What Is Double Buffering?</h2>
+
+<div class="highlight">
+Double buffering means React keeps two copies of the Fiber tree and switches between them when updates are ready.
+</div>
+
+<table>
+<tr><th>Buffer</th><th>Purpose</th></tr>
+<tr><td>Current Tree</td><td>Represents what is currently on screen</td></tr>
+<tr><td>Work-In-Progress Tree</td><td>Represents the next version of the UI</td></tr>
+</table>
+
+<h2>Current Tree</h2>
+
+<div class="highlight">
+The Current Tree represents the UI currently visible to the user.
+</div>
+
+<div class="flow">
+Current Tree
+<br>↓<br>
+Screen
+<br>↓<br>
+User Sees It
+</div>
+
+<div class="file-name">Current UI</div>
+
+<pre>&lt;h1&gt;Count: 0&lt;/h1&gt;</pre>
+
+<h2>Work-In-Progress Tree</h2>
+
+<div class="highlight">
+The Work-In-Progress (WIP) Tree is the tree React builds during the Render Phase.
+</div>
+
+<div class="flow">
+Current Tree
+<br>↓<br>
+Clone Fiber Nodes
+<br>↓<br>
+Create WIP Tree
+<br>↓<br>
+Calculate Updates
+</div>
+
+<div class="file-name">WIP UI</div>
+
+<pre>&lt;h1&gt;Count: 1&lt;/h1&gt;</pre>
+
+<h2>Visual Representation</h2>
+
+<div class="flow">
+Current Tree
+<br>
+(App → Header → Counter(0))
+<br><br>
+User Sees This
+</div>
+
+<br>
+
+<div class="flow">
+Work-In-Progress Tree
+<br>
+(App → Header → Counter(1))
+<br><br>
+React Builds This In Background
+</div>
+
+<h2>How Tree Swapping Works</h2>
+
+<div class="flow">
+Current Tree
+<br>↓<br>
+Build WIP Tree
+<br>↓<br>
+Render Phase Complete
+<br>↓<br>
+Commit Phase
+<br>↓<br>
+WIP Becomes Current
+</div>
+
+<div class="success">
+React does not rebuild the screen gradually. It swaps the completed WIP tree into the Current Tree during commit.
+</div>
+
+<h2>Relationship With Render Phase</h2>
+
+<div class="highlight">
+Render Phase mainly works on the Work-In-Progress Tree.
+</div>
+
+<div class="flow">
+State Update
+<br>↓<br>
+Build WIP Tree
+<br>↓<br>
+Compare Fibers
+<br>↓<br>
+Prepare Effects
+</div>
+
+<h2>Relationship With Commit Phase</h2>
+
+<div class="flow">
+Render Phase Finished
+<br>↓<br>
+WIP Tree Ready
+<br>↓<br>
+Commit Phase
+<br>↓<br>
+Swap Trees
+<br>↓<br>
+Update DOM
+</div>
+
+<h2>Why Double Buffering Is Important</h2>
+
+<p>
+Double buffering allows React to safely prepare updates without affecting the visible UI.
+</p>
+
+<div class="flow">
+Current Tree Safe
+<br>↓<br>
+Build WIP Tree
+<br>↓<br>
+Pause If Needed
+<br>↓<br>
+Resume Later
+<br>↓<br>
+Commit When Ready
+</div>
+
+<h2>How This Helps Concurrent Rendering</h2>
+
+<div class="warning">
+React 16 introduced Fiber and double buffering.
+<br><br>
+React 18 uses this architecture for concurrent rendering.
+</div>
+
+<div class="flow">
+Current Tree Exists
+<br>↓<br>
+Build WIP Tree
+<br>↓<br>
+Pause Work
+<br>↓<br>
+Resume Work
+<br>↓<br>
+Finish Tree
+<br>↓<br>
+Commit
+</div>
+
+<h2>Easy Way To Remember</h2>
+
+<table>
+<tr><th>Thing</th><th>Meaning</th></tr>
+<tr><td>Current Tree</td><td>Current screen</td></tr>
+<tr><td>WIP Tree</td><td>Next screen</td></tr>
+<tr><td>Double Buffering</td><td>Keeping both trees at the same time</td></tr>
+<tr><td>Commit Phase</td><td>Swap WIP into Current</td></tr>
+</table>
+
+<h2>Real Analogy</h2>
+
+<div class="flow">
+Movie Currently Playing
+<br>↓<br>
+Current Buffer
+<br><br>
+Next Frame Prepared
+<br>↓<br>
+Second Buffer
+<br><br>
+Swap Buffers
+<br>↓<br>
+Smooth Playback
+</div>
+
+<p>
+React Fiber uses a similar concept with trees instead of video frames.
+</p>
+
+<h2>Interview Answer</h2>
+
+<div class="highlight">
+Double buffering in React Fiber means React maintains two Fiber trees simultaneously: the Current Tree and the Work-In-Progress Tree. The Current Tree represents the UI currently displayed to the user, while the Work-In-Progress Tree represents the next version of the UI being prepared during the Render Phase. Once React finishes building the WIP tree, the Commit Phase swaps it with the Current Tree. This architecture allows React to prepare updates safely, support scheduling, pause and resume work, and enable concurrent rendering features.
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+Double buffering means React keeps both a Current Tree and a Work-In-Progress Tree, then swaps them during commit when the new UI is ready.
+</div>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>441 - What is XSS and how can React be vulnerable?</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:24px;margin-bottom:10px;font-size:21px}
+p,li{color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px;margin-top:15px}
+.success{background:#052e16;padding:18px;border-left:5px solid #22c55e;border-radius:10px;margin-top:15px}
+.warning{background:#1e1b4b;padding:18px;border-left:5px solid #fbbf24;border-radius:10px;margin-top:15px}
+.danger{background:#3f0712;padding:18px;border-left:5px solid #fb7185;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;text-align:center;line-height:2;font-size:18px;margin-top:15px}
+.file-name{background:#111827;color:#93c5fd;padding:12px 16px;border-radius:10px;border:1px solid #1e293b;font-weight:bold;margin-top:20px;margin-bottom:10px}
+.badge{display:inline-block;background:#172554;color:#93c5fd;border:1px solid #1d4ed8;padding:4px 10px;border-radius:999px;font-size:13px;margin-right:8px}
+pre[class*="language-"],code[class*="language-"]{color:#f8f8f2;background:#1e1e1e;font-family:Consolas,Monaco,'Courier New',monospace;font-size:15px}
+.token.keyword{color:#c792ea}.token.string{color:#c3e88d}.token.function{color:#82aaff}.token.class-name{color:#ffcb6b}.token.number{color:#f78c6c}.token.operator{color:#89ddff}.token.punctuation{color:#89ddff}.token.tag{color:#f07178}.token.attr-name{color:#ffcb6b}.token.attr-value{color:#c3e88d}
+</style>
+</head>
+<body>
+<div class="container">
+<h1>441. What is XSS (Cross-Site Scripting) and How Can React Be Vulnerable?</h1>
+
+<h2>One-Line Definition</h2>
+<div class="highlight">XSS means an attacker submits malicious JavaScript as user input, and the browser later executes that code when the content is displayed on a page.</div>
+
+<h2>Understand From Starting</h2>
+<p>Imagine you have a website where users can write comments.</p>
+<pre class="language-text"><code class="language-text">Article Page
+
+Comment Box
+[________________]
+
+[Submit]</code></pre>
+
+<h2>Normal User Flow</h2>
+<p>A normal user enters simple text.</p>
+<pre class="language-text"><code class="language-text">Nice article</code></pre>
+<p>Your server stores it in the database.</p>
+<pre class="language-text"><code class="language-text">Database Comment:
+Nice article</code></pre>
+<p>Later your website displays it.</p>
+<pre class="language-html"><code class="language-html">&lt;div&gt;Nice article&lt;/div&gt;</code></pre>
+<div class="success">Browser shows normal text. Everything is safe.</div>
+
+<h2>Attacker Flow</h2>
+<p>The attacker does not change your React source code. He enters dangerous code inside a normal input field like comment box, chat box, profile bio, or review box.</p>
+<pre class="language-html"><code class="language-html">&lt;script&gt;alert('Hacked')&lt;/script&gt;</code></pre>
+<p>If your server stores this input and your website later displays it as real HTML, the browser executes it.</p>
+<pre class="language-html"><code class="language-html">&lt;div&gt;
+  &lt;script&gt;alert('Hacked')&lt;/script&gt;
+&lt;/div&gt;</code></pre>
+<div class="danger">The browser sees &lt;script&gt; and runs it as JavaScript. This is XSS.</div>
+
+<h2>Step-by-Step XSS Flow</h2>
+<div class="flow">Attacker<br>↓<br>Comment Box / Chat / Profile Bio<br>↓<br>Database Stores Input<br>↓<br>Website Reads That Data<br>↓<br>Browser Receives HTML<br>↓<br>Script Executes<br>↓<br>XSS Attack</div>
+
+<h2>Why Is XSS Dangerous?</h2>
+<p>In examples we use alert, but real attackers can do more dangerous things.</p>
+<pre class="language-javascript"><code class="language-javascript">alert('Hacked');</code></pre>
+<p>Instead of alert, attacker may try:</p>
+<pre class="language-javascript"><code class="language-javascript">stealCookies();
+sendUserDataToAttacker();
+redirectToFakeLoginPage();</code></pre>
+<ul>
+<li>Steal session data</li>
+<li>Steal user information</li>
+<li>Redirect users to fake login pages</li>
+<li>Perform actions as the logged-in user</li>
+</ul>
+
+<h2>Common Places Where Attackers Enter Data</h2>
+<table>
+<tr><th>Input Area</th><th>Example</th></tr>
+<tr><td>Comment box</td><td>Blog comments</td></tr>
+<tr><td>Chat message</td><td>Message sent to another user</td></tr>
+<tr><td>User profile</td><td>About me / bio section</td></tr>
+<tr><td>Product review</td><td>Review text</td></tr>
+<tr><td>Support ticket</td><td>Problem description</td></tr>
+<tr><td>CMS editor</td><td>Admin-created page content</td></tr>
+</table>
+
+<h2>How React Protects You</h2>
+<p>React normally protects you when you render data inside JSX using curly braces.</p>
+<div class="file-name">Safe React Example</div>
+<pre class="language-jsx"><code class="language-jsx">const comment = "&lt;script&gt;alert('Hacked')&lt;/script&gt;";
+
+function Comment() {
+  return &lt;div&gt;{comment}&lt;/div&gt;;
+}</code></pre>
+<p>React converts HTML characters into text.</p>
+<pre class="language-html"><code class="language-html">&lt;div&gt;
+  &amp;lt;script&amp;gt;alert('Hacked')&amp;lt;/script&amp;gt;
+&lt;/div&gt;</code></pre>
+<div class="success">Now the browser displays the script as plain text. It does not execute.</div>
+
+<h2>What User Sees</h2>
+<pre class="language-text"><code class="language-text">&lt;script&gt;alert('Hacked')&lt;/script&gt;</code></pre>
+<div class="highlight">React escaped the dangerous HTML, so it becomes text, not executable code.</div>
+
+<h2>Then How Can React Be Vulnerable?</h2>
+<p>React can become vulnerable when you use <span class="badge">dangerouslySetInnerHTML</span> with untrusted user data.</p>
+<div class="file-name">Unsafe React Example</div>
+<pre class="language-jsx"><code class="language-jsx">const comment = "&lt;script&gt;alert('Hacked')&lt;/script&gt;";
+
+function Comment() {
+  return &lt;div dangerouslySetInnerHTML={{ __html: comment }} /&gt;;
+}</code></pre>
+<p>Now React does not escape the HTML. It inserts it directly into the DOM.</p>
+<pre class="language-html"><code class="language-html">&lt;div&gt;
+  &lt;script&gt;alert('Hacked')&lt;/script&gt;
+&lt;/div&gt;</code></pre>
+<div class="danger">The browser treats it as real JavaScript and executes it. XSS happens.</div>
+
+<h2>Why Is It Called dangerouslySetInnerHTML?</h2>
+<div class="warning">React intentionally uses the word dangerous because this API can create XSS problems if you pass untrusted user input into it.</div>
+
+<h2>Safe vs Unsafe</h2>
+<table>
+<tr><th>Code</th><th>Result</th></tr>
+<tr><td><pre class="language-jsx"><code class="language-jsx">&lt;div&gt;{comment}&lt;/div&gt;</code></pre></td><td>Safe. React escapes HTML.</td></tr>
+<tr><td><pre class="language-jsx"><code class="language-jsx">&lt;div dangerouslySetInnerHTML={{ __html: comment }} /&gt;</code></pre></td><td>Unsafe if comment comes from user input.</td></tr>
+</table>
+
+<h2>Safe React Flow</h2>
+<div class="flow">Attacker Input<br>↓<br>Database<br>↓<br>React JSX {comment}<br>↓<br>React Escapes HTML<br>↓<br>Text Displayed<br>↓<br>Safe</div>
+
+<h2>Unsafe React Flow</h2>
+<div class="flow">Attacker Input<br>↓<br>Database<br>↓<br>dangerouslySetInnerHTML<br>↓<br>Raw HTML Inserted<br>↓<br>Browser Executes Script<br>↓<br>XSS</div>
+
+<h2>How To Prevent XSS In React</h2>
+<ul>
+<li>Render user input with JSX curly braces: <code>{comment}</code></li>
+<li>Avoid <code>dangerouslySetInnerHTML</code> for user-generated content.</li>
+<li>If HTML is required, sanitize it before rendering.</li>
+<li>Validate and sanitize input on backend also.</li>
+<li>Use trusted libraries for sanitization, not manual string replace.</li>
+</ul>
+
+<h2>Interview Answer</h2>
+<div class="highlight">XSS is a vulnerability where attackers inject malicious JavaScript through user input, and the browser later executes it when the content is displayed. React normally protects against XSS by escaping values rendered inside JSX. However, React can be vulnerable when developers use dangerouslySetInnerHTML with untrusted data because it inserts raw HTML directly into the DOM without escaping.</div>
+
+<h2>One-Line Interview Answer</h2>
+<div class="highlight">React is safe by default because JSX escapes user input, but it can become vulnerable to XSS if untrusted data is rendered using dangerouslySetInnerHTML.</div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+</body>
+</html>
