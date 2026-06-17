@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>119 - Redux Saga vs Redux Thunk</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px}
+p,li{color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px}
+.success{background:#052e16;padding:18px;border-left:5px solid #22c55e;border-radius:10px;margin-top:15px}
+.warning{background:#1e1b4b;padding:18px;border-left:5px solid #fbbf24;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;text-align:center;line-height:2;font-size:18px}
+.file-name{background:#111827;color:#93c5fd;padding:12px 16px;border-radius:10px;border:1px solid #1e293b;font-weight:bold;margin-top:20px;margin-bottom:10px}
+pre[class*="language-"],code[class*="language-"]{background:#1e1e1e}
+.token.keyword{color:#c792ea}
+.token.string{color:#c3e88d}
+.token.function{color:#82aaff}
+.token.class-name{color:#ffcb6b}
+.token.number{color:#f78c6c}
+.token.operator{color:#89ddff}
+.token.punctuation{color:#89ddff}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>119. What is redux-saga and how does it differ from redux-thunk?</h1>
+
+<h2>One-Line Answer</h2>
+
+<div class="highlight">
+Redux Thunk and Redux Saga are middleware for handling async work in Redux. <b>Thunk</b> runs async logic inside action creators, while <b>Saga</b> listens for actions and runs async logic in separate saga files.
+</div>
+
+<h2>Why Do We Need Thunk Or Saga?</h2>
+
+<p>
+Redux reducers must be pure. They should not call APIs directly.
+</p>
+
+<div class="flow">
+Component
+<br>↓
+Async API Call
+<br>↓
+Success / Error
+<br>↓
+Reducer Updates Store
+</div>
+
+<div class="warning">
+Reducers cannot directly do API calls, setTimeout, localStorage, WebSocket, or other side effects.
+</div>
+
+<h2>Real World Example - Product Loading</h2>
+
+<p>
+We want to load products from API and show:
+</p>
+
+<ul>
+<li>Loading state</li>
+<li>Success data</li>
+<li>Error message</li>
+</ul>
+
+<div class="flow">
+Page Opens
+<br>↓
+Show Loading
+<br>↓
+Call Products API
+<br>↓
+Success OR Error
+</div>
+
+<h2>Common Redux State</h2>
+
+<div class="file-name">productReducer.js</div>
+
+<pre class="language-js"><code class="language-js">const initialState = { products: [], loading: false, error: null };
+
+function productReducer(state = initialState, action) {
+  switch (action.type) {
+    case 'PRODUCTS_LOADING':
+      return { ...state, loading: true, error: null };
+
+    case 'PRODUCTS_SUCCESS':
+      return { ...state, loading: false, products: action.payload };
+
+    case 'PRODUCTS_ERROR':
+      return { ...state, loading: false, error: action.payload };
+
+    default:
+      return state;
+  }
+}</code></pre>
+
+<h2>Redux Thunk Example</h2>
+
+<div class="highlight">
+Thunk means the action creator itself does the async work.
+</div>
+
+<div class="file-name">productThunk.js</div>
+
+<pre class="language-js"><code class="language-js">export const fetchProducts = () => async dispatch => {
+  dispatch({ type: 'PRODUCTS_LOADING' });
+
+  try {
+    const products = await (await fetch('/api/products')).json();
+    dispatch({ type: 'PRODUCTS_SUCCESS', payload: products });
+  } catch {
+    dispatch({ type: 'PRODUCTS_ERROR', payload: 'Failed to load products' });
+  }
+};</code></pre>
+
+<div class="file-name">Products.jsx</div>
+
+<pre class="language-jsx"><code class="language-jsx">useEffect(() =&gt; {
+  dispatch(fetchProducts());
+}, []);</code></pre>
+
+<div class="flow">
+dispatch(fetchProducts())
+<br>↓
+Thunk Function Runs
+<br>↓
+PRODUCTS_LOADING
+<br>↓
+API Call
+<br>↓
+PRODUCTS_SUCCESS / PRODUCTS_ERROR
+</div>
+
+<h2>Redux Saga Example</h2>
+
+<div class="highlight">
+Saga means the component dispatches a normal action, and saga watches that action.
+</div>
+
+<div class="file-name">Products.jsx</div>
+
+<pre class="language-jsx"><code class="language-jsx">useEffect(() =&gt; {
+  dispatch({ type: 'FETCH_PRODUCTS' });
+}, []);</code></pre>
+
+<div class="file-name">productSaga.js</div>
+
+<pre class="language-js"><code class="language-js">import { call, put, takeEvery } from 'redux-saga/effects';
+
+function* fetchProducts() {
+  try {
+    yield put({ type: 'PRODUCTS_LOADING' });
+    const products = yield call(api.getProducts);
+    yield put({ type: 'PRODUCTS_SUCCESS', payload: products });
+  } catch {
+    yield put({ type: 'PRODUCTS_ERROR', payload: 'Failed to load products' });
+  }
+}
+
+export function* productSaga() {
+  yield takeEvery('FETCH_PRODUCTS', fetchProducts);
+}</code></pre>
+
+<div class="flow">
+dispatch({ type:'FETCH_PRODUCTS' })
+<br>↓
+Saga Watches Action
+<br>↓
+PRODUCTS_LOADING
+<br>↓
+API Call
+<br>↓
+PRODUCTS_SUCCESS / PRODUCTS_ERROR
+</div>
+
+<h2>UI Component</h2>
+
+<div class="file-name">Products.jsx</div>
+
+<pre class="language-jsx"><code class="language-jsx">function Products() {
+  const { products, loading, error } = useSelector(state =&gt; state.products);
+
+  if (loading) return &lt;h2&gt;Loading...&lt;/h2&gt;;
+  if (error) return &lt;h2&gt;{error}&lt;/h2&gt;;
+
+  return (
+    &lt;ul&gt;
+      {products.map(product =&gt; &lt;li key={product.id}&gt;{product.name}&lt;/li&gt;)}
+    &lt;/ul&gt;
+  );
+}</code></pre>
+
+<h2>Thunk vs Saga Flow</h2>
+
+<table>
+<tr>
+<th>Redux Thunk</th>
+<th>Redux Saga</th>
+</tr>
+
+<tr>
+<td>dispatch(fetchProducts())</td>
+<td>dispatch({ type:'FETCH_PRODUCTS' })</td>
+</tr>
+
+<tr>
+<td>Thunk function runs</td>
+<td>Saga watches action</td>
+</tr>
+
+<tr>
+<td>API logic inside action creator</td>
+<td>API logic inside saga file</td>
+</tr>
+
+<tr>
+<td>Uses async/await</td>
+<td>Uses generator + yield</td>
+</tr>
+
+<tr>
+<td>Simple API calls</td>
+<td>Complex async workflows</td>
+</tr>
+</table>
+
+<h2>When Saga Is Better?</h2>
+
+<p>
+Saga is useful when async logic becomes complex.
+</p>
+
+<ul>
+<li>Debounce search</li>
+<li>Cancel previous API request</li>
+<li>Retry failed request</li>
+<li>Polling</li>
+<li>Parallel API calls</li>
+</ul>
+
+<div class="file-name">Debounce Example</div>
+
+<pre class="language-js"><code class="language-js">import { debounce } from 'redux-saga/effects';
+
+export function* searchSaga() {
+  yield debounce(500, 'SEARCH_USERS', searchUsers);
+}</code></pre>
+
+<h2>Easy Memory</h2>
+
+<div class="flow">
+Thunk
+<br>↓
+Action Creator Does Async Work
+<br><br>
+Saga
+<br>↓
+Saga Watches Action
+<br>↓
+Saga Does Async Work
+</div>
+
+<h2>Interview Answer</h2>
+
+<div class="highlight">
+Redux Thunk and Redux Saga are Redux middleware used to handle side effects such as API calls. Redux Thunk allows action creators to return functions, so async logic is written inside action creators. Redux Saga uses generator functions that listen for dispatched actions and run side effects separately in saga files. Thunk is simpler and commonly used for normal API calls, while Saga is more powerful for complex workflows like debounce, cancellation, retry, polling, and parallel tasks.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+
+</body>
+</html>

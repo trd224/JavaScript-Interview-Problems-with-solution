@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>118 - What is the Flux Architecture Pattern?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px}
+p,li{color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px}
+.success{background:#052e16;padding:18px;border-left:5px solid #22c55e;border-radius:10px;margin-top:15px}
+.warning{background:#1e1b4b;padding:18px;border-left:5px solid #fbbf24;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;text-align:center;line-height:2;font-size:18px}
+.file-name{background:#111827;color:#93c5fd;padding:12px 16px;border-radius:10px;border:1px solid #1e293b;font-weight:bold;margin-top:20px;margin-bottom:10px}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>118. What is the Flux Architecture Pattern?</h1>
+
+<h2>One-Line Answer</h2>
+
+<div class="highlight">
+Flux is an architectural pattern created by Facebook that enforces <b>one-way data flow</b> to make state changes predictable and easier to debug.
+</div>
+
+<h2>Why Flux Was Created?</h2>
+
+<p>
+Before Flux, large applications often had state flowing in multiple directions.
+</p>
+
+<div class="flow">
+Component A
+<br>↔
+Component B
+<br>↔
+Component C
+<br>↔
+Component D
+</div>
+
+<p>
+As applications grew, it became difficult to know:
+</p>
+
+<ul>
+<li>Who changed the state?</li>
+<li>When was the state changed?</li>
+<li>Why did the UI update?</li>
+</ul>
+
+<div class="warning">
+Facebook created Flux to make state changes predictable.
+</div>
+
+<h2>Main Idea Of Flux</h2>
+
+<div class="highlight">
+Data should always move in one direction.
+</div>
+
+<div class="flow">
+User Interaction
+<br>↓
+Action
+<br>↓
+Dispatcher
+<br>↓
+Store
+<br>↓
+View
+<br>↓
+User Interaction
+</div>
+
+<p>
+Notice that data never moves backward.
+</p>
+
+<h2>Flux Components</h2>
+
+<table>
+
+<tr>
+<th>Part</th>
+<th>Purpose</th>
+</tr>
+
+<tr>
+<td>Action</td>
+<td>Describes what happened</td>
+</tr>
+
+<tr>
+<td>Dispatcher</td>
+<td>Sends actions to stores</td>
+</tr>
+
+<tr>
+<td>Store</td>
+<td>Holds application state</td>
+</tr>
+
+<tr>
+<td>View</td>
+<td>Displays state to users</td>
+</tr>
+
+</table>
+
+<h2>Step-By-Step Example</h2>
+
+<p>
+Imagine an e-commerce application.
+</p>
+
+<p>
+User clicks:
+</p>
+
+<div class="flow">
+Add To Cart
+</div>
+
+<h3>Step 1: Create Action</h3>
+
+<div class="file-name">Action</div>
+
+<pre>Add To Cart Product #10</pre>
+
+<div class="flow">
+User Click
+<br>↓
+Action Created
+</div>
+
+<h3>Step 2: Send To Dispatcher</h3>
+
+<div class="flow">
+Action
+<br>↓
+Dispatcher
+</div>
+
+<p>
+Dispatcher acts like a traffic controller.
+</p>
+
+<h3>Step 3: Store Updates</h3>
+
+<div class="flow">
+Dispatcher
+<br>↓
+CartStore
+</div>
+
+<p>
+CartStore updates its state.
+</p>
+
+<h3>Step 4: View Updates</h3>
+
+<div class="flow">
+CartStore
+<br>↓
+Cart UI
+<br>↓
+Shows New Cart Count
+</div>
+
+<h2>Complete Flux Flow</h2>
+
+<div class="flow">
+User Clicks Add To Cart
+<br>↓
+Action
+<br>↓
+Dispatcher
+<br>↓
+CartStore
+<br>↓
+State Updated
+<br>↓
+View Updated
+</div>
+
+<h2>Why Dispatcher Exists?</h2>
+
+<p>
+Original Flux often had multiple stores.
+</p>
+
+<div class="flow">
+Dispatcher
+<br>↓
+UserStore
+<br>
+CartStore
+<br>
+ProductStore
+</div>
+
+<p>
+Dispatcher's job was:
+</p>
+
+<div class="flow">
+Receive Action
+<br>↓
+Send To Correct Stores
+</div>
+
+<h2>Advantages Of Flux</h2>
+
+<ul>
+<li>Predictable state updates</li>
+<li>Easier debugging</li>
+<li>Clear data flow</li>
+<li>Better scalability</li>
+<li>Less accidental state mutations</li>
+</ul>
+
+<h2>Flux vs Traditional Two-Way Flow</h2>
+
+<table>
+
+<tr>
+<th>Traditional</th>
+<th>Flux</th>
+</tr>
+
+<tr>
+<td>State can change from many directions</td>
+<td>State changes follow one path</td>
+</tr>
+
+<tr>
+<td>Hard to debug</td>
+<td>Easier to debug</td>
+</tr>
+
+<tr>
+<td>Complex dependencies</td>
+<td>Predictable flow</td>
+</tr>
+
+</table>
+
+<h2>Relationship With Redux</h2>
+
+<div class="warning">
+Flux is not Redux.
+</div>
+
+<div class="highlight">
+Flux is an architecture pattern. Redux is a library inspired by Flux.
+</div>
+
+<table>
+
+<tr>
+<th>Flux</th>
+<th>Redux</th>
+</tr>
+
+<tr>
+<td>Architecture</td>
+<td>Library</td>
+</tr>
+
+<tr>
+<td>Dispatcher</td>
+<td>dispatch() + Reducers</td>
+</tr>
+
+<tr>
+<td>Multiple Stores</td>
+<td>Single Store</td>
+</tr>
+
+<tr>
+<td>Created by Facebook</td>
+<td>Inspired by Flux</td>
+</tr>
+
+</table>
+
+<h2>Easy Memory Trick</h2>
+
+<div class="flow">
+Flux
+<br>↓
+Idea
+<br>↓
+One-Way Data Flow
+<br><br>
+Redux
+<br>↓
+Implementation Of Similar Idea
+</div>
+
+<h2>Interview Answer</h2>
+
+<div class="highlight">
+Flux is an architectural pattern created by Facebook that enforces one-way data flow using Actions, a Dispatcher, Stores, and Views. When a user performs an action, the action is sent to a Dispatcher, which forwards it to the appropriate Store. The Store updates its state and the View re-renders. Flux was designed to make state management predictable and easier to debug in large applications.
+</div>
+
+<h2>Easy Way To Remember</h2>
+
+<div class="flow">
+Flux
+<br>↓
+Action
+<br>↓
+Dispatcher
+<br>↓
+Store
+<br>↓
+View
+<br><br>
+One-Way Data Flow
+</div>
+
+</div>
+
+</body>
+</html>

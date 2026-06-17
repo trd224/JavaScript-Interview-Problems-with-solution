@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>117 - Flux Architecture and Redux</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px}
+p,li{color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px}
+.success{background:#052e16;padding:18px;border-left:5px solid #22c55e;border-radius:10px;margin-top:15px}
+.warning{background:#1e1b4b;padding:18px;border-left:5px solid #fbbf24;border-radius:10px;margin-top:15px}
+.danger{background:#2a0f12;padding:18px;border-left:5px solid #ef4444;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;text-align:center;line-height:2;font-size:18px}
+.file-name{background:#111827;color:#93c5fd;padding:12px 16px;border-radius:10px;border:1px solid #1e293b;font-weight:bold;margin-top:20px;margin-bottom:10px}
+pre[class*="language-"],code[class*="language-"]{background:#1e1e1e}
+.token.keyword{color:#c792ea}
+.token.string{color:#c3e88d}
+.token.function{color:#82aaff}
+.token.class-name{color:#ffcb6b}
+.token.number{color:#f78c6c}
+.token.operator{color:#89ddff}
+.token.punctuation{color:#89ddff}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>117. What is the flux architecture and how does Redux implement it?</h1>
+
+<h2>One-Line Answer</h2>
+
+<div class="highlight">
+Flux is an architecture pattern for <b>one-way data flow</b>. Redux is a state management library inspired by Flux, but Redux implements it differently using <b>dispatch()</b>, <b>reducers</b>, and a <b>single store</b>.
+</div>
+
+<h2>First Clear The Main Confusion</h2>
+
+<div class="warning">
+Flux is not a second name of Redux.
+<br><br>
+Flux is not an extra feature inside Redux.
+<br><br>
+Redux does not internally use Flux code.
+</div>
+
+<div class="success">
+Correct understanding: Redux follows Flux architecture principles.
+</div>
+
+<h2>Simple Meaning</h2>
+
+<table>
+<tr>
+<th>Term</th>
+<th>Meaning</th>
+</tr>
+
+<tr>
+<td>Flux</td>
+<td>Architecture / pattern / blueprint</td>
+</tr>
+
+<tr>
+<td>Redux</td>
+<td>Actual JavaScript state management library</td>
+</tr>
+
+<tr>
+<td>Flux Main Rule</td>
+<td>Data should move in one direction</td>
+</tr>
+
+<tr>
+<td>Redux Main Idea</td>
+<td>Implement one-way data flow with action, dispatch, reducer, and store</td>
+</tr>
+</table>
+
+<h2>Best Memory Example</h2>
+
+<div class="flow">
+Flux = Blueprint
+<br><br>
+Redux = House Built Using That Blueprint Idea
+</div>
+
+<p>
+A blueprint is not the house. But the house follows the blueprint.
+</p>
+
+<div class="highlight">
+Similarly, Flux is not Redux. Redux follows the Flux idea.
+</div>
+
+<h2>Why Flux Was Created?</h2>
+
+<p>
+Before Flux, large applications could have messy two-way state updates.
+</p>
+
+<div class="flow">
+Component A
+<br>↔
+Component B
+<br>↔
+Component C
+<br>↔
+Component D
+</div>
+
+<p>
+This made state hard to debug because data could move everywhere.
+</p>
+
+<div class="success">
+Flux solved this by enforcing one-way data flow.
+</div>
+
+<h2>Original Flux Flow</h2>
+
+<div class="flow">
+User Interaction
+<br>↓
+Action
+<br>↓
+Dispatcher
+<br>↓
+Store
+<br>↓
+View
+</div>
+
+<h2>Flux Parts</h2>
+
+<table>
+<tr>
+<th>Flux Part</th>
+<th>Meaning</th>
+</tr>
+
+<tr>
+<td>Action</td>
+<td>Plain object that describes what happened</td>
+</tr>
+
+<tr>
+<td>Dispatcher</td>
+<td>A separate central object that sends actions to stores</td>
+</tr>
+
+<tr>
+<td>Store</td>
+<td>Holds state and update logic</td>
+</tr>
+
+<tr>
+<td>View</td>
+<td>UI that displays state</td>
+</tr>
+</table>
+
+<h2>Flux Real-World Example</h2>
+
+<div class="flow">
+User Clicks Add To Cart
+<br>↓
+Action Created
+<br>↓
+Dispatcher Receives Action
+<br>↓
+Dispatcher Sends Action To CartStore
+<br>↓
+CartStore Updates
+<br>↓
+Cart View Updates
+</div>
+
+<h2>Important: Original Flux Has A Real Dispatcher</h2>
+
+<div class="warning">
+In original Flux, Dispatcher is a separate object/class.
+</div>
+
+<div class="file-name">Flux Concept</div>
+
+<pre class="language-js"><code class="language-js">Dispatcher.dispatch({
+  type: 'ADD_TO_CART',
+  payload: product
+});</code></pre>
+
+<div class="flow">
+Action
+<br>↓
+Dispatcher Object
+<br>↓
+CartStore
+<br>UserStore
+<br>ProductStore
+</div>
+
+<p>
+Flux needed Dispatcher because Flux could have multiple stores.
+</p>
+
+<h2>Then Redux Came</h2>
+
+<p>
+Redux liked Flux's one-way data flow idea, but simplified the design.
+</p>
+
+<div class="highlight">
+Redux removed the separate Dispatcher object, used reducers for update logic, and used one single store.
+</div>
+
+<h2>Redux Flow</h2>
+
+<div class="flow">
+User Interaction
+<br>↓
+dispatch(action)
+<br>↓
+Reducer
+<br>↓
+Single Store
+<br>↓
+React UI
+</div>
+
+<h2>Redux Real-World Example</h2>
+
+<div class="file-name">React Component</div>
+
+<pre class="language-jsx"><code class="language-jsx">function ProductButton({ product }) {
+  const dispatch = useDispatch();
+
+  return &lt;button onClick={() =&gt; dispatch(addToCart(product))}&gt;Add To Cart&lt;/button&gt;;
+}</code></pre>
+
+<div class="file-name">Action</div>
+
+<pre class="language-js"><code class="language-js">const action = { type: 'ADD_TO_CART', payload: product };</code></pre>
+
+<div class="file-name">Reducer</div>
+
+<pre class="language-js"><code class="language-js">function cartReducer(state, action) {
+  switch (action.type) {
+    case 'ADD_TO_CART':
+      return { ...state, items: [...state.items, action.payload] };
+    default:
+      return state;
+  }
+}</code></pre>
+
+<div class="flow">
+dispatch(addToCart(product))
+<br>↓
+Reducer Receives Action
+<br>↓
+Reducer Returns New State
+<br>↓
+Redux Store Updates
+<br>↓
+UI Re-renders
+</div>
+
+<h2>Your Confusion: Redux Has dispatch(), So Is That Dispatcher?</h2>
+
+<div class="danger">
+No. Redux dispatch() is not the same as Flux Dispatcher.
+</div>
+
+<p>
+The name looks similar, but architecture is different.
+</p>
+
+<table>
+<tr>
+<th>Flux Dispatcher</th>
+<th>Redux dispatch()</th>
+</tr>
+
+<tr>
+<td>Separate object/class</td>
+<td>Function on Redux store</td>
+</tr>
+
+<tr>
+<td>Routes action to multiple stores</td>
+<td>Sends action to reducers</td>
+</tr>
+
+<tr>
+<td>Needed because Flux can have many stores</td>
+<td>Used with one Redux store</td>
+</tr>
+
+<tr>
+<td>Store contains update logic</td>
+<td>Reducer contains update logic</td>
+</tr>
+</table>
+
+<h2>Why Redux Has No Separate Dispatcher?</h2>
+
+<p>
+Flux has many stores.
+</p>
+
+<div class="flow">
+Action
+<br>↓
+Dispatcher
+<br>↓
+CartStore
+<br>UserStore
+<br>ProductStore
+</div>
+
+<p>
+So Dispatcher is like traffic police.
+</p>
+
+<div class="flow">
+Dispatcher
+<br>↓
+Send Action To Correct Stores
+</div>
+
+<p>
+Redux has one store.
+</p>
+
+<div class="flow">
+Action
+<br>↓
+Single Store
+<br>↓
+Reducers
+</div>
+
+<p>
+So Redux does not need a separate Dispatcher object.
+</p>
+
+<div class="success">
+Redux still uses the word dispatch because dispatch means "send an action", but it is not the Flux Dispatcher component.
+</div>
+
+<h2>Flux vs Redux Flow</h2>
+
+<table>
+<tr>
+<th>Flux</th>
+<th>Redux</th>
+</tr>
+
+<tr>
+<td>Action → Dispatcher → Store → View</td>
+<td>Action → dispatch() → Reducer → Store → View</td>
+</tr>
+
+<tr>
+<td>Multiple stores possible</td>
+<td>Single store</td>
+</tr>
+
+<tr>
+<td>Dispatcher routes actions</td>
+<td>dispatch sends action to reducer</td>
+</tr>
+
+<tr>
+<td>Store updates itself</td>
+<td>Reducer calculates new state</td>
+</tr>
+</table>
+
+<h2>Are Redux Things Part Of Flux?</h2>
+
+<table>
+<tr>
+<th>Thing</th>
+<th>Flux?</th>
+<th>Redux?</th>
+<th>Explanation</th>
+</tr>
+
+<tr>
+<td>Action</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>Both use action idea</td>
+</tr>
+
+<tr>
+<td>Store</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>Flux can have many stores; Redux has one store</td>
+</tr>
+
+<tr>
+<td>Dispatcher</td>
+<td>Yes</td>
+<td>No</td>
+<td>Redux removed separate Dispatcher object</td>
+</tr>
+
+<tr>
+<td>dispatch()</td>
+<td>No exact same API</td>
+<td>Yes</td>
+<td>Redux function used to send action</td>
+</tr>
+
+<tr>
+<td>Reducer</td>
+<td>No</td>
+<td>Yes</td>
+<td>Redux uses reducers for update logic</td>
+</tr>
+
+<tr>
+<td>useSelector()</td>
+<td>No</td>
+<td>React-Redux</td>
+<td>Hook from React-Redux, not Flux</td>
+</tr>
+
+<tr>
+<td>useDispatch()</td>
+<td>No</td>
+<td>React-Redux</td>
+<td>Hook from React-Redux, not Flux</td>
+</tr>
+</table>
+
+<h2>What About Angular NgRx?</h2>
+
+<div class="highlight">
+NgRx also follows Flux/Redux-style one-way data flow, but it is for Angular.
+</div>
+
+<div class="flow">
+Flux
+<br>↓
+Architecture Idea
+<br><br>
+Redux
+<br>↓
+React State Library Inspired By Flux
+<br><br>
+NgRx
+<br>↓
+Angular State Library Inspired By Redux/Flux
+</div>
+
+<h2>NgRx Flow</h2>
+
+<div class="flow">
+Angular Component
+<br>↓
+store.dispatch(action)
+<br>↓
+Reducer
+<br>↓
+NgRx Store
+<br>↓
+Selector
+<br>↓
+Angular UI Updates
+</div>
+
+<div class="file-name">NgRx Example</div>
+
+<pre class="language-ts"><code class="language-ts">this.store.dispatch(addToCart({ product }));</code></pre>
+
+<div class="success">
+Redux and NgRx both follow one-way data flow, but they are separate libraries.
+</div>
+
+<h2>Complete Redux Flow With React-Redux</h2>
+
+<div class="flow">
+User Clicks Button
+<br>↓
+useDispatch()
+<br>↓
+dispatch(action)
+<br>↓
+Reducer Runs
+<br>↓
+Redux Store Updates
+<br>↓
+useSelector() Gets New State
+<br>↓
+React Component Re-renders
+</div>
+
+<div class="file-name">React-Redux Example</div>
+
+<pre class="language-jsx"><code class="language-jsx">function CartButton({ product }) {
+  const dispatch = useDispatch();
+  const count = useSelector(state =&gt; state.cart.items.length);
+
+  return &lt;button onClick={() =&gt; dispatch(addToCart(product))}&gt;Cart ({count})&lt;/button&gt;;
+}</code></pre>
+
+<h2>Final Correct Understanding</h2>
+
+<div class="highlight">
+Redux does not internally use Flux. Redux is a separate library inspired by Flux architecture. It keeps Flux's one-way data flow idea, but replaces the separate Dispatcher with dispatch() + reducers and uses one single store instead of multiple stores.
+</div>
+
+<h2>Interview Answer</h2>
+
+<div class="highlight">
+Flux is an architectural pattern created by Facebook for predictable one-way data flow. Original Flux uses Actions, a Dispatcher, Stores, and Views. Redux is a state management library inspired by Flux, but it simplifies Flux by removing the separate Dispatcher, using a single store, and moving update logic into pure reducers. Redux still uses actions and dispatch(), but Redux dispatch() is not the same as the original Flux Dispatcher object. Redux follows Flux principles; it does not internally use Flux code.
+</div>
+
+<h2>Easy Way To Remember</h2>
+
+<div class="flow">
+Flux
+<br>↓
+Idea / Architecture / Blueprint
+<br><br>
+Redux
+<br>↓
+Library / Implementation Inspired By Flux
+</div>
+
+<br>
+
+<div class="flow">
+Flux = Action → Dispatcher → Store → View
+<br><br>
+Redux = Action → dispatch() → Reducer → Store → View
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js"></script>
+
+</body>
+</html>

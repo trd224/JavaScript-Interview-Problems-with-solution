@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>078 - cloneElement vs createElement</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+p,li{color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px}
+.success{background:#052e16;padding:18px;border-left:5px solid #22c55e;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;text-align:center;line-height:2;font-size:18px}
+.file-name{background:#111827;color:#93c5fd;padding:12px 16px;border-radius:10px;border:1px solid #1e293b;font-weight:bold;margin-top:20px;margin-bottom:10px}
+pre[class*="language-"],code[class*="language-"]{background:#1e1e1e}
+.token.keyword{color:#c792ea}
+.token.string{color:#c3e88d}
+.token.function{color:#82aaff}
+.token.class-name{color:#ffcb6b}
+.token.number{color:#f78c6c}
+.token.operator{color:#89ddff}
+.token.punctuation{color:#89ddff}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>078. What is the Difference Between cloneElement and createElement?</h1>
+
+<h2>One-Line Answer</h2>
+
+<div class="highlight">
+<b>createElement()</b> creates a brand new React element from scratch, while <b>cloneElement()</b> creates a copy of an existing React element and optionally changes its props or children.
+</div>
+
+<h2>React.createElement()</h2>
+
+<p>
+Used to create a new React element.
+</p>
+
+<div class="file-name">Example</div>
+
+<pre class="language-js"><code class="language-js">const button = React.createElement('button', { className: 'btn' }, 'Save');</code></pre>
+
+<div class="flow">
+Tag
+<br>+
+Props
+<br>+
+Children
+<br>↓
+New React Element
+</div>
+
+<div class="file-name">Equivalent JSX</div>
+
+<pre class="language-jsx"><code class="language-jsx">&lt;button className="btn"&gt;Save&lt;/button&gt;</code></pre>
+
+<div class="success">
+JSX is converted into React.createElement() behind the scenes.
+</div>
+
+<h2>React.cloneElement()</h2>
+
+<p>
+Used when you already have a React element and want to create a modified copy of it.
+</p>
+
+<div class="file-name">Original Element</div>
+
+<pre class="language-jsx"><code class="language-jsx">const button = &lt;button&gt;Save&lt;/button&gt;;</code></pre>
+
+<div class="file-name">Clone Element</div>
+
+<pre class="language-js"><code class="language-js">const newButton = React.cloneElement(button, { className: 'btn' });</code></pre>
+
+<div class="flow">
+Existing Element
+<br>↓
+cloneElement()
+<br>↓
+Add / Override Props
+<br>↓
+New Element
+</div>
+
+<h2>Changing Children</h2>
+
+<div class="file-name">Example</div>
+
+<pre class="language-js"><code class="language-js">const button = &lt;button&gt;Save&lt;/button&gt;;
+
+const updatedButton = React.cloneElement(button, {}, 'Update');</code></pre>
+
+<div class="flow">
+Save
+<br>↓
+cloneElement()
+<br>↓
+Update
+</div>
+
+<h2>Real-World Example</h2>
+
+<div class="file-name">Parent Component</div>
+
+<pre class="language-jsx"><code class="language-jsx">function Parent({ children }) {
+  return React.cloneElement(children, { color: 'blue' });
+}</code></pre>
+
+<div class="file-name">Usage</div>
+
+<pre class="language-jsx"><code class="language-jsx">&lt;Parent&gt;
+  &lt;Button /&gt;
+&lt;/Parent&gt;</code></pre>
+
+<div class="flow">
+Parent Receives Child
+<br>↓
+cloneElement()
+<br>↓
+Inject Props
+<br>↓
+Return Modified Child
+</div>
+
+<h2>Visual Comparison</h2>
+
+<div class="flow">
+createElement()
+<br><br>
+Nothing
+<br>↓
+Create New Element
+<br>↓
+&lt;button&gt;Save&lt;/button&gt;
+</div>
+
+<br>
+
+<div class="flow">
+cloneElement()
+<br><br>
+&lt;button&gt;Save&lt;/button&gt;
+<br>↓
+Clone Existing Element
+<br>↓
+Modify Props / Children
+<br>↓
+&lt;button class="btn"&gt;Save&lt;/button&gt;
+</div>
+
+<h2>Difference Table</h2>
+
+<table>
+<tr>
+<th>Feature</th>
+<th>createElement()</th>
+<th>cloneElement()</th>
+</tr>
+
+<tr>
+<td>Purpose</td>
+<td>Create new element</td>
+<td>Copy existing element</td>
+</tr>
+
+<tr>
+<td>Requires existing element?</td>
+<td>No</td>
+<td>Yes</td>
+</tr>
+
+<tr>
+<td>Modify props?</td>
+<td>While creating</td>
+<td>Yes</td>
+</tr>
+
+<tr>
+<td>Modify children?</td>
+<td>Yes</td>
+<td>Yes</td>
+</tr>
+
+<tr>
+<td>Used by JSX?</td>
+<td>Yes</td>
+<td>No</td>
+</tr>
+
+<tr>
+<td>Common Usage</td>
+<td>Create UI</td>
+<td>Enhance child elements</td>
+</tr>
+
+</table>
+
+<h2>Interview Answer</h2>
+
+<div class="highlight">
+React.createElement() creates a completely new React element by specifying its type, props, and children. React.cloneElement() takes an existing React element, creates a copy of it, and allows you to override or add new props and children. JSX compiles into createElement() calls, while cloneElement() is commonly used when parent components need to enhance or modify their children.
+</div>
+
+<h2>Easy Way To Remember</h2>
+
+<div class="flow">
+createElement()
+<br>↓
+Create New Element
+<br><br>
+cloneElement()
+<br>↓
+Copy Existing Element
+<br>↓
+Modify It
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+
+</body>
+</html>

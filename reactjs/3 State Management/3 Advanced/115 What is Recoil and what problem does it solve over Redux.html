@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>115 - What is Recoil and what problem does it solve over Redux?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px}
+p,li{color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px}
+.success{background:#052e16;padding:18px;border-left:5px solid #22c55e;border-radius:10px;margin-top:15px}
+.warning{background:#1e1b4b;padding:18px;border-left:5px solid #fbbf24;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;text-align:center;line-height:2;font-size:18px}
+.file-name{background:#111827;color:#93c5fd;padding:12px 16px;border-radius:10px;border:1px solid #1e293b;font-weight:bold;margin-top:20px;margin-bottom:10px}
+pre[class*="language-"],code[class*="language-"]{background:#1e1e1e}
+.token.keyword{color:#c792ea}
+.token.string{color:#c3e88d}
+.token.function{color:#82aaff}
+.token.class-name{color:#ffcb6b}
+.token.number{color:#f78c6c}
+.token.operator{color:#89ddff}
+.token.punctuation{color:#89ddff}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>115. What is Recoil and what problem does it solve over Redux?</h1>
+
+<h2>One-Line Answer</h2>
+
+<div class="highlight">
+Recoil is a React state management library from Meta that uses <b>atoms</b> and <b>selectors</b> to manage global state with less boilerplate and more granular re-rendering than Redux.
+</div>
+
+<h2>First Understand The Redux Problem</h2>
+
+<p>
+Suppose an e-commerce application has:
+</p>
+
+<div class="flow">
+User State
+<br>↓
+Cart State
+<br>↓
+Theme State
+<br>↓
+Notification State
+</div>
+
+<p>
+Redux stores everything inside one central store.
+</p>
+
+<div class="file-name">Redux Store</div>
+
+<pre class="language-js"><code class="language-js">const store = {
+  user: {},
+  cart: [],
+  theme: 'light',
+  notifications: []
+};</code></pre>
+
+<div class="flow">
+One Big Store
+<br>↓
+Actions
+<br>↓
+Reducers
+<br>↓
+Dispatch
+<br>↓
+Update State
+</div>
+
+<div class="warning">
+Redux is powerful, but even simple state often needs actions, reducers, dispatch calls, and store configuration.
+</div>
+
+<h2>How Recoil Solves This</h2>
+
+<div class="highlight">
+Instead of one big store, Recoil splits state into many small atoms.
+</div>
+
+<div class="flow">
+Redux
+<br>↓
+One Large Store
+<br><br>
+Recoil
+<br>↓
+Many Small Atoms
+</div>
+
+<h2>What Is An Atom?</h2>
+
+<p>
+An atom is a single piece of global state.
+</p>
+
+<div class="file-name">themeAtom.js</div>
+
+<pre class="language-js"><code class="language-js">import { atom } from 'recoil';
+
+export const themeAtom = atom({
+  key: 'themeAtom',
+  default: 'light'
+});</code></pre>
+
+<div class="flow">
+themeAtom
+<br>↓
+Stores
+<br>light
+</div>
+
+<p>
+Think of an atom as a global useState.
+</p>
+
+<h2>Using An Atom</h2>
+
+<div class="file-name">ThemeSwitcher.jsx</div>
+
+<pre class="language-jsx"><code class="language-jsx">import { useRecoilState } from 'recoil';
+import { themeAtom } from './themeAtom';
+
+function ThemeSwitcher() {
+
+  const [theme, setTheme] =
+    useRecoilState(themeAtom);
+
+  return (
+    &lt;button
+      onClick={() =&gt; setTheme('dark')}
+    &gt;
+      Dark Mode
+    &lt;/button&gt;
+  );
+
+}</code></pre>
+
+<div class="flow">
+useRecoilState()
+<br>↓
+Read Atom
+<br>↓
+Update Atom
+</div>
+
+<h2>Real World E-Commerce Example</h2>
+
+<div class="file-name">cartAtom.js</div>
+
+<pre class="language-js"><code class="language-js">import { atom } from 'recoil';
+
+export const cartAtom = atom({
+  key: 'cartAtom',
+  default: []
+});</code></pre>
+
+<div class="file-name">AddToCart.jsx</div>
+
+<pre class="language-jsx"><code class="language-jsx">const [cart, setCart] =
+  useRecoilState(cartAtom);
+
+setCart([...cart, product]);</code></pre>
+
+<div class="file-name">CartBadge.jsx</div>
+
+<pre class="language-jsx"><code class="language-jsx">const cart =
+  useRecoilValue(cartAtom);
+
+return (
+  &lt;span&gt;
+    {cart.length}
+  &lt;/span&gt;
+);</code></pre>
+
+<div class="flow">
+cartAtom
+<br>↓
+Shared By Multiple Components
+<br>↓
+Global State
+</div>
+
+<h2>What Are Selectors?</h2>
+
+<p>
+Selectors are derived state.
+</p>
+
+<div class="file-name">cartTotalSelector.js</div>
+
+<pre class="language-js"><code class="language-js">import { selector } from 'recoil';
+import { cartAtom } from './cartAtom';
+
+export const cartTotalSelector =
+  selector({
+
+    key: 'cartTotalSelector',
+
+    get: ({ get }) =>
+      get(cartAtom).reduce(
+        (sum, item) =>
+          sum + item.price,
+        0
+      )
+
+  });</code></pre>
+
+<div class="flow">
+cartAtom
+<br>↓
+Selector
+<br>↓
+Calculated Value
+</div>
+
+<p>
+Similar to Redux selectors.
+</p>
+
+<h2>Why Recoil Feels Simpler Than Redux</h2>
+
+<div class="file-name">Redux Update</div>
+
+<pre class="language-js"><code class="language-js">dispatch(addToCart(product));</code></pre>
+
+Requires:
+
+<ul>
+<li>Action</li>
+<li>Reducer</li>
+<li>Dispatch</li>
+<li>Store Setup</li>
+</ul>
+
+<div class="file-name">Recoil Update</div>
+
+<pre class="language-js"><code class="language-js">setCart([...cart, product]);</code></pre>
+
+<div class="success">
+Recoil feels much closer to useState.
+</div>
+
+<h2>How Recoil Re-Renders Components</h2>
+
+<div class="flow">
+Atom Created
+<br>↓
+Component Subscribes
+<br>↓
+Atom Changes
+<br>↓
+Only Subscribers Re-render
+</div>
+
+<div class="highlight">
+Unlike Context, components that don't use that atom do not re-render.
+</div>
+
+<h2>Redux vs Recoil</h2>
+
+<table>
+
+<tr>
+<th>Redux</th>
+<th>Recoil</th>
+</tr>
+
+<tr>
+<td>One Global Store</td>
+<td>Many Independent Atoms</td>
+</tr>
+
+<tr>
+<td>Reducers Required</td>
+<td>No Reducers Required</td>
+</tr>
+
+<tr>
+<td>Actions Required</td>
+<td>No Actions Required</td>
+</tr>
+
+<tr>
+<td>dispatch()</td>
+<td>Direct State Updates</td>
+</tr>
+
+<tr>
+<td>More Boilerplate</td>
+<td>Less Boilerplate</td>
+</tr>
+
+<tr>
+<td>Mature Ecosystem</td>
+<td>Simpler API</td>
+</tr>
+
+<tr>
+<td>Excellent For Large Apps</td>
+<td>Excellent For React Apps</td>
+</tr>
+
+</table>
+
+<h2>Recoil vs Jotai</h2>
+
+<table>
+
+<tr>
+<th>Recoil</th>
+<th>Jotai</th>
+</tr>
+
+<tr>
+<td>Atoms + Selectors</td>
+<td>Atoms + Derived Atoms</td>
+</tr>
+
+<tr>
+<td>Requires key</td>
+<td>No key required</td>
+</tr>
+
+<tr>
+<td>More built-in features</td>
+<td>Smaller API</td>
+</tr>
+
+<tr>
+<td>Created by Meta</td>
+<td>Community Library</td>
+</tr>
+
+</table>
+
+<h2>What Problem Does Recoil Solve Over Redux?</h2>
+
+<div class="flow">
+Redux
+<br>↓
+Store
+<br>↓
+Action
+<br>↓
+Reducer
+<br>↓
+Dispatch
+<br><br>
+Recoil
+<br>↓
+Atom
+<br>↓
+Hook
+<br>↓
+Update State
+</div>
+
+<div class="highlight">
+Recoil solves Redux's boilerplate and complexity by replacing actions, reducers, and dispatch calls with simple atom-based state management while still providing global shared state and efficient re-rendering.
+</div>
+
+<h2>Interview Answer</h2>
+
+<div class="highlight">
+Recoil is a React state management library that uses atoms and selectors instead of a centralized Redux store. Atoms represent individual pieces of global state, while selectors derive computed state from atoms. Recoil solves Redux's boilerplate by eliminating actions, reducers, and dispatch calls, making global state management feel much closer to React's useState while still supporting shared state and efficient updates.
+</div>
+
+<h2>Easy Way To Remember</h2>
+
+<div class="flow">
+Redux
+<br>↓
+One Big Store
+<br>↓
+dispatch(action)
+<br><br>
+Recoil
+<br>↓
+Many Small Atoms
+<br>↓
+setState()
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+
+</body>
+</html>

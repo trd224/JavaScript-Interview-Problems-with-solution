@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>116 - How does MobX differ from Redux in its reactive approach?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px}
+p,li{color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px}
+.success{background:#052e16;padding:18px;border-left:5px solid #22c55e;border-radius:10px;margin-top:15px}
+.warning{background:#1e1b4b;padding:18px;border-left:5px solid #fbbf24;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;text-align:center;line-height:2;font-size:18px}
+.file-name{background:#111827;color:#93c5fd;padding:12px 16px;border-radius:10px;border:1px solid #1e293b;font-weight:bold;margin-top:20px;margin-bottom:10px}
+pre[class*="language-"],code[class*="language-"]{background:#1e1e1e}
+.token.keyword{color:#c792ea}
+.token.string{color:#c3e88d}
+.token.function{color:#82aaff}
+.token.class-name{color:#ffcb6b}
+.token.number{color:#f78c6c}
+.token.operator{color:#89ddff}
+.token.punctuation{color:#89ddff}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>116. How does MobX differ from Redux in its reactive approach?</h1>
+
+<h2>One-Line Answer</h2>
+
+<div class="highlight">
+Redux uses an explicit <b>action → reducer → store update</b> flow, while MobX automatically tracks dependencies and updates components reactively whenever observable data changes.
+</div>
+
+<h2>The Core Difference</h2>
+
+<div class="flow">
+Redux
+<br>↓
+Tell State What To Do
+<br><br>
+MobX
+<br>↓
+State Changes
+<br>↓
+UI Automatically Reacts
+</div>
+
+<h2>Redux Approach</h2>
+
+<p>
+Redux follows a strict unidirectional data flow.
+</p>
+
+<div class="file-name">Redux Update</div>
+
+<pre class="language-js"><code class="language-js">dispatch(addToCart(product));</code></pre>
+
+<div class="flow">
+dispatch()
+<br>↓
+Action
+<br>↓
+Reducer
+<br>↓
+Store Updated
+<br>↓
+Component Re-renders
+</div>
+
+<p>
+Redux requires:
+</p>
+
+<ul>
+<li>Store</li>
+<li>Actions</li>
+<li>Reducers</li>
+<li>Dispatch</li>
+</ul>
+
+<h2>MobX Approach</h2>
+
+<p>
+MobX uses observable state.
+</p>
+
+<div class="file-name">CartStore.js</div>
+
+<pre class="language-js"><code class="language-js">import { makeAutoObservable } from 'mobx';
+
+class CartStore {
+
+  items = [];
+
+  constructor() {
+    makeAutoObservable(this);
+  }
+
+  addToCart(product) {
+    this.items.push(product);
+  }
+
+}
+
+export default new CartStore();</code></pre>
+
+<p>
+Update state directly:
+</p>
+
+<pre class="language-js"><code class="language-js">cartStore.addToCart(product);</code></pre>
+
+<div class="flow">
+Observable State
+<br>↓
+State Changes
+<br>↓
+MobX Detects Change
+<br>↓
+UI Updates Automatically
+</div>
+
+<h2>Real World E-Commerce Example</h2>
+
+<h3>Redux Version</h3>
+
+<div class="file-name">Action</div>
+
+<pre class="language-js"><code class="language-js">dispatch(addToCart(product));</code></pre>
+
+<div class="file-name">Reducer</div>
+
+<pre class="language-js"><code class="language-js">case 'ADD_TO_CART':
+  return {
+    ...state,
+    items: [...state.items, action.payload]
+  };</code></pre>
+
+<div class="flow">
+Product
+<br>↓
+Dispatch Action
+<br>↓
+Reducer
+<br>↓
+Update Store
+</div>
+
+<h3>MobX Version</h3>
+
+<div class="file-name">Store</div>
+
+<pre class="language-js"><code class="language-js">addToCart(product) {
+  this.items.push(product);
+}</code></pre>
+
+<div class="flow">
+Product
+<br>↓
+addToCart()
+<br>↓
+Observable Updated
+<br>↓
+UI Updates
+</div>
+
+<h2>How MobX Reactivity Works</h2>
+
+<div class="file-name">CartBadge.jsx</div>
+
+<pre class="language-jsx"><code class="language-jsx">import { observer } from 'mobx-react-lite';
+
+const CartBadge = observer(() => {
+
+  return (
+    &lt;span&gt;
+      {cartStore.items.length}
+    &lt;/span&gt;
+  );
+
+});</code></pre>
+
+<div class="flow">
+Component Reads
+cartStore.items
+<br>↓
+MobX Tracks Dependency
+<br>↓
+items Changes
+<br>↓
+Component Re-renders
+</div>
+
+<div class="success">
+You never manually subscribe to state. MobX tracks it automatically.
+</div>
+
+<h2>Think Of It Like Excel</h2>
+
+<p>
+MobX behaves similarly to Excel formulas.
+</p>
+
+<div class="flow">
+Cell A Changes
+<br>↓
+Dependent Cells Update
+<br>↓
+Automatically
+</div>
+
+<p>
+MobX does the same thing with React components.
+</p>
+
+<h2>Computed Values In MobX</h2>
+
+<div class="file-name">CartStore.js</div>
+
+<pre class="language-js"><code class="language-js">get totalPrice() {
+  return this.items.reduce(
+    (sum, item) =>
+      sum + item.price,
+    0
+  );
+}</code></pre>
+
+<div class="flow">
+items
+<br>↓
+totalPrice
+<br>↓
+Automatically Recalculated
+</div>
+
+<p>
+This is similar to:
+</p>
+
+<ul>
+<li>Redux Selectors</li>
+<li>Recoil Selectors</li>
+<li>Jotai Derived Atoms</li>
+</ul>
+
+<h2>Mental Model Difference</h2>
+
+<table>
+
+<tr>
+<th>Redux</th>
+<th>MobX</th>
+</tr>
+
+<tr>
+<td>Event Driven</td>
+<td>Reactive</td>
+</tr>
+
+<tr>
+<td>Dispatch Actions</td>
+<td>Change Observable Data</td>
+</tr>
+
+<tr>
+<td>Reducers Update State</td>
+<td>State Updates Directly</td>
+</tr>
+
+<tr>
+<td>Explicit Flow</td>
+<td>Automatic Tracking</td>
+</tr>
+
+</table>
+
+<h2>Redux vs MobX</h2>
+
+<table>
+
+<tr>
+<th>Redux</th>
+<th>MobX</th>
+</tr>
+
+<tr>
+<td>Single Store</td>
+<td>Observable Objects</td>
+</tr>
+
+<tr>
+<td>Actions Required</td>
+<td>No Actions Required</td>
+</tr>
+
+<tr>
+<td>Reducers Required</td>
+<td>No Reducers Required</td>
+</tr>
+
+<tr>
+<td>Immutable Updates</td>
+<td>Mutable Updates Allowed</td>
+</tr>
+
+<tr>
+<td>Explicit State Flow</td>
+<td>Automatic Reactivity</td>
+</tr>
+
+<tr>
+<td>Predictable</td>
+<td>Less Explicit</td>
+</tr>
+
+<tr>
+<td>More Boilerplate</td>
+<td>Less Boilerplate</td>
+</tr>
+
+</table>
+
+<h2>What Problem Does MobX Solve?</h2>
+
+<div class="flow">
+Redux
+<br>↓
+Action
+<br>↓
+Reducer
+<br>↓
+Store
+<br>↓
+Component
+<br><br>
+MobX
+<br>↓
+Observable State
+<br>↓
+Component
+</div>
+
+<div class="highlight">
+MobX removes much of Redux's boilerplate by making state observable and automatically updating components that depend on that state.
+</div>
+
+<h2>Interview Answer</h2>
+
+<div class="highlight">
+Redux uses an explicit action-based architecture where actions are dispatched, reducers calculate new state, and the store updates predictably. MobX uses a reactive model where state is observable and components automatically re-render when the observable data they use changes. Redux emphasizes predictability and explicit data flow, while MobX emphasizes simplicity and automatic reactivity.
+</div>
+
+<h2>Easy Way To Remember</h2>
+
+<div class="flow">
+Redux
+<br>↓
+Tell State To Change
+<br><br>
+MobX
+<br>↓
+State Changes
+<br>↓
+UI Reacts Automatically
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+
+</body>
+</html>

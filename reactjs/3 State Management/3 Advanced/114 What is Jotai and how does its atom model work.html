@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>114 - What is Jotai and how does its atom model work?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px}
+p,li{color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px}
+.success{background:#052e16;padding:18px;border-left:5px solid #22c55e;border-radius:10px;margin-top:15px}
+.warning{background:#1e1b4b;padding:18px;border-left:5px solid #fbbf24;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;text-align:center;line-height:2;font-size:18px}
+.file-name{background:#111827;color:#93c5fd;padding:12px 16px;border-radius:10px;border:1px solid #1e293b;font-weight:bold;margin-top:20px;margin-bottom:10px}
+pre[class*="language-"],code[class*="language-"]{background:#1e1e1e}
+.token.keyword{color:#c792ea}
+.token.string{color:#c3e88d}
+.token.function{color:#82aaff}
+.token.class-name{color:#ffcb6b}
+.token.number{color:#f78c6c}
+.token.operator{color:#89ddff}
+.token.punctuation{color:#89ddff}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>114. What is Jotai and how does its atom model work?</h1>
+
+<h2>One-Line Answer</h2>
+
+<div class="highlight">
+Jotai is a lightweight React state management library where state is stored in small independent units called <b>atoms</b> instead of one large global store.
+</div>
+
+<h2>Why Jotai Was Created?</h2>
+
+<p>
+Redux stores everything in one big store.
+</p>
+
+<div class="file-name">Redux Store</div>
+
+<pre class="language-js"><code class="language-js">const store = {
+  user: {},
+  cart: [],
+  theme: 'dark',
+  notifications: []
+};</code></pre>
+
+<div class="flow">
+One Big Store
+<br>↓
+Reducers
+<br>↓
+Actions
+<br>↓
+Dispatch
+</div>
+
+<p>
+Jotai takes a different approach.
+</p>
+
+<div class="flow">
+One Big Store
+<br>❌
+<br><br>
+Many Small Atoms
+<br>✅
+</div>
+
+<h2>What Is An Atom?</h2>
+
+<div class="highlight">
+An atom is a single piece of global state.
+</div>
+
+<div class="file-name">countAtom.js</div>
+
+<pre class="language-js"><code class="language-js">import { atom } from 'jotai';
+
+export const countAtom = atom(0);</code></pre>
+
+<div class="flow">
+countAtom
+<br>↓
+Stores
+<br>0
+</div>
+
+<p>
+Think of an atom as a globally shared useState.
+</p>
+
+<h2>Using An Atom</h2>
+
+<div class="file-name">Counter.jsx</div>
+
+<pre class="language-jsx"><code class="language-jsx">import { useAtom } from 'jotai';
+import { countAtom } from './countAtom';
+
+function Counter() {
+
+  const [count, setCount] =
+    useAtom(countAtom);
+
+  return (
+    &lt;&gt;
+      &lt;h2&gt;{count}&lt;/h2&gt;
+
+      &lt;button
+        onClick={() =&gt; setCount(count + 1)}
+      &gt;
+        Increment
+      &lt;/button&gt;
+    &lt;/&gt;
+  );
+
+}</code></pre>
+
+<div class="flow">
+useAtom()
+<br>↓
+Read Atom
+<br>↓
+Update Atom
+</div>
+
+<h2>Real World E-Commerce Example</h2>
+
+<div class="file-name">cartAtom.js</div>
+
+<pre class="language-js"><code class="language-js">import { atom } from 'jotai';
+
+export const cartAtom = atom([]);</code></pre>
+
+<div class="file-name">AddToCart.jsx</div>
+
+<pre class="language-jsx"><code class="language-jsx">const [cart, setCart] =
+  useAtom(cartAtom);
+
+setCart([...cart, product]);</code></pre>
+
+<div class="file-name">CartBadge.jsx</div>
+
+<pre class="language-jsx"><code class="language-jsx">const [cart] =
+  useAtom(cartAtom);
+
+return (
+  &lt;span&gt;
+    {cart.length}
+  &lt;/span&gt;
+);</code></pre>
+
+<div class="flow">
+cartAtom
+<br>↓
+Shared By Multiple Components
+<br>↓
+Global State
+</div>
+
+<h2>How The Atom Model Works</h2>
+
+<p>
+Imagine an application has:
+</p>
+
+<div class="file-name">atoms.js</div>
+
+<pre class="language-js"><code class="language-js">export const userAtom = atom(null);
+
+export const cartAtom = atom([]);
+
+export const themeAtom = atom('light');
+
+export const notificationAtom = atom([]);</code></pre>
+
+<div class="flow">
+userAtom
+<br>
+cartAtom
+<br>
+themeAtom
+<br>
+notificationAtom
+<br><br>
+Independent State Pieces
+</div>
+
+<p>
+Each atom is independent.
+</p>
+
+<p>
+Components subscribe only to the atoms they use.
+</p>
+
+<div class="flow">
+themeAtom Changes
+<br>↓
+Only Theme Components Re-render
+</div>
+
+<div class="success">
+Unlike Context, unrelated components do not re-render.
+</div>
+
+<h2>Derived Atoms</h2>
+
+<p>
+Atoms can depend on other atoms.
+</p>
+
+<div class="file-name">cartTotalAtom.js</div>
+
+<pre class="language-js"><code class="language-js">import { atom } from 'jotai';
+import { cartAtom } from './cartAtom';
+
+export const cartTotalAtom =
+  atom(get =>
+    get(cartAtom).reduce(
+      (sum, item) =>
+        sum + item.price,
+      0
+    )
+  );</code></pre>
+
+<div class="flow">
+cartAtom
+<br>↓
+Derived Atom
+<br>↓
+Total Price
+</div>
+
+<p>
+This is similar to Redux selectors.
+</p>
+
+<h2>Writable Derived Atom</h2>
+
+<div class="file-name">countAtom.js</div>
+
+<pre class="language-js"><code class="language-js">export const countAtom = atom(0);
+
+export const incrementAtom = atom(
+  null,
+  (get, set) => {
+    set(
+      countAtom,
+      get(countAtom) + 1
+    );
+  }
+);</code></pre>
+
+<div class="flow">
+Business Logic
+<br>↓
+Inside Atom
+<br>↓
+Reusable Everywhere
+</div>
+
+<h2>How Jotai Updates Components</h2>
+
+<div class="flow">
+Atom Created
+<br>↓
+Component Uses Atom
+<br>↓
+Atom Changes
+<br>↓
+Only Subscribers Re-render
+</div>
+
+<div class="highlight">
+This is the biggest advantage of the atom model.
+</div>
+
+<h2>Jotai vs Redux</h2>
+
+<table>
+
+<tr>
+<th>Jotai</th>
+<th>Redux</th>
+</tr>
+
+<tr>
+<td>Many Small Atoms</td>
+<td>One Global Store</td>
+</tr>
+
+<tr>
+<td>No Reducers Required</td>
+<td>Reducers Required</td>
+</tr>
+
+<tr>
+<td>No Actions Required</td>
+<td>Actions Required</td>
+</tr>
+
+<tr>
+<td>No Dispatch Required</td>
+<td>dispatch(action)</td>
+</tr>
+
+<tr>
+<td>Minimal Boilerplate</td>
+<td>More Boilerplate</td>
+</tr>
+
+<tr>
+<td>Fine-Grained Updates</td>
+<td>Store Based Updates</td>
+</tr>
+
+</table>
+
+<h2>Jotai vs Recoil</h2>
+
+<table>
+
+<tr>
+<th>Jotai</th>
+<th>Recoil</th>
+</tr>
+
+<tr>
+<td>No Key Required</td>
+<td>Key Required</td>
+</tr>
+
+<tr>
+<td>Smaller API</td>
+<td>More Features</td>
+</tr>
+
+<tr>
+<td>Derived Atoms</td>
+<td>Selectors</td>
+</tr>
+
+<tr>
+<td>Very Lightweight</td>
+<td>Slightly Larger</td>
+</tr>
+
+</table>
+
+<h2>What Problem Does Jotai Solve?</h2>
+
+<div class="flow">
+Redux
+<br>↓
+Store
+<br>↓
+Reducer
+<br>↓
+Action
+<br>↓
+Dispatch
+<br><br>
+Jotai
+<br>↓
+Atom
+<br>↓
+useAtom()
+<br>↓
+Update State
+</div>
+
+<div class="highlight">
+Jotai solves Redux complexity by allowing state to be split into small independent atoms that can be read and updated directly using React hooks.
+</div>
+
+<h2>Interview Answer</h2>
+
+<div class="highlight">
+Jotai is a lightweight React state management library based on atoms. An atom represents a single piece of global state that can be shared across components. Components subscribe only to the atoms they use, so when an atom changes, only those components re-render. Jotai also supports derived atoms and writable atoms, providing powerful state management with very little boilerplate.
+</div>
+
+<h2>Easy Way To Remember</h2>
+
+<div class="flow">
+Redux
+<br>↓
+One Big Store
+<br><br>
+Jotai
+<br>↓
+Many Small Atoms
+<br><br>
+Component
+<br>↓
+useAtom()
+<br>↓
+Read + Update State
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+
+</body>
+</html>

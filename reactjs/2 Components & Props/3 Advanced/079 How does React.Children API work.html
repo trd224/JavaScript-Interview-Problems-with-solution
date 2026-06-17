@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>079 - How does React.Children API work?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+p,li{color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px}
+.success{background:#052e16;padding:18px;border-left:5px solid #22c55e;border-radius:10px;margin-top:15px}
+.warning{background:#1e1b4b;padding:18px;border-left:5px solid #fbbf24;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;text-align:center;line-height:2;font-size:18px}
+.file-name{background:#111827;color:#93c5fd;padding:12px 16px;border-radius:10px;border:1px solid #1e293b;font-weight:bold;margin-top:20px;margin-bottom:10px}
+pre[class*="language-"],code[class*="language-"]{background:#1e1e1e}
+.token.keyword{color:#c792ea}
+.token.string{color:#c3e88d}
+.token.function{color:#82aaff}
+.token.class-name{color:#ffcb6b}
+.token.number{color:#f78c6c}
+.token.operator{color:#89ddff}
+.token.punctuation{color:#89ddff}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>079. How does React.Children API work?</h1>
+
+<h2>One-Line Answer</h2>
+
+<div class="highlight">
+The <b>React.Children API</b> provides utility methods for safely working with the special <b>children</b> prop, regardless of whether it contains one child, multiple children, fragments, or nested structures.
+</div>
+
+<h2>Why Do We Need It?</h2>
+
+<p>
+The children prop is not always an array.
+</p>
+
+<div class="file-name">Example</div>
+
+<pre class="language-jsx"><code class="language-jsx">function Card({ children }) {
+  console.log(children);
+  return children;
+}</code></pre>
+
+<p>
+Sometimes children is:
+</p>
+
+<pre class="language-jsx"><code class="language-jsx">&lt;Card&gt;
+  &lt;h1&gt;Title&lt;/h1&gt;
+&lt;/Card&gt;</code></pre>
+
+<div class="flow">
+children
+<br>↓
+Single React Element
+</div>
+
+<p>
+Sometimes children is:
+</p>
+
+<pre class="language-jsx"><code class="language-jsx">&lt;Card&gt;
+  &lt;h1&gt;Title&lt;/h1&gt;
+  &lt;p&gt;Description&lt;/p&gt;
+&lt;/Card&gt;</code></pre>
+
+<div class="flow">
+children
+<br>↓
+Array Of React Elements
+</div>
+
+<div class="warning">
+Because children can have different shapes, React provides the Children API.
+</div>
+
+<h2>React.Children.map()</h2>
+
+<p>
+Safely loops through all children.
+</p>
+
+<div class="file-name">Example</div>
+
+<pre class="language-jsx"><code class="language-jsx">function List({ children }) {
+  return React.Children.map(children, child => (
+    &lt;li&gt;{child}&lt;/li&gt;
+  ));
+}</code></pre>
+
+<div class="flow">
+children
+<br>↓
+React.Children.map()
+<br>↓
+Process Every Child
+</div>
+
+<h2>Usage</h2>
+
+<pre class="language-jsx"><code class="language-jsx">&lt;List&gt;
+  &lt;span&gt;A&lt;/span&gt;
+  &lt;span&gt;B&lt;/span&gt;
+  &lt;span&gt;C&lt;/span&gt;
+&lt;/List&gt;</code></pre>
+
+<div class="flow">
+A
+<br>B
+<br>C
+<br>↓
+Wrapped In &lt;li&gt;
+</div>
+
+<h2>React.Children.count()</h2>
+
+<p>
+Returns the total number of children.
+</p>
+
+<div class="file-name">Example</div>
+
+<pre class="language-jsx"><code class="language-jsx">const total = React.Children.count(children);</code></pre>
+
+<div class="flow">
+Children
+<br>↓
+Count
+<br>↓
+3
+</div>
+
+<h2>React.Children.only()</h2>
+
+<p>
+Ensures exactly one child is passed.
+</p>
+
+<div class="file-name">Example</div>
+
+<pre class="language-jsx"><code class="language-jsx">function Modal({ children }) {
+  return React.Children.only(children);
+}</code></pre>
+
+<div class="file-name">Valid</div>
+
+<pre class="language-jsx"><code class="language-jsx">&lt;Modal&gt;
+  &lt;div&gt;Content&lt;/div&gt;
+&lt;/Modal&gt;</code></pre>
+
+<div class="file-name">Invalid</div>
+
+<pre class="language-jsx"><code class="language-jsx">&lt;Modal&gt;
+  &lt;div&gt;One&lt;/div&gt;
+  &lt;div&gt;Two&lt;/div&gt;
+&lt;/Modal&gt;</code></pre>
+
+<div class="warning">
+React throws an error if more than one child is provided.
+</div>
+
+<h2>React.Children.toArray()</h2>
+
+<p>
+Converts children into a normal array.
+</p>
+
+<div class="file-name">Example</div>
+
+<pre class="language-jsx"><code class="language-jsx">const items = React.Children.toArray(children);</code></pre>
+
+<div class="flow">
+children
+<br>↓
+toArray()
+<br>↓
+Real JavaScript Array
+</div>
+
+<p>
+Now array methods can be used.
+</p>
+
+<pre class="language-js"><code class="language-js">const reversed = React.Children.toArray(children).reverse();</code></pre>
+
+<h2>React.Children.forEach()</h2>
+
+<p>
+Similar to Array.forEach().
+</p>
+
+<div class="file-name">Example</div>
+
+<pre class="language-jsx"><code class="language-jsx">React.Children.forEach(children, child => {
+  console.log(child);
+});</code></pre>
+
+<div class="flow">
+children
+<br>↓
+forEach()
+<br>↓
+Run Logic For Each Child
+</div>
+
+<h2>Real-World Example</h2>
+
+<p>
+Tabs component automatically numbers its children.
+</p>
+
+<div class="file-name">Tabs Component</div>
+
+<pre class="language-jsx"><code class="language-jsx">function Tabs({ children }) {
+  return React.Children.map(children, (child, index) =>
+    React.cloneElement(child, { index })
+  );
+}</code></pre>
+
+<div class="file-name">Usage</div>
+
+<pre class="language-jsx"><code class="language-jsx">&lt;Tabs&gt;
+  &lt;Tab title="Home" /&gt;
+  &lt;Tab title="Products" /&gt;
+  &lt;Tab title="About" /&gt;
+&lt;/Tabs&gt;</code></pre>
+
+<div class="flow">
+Children
+<br>↓
+map()
+<br>↓
+cloneElement()
+<br>↓
+Inject index Prop
+</div>
+
+<h2>Most Common Combination</h2>
+
+<div class="file-name">Example</div>
+
+<pre class="language-jsx"><code class="language-jsx">function Wrapper({ children }) {
+  return React.Children.map(children, child =>
+    React.cloneElement(child, { className: 'item' })
+  );
+}</code></pre>
+
+<div class="flow">
+React.Children.map()
+<br>+
+React.cloneElement()
+<br>↓
+Modify Every Child
+</div>
+
+<h2>Difference Between Methods</h2>
+
+<table>
+<tr>
+<th>Method</th>
+<th>Purpose</th>
+</tr>
+
+<tr>
+<td>map()</td>
+<td>Transform children</td>
+</tr>
+
+<tr>
+<td>forEach()</td>
+<td>Loop through children</td>
+</tr>
+
+<tr>
+<td>count()</td>
+<td>Count children</td>
+</tr>
+
+<tr>
+<td>only()</td>
+<td>Require exactly one child</td>
+</tr>
+
+<tr>
+<td>toArray()</td>
+<td>Convert children to array</td>
+</tr>
+
+</table>
+
+<h2>Interview Answer</h2>
+
+<div class="highlight">
+The React.Children API provides helper methods for working with the children prop safely. Since children may be a single element, multiple elements, fragments, or nested structures, methods such as React.Children.map(), forEach(), count(), only(), and toArray() provide a consistent way to iterate, transform, validate, and manipulate child elements.
+</div>
+
+<h2>Easy Way To Remember</h2>
+
+<div class="flow">
+children
+<br>↓
+Unknown Shape
+<br>↓
+React.Children API
+<br>↓
+Safe Access & Manipulation
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+
+</body>
+</html>

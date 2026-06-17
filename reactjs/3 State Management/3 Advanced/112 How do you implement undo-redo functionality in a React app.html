@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>112 - Undo Redo Functionality in React</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px}
+p,li{color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px}
+.success{background:#052e16;padding:18px;border-left:5px solid #22c55e;border-radius:10px;margin-top:15px}
+.warning{background:#1e1b4b;padding:18px;border-left:5px solid #fbbf24;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;text-align:center;line-height:2;font-size:18px}
+.file-name{background:#111827;color:#93c5fd;padding:12px 16px;border-radius:10px;border:1px solid #1e293b;font-weight:bold;margin-top:20px;margin-bottom:10px}
+pre[class*="language-"],code[class*="language-"]{background:#1e1e1e}
+.token.keyword{color:#c792ea}
+.token.string{color:#c3e88d}
+.token.function{color:#82aaff}
+.token.class-name{color:#ffcb6b}
+.token.number{color:#f78c6c}
+.token.operator{color:#89ddff}
+.token.punctuation{color:#89ddff}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>112. How do you implement undo/redo functionality in a React app?</h1>
+
+<h2>One-Line Answer</h2>
+
+<div class="highlight">
+Undo/redo is usually implemented by storing state history in three parts: <b>past</b>, <b>present</b>, and <b>future</b>.
+</div>
+
+<h2>Main Idea</h2>
+
+<div class="flow">
+Past States
+<br>↓
+Current State
+<br>↓
+Future States
+</div>
+
+<p>
+When user changes data, current state moves into past.
+</p>
+
+<p>
+When user clicks undo, current state moves into future and previous state becomes current.
+</p>
+
+<p>
+When user clicks redo, current state moves into past and next future state becomes current.
+</p>
+
+<h2>State Shape</h2>
+
+<div class="file-name">Undo Redo State</div>
+
+<pre class="language-js"><code class="language-js">const history = {
+  past: [],
+  present: '',
+  future: []
+};</code></pre>
+
+<table>
+<tr>
+<th>Part</th>
+<th>Meaning</th>
+</tr>
+
+<tr>
+<td>past</td>
+<td>Old states for undo</td>
+</tr>
+
+<tr>
+<td>present</td>
+<td>Current state</td>
+</tr>
+
+<tr>
+<td>future</td>
+<td>Undone states for redo</td>
+</tr>
+</table>
+
+<h2>Example Flow</h2>
+
+<div class="flow">
+Type A
+<br>↓
+present = A
+<br><br>
+Type AB
+<br>↓
+past = [A]
+<br>present = AB
+<br><br>
+Type ABC
+<br>↓
+past = [A, AB]
+<br>present = ABC
+</div>
+
+<h2>When Undo Clicked</h2>
+
+<div class="flow">
+past = [A, AB]
+<br>present = ABC
+<br>future = []
+<br><br>
+Undo
+<br>↓
+past = [A]
+<br>present = AB
+<br>future = [ABC]
+</div>
+
+<h2>When Redo Clicked</h2>
+
+<div class="flow">
+past = [A]
+<br>present = AB
+<br>future = [ABC]
+<br><br>
+Redo
+<br>↓
+past = [A, AB]
+<br>present = ABC
+<br>future = []
+</div>
+
+<h2>Full React Example</h2>
+
+<div class="file-name">App.jsx</div>
+
+<pre class="language-jsx"><code class="language-jsx">import { useState } from 'react';
+
+function App() {
+  const [history, setHistory] = useState({ past: [], present: '', future: [] });
+
+  function updateValue(newValue) {
+    setHistory(prev => ({
+      past: [...prev.past, prev.present],
+      present: newValue,
+      future: []
+    }));
+  }
+
+  function undo() {
+    setHistory(prev => {
+      if (prev.past.length === 0) return prev;
+
+      const previous = prev.past[prev.past.length - 1];
+      const newPast = prev.past.slice(0, -1);
+
+      return {
+        past: newPast,
+        present: previous,
+        future: [prev.present, ...prev.future]
+      };
+    });
+  }
+
+  function redo() {
+    setHistory(prev => {
+      if (prev.future.length === 0) return prev;
+
+      const next = prev.future[0];
+      const newFuture = prev.future.slice(1);
+
+      return {
+        past: [...prev.past, prev.present],
+        present: next,
+        future: newFuture
+      };
+    });
+  }
+
+  return (
+    &lt;div&gt;
+      &lt;input value={history.present} onChange={e =&gt; updateValue(e.target.value)} /&gt;
+
+      &lt;button onClick={undo} disabled={history.past.length === 0}&gt;Undo&lt;/button&gt;
+
+      &lt;button onClick={redo} disabled={history.future.length === 0}&gt;Redo&lt;/button&gt;
+
+      &lt;h3&gt;Current Value: {history.present}&lt;/h3&gt;
+    &lt;/div&gt;
+  );
+}
+
+export default App;</code></pre>
+
+<h2>Important Part 1: Updating Value</h2>
+
+<pre class="language-js"><code class="language-js">function updateValue(newValue) {
+  setHistory(prev => ({
+    past: [...prev.past, prev.present],
+    present: newValue,
+    future: []
+  }));
+}</code></pre>
+
+<div class="flow">
+Old Present
+<br>↓
+Move To Past
+<br><br>
+New Value
+<br>↓
+Becomes Present
+<br><br>
+Future
+<br>↓
+Cleared
+</div>
+
+<div class="warning">
+Future must be cleared when user makes a new change after undo.
+</div>
+
+<h2>Important Part 2: Undo</h2>
+
+<pre class="language-js"><code class="language-js">function undo() {
+  setHistory(prev => {
+    if (prev.past.length === 0) return prev;
+
+    const previous = prev.past[prev.past.length - 1];
+    const newPast = prev.past.slice(0, -1);
+
+    return {
+      past: newPast,
+      present: previous,
+      future: [prev.present, ...prev.future]
+    };
+  });
+}</code></pre>
+
+<div class="flow">
+Last Past State
+<br>↓
+Becomes Present
+<br><br>
+Current Present
+<br>↓
+Moves To Future
+</div>
+
+<h2>Important Part 3: Redo</h2>
+
+<pre class="language-js"><code class="language-js">function redo() {
+  setHistory(prev => {
+    if (prev.future.length === 0) return prev;
+
+    const next = prev.future[0];
+    const newFuture = prev.future.slice(1);
+
+    return {
+      past: [...prev.past, prev.present],
+      present: next,
+      future: newFuture
+    };
+  });
+}</code></pre>
+
+<div class="flow">
+First Future State
+<br>↓
+Becomes Present
+<br><br>
+Current Present
+<br>↓
+Moves To Past
+</div>
+
+<h2>Why Future Is Cleared On New Typing?</h2>
+
+<div class="flow">
+A → AB → ABC
+<br>↓
+Undo To AB
+<br>↓
+Type ABD
+<br>↓
+ABC Redo Is No Longer Valid
+</div>
+
+<div class="highlight">
+After a new change, redo history should be removed because the user has created a new branch of state.
+</div>
+
+<h2>Interview Answer</h2>
+
+<div class="highlight">
+Undo/redo can be implemented by storing state history as past, present, and future. On every new update, the current present value is pushed into past and future is cleared. On undo, the last past value becomes present and the old present moves into future. On redo, the first future value becomes present and the old present moves back into past.
+</div>
+
+<h2>Easy Way To Remember</h2>
+
+<div class="flow">
+New Change
+<br>↓
+present → past
+<br><br>
+Undo
+<br>↓
+past → present → future
+<br><br>
+Redo
+<br>↓
+future → present → past
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+
+</body>
+</html>
