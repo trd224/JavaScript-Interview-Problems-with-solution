@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>121 - What is tearing in concurrent React and how does it affect state libraries?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px}
+p,li{color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px}
+.success{background:#052e16;padding:18px;border-left:5px solid #22c55e;border-radius:10px;margin-top:15px}
+.warning{background:#1e1b4b;padding:18px;border-left:5px solid #fbbf24;border-radius:10px;margin-top:15px}
+.danger{background:#2a0f12;padding:18px;border-left:5px solid #ef4444;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;text-align:center;line-height:2;font-size:18px}
+.file-name{background:#111827;color:#93c5fd;padding:12px 16px;border-radius:10px;border:1px solid #1e293b;font-weight:bold;margin-top:20px;margin-bottom:10px}
+pre[class*="language-"],code[class*="language-"]{background:#1e1e1e}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>121. What is tearing in concurrent React and how does it affect state libraries?</h1>
+
+<h2>One-Line Answer</h2>
+
+<div class="highlight">
+Tearing happens when different parts of the UI temporarily see different versions of the same state during Concurrent React rendering.
+</div>
+
+<h2>First Understand Normal React</h2>
+
+<p>
+Before React 18:
+</p>
+
+<div class="flow">
+State Changes
+<br>↓
+Render
+<br>↓
+Commit UI
+</div>
+
+<p>
+Rendering was mostly synchronous.
+</p>
+
+<div class="success">
+All components usually saw the same state version.
+</div>
+
+<h2>What Changed In React 18?</h2>
+
+<p>
+React introduced Concurrent Rendering.
+</p>
+
+<div class="flow">
+Start Render
+<br>↓
+Pause Render
+<br>↓
+Resume Later
+<br>↓
+Commit UI
+</div>
+
+<p>
+React can now pause rendering and continue later.
+</p>
+
+<h2>The Problem</h2>
+
+<p>
+Imagine a Redux store:
+</p>
+
+<div class="flow">
+count = 5
+</div>
+
+<p>
+React starts rendering two components.
+</p>
+
+<div class="file-name">CounterA.jsx</div>
+
+<pre class="language-jsx"><code class="language-jsx">function CounterA() {
+  const count = useSelector(
+    state => state.count
+  );
+
+  return &lt;h2&gt;A: {count}&lt;/h2&gt;;
+}</code></pre>
+
+<div class="file-name">CounterB.jsx</div>
+
+<pre class="language-jsx"><code class="language-jsx">function CounterB() {
+  const count = useSelector(
+    state => state.count
+  );
+
+  return &lt;h2&gt;B: {count}&lt;/h2&gt;;
+}</code></pre>
+
+<h2>Normal Expected Result</h2>
+
+<div class="flow">
+A: 5
+<br>
+B: 5
+</div>
+
+<h2>Tearing Scenario</h2>
+
+<p>
+React starts rendering:
+</p>
+
+<div class="flow">
+Render Starts
+<br>↓
+CounterA Reads count=5
+</div>
+
+<p>
+Before React finishes:
+</p>
+
+<div class="flow">
+Redux Store Updates
+<br>↓
+count=6
+</div>
+
+<p>
+Now React continues rendering:
+</p>
+
+<div class="flow">
+CounterB Reads count=6
+</div>
+
+<p>
+UI may temporarily become:
+</p>
+
+<div class="danger">
+A: 5
+<br>
+B: 6
+</div>
+
+<p>
+Both components are showing different versions of the same state.
+</p>
+
+<div class="warning">
+This inconsistency is called Tearing.
+</div>
+
+<h2>Visual Timeline</h2>
+
+<div class="flow">
+Store = 5
+<br>↓
+CounterA Reads 5
+<br>↓
+Store Changes To 6
+<br>↓
+CounterB Reads 6
+<br>↓
+UI Shows
+<br>
+A:5
+<br>
+B:6
+</div>
+
+<h2>Why Is This Bad?</h2>
+
+<p>
+Imagine an e-commerce checkout page:
+</p>
+
+<div class="flow">
+Cart Total
+<br>
+₹500
+<br><br>
+Item Count
+<br>
+4 Items
+</div>
+
+<p>
+Store updates while rendering.
+</p>
+
+<p>
+UI could temporarily show:
+</p>
+
+<div class="danger">
+Cart Total = ₹600
+<br>
+Item Count = 4
+</div>
+
+<p>
+The numbers no longer match.
+</p>
+
+<h2>Why State Libraries Were Affected?</h2>
+
+<p>
+Libraries such as:
+</p>
+
+<ul>
+<li>Redux</li>
+<li>Zustand</li>
+<li>MobX</li>
+<li>Custom Stores</li>
+</ul>
+
+<p>
+keep state outside React.
+</p>
+
+<div class="flow">
+React State
+<br>↓
+Safe
+</div>
+
+<br>
+
+<div class="flow">
+External Store
+<br>↓
+Can Tear
+</div>
+
+<p>
+Because React does not control external state.
+</p>
+
+<h2>Old Subscription Pattern</h2>
+
+<div class="file-name">Before React 18</div>
+
+<pre class="language-js"><code class="language-js">useEffect(() => {
+
+  return store.subscribe(
+    () => setState(
+      store.getState()
+    )
+  );
+
+}, []);</code></pre>
+
+<div class="warning">
+This pattern was not fully safe for Concurrent React.
+</div>
+
+<h2>React's Solution</h2>
+
+<p>
+React introduced:
+</p>
+
+<div class="flow">
+useSyncExternalStore
+</div>
+
+<div class="highlight">
+useSyncExternalStore guarantees that all components read the same snapshot of external state during rendering.
+</div>
+
+<h2>How useSyncExternalStore Prevents Tearing</h2>
+
+<div class="flow">
+React Starts Render
+<br>↓
+Take Snapshot
+<br>↓
+All Components Read Same Snapshot
+<br>↓
+Render Completes
+</div>
+
+<p>
+Even if the store changes during render:
+</p>
+
+<div class="flow">
+React Detects Change
+<br>↓
+Restart Render
+<br>↓
+Use New Snapshot
+</div>
+
+<h2>Real Redux Example</h2>
+
+<p>
+Modern React Redux internally uses:
+</p>
+
+<div class="file-name">Internal Concept</div>
+
+<pre class="language-js"><code class="language-js">useSyncExternalStore(
+  subscribe,
+  getSnapshot
+);</code></pre>
+
+<p>
+So when you write:
+</p>
+
+<div class="file-name">Redux Code</div>
+
+<pre class="language-jsx"><code class="language-jsx">const user = useSelector(
+  state => state.user
+);</code></pre>
+
+<p>
+React Redux uses useSyncExternalStore internally.
+</p>
+
+<div class="success">
+This prevents tearing in Concurrent React.
+</div>
+
+<h2>Tearing vs No Tearing</h2>
+
+<table>
+
+<tr>
+<th>Without Protection</th>
+<th>With useSyncExternalStore</th>
+</tr>
+
+<tr>
+<td>A:5 B:6</td>
+<td>A:6 B:6</td>
+</tr>
+
+<tr>
+<td>Inconsistent UI</td>
+<td>Consistent UI</td>
+</tr>
+
+<tr>
+<td>Tearing</td>
+<td>No Tearing</td>
+</tr>
+
+</table>
+
+<h2>Relationship With Previous Question</h2>
+
+<div class="highlight">
+React introduced useSyncExternalStore specifically to solve tearing and inconsistent snapshots when external stores are used with Concurrent React.
+</div>
+
+<div class="flow">
+External Store
+<br>↓
+Concurrent Rendering
+<br>↓
+Tearing Risk
+<br>↓
+useSyncExternalStore
+<br>↓
+Consistent Snapshot
+</div>
+
+<h2>Interview Answer</h2>
+
+<div class="highlight">
+Tearing is a rendering inconsistency where different components temporarily read different versions of the same state during Concurrent React rendering. It mainly affects external state libraries such as Redux, Zustand, MobX, and custom stores because their state exists outside React. React introduced useSyncExternalStore to ensure that all components read the same state snapshot during rendering, preventing tearing and keeping the UI consistent.
+</div>
+
+<h2>Easy Way To Remember</h2>
+
+<div class="flow">
+Store = 5
+<br>↓
+Component A Reads 5
+<br>↓
+Store Changes To 6
+<br>↓
+Component B Reads 6
+<br><br>
+A:5
+<br>
+B:6
+<br><br>
+= Tearing
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+
+</body>
+</html>

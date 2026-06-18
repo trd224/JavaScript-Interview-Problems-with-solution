@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>208 - What is Progressive Hydration?</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px}
+p,li{color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px}
+.success{background:#052e16;padding:18px;border-left:5px solid #22c55e;border-radius:10px;margin-top:15px}
+.warning{background:#1e1b4b;padding:18px;border-left:5px solid #fbbf24;border-radius:10px;margin-top:15px}
+.danger{background:#2a0f12;padding:18px;border-left:5px solid #ef4444;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;text-align:center;line-height:2;font-size:18px}
+.file-name{background:#111827;color:#93c5fd;padding:12px 16px;border-radius:10px;border:1px solid #1e293b;font-weight:bold;margin-top:20px;margin-bottom:10px}
+pre[class*="language-"],code[class*="language-"]{background:#1e1e1e}
+.token.keyword{color:#c792ea}.token.string{color:#c3e88d}.token.function{color:#82aaff}.token.class-name{color:#ffcb6b}.token.number{color:#f78c6c}.token.operator{color:#89ddff}.token.punctuation{color:#89ddff}
+</style>
+</head>
+<body>
+<div class="container">
+
+<h1>208. What is Progressive Hydration?</h1>
+
+<h2>One-Line Answer</h2>
+<div class="highlight">
+<b>Progressive Hydration</b> means hydrating a server-rendered page gradually in smaller parts instead of hydrating the whole page at once.
+</div>
+
+<h2>First Understand Hydration</h2>
+<p>
+In SSR, the server sends HTML to the browser. The user can see the page quickly, but React events are not active until hydration happens.
+</p>
+
+<div class="flow">
+Server Sends HTML
+<br>↓
+Browser Shows Page
+<br>↓
+JavaScript Downloads
+<br>↓
+React Hydrates HTML
+<br>↓
+Page Becomes Interactive
+</div>
+
+<div class="highlight">
+Hydration means React attaches JavaScript behavior like onClick, onChange, state updates, and effects to already-rendered HTML.
+</div>
+
+<h2>Problem With Hydrating Everything At Once</h2>
+<p>
+Imagine a large ecommerce page:
+</p>
+
+<div class="flow">
+Navbar
+<br>Search
+<br>Filters
+<br>ProductList
+<br>Reviews
+<br>Comments
+<br>Footer
+</div>
+
+<p>
+If React tries to hydrate everything together, the browser may become busy.
+</p>
+
+<div class="danger">
+Big hydration work can delay interactivity. The page is visible, but buttons, inputs, and filters may not work immediately.
+</div>
+
+<h2>Progressive Hydration Idea</h2>
+<div class="flow">
+Hydrate Navbar
+<br>↓
+Hydrate Search
+<br>↓
+Hydrate Filters
+<br>↓
+Hydrate ProductList
+<br>↓
+Hydrate Comments
+<br>↓
+Hydrate Footer
+</div>
+
+<div class="success">
+Instead of one big hydration job, the page becomes interactive step by step.
+</div>
+
+<h2>Simple Analogy</h2>
+<p>
+Without progressive hydration:
+</p>
+
+<div class="flow">
+Build Whole House
+<br>↓
+Then Allow Anyone Inside
+</div>
+
+<p>
+With progressive hydration:
+</p>
+
+<div class="flow">
+Finish Main Door
+<br>↓
+People Can Enter
+<br>↓
+Finish Living Room
+<br>↓
+Finish Kitchen
+<br>↓
+Finish Other Rooms
+</div>
+
+<h2>Real Example</h2>
+<div class="file-name">Page.jsx</div>
+<pre class="language-jsx"><code class="language-jsx">function Page(){
+  return (
+    &lt;&gt;
+      &lt;Navbar /&gt;
+      &lt;SearchBox /&gt;
+      &lt;ProductList /&gt;
+      &lt;Comments /&gt;
+    &lt;/&gt;
+  );
+}</code></pre>
+
+<p>
+On a big page, some parts are more important than others.
+</p>
+
+<table>
+<tr><th>Component</th><th>Need</th><th>Priority</th></tr>
+<tr><td>Navbar</td><td>User may click immediately</td><td>High</td></tr>
+<tr><td>SearchBox</td><td>User may type immediately</td><td>High</td></tr>
+<tr><td>ProductList</td><td>Important content</td><td>Medium/High</td></tr>
+<tr><td>Comments</td><td>Usually used later</td><td>Low</td></tr>
+<tr><td>Footer</td><td>Rarely urgent</td><td>Low</td></tr>
+</table>
+
+<h2>Progressive Hydration Flow</h2>
+<div class="flow">
+HTML Visible
+<br>↓
+JS Downloads
+<br>↓
+Navbar Hydrates
+<br>↓
+SearchBox Hydrates
+<br>↓
+ProductList Hydrates
+<br>↓
+Comments Hydrate Later
+</div>
+
+<h2>Relationship With Selective Hydration</h2>
+<p>
+Progressive hydration and selective hydration are related, but not exactly the same.
+</p>
+
+<table>
+<tr><th>Feature</th><th>Meaning</th></tr>
+<tr><td>Progressive Hydration</td><td>Hydrate page gradually in stages</td></tr>
+<tr><td>Selective Hydration</td><td>Hydrate important or user-interacted parts first</td></tr>
+</table>
+
+<div class="highlight">
+Progressive Hydration = step-by-step hydration.
+<br><br>
+Selective Hydration = priority-based hydration.
+</div>
+
+<h2>Example Difference</h2>
+
+<h3>Progressive Hydration</h3>
+<div class="flow">
+Navbar Hydrates
+<br>↓
+Search Hydrates
+<br>↓
+Products Hydrate
+<br>↓
+Comments Hydrate
+</div>
+
+<h3>Selective Hydration</h3>
+<div class="flow">
+Hydration Already Running
+<br>↓
+User Clicks Search
+<br>↓
+React Prioritizes Search
+<br>↓
+Search Hydrates First
+<br>↓
+Comments Later
+</div>
+
+<div class="warning">
+Progressive hydration is about gradual hydration. Selective hydration is about choosing what should hydrate first.
+</div>
+
+<h2>Important Correction From Previous Topic</h2>
+<div class="success">
+Hydration starts automatically after JavaScript downloads. User interaction does not start hydration. User interaction can change priority in selective hydration.
+</div>
+
+<h2>Progressive Hydration And Suspense</h2>
+<p>
+Suspense boundaries help React split the page into smaller parts.
+</p>
+
+<div class="file-name">Suspense Example</div>
+<pre class="language-jsx"><code class="language-jsx">function Page(){
+  return (
+    &lt;&gt;
+      &lt;Navbar /&gt;
+
+      &lt;Suspense fallback={&lt;p&gt;Loading products...&lt;/p&gt;}&gt;
+        &lt;ProductList /&gt;
+      &lt;/Suspense&gt;
+
+      &lt;Suspense fallback={&lt;p&gt;Loading comments...&lt;/p&gt;}&gt;
+        &lt;Comments /&gt;
+      &lt;/Suspense&gt;
+    &lt;/&gt;
+  );
+}</code></pre>
+
+<div class="flow">
+Suspense Boundary
+<br>↓
+Separate Page Section
+<br>↓
+Can Load/Hydrate Independently
+</div>
+
+<h2>Progressive Hydration And Streaming SSR</h2>
+<p>
+Progressive hydration is commonly discussed with Streaming SSR.
+</p>
+
+<div class="flow">
+Server Streams HTML In Pieces
+<br>↓
+Browser Shows Pieces Early
+<br>↓
+JS Loads
+<br>↓
+React Hydrates Available Parts
+<br>↓
+More Parts Stream In
+<br>↓
+More Parts Hydrate Later
+</div>
+
+<div class="highlight">
+Streaming SSR sends HTML progressively. Progressive hydration makes those parts interactive progressively.
+</div>
+
+<h2>Without Progressive Hydration</h2>
+<div class="flow">
+Full Page HTML
+<br>↓
+Full JS
+<br>↓
+Hydrate Everything
+<br>↓
+Then Page Fully Interactive
+</div>
+
+<h2>With Progressive Hydration</h2>
+<div class="flow">
+Important HTML Visible
+<br>↓
+Important JS Ready
+<br>↓
+Important Area Hydrates
+<br>↓
+User Can Interact
+<br>↓
+Less Important Areas Hydrate Later
+</div>
+
+<h2>Why It Improves User Experience</h2>
+<ul>
+<li>Important areas become interactive earlier</li>
+<li>Browser does not need to process one huge hydration task</li>
+<li>Large SSR pages feel faster</li>
+<li>Less important sections can wait</li>
+<li>Works well with Suspense and streaming</li>
+</ul>
+
+<h2>Progressive Hydration vs Lazy Loading</h2>
+<table>
+<tr><th>Concept</th><th>Meaning</th></tr>
+<tr><td>Lazy Loading</td><td>Load code or data later</td></tr>
+<tr><td>Hydration</td><td>Attach React behavior to SSR HTML</td></tr>
+<tr><td>Progressive Hydration</td><td>Attach behavior gradually section by section</td></tr>
+</table>
+
+<div class="warning">
+Lazy loading is about when code/data loads. Progressive hydration is about when server-rendered HTML becomes interactive.
+</div>
+
+<h2>Where Is It Useful?</h2>
+<ul>
+<li>Large ecommerce pages</li>
+<li>News websites</li>
+<li>Dashboards</li>
+<li>Pages with comments/reviews below the fold</li>
+<li>SSR apps using Suspense and streaming</li>
+</ul>
+
+<h2>Interview Answer</h2>
+<div class="highlight">
+Progressive Hydration is an SSR performance technique where React hydrates a server-rendered page gradually in smaller parts instead of hydrating the whole page at once. The browser can show HTML first, then React attaches interactivity section by section. This improves perceived performance because important parts like navbar, search, or buttons can become interactive earlier, while less important sections like comments or footer hydrate later.
+</div>
+
+<h2>Easy Way To Remember</h2>
+<div class="flow">
+SSR HTML Visible
+<br>↓
+JS Downloads
+<br>↓
+Hydration Happens Step By Step
+<br>↓
+Important Parts Become Interactive Earlier
+<br>↓
+Less Important Parts Later
+<br>↓
+Progressive Hydration
+</div>
+
+<h2>Final Difference</h2>
+<div class="success">
+Progressive Hydration = hydrate gradually.
+<br><br>
+Selective Hydration = hydrate based on priority or user interaction.
+</div>
+
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+</body>
+</html>

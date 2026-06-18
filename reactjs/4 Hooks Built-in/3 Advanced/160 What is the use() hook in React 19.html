@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>160 - What is the use() Hook in React 19?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px}
+p,li{color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px}
+.success{background:#052e16;padding:18px;border-left:5px solid #22c55e;border-radius:10px;margin-top:15px}
+.warning{background:#1e1b4b;padding:18px;border-left:5px solid #fbbf24;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;text-align:center;line-height:2;font-size:18px}
+.file-name{background:#111827;color:#93c5fd;padding:12px 16px;border-radius:10px;border:1px solid #1e293b;font-weight:bold;margin-top:20px;margin-bottom:10px}
+pre[class*="language-"],code[class*="language-"]{background:#1e1e1e}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>160. What is the use() Hook in React 19?</h1>
+
+<h2>One-Line Answer</h2>
+
+<div class="highlight">
+The <b>use()</b> hook allows React to directly read a Promise or Context during rendering. If the Promise is still pending, React automatically pauses (suspends) rendering and waits for the Promise to finish.
+</div>
+
+<h2>Why Was use() Introduced?</h2>
+
+<p>
+Before React 19, loading async data usually required:
+</p>
+
+<ul>
+<li>useState</li>
+<li>useEffect</li>
+<li>Loading State</li>
+<li>Error State</li>
+</ul>
+
+<div class="file-name">Before React 19</div>
+
+<pre class="language-jsx"><code class="language-jsx">function User() {
+
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    fetch('/api/user')
+      .then(res => res.json())
+      .then(data => setUser(data));
+  }, []);
+
+  if (!user) return &lt;h2&gt;Loading...&lt;/h2&gt;;
+
+  return &lt;h2&gt;{user.name}&lt;/h2&gt;;
+
+}</code></pre>
+
+<div class="flow">
+Render
+<br>↓
+useEffect Runs
+<br>↓
+Fetch Starts
+<br>↓
+Loading State
+<br>↓
+Data Arrives
+<br>↓
+setUser()
+<br>↓
+Re-render
+</div>
+
+<div class="warning">
+Lots of boilerplate.
+</div>
+
+<h2>React 19 Solution</h2>
+
+<div class="file-name">Using use()</div>
+
+<pre class="language-jsx"><code class="language-jsx">import { use } from 'react';
+
+function User({ userPromise }) {
+
+  const user = use(userPromise);
+
+  return &lt;h2&gt;{user.name}&lt;/h2&gt;;
+
+}</code></pre>
+
+<h2>How use() Works Internally</h2>
+
+<p>
+When React sees:
+</p>
+
+<pre class="language-js"><code class="language-js">use(userPromise)</code></pre>
+
+<p>
+React asks:
+</p>
+
+<div class="flow">
+Promise Resolved?
+<br>↓
+No
+<br>↓
+Suspend Rendering
+<br>↓
+Show Suspense Fallback
+<br>↓
+Promise Resolves
+<br>↓
+Continue Rendering
+</div>
+
+<div class="success">
+React handles the waiting automatically.
+</div>
+
+<h2>Relationship With Suspense</h2>
+
+<p>
+Just like React.lazy(), use() works together with Suspense.
+</p>
+
+<div class="file-name">Complete Example</div>
+
+<pre class="language-jsx"><code class="language-jsx">import { Suspense, use } from 'react';
+
+const userPromise = fetch('/api/user')
+                    .then(res => res.json());
+
+function User({ userPromise }) {
+
+  const user = use(userPromise);
+
+  return &lt;h2&gt;{user.name}&lt;/h2&gt;;
+
+}
+
+export default function App() {
+
+  return (
+    &lt;Suspense fallback={
+      &lt;h2&gt;Loading...&lt;/h2&gt;
+    }&gt;
+      &lt;User userPromise={userPromise} /&gt;
+    &lt;/Suspense&gt;
+  );
+
+}</code></pre>
+
+<h2>Execution Flow</h2>
+
+<div class="flow">
+App Renders
+<br>↓
+User Component Renders
+<br>↓
+use(userPromise)
+<br>↓
+Promise Pending
+<br>↓
+Suspend Component
+<br>↓
+Suspense Shows Loading...
+<br>↓
+Promise Resolves
+<br>↓
+Continue Rendering
+<br>↓
+Show User Data
+</div>
+
+<h2>Connection To Previous Suspense Topic</h2>
+
+<p>
+You already learned:
+</p>
+
+<div class="flow">
+React.lazy()
+<br>↓
+Suspense
+<br>↓
+Loading Fallback
+</div>
+
+<p>
+Now React 19 adds:
+</p>
+
+<div class="flow">
+use()
+<br>↓
+Suspense
+<br>↓
+Loading Fallback
+</div>
+
+<p>
+Same Suspense mechanism.
+</p>
+
+<h2>Promise Example Step By Step</h2>
+
+<div class="file-name">Promise Creation</div>
+
+<pre class="language-js"><code class="language-js">const userPromise =
+  fetch('/api/user')
+    .then(res => res.json());</code></pre>
+
+<p>
+At first:
+</p>
+
+<div class="flow">
+Promise
+<br>↓
+Pending
+</div>
+
+<p>
+Then:
+</p>
+
+<pre class="language-js"><code class="language-js">const user = use(userPromise);</code></pre>
+
+<p>
+React sees:
+</p>
+
+<div class="flow">
+Promise Pending
+<br>↓
+Cannot Continue
+<br>↓
+Suspend Component
+</div>
+
+<p>
+Later:
+</p>
+
+<div class="flow">
+Promise Resolves
+<br>↓
+React Resumes Rendering
+<br>↓
+user Contains Data
+</div>
+
+<h2>Context Support</h2>
+
+<p>
+use() can also read Context.
+</p>
+
+<div class="file-name">ThemeContext.jsx</div>
+
+<pre class="language-jsx"><code class="language-jsx">import { createContext } from 'react';
+
+export const ThemeContext = createContext('light');</code></pre>
+
+<div class="file-name">Child.jsx</div>
+
+<pre class="language-jsx"><code class="language-jsx">import { use } from 'react';
+import { ThemeContext } from './ThemeContext';
+
+function Child() {
+
+  const theme = use(ThemeContext);
+
+  return &lt;h2&gt;{theme}&lt;/h2&gt;;
+
+}</code></pre>
+
+<p>
+Equivalent to:
+</p>
+
+<pre class="language-jsx"><code class="language-jsx">const theme = useContext(ThemeContext);</code></pre>
+
+<h2>Biggest Difference From useEffect</h2>
+
+<table>
+
+<tr>
+<th>useEffect</th>
+<th>use()</th>
+</tr>
+
+<tr>
+<td>Fetch After Render</td>
+<td>Read During Render</td>
+</tr>
+
+<tr>
+<td>Need Loading State</td>
+<td>Suspense Handles Loading</td>
+</tr>
+
+<tr>
+<td>Need useState</td>
+<td>No useState Needed</td>
+</tr>
+
+<tr>
+<td>More Boilerplate</td>
+<td>Less Boilerplate</td>
+</tr>
+
+</table>
+
+<h2>Why React Wanted This?</h2>
+
+<div class="flow">
+Component Needs Data
+<br>↓
+Read Data Directly
+<br>↓
+React Handles Waiting
+<br>↓
+Suspense Shows Loading
+<br>↓
+Continue Rendering
+</div>
+
+<div class="success">
+Cleaner async code.
+</div>
+
+<h2>Server Components + use()</h2>
+
+<p>
+This is where use() becomes extremely powerful.
+</p>
+
+<div class="file-name">Server Component Style</div>
+
+<pre class="language-jsx"><code class="language-jsx">import { use } from 'react';
+
+function User({ userPromise }) {
+
+  const user = use(userPromise);
+
+  return &lt;h2&gt;{user.name}&lt;/h2&gt;;
+
+}</code></pre>
+
+<div class="highlight">
+React Server Components frequently use use() to read async data directly during rendering.
+</div>
+
+<h2>When Should You Use It?</h2>
+
+<table>
+
+<tr>
+<th>Good Use Cases</th>
+<th>Bad Use Cases</th>
+</tr>
+
+<tr>
+<td>Suspense Data Loading</td>
+<td>Counter State</td>
+</tr>
+
+<tr>
+<td>Server Components</td>
+<td>Form Inputs</td>
+</tr>
+
+<tr>
+<td>Async Resources</td>
+<td>useState Replacement</td>
+</tr>
+
+<tr>
+<td>Context Reading</td>
+<td>Local UI State</td>
+</tr>
+
+</table>
+
+<h2>Easy Way To Remember</h2>
+
+<div class="flow">
+Need Promise Data?
+<br>↓
+use()
+<br>↓
+Promise Pending?
+<br>↓
+Suspend
+<br>↓
+Suspense Fallback
+<br>↓
+Promise Resolves
+<br>↓
+Continue Rendering
+</div>
+
+<h2>Interview Answer</h2>
+
+<div class="highlight">
+The use() hook introduced in React 19 allows components to directly read Promises and Context values during rendering. When used with a Promise, React automatically suspends rendering if the Promise is pending and resumes once it resolves. It works together with Suspense, which shows fallback UI while waiting. This reduces the need for useEffect, loading state, and manual async handling, making asynchronous data fetching much simpler, especially in Server Components and Suspense-based applications.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+
+</body>
+</html>

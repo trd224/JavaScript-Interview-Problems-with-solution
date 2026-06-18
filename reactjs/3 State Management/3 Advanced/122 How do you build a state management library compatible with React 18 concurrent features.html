@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>122 - React 18 Concurrent Compatible State Library</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px}
+p,li{color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px}
+.success{background:#052e16;padding:18px;border-left:5px solid #22c55e;border-radius:10px;margin-top:15px}
+.warning{background:#1e1b4b;padding:18px;border-left:5px solid #fbbf24;border-radius:10px;margin-top:15px}
+.danger{background:#2a0f12;padding:18px;border-left:5px solid #ef4444;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;text-align:center;line-height:2;font-size:18px}
+.file-name{background:#111827;color:#93c5fd;padding:12px 16px;border-radius:10px;border:1px solid #1e293b;font-weight:bold;margin-top:20px;margin-bottom:10px}
+pre[class*="language-"],code[class*="language-"]{background:#1e1e1e}
+.token.keyword{color:#c792ea}
+.token.string{color:#c3e88d}
+.token.function{color:#82aaff}
+.token.class-name{color:#ffcb6b}
+.token.number{color:#f78c6c}
+.token.operator{color:#89ddff}
+.token.punctuation{color:#89ddff}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>122. How do you build a state management library compatible with React 18 concurrent features?</h1>
+
+<h2>One-Line Answer</h2>
+
+<div class="highlight">
+To build a React 18 concurrent-compatible state library, keep state outside React, expose <b>getSnapshot()</b> and <b>subscribe()</b>, and connect components using <b>useSyncExternalStore()</b>.
+</div>
+
+<h2>Why React 18 Needs Special Care?</h2>
+
+<p>
+React 18 can pause and resume rendering.
+</p>
+
+<div class="flow">
+Render Starts
+<br>↓
+React Can Pause
+<br>↓
+External Store Can Change
+<br>↓
+React Can Resume
+</div>
+
+<div class="warning">
+If components read external state directly, different components may see different state versions. This is called tearing.
+</div>
+
+<h2>Main Rule</h2>
+
+<div class="highlight">
+Do not connect external stores to React using only useEffect + setState. Use useSyncExternalStore.
+</div>
+
+<h2>What A Concurrent-Safe Store Needs</h2>
+
+<table>
+<tr>
+<th>Function</th>
+<th>Purpose</th>
+</tr>
+
+<tr>
+<td>getSnapshot()</td>
+<td>Returns current state</td>
+</tr>
+
+<tr>
+<td>subscribe(listener)</td>
+<td>Registers listener for updates</td>
+</tr>
+
+<tr>
+<td>setState()</td>
+<td>Updates store and notifies listeners</td>
+</tr>
+
+<tr>
+<td>useStore()</td>
+<td>React hook that uses useSyncExternalStore</td>
+</tr>
+</table>
+
+<h2>Step 1: Create External Store</h2>
+
+<div class="file-name">createStore.js</div>
+
+<pre class="language-js"><code class="language-js">export function createStore(initialState) {
+  let state = initialState;
+  const listeners = new Set();
+
+  function getSnapshot() {
+    return state;
+  }
+
+  function subscribe(listener) {
+    listeners.add(listener);
+    return () =&gt; listeners.delete(listener);
+  }
+
+  function setState(updater) {
+    state = typeof updater === 'function' ? updater(state) : updater;
+    listeners.forEach(listener =&gt; listener());
+  }
+
+  return {
+    getSnapshot,
+    subscribe,
+    setState
+  };
+}</code></pre>
+
+<h2>How This Store Works</h2>
+
+<div class="flow">
+state Lives Outside React
+<br>↓
+getSnapshot Reads State
+<br>↓
+setState Updates State
+<br>↓
+subscribe Notifies React
+</div>
+
+<h2>Step 2: Create Store Instance</h2>
+
+<div class="file-name">counterStore.js</div>
+
+<pre class="language-js"><code class="language-js">import { createStore } from './createStore';
+
+export const counterStore = createStore({
+  count: 0
+});</code></pre>
+
+<div class="highlight">
+This is an external store because state lives outside React.
+</div>
+
+<h2>Step 3: Build React Hook Using useSyncExternalStore</h2>
+
+<div class="file-name">useStore.js</div>
+
+<pre class="language-js"><code class="language-js">import { useSyncExternalStore } from 'react';
+
+export function useStore(store) {
+  return useSyncExternalStore(
+    store.subscribe,
+    store.getSnapshot
+  );
+}</code></pre>
+
+<div class="flow">
+useStore()
+<br>↓
+useSyncExternalStore()
+<br>↓
+subscribe + getSnapshot
+<br>↓
+Concurrent Safe Updates
+</div>
+
+<h2>Step 4: Use Store In Component</h2>
+
+<div class="file-name">Counter.jsx</div>
+
+<pre class="language-jsx"><code class="language-jsx">import { useStore } from './useStore';
+import { counterStore } from './counterStore';
+
+function Counter() {
+  const state = useStore(counterStore);
+
+  return (
+    &lt;&gt;
+      &lt;h2&gt;Count: {state.count}&lt;/h2&gt;
+
+      &lt;button onClick={() =&gt; counterStore.setState(prev =&gt; ({ ...prev, count: prev.count + 1 }))}&gt;
+        Increment
+      &lt;/button&gt;
+    &lt;/&gt;
+  );
+}</code></pre>
+
+<h2>Complete Flow</h2>
+
+<div class="flow">
+User Clicks Button
+<br>↓
+counterStore.setState()
+<br>↓
+Store State Changes
+<br>↓
+Listeners Notify React
+<br>↓
+useSyncExternalStore Gets Snapshot
+<br>↓
+Component Re-renders Safely
+</div>
+
+<h2>Problem With Basic useStore</h2>
+
+<p>
+This works, but every component using the store re-renders whenever any part of the store changes.
+</p>
+
+<div class="warning">
+We need selector support like Redux useSelector().
+</div>
+
+<h2>Step 5: Add Selector Support</h2>
+
+<div class="file-name">useStoreSelector.js</div>
+
+<pre class="language-js"><code class="language-js">import { useSyncExternalStore } from 'react';
+
+export function useStoreSelector(store, selector) {
+  return useSyncExternalStore(
+    store.subscribe,
+    () =&gt; selector(store.getSnapshot())
+  );
+}</code></pre>
+
+<h2>Use Selector In Component</h2>
+
+<div class="file-name">CounterValue.jsx</div>
+
+<pre class="language-jsx"><code class="language-jsx">function CounterValue() {
+  const count = useStoreSelector(
+    counterStore,
+    state =&gt; state.count
+  );
+
+  return &lt;h2&gt;Count: {count}&lt;/h2&gt;;
+}</code></pre>
+
+<div class="success">
+Now component reads only the selected part of the store.
+</div>
+
+<h2>Real World Example: Auth Store</h2>
+
+<div class="file-name">authStore.js</div>
+
+<pre class="language-js"><code class="language-js">export const authStore = createStore({
+  user: null,
+  loading: false,
+  error: null
+});</code></pre>
+
+<div class="file-name">authActions.js</div>
+
+<pre class="language-js"><code class="language-js">export async function login(email, password) {
+  authStore.setState(prev =&gt; ({ ...prev, loading: true, error: null }));
+
+  try {
+    const user = await api.login(email, password);
+    authStore.setState(prev =&gt; ({ ...prev, user, loading: false }));
+  } catch {
+    authStore.setState(prev =&gt; ({ ...prev, loading: false, error: 'Login failed' }));
+  }
+}</code></pre>
+
+<div class="file-name">LoginStatus.jsx</div>
+
+<pre class="language-jsx"><code class="language-jsx">function LoginStatus() {
+  const user = useStoreSelector(authStore, state =&gt; state.user);
+  const loading = useStoreSelector(authStore, state =&gt; state.loading);
+  const error = useStoreSelector(authStore, state =&gt; state.error);
+
+  if (loading) return &lt;h2&gt;Loading...&lt;/h2&gt;;
+  if (error) return &lt;h2&gt;{error}&lt;/h2&gt;;
+
+  return &lt;h2&gt;{user ? user.name : 'Guest'}&lt;/h2&gt;;
+}</code></pre>
+
+<h2>Why This Is React 18 Compatible?</h2>
+
+<div class="highlight">
+Because React reads the external store through useSyncExternalStore, React can keep snapshots consistent during concurrent rendering.
+</div>
+
+<div class="flow">
+External Store
+<br>↓
+getSnapshot()
+<br>↓
+React Reads Same Snapshot
+<br>↓
+No Tearing
+</div>
+
+<h2>What Not To Do</h2>
+
+<div class="danger">
+Do not build a React 18 state library using only useEffect + subscribe + setState.
+</div>
+
+<div class="file-name">Old Unsafe Pattern</div>
+
+<pre class="language-jsx"><code class="language-jsx">useEffect(() =&gt; {
+  return store.subscribe(() =&gt; {
+    setState(store.getSnapshot());
+  });
+}, []);</code></pre>
+
+<div class="warning">
+This can be unsafe with Concurrent Rendering because React may pause and resume renders.
+</div>
+
+<h2>Better Pattern</h2>
+
+<div class="file-name">Concurrent Safe Pattern</div>
+
+<pre class="language-js"><code class="language-js">const state = useSyncExternalStore(
+  store.subscribe,
+  store.getSnapshot
+);</code></pre>
+
+<h2>Library Design Checklist</h2>
+
+<table>
+<tr>
+<th>Requirement</th>
+<th>Why Important</th>
+</tr>
+
+<tr>
+<td>External store has subscribe()</td>
+<td>React needs update notification</td>
+</tr>
+
+<tr>
+<td>External store has getSnapshot()</td>
+<td>React needs current value</td>
+</tr>
+
+<tr>
+<td>Use useSyncExternalStore()</td>
+<td>Prevents tearing</td>
+</tr>
+
+<tr>
+<td>Support selectors</td>
+<td>Avoid unnecessary re-renders</td>
+</tr>
+
+<tr>
+<td>Return unsubscribe function</td>
+<td>Prevent memory leaks</td>
+</tr>
+
+<tr>
+<td>Avoid mutation surprises</td>
+<td>Keep snapshots predictable</td>
+</tr>
+</table>
+
+<h2>Redux Comparison</h2>
+
+<p>
+Redux store already has:
+</p>
+
+<ul>
+<li>store.getState()</li>
+<li>store.subscribe()</li>
+<li>store.dispatch()</li>
+</ul>
+
+<p>
+React Redux connects Redux to React using useSyncExternalStore internally.
+</p>
+
+<div class="flow">
+Redux Store
+<br>↓
+React Redux
+<br>↓
+useSyncExternalStore
+<br>↓
+useSelector
+<br>↓
+Your Component
+</div>
+
+<h2>Interview Answer</h2>
+
+<div class="highlight">
+To build a state management library compatible with React 18 concurrent features, the store should expose a subscribe method for listening to changes and a getSnapshot method for reading the current state. React components should subscribe to the store using useSyncExternalStore instead of manually using useEffect and setState. This ensures React reads consistent snapshots during concurrent rendering and prevents tearing. A good library also supports selectors to avoid unnecessary re-renders and returns unsubscribe functions to clean up subscriptions.
+</div>
+
+<h2>Easy Way To Remember</h2>
+
+<div class="flow">
+External Store
+<br>↓
+subscribe()
+<br>+
+getSnapshot()
+<br>↓
+useSyncExternalStore()
+<br>↓
+Concurrent-Safe React State Library
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+
+</body>
+</html>

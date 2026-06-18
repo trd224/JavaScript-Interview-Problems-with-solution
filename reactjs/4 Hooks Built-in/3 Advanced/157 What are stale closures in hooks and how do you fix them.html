@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>157 - Stale Closures in Hooks</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px}
+p,li{color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px}
+.success{background:#052e16;padding:18px;border-left:5px solid #22c55e;border-radius:10px;margin-top:15px}
+.warning{background:#1e1b4b;padding:18px;border-left:5px solid #fbbf24;border-radius:10px;margin-top:15px}
+.danger{background:#2a0f12;padding:18px;border-left:5px solid #ef4444;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;text-align:center;line-height:2;font-size:18px}
+.file-name{background:#111827;color:#93c5fd;padding:12px 16px;border-radius:10px;border:1px solid #1e293b;font-weight:bold;margin-top:20px;margin-bottom:10px}
+pre[class*="language-"],code[class*="language-"]{background:#1e1e1e}
+.token.keyword{color:#c792ea}
+.token.string{color:#c3e88d}
+.token.function{color:#82aaff}
+.token.class-name{color:#ffcb6b}
+.token.number{color:#f78c6c}
+.token.operator{color:#89ddff}
+.token.punctuation{color:#89ddff}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>157. What are Stale Closures in Hooks and How Do You Fix Them?</h1>
+
+<h2>One-Line Answer</h2>
+
+<div class="highlight">
+A <b>stale closure</b> happens when a function remembers old state or props from an earlier React render and keeps using that old value even after newer values exist.
+</div>
+
+<h2>First Understand JavaScript Closure</h2>
+
+<div class="file-name">Closure Example</div>
+
+<pre class="language-js"><code class="language-js">function createCounter() {
+  let count = 0;
+
+  return function() {
+    console.log(count);
+  };
+}
+
+const counter = createCounter();
+
+counter();
+counter();
+counter();</code></pre>
+
+<p>
+Output:
+</p>
+
+<div class="flow">
+0
+<br>0
+<br>0
+</div>
+
+<p>
+Here count never changes, so printing 0 again and again is normal.
+</p>
+
+<h2>Better Closure Flow</h2>
+
+<div class="flow">
+Returned Function
+<br>↓
+Uses count
+<br>↓
+JavaScript Sees Function Needs count
+<br>↓
+If count Is Destroyed, Function Will Crash
+<br>↓
+count Cannot Be Destroyed
+<br>↓
+count Stored With Function
+<br>↓
+Closure Created
+</div>
+
+<div class="warning">
+"count stored with function" does not mean count is copied inside the function code.
+</div>
+
+<div class="highlight">
+It means the returned function is linked with a hidden closure environment that keeps count alive.
+</div>
+
+<div class="flow">
+counter
+<br>│
+<br>├── Function Code
+<br>│
+<br>└── Hidden Closure Environment
+<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;count = 0
+</div>
+
+<h2>Backpack Explanation</h2>
+
+<p>
+Think of the returned function as a person carrying a backpack.
+</p>
+
+<div class="flow">
+Function
+<br>↓
+Backpack
+<br>↓
+count = 0
+</div>
+
+<p>
+Even after createCounter() finishes, the backpack remains.
+</p>
+
+<div class="success">
+That backpack is the closure.
+</div>
+
+<h2>Why JavaScript Keeps count Alive?</h2>
+
+<p>
+If JavaScript destroyed count after createCounter() finished:
+</p>
+
+<div class="flow">
+createCounter()
+<br>↓
+count = 0
+<br>↓
+Return Function
+<br>↓
+Destroy count
+</div>
+
+<p>
+Then this would fail:
+</p>
+
+<pre class="language-js"><code class="language-js">counter();</code></pre>
+
+<div class="danger">
+ReferenceError: count is not defined
+</div>
+
+<p>
+So JavaScript keeps count alive because the returned function still needs it.
+</p>
+
+<h2>Closure With Updating count</h2>
+
+<div class="file-name">Updated Closure Example</div>
+
+<pre class="language-js"><code class="language-js">function createCounter() {
+  let count = 0;
+
+  return function() {
+    count++;
+    console.log(count);
+  };
+}
+
+const counter = createCounter();
+
+counter();
+counter();
+counter();</code></pre>
+
+<p>
+Output:
+</p>
+
+<div class="flow">
+1
+<br>2
+<br>3
+</div>
+
+<div class="success">
+This proves count was not destroyed. The closure kept the same count variable alive.
+</div>
+
+<h2>Multiple Closures</h2>
+
+<pre class="language-js"><code class="language-js">const counter1 = createCounter();
+const counter2 = createCounter();
+
+counter1();
+counter1();
+counter2();</code></pre>
+
+<p>
+Output:
+</p>
+
+<div class="flow">
+1
+<br>2
+<br>1
+</div>
+
+<p>
+Because each call to createCounter() creates a separate closure.
+</p>
+
+<div class="flow">
+counter1
+<br>↓
+Closure A
+<br>count = 2
+<br><br>
+counter2
+<br>↓
+Closure B
+<br>count = 1
+</div>
+
+<h2>Now Connect This To React</h2>
+
+<div class="file-name">Counter.jsx</div>
+
+<pre class="language-jsx"><code class="language-jsx">function Counter() {
+  const [count, setCount] = useState(0);
+}</code></pre>
+
+<div class="danger">
+React does NOT update the same count variable.
+</div>
+
+<p>
+Every render creates a new count variable.
+</p>
+
+<div class="flow">
+Render #1
+<br>count = 0
+<br><br>
+Render #2
+<br>count = 1
+<br><br>
+Render #3
+<br>count = 2
+</div>
+
+<h2>The Stale Closure Problem</h2>
+
+<div class="warning">
+Important correction: if there is no code that updates count, then expecting 0, 0, 0 is correct. To understand stale closure, we need one callback that logs count and another action that updates count.
+</div>
+
+<div class="file-name">Broken Example</div>
+
+<pre class="language-jsx"><code class="language-jsx">function Counter() {
+  const [count, setCount] = useState(0);
+
+  useEffect(() =&gt; {
+    const id = setInterval(() =&gt; {
+      console.log(count);
+    }, 1000);
+
+    return () =&gt; clearInterval(id);
+  }, []);
+
+  return (
+    &lt;&gt;
+      &lt;h2&gt;UI Count: {count}&lt;/h2&gt;
+      &lt;button onClick={() =&gt; setCount(count + 1)}&gt;
+        Increment
+      &lt;/button&gt;
+    &lt;/&gt;
+  );
+}</code></pre>
+
+<h2>What Happens?</h2>
+
+<p>
+When you click the button, UI count changes:
+</p>
+
+<div class="flow">
+UI Count
+<br>0 → 1 → 2 → 3
+</div>
+
+<p>
+But console still prints:
+</p>
+
+<div class="flow">
+0
+<br>0
+<br>0
+<br>0
+</div>
+
+<div class="danger">
+The interval captured count = 0 from the first render.
+</div>
+
+<h2>Why This Happens?</h2>
+
+<div class="flow">
+Render #1
+<br>count = 0
+<br>↓
+useEffect Runs
+<br>↓
+setInterval Created
+<br>↓
+Interval Function Gets Backpack
+<br>↓
+count = 0
+</div>
+
+<br>
+
+<div class="flow">
+User Clicks Increment
+<br>↓
+Render #2
+<br>count = 1
+<br><br>
+User Clicks Increment
+<br>↓
+Render #3
+<br>count = 2
+<br><br>
+User Clicks Increment
+<br>↓
+Render #4
+<br>count = 3
+</div>
+
+<br>
+
+<div class="danger">
+Interval still uses old backpack:
+<br>
+count = 0
+</div>
+
+<div class="highlight">
+That old backpack containing old React values is called a stale closure.
+</div>
+
+<h2>Why Empty Dependency Array Causes This</h2>
+
+<pre class="language-jsx"><code class="language-jsx">useEffect(() =&gt; {
+  // runs only once after first render
+}, []);</code></pre>
+
+<div class="flow">
+[] dependency
+<br>↓
+Effect Runs Only Once
+<br>↓
+Callback Created Once
+<br>↓
+Callback Captures First Render Values
+</div>
+
+<div class="warning">
+If that callback uses count, it will remember the first render count unless we fix it.
+</div>
+
+<h2>Fix #1 - Add Correct Dependencies</h2>
+
+<div class="file-name">Correct Dependency Array</div>
+
+<pre class="language-jsx"><code class="language-jsx">useEffect(() =&gt; {
+  const id = setInterval(() =&gt; {
+    console.log(count);
+  }, 1000);
+
+  return () =&gt; clearInterval(id);
+}, [count]);</code></pre>
+
+<div class="flow">
+count Changes
+<br>↓
+Effect Cleans Up
+<br>↓
+Old Interval Removed
+<br>↓
+New Interval Created
+<br>↓
+New Closure Captures Latest count
+</div>
+
+<div class="success">
+Now the interval logs the latest count, but the interval is recreated whenever count changes.
+</div>
+
+<h2>Fix #2 - Functional State Update</h2>
+
+<p>
+Use this when the callback updates state based on previous state.
+</p>
+
+<div class="file-name">Broken Counter</div>
+
+<pre class="language-jsx"><code class="language-jsx">useEffect(() =&gt; {
+  const id = setInterval(() =&gt; {
+    setCount(count + 1);
+  }, 1000);
+
+  return () =&gt; clearInterval(id);
+}, []);</code></pre>
+
+<p>
+Because count is captured as 0, result becomes:
+</p>
+
+<div class="flow">
+1
+<br>1
+<br>1
+<br>1
+</div>
+
+<h3>Correct Version</h3>
+
+<pre class="language-jsx"><code class="language-jsx">useEffect(() =&gt; {
+  const id = setInterval(() =&gt; {
+    setCount(prev =&gt; prev + 1);
+  }, 1000);
+
+  return () =&gt; clearInterval(id);
+}, []);</code></pre>
+
+<div class="success">
+Functional update works because React gives the latest state through prev.
+</div>
+
+<div class="flow">
+Old Closure
+<br>↓
+Does Not Matter
+<br>↓
+React Gives Latest State
+<br>↓
+prev =&gt; prev + 1
+</div>
+
+<h2>Fix #3 - useRef For Latest Value</h2>
+
+<p>
+Use ref when you want latest value without recreating the effect.
+</p>
+
+<pre class="language-jsx"><code class="language-jsx">function Counter() {
+  const [count, setCount] = useState(0);
+  const countRef = useRef(count);
+
+  countRef.current = count;
+
+  useEffect(() =&gt; {
+    const id = setInterval(() =&gt; {
+      console.log(countRef.current);
+    }, 1000);
+
+    return () =&gt; clearInterval(id);
+  }, []);
+
+  return (
+    &lt;button onClick={() =&gt; setCount(count + 1)}&gt;
+      Increment
+    &lt;/button&gt;
+  );
+}</code></pre>
+
+<div class="success">
+Ref does not create a new closure value on every render. countRef.current always points to the latest value.
+</div>
+
+<h2>Real World Example - Search API</h2>
+
+<div class="file-name">Buggy Search</div>
+
+<pre class="language-jsx"><code class="language-jsx">useEffect(() =&gt; {
+  fetch(`/api/search?q=${search}`);
+}, []);</code></pre>
+
+<p>
+If search changes from React to Redux:
+</p>
+
+<div class="flow">
+Initial Render
+<br>search = React
+<br>↓
+Effect Captures React
+<br>↓
+User Types Redux
+<br>↓
+Effect Still Uses React
+</div>
+
+<div class="danger">
+search is stale because it is missing from dependencies.
+</div>
+
+<h3>Correct Version</h3>
+
+<pre class="language-jsx"><code class="language-jsx">useEffect(() =&gt; {
+  fetch(`/api/search?q=${search}`);
+}, [search]);</code></pre>
+
+<h2>Real World Example - Event Listener</h2>
+
+<div class="file-name">Buggy Listener</div>
+
+<pre class="language-jsx"><code class="language-jsx">useEffect(() =&gt; {
+  function handleResize() {
+    console.log(width);
+  }
+
+  window.addEventListener('resize', handleResize);
+
+  return () =&gt; window.removeEventListener('resize', handleResize);
+}, []);</code></pre>
+
+<div class="danger">
+If width changes later, handleResize may still use old width.
+</div>
+
+<h3>Fix With Dependencies</h3>
+
+<pre class="language-jsx"><code class="language-jsx">useEffect(() =&gt; {
+  function handleResize() {
+    console.log(width);
+  }
+
+  window.addEventListener('resize', handleResize);
+
+  return () =&gt; window.removeEventListener('resize', handleResize);
+}, [width]);</code></pre>
+
+<h3>Or Fix With Ref</h3>
+
+<pre class="language-jsx"><code class="language-jsx">const widthRef = useRef(width);
+widthRef.current = width;
+
+useEffect(() =&gt; {
+  function handleResize() {
+    console.log(widthRef.current);
+  }
+
+  window.addEventListener('resize', handleResize);
+
+  return () =&gt; window.removeEventListener('resize', handleResize);
+}, []);</code></pre>
+
+<h2>Common Places Where Stale Closures Happen</h2>
+
+<table>
+<tr>
+<th>Place</th>
+<th>Problem</th>
+<th>Common Fix</th>
+</tr>
+
+<tr>
+<td>setInterval</td>
+<td>Old state value</td>
+<td>Dependencies, functional update, or ref</td>
+</tr>
+
+<tr>
+<td>setTimeout</td>
+<td>Old state value</td>
+<td>Dependencies or ref</td>
+</tr>
+
+<tr>
+<td>useEffect</td>
+<td>Missing dependencies</td>
+<td>Add dependencies</td>
+</tr>
+
+<tr>
+<td>Event listeners</td>
+<td>Old props/state</td>
+<td>Ref or recreate listener</td>
+</tr>
+
+<tr>
+<td>WebSocket callbacks</td>
+<td>Old values</td>
+<td>Ref</td>
+</tr>
+
+<tr>
+<td>Async requests</td>
+<td>Outdated query/data</td>
+<td>Dependencies + cleanup</td>
+</tr>
+</table>
+
+<h2>Relationship With exhaustive-deps Rule</h2>
+
+<div class="flow">
+Function Uses Variable
+<br>↓
+Variable Can Change
+<br>↓
+Dependency Missing
+<br>↓
+Stale Closure Risk
+</div>
+
+<div class="warning">
+The exhaustive-deps ESLint rule exists mainly to prevent stale closure bugs.
+</div>
+
+<h2>Best Rules To Fix Stale Closures</h2>
+
+<table>
+<tr>
+<th>Situation</th>
+<th>Best Fix</th>
+</tr>
+
+<tr>
+<td>Effect uses changing value</td>
+<td>Add value to dependency array</td>
+</tr>
+
+<tr>
+<td>Updating state based on previous state</td>
+<td>Use functional update</td>
+</tr>
+
+<tr>
+<td>Long-running callback needs latest value</td>
+<td>Use useRef</td>
+</tr>
+
+<tr>
+<td>Function depends on props/state</td>
+<td>Use useCallback with dependencies</td>
+</tr>
+</table>
+
+<h2>Interview Answer</h2>
+
+<div class="highlight">
+A stale closure occurs when a function captures state or props from an earlier React render and keeps using those outdated values after newer renders have created newer values. This happens because JavaScript closures preserve the variables they used when the function was created. In React, every render creates new variables, so callbacks inside useEffect, setInterval, setTimeout, event listeners, WebSocket handlers, and async functions can accidentally keep old values. You fix stale closures by adding correct dependencies, using functional state updates, or storing the latest value in a useRef when the callback should not be recreated.
+</div>
+
+<h2>Easy Way To Remember</h2>
+
+<div class="flow">
+Closure
+<br>↓
+Function + Backpack
+<br><br>
+React Re-render
+<br>↓
+New Values Created
+<br><br>
+Old Function
+<br>↓
+Still Uses Old Backpack
+<br><br>
+= Stale Closure
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>161 - use() Hook in React 19</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;font-size:34px}h2{color:#c084fc;margin-top:35px}h3{color:#38bdf8}
+p,li{color:#cbd5e1}.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px}
+.success{background:#052e16;padding:18px;border-left:5px solid #22c55e;border-radius:10px;margin-top:15px}
+.warning{background:#1e1b4b;padding:18px;border-left:5px solid #fbbf24;border-radius:10px;margin-top:15px}
+.danger{background:#2a0f12;padding:18px;border-left:5px solid #ef4444;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;text-align:center;line-height:2;font-size:18px}
+.file-name{background:#111827;color:#93c5fd;padding:12px 16px;border-radius:10px;border:1px solid #1e293b;font-weight:bold;margin-top:20px;margin-bottom:10px}
+table{width:100%;border-collapse:collapse;margin-top:20px}th,td{border:1px solid #1e293b;padding:14px;text-align:left}th{background:#0f172a;color:#38bdf8}td{background:#020617;color:#d1d5db}
+pre[class*="language-"],code[class*="language-"]{background:#1e1e1e}
+</style>
+</head>
+<body>
+<div class="container">
+
+<h1>161. What is the use() Hook in React 19 and How Does It Replace useContext and Data Unwrapping?</h1>
+
+<h2>One-Line Answer</h2>
+<div class="highlight">
+React 19's <b>use()</b> hook can read <b>Context</b> and <b>Promise</b> values during rendering. For Context, it can replace <b>useContext()</b>. For Promise data, it unwraps the resolved value and works with <b>Suspense</b>.
+</div>
+
+<h2>Simple Meaning</h2>
+<div class="flow">
+use(Context)
+<br>↓
+Read Context Value
+<br><br>
+use(Promise)
+<br>↓
+Read Async Data
+<br>↓
+If Pending, Suspend
+</div>
+
+<h2>1. Replacing useContext()</h2>
+
+<div class="file-name">Before - useContext</div>
+<pre class="language-jsx"><code class="language-jsx">import { useContext } from 'react';
+
+function Child() {
+  const theme = useContext(ThemeContext);
+
+  return &lt;h2&gt;{theme}&lt;/h2&gt;;
+}</code></pre>
+
+<div class="file-name">React 19 - use()</div>
+<pre class="language-jsx"><code class="language-jsx">import { use } from 'react';
+
+function Child() {
+  const theme = use(ThemeContext);
+
+  return &lt;h2&gt;{theme}&lt;/h2&gt;;
+}</code></pre>
+
+<div class="success">
+For Context, <b>use(ThemeContext)</b> works like <b>useContext(ThemeContext)</b>.
+</div>
+
+<h2>2. Replacing Data Unwrapping</h2>
+
+<p>
+Data unwrapping means getting the final value from a Promise.
+</p>
+
+<div class="file-name">Promise Created Outside Component</div>
+<pre class="language-js"><code class="language-js">const userPromise = fetch('/api/user').then(res =&gt; res.json());</code></pre>
+
+<div class="file-name">React 19 use()</div>
+<pre class="language-jsx"><code class="language-jsx">import { use } from 'react';
+
+function User({ userPromise }) {
+  const user = use(userPromise);
+
+  return &lt;h2&gt;{user.name}&lt;/h2&gt;;
+}</code></pre>
+
+<div class="flow">
+use(userPromise)
+<br>↓
+Promise Pending?
+<br>↓
+Suspend Component
+<br>↓
+Suspense Shows Loading
+<br>↓
+Promise Resolves
+<br>↓
+user Contains Data
+</div>
+
+<h2>Important: Fetch Without useEffect</h2>
+
+<div class="highlight">
+Yes, with React 19 use(), data can be fetched without useEffect in Suspense-based data loading.
+</div>
+
+<div class="file-name">Complete Example</div>
+<pre class="language-jsx"><code class="language-jsx">import { Suspense, use } from 'react';
+
+const userPromise = fetch('/api/user').then(res =&gt; res.json());
+
+function User({ userPromise }) {
+  const user = use(userPromise);
+
+  return &lt;h2&gt;{user.name}&lt;/h2&gt;;
+}
+
+export default function App() {
+  return (
+    &lt;Suspense fallback={&lt;h2&gt;Loading...&lt;/h2&gt;}&gt;
+      &lt;User userPromise={userPromise} /&gt;
+    &lt;/Suspense&gt;
+  );
+}</code></pre>
+
+<h2>How This Works?</h2>
+
+<div class="flow">
+JS File Loads
+<br>↓
+fetch('/api/user') Starts
+<br>↓
+Promise Created
+<br>↓
+App Renders
+<br>↓
+User Calls use(userPromise)
+<br>↓
+Promise Pending
+<br>↓
+React Suspends
+<br>↓
+Suspense Shows Loading...
+<br>↓
+Promise Resolves
+<br>↓
+User Renders Data
+</div>
+
+<h2>Old React Way</h2>
+
+<div class="file-name">Before React 19</div>
+<pre class="language-jsx"><code class="language-jsx">function User() {
+  const [user, setUser] = useState(null);
+
+  useEffect(() =&gt; {
+    fetch('/api/user')
+      .then(res =&gt; res.json())
+      .then(data =&gt; setUser(data));
+  }, []);
+
+  if (!user) return &lt;h2&gt;Loading...&lt;/h2&gt;;
+
+  return &lt;h2&gt;{user.name}&lt;/h2&gt;;
+}</code></pre>
+
+<div class="flow">
+Render
+<br>↓
+useEffect Runs
+<br>↓
+Fetch Starts
+<br>↓
+setUser()
+<br>↓
+Re-render
+</div>
+
+<h2>React 19 use() Way</h2>
+
+<div class="flow">
+Fetch Starts
+<br>↓
+Component Reads Promise
+<br>↓
+use(promise)
+<br>↓
+React Waits With Suspense
+<br>↓
+Render Continues With Data
+</div>
+
+<h2>Very Important Warning</h2>
+
+<div class="danger">
+Do not create a new Promise directly inside the component on every render.
+</div>
+
+<div class="file-name">Bad Pattern</div>
+<pre class="language-jsx"><code class="language-jsx">function User() {
+  const user = use(fetch('/api/user').then(res =&gt; res.json()));
+
+  return &lt;h2&gt;{user.name}&lt;/h2&gt;;
+}</code></pre>
+
+<div class="flow">
+Render
+<br>↓
+Creates New Promise
+<br>↓
+Render Again
+<br>↓
+Creates New Promise Again
+<br>↓
+Possible Re-fetch Problem
+</div>
+
+<div class="success">
+Better: create the Promise outside the component or pass it from a framework/server layer.
+</div>
+
+<h2>use() Does Not Fully Replace useEffect</h2>
+
+<div class="warning">
+use() replaces many data-fetching useEffect patterns, but not all useEffect usage.
+</div>
+
+<table>
+<tr>
+<th>Still Need useEffect For</th>
+<th>Example</th>
+</tr>
+<tr>
+<td>Subscriptions</td>
+<td>socket.connect()</td>
+</tr>
+<tr>
+<td>Timers</td>
+<td>setInterval()</td>
+</tr>
+<tr>
+<td>Event Listeners</td>
+<td>window.addEventListener()</td>
+</tr>
+<tr>
+<td>Manual DOM side effects</td>
+<td>document.title</td>
+</tr>
+</table>
+
+<h2>How React Handles use()</h2>
+
+<table>
+<tr>
+<th>Input</th>
+<th>React Behavior</th>
+</tr>
+<tr>
+<td>Context</td>
+<td>Returns current context value</td>
+</tr>
+<tr>
+<td>Resolved Promise</td>
+<td>Returns resolved data</td>
+</tr>
+<tr>
+<td>Pending Promise</td>
+<td>Suspends component</td>
+</tr>
+<tr>
+<td>Rejected Promise</td>
+<td>Throws error to Error Boundary</td>
+</tr>
+</table>
+
+<h2>use() vs useContext()</h2>
+
+<table>
+<tr>
+<th>useContext()</th>
+<th>use()</th>
+</tr>
+<tr>
+<td>Reads only Context</td>
+<td>Reads Context and Promises</td>
+</tr>
+<tr>
+<td>Cannot unwrap Promise</td>
+<td>Can unwrap Promise</td>
+</tr>
+<tr>
+<td>Used only for Context</td>
+<td>Used for Context + async resources</td>
+</tr>
+</table>
+
+<h2>Easy Memory</h2>
+<div class="flow">
+useContext(Context)
+<br>↓
+React 19
+<br>use(Context)
+<br><br>
+promise.then(data)
+<br>↓
+React 19
+<br>use(promise)
+</div>
+
+<h2>Interview Answer</h2>
+<div class="highlight">
+React 19's use() hook lets components read Context values and Promises during rendering. For Context, use(Context) can replace useContext(Context). For Promises, use(promise) unwraps the resolved value. If the Promise is pending, React suspends the component and shows the nearest Suspense fallback. This removes much of the boilerplate previously handled with useEffect, useState, and manual loading state for Suspense-based data loading, but useEffect is still needed for subscriptions, timers, event listeners, and other side effects.
+</div>
+
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+</body>
+</html>

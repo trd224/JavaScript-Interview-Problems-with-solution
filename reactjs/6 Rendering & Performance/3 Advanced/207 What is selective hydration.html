@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>207 - What is Selective Hydration?</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px}
+p,li{color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px}
+.success{background:#052e16;padding:18px;border-left:5px solid #22c55e;border-radius:10px;margin-top:15px}
+.warning{background:#1e1b4b;padding:18px;border-left:5px solid #fbbf24;border-radius:10px;margin-top:15px}
+.danger{background:#2a0f12;padding:18px;border-left:5px solid #ef4444;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;text-align:center;line-height:2;font-size:18px}
+.file-name{background:#111827;color:#93c5fd;padding:12px 16px;border-radius:10px;border:1px solid #1e293b;font-weight:bold;margin-top:20px;margin-bottom:10px}
+pre[class*="language-"],code[class*="language-"]{background:#1e1e1e}
+.token.keyword{color:#c792ea}.token.string{color:#c3e88d}.token.function{color:#82aaff}.token.class-name{color:#ffcb6b}.token.number{color:#f78c6c}.token.operator{color:#89ddff}.token.punctuation{color:#89ddff}
+</style>
+</head>
+<body>
+<div class="container">
+
+<h1>207. What is Selective Hydration?</h1>
+
+<h2>One-Line Answer</h2>
+<div class="highlight">
+<b>Selective Hydration</b> is a React 18 feature for SSR pages. After server HTML is shown and JavaScript downloads, React starts hydration automatically, but it can prioritize the part of the page that the user interacts with first.
+</div>
+
+<h2>First Understand SSR</h2>
+<p>
+In SSR, React renders HTML on the server and sends that HTML to the browser.
+</p>
+
+<div class="flow">
+React Component On Server
+<br>↓
+Server Generates HTML
+<br>↓
+Browser Receives HTML
+<br>↓
+User Can See Page Quickly
+</div>
+
+<p>
+But this HTML is only visible content. It is not fully interactive yet.
+</p>
+
+<div class="warning">
+SSR gives fast visible HTML, but JavaScript is still needed to attach React events like onClick, onChange, onSubmit, etc.
+</div>
+
+<h2>What Is Hydration?</h2>
+<p>
+Hydration means React connects JavaScript logic with the HTML that already came from the server.
+</p>
+
+<div class="flow">
+Server HTML Already Exists
+<br>↓
+React Loads In Browser
+<br>↓
+React Reuses Existing HTML
+<br>↓
+React Attaches Event Handlers
+<br>↓
+Page Becomes Interactive
+</div>
+
+<div class="highlight">
+Hydration does not mean React creates the whole DOM again. React tries to reuse the server-rendered HTML and attach behavior to it.
+</div>
+
+<h2>Normal Hydration Flow</h2>
+
+<div class="flow">
+Server Sends HTML
+<br>↓
+Browser Shows HTML
+<br>↓
+JavaScript Bundle Downloads
+<br>↓
+Hydration Starts Automatically
+<br>↓
+React Attaches Events
+<br>↓
+Components Become Interactive
+</div>
+
+<div class="success">
+Your correction is important: hydration starts automatically after JavaScript downloads. React does not wait for the user to click before starting hydration.
+</div>
+
+<h2>Problem With Big SSR Pages</h2>
+<p>
+Imagine an ecommerce page:
+</p>
+
+<div class="flow">
+Navbar
+<br>↓
+Search Box
+<br>↓
+Filters
+<br>↓
+ProductList
+<br>↓
+Reviews
+<br>↓
+Comments
+<br>↓
+Footer
+</div>
+
+<p>
+Some parts are small, but some parts are heavy.
+</p>
+
+<table>
+<tr><th>Component</th><th>Hydration Cost</th><th>Importance</th></tr>
+<tr><td>Navbar</td><td>10ms</td><td>High</td></tr>
+<tr><td>Search Box</td><td>20ms</td><td>High</td></tr>
+<tr><td>ProductList</td><td>150ms</td><td>High</td></tr>
+<tr><td>Reviews</td><td>700ms</td><td>Medium</td></tr>
+<tr><td>Comments</td><td>2000ms</td><td>Low initially</td></tr>
+<tr><td>Footer</td><td>10ms</td><td>Low</td></tr>
+</table>
+
+<div class="danger">
+If React spends too much time hydrating a heavy low-priority section, important UI like Search Box can feel delayed.
+</div>
+
+<h2>Old Style Thinking</h2>
+<p>
+In older SSR mental model, hydration feels like one big process.
+</p>
+
+<div class="flow">
+Start Hydration
+<br>↓
+Hydrate Big Page
+<br>↓
+Wait Until Important Parts Are Ready
+<br>↓
+Then User Interaction Works
+</div>
+
+<div class="warning">
+The issue is not that the page is invisible. The page is visible. The issue is that some visible parts may not be interactive yet.
+</div>
+
+<h2>What Selective Hydration Changes</h2>
+<div class="highlight">
+Selective Hydration allows React to treat parts of the page separately and hydrate higher-priority parts first.
+</div>
+
+<div class="flow">
+Hydration Already Running
+<br>↓
+User Clicks Search Box
+<br>↓
+React Detects This Interaction
+<br>↓
+React Gives Search/Product Area Higher Priority
+<br>↓
+That Area Hydrates First
+<br>↓
+User Interaction Is Handled Faster
+<br>↓
+Other Areas Hydrate Later
+</div>
+
+<h2>Very Important Correction</h2>
+
+<h3>Wrong</h3>
+<div class="danger">
+User Clicks Search Box
+<br>↓
+Hydration Starts
+</div>
+
+<h3>Correct</h3>
+<div class="success">
+JavaScript Downloads
+<br>↓
+Hydration Starts Automatically
+<br>↓
+User Clicks Search Box During Hydration
+<br>↓
+React Prioritizes Search Box Hydration
+</div>
+
+<div class="highlight">
+So the click does not start hydration. The click changes hydration priority.
+</div>
+
+<h2>Example With Suspense Boundaries</h2>
+<p>
+Selective Hydration works best when the page is split using Suspense boundaries.
+</p>
+
+<div class="file-name">Page.jsx</div>
+<pre class="language-jsx"><code class="language-jsx">function Page(){
+  return (
+    &lt;&gt;
+      &lt;Navbar /&gt;
+
+      &lt;Suspense fallback={&lt;SearchSkeleton /&gt;}&gt;
+        &lt;ProductSearch /&gt;
+      &lt;/Suspense&gt;
+
+      &lt;Suspense fallback={&lt;ListSkeleton /&gt;}&gt;
+        &lt;ProductList /&gt;
+      &lt;/Suspense&gt;
+
+      &lt;Suspense fallback={&lt;CommentsSkeleton /&gt;}&gt;
+        &lt;Comments /&gt;
+      &lt;/Suspense&gt;
+    &lt;/&gt;
+  );
+}</code></pre>
+
+<p>
+Each Suspense boundary gives React a separable area.
+</p>
+
+<div class="flow">
+Boundary 1: ProductSearch
+<br>Boundary 2: ProductList
+<br>Boundary 3: Comments
+<br>↓
+React Can Hydrate Them With Different Priorities
+</div>
+
+<h2>Real Scenario</h2>
+
+<div class="flow">
+SSR HTML Arrives
+<br>↓
+Browser Shows Full Page
+<br>↓
+JS Bundle Downloads
+<br>↓
+React Starts Hydration
+<br>↓
+Comments Section Is Heavy
+<br>↓
+User Clicks Product Search
+<br>↓
+React Pauses Lower Priority Work
+<br>↓
+React Hydrates ProductSearch First
+<br>↓
+Search onChange/onClick Works
+<br>↓
+React Continues Hydrating Comments Later
+</div>
+
+<h2>What Happens To The User Click Before Hydration?</h2>
+<p>
+React can capture and replay some events during hydration.
+</p>
+
+<div class="flow">
+User Clicks A Not-Yet-Hydrated Button
+<br>↓
+React Captures The Event
+<br>↓
+React Hydrates That Boundary With Priority
+<br>↓
+React Replays/Handles The Event
+</div>
+
+<div class="success">
+This helps users feel that the app responds faster, even when the whole page is not fully hydrated yet.
+</div>
+
+<h2>Event Replay Simple Example</h2>
+<div class="file-name">Search.jsx</div>
+<pre class="language-jsx"><code class="language-jsx">function ProductSearch(){
+  function handleChange(e){
+    console.log(e.target.value);
+  }
+
+  return &lt;input onChange={handleChange} placeholder="Search product" /&gt;;
+}</code></pre>
+
+<p>
+If the user types while hydration is still happening:
+</p>
+
+<div class="flow">
+User Types In Search
+<br>↓
+React Knows Search Area Is Important
+<br>↓
+React Hydrates ProductSearch First
+<br>↓
+onChange Handler Gets Attached
+<br>↓
+Typing Is Handled
+</div>
+
+<h2>Selective Hydration And Streaming SSR</h2>
+<p>
+Selective Hydration is very powerful with Streaming SSR.
+</p>
+
+<div class="flow">
+Server Does Not Wait For Whole Page
+<br>↓
+Server Streams HTML In Pieces
+<br>↓
+Browser Shows Available Parts Early
+<br>↓
+JavaScript Downloads
+<br>↓
+React Hydrates Available Boundaries
+<br>↓
+Important Boundaries Can Hydrate First
+</div>
+
+<div class="highlight">
+Streaming SSR helps send HTML in chunks. Selective Hydration helps make important chunks interactive earlier.
+</div>
+
+<h2>Streaming SSR Example</h2>
+
+<div class="file-name">Server Page</div>
+<pre class="language-jsx"><code class="language-jsx">function App(){
+  return (
+    &lt;html&gt;
+      &lt;body&gt;
+        &lt;Navbar /&gt;
+
+        &lt;Suspense fallback={&lt;LoadingProducts /&gt;}&gt;
+          &lt;Products /&gt;
+        &lt;/Suspense&gt;
+
+        &lt;Suspense fallback={&lt;LoadingComments /&gt;}&gt;
+          &lt;Comments /&gt;
+        &lt;/Suspense&gt;
+      &lt;/body&gt;
+    &lt;/html&gt;
+  );
+}</code></pre>
+
+<div class="flow">
+Navbar HTML Streams First
+<br>↓
+Products HTML Streams When Ready
+<br>↓
+Comments HTML Streams Later
+<br>↓
+React Can Hydrate Ready/Important Parts Selectively
+</div>
+
+<h2>Normal Hydration vs Selective Hydration</h2>
+
+<table>
+<tr><th>Normal Hydration</th><th>Selective Hydration</th></tr>
+<tr><td>Hydration feels like one big process</td><td>Hydration can be prioritized by area</td></tr>
+<tr><td>Heavy parts may delay important interactions</td><td>Important or clicked parts hydrate first</td></tr>
+<tr><td>Less control over interaction priority</td><td>Better priority handling</td></tr>
+<tr><td>User may wait for interactivity</td><td>User gets key interactivity sooner</td></tr>
+<tr><td>Not ideal for large SSR pages</td><td>Better for large SSR + Suspense pages</td></tr>
+</table>
+
+<h2>Selective Hydration vs Lazy Loading</h2>
+
+<table>
+<tr><th>Concept</th><th>Meaning</th></tr>
+<tr><td>Lazy Loading</td><td>Load code/data later when needed</td></tr>
+<tr><td>Hydration</td><td>Attach React behavior to server HTML</td></tr>
+<tr><td>Selective Hydration</td><td>Choose which server-rendered part becomes interactive first</td></tr>
+</table>
+
+<div class="warning">
+Do not confuse selective hydration with lazy loading. Lazy loading is about loading resources. Selective hydration is about prioritizing interactivity of already rendered SSR HTML.
+</div>
+
+<h2>Selective Hydration vs Time Slicing</h2>
+
+<table>
+<tr><th>Feature</th><th>Work Type</th><th>Main Idea</th></tr>
+<tr><td>Time Slicing</td><td>Rendering work</td><td>Break render work into chunks and prioritize urgent updates</td></tr>
+<tr><td>Selective Hydration</td><td>Hydration work</td><td>Prioritize which SSR part becomes interactive first</td></tr>
+</table>
+
+<div class="flow">
+Time Slicing
+<br>↓
+Which render work should React finish first?
+<br><br>
+Selective Hydration
+<br>↓
+Which server-rendered area should React hydrate first?
+</div>
+
+<h2>Why Suspense Is Important Here</h2>
+<p>
+Suspense boundaries give React natural checkpoints.
+</p>
+
+<div class="flow">
+Page
+<br>↓
+Suspense Boundary A
+<br>↓
+Suspense Boundary B
+<br>↓
+Suspense Boundary C
+</div>
+
+<div class="success">
+Because boundaries are separate, React can hydrate Boundary A before Boundary C if Boundary A is more important.
+</div>
+
+<h2>Without Suspense Boundaries</h2>
+<div class="warning">
+If the page is not split into good boundaries, React has less flexibility to hydrate separate areas efficiently.
+</div>
+
+<div class="flow">
+One Large App Tree
+<br>↓
+Harder To Prioritize Smaller Sections
+</div>
+
+<h2>With Suspense Boundaries</h2>
+<div class="success">
+Smaller sections make prioritization easier.
+</div>
+
+<div class="flow">
+Navbar
+<br>Product Search Boundary
+<br>Product List Boundary
+<br>Comments Boundary
+<br>↓
+React Can Prioritize Important Boundary
+</div>
+
+<h2>Common Misconceptions</h2>
+
+<table>
+<tr><th>Misconception</th><th>Correct Understanding</th></tr>
+<tr><td>Hydration starts only after user clicks</td><td>Hydration starts automatically after JS downloads</td></tr>
+<tr><td>Selective hydration means only one component hydrates</td><td>Multiple areas can hydrate, but React can prioritize important ones</td></tr>
+<tr><td>Selective hydration creates HTML</td><td>SSR creates HTML; hydration attaches behavior</td></tr>
+<tr><td>Selective hydration makes app faster by itself</td><td>It improves perceived responsiveness by prioritizing interactivity</td></tr>
+<tr><td>It is same as lazy loading</td><td>Lazy loading loads code/data; selective hydration prioritizes hydration</td></tr>
+</table>
+
+<h2>Detailed Browser Timeline</h2>
+
+<div class="flow">
+1. User Requests Page
+<br>↓
+2. Server Renders React To HTML
+<br>↓
+3. Browser Receives HTML
+<br>↓
+4. Browser Paints HTML
+<br>↓
+5. User Can See Content
+<br>↓
+6. JavaScript Downloads
+<br>↓
+7. React Starts Hydration
+<br>↓
+8. User Interacts With ProductSearch
+<br>↓
+9. React Prioritizes ProductSearch Boundary
+<br>↓
+10. ProductSearch Becomes Interactive
+<br>↓
+11. Remaining Boundaries Hydrate Later
+</div>
+
+<h2>Why This Improves UX</h2>
+<p>
+Users usually do not interact with every part of the page immediately.
+</p>
+
+<div class="flow">
+User Opens Page
+<br>↓
+Most Likely Uses Navbar/Search/Button First
+<br>↓
+Comments/Footer Are Less Urgent
+<br>↓
+React Hydrates Urgent UI First
+</div>
+
+<div class="success">
+This improves perceived performance because the part the user needs becomes interactive earlier.
+</div>
+
+<h2>Before React 18 Mental Model</h2>
+
+<div class="flow">
+HTML Visible
+<br>↓
+Wait For Hydration
+<br>↓
+Page Becomes Interactive
+</div>
+
+<h2>React 18 Mental Model</h2>
+
+<div class="flow">
+HTML Visible
+<br>↓
+Hydration Starts
+<br>↓
+Important Areas Become Interactive Earlier
+<br>↓
+Less Important Areas Continue Later
+</div>
+
+<h2>Where Do We See This?</h2>
+<ul>
+<li>React 18 SSR apps</li>
+<li>Streaming SSR</li>
+<li>Suspense-heavy pages</li>
+<li>Next.js App Router style SSR/streaming architectures</li>
+<li>Large pages where some sections are heavy</li>
+</ul>
+
+<h2>Simple Code Summary</h2>
+
+<div class="file-name">Selective Hydration Friendly Structure</div>
+<pre class="language-jsx"><code class="language-jsx">function EcommercePage(){
+  return (
+    &lt;&gt;
+      &lt;Navbar /&gt;
+
+      &lt;Suspense fallback={&lt;p&gt;Loading search...&lt;/p&gt;}&gt;
+        &lt;ProductSearch /&gt;
+      &lt;/Suspense&gt;
+
+      &lt;Suspense fallback={&lt;p&gt;Loading products...&lt;/p&gt;}&gt;
+        &lt;ProductList /&gt;
+      &lt;/Suspense&gt;
+
+      &lt;Suspense fallback={&lt;p&gt;Loading comments...&lt;/p&gt;}&gt;
+        &lt;Comments /&gt;
+      &lt;/Suspense&gt;
+    &lt;/&gt;
+  );
+}</code></pre>
+
+<h2>Full Easy Example</h2>
+
+<div class="file-name">ProductSearch.jsx</div>
+<pre class="language-jsx"><code class="language-jsx">function ProductSearch(){
+  const [query,setQuery] = useState('');
+
+  return (
+    &lt;input
+      value={query}
+      onChange={e =&gt; setQuery(e.target.value)}
+      placeholder="Search products"
+    /&gt;
+  );
+}</code></pre>
+
+<p>
+When this component comes from SSR, the input may be visible before hydration completes.
+</p>
+
+<div class="flow">
+Input Visible
+<br>↓
+JS Hydration Running
+<br>↓
+User Types
+<br>↓
+React Prioritizes This Input Area
+<br>↓
+onChange Becomes Ready Faster
+</div>
+
+<h2>Interview Answer</h2>
+<div class="highlight">
+Selective Hydration is a React 18 SSR feature that lets React prioritize hydration of specific parts of a server-rendered page. After the browser receives SSR HTML and downloads JavaScript, hydration starts automatically. During hydration, if the user interacts with a part of the page, React can give that Suspense boundary higher priority, hydrate it first, and handle the event sooner. This improves responsiveness because important UI becomes interactive before less important or heavy sections finish hydrating.
+</div>
+
+<h2>Easy Way To Remember</h2>
+
+<div class="flow">
+SSR HTML
+<br>↓
+Visible But Not Fully Interactive
+<br>↓
+JS Downloads
+<br>↓
+Hydration Starts Automatically
+<br>↓
+User Interacts With One Area
+<br>↓
+React Hydrates That Area First
+<br>↓
+Other Areas Later
+<br>↓
+Selective Hydration
+</div>
+
+<h2>Final Short Summary</h2>
+<div class="success">
+Selective Hydration does not mean hydration starts after click. Hydration starts automatically. Selective Hydration means React can change priority and finish hydration of the interacted/important part first.
+</div>
+
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+</body>
+</html>

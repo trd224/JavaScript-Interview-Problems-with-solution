@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>205 - What is the Profiler API Component?</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px}
+p,li{color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px}
+.success{background:#052e16;padding:18px;border-left:5px solid #22c55e;border-radius:10px;margin-top:15px}
+.warning{background:#1e1b4b;padding:18px;border-left:5px solid #fbbf24;border-radius:10px;margin-top:15px}
+.danger{background:#2a0f12;padding:18px;border-left:5px solid #ef4444;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;text-align:center;line-height:2;font-size:18px}
+.file-name{background:#111827;color:#93c5fd;padding:12px 16px;border-radius:10px;border:1px solid #1e293b;font-weight:bold;margin-top:20px;margin-bottom:10px}
+pre[class*="language-"],code[class*="language-"]{background:#1e1e1e}
+.token.keyword{color:#c792ea}.token.string{color:#c3e88d}.token.function{color:#82aaff}.token.class-name{color:#ffcb6b}.token.number{color:#f78c6c}.token.operator{color:#89ddff}.token.punctuation{color:#89ddff}
+</style>
+</head>
+<body>
+<div class="container">
+
+<h1>205. What is the Profiler API Component?</h1>
+
+<h2>One-Line Answer</h2>
+<div class="highlight">
+The React <b>Profiler</b> component is a performance measuring tool. It tells you how long a component tree takes to render, so you can find slow components and unnecessary re-renders.
+</div>
+
+<h2>Important Point</h2>
+<div class="warning">
+Profiler does <b>not</b> make your app faster. It only shows where the app is slow. After finding the slow component, you optimize it using React.memo, useMemo, useCallback, virtualization, or better state structure.
+</div>
+
+<h2>Why Do We Use Profiler?</h2>
+<div class="flow">
+App Feels Slow
+<br>↓
+Many Components Are Rendering
+<br>↓
+Which Component Is Slow?
+<br>↓
+Use Profiler
+<br>↓
+Measure Render Time
+<br>↓
+Optimize Correct Component
+</div>
+
+<h2>Basic Syntax</h2>
+<div class="file-name">App.jsx</div>
+<pre class="language-jsx"><code class="language-jsx">import { Profiler } from 'react';
+
+function onRender(id,phase,actualDuration,baseDuration,startTime,commitTime){
+  console.log({id,phase,actualDuration,baseDuration,startTime,commitTime});
+}
+
+function App(){
+  return (
+    &lt;Profiler id="Products" onRender={onRender}&gt;
+      &lt;Products /&gt;
+    &lt;/Profiler&gt;
+  );
+}</code></pre>
+
+<h2>How It Works</h2>
+<div class="flow">
+Products Component Renders
+<br>↓
+Profiler Measures Render Time
+<br>↓
+onRender Function Runs
+<br>↓
+Console Shows Performance Data
+</div>
+
+<h2>Callback Parameters</h2>
+<table>
+<tr><th>Parameter</th><th>Meaning</th></tr>
+<tr><td>id</td><td>Name you gave to Profiler</td></tr>
+<tr><td>phase</td><td>mount for first render, update for re-render</td></tr>
+<tr><td>actualDuration</td><td>Time taken for this render</td></tr>
+<tr><td>baseDuration</td><td>Estimated time if everything rendered without optimization</td></tr>
+<tr><td>startTime</td><td>When React started rendering</td></tr>
+<tr><td>commitTime</td><td>When React committed the UI update</td></tr>
+</table>
+
+<h2>Simple Output Example</h2>
+<pre class="language-js"><code class="language-js">Products mount 120ms
+Products update 80ms</code></pre>
+
+<div class="success">
+This means the Products component is expensive. Now you know where to focus optimization.
+</div>
+
+<h2>Real Example</h2>
+<div class="file-name">Products.jsx</div>
+<pre class="language-jsx"><code class="language-jsx">function Products(){
+  const items = Array.from({length:10000},(_,i) =&gt; i);
+
+  return (
+    &lt;&gt;
+      {items.map(item =&gt; &lt;div key={item}&gt;Product {item}&lt;/div&gt;)}
+    &lt;/&gt;
+  );
+}</code></pre>
+
+<div class="danger">
+Rendering 10,000 products can be slow. Profiler helps confirm if this component is the bottleneck.
+</div>
+
+<h2>Why Not Always Wrap Whole App?</h2>
+<p>
+You can wrap the full App, but it usually gives broad data, not exact data.
+</p>
+
+<div class="file-name">Whole App Profiling</div>
+<pre class="language-jsx"><code class="language-jsx">&lt;Profiler id="App" onRender={onRender}&gt;
+  &lt;App /&gt;
+&lt;/Profiler&gt;</code></pre>
+
+<div class="flow">
+Navbar Updated
+<br>Sidebar Updated
+<br>Products Updated
+<br>Footer Updated
+<br>↓
+Profiler Says: App = 300ms
+</div>
+
+<div class="warning">
+Problem: you know App is slow, but you still do not know which inner component caused the slowness.
+</div>
+
+<h2>Better: Wrap Suspected Inner Components</h2>
+<div class="file-name">Better Profiling</div>
+<pre class="language-jsx"><code class="language-jsx">&lt;Profiler id="Navbar" onRender={onRender}&gt;&lt;Navbar /&gt;&lt;/Profiler&gt;
+&lt;Profiler id="Filters" onRender={onRender}&gt;&lt;Filters /&gt;&lt;/Profiler&gt;
+&lt;Profiler id="ProductList" onRender={onRender}&gt;&lt;ProductList /&gt;&lt;/Profiler&gt;</code></pre>
+
+<div class="flow">
+Navbar = 2ms
+<br>Filters = 5ms
+<br>ProductList = 285ms
+<br>Cart = 3ms
+</div>
+
+<div class="success">
+Now the slow component is clear: ProductList.
+</div>
+
+<h2>Profiler Is Like console.log For Performance</h2>
+<table>
+<tr><th>Tool</th><th>Purpose</th></tr>
+<tr><td>console.log()</td><td>Checks what is happening in code</td></tr>
+<tr><td>Profiler</td><td>Checks how long rendering takes</td></tr>
+</table>
+
+<h2>Profiler vs Optimization Hooks</h2>
+<table>
+<tr><th>API</th><th>Purpose</th></tr>
+<tr><td>Profiler</td><td>Measures performance</td></tr>
+<tr><td>React.memo</td><td>Skips child re-render when props are same</td></tr>
+<tr><td>useMemo</td><td>Caches expensive calculated value</td></tr>
+<tr><td>useCallback</td><td>Caches function reference</td></tr>
+<tr><td>react-window</td><td>Renders only visible list items</td></tr>
+</table>
+
+<h2>Typical Development Flow</h2>
+<div class="flow">
+Page Feels Slow
+<br>↓
+Wrap Suspected Component With Profiler
+<br>↓
+Check actualDuration
+<br>↓
+Find Slow Component
+<br>↓
+Optimize It
+<br>↓
+Measure Again
+<br>↓
+Remove Profiler Before Final Code
+</div>
+
+<h2>Do We Use It In Production?</h2>
+<div class="warning">
+Usually no. Most developers use Profiler during development/testing to debug performance. It is not a UI feature for users.
+</div>
+
+<h2>Interview Answer</h2>
+<div class="highlight">
+The React Profiler API is a component used to measure rendering performance. It wraps a component tree and calls an onRender callback whenever that tree renders. The callback gives details like render phase, actual render duration, base duration, start time, and commit time. It is mainly used during development to find slow components and unnecessary re-renders. Usually we wrap specific suspected components instead of the whole App, because wrapping only App tells us the total render cost but not the exact slow child component.
+</div>
+
+<h2>Easy Way To Remember</h2>
+<div class="flow">
+Profiler
+<br>↓
+Measures Render Time
+<br>↓
+Finds Slow Components
+<br>↓
+Does Not Optimize By Itself
+<br>↓
+Helps You Optimize Correctly
+</div>
+
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+</body>
+</html>

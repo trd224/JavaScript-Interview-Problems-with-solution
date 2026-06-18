@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>204 - What is Time Slicing?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px}
+p,li{color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px}
+.success{background:#052e16;padding:18px;border-left:5px solid #22c55e;border-radius:10px;margin-top:15px}
+.warning{background:#1e1b4b;padding:18px;border-left:5px solid #fbbf24;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;text-align:center;line-height:2;font-size:18px}
+.file-name{background:#111827;color:#93c5fd;padding:12px 16px;border-radius:10px;border:1px solid #1e293b;font-weight:bold;margin-top:20px;margin-bottom:10px}
+pre[class*="language-"],code[class*="language-"]{background:#1e1e1e}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>204. What is Time Slicing?</h1>
+
+<h2>One-Line Answer</h2>
+
+<div class="highlight">
+Time Slicing is a React Concurrent Rendering feature that allows React to break large rendering work into small chunks and pause between them so the browser can stay responsive.
+</div>
+
+<h2>Problem Before Time Slicing</h2>
+
+<p>
+Imagine React must render 10,000 items.
+</p>
+
+<div class="flow">
+User Types
+<br>↓
+React Starts Rendering
+<br>↓
+Render 10,000 Items
+<br>↓
+CPU Busy
+<br>↓
+UI Freezes
+<br>↓
+User Waits
+</div>
+
+<div class="danger">
+In older React rendering was mostly synchronous.
+Once rendering started, React continued until all work finished.
+</div>
+
+<h2>With Time Slicing</h2>
+
+<div class="flow">
+Render 10,000 Items
+<br>↓
+Do Small Chunk
+<br>↓
+Pause
+<br>↓
+Give Browser Time
+<br>↓
+Continue Next Chunk
+<br>↓
+Pause Again
+<br>↓
+Continue Until Complete
+</div>
+
+<div class="success">
+The browser gets opportunities to handle clicks, typing, scrolling, and animations while React is rendering.
+</div>
+
+<h2>Simple Analogy</h2>
+
+<p>
+Without Time Slicing:
+</p>
+
+<div class="flow">
+Read Entire 500 Page Book
+<br>↓
+Then Answer Phone
+</div>
+
+<p>
+With Time Slicing:
+</p>
+
+<div class="flow">
+Read 10 Pages
+<br>↓
+Check Phone
+<br>↓
+Read 10 More Pages
+<br>↓
+Check Phone Again
+</div>
+
+<h2>What React Actually Does</h2>
+
+<div class="flow">
+Update Starts
+<br>↓
+React Creates Work
+<br>↓
+Process Small Part
+<br>↓
+Should Browser Run?
+<br>↓
+Yes → Pause
+<br>↓
+Browser Handles Input
+<br>↓
+React Resumes Later
+</div>
+
+<h2>Real Example</h2>
+
+<div class="file-name">Heavy Search Result Rendering</div>
+
+<pre class="language-jsx"><code class="language-jsx">function Search() {
+
+  const [query,setQuery] = useState('');
+
+  const results =
+    hugeList.filter(item =>
+      item.includes(query)
+    );
+
+  return (
+    <>
+      &lt;input
+        value={query}
+        onChange={e =>
+          setQuery(e.target.value)
+        }
+      /&gt;
+
+      {results.map(item =>
+        &lt;div key={item}&gt;
+          {item}
+        &lt;/div&gt;
+      )}
+    </>
+  );
+}</code></pre>
+
+<p>
+If thousands of results must render, React may split the rendering work into smaller pieces instead of blocking the browser.
+</p>
+
+<h2>Relationship With Concurrent Rendering</h2>
+
+<div class="flow">
+Concurrent Rendering
+<br>↓
+Includes
+<br>↓
+Time Slicing
+<br>↓
+React Can Pause Work
+<br>↓
+React Can Resume Work
+<br>↓
+React Can Prioritize Important Updates
+</div>
+
+<h2>Relationship With useTransition</h2>
+
+<div class="file-name">Example</div>
+
+<pre class="language-jsx"><code class="language-jsx">const [isPending,startTransition] =
+  useTransition();
+
+function handleChange(e){
+
+  setInput(e.target.value);
+
+  startTransition(() => {
+
+    setResults(
+      filterHugeList(e.target.value)
+    );
+
+  });
+
+}
+</code></pre>
+
+<div class="highlight">
+When you use startTransition(), React may use Time Slicing to keep typing responsive while rendering large result lists.
+</div>
+
+<h2>Can Users See Partial UI?</h2>
+
+<p>
+Usually No.
+</p>
+
+<div class="flow">
+React Builds Work
+<br>↓
+May Pause Internally
+<br>↓
+Continue Rendering
+<br>↓
+Finally Commit UI
+<br>↓
+User Sees Complete Update
+</div>
+
+<p>
+Time Slicing happens during the render phase, not during the commit phase.
+</p>
+
+<h2>Without vs With Time Slicing</h2>
+
+<table>
+<tr>
+<th>Without</th>
+<th>With</th>
+</tr>
+
+<tr>
+<td>Long blocking render</td>
+<td>Work split into chunks</td>
+</tr>
+
+<tr>
+<td>UI may freeze</td>
+<td>UI stays responsive</td>
+</tr>
+
+<tr>
+<td>Cannot pause work</td>
+<td>Can pause and resume</td>
+</tr>
+
+<tr>
+<td>User input delayed</td>
+<td>User input handled quickly</td>
+</tr>
+
+</table>
+
+<h2>Interview Answer</h2>
+
+<div class="highlight">
+Time Slicing is a React Concurrent Rendering capability that breaks large rendering work into smaller chunks. React can pause rendering, allow the browser to process user interactions such as typing or clicking, and then continue rendering later. This prevents the UI from freezing and makes applications feel more responsive.
+</div>
+
+<h2>Easy Way To Remember</h2>
+
+<div class="flow">
+Big Render Work
+<br>↓
+Split Into Small Pieces
+<br>↓
+Pause Between Pieces
+<br>↓
+Browser Stays Responsive
+<br>↓
+= Time Slicing
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+
+</body>
+</html>

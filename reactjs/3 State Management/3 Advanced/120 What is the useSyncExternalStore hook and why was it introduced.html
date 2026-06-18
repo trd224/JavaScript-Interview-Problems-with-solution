@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>120 - useSyncExternalStore Hook</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px}
+p,li{color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px}
+.success{background:#052e16;padding:18px;border-left:5px solid #22c55e;border-radius:10px;margin-top:15px}
+.warning{background:#1e1b4b;padding:18px;border-left:5px solid #fbbf24;border-radius:10px;margin-top:15px}
+.danger{background:#2a0f12;padding:18px;border-left:5px solid #ef4444;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;text-align:center;line-height:2;font-size:18px}
+.file-name{background:#111827;color:#93c5fd;padding:12px 16px;border-radius:10px;border:1px solid #1e293b;font-weight:bold;margin-top:20px;margin-bottom:10px}
+pre[class*="language-"],code[class*="language-"]{background:#1e1e1e}
+.token.keyword{color:#c792ea}
+.token.string{color:#c3e88d}
+.token.function{color:#82aaff}
+.token.class-name{color:#ffcb6b}
+.token.number{color:#f78c6c}
+.token.operator{color:#89ddff}
+.token.punctuation{color:#89ddff}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>120. What is the useSyncExternalStore Hook and Why Was It Introduced?</h1>
+
+<h2>One-Line Answer</h2>
+
+<div class="highlight">
+<b>useSyncExternalStore</b> is a React 18 hook used to safely connect React components with <b>external stores</b>, especially in Concurrent React, so the UI does not show mixed or torn state.
+</div>
+
+<h2>First Clear The Biggest Confusion</h2>
+
+<div class="warning">
+External store does not mean only Redux.
+</div>
+
+<p>
+External store means any state that lives outside React.
+</p>
+
+<table>
+<tr>
+<th>State Type</th>
+<th>Example</th>
+</tr>
+
+<tr>
+<td>React State</td>
+<td>useState, useReducer, Context</td>
+</tr>
+
+<tr>
+<td>External Store</td>
+<td>Redux, Zustand, MobX, custom store, browser API, WebSocket state</td>
+</tr>
+</table>
+
+<div class="highlight">
+Redux is only one example of an external store.
+</div>
+
+<h2>React State vs External Store</h2>
+
+<div class="flow">
+React State
+<br>↓
+React Owns It
+<br>↓
+React Knows When It Changes
+</div>
+
+<br>
+
+<div class="flow">
+External Store
+<br>↓
+State Lives Outside React
+<br>↓
+React Does Not Automatically Know
+</div>
+
+<h2>Example Of React State</h2>
+
+<div class="file-name">Counter.jsx</div>
+
+<pre class="language-jsx"><code class="language-jsx">function Counter() {
+  const [count, setCount] = useState(0);
+
+  return &lt;button onClick={() =&gt; setCount(count + 1)}&gt;Count: {count}&lt;/button&gt;;
+}</code></pre>
+
+<div class="success">
+Here React owns count, so React automatically re-renders when setCount runs.
+</div>
+
+<h2>Why Is This Called An External Store?</h2>
+
+<p>
+Many developers think external store means Redux only.
+</p>
+
+<div class="warning">
+External Store does not mean Redux.
+</div>
+
+<p>
+External store means any state that lives outside React.
+</p>
+
+<h3>External State Example</h3>
+
+<div class="file-name">externalStore.js</div>
+
+<pre class="language-js"><code class="language-js">let count = 0;
+
+export const store = {
+  getState: () =&gt; count,
+  increment: () =&gt; { count++; }
+};</code></pre>
+
+<div class="file-name">Counter.jsx</div>
+
+<pre class="language-jsx"><code class="language-jsx">function Counter() {
+  const count = store.getState();
+
+  return &lt;h1&gt;Count: {count}&lt;/h1&gt;;
+}</code></pre>
+
+<div class="flow">
+count Lives In externalStore.js
+<br>↓
+React Does Not Own It
+<br>↓
+React Only Reads It
+</div>
+
+<div class="highlight">
+Because count lives in externalStore.js instead of inside the React component, it is called external state or an external store.
+</div>
+
+<h2>Redux Is The Same Idea</h2>
+
+<div class="file-name">Redux Store</div>
+
+<pre class="language-js"><code class="language-js">const store = createStore(reducer);</code></pre>
+
+<p>
+Redux state lives inside the Redux store, not inside React components.
+</p>
+
+<div class="flow">
+Redux Store
+<br>↓
+State Lives Outside React
+<br>↓
+External Store
+</div>
+
+<h2>Zustand Is Also An External Store</h2>
+
+<div class="file-name">zustandStore.js</div>
+
+<pre class="language-js"><code class="language-js">const useStore = create(() =&gt; ({
+  count: 0
+}));</code></pre>
+
+<div class="flow">
+State Lives Inside Zustand
+<br>↓
+Outside React
+<br>↓
+External Store
+</div>
+
+<h2>MobX Is Also An External Store</h2>
+
+<div class="file-name">counterStore.js</div>
+
+<pre class="language-js"><code class="language-js">class CounterStore {
+  count = 0;
+}</code></pre>
+
+<div class="flow">
+State Lives Inside MobX
+<br>↓
+Outside React
+<br>↓
+External Store
+</div>
+
+<h2>Real Definition Of External Store</h2>
+
+<div class="highlight">
+Any state that lives outside React's useState, useReducer, or Context is considered an External Store.
+</div>
+
+<table>
+<tr>
+<th>Internal React State</th>
+<th>External Store</th>
+</tr>
+
+<tr>
+<td>useState</td>
+<td>Redux</td>
+</tr>
+
+<tr>
+<td>useReducer</td>
+<td>Zustand</td>
+</tr>
+
+<tr>
+<td>Context</td>
+<td>MobX</td>
+</tr>
+
+<tr>
+<td>React Owns State</td>
+<td>State Lives Outside React</td>
+</tr>
+</table>
+
+<div class="success">
+Now the purpose of useSyncExternalStore becomes clearer: React created it to safely connect React components to any external store, not just Redux.
+</div>
+
+<h2>Why Subscription Is Needed?</h2>
+
+<p>
+React must be informed when external store changes.
+</p>
+
+<div class="flow">
+External Store Changes
+<br>↓
+Subscription Fires
+<br>↓
+React Is Notified
+<br>↓
+Component Re-renders
+</div>
+
+<h2>Wrong Direct Reading Example</h2>
+
+<p>
+If you directly read Redux or custom store without subscription:
+</p>
+
+<div class="file-name">Wrong Pattern</div>
+
+<pre class="language-jsx"><code class="language-jsx">function Counter() {
+  const count = store.getState().count;
+
+  return &lt;h1&gt;Count: {count}&lt;/h1&gt;;
+}</code></pre>
+
+<p>
+Then the store may update:
+</p>
+
+<pre class="language-js"><code class="language-js">store.dispatch({ type: 'INCREMENT' });</code></pre>
+
+<p>
+But React will not automatically know.
+</p>
+
+<div class="danger">
+Store changed, but React component may not re-render because React was not subscribed.
+</div>
+
+<h2>Old Way Before React 18</h2>
+
+<p>
+Before React 18, libraries commonly used <b>useEffect + store.subscribe + setState</b>.
+</p>
+
+<div class="file-name">Old Manual Subscription</div>
+
+<pre class="language-jsx"><code class="language-jsx">function Counter() {
+  const [count, setCount] = useState(store.getState().count);
+
+  useEffect(() =&gt; {
+    return store.subscribe(() =&gt; {
+      setCount(store.getState().count);
+    });
+  }, []);
+
+  return &lt;h1&gt;Count: {count}&lt;/h1&gt;;
+}</code></pre>
+
+<h2>How Old Way Worked</h2>
+
+<div class="flow">
+Store Changes
+<br>↓
+store.subscribe() Callback Runs
+<br>↓
+setCount(store.getState().count)
+<br>↓
+React Re-renders
+</div>
+
+<div class="success">
+Before React 18, this old pattern was mostly fine because React rendering was mostly synchronous.
+</div>
+
+<h2>Important: Old Pattern Was Not Created For Tearing</h2>
+
+<div class="highlight">
+Old subscribe pattern was used only to tell React: "External store changed, please re-render."
+</div>
+
+<p>
+Before React 18:
+</p>
+
+<div class="flow">
+Store Changes
+<br>↓
+setState()
+<br>↓
+Render Starts
+<br>↓
+Render Finishes
+<br>↓
+Commit UI
+</div>
+
+<p>
+React usually did not pause rendering in the middle.
+</p>
+
+<h2>What Changed In React 18?</h2>
+
+<p>
+React 18 introduced Concurrent Rendering.
+</p>
+
+<div class="flow">
+Render Starts
+<br>↓
+React Can Pause
+<br>↓
+External Store Can Change
+<br>↓
+React Can Resume
+<br>↓
+Commit UI
+</div>
+
+<div class="warning">
+Now external stores need stronger safety because components can read mixed state snapshots.
+</div>
+
+<h2>What Is Tearing?</h2>
+
+<div class="highlight">
+Tearing means different components see different versions of the same external state during one render.
+</div>
+
+<h2>Real-World Shopping Cart Example</h2>
+
+<p>
+Store has:
+</p>
+
+<pre class="language-js"><code class="language-js">{
+  cartItems: 4,
+  totalPrice: 500
+}</code></pre>
+
+<p>
+Correct UI:
+</p>
+
+<div class="flow">
+Cart Items: 4
+<br>
+Total Price: ₹500
+</div>
+
+<p>
+User adds one item. Store becomes:
+</p>
+
+<pre class="language-js"><code class="language-js">{
+  cartItems: 5,
+  totalPrice: 600
+}</code></pre>
+
+<h3>Without Tearing</h3>
+
+<div class="flow">
+Cart Items: 5
+<br>
+Total Price: ₹600
+</div>
+
+<h3>With Tearing</h3>
+
+<div class="flow">
+React Starts Render
+<br>↓
+CartItems Reads Old State: 4
+<br>↓
+Store Changes
+<br>↓
+CartTotal Reads New State: ₹600
+</div>
+
+<p>
+Bad UI:
+</p>
+
+<div class="danger">
+Cart Items: 4
+<br>
+Total Price: ₹600
+</div>
+
+<div class="warning">
+This is tearing because the UI is showing old and new state together.
+</div>
+
+<h2>Why useSyncExternalStore Was Introduced?</h2>
+
+<div class="highlight">
+React introduced useSyncExternalStore to make external store subscriptions safe with Concurrent Rendering.
+</div>
+
+<p>
+It gives React two things:
+</p>
+
+<ul>
+<li><b>subscribe</b> - how to listen when external store changes.</li>
+<li><b>getSnapshot</b> - how to read the current consistent value.</li>
+</ul>
+
+<h2>New Way In React 18</h2>
+
+<div class="file-name">Syntax</div>
+
+<pre class="language-js"><code class="language-js">const value = useSyncExternalStore(subscribe, getSnapshot);</code></pre>
+
+<table>
+<tr>
+<th>Argument</th>
+<th>Meaning</th>
+</tr>
+
+<tr>
+<td>subscribe</td>
+<td>Registers a listener for store changes</td>
+</tr>
+
+<tr>
+<td>getSnapshot</td>
+<td>Returns the current value from the store</td>
+</tr>
+
+<tr>
+<td>getServerSnapshot</td>
+<td>Optional snapshot for server rendering</td>
+</tr>
+</table>
+
+<h2>How It Prevents Tearing</h2>
+
+<div class="flow">
+React Takes Snapshot
+<br>↓
+All Components Read Same Snapshot
+<br>↓
+If Store Changes During Render
+<br>↓
+React Detects It
+<br>↓
+React Re-renders With New Snapshot
+</div>
+
+<h2>Custom Store Example</h2>
+
+<p>
+This is not Redux. This is a small custom external store to understand the hook directly.
+</p>
+
+<div class="file-name">store.js</div>
+
+<pre class="language-js"><code class="language-js">let count = 0;
+const listeners = new Set();
+
+export const store = {
+  getSnapshot: () =&gt; count,
+
+  subscribe: listener =&gt; {
+    listeners.add(listener);
+    return () =&gt; listeners.delete(listener);
+  },
+
+  increment: () =&gt; {
+    count++;
+    listeners.forEach(listener =&gt; listener());
+  }
+};</code></pre>
+
+<div class="file-name">Counter.jsx</div>
+
+<pre class="language-jsx"><code class="language-jsx">import { useSyncExternalStore } from 'react';
+import { store } from './store';
+
+function Counter() {
+  const count = useSyncExternalStore(store.subscribe, store.getSnapshot);
+
+  return (
+    &lt;&gt;
+      &lt;h1&gt;Count: {count}&lt;/h1&gt;
+      &lt;button onClick={store.increment}&gt;Increment&lt;/button&gt;
+    &lt;/&gt;
+  );
+}</code></pre>
+
+<div class="warning">
+This example uses useSyncExternalStore directly because we created our own custom external store.
+</div>
+
+<h2>Why Not Use Redux Here?</h2>
+
+<p>
+If we use Redux, React Redux hides the internal mechanism behind useSelector.
+</p>
+
+<div class="file-name">Normal Redux Usage</div>
+
+<pre class="language-jsx"><code class="language-jsx">const count = useSelector(state =&gt; state.count);</code></pre>
+
+<p>
+This is what you normally write in Redux apps.
+</p>
+
+<div class="success">
+In normal Redux, you do not write useSyncExternalStore manually.
+</div>
+
+<h2>Redux vs React Redux</h2>
+
+<table>
+<tr>
+<th>Library</th>
+<th>Responsibility</th>
+</tr>
+
+<tr>
+<td>Redux</td>
+<td>Creates store, dispatches actions, updates state, provides subscribe()</td>
+</tr>
+
+<tr>
+<td>React Redux</td>
+<td>Connects Redux store to React using hooks like useSelector()</td>
+</tr>
+</table>
+
+<div class="highlight">
+Redux itself does not use useSyncExternalStore because Redux is not React-specific.
+</div>
+
+<h2>Important Correction</h2>
+
+<div class="danger">
+Wrong: Redux uses useSyncExternalStore internally.
+</div>
+
+<div class="success">
+Correct: React Redux uses useSyncExternalStore internally.
+</div>
+
+<h2>React Redux Internal Idea</h2>
+
+<p>
+When you write:
+</p>
+
+<div class="file-name">Your Code</div>
+
+<pre class="language-jsx"><code class="language-jsx">const count = useSelector(state =&gt; state.count);</code></pre>
+
+<p>
+React Redux conceptually does something like:
+</p>
+
+<div class="file-name">Simplified Internal Idea</div>
+
+<pre class="language-js"><code class="language-js">function useSelector(selector) {
+  const state = useSyncExternalStore(store.subscribe, store.getState);
+
+  return selector(state);
+}</code></pre>
+
+<div class="warning">
+Real React Redux is more advanced. It also has equality checks and optimizations.
+</div>
+
+<h2>What Happens After Redux Update?</h2>
+
+<div class="flow">
+User Click / API / WebSocket
+<br>↓
+dispatch(action)
+<br>↓
+Redux Store Updates
+<br>↓
+store.subscribe() Notifies React Redux
+<br>↓
+React Redux uses useSyncExternalStore
+<br>↓
+useSelector Runs Selector
+<br>↓
+Component Re-renders If Selected Value Changed
+</div>
+
+<h2>Example With useSelector</h2>
+
+<p>
+Redux state:
+</p>
+
+<pre class="language-js"><code class="language-js">{
+  user: { name: 'Rizwan' },
+  cart: { items: [] }
+}</code></pre>
+
+<p>
+Component selects user:
+</p>
+
+<pre class="language-jsx"><code class="language-jsx">const user = useSelector(state =&gt; state.user);</code></pre>
+
+<h3>If Cart Changes</h3>
+
+<div class="flow">
+Store Updates
+<br>↓
+Subscription Fires
+<br>↓
+Selector Runs
+<br>↓
+user Same
+<br>↓
+No Re-render
+</div>
+
+<h3>If User Changes</h3>
+
+<div class="flow">
+Store Updates
+<br>↓
+Subscription Fires
+<br>↓
+Selector Runs
+<br>↓
+user Changed
+<br>↓
+Component Re-renders
+</div>
+
+<h2>Old Way vs New Way</h2>
+
+<table>
+<tr>
+<th>Old Way</th>
+<th>New Way</th>
+</tr>
+
+<tr>
+<td>useEffect + store.subscribe + setState</td>
+<td>useSyncExternalStore</td>
+</tr>
+
+<tr>
+<td>Manual subscription sync</td>
+<td>React-supported external store sync</td>
+</tr>
+
+<tr>
+<td>Mostly okay before React 18</td>
+<td>Safe for Concurrent Rendering</td>
+</tr>
+
+<tr>
+<td>Possible tearing in React 18</td>
+<td>Prevents tearing</td>
+</tr>
+</table>
+
+<h2>When Do You Use useSyncExternalStore Directly?</h2>
+
+<ul>
+<li>When building your own external store</li>
+<li>When building a state management library</li>
+<li>When subscribing to browser APIs</li>
+<li>When creating custom global state outside React</li>
+</ul>
+
+<div class="success">
+Normal Redux developers usually use useSelector(), not useSyncExternalStore().
+</div>
+
+<h2>Final Interview Answer</h2>
+
+<div class="highlight">
+useSyncExternalStore is a React 18 hook introduced to safely subscribe React components to external stores. An external store is any state that lives outside React, such as Redux, Zustand, MobX, a custom store, or browser API state. Before React 18, libraries often used useEffect with store.subscribe and setState to update React when an external store changed. That worked mostly fine with synchronous rendering, but React 18 Concurrent Rendering can pause and resume renders, which may cause tearing where different components see different versions of the same store. useSyncExternalStore solves this by giving React a standard way to subscribe to external stores and read consistent snapshots. In Redux apps, developers normally use useSelector(); React Redux internally uses useSyncExternalStore and store.subscribe for safe updates.
+</div>
+
+<h2>Easy Way To Remember</h2>
+
+<div class="flow">
+Custom External Store
+<br>↓
+You May Use useSyncExternalStore Directly
+<br><br>
+Redux Store
+<br>↓
+You Use useSelector()
+<br>↓
+React Redux Internally Uses useSyncExternalStore
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+
+</body>
+</html>
