@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>415 - What is the React Compiler (React Forget) in React 19?</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px}
+p,li{color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left;vertical-align:top}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px}
+.success{background:#052e16;padding:18px;border-left:5px solid #22c55e;border-radius:10px;margin-top:15px}
+.warning{background:#1e1b4b;padding:18px;border-left:5px solid #fbbf24;border-radius:10px;margin-top:15px}
+.danger{background:#2a0f12;padding:18px;border-left:5px solid #ef4444;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;text-align:center;line-height:2;font-size:18px}
+.file-name{background:#111827;color:#93c5fd;padding:12px 16px;border-radius:10px;border:1px solid #1e293b;font-weight:bold;margin-top:20px;margin-bottom:10px}
+pre[class*="language-"],code[class*="language-"]{background:#1e1e1e}
+.token.keyword{color:#c792ea}.token.string{color:#c3e88d}.token.function{color:#82aaff}.token.class-name{color:#ffcb6b}.token.number{color:#f78c6c}.token.operator{color:#89ddff}.token.punctuation{color:#89ddff}
+</style>
+</head>
+<body>
+<div class="container">
+
+<h1>415. What is the React Compiler (React Forget)?</h1>
+
+<h2>One-Line Answer</h2>
+<div class="highlight">
+React Compiler, previously called <b>React Forget</b>, is an optional build-time optimization tool that analyzes React components and automatically applies many memoization optimizations, reducing the need for manual <code>useMemo()</code>, <code>useCallback()</code>, and <code>React.memo()</code>.
+</div>
+
+<h2>First Clear The Biggest Confusion</h2>
+
+<div class="warning">
+React Compiler is not the same thing as Babel/SWC, and it does not replace them.
+</div>
+
+<div class="flow">
+Babel / SWC
+<br>↓
+Converts JSX To JavaScript
+<br><br>
+React Compiler
+<br>↓
+Optimizes React Rendering
+</div>
+
+<h2>Normal React Build Without React Compiler</h2>
+<p>
+In a normal React project, you write JSX, and your build tool converts it into browser-understandable JavaScript.
+</p>
+
+<div class="flow">
+React Code
+<br>↓
+npm run build
+<br>↓
+Vite / Next.js / Webpack
+<br>↓
+Babel / SWC
+<br>↓
+JavaScript Bundle
+<br>↓
+Browser
+</div>
+
+<h3>Example</h3>
+
+<div class="file-name">Your JSX Code</div>
+<pre class="language-jsx"><code class="language-jsx">function App(){
+  return &lt;h1&gt;Hello&lt;/h1&gt;;
+}</code></pre>
+
+<p>
+The browser does not understand JSX directly, so Babel/SWC converts it.
+</p>
+
+<div class="file-name">Converted JavaScript Idea</div>
+<pre class="language-js"><code class="language-js">function App(){
+  return React.createElement('h1',null,'Hello');
+}</code></pre>
+
+<div class="success">
+Babel/SWC is required because JSX cannot run directly in the browser.
+</div>
+
+<h2>Build With React Compiler</h2>
+
+<p>
+When React Compiler is configured, you still run the same build command.
+</p>
+
+<div class="flow">
+React Code
+<br>↓
+npm run build
+<br>↓
+React Compiler
+<br>↓
+Babel / SWC
+<br>↓
+Optimized JavaScript Bundle
+<br>↓
+Browser
+</div>
+
+<div class="highlight">
+You do not run another command manually. After setup, <code>npm run build</code> does everything.
+</div>
+
+<h2>Why Do We Need React Compiler?</h2>
+
+<p>
+You already learned that React can re-render components unnecessarily when new object or function references are created.
+</p>
+
+<div class="file-name">Without Optimization</div>
+<pre class="language-jsx"><code class="language-jsx">function Parent(){
+  const settings={theme:'dark'};
+
+  function handleClick(){
+    console.log('Clicked');
+  }
+
+  return &lt;Child settings={settings} onClick={handleClick}/&gt;;
+}</code></pre>
+
+<p>
+Every render creates:
+</p>
+
+<ul>
+<li>New <code>settings</code> object</li>
+<li>New <code>handleClick</code> function</li>
+<li>Possible unnecessary child re-render</li>
+</ul>
+
+<div class="flow">
+Parent Re-renders
+<br>↓
+New Object Created
+<br>↓
+New Function Created
+<br>↓
+Child Receives New Props
+<br>↓
+Child May Re-render
+</div>
+
+<h2>Old Manual Optimization</h2>
+
+<p>
+Before React Compiler, developers often used <code>useMemo</code>, <code>useCallback</code>, and <code>React.memo</code>.
+</p>
+
+<div class="file-name">Parent.jsx</div>
+<pre class="language-jsx"><code class="language-jsx">import {useMemo,useCallback} from 'react';
+import Child from './Child';
+
+function Parent(){
+  const settings=useMemo(()=&gt;({theme:'dark'}),[]);
+
+  const handleClick=useCallback(()=&gt;{
+    console.log('Clicked');
+  },[]);
+
+  return &lt;Child settings={settings} onClick={handleClick}/&gt;;
+}</code></pre>
+
+<div class="file-name">Child.jsx</div>
+<pre class="language-jsx"><code class="language-jsx">import React from 'react';
+
+const Child=React.memo(function Child({settings,onClick}){
+  return &lt;button onClick={onClick}&gt;{settings.theme}&lt;/button&gt;;
+});
+
+export default Child;</code></pre>
+
+<div class="warning">
+This works, but developers often forget it, overuse it, or use wrong dependencies.
+</div>
+
+<h2>With React Compiler</h2>
+
+<p>
+The goal is to let you write normal React code.
+</p>
+
+<div class="file-name">Parent.jsx</div>
+<pre class="language-jsx"><code class="language-jsx">function Parent(){
+  const settings={theme:'dark'};
+
+  function handleClick(){
+    console.log('Clicked');
+  }
+
+  return &lt;Child settings={settings} onClick={handleClick}/&gt;;
+}</code></pre>
+
+<div class="flow">
+Developer Writes Normal Code
+<br>↓
+React Compiler Analyzes Code
+<br>↓
+Finds Stable Values
+<br>↓
+Adds Memoization Internally
+<br>↓
+Fewer Unnecessary Re-renders
+</div>
+
+<div class="success">
+React Compiler tries to give optimized behavior without forcing you to manually write memoization everywhere.
+</div>
+
+<h2>Does React Compiler Replace Babel?</h2>
+
+<div class="danger">
+No. React Compiler does not replace Babel or SWC.
+</div>
+
+<table>
+<tr><th>Tool</th><th>Job</th></tr>
+<tr><td>Babel / SWC</td><td>Convert JSX and modern JavaScript syntax</td></tr>
+<tr><td>React Compiler</td><td>Analyze React code and optimize rendering</td></tr>
+</table>
+
+<div class="flow">
+Wrong Thinking
+<br>↓
+React Compiler OR Babel
+<br><br>
+Correct Thinking
+<br>↓
+React Compiler + Babel/SWC
+</div>
+
+<h2>Why Is It Not Added By Default With Babel?</h2>
+
+<p>
+Because Babel is required for JSX, but React Compiler is an optional optimization.
+</p>
+
+<table>
+<tr><th>Reason</th><th>Explanation</th></tr>
+<tr><td>Babel is required</td><td>Browser cannot understand JSX without compilation</td></tr>
+<tr><td>React Compiler is optional</td><td>Your app works without it</td></tr>
+<tr><td>It changes optimization behavior</td><td>React team wants gradual adoption</td></tr>
+<tr><td>Existing apps need testing</td><td>Turning it on automatically could cause unexpected issues</td></tr>
+<tr><td>Build tools differ</td><td>Vite, Next.js, Webpack, CRA all configure builds differently</td></tr>
+</table>
+
+<div class="highlight">
+Simple reason: Babel is necessary to run React JSX. React Compiler is not necessary to run React; it improves performance.
+</div>
+
+<h2>Is React Compiler A React 19 Feature?</h2>
+
+<div class="warning">
+Not exactly. React Compiler is not a core React 19 runtime feature. It is a separate optional build-time compiler that works with React 19.
+</div>
+
+<table>
+<tr><th>React 19 Feature</th><th>React Compiler</th></tr>
+<tr><td>Built into React APIs</td><td>Separate build tool</td></tr>
+<tr><td>Example: Actions, useActionState, useOptimistic</td><td>Example: babel-plugin-react-compiler</td></tr>
+<tr><td>Runtime/API feature</td><td>Build-time optimization</td></tr>
+</table>
+
+<p>
+It is often discussed with React 19 because it became popular around the React 19 era.
+</p>
+
+<h2>When Was React Compiler Introduced?</h2>
+
+<div class="flow">
+2021
+<br>↓
+Announced as React Forget research project
+<br><br>
+2024+
+<br>↓
+Renamed / promoted as React Compiler
+<br><br>
+React 19 Era
+<br>↓
+More public adoption and discussion
+</div>
+
+<div class="highlight">
+Original name was <b>React Forget</b> because developers could forget manual memoization and the compiler would remember optimization.
+</div>
+
+<h2>Does It Mean I Do Not Need useMemo/useCallback?</h2>
+
+<div class="success">
+In many cases, React Compiler reduces the need for <code>useMemo</code> and <code>useCallback</code>.
+</div>
+
+<h3>Before</h3>
+<pre class="language-jsx"><code class="language-jsx">const filteredProducts=useMemo(()=&gt;products.filter(product=&gt;product.price&gt;1000),[products]);</code></pre>
+
+<h3>With Compiler</h3>
+<pre class="language-jsx"><code class="language-jsx">const filteredProducts=products.filter(product=&gt;product.price&gt;1000);</code></pre>
+
+<h3>Before</h3>
+<pre class="language-jsx"><code class="language-jsx">const handleClick=useCallback(()=&gt;{
+  console.log('Clicked');
+},[]);</code></pre>
+
+<h3>With Compiler</h3>
+<pre class="language-jsx"><code class="language-jsx">function handleClick(){
+  console.log('Clicked');
+}</code></pre>
+
+<div class="warning">
+But do not think you can ignore <code>useMemo</code>, <code>useCallback</code>, or <code>React.memo</code>. Many projects do not use the compiler, and the compiler cannot optimize every possible pattern.
+</div>
+
+<h2>Should You Always Use React Compiler?</h2>
+
+<table>
+<tr><th>Project Type</th><th>Suggestion</th></tr>
+<tr><td>Small learning project</td><td>Not required</td></tr>
+<tr><td>Existing production project</td><td>Enable carefully and test</td></tr>
+<tr><td>New modern React project</td><td>Can consider using it</td></tr>
+<tr><td>Interview preparation</td><td>Learn both manual memoization and compiler concept</td></tr>
+</table>
+
+<h2>How To Configure React Compiler</h2>
+
+<h3>Install</h3>
+<div class="file-name">Terminal</div>
+<pre class="language-bash"><code class="language-bash">npm install -D babel-plugin-react-compiler</code></pre>
+
+<h3>Vite Example</h3>
+<div class="file-name">vite.config.js</div>
+<pre class="language-js"><code class="language-js">import {defineConfig} from 'vite';
+import react from '@vitejs/plugin-react';
+
+export default defineConfig({
+  plugins:[
+    react({
+      babel:{
+        plugins:['babel-plugin-react-compiler']
+      }
+    })
+  ]
+});</code></pre>
+
+<h3>Babel Example</h3>
+<div class="file-name">babel.config.js</div>
+<pre class="language-js"><code class="language-js">module.exports={
+  plugins:[
+    'babel-plugin-react-compiler'
+  ]
+};</code></pre>
+
+<h3>Create React App</h3>
+
+<div class="warning">
+Create React App hides Babel config, so React Compiler setup is not clean there. You usually need eject, CRACO, or react-app-rewired. For new apps, Vite is easier.
+</div>
+
+<div class="flow">
+CRA
+<br>↓
+Babel Config Hidden
+<br>↓
+Hard To Configure Compiler
+<br><br>
+Vite / Custom Babel
+<br>↓
+Easy To Configure Compiler
+</div>
+
+<h2>After Setup, What Command Do I Run?</h2>
+
+<div class="highlight">
+Same command:
+<br><br>
+<code>npm run build</code>
+</div>
+
+<div class="flow">
+npm run build
+<br>↓
+Build Tool Starts
+<br>↓
+React Compiler Runs If Configured
+<br>↓
+Babel/SWC Converts JSX
+<br>↓
+Final Bundle Generated
+</div>
+
+<h2>Your Main Doubt Answered</h2>
+
+<table>
+<tr><th>Your Question</th><th>Answer</th></tr>
+<tr><td>Do I run another command?</td><td>No. After setup, <code>npm run build</code> handles it.</td></tr>
+<tr><td>Does compiler replace Babel?</td><td>No. It works with Babel/SWC.</td></tr>
+<tr><td>Is it default?</td><td>No. You must configure it.</td></tr>
+<tr><td>Is it React 19 core feature?</td><td>No. It is separate optional build-time tool.</td></tr>
+<tr><td>Can I stop learning useMemo/useCallback?</td><td>No. Compiler reduces need, but does not fully replace knowledge.</td></tr>
+</table>
+
+<h2>Easy Analogy</h2>
+
+<div class="flow">
+Babel
+<br>↓
+Translator
+<br>↓
+JSX To JavaScript
+<br><br>
+React Compiler
+<br>↓
+Performance Expert
+<br>↓
+Finds Re-render Problems
+</div>
+
+<h2>Easy Way To Remember</h2>
+
+<div class="flow">
+React Compiler
+<br>↓
+Optional
+<br>↓
+Build-Time
+<br>↓
+Works With Babel/SWC
+<br>↓
+Optimizes React Re-renders
+<br>↓
+Reduces Manual Memoization
+</div>
+
+<h2>Interview Answer</h2>
+
+<div class="highlight">
+React Compiler, formerly called React Forget, is an optional build-time compiler for React. It analyzes React components during the build process and automatically applies many memoization optimizations that developers previously handled using useMemo, useCallback, and React.memo. It does not replace Babel or SWC; instead, it works alongside them. Babel/SWC converts JSX to JavaScript, while React Compiler optimizes React rendering behavior. Once configured, it runs automatically during npm run build.
+</div>
+
+<h2>Final Summary</h2>
+
+<div class="success">
+Use React Compiler as an optimization layer, not as a Babel replacement. Your app can run without it, but when configured and tested, it can reduce unnecessary re-renders and make your React code cleaner.
+</div>
+
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+</body>
+</html>

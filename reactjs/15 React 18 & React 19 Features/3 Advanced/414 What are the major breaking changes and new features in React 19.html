@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>414 - What are the major breaking changes and new features in React 19?</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px}
+p,li{color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left;vertical-align:top}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px}
+.success{background:#052e16;padding:18px;border-left:5px solid #22c55e;border-radius:10px;margin-top:15px}
+.warning{background:#1e1b4b;padding:18px;border-left:5px solid #fbbf24;border-radius:10px;margin-top:15px}
+.danger{background:#2a0f12;padding:18px;border-left:5px solid #ef4444;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;text-align:center;line-height:2;font-size:18px}
+.file-name{background:#111827;color:#93c5fd;padding:12px 16px;border-radius:10px;border:1px solid #1e293b;font-weight:bold;margin-top:20px;margin-bottom:10px}
+pre[class*="language-"],code[class*="language-"]{background:#1e1e1e}
+.token.keyword{color:#c792ea}.token.string{color:#c3e88d}.token.function{color:#82aaff}.token.class-name{color:#ffcb6b}.token.number{color:#f78c6c}.token.operator{color:#89ddff}.token.punctuation{color:#89ddff}
+</style>
+</head>
+<body>
+<div class="container">
+
+<h1>414. What are the major breaking changes and new features in React 19?</h1>
+
+<h2>One-Line Answer</h2>
+<div class="highlight">
+React 19 adds new features like Actions, Form Actions, useActionState, useFormStatus, useOptimistic, use(), Server Components support, ref as prop, and metadata support. It also removes or changes some old APIs like string refs, module pattern factories, ReactDOM.render, hydrate, unmountComponentAtNode, findDOMNode, and old testing APIs.
+</div>
+
+<h2>React 19 Main New Features</h2>
+<table>
+<tr><th>Feature</th><th>Meaning</th></tr>
+<tr><td>Actions</td><td>Async functions for data updates</td></tr>
+<tr><td>Form Actions</td><td>Submit forms directly with action function</td></tr>
+<tr><td>useActionState</td><td>Manage action result and message</td></tr>
+<tr><td>useFormStatus</td><td>Know when form is submitting</td></tr>
+<tr><td>useOptimistic</td><td>Update UI immediately before server response</td></tr>
+<tr><td>use()</td><td>Read promise/context during render</td></tr>
+<tr><td>Server Components</td><td>Components that run on server</td></tr>
+<tr><td>ref as prop</td><td>Less need for forwardRef</td></tr>
+<tr><td>Context shortcut</td><td>Use context directly as provider</td></tr>
+<tr><td>Metadata support</td><td>Use title/meta/link tags in components</td></tr>
+</table>
+
+<h2>1. Actions</h2>
+<p>
+Actions are async functions used for updates like save, delete, login, signup, add comment, and place order.
+</p>
+
+<div class="file-name">Action Example</div>
+<pre class="language-jsx"><code class="language-jsx">async function saveUser(formData){
+  const name=formData.get('name');
+  await fetch('/api/users',{method:'POST',body:JSON.stringify({name})});
+}
+
+export default function UserForm(){
+  return (
+    &lt;form action={saveUser}&gt;
+      &lt;input name="name"/&gt;
+      &lt;button&gt;Save&lt;/button&gt;
+    &lt;/form&gt;
+  );
+}</code></pre>
+
+<div class="flow">
+User Clicks Save
+<br>↓
+Action Runs
+<br>↓
+Server Update
+<br>↓
+UI Updates
+</div>
+
+<h2>2. useActionState()</h2>
+<div class="file-name">useActionState Example</div>
+<pre class="language-jsx"><code class="language-jsx">import {useActionState} from 'react';
+
+async function createUser(prevState,formData){
+  const name=formData.get('name');
+  if(!name) return {message:'Name is required'};
+  return {message:'User created'};
+}
+
+export default function Signup(){
+  const [state,formAction]=useActionState(createUser,{message:''});
+
+  return (
+    &lt;form action={formAction}&gt;
+      &lt;input name="name"/&gt;
+      &lt;button&gt;Create&lt;/button&gt;
+      &lt;p&gt;{state.message}&lt;/p&gt;
+    &lt;/form&gt;
+  );
+}</code></pre>
+
+<h2>3. useFormStatus()</h2>
+<div class="file-name">Correct Child Component Example</div>
+<pre class="language-jsx"><code class="language-jsx">import {useFormStatus} from 'react-dom';
+
+function SubmitButton(){
+  const {pending}=useFormStatus();
+
+  return (
+    &lt;button disabled={pending}&gt;
+      {pending?'Saving...':'Save'}
+    &lt;/button&gt;
+  );
+}
+
+function UserForm(){
+  return (
+    &lt;form action={saveUser}&gt;
+      &lt;input name="name"/&gt;
+      &lt;SubmitButton /&gt;
+    &lt;/form&gt;
+  );
+}</code></pre>
+
+<div class="danger">
+Do not use useFormStatus inside the same component that creates the form. Use it inside a child component inside the form.
+</div>
+
+<div class="file-name">Wrong Same Component Example</div>
+<pre class="language-jsx"><code class="language-jsx">import {useFormStatus} from 'react-dom';
+
+function UserForm(){
+  const {pending}=useFormStatus();
+
+  return (
+    &lt;form action={saveUser}&gt;
+      &lt;input name="name"/&gt;
+      &lt;button disabled={pending}&gt;Save&lt;/button&gt;
+    &lt;/form&gt;
+  );
+}</code></pre>
+
+<h2>4. useOptimistic()</h2>
+<div class="file-name">Like Button Example</div>
+<pre class="language-jsx"><code class="language-jsx">import {useState,useOptimistic} from 'react';
+
+export default function LikeButton(){
+  const [likes,setLikes]=useState(10);
+  const [optimisticLikes,addLike]=useOptimistic(likes,(current,value)=>current+value);
+
+  async function handleLike(){
+    addLike(1);
+    const updatedLikes=await saveLike();
+    setLikes(updatedLikes);
+  }
+
+  return &lt;button onClick={handleLike}&gt;❤️ {optimisticLikes}&lt;/button&gt;;
+}</code></pre>
+
+<h2>5. use() API</h2>
+<div class="file-name">use() With Suspense</div>
+<pre class="language-jsx"><code class="language-jsx">import {use,Suspense} from 'react';
+
+const usersPromise=fetch('/api/users').then(res=&gt;res.json());
+
+function Users(){
+  const users=use(usersPromise);
+  return &lt;ul&gt;{users.map(user=&gt;&lt;li key={user.id}&gt;{user.name}&lt;/li&gt;)}&lt;/ul&gt;;
+}
+
+export default function Page(){
+  return (
+    &lt;Suspense fallback={&lt;h2&gt;Loading...&lt;/h2&gt;}&gt;
+      &lt;Users /&gt;
+    &lt;/Suspense&gt;
+  );
+}</code></pre>
+
+<h2>6. Server Components</h2>
+<div class="file-name">Server Component Example</div>
+<pre class="language-jsx"><code class="language-jsx">export default async function Users(){
+  const users=await fetch('https://api.example.com/users').then(res=&gt;res.json());
+
+  return (
+    &lt;ul&gt;
+      {users.map(user=&gt;&lt;li key={user.id}&gt;{user.name}&lt;/li&gt;)}
+    &lt;/ul&gt;
+  );
+}</code></pre>
+
+<div class="success">
+If there is no <code>'use client'</code>, it is inside a framework that supports Server Components, and it fetches data directly with async/await, it is usually a Server Component.
+</div>
+
+<h2>7. ref as Prop</h2>
+<div class="file-name">Before React 19</div>
+<pre class="language-jsx"><code class="language-jsx">import {forwardRef} from 'react';
+
+const Input=forwardRef(function Input(props,ref){
+  return &lt;input ref={ref} {...props}/&gt;;
+});</code></pre>
+
+<div class="file-name">React 19</div>
+<pre class="language-jsx"><code class="language-jsx">function Input({ref,...props}){
+  return &lt;input ref={ref} {...props}/&gt;;
+}</code></pre>
+
+<h2>8. Context Provider Shortcut</h2>
+<div class="file-name">Before</div>
+<pre class="language-jsx"><code class="language-jsx">&lt;ThemeContext.Provider value="dark"&gt;
+  &lt;App /&gt;
+&lt;/ThemeContext.Provider&gt;</code></pre>
+
+<div class="file-name">React 19</div>
+<pre class="language-jsx"><code class="language-jsx">&lt;ThemeContext value="dark"&gt;
+  &lt;App /&gt;
+&lt;/ThemeContext&gt;</code></pre>
+
+<h2>9. Metadata Support</h2>
+<div class="file-name">ProductPage.jsx</div>
+<pre class="language-jsx"><code class="language-jsx">function ProductPage(){
+  return (
+    &lt;&gt;
+      &lt;title&gt;Product Page&lt;/title&gt;
+      &lt;meta name="description" content="Buy best products online"/&gt;
+      &lt;h1&gt;Products&lt;/h1&gt;
+    &lt;/&gt;
+  );
+}</code></pre>
+
+<h2>Major Breaking Changes In React 19</h2>
+<table>
+<tr><th>Breaking Change</th><th>What To Use Instead</th></tr>
+<tr><td>New JSX Transform required</td><td>Update Babel/Vite/Next config</td></tr>
+<tr><td>ReactDOM.render removed</td><td>createRoot()</td></tr>
+<tr><td>ReactDOM.hydrate removed</td><td>hydrateRoot()</td></tr>
+<tr><td>unmountComponentAtNode removed</td><td>root.unmount()</td></tr>
+<tr><td>findDOMNode removed</td><td>Use refs</td></tr>
+<tr><td>String refs removed</td><td>Use createRef/useRef</td></tr>
+<tr><td>Module pattern factories removed</td><td>Use normal function/class components</td></tr>
+<tr><td>react-test-renderer deprecated</td><td>Use Testing Library</td></tr>
+<tr><td>propTypes/defaultProps for functions removed</td><td>Use TypeScript/default parameters</td></tr>
+</table>
+
+<h2>Breaking Change 1: ReactDOM.render Removed</h2>
+<div class="file-name">Before</div>
+<pre class="language-jsx"><code class="language-jsx">import ReactDOM from 'react-dom';
+
+ReactDOM.render(&lt;App /&gt;,document.getElementById('root'));</code></pre>
+
+<div class="file-name">React 19</div>
+<pre class="language-jsx"><code class="language-jsx">import {createRoot} from 'react-dom/client';
+
+createRoot(document.getElementById('root')).render(&lt;App /&gt;);</code></pre>
+
+<h2>Breaking Change 2: hydrate Removed</h2>
+<div class="file-name">Before</div>
+<pre class="language-jsx"><code class="language-jsx">import ReactDOM from 'react-dom';
+
+ReactDOM.hydrate(&lt;App /&gt;,document.getElementById('root'));</code></pre>
+
+<div class="file-name">React 19</div>
+<pre class="language-jsx"><code class="language-jsx">import {hydrateRoot} from 'react-dom/client';
+
+hydrateRoot(document.getElementById('root'),&lt;App /&gt;);</code></pre>
+
+<h2>Breaking Change 3: unmountComponentAtNode Removed</h2>
+<div class="file-name">Before</div>
+<pre class="language-jsx"><code class="language-jsx">ReactDOM.unmountComponentAtNode(document.getElementById('root'));</code></pre>
+
+<div class="file-name">React 19</div>
+<pre class="language-jsx"><code class="language-jsx">const root=createRoot(document.getElementById('root'));
+
+root.render(&lt;App /&gt;);
+
+root.unmount();</code></pre>
+
+<h2>Breaking Change 4: findDOMNode Removed</h2>
+<div class="file-name">Before</div>
+<pre class="language-jsx"><code class="language-jsx">import {findDOMNode} from 'react-dom';
+
+const node=findDOMNode(component);</code></pre>
+
+<div class="file-name">React 19</div>
+<pre class="language-jsx"><code class="language-jsx">import {useRef} from 'react';
+
+function App(){
+  const inputRef=useRef(null);
+
+  return &lt;input ref={inputRef}/&gt;;
+}</code></pre>
+
+<h2>Breaking Change 5: String Refs Removed</h2>
+<div class="file-name">Before</div>
+<pre class="language-jsx"><code class="language-jsx">class App extends React.Component{
+  render(){
+    return &lt;input ref="nameInput"/&gt;;
+  }
+}</code></pre>
+
+<div class="file-name">React 19</div>
+<pre class="language-jsx"><code class="language-jsx">function App(){
+  const nameInput=useRef(null);
+
+  return &lt;input ref={nameInput}/&gt;;
+}</code></pre>
+
+<h2>Breaking Change 6: Function defaultProps Removed</h2>
+<div class="file-name">Before</div>
+<pre class="language-jsx"><code class="language-jsx">function Button(props){
+  return &lt;button&gt;{props.label}&lt;/button&gt;;
+}
+
+Button.defaultProps={
+  label:'Save'
+};</code></pre>
+
+<div class="file-name">React 19</div>
+<pre class="language-jsx"><code class="language-jsx">function Button({label='Save'}){
+  return &lt;button&gt;{label}&lt;/button&gt;;
+}</code></pre>
+
+<h2>Easy Way To Remember</h2>
+<div class="flow">
+React 19 New Features
+<br>↓
+Forms + Actions + Server Components + Less Boilerplate
+<br><br>
+React 19 Breaking Changes
+<br>↓
+Old ReactDOM APIs + Old Refs + Old Testing APIs Removed
+</div>
+
+<h2>Interview Answer</h2>
+<div class="highlight">
+React 19 introduces major new features such as Actions, Form Actions, useActionState, useFormStatus, useOptimistic, the use() API, Server Components support, ref as prop, simpler Context providers, metadata support, and better hydration errors. Major breaking changes include requiring the new JSX transform, removing ReactDOM.render, hydrate, unmountComponentAtNode, findDOMNode, string refs, module pattern factories, and old testing APIs. Most changes modernize React and reduce boilerplate.
+</div>
+
+<h2>Source Notes</h2>
+<p>
+React’s official React 19 release post lists the main new features, while the official upgrade guide lists breaking changes and migration guidance. :contentReference[oaicite:0]{index=0} :contentReference[oaicite:1]{index=1}
+</p>
+
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+</body>
+</html>

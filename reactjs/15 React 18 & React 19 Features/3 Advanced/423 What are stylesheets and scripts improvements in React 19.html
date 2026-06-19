@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>423 - What are stylesheets and scripts improvements in React 19?</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px}
+p,li{color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left;vertical-align:top}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px}
+.success{background:#052e16;padding:18px;border-left:5px solid #22c55e;border-radius:10px;margin-top:15px}
+.warning{background:#1e1b4b;padding:18px;border-left:5px solid #fbbf24;border-radius:10px;margin-top:15px}
+.danger{background:#2a0f12;padding:18px;border-left:5px solid #ef4444;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;text-align:center;line-height:2;font-size:18px}
+.file-name{background:#111827;color:#93c5fd;padding:12px 16px;border-radius:10px;border:1px solid #1e293b;font-weight:bold;margin-top:20px;margin-bottom:10px}
+pre[class*="language-"],code[class*="language-"]{background:#1e1e1e}
+.token.keyword{color:#c792ea}.token.string{color:#c3e88d}.token.function{color:#82aaff}.token.class-name{color:#ffcb6b}.token.number{color:#f78c6c}.token.operator{color:#89ddff}.token.punctuation{color:#89ddff}
+</style>
+</head>
+<body>
+<div class="container">
+
+<h1>423. What are stylesheets and scripts improvements in React 19?</h1>
+
+<h2>One-Line Answer</h2>
+<div class="highlight">
+React 19 improves how React handles stylesheets and scripts. You can declare resources like <code>&lt;link rel="stylesheet"&gt;</code> and <code>&lt;script&gt;</code> inside components, and React can coordinate loading, deduplicate repeated resources, and work better with SSR and streaming.
+</div>
+
+<h2>Why Was This Needed?</h2>
+<p>
+Before React 19, developers commonly managed stylesheets and scripts manually in <code>index.html</code> or by creating script tags inside <code>useEffect()</code>.
+</p>
+
+<div class="file-name">index.html</div>
+<pre class="language-html"><code class="language-html">&lt;link rel="stylesheet" href="/product.css"/&gt;
+&lt;script src="/analytics.js"&gt;&lt;/script&gt;</code></pre>
+
+<div class="file-name">Old Dynamic Script Loading</div>
+<pre class="language-jsx"><code class="language-jsx">import {useEffect} from 'react';
+
+function ProductPage(){
+  useEffect(()=&gt;{
+    const script=document.createElement('script');
+    script.src='/analytics.js';
+    document.body.appendChild(script);
+  },[]);
+
+  return &lt;h1&gt;Products&lt;/h1&gt;;
+}</code></pre>
+
+<div class="warning">
+This works, but loading order, duplicate files, and timing can become difficult, especially with SSR and streaming.
+</div>
+
+<h2>React 19 Stylesheet Support</h2>
+<p>
+React 19 allows stylesheet links to be declared directly inside components.
+</p>
+
+<div class="file-name">ProductPage.jsx</div>
+<pre class="language-jsx"><code class="language-jsx">function ProductPage(){
+  return (
+    &lt;&gt;
+      &lt;link rel="stylesheet" href="/product.css"/&gt;
+      &lt;h1&gt;Products&lt;/h1&gt;
+    &lt;/&gt;
+  );
+}</code></pre>
+
+<div class="flow">
+Component Renders
+<br>↓
+React Finds Stylesheet
+<br>↓
+React Loads CSS
+<br>↓
+Content Appears With Correct Styling
+</div>
+
+<div class="success">
+This helps reduce problems like content appearing before important CSS is ready.
+</div>
+
+<h2>React 19 Script Support</h2>
+<p>
+Scripts can also be declared from components.
+</p>
+
+<div class="file-name">Analytics.jsx</div>
+<pre class="language-jsx"><code class="language-jsx">function Analytics(){
+  return &lt;script async src="/analytics.js"/&gt;;
+}</code></pre>
+
+<div class="success">
+React can understand the script as a resource instead of you manually appending it with DOM APIs.
+</div>
+
+<h2>Real-World Product Page Example</h2>
+
+<div class="file-name">ProductPage.jsx</div>
+<pre class="language-jsx"><code class="language-jsx">function ProductPage(){
+  return (
+    &lt;&gt;
+      &lt;title&gt;iPhone 17&lt;/title&gt;
+      &lt;meta name="description" content="Buy iPhone 17"/&gt;
+      &lt;link rel="stylesheet" href="/product.css"/&gt;
+      &lt;script async src="/analytics.js"/&gt;
+      &lt;h1&gt;iPhone 17&lt;/h1&gt;
+    &lt;/&gt;
+  );
+}</code></pre>
+
+<div class="flow">
+Page Component Renders
+<br>↓
+React Finds Metadata
+<br>↓
+React Finds Stylesheet
+<br>↓
+React Finds Script
+<br>↓
+Resources Are Managed By React
+</div>
+
+<h2>Deduplication</h2>
+<p>
+If multiple components request the same stylesheet or script, React can avoid loading it multiple times.
+</p>
+
+<div class="file-name">Header.jsx</div>
+<pre class="language-jsx"><code class="language-jsx">function Header(){
+  return &lt;link rel="stylesheet" href="/app.css"/&gt;;
+}</code></pre>
+
+<div class="file-name">Footer.jsx</div>
+<pre class="language-jsx"><code class="language-jsx">function Footer(){
+  return &lt;link rel="stylesheet" href="/app.css"/&gt;;
+}</code></pre>
+
+<div class="flow">
+Header Requests app.css
+<br>↓
+Footer Requests app.css
+<br>↓
+React Detects Same href
+<br>↓
+Loads app.css Once
+</div>
+
+<h2>Relation To Streaming SSR</h2>
+<p>
+You recently learned streaming with Suspense. Stylesheet and script improvements are useful because React can coordinate resources while HTML is being streamed.
+</p>
+
+<div class="file-name">Server Component Example</div>
+<pre class="language-jsx"><code class="language-jsx">export default async function ProductPage(){
+  const product=await fetch('/api/product/1').then(res=&gt;res.json());
+
+  return (
+    &lt;&gt;
+      &lt;title&gt;{product.name}&lt;/title&gt;
+      &lt;meta name="description" content={product.description}/&gt;
+      &lt;link rel="stylesheet" href="/product.css"/&gt;
+      &lt;script async src="/analytics.js"/&gt;
+      &lt;h1&gt;{product.name}&lt;/h1&gt;
+    &lt;/&gt;
+  );
+}</code></pre>
+
+<div class="flow">
+Server Starts Rendering
+<br>↓
+React Knows Required CSS
+<br>↓
+HTML Streams
+<br>↓
+Styles Are Coordinated
+<br>↓
+Page Appears Correctly Styled
+</div>
+
+<h2>Why Is This Useful?</h2>
+<table>
+<tr><th>Improvement</th><th>Meaning</th></tr>
+<tr><td>Resource Coordination</td><td>React can coordinate when resources load</td></tr>
+<tr><td>Deduplication</td><td>Same stylesheet/script is not loaded repeatedly</td></tr>
+<tr><td>Better SSR</td><td>Works better with server rendering and streaming</td></tr>
+<tr><td>Less Manual DOM Code</td><td>No need to manually append script tags in many cases</td></tr>
+<tr><td>Better UX</td><td>Helps avoid flash of unstyled content</td></tr>
+</table>
+
+<h2>Before vs React 19</h2>
+<table>
+<tr><th>Before React 19</th><th>React 19</th></tr>
+<tr><td>CSS usually placed manually in HTML</td><td>CSS can be declared in components</td></tr>
+<tr><td>Scripts often loaded with useEffect</td><td>Scripts can be declared in JSX</td></tr>
+<tr><td>Duplicate resource loading possible</td><td>React can deduplicate resources</td></tr>
+<tr><td>Harder with streaming SSR</td><td>Better resource coordination with SSR</td></tr>
+</table>
+
+<h2>Easy Way To Remember</h2>
+<div class="flow">
+Before React 19
+<br>↓
+Manage CSS And Scripts Yourself
+<br><br>
+React 19
+<br>↓
+Declare Resources In Components
+<br>↓
+React Coordinates Them
+</div>
+
+<h2>Interview Answer</h2>
+<div class="highlight">
+React 19 improves stylesheet and script handling by treating them as resources that can be declared directly inside React components. React can coordinate their loading, deduplicate repeated resources, and integrate better with SSR and streaming. This reduces manual DOM code, improves loading behavior, and helps avoid issues like duplicate scripts or unstyled content appearing too early.
+</div>
+
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js"></script>
+</body>
+</html>

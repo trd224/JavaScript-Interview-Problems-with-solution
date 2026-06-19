@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>420 - What are React 19 Form Actions?</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px}
+p,li{color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px}
+.success{background:#052e16;padding:18px;border-left:5px solid #22c55e;border-radius:10px;margin-top:15px}
+.warning{background:#1e1b4b;padding:18px;border-left:5px solid #fbbf24;border-radius:10px;margin-top:15px}
+.danger{background:#2a0f12;padding:18px;border-left:5px solid #ef4444;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;text-align:center;line-height:2;font-size:18px}
+.file-name{background:#111827;color:#93c5fd;padding:12px 16px;border-radius:10px;border:1px solid #1e293b;font-weight:bold;margin-top:20px;margin-bottom:10px}
+pre[class*="language-"],code[class*="language-"]{background:#1e1e1e}
+.token.keyword{color:#c792ea}.token.string{color:#c3e88d}.token.function{color:#82aaff}.token.class-name{color:#ffcb6b}.token.number{color:#f78c6c}.token.operator{color:#89ddff}.token.punctuation{color:#89ddff}
+</style>
+</head>
+<body>
+<div class="container">
+
+<h1>420. What are React 19 Form Actions?</h1>
+
+<h2>One-Line Answer</h2>
+<div class="highlight">
+React 19 Form Actions allow a form to call a function directly using the <code>action</code> prop. React automatically passes <code>FormData</code> to that function, so we need less <code>onSubmit</code>, <code>preventDefault()</code>, and manual form-handling code. React’s official docs describe this as passing a function to the form <code>action</code> prop, where <code>formData</code> is passed automatically. :contentReference[oaicite:0]{index=0}
+</div>
+
+<h2>Before React 19</h2>
+<p>
+Before React 19, we normally handled forms using <code>onSubmit</code>.
+</p>
+
+<div class="file-name">OldForm.jsx</div>
+<pre class="language-jsx"><code class="language-jsx">function OldForm(){
+  async function handleSubmit(e){
+    e.preventDefault();
+    const formData=new FormData(e.target);
+    const name=formData.get('name');
+    await fetch('/api/users',{method:'POST',body:JSON.stringify({name})});
+  }
+
+  return (
+    &lt;form onSubmit={handleSubmit}&gt;
+      &lt;input name="name"/&gt;
+      &lt;button&gt;Save&lt;/button&gt;
+    &lt;/form&gt;
+  );
+}</code></pre>
+
+<div class="flow">
+Form Submit
+<br>↓
+onSubmit Runs
+<br>↓
+preventDefault()
+<br>↓
+new FormData()
+<br>↓
+API Call
+</div>
+
+<div class="warning">
+This works, but it creates extra boilerplate code.
+</div>
+
+<h2>React 19 Form Action</h2>
+<p>
+In React 19, we can pass an async function directly to <code>action</code>.
+</p>
+
+<div class="file-name">UserForm.jsx</div>
+<pre class="language-jsx"><code class="language-jsx">async function saveUser(formData){
+  const name=formData.get('name');
+  await fetch('/api/users',{method:'POST',body:JSON.stringify({name})});
+}
+
+export default function UserForm(){
+  return (
+    &lt;form action={saveUser}&gt;
+      &lt;input name="name"/&gt;
+      &lt;button&gt;Save&lt;/button&gt;
+    &lt;/form&gt;
+  );
+}</code></pre>
+
+<div class="success">
+Here <code>saveUser</code> is the Form Action. React automatically gives it <code>formData</code>.
+</div>
+
+<h2>What Happens Internally?</h2>
+
+<div class="flow">
+User Types Name
+<br>↓
+Clicks Save
+<br>↓
+React Creates FormData
+<br>↓
+saveUser(formData) Runs
+<br>↓
+API Call Happens
+<br>↓
+Form Action Completes
+</div>
+
+<h2>Real-World Example</h2>
+
+<div class="file-name">CreateUserForm.jsx</div>
+<pre class="language-jsx"><code class="language-jsx">async function createUser(formData){
+  const name=formData.get('name');
+  const email=formData.get('email');
+
+  await fetch('/api/users',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({name,email})
+  });
+}
+
+export default function CreateUserForm(){
+  return (
+    &lt;form action={createUser}&gt;
+      &lt;input name="name" placeholder="Name"/&gt;
+      &lt;input name="email" placeholder="Email"/&gt;
+      &lt;button&gt;Create User&lt;/button&gt;
+    &lt;/form&gt;
+  );
+}</code></pre>
+
+<h2>Form Actions With useActionState()</h2>
+<p>
+<code>useActionState()</code> is useful when the action should return a message, error, or result. React’s docs define <code>useActionState</code> as a hook for updating state with side effects using Actions. :contentReference[oaicite:1]{index=1}
+</p>
+
+<div class="file-name">SignupForm.jsx</div>
+<pre class="language-jsx"><code class="language-jsx">import {useActionState} from 'react';
+
+async function createUser(prevState,formData){
+  const name=formData.get('name');
+
+  if(!name){
+    return {message:'Name is required'};
+  }
+
+  await fetch('/api/users',{method:'POST',body:JSON.stringify({name})});
+
+  return {message:'User created successfully'};
+}
+
+export default function SignupForm(){
+  const [state,formAction]=useActionState(createUser,{message:''});
+
+  return (
+    &lt;form action={formAction}&gt;
+      &lt;input name="name" placeholder="Name"/&gt;
+      &lt;button&gt;Create&lt;/button&gt;
+      &lt;p&gt;{state.message}&lt;/p&gt;
+    &lt;/form&gt;
+  );
+}</code></pre>
+
+<div class="flow">
+Submit Form
+<br>↓
+Action Runs
+<br>↓
+Action Returns Message
+<br>↓
+state.message Updates
+<br>↓
+UI Shows Result
+</div>
+
+<h2>Form Actions With useFormStatus()</h2>
+<p>
+<code>useFormStatus()</code> gives information about the parent form submission, like <code>pending</code>. It must be used in a component rendered inside the form. :contentReference[oaicite:2]{index=2}
+</p>
+
+<div class="file-name">SubmitButton.jsx</div>
+<pre class="language-jsx"><code class="language-jsx">import {useFormStatus} from 'react-dom';
+
+function SubmitButton(){
+  const {pending}=useFormStatus();
+
+  return (
+    &lt;button disabled={pending}&gt;
+      {pending?'Saving...':'Save'}
+    &lt;/button&gt;
+  );
+}</code></pre>
+
+<div class="file-name">UserForm.jsx</div>
+<pre class="language-jsx"><code class="language-jsx">function UserForm(){
+  return (
+    &lt;form action={saveUser}&gt;
+      &lt;input name="name"/&gt;
+      &lt;SubmitButton /&gt;
+    &lt;/form&gt;
+  );
+}</code></pre>
+
+<div class="danger">
+Do not use <code>useFormStatus()</code> in the same component that creates the form. Use it inside a child component inside the form.
+</div>
+
+<h2>Wrong Example: Same Component</h2>
+
+<div class="file-name">WrongUserForm.jsx</div>
+<pre class="language-jsx"><code class="language-jsx">import {useFormStatus} from 'react-dom';
+
+function UserForm(){
+  const {pending}=useFormStatus();
+
+  return (
+    &lt;form action={saveUser}&gt;
+      &lt;input name="name"/&gt;
+      &lt;button disabled={pending}&gt;Save&lt;/button&gt;
+    &lt;/form&gt;
+  );
+}</code></pre>
+
+<div class="warning">
+This is wrong because <code>UserForm</code> itself is not inside the form context. The child component <code>SubmitButton</code> is inside the form context.
+</div>
+
+<h2>Benefits</h2>
+<ul>
+<li>Less boilerplate code</li>
+<li>No manual <code>preventDefault()</code></li>
+<li>No manual <code>new FormData(e.target)</code></li>
+<li>Cleaner async form submission</li>
+<li>Works well with <code>useActionState()</code></li>
+<li>Works well with <code>useFormStatus()</code></li>
+</ul>
+
+<h2>Old vs React 19</h2>
+
+<table>
+<tr><th>Old React Form</th><th>React 19 Form Action</th></tr>
+<tr><td><code>onSubmit</code></td><td><code>action={saveUser}</code></td></tr>
+<tr><td><code>e.preventDefault()</code></td><td>Handled automatically</td></tr>
+<tr><td><code>new FormData(e.target)</code></td><td><code>formData</code> passed automatically</td></tr>
+<tr><td>Manual loading state</td><td><code>useFormStatus()</code></td></tr>
+<tr><td>Manual result state</td><td><code>useActionState()</code></td></tr>
+</table>
+
+<h2>Easy Way To Remember</h2>
+
+<div class="flow">
+Old React
+<br>↓
+form onSubmit
+<br>↓
+preventDefault()
+<br>↓
+manual FormData
+<br><br>
+React 19
+<br>↓
+form action
+<br>↓
+React gives FormData automatically
+</div>
+
+<h2>Interview Answer</h2>
+<div class="highlight">
+React 19 Form Actions let us pass a function directly to a form’s <code>action</code> prop. When the form is submitted, React automatically creates and passes <code>FormData</code> to that function. This simplifies form handling by reducing <code>onSubmit</code>, <code>preventDefault()</code>, and manual <code>FormData</code> boilerplate, and it works naturally with hooks like <code>useActionState()</code> and <code>useFormStatus()</code>.
+</div>
+
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+</body>
+</html>

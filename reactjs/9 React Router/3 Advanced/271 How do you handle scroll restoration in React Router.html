@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>271 - How do you handle scroll restoration in React Router?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px}
+p,li{color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px}
+.success{background:#052e16;padding:18px;border-left:5px solid #22c55e;border-radius:10px;margin-top:15px}
+.warning{background:#1e1b4b;padding:18px;border-left:5px solid #fbbf24;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;text-align:center;line-height:2;font-size:18px}
+.file-name{background:#111827;color:#93c5fd;padding:12px 16px;border-radius:10px;border:1px solid #1e293b;font-weight:bold;margin-top:20px;margin-bottom:10px}
+pre[class*="language-"],code[class*="language-"]{background:#1e1e1e}
+.token.keyword{color:#c792ea}.token.string{color:#c3e88d}.token.function{color:#82aaff}.token.class-name{color:#ffcb6b}.token.number{color:#f78c6c}.token.operator{color:#89ddff}.token.punctuation{color:#89ddff}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+<h1>271. How do you handle scroll restoration in React Router?</h1>
+
+<h2>One-Line Answer</h2>
+
+<div class="highlight">
+React Router v6.4+ provides the <code>&lt;ScrollRestoration /&gt;</code> component, which automatically remembers and restores scroll positions when users navigate back and forward.
+</div>
+
+<h2>The Problem</h2>
+
+<p>
+Imagine an e-commerce website with hundreds of products.
+</p>
+
+<div class="flow">
+Open Products Page
+<br>↓
+Scroll To Product #80
+<br>↓
+Click Product Details
+<br>↓
+Press Browser Back
+</div>
+
+<p>
+What should happen?
+</p>
+
+<div class="success">
+User should return to Product #80.
+</div>
+
+<div class="warning">
+Without scroll restoration, the user returns to the top of the page and must scroll again.
+</div>
+
+<h2>Without Scroll Restoration</h2>
+
+<div class="flow">
+Products Page
+<br>↓
+Scroll To Product #80
+<br>↓
+Open Product Detail
+<br>↓
+Back Button
+<br>↓
+Returned To Top ❌
+</div>
+
+<h2>With Scroll Restoration</h2>
+
+<div class="flow">
+Products Page
+<br>↓
+Scroll To Product #80
+<br>↓
+Open Product Detail
+<br>↓
+Back Button
+<br>↓
+Return To Product #80 ✅
+</div>
+
+<h2>Using ScrollRestoration</h2>
+
+<p>
+Place it once inside your root layout route.
+</p>
+
+<div class="file-name">AppLayout.jsx</div>
+
+<pre class="language-jsx"><code class="language-jsx">import {Outlet,ScrollRestoration} from 'react-router-dom';
+
+export default function AppLayout(){
+
+  return (
+    &lt;&gt;
+      &lt;Header /&gt;
+
+      &lt;Outlet /&gt;
+
+      &lt;Footer /&gt;
+
+      &lt;ScrollRestoration /&gt;
+    &lt;/&gt;
+  );
+
+}</code></pre>
+
+<h2>Router Setup</h2>
+
+<div class="file-name">router.jsx</div>
+
+<pre class="language-jsx"><code class="language-jsx">import {createBrowserRouter} from 'react-router-dom';
+import AppLayout from './AppLayout';
+
+export const router=createBrowserRouter([
+  {
+    path:'/',
+    element:&lt;AppLayout /&gt;,
+    children:[
+      {index:true,element:&lt;Home /&gt;},
+      {path:'products',element:&lt;Products /&gt;},
+      {path:'products/:id',element:&lt;ProductDetail /&gt;}
+    ]
+  }
+]);</code></pre>
+
+<h2>How It Works Internally</h2>
+
+<div class="flow">
+User Scrolls
+<br>↓
+React Router Saves Position
+<br>↓
+Navigate To New Route
+<br>↓
+Position Stored
+<br>↓
+User Clicks Back
+<br>↓
+Position Restored
+</div>
+
+<h2>Understanding AppLayout, Outlet and ScrollRestoration</h2>
+
+<div class="flow">
+AppLayout
+<br>├─ Header
+<br>├─ Outlet
+<br>└─ ScrollRestoration
+</div>
+
+<p>
+If the user visits:
+</p>
+
+<pre><code>https://site.com/products</code></pre>
+
+<p>
+Then Outlet renders:
+</p>
+
+<pre><code>&lt;Products /&gt;</code></pre>
+
+<p>
+If the user visits:
+</p>
+
+<pre><code>https://site.com/products/101</code></pre>
+
+<p>
+Then Outlet renders:
+</p>
+
+<pre><code>&lt;ProductDetail /&gt;</code></pre>
+
+<p>
+Meanwhile <code>ScrollRestoration</code> keeps tracking scroll positions for all routes.
+</p>
+
+<h2>Manual Scroll-To-Top Alternative</h2>
+
+<p>
+Sometimes developers do not want restoration. They always want a new page to start at the top.
+</p>
+
+<div class="file-name">ScrollToTop.jsx</div>
+
+<pre class="language-jsx"><code class="language-jsx">import {useEffect} from 'react';
+import {useLocation} from 'react-router-dom';
+
+export default function ScrollToTop(){
+
+  const {pathname}=useLocation();
+
+  useEffect(()=>{
+    window.scrollTo(0,0);
+  },[pathname]);
+
+  return null;
+
+}</code></pre>
+
+<h3>Behavior</h3>
+
+<div class="flow">
+Navigate To Route
+<br>↓
+Always Scroll To Top
+<br>↓
+Old Position Lost
+</div>
+
+<h2>ScrollRestoration vs ScrollToTop</h2>
+
+<table>
+<tr>
+<th>Feature</th>
+<th>ScrollRestoration</th>
+<th>ScrollToTop</th>
+</tr>
+
+<tr>
+<td>Back Button Support</td>
+<td>✅ Yes</td>
+<td>❌ No</td>
+</tr>
+
+<tr>
+<td>Restore Old Position</td>
+<td>✅ Yes</td>
+<td>❌ No</td>
+</tr>
+
+<tr>
+<td>Always Go Top</td>
+<td>❌ No</td>
+<td>✅ Yes</td>
+</tr>
+
+<tr>
+<td>Best For</td>
+<td>E-commerce, blogs</td>
+<td>Traditional page navigation</td>
+</tr>
+
+</table>
+
+<h2>Real-World Example</h2>
+
+<div class="flow">
+Amazon Product List
+<br>↓
+Scroll To Item #200
+<br>↓
+Open Product
+<br>↓
+Read Details
+<br>↓
+Press Back
+<br>↓
+Return To Item #200
+</div>
+
+<div class="success">
+This is exactly the user experience that ScrollRestoration provides.
+</div>
+
+<h2>Interview Answer</h2>
+
+<div class="highlight">
+React Router v6.4+ handles scroll restoration through the <code>&lt;ScrollRestoration /&gt;</code> component. It is typically placed inside the root layout route and automatically saves and restores scroll positions during browser back and forward navigation. For applications that always need to start at the top after navigation, developers can instead use a custom component with <code>useLocation()</code> and <code>window.scrollTo(0,0)</code>.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+
+</body>
+</html>

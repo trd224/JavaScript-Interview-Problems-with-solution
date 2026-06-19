@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>270 - What is the loader and action API in React Router v6.4+?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px}
+p,li{color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px}
+.success{background:#052e16;padding:18px;border-left:5px solid #22c55e;border-radius:10px;margin-top:15px}
+.warning{background:#1e1b4b;padding:18px;border-left:5px solid #fbbf24;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;text-align:center;line-height:2;font-size:18px}
+.file-name{background:#111827;color:#93c5fd;padding:12px 16px;border-radius:10px;border:1px solid #1e293b;font-weight:bold;margin-top:20px;margin-bottom:10px}
+pre[class*="language-"],code[class*="language-"]{background:#1e1e1e}
+.token.keyword{color:#c792ea}.token.string{color:#c3e88d}.token.function{color:#82aaff}.token.class-name{color:#ffcb6b}.token.number{color:#f78c6c}.token.operator{color:#89ddff}.token.punctuation{color:#89ddff}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+<h1>270. What is the loader and action API in React Router v6.4+?</h1>
+
+<h2>One-Line Answer</h2>
+
+<div class="highlight">
+React Router v6.4+ introduced <b>loaders</b> for reading data before rendering a route and <b>actions</b> for handling form submissions and data mutations.
+</div>
+
+<h2>Problem Before v6.4</h2>
+
+<p>
+Traditionally we fetched data inside <code>useEffect()</code>.
+</p>
+
+<div class="file-name">Old Way</div>
+
+<pre class="language-jsx"><code class="language-jsx">function Users(){
+
+  const [users,setUsers]=useState([]);
+
+  useEffect(()=>{
+    fetch('/api/users')
+      .then(res=>res.json())
+      .then(data=>setUsers(data));
+  },[]);
+
+  return &lt;UsersList users={users}/&gt;;
+
+}</code></pre>
+
+<div class="flow">
+Route Loads
+<br>↓
+Component Renders
+<br>↓
+useEffect Runs
+<br>↓
+Fetch Starts
+<br>↓
+Data Arrives
+<br>↓
+UI Updates
+</div>
+
+<div class="warning">
+The component renders before data is available.
+</div>
+
+<h2>Loader API</h2>
+
+<p>
+A loader runs before the route component renders.
+</p>
+
+<div class="file-name">users-loader.js</div>
+
+<pre class="language-jsx"><code class="language-jsx">export async function usersLoader(){
+
+  const res=await fetch('/api/users');
+
+  return res.json();
+
+}</code></pre>
+
+<div class="file-name">router.js</div>
+
+<pre class="language-jsx"><code class="language-jsx">createBrowserRouter([
+  {
+    path:'/users',
+    element:&lt;Users/&gt;,
+    loader:usersLoader
+  }
+]);</code></pre>
+
+<div class="file-name">Users.jsx</div>
+
+<pre class="language-jsx"><code class="language-jsx">import {useLoaderData} from 'react-router-dom';
+
+export default function Users(){
+
+  const users=useLoaderData();
+
+  return (
+    &lt;ul&gt;
+      {users.map(user=&gt;
+        &lt;li key={user.id}&gt;{user.name}&lt;/li&gt;
+      )}
+    &lt;/ul&gt;
+  );
+
+}</code></pre>
+
+<h3>Loader Flow</h3>
+
+<div class="flow">
+Navigate To Route
+<br>↓
+Loader Runs
+<br>↓
+Fetch Data
+<br>↓
+Data Ready
+<br>↓
+Render Component
+</div>
+
+<div class="success">
+Very similar to React Server Components where data is fetched before rendering.
+</div>
+
+<h2>Action API</h2>
+
+<p>
+Actions handle form submissions, POST requests, updates and deletes.
+</p>
+
+<div class="file-name">users-action.js</div>
+
+<pre class="language-jsx"><code class="language-jsx">export async function createUserAction({request}){
+
+  const formData=await request.formData();
+
+  await fetch('/api/users',{
+    method:'POST',
+    body:formData
+  });
+
+  return null;
+
+}</code></pre>
+
+<div class="file-name">router.js</div>
+
+<pre class="language-jsx"><code class="language-jsx">createBrowserRouter([
+  {
+    path:'/users',
+    element:&lt;Users/&gt;,
+    loader:usersLoader,
+    action:createUserAction
+  }
+]);</code></pre>
+
+<div class="file-name">Users.jsx</div>
+
+<pre class="language-jsx"><code class="language-jsx">import {Form} from 'react-router-dom';
+
+export default function Users(){
+
+  return (
+    &lt;Form method="post"&gt;
+      &lt;input name="name"/&gt;
+      &lt;button&gt;Save&lt;/button&gt;
+    &lt;/Form&gt;
+  );
+
+}</code></pre>
+
+<h3>Action Flow</h3>
+
+<div class="flow">
+User Submits Form
+<br>↓
+Action Runs
+<br>↓
+POST/PUT/DELETE Request
+<br>↓
+Data Updated
+<br>↓
+Route Revalidates
+<br>↓
+Loader Runs Again
+<br>↓
+Fresh Data Appears
+</div>
+
+<h2>Real Example</h2>
+
+<div class="flow">
+Open Users Page
+<br>↓
+Loader Fetches Users
+<br>↓
+Users Displayed
+<br><br>
+User Adds New User
+<br>↓
+Action Executes
+<br>↓
+Database Updated
+<br>↓
+Loader Re-runs
+<br>↓
+Updated User List Shown
+</div>
+
+<h2>Why Loader + Action Are Powerful</h2>
+
+<table>
+<tr>
+<th>Feature</th>
+<th>Benefit</th>
+</tr>
+
+<tr>
+<td>Loader</td>
+<td>Fetch before render</td>
+</tr>
+
+<tr>
+<td>Action</td>
+<td>Handle mutations</td>
+</tr>
+
+<tr>
+<td>Automatic Revalidation</td>
+<td>Fresh data after actions</td>
+</tr>
+
+<tr>
+<td>No useEffect Fetching</td>
+<td>Cleaner code</td>
+</tr>
+
+<tr>
+<td>Route-Based Data</td>
+<td>Data belongs to route</td>
+</tr>
+
+</table>
+
+<h2>Easy Way To Remember</h2>
+
+<div class="flow">
+Loader
+<br>↓
+GET Data
+<br>↓
+Read Data
+<br><br>
+Action
+<br>↓
+POST / PUT / DELETE
+<br>↓
+Change Data
+</div>
+
+<h2>Comparison With React Server Components</h2>
+
+<table>
+<tr>
+<th>React Router Loader</th>
+<th>React Server Component</th>
+</tr>
+
+<tr>
+<td>Runs before route render</td>
+<td>Runs on server before render</td>
+</tr>
+
+<tr>
+<td>Used in SPA routing</td>
+<td>Used in server rendering</td>
+</tr>
+
+<tr>
+<td>Provides route data</td>
+<td>Provides component data</td>
+</tr>
+
+<tr>
+<td>useLoaderData()</td>
+<td>await fetch()</td>
+</tr>
+
+</table>
+
+<h2>Interview Answer</h2>
+
+<div class="highlight">
+In React Router v6.4+, a loader is a route-level function used to fetch data before a route component renders. An action is a route-level function used to handle form submissions and data mutations such as POST, PUT, PATCH, and DELETE requests. After an action completes, React Router can automatically re-run loaders to keep the UI synchronized with the latest data.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+
+</body>
+</html>

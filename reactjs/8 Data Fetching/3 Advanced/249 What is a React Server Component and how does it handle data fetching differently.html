@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>249 - What is a React Server Component and how does it handle data fetching differently?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px}
+p,li{color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px}
+.success{background:#052e16;padding:18px;border-left:5px solid #22c55e;border-radius:10px;margin-top:15px}
+.warning{background:#1e1b4b;padding:18px;border-left:5px solid #fbbf24;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;text-align:center;line-height:2;font-size:18px}
+.file-name{background:#111827;color:#93c5fd;padding:12px 16px;border-radius:10px;border:1px solid #1e293b;font-weight:bold;margin-top:20px;margin-bottom:10px}
+pre[class*="language-"],code[class*="language-"]{background:#1e1e1e}
+.token.keyword{color:#c792ea}.token.string{color:#c3e88d}.token.function{color:#82aaff}.token.class-name{color:#ffcb6b}.token.number{color:#f78c6c}.token.operator{color:#89ddff}.token.punctuation{color:#89ddff}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+<h1>249. What is a React Server Component and how does it handle data fetching differently?</h1>
+
+<h2>One-Line Answer</h2>
+
+<div class="highlight">
+A <b>React Server Component (RSC)</b> is a component that runs only on the server. It can fetch data directly while rendering using <code>await</code>, so data is loaded before the UI is sent to the browser.
+</div>
+
+<h2>Why Was It Introduced?</h2>
+
+<p>
+Traditionally React components run in the browser.
+To get data they usually use <code>useEffect()</code>.
+</p>
+
+<div class="flow">
+Page Loads
+<br>↓
+Download JS
+<br>↓
+Hydration
+<br>↓
+useEffect Runs
+<br>↓
+Fetch Data
+<br>↓
+Show Data
+</div>
+
+<div class="warning">
+The browser must wait for JavaScript and hydration before data fetching starts.
+</div>
+
+<h2>Traditional Client Component Fetching</h2>
+
+<div class="file-name">Users.jsx (Client Component)</div>
+
+<pre class="language-jsx"><code class="language-jsx">'use client';
+
+import {useState,useEffect} from 'react';
+
+export default function Users(){
+
+  const [users,setUsers]=useState([]);
+
+  useEffect(()=>{
+    fetch('/api/users')
+      .then(res=>res.json())
+      .then(data=>setUsers(data));
+  },[]);
+
+  return (
+    &lt;ul&gt;
+      {users.map(user=&gt;
+        &lt;li key={user.id}&gt;{user.name}&lt;/li&gt;
+      )}
+    &lt;/ul&gt;
+  );
+
+}</code></pre>
+
+<h3>What Happens?</h3>
+
+<div class="flow">
+Browser Gets HTML
+<br>↓
+JS Downloads
+<br>↓
+Hydration Starts
+<br>↓
+useEffect Executes
+<br>↓
+API Call Starts
+<br>↓
+Data Arrives
+<br>↓
+UI Updates
+</div>
+
+<h2>React Server Component Fetching</h2>
+
+<div class="file-name">Users.jsx (Server Component)</div>
+
+<pre class="language-jsx"><code class="language-jsx">export default async function Users(){
+
+  const users=await fetch(
+    'https://api.example.com/users'
+  ).then(res=>res.json());
+
+  return (
+    &lt;ul&gt;
+      {users.map(user=&gt;
+        &lt;li key={user.id}&gt;{user.name}&lt;/li&gt;
+      )}
+    &lt;/ul&gt;
+  );
+
+}</code></pre>
+
+<div class="file-name">No second .then() is needed because await already waits for the entire Promise chain and gives the final users data.</div>
+
+<h3>What Happens?</h3>
+
+<div class="flow">
+User Requests Page
+<br>↓
+Server Component Runs
+<br>↓
+Fetch Data
+<br>↓
+Generate UI
+<br>↓
+Send Ready Result
+<br>↓
+Browser Displays Data
+</div>
+
+<div class="success">
+Data fetching happens on the server before the page reaches the browser.
+</div>
+
+<h2>Relation To Our SSR Discussion</h2>
+
+<p>
+Earlier we discussed SSR:
+</p>
+
+<div class="flow">
+Server Generates HTML
+<br>↓
+Browser Receives HTML
+<br>↓
+Hydration Starts
+<br>↓
+Page Becomes Interactive
+</div>
+
+<p>
+In SSR the HTML comes from the server, but React components may still need JavaScript hydration.
+</p>
+
+<p>
+With React Server Components:
+</p>
+
+<div class="flow">
+Server Component Runs
+<br>↓
+Fetch Data
+<br>↓
+Generate UI
+<br>↓
+Send Result
+<br>↓
+No Component JS Sent
+</div>
+
+<div class="warning">
+A Server Component never runs in the browser.
+</div>
+
+<h2>Can We Use Hooks?</h2>
+
+<table>
+<tr>
+<th>Feature</th>
+<th>Server Component</th>
+</tr>
+
+<tr>
+<td>useState</td>
+<td>❌ No</td>
+</tr>
+
+<tr>
+<td>useEffect</td>
+<td>❌ No</td>
+</tr>
+
+<tr>
+<td>Browser APIs</td>
+<td>❌ No</td>
+</tr>
+
+<tr>
+<td>Database Access</td>
+<td>✅ Yes</td>
+</tr>
+
+<tr>
+<td>API Calls</td>
+<td>✅ Yes</td>
+</tr>
+
+<tr>
+<td>async/await</td>
+<td>✅ Yes</td>
+</tr>
+
+</table>
+
+<h2>How Interactivity Is Added?</h2>
+
+<p>
+Server Components are often combined with Client Components.
+</p>
+
+<div class="file-name">Page.jsx</div>
+
+<pre class="language-jsx"><code class="language-jsx">import SearchBox from './SearchBox';
+
+export default async function Page(){
+
+  const products=await getProducts();
+
+  return (
+    &lt;&gt;
+      &lt;SearchBox /&gt;
+      &lt;ProductsList products={products} /&gt;
+    &lt;/&gt;
+  );
+
+}</code></pre>
+
+<table>
+<tr>
+<th>Component</th>
+<th>Type</th>
+</tr>
+
+<tr>
+<td>Page</td>
+<td>Server Component</td>
+</tr>
+
+<tr>
+<td>ProductsList</td>
+<td>Server Component</td>
+</tr>
+
+<tr>
+<td>SearchBox</td>
+<td>Client Component</td>
+</tr>
+
+</table>
+
+<h2>Data Fetching Difference</h2>
+
+<table>
+<tr>
+<th>Client Component</th>
+<th>Server Component</th>
+</tr>
+
+<tr>
+<td>Fetches after hydration</td>
+<td>Fetches before sending UI</td>
+</tr>
+
+<tr>
+<td>Usually uses useEffect</td>
+<td>Uses await directly</td>
+</tr>
+
+<tr>
+<td>Runs in browser</td>
+<td>Runs on server</td>
+</tr>
+
+<tr>
+<td>More JS shipped</td>
+<td>Less JS shipped</td>
+</tr>
+
+<tr>
+<td>Extra network round trip</td>
+<td>No extra round trip</td>
+</tr>
+
+</table>
+
+<h2>Easy Way To Remember</h2>
+
+<div class="flow">
+Client Component
+<br>↓
+Hydrate First
+<br>↓
+Fetch Later
+<br><br>
+Server Component
+<br>↓
+Fetch First
+<br>↓
+Send Ready UI
+</div>
+
+<h2>Interview Answer</h2>
+
+<div class="highlight">
+A React Server Component is a component that executes only on the server. Unlike Client Components that usually fetch data in useEffect after hydration, Server Components can fetch data directly during rendering using async/await. The server retrieves the data, renders the UI, and sends the result to the browser, reducing JavaScript bundle size and eliminating the extra fetch-after-hydration step.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>421 - What is the ref as a prop change in React 19?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px}
+p,li{color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px}
+.success{background:#052e16;padding:18px;border-left:5px solid #22c55e;border-radius:10px;margin-top:15px}
+.warning{background:#1e1b4b;padding:18px;border-left:5px solid #fbbf24;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;text-align:center;line-height:2;font-size:18px}
+.file-name{background:#111827;color:#93c5fd;padding:12px 16px;border-radius:10px;border:1px solid #1e293b;font-weight:bold;margin-top:20px;margin-bottom:10px}
+pre[class*="language-"],code[class*="language-"]{background:#1e1e1e}
+.token.keyword{color:#c792ea}.token.string{color:#c3e88d}.token.function{color:#82aaff}.token.class-name{color:#ffcb6b}.token.number{color:#f78c6c}.token.operator{color:#89ddff}.token.punctuation{color:#89ddff}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+<h1>421. What is the ref as a prop change in React 19?</h1>
+
+<h2>One-Line Answer</h2>
+
+<div class="highlight">
+In React 19, function components can receive <code>ref</code> directly as a normal prop, reducing the need for <code>forwardRef()</code> in many cases.
+</div>
+
+<h2>Problem Before React 19</h2>
+
+<p>
+Before React 19, function components could not receive <code>ref</code> directly.
+</p>
+
+<div class="file-name">App.jsx</div>
+
+<pre class="language-jsx"><code class="language-jsx">function Input(props){
+  return &lt;input {...props}/&gt;;
+}
+
+function App(){
+  const inputRef=useRef(null);
+
+  return &lt;Input ref={inputRef}/&gt;;
+}</code></pre>
+
+<div class="warning">
+This does not work because React does not pass ref as a normal prop.
+</div>
+
+<h2>Old Solution: forwardRef()</h2>
+
+<div class="file-name">Input.jsx</div>
+
+<pre class="language-jsx"><code class="language-jsx">import {forwardRef} from 'react';
+
+const Input=forwardRef(function Input(props,ref){
+  return &lt;input ref={ref} {...props}/&gt;;
+});
+
+export default Input;</code></pre>
+
+<div class="file-name">App.jsx</div>
+
+<pre class="language-jsx"><code class="language-jsx">import {useRef} from 'react';
+import Input from './Input';
+
+export default function App(){
+
+  const inputRef=useRef(null);
+
+  function focusInput(){
+    inputRef.current.focus();
+  }
+
+  return (
+    &lt;&gt;
+      &lt;Input ref={inputRef} placeholder="Name"/&gt;
+      &lt;button onClick={focusInput}&gt;Focus&lt;/button&gt;
+    &lt;/&gt;
+  );
+
+}</code></pre>
+
+<div class="flow">
+Parent Creates Ref
+<br>↓
+Passes Ref
+<br>↓
+forwardRef Receives Ref
+<br>↓
+Attach To DOM Element
+<br>↓
+inputRef.current Works
+</div>
+
+<h2>React 19</h2>
+
+<p>
+Now ref can be received directly as a prop.
+</p>
+
+<div class="file-name">Input.jsx</div>
+
+<pre class="language-jsx"><code class="language-jsx">function Input({ref,...props}){
+  return &lt;input ref={ref} {...props}/&gt;;
+}
+
+export default Input;</code></pre>
+
+<div class="file-name">App.jsx</div>
+
+<pre class="language-jsx"><code class="language-jsx">import {useRef} from 'react';
+import Input from './Input';
+
+export default function App(){
+
+  const inputRef=useRef(null);
+
+  function focusInput(){
+    inputRef.current.focus();
+  }
+
+  return (
+    &lt;&gt;
+      &lt;Input ref={inputRef} placeholder="Name"/&gt;
+      &lt;button onClick={focusInput}&gt;Focus&lt;/button&gt;
+    &lt;/&gt;
+  );
+
+}</code></pre>
+
+<div class="success">
+No forwardRef() needed in many simple cases.
+</div>
+
+<h2>Real-World Example</h2>
+
+<p>
+Suppose we have a reusable search component.
+</p>
+
+<div class="file-name">SearchInput.jsx</div>
+
+<pre class="language-jsx"><code class="language-jsx">function SearchInput({ref,...props}){
+  return &lt;input ref={ref} {...props}/&gt;;
+}
+
+export default SearchInput;</code></pre>
+
+<div class="file-name">Products.jsx</div>
+
+<pre class="language-jsx"><code class="language-jsx">import {useRef} from 'react';
+import SearchInput from './SearchInput';
+
+export default function Products(){
+
+  const searchRef=useRef(null);
+
+  function focusSearch(){
+    searchRef.current.focus();
+  }
+
+  return (
+    &lt;&gt;
+      &lt;SearchInput ref={searchRef} placeholder="Search Products"/&gt;
+      &lt;button onClick={focusSearch}&gt;Focus Search&lt;/button&gt;
+    &lt;/&gt;
+  );
+
+}</code></pre>
+
+<div class="flow">
+Products Page Loads
+<br>↓
+User Clicks Focus Search
+<br>↓
+searchRef.current.focus()
+<br>↓
+Cursor Goes To Search Box
+</div>
+
+<h2>Why Did React Add This?</h2>
+
+<p>
+A huge amount of React code looked like this:
+</p>
+
+<pre class="language-jsx"><code class="language-jsx">const Input=forwardRef(function Input(props,ref){
+  return &lt;input ref={ref} {...props}/&gt;;
+});</code></pre>
+
+<p>
+The only purpose was forwarding the ref.
+</p>
+
+<div class="flow">
+Create Component
+<br>↓
+Need Ref
+<br>↓
+Write forwardRef
+<br>↓
+Extra Boilerplate
+</div>
+
+<p>
+React 19 reduces that boilerplate.
+</p>
+
+<h2>Before vs After</h2>
+
+<table>
+<tr>
+<th>Before React 19</th>
+<th>React 19</th>
+</tr>
+
+<tr>
+<td>forwardRef required</td>
+<td>Often not required</td>
+</tr>
+
+<tr>
+<td>Special API</td>
+<td>ref behaves more like normal prop</td>
+</tr>
+
+<tr>
+<td>More boilerplate</td>
+<td>Cleaner code</td>
+</tr>
+</table>
+
+<h2>Important Note</h2>
+
+<div class="warning">
+You still need to understand forwardRef because many existing React applications and interview questions use it.
+</div>
+
+<div class="highlight">
+React 19 does not magically remove all forwardRef use cases. It simply makes many common ref-forwarding scenarios easier.
+</div>
+
+<h2>Easy Way To Remember</h2>
+
+<div class="flow">
+Before React 19
+<br>↓
+ref
+<br>↓
+forwardRef
+<br>↓
+DOM Element
+<br><br>
+React 19
+<br>↓
+ref
+<br>↓
+Component Prop
+<br>↓
+DOM Element
+</div>
+
+<h2>Interview Answer</h2>
+
+<div class="highlight">
+The ref as a prop change in React 19 allows function components to receive ref directly as a prop, reducing the need for forwardRef in many common scenarios. This makes component code simpler and removes boilerplate that was previously required only to forward refs to child elements.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+
+</body>
+</html>

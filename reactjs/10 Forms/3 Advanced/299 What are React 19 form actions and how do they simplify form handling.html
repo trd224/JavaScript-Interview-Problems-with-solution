@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>299 - What are React 19 Form Actions and how do they simplify form handling?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px}
+p,li{color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px}
+.success{background:#052e16;padding:18px;border-left:5px solid #22c55e;border-radius:10px;margin-top:15px}
+.warning{background:#1e1b4b;padding:18px;border-left:5px solid #fbbf24;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;text-align:center;line-height:2;font-size:18px}
+.file-name{background:#111827;color:#93c5fd;padding:12px 16px;border-radius:10px;border:1px solid #1e293b;font-weight:bold;margin-top:20px;margin-bottom:10px}
+pre[class*="language-"],code[class*="language-"]{background:#1e1e1e}
+.token.keyword{color:#c792ea}.token.string{color:#c3e88d}.token.function{color:#82aaff}.token.class-name{color:#ffcb6b}.token.number{color:#f78c6c}.token.operator{color:#89ddff}.token.punctuation{color:#89ddff}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+<h1>299. What are React 19 Form Actions and how do they simplify form handling?</h1>
+
+<h2>One-Line Answer</h2>
+
+<div class="highlight">
+React 19 Form Actions allow forms to directly call async functions through the form's <code>action</code> prop, eliminating much of the manual <code>onSubmit</code>, state management, and loading logic.
+</div>
+
+<h2>The Old Way (Before React 19)</h2>
+
+<p>
+Traditionally, forms required:
+</p>
+
+<ul>
+<li>onSubmit handler</li>
+<li>preventDefault()</li>
+<li>Loading state</li>
+<li>Error state</li>
+<li>Success state</li>
+<li>Manual API calls</li>
+</ul>
+
+<div class="file-name">Old Form Handling</div>
+
+<pre class="language-jsx"><code class="language-jsx">function SignupForm(){
+
+  const [loading,setLoading]=useState(false);
+
+  async function handleSubmit(e){
+
+    e.preventDefault();
+
+    setLoading(true);
+
+    const formData=new FormData(e.target);
+
+    await saveUser(formData);
+
+    setLoading(false);
+
+  }
+
+  return (
+    &lt;form onSubmit={handleSubmit}&gt;
+      &lt;input name="email"/&gt;
+      &lt;button disabled={loading}&gt;
+        {loading?'Saving...':'Save'}
+      &lt;/button&gt;
+    &lt;/form&gt;
+  );
+
+}</code></pre>
+
+<div class="warning">
+Lots of boilerplate code just to submit a form.
+</div>
+
+<h2>React 19 Form Actions</h2>
+
+<p>
+Now the form can directly call an async function.
+</p>
+
+<div class="file-name">React 19 Form Action</div>
+
+<pre class="language-jsx"><code class="language-jsx">async function saveUser(formData){
+
+  const email=formData.get('email');
+
+  await fetch('/api/users',{
+    method:'POST',
+    body:JSON.stringify({email})
+  });
+
+}
+
+function SignupForm(){
+
+  return (
+    &lt;form action={saveUser}&gt;
+      &lt;input name="email"/&gt;
+      &lt;button&gt;Save&lt;/button&gt;
+    &lt;/form&gt;
+  );
+
+}</code></pre>
+
+<div class="success">
+No onSubmit. No preventDefault. No manual FormData creation.
+</div>
+
+<h2>What Happens Internally?</h2>
+
+<div class="flow">
+User Clicks Submit
+<br>↓
+React Collects FormData
+<br>↓
+Calls saveUser(formData)
+<br>↓
+Waits For Promise
+<br>↓
+Updates UI
+</div>
+
+<h2>Real-World Example</h2>
+
+<p>
+Imagine a login form.
+</p>
+
+<div class="file-name">Login Form</div>
+
+<pre class="language-jsx"><code class="language-jsx">async function login(formData){
+
+  const email=formData.get('email');
+  const password=formData.get('password');
+
+  await fetch('/api/login',{
+    method:'POST',
+    body:JSON.stringify({
+      email,
+      password
+    })
+  });
+
+}
+
+export default function Login(){
+
+  return (
+    &lt;form action={login}&gt;
+      &lt;input name="email"/&gt;
+      &lt;input type="password" name="password"/&gt;
+      &lt;button&gt;Login&lt;/button&gt;
+    &lt;/form&gt;
+  );
+
+}</code></pre>
+
+<h2>Relation To React Router Actions</h2>
+
+<p>
+You recently learned React Router Actions.
+</p>
+
+<table>
+<tr>
+<th>React Router Action</th>
+<th>React 19 Form Action</th>
+</tr>
+
+<tr>
+<td>Route-level action</td>
+<td>Component-level action</td>
+</tr>
+
+<tr>
+<td>Defined in router config</td>
+<td>Defined directly in component</td>
+</tr>
+
+<tr>
+<td>Works with React Router</td>
+<td>Built into React</td>
+</tr>
+
+<tr>
+<td>Handles form submissions</td>
+<td>Handles form submissions</td>
+</tr>
+
+</table>
+
+<h2>Works Great With useActionState</h2>
+
+<p>
+React 19 introduced <code>useActionState()</code> specifically for Form Actions.
+</p>
+
+<div class="file-name">SignupForm.jsx</div>
+
+<pre class="language-jsx"><code class="language-jsx">import {useActionState} from 'react';
+
+async function createUser(prevState,formData){
+
+  const name=formData.get('name');
+
+  if(!name){
+    return 'Name is required';
+  }
+
+  return 'User created';
+}
+
+export default function SignupForm(){
+
+  const [message,formAction]=
+    useActionState(createUser,'');
+
+  return (
+    &lt;form action={formAction}&gt;
+      &lt;input name="name"/&gt;
+      &lt;button&gt;Save&lt;/button&gt;
+      &lt;p&gt;{message}&lt;/p&gt;
+    &lt;/form&gt;
+  );
+
+}</code></pre>
+
+<div class="success">
+Notice how the action returns state directly.
+</div>
+
+<h2>Why React 19 Introduced Form Actions</h2>
+
+<div class="flow">
+Less Boilerplate
+<br>↓
+Simpler Forms
+<br>↓
+Better Server Actions Integration
+<br>↓
+Built-In Async Handling
+</div>
+
+<h2>Old vs New</h2>
+
+<table>
+<tr>
+<th>Before React 19</th>
+<th>React 19</th>
+</tr>
+
+<tr>
+<td>onSubmit</td>
+<td>action</td>
+</tr>
+
+<tr>
+<td>preventDefault()</td>
+<td>Automatic</td>
+</tr>
+
+<tr>
+<td>Manual FormData</td>
+<td>Automatic</td>
+</tr>
+
+<tr>
+<td>More boilerplate</td>
+<td>Less code</td>
+</tr>
+
+<tr>
+<td>Custom async handling</td>
+<td>Built-in support</td>
+</tr>
+
+</table>
+
+<h2>Easy Way To Remember</h2>
+
+<div class="flow">
+Old React
+<br>↓
+form
+<br>↓
+onSubmit
+<br>↓
+handleSubmit
+<br><br>
+React 19
+<br>↓
+form
+<br>↓
+action
+<br>↓
+async function
+</div>
+
+<h2>Interview Answer</h2>
+
+<div class="highlight">
+React 19 Form Actions allow developers to pass async functions directly to a form's <code>action</code> prop. When the form is submitted, React automatically collects the FormData and invokes the action function. This removes much of the traditional form boilerplate such as onSubmit handlers, preventDefault, and manual FormData processing. Form Actions work especially well with hooks like useActionState and Server Actions.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+
+</body>
+</html>
