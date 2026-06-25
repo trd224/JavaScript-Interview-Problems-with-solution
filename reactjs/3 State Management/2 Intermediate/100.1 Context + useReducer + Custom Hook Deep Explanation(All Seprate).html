@@ -751,6 +751,66 @@ export function useAuth() {
   return useContext(AuthContext);
 }</code></pre>
 
+<pre><code class="language-jsx">// App.js
+import { AuthProvider } from './AuthContext';
+import Login from './Login';
+
+export default function App() {
+  return (
+    &lt;AuthProvider&gt;
+      &lt;Login /&gt;
+    &lt;/AuthProvider&gt;
+  );
+}
+
+</code></pre>
+
+<pre><code class="language-jsx">// Login.js
+import { useAuth } from './AuthContext';
+
+export default function Login() {
+  const { state, dispatch } = useAuth();
+
+  const login = () => {
+    dispatch({ type: 'LOGIN_START' });
+
+    setTimeout(() => {
+      dispatch({
+        type: 'LOGIN_SUCCESS',
+        payload: {
+          id: 1,
+          name: 'Rizwan'
+        }
+      });
+    }, 1000);
+  };
+
+  const logout = () => {
+    dispatch({ type: 'LOGOUT' });
+  };
+
+  return (
+    &lt;&gt;
+      &lt;h2&gt;Authentication Example&lt;/h2&gt;
+
+      {state.loading && &lt;p&gt;Loading...&lt;/p&gt;}
+
+      {state.user ? (
+        &lt;&gt;
+          &lt;p&gt;Welcome {state.user.name}&lt;/p&gt;
+          &lt;button onClick={logout}&gt;Logout&lt;/button&gt;
+        &lt;/&gt;
+      ) : (
+        &lt;button onClick={login}&gt;Login&lt;/button&gt;
+      )}
+
+      {state.error && &lt;p&gt;{state.error}&lt;/p&gt;}
+    &lt;/&gt;
+  );
+}
+  
+</code></pre>
+
 <div class="highlight">
 This single-file approach is good for learning, interviews, and small projects.
 </div>

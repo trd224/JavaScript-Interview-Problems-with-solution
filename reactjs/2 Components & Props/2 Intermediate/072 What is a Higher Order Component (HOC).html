@@ -174,6 +174,7 @@ Similarly, a Higher Order Component is a function that works with React componen
 <p>
 The HOC receives a component and returns a new component.
 </p>
+<p>In an HOC you can replace the named function with an anonymous function because it is just returning a component, but the function will lose a readable name in debugging.</p>
 
 <h2>Simple Example</h2>
 
@@ -281,31 +282,23 @@ Render Enhanced Component
 The HOC should forward props to the wrapped component.
 </p>
 
-<pre><code class="language-jsx">function withUser(Component) {
-
+<pre><code class="language-jsx">
+function withSomething(Component) {
   return function EnhancedComponent(props) {
-
-    const user = {
-      name: 'Rizwan'
-    };
-
-    return (
-      &lt;Component {...props} user={user} /&gt;
-    );
-
+    return &lt;Component {...props} /&gt;;
   };
-
-}</code></pre>
-
-<h3>Usage</h3>
-
-<pre><code class="language-jsx">function Profile({ user }) {
-
-  return &lt;h2&gt;{user.name}&lt;/h2&gt;;
-
 }
 
-const EnhancedProfile = withUser(Profile);</code></pre>
+function Hello(props) {
+  return &lt;h1&gt;Hello {props.name}&lt;/h1&gt;;
+}
+
+const EnhancedHello = withSomething(Hello);
+
+export default function App() {
+  return &lt;EnhancedHello name="Rizwan" /&gt;;
+}
+</code></pre>
 
 <h2>Advantages</h2>
 
