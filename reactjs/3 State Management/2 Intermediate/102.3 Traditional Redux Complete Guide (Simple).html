@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Traditional Redux Complete Guide</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet"/>
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.8}
+.container{max-width:1100px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;font-size:36px}
+h2{color:#c084fc;margin-top:40px}
+h3{color:#38bdf8}
+p,li{color:#cbd5e1}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;text-align:center;font-size:18px;line-height:2}
+pre{border-radius:12px !important;overflow:auto !important}
+table{width:100%;border-collapse:collapse}
+th,td{border:1px solid #1e293b;padding:12px}
+th{background:#0f172a;color:#38bdf8}
+</style>
+
+</head>
+
+<body>
+<div class="container">
+
+<h1>Traditional Redux in React (Complete Guide)</h1>
+
+<div class="highlight">
+Redux is a predictable state container that allows us to manage global state in a single store.
+</div>
+
+<h2>Problem Without Redux</h2>
+<p>Prop drilling becomes difficult in large applications.</p>
+
+<pre>
+App → Navbar → Sidebar → Cart
+</pre>
+
+<h2>Professional Folder Structure</h2>
+
+<pre>
+src/
+├── app/
+│   └── store.js
+│
+├── features/
+│   └── counter/
+│       ├── counterReducer.js
+│       ├── Counter.js
+│       ├── Buttons.js
+│
+├── components/
+│   ├── Header.js
+│   ├── Footer.js
+│
+├── App.js
+└── index.js
+</pre>
+
+<h2>1. Install Redux</h2>
+
+<pre><code class="language-bash">
+npm install redux react-redux
+</code></pre>
+
+<pre><code>| Package           | Purpose                                       |
+| ----------------- | --------------------------------------------- |
+| **`redux`**       | Creates and manages the Redux store.          |
+| **`react-redux`** | Connects React components to the Redux store. |
+</code></pre>
+
+<h2>2. Reducer</h2>
+
+<pre><code class="language-js">
+// features/counter/counterReducer.js
+
+const initialState = { count: 0 };
+
+export default function counterReducer(state = initialState, action) {
+    switch(action.type) {
+        case "INCREMENT":
+            return { ...state, count: state.count + 1 };
+
+        case "DECREMENT":
+            return { ...state, count: state.count - 1 };
+
+        default:
+            return state;
+    }
+}
+</code></pre>
+
+<h2>3. Store</h2>
+
+<pre><code class="language-js">
+// app/store.js
+
+import { createStore } from "redux";
+import counterReducer from "../features/counter/counterReducer";
+
+const store = createStore(counterReducer);
+
+export default store;
+</code></pre>
+
+<h2>4. Provider Setup</h2>
+
+<pre><code class="language-js">
+// index.js
+
+import React from "react";
+import ReactDOM from "react-dom/client";
+import { Provider } from "react-redux";
+import store from "./app/store";
+import App from "./App";
+
+const root = ReactDOM.createRoot(document.getElementById("root"));
+
+root.render(
+    &lt;Provider store={store}&gt;
+        &lt;App /&gt;
+    &lt;/Provider&gt;
+);
+</code></pre>
+
+<h2>5. Read State (useSelector)</h2>
+
+<pre><code class="language-js">
+// features/counter/Counter.js
+
+import { useSelector } from "react-redux";
+
+export default function Counter() {
+    const count = useSelector(state => state.count);
+    return &lt;h1&gt;{count}&lt;/h1&gt;;
+}
+</code></pre>
+
+<h2>6. Dispatch Actions</h2>
+
+<pre><code class="language-js">
+// features/counter/Buttons.js
+
+import { useDispatch } from "react-redux";
+
+export default function Buttons() {
+    const dispatch = useDispatch();
+
+    return (
+        &lt;&gt;
+            &lt;button onClick={() =&gt; dispatch({ type: "INCREMENT" })}&gt;+&lt;/button&gt;
+            &lt;button onClick={() =&gt; dispatch({ type: "DECREMENT" })}&gt;-&lt;/button&gt;
+        &lt;/&gt;
+    );
+}
+</code></pre>
+
+<h2>Redux Flow</h2>
+
+<div class="flow">
+dispatch(action) → reducer → store update → useSelector → UI re-render
+</div>
+
+<h2>Full Architecture</h2>
+
+<pre>
+User Action
+   ↓
+dispatch({ type })
+   ↓
+Reducer executes
+   ↓
+New state returned
+   ↓
+Store updates
+   ↓
+UI updates via useSelector
+</pre>
+
+<h2>Why New Object Required?</h2>
+
+<pre><code class="language-js">
+// ❌ Wrong
+state.count++;
+
+// ✅ Correct
+return {
+    ...state,
+    count: state.count + 1
+};
+</code></pre>
+
+<h2>Concept Summary</h2>
+
+<table>
+<tr><th>Concept</th><th>Meaning</th></tr>
+<tr><td>Store</td><td>Global state container</td></tr>
+<tr><td>Action</td><td>Describes event</td></tr>
+<tr><td>Reducer</td><td>Updates state</td></tr>
+<tr><td>Dispatch</td><td>Sends action</td></tr>
+<tr><td>useSelector</td><td>Reads state</td></tr>
+<tr><td>useDispatch</td><td>Updates state</td></tr>
+<tr><td>Provider</td><td>Connects React + Redux</td></tr>
+</table>
+
+<h2>Complete Example</h2>
+
+<pre><code class="language-js">
+import { createStore } from "redux";
+import { Provider, useSelector, useDispatch } from "react-redux";
+
+const initialState = { count: 0 };
+
+function reducer(state = initialState, action) {
+    switch(action.type) {
+        case "INCREMENT":
+            return { ...state, count: state.count + 1 };
+        case "DECREMENT":
+            return { ...state, count: state.count - 1 };
+        default:
+            return state;
+    }
+}
+
+const store = createStore(reducer);
+
+function Counter() {
+    const count = useSelector(state => state.count);
+    const dispatch = useDispatch();
+
+    return (
+        &lt;&gt;
+            &lt;h1&gt;{count}&lt;/h1&gt;
+            &lt;button onClick={() =&gt; dispatch({ type: "INCREMENT" })}&gt;+&lt;/button&gt;
+            &lt;button onClick={() =&gt; dispatch({ type: "DECREMENT" })}&gt;-&lt;/button&gt;
+        &lt;/&gt;
+    );
+}
+
+export default function App() {
+    return (
+        &lt;Provider store={store}&gt;
+            &lt;Counter /&gt;
+        &lt;/Provider&gt;
+    );
+}
+</code></pre>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+
+</body>
+</html>

@@ -270,6 +270,80 @@ forwardRef is often used together with useImperativeHandle.
   }
 }));</code></pre>
 
+<pre><code class="language-jsx">
+import { useRef, forwardRef, useImperativeHandle } from 'react';
+
+// ─── Child Component ───────────────────────────────────────────────────────────
+const FancyInput = forwardRef((props, ref) => {
+
+  const inputRef = useRef(null);
+
+  useImperativeHandle(ref, () => ({
+
+    focus() {
+      inputRef.current.focus();
+    },
+
+    clear() {
+      inputRef.current.value = '';
+    },
+
+    getValue() {
+      return inputRef.current.value;
+    },
+
+    shake() {
+      inputRef.current.classList.add('shake');
+      setTimeout(() => inputRef.current.classList.remove('shake'), 500);
+    }
+
+  }));
+
+  return (
+    &lt;input
+      ref={inputRef}
+      type="text"
+      placeholder="Type something..."
+      style={{ padding: '8px', borderRadius: '6px', border: '1px solid #38bdf8' }}
+    /&gt;
+  );
+
+});
+
+// ─── Parent Component ──────────────────────────────────────────────────────────
+function App() {
+
+  const inputRef = useRef(null);
+
+  return (
+    &lt;div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}&gt;
+
+      &lt;FancyInput ref={inputRef} /&gt;
+
+      &lt;button onClick={() => inputRef.current.focus()}&gt;
+        Focus Input
+      &lt;/button&gt;
+
+      &lt;button onClick={() => inputRef.current.clear()}&gt;
+        Clear Input
+      &lt;/button&gt;
+
+      &lt;button onClick={() => alert(inputRef.current.getValue())}&gt;
+        Get Value
+      &lt;/button&gt;
+
+      &lt;button onClick={() => inputRef.current.shake()}&gt;
+        Shake Input
+      &lt;/button&gt;
+
+    &lt;/div&gt;
+  );
+
+}
+
+export default App;
+</code></pre>
+
 <p>
 Instead of exposing the whole DOM element, we expose only specific methods.
 </p>

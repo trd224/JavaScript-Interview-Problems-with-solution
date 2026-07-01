@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Custom Hook Instead of HOC in React</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+
+body {
+  margin: 0;
+  padding: 0;
+  background: #000814;
+  color: #e2e8f0;
+  font-family: Arial, sans-serif;
+  line-height: 1.7;
+}
+
+.container {
+  max-width: 1000px;
+  margin: 40px auto;
+  background: #020617;
+  padding: 40px;
+  border-radius: 18px;
+  border: 1px solid #0f172a;
+  box-shadow: 0 0 40px rgba(0, 0, 0, .95);
+}
+
+h1 {
+  color: #f8fafc;
+  margin-bottom: 30px;
+  font-size: 34px;
+}
+
+h2 {
+  color: #c084fc;
+  margin-top: 35px;
+  margin-bottom: 15px;
+  font-size: 26px;
+}
+
+h3 {
+  color: #38bdf8;
+  margin-top: 25px;
+  margin-bottom: 10px;
+}
+
+p {
+  color: #cbd5e1;
+}
+
+ul {
+  padding-left: 24px;
+}
+
+li {
+  margin-bottom: 10px;
+  color: #cbd5e1;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+table th,
+table td {
+  border: 1px solid #1e293b;
+  padding: 14px;
+  text-align: left;
+}
+
+table th {
+  background: #0f172a;
+  color: #38bdf8;
+}
+
+table td {
+  background: #020617;
+  color: #d1d5db;
+}
+
+.highlight {
+  background: #0f172a;
+  padding: 18px;
+  border-left: 5px solid #38bdf8;
+  border-radius: 10px;
+  margin-top: 15px;
+}
+
+.flow {
+  background: #020617;
+  border: 1px solid #1e293b;
+  padding: 20px;
+  border-radius: 10px;
+  margin-top: 15px;
+  text-align: center;
+  line-height: 2;
+  font-size: 18px;
+}
+
+pre {
+  border-radius: 12px;
+  overflow-x: auto;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+  <h1>How to Use Custom Hooks Instead of HOC in React</h1>
+
+  <h2>One-Line Definition</h2>
+
+  <div class="highlight">
+    A Custom Hook is a plain JavaScript function starting with <code>use</code> that encapsulates reusable stateful logic — replacing the need for HOC wrappers entirely.
+  </div>
+
+  <h2>What Problem Does This Solve?</h2>
+
+  <p>
+    Higher-Order Components (HOCs) were the go-to pattern for sharing stateful logic before React Hooks. But they introduced wrapper hell, prop collisions, and poor readability.
+  </p>
+
+  <p>
+    Custom Hooks extract that same logic into a simple function you call directly inside your component — no wrapping needed.
+  </p>
+
+  <div class="flow">
+    Reusable Stateful Logic
+    <br>↓<br>
+    HOC wraps a component (old way)
+    <br>↓<br>
+    Custom Hook called inside component (modern way)
+    <br>↓<br>
+    Cleaner, composable, no wrapper hell
+  </div>
+
+  <h2>Example: Auth Guard</h2>
+
+  <h3>HOC Approach (Old)</h3>
+
+  <pre><code class="language-jsx">// withAuth.jsx
+function withAuth(WrappedComponent) {
+  return function AuthenticatedComponent(props) {
+    const [user, setUser] = useState(null);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+      fetchUser().then(u => {
+        setUser(u);
+        setLoading(false);
+      });
+    }, []);
+
+    if (loading) return &lt;Spinner /&gt;;
+    if (!user) return &lt;Redirect to="/login" /&gt;;
+
+    return &lt;WrappedComponent {...props} user={user} /&gt;;
+  };
+}
+
+// Usage — must wrap the component
+export default withAuth(Dashboard);</code></pre>
+
+  <p>Problems: extra component in the tree, prop collision risk, hard to compose multiple HOCs, and tricky to type in TypeScript.</p>
+
+  <h3>Custom Hook Approach (Modern)</h3>
+
+  <pre><code class="language-jsx">// useAuth.js
+function useAuth() {
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchUser().then(u => {
+      setUser(u);
+      setLoading(false);
+    });
+  }, []);
+
+  return { user, loading };
+}
+
+// Dashboard.jsx — call it directly, no wrapping needed
+function Dashboard() {
+  const { user, loading } = useAuth();
+
+  if (loading) return &lt;Spinner /&gt;;
+  if (!user) return &lt;Redirect to="/login" /&gt;;
+
+  return &lt;div&gt;Welcome, {user.name}&lt;/div&gt;;
+}</code></pre>
+
+  <h2>How It Works</h2>
+
+  <div class="flow">
+    Extract Logic Into useXxx() Function
+    <br>↓<br>
+    Call Hook Inside Component
+    <br>↓<br>
+    Destructure Returned State / Functions
+    <br>↓<br>
+    Component Renders Using That State
+  </div>
+
+  <h2>Example: Data Fetching Comparison</h2>
+
+  <h3>HOC Way — Composing Two HOCs</h3>
+
+  <pre><code class="language-jsx">// Two HOCs composed — messy
+function withData(WrappedComponent, url) {
+  return function(props) {
+    const [data, setData] = useState(null);
+
+    useEffect(() => {
+      fetch(url).then(r => r.json()).then(setData);
+    }, []);
+
+    return &lt;WrappedComponent {...props} data={data} /&gt;;
+  };
+}
+
+// Nesting two HOCs gets ugly fast
+export default withAuth(withData(UserList, '/api/users'));</code></pre>
+
+  <h3>Custom Hook Way — Composing Two Hooks</h3>
+
+  <pre><code class="language-jsx">// useFetch.js
+function useFetch(url) {
+  const [data, setData] = useState(null);
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch(url)
+      .then(r => r.json())
+      .then(setData)
+      .catch(setError)
+      .finally(() => setLoading(false));
+  }, [url]);
+
+  return { data, error, loading };
+}
+
+// UserList.jsx — clean hook composition
+function UserList() {
+  const { user } = useAuth();                         // hook 1
+  const { data, loading } = useFetch('/api/users');   // hook 2
+
+  if (loading) return &lt;Spinner /&gt;;
+
+  return (
+    &lt;ul&gt;
+      {data.map(u =&gt; &lt;li key={u.id}&gt;{u.name}&lt;/li&gt;)}
+    &lt;/ul&gt;
+  );
+}</code></pre>
+
+  <h2>Another Example: Mouse Position Tracker</h2>
+
+  <h3>HOC Version</h3>
+
+  <pre><code class="language-jsx">function withMousePosition(WrappedComponent) {
+  return function(props) {
+    const [position, setPosition] = useState({ x: 0, y: 0 });
+
+    const handleMouseMove = e => {
+      setPosition({ x: e.clientX, y: e.clientY });
+    };
+
+    return (
+      &lt;div onMouseMove={handleMouseMove}&gt;
+        &lt;WrappedComponent {...props} position={position} /&gt;
+      &lt;/div&gt;
+    );
+  };
+}
+
+export default withMousePosition(MyComponent);</code></pre>
+
+  <h3>Custom Hook Version</h3>
+
+  <pre><code class="language-jsx">// useMousePosition.js
+function useMousePosition() {
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+
+  useEffect(() => {
+    const handleMouseMove = e => {
+      setPosition({ x: e.clientX, y: e.clientY });
+    };
+
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => window.removeEventListener('mousemove', handleMouseMove);
+  }, []);
+
+  return position;
+}
+
+// Usage — no wrapper, no prop injection
+function MyComponent() {
+  const { x, y } = useMousePosition();
+
+  return &lt;h2&gt;Mouse: {x}, {y}&lt;/h2&gt;;
+}</code></pre>
+
+  <h2>Advantages of Custom Hooks over HOC</h2>
+
+  <ul>
+    <li>No extra component added to the React tree.</li>
+    <li>No prop name collision between layers.</li>
+    <li>Multiple hooks compose naturally inside a single component.</li>
+    <li>Much easier to read, debug, and type with TypeScript.</li>
+    <li>Logic is just a function — easily unit-testable in isolation.</li>
+    <li>No need to understand wrapping or injection patterns.</li>
+  </ul>
+
+  <h2>Custom Hook vs HOC Comparison</h2>
+
+  <table>
+    <tr>
+      <th>Feature</th>
+      <th>Custom Hook</th>
+      <th>HOC</th>
+    </tr>
+    <tr>
+      <td>Introduced</td>
+      <td>React 16.8</td>
+      <td>Before Hooks</td>
+    </tr>
+    <tr>
+      <td>Logic Reuse</td>
+      <td>✅</td>
+      <td>✅</td>
+    </tr>
+    <tr>
+      <td>Wraps Component</td>
+      <td>❌</td>
+      <td>✅</td>
+    </tr>
+    <tr>
+      <td>Prop Collision Risk</td>
+      <td>❌ None</td>
+      <td>✅ Possible</td>
+    </tr>
+    <tr>
+      <td>Composability</td>
+      <td>Very easy</td>
+      <td>Messy nesting</td>
+    </tr>
+    <tr>
+      <td>Readability</td>
+      <td>Higher</td>
+      <td>Lower</td>
+    </tr>
+    <tr>
+      <td>TypeScript Support</td>
+      <td>Easier</td>
+      <td>Verbose</td>
+    </tr>
+    <tr>
+      <td>Modern React</td>
+      <td>✅ Preferred</td>
+      <td>Less Common</td>
+    </tr>
+  </table>
+
+  <h2>When to Still Use HOC</h2>
+
+  <table>
+    <tr>
+      <th>Situation</th>
+      <th>Prefer</th>
+    </tr>
+    <tr>
+      <td>Pure logic reuse (auth, data fetching, timers)</td>
+      <td>Custom Hook</td>
+    </tr>
+    <tr>
+      <td>Composing multiple behaviors</td>
+      <td>Custom Hook</td>
+    </tr>
+    <tr>
+      <td>Logic + JSX wrapping (e.g. Error Boundary)</td>
+      <td>HOC</td>
+    </tr>
+    <tr>
+      <td>Class components (legacy codebases)</td>
+      <td>HOC</td>
+    </tr>
+    <tr>
+      <td>Third-party wrappers (React.memo, forwardRef)</td>
+      <td>HOC</td>
+    </tr>
+  </table>
+
+  <h2>Important Interview Points</h2>
+
+  <ul>
+    <li>A Custom Hook is any function starting with <code>use</code> that calls other hooks.</li>
+    <li>It replaces HOC when the HOC does not render any JSX of its own.</li>
+    <li>Hooks compose cleanly — call multiple hooks side by side, no nesting.</li>
+    <li>No wrapper component is added to the React DevTools tree.</li>
+    <li>Hooks are easier to test in isolation as plain functions.</li>
+    <li>If a HOC only injects props via logic, convert it to a hook.</li>
+  </ul>
+
+  <h2>Short Interview Answer</h2>
+
+  <div class="highlight">
+    Custom Hooks replace HOCs by moving shared stateful logic into a plain <code>use</code>-prefixed function that components call directly. This eliminates wrapper components, removes prop collision risk, and makes composition trivial — just call multiple hooks side by side inside one component.
+  </div>
+
+  <h2>One-Line Interview Answer</h2>
+
+  <div class="highlight">
+    If a HOC only injects logic and not JSX, it should be a Custom Hook — a plain function starting with <code>use</code> that components call directly to access shared state or side effects.
+  </div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+
+</body>
+</html>

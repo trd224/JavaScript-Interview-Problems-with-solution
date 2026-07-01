@@ -1,0 +1,937 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Traditional Redux Complete Guide</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet"/>
+
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+
+body{
+background:#000814;
+color:#e2e8f0;
+font-family:Arial,Helvetica,sans-serif;
+line-height:1.8;
+padding:30px;
+}
+
+.container{
+max-width:1200px;
+margin:auto;
+background:#020617;
+padding:40px;
+border-radius:18px;
+border:1px solid #1e293b;
+box-shadow:0 0 30px rgba(0,0,0,.8);
+}
+
+h1{
+font-size:40px;
+color:#f8fafc;
+margin-bottom:25px;
+}
+
+h2{
+color:#c084fc;
+margin-top:45px;
+margin-bottom:15px;
+}
+
+h3{
+color:#38bdf8;
+margin-top:25px;
+margin-bottom:10px;
+}
+
+p{
+color:#cbd5e1;
+margin-bottom:15px;
+}
+
+ul{
+margin-left:25px;
+}
+
+li{
+margin:8px 0;
+}
+
+.highlight{
+background:#0f172a;
+padding:20px;
+border-left:5px solid #38bdf8;
+border-radius:10px;
+margin:20px 0;
+}
+
+.flow{
+background:#020617;
+border:1px solid #334155;
+padding:25px;
+border-radius:10px;
+text-align:center;
+font-size:18px;
+line-height:2;
+margin-top:20px;
+}
+
+pre{
+border-radius:12px!important;
+overflow:auto!important;
+margin-top:15px;
+}
+
+table{
+width:100%;
+border-collapse:collapse;
+margin-top:20px;
+}
+
+th,td{
+border:1px solid #334155;
+padding:12px;
+}
+
+th{
+background:#0f172a;
+color:#38bdf8;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>Traditional Redux (Professional Architecture)</h1>
+
+<div class="highlight">
+
+Redux is a predictable state container that allows us to manage global state inside a single centralized store.
+
+</div>
+
+<h2>Why Redux?</h2>
+
+<p>
+
+Without Redux, passing data from parent to deeply nested child components leads to prop drilling.
+
+</p>
+
+<pre>
+
+App
+ │
+ ├── Header
+ │
+ ├── Dashboard
+ │      │
+ │      ├── Sidebar
+ │      │      │
+ │      │      └── Menu
+ │      │
+ │      └── Content
+ │
+ └── Footer
+
+</pre>
+
+<p>
+
+Redux stores the state globally so every component can directly access it.
+
+</p>
+
+<hr>
+
+<h2>Professional Folder Structure</h2>
+
+<pre>
+
+src/
+│
+├── app/
+│   └── store.js
+│
+├── redux/
+│   │
+│   ├── constants/
+│   │   └── counterConstants.js
+│   │
+│   ├── actions/
+│   │   └── counterActions.js
+│   │
+│   ├── reducers/
+│   │   ├── counterReducer.js
+│   │   └── rootReducer.js
+│   │
+│   └── types/
+│       └── index.js
+│
+├── features/
+│   └── counter/
+│       ├── Counter.js
+│       └── CounterButtons.js
+│
+├── components/
+│   ├── Header.js
+│   ├── Footer.js
+│
+├── App.js
+├── index.js
+└── index.css
+
+</pre>
+
+<div class="highlight">
+
+<b>Explanation</b>
+
+<ul>
+
+<li><b>app</b> → Store configuration</li>
+
+<li><b>constants</b> → Action type constants</li>
+
+<li><b>actions</b> → Action creators</li>
+
+<li><b>reducers</b> → State update logic</li>
+
+<li><b>rootReducer</b> → Combines multiple reducers</li>
+
+<li><b>features</b> → Feature-specific React components</li>
+
+<li><b>components</b> → Shared UI components</li>
+
+</ul>
+
+</div>
+
+<hr>
+
+<h2>Step 1 — Install Redux</h2>
+
+<pre><code class="language-bash">npm install redux react-redux</code></pre>
+
+<table>
+
+<tr>
+
+<th>Package</th>
+
+<th>Purpose</th>
+
+</tr>
+
+<tr>
+
+<td>redux</td>
+
+<td>Creates and manages the Redux Store.</td>
+
+</tr>
+
+<tr>
+
+<td>react-redux</td>
+
+<td>Connects React Components with Redux.</td>
+
+</tr>
+
+</table>
+
+<hr>
+
+<h2>Step 2 — Create Action Constants</h2>
+
+<h3>redux/constants/counterConstants.js</h3>
+
+<pre><code class="language-js">export const INCREMENT = "INCREMENT";
+export const DECREMENT = "DECREMENT";</code></pre>
+
+<div class="highlight">
+
+Using constants prevents spelling mistakes in action types.
+
+</div>
+
+<hr>
+
+<h2>Step 3 — Create Action Creators</h2>
+
+<h3>redux/actions/counterActions.js</h3>
+
+<pre><code class="language-js">import { INCREMENT, DECREMENT } from "../constants/counterConstants";
+
+export const increment = () => {
+  return { type: INCREMENT };
+};
+
+export const decrement = () => {
+  return { type: DECREMENT };
+};</code></pre>
+
+<div class="highlight">
+
+Action creators return action objects.
+
+Instead of writing
+
+dispatch({ type: "INCREMENT" })
+
+everywhere,
+
+we simply write
+
+dispatch(increment())
+
+</div>
+
+<hr>
+
+<h2>Step 4 — Create Reducer</h2>
+
+<h3>redux/reducers/counterReducer.js</h3>
+
+<pre><code class="language-js">import { INCREMENT, DECREMENT } from "../constants/counterConstants";
+
+const initialState = { count: 0 };
+
+export default function counterReducer(state = initialState, action) {
+  switch (action.type) {
+    case INCREMENT:
+      return { ...state, count: state.count + 1 };
+    case DECREMENT:
+      return { ...state, count: state.count - 1 };
+    default:
+      return state;
+  }
+}</code></pre>
+
+<div class="highlight">
+
+Reducers never modify the existing state.
+
+They always return a brand-new state object.
+
+</div>
+
+<hr>
+
+<h2>Step 5 — Create Root Reducer</h2>
+
+<h3>redux/reducers/rootReducer.js</h3>
+
+<pre><code class="language-js">import { combineReducers } from "redux";
+import counterReducer from "./counterReducer";
+
+const rootReducer = combineReducers({
+  counter: counterReducer
+});
+
+export default rootReducer;</code></pre>
+
+<div class="highlight">
+
+Even if there is only one reducer today,
+
+using a Root Reducer makes scaling much easier.
+
+</div>
+
+<hr>
+
+<h2>Step 6 — Create Store</h2>
+
+<h3>app/store.js</h3>
+
+<pre><code class="language-js">import { createStore } from "redux";
+import rootReducer from "../redux/reducers/rootReducer";
+
+const store = createStore(rootReducer);
+
+export default store;</code></pre>
+
+<div class="highlight">
+
+The Store keeps the entire application's global state.
+
+</div>
+
+<hr>
+
+<h2>Step 7 — Connect Redux with React</h2>
+
+<h3>index.js</h3>
+
+<pre><code class="language-js">import React from "react";
+import ReactDOM from "react-dom/client";
+import { Provider } from "react-redux";
+import store from "./app/store";
+import App from "./App";
+
+const root = ReactDOM.createRoot(document.getElementById("root"));
+
+root.render(
+  &lt;Provider store={store}&gt;
+    &lt;App /&gt;
+  &lt;/Provider&gt;
+);</code></pre>
+
+<div class="highlight">
+
+The Provider makes the Redux Store available to every React component.
+
+</div>
+
+<hr>
+<h2>Step 8 — Read Data using useSelector()</h2>
+
+<h3>features/counter/Counter.js</h3>
+
+<pre><code class="language-js">import { useSelector } from "react-redux";
+
+export default function Counter() {
+  const count = useSelector(state => state.counter.count);
+  return &lt;h1&gt;{count}&lt;/h1&gt;;
+}</code></pre>
+
+<div class="highlight">
+
+<b>useSelector()</b> allows us to read data from the Redux Store.
+
+Whenever the selected state changes, React automatically re-renders the component.
+
+</div>
+
+<hr>
+
+<h2>Step 9 — Update State using useDispatch()</h2>
+
+<h3>features/counter/CounterButtons.js</h3>
+
+<pre><code class="language-js">import { useDispatch } from "react-redux";
+import { increment, decrement } from "../../redux/actions/counterActions";
+
+export default function CounterButtons() {
+  const dispatch = useDispatch();
+
+  return (
+    &lt;&gt;
+      &lt;button onClick={() => dispatch(increment())}&gt;+&lt;/button&gt;
+      &lt;button onClick={() => dispatch(decrement())}&gt;-&lt;/button&gt;
+    &lt;/&gt;
+  );
+}</code></pre>
+
+<div class="highlight">
+
+<b>useDispatch()</b> allows us to send actions to Redux.
+
+The reducer receives the action and updates the Store.
+
+</div>
+
+<hr>
+
+<h2>Step 10 — App.js</h2>
+
+<pre><code class="language-js">import Counter from "./features/counter/Counter";
+import CounterButtons from "./features/counter/CounterButtons";
+
+export default function App() {
+  return (
+    &lt;&gt;
+      &lt;Counter /&gt;
+      &lt;CounterButtons /&gt;
+    &lt;/&gt;
+  );
+}</code></pre>
+
+<hr>
+
+<h2>Redux Data Flow</h2>
+
+<div class="flow">
+
+User Click
+
+<br>
+
+↓
+
+<br>
+
+dispatch(increment())
+
+<br>
+
+↓
+
+<br>
+
+Action Creator
+
+<br>
+
+↓
+
+<br>
+
+Redux Store
+
+<br>
+
+↓
+
+<br>
+
+Root Reducer
+
+<br>
+
+↓
+
+<br>
+
+Counter Reducer
+
+<br>
+
+↓
+
+<br>
+
+Returns New State
+
+<br>
+
+↓
+
+<br>
+
+Redux Store Updated
+
+<br>
+
+↓
+
+<br>
+
+useSelector()
+
+<br>
+
+↓
+
+<br>
+
+React Component Re-renders
+
+</div>
+
+<hr>
+
+<h2>Complete Architecture</h2>
+
+<pre>
+
+User
+
+ │
+
+ ▼
+
+CounterButtons
+
+ │
+
+ ▼
+
+dispatch()
+
+ │
+
+ ▼
+
+Action Creator
+
+ │
+
+ ▼
+
+Action Object
+
+ │
+
+ ▼
+
+Store
+
+ │
+
+ ▼
+
+Root Reducer
+
+ │
+
+ ▼
+
+Counter Reducer
+
+ │
+
+ ▼
+
+New State Returned
+
+ │
+
+ ▼
+
+Store Updated
+
+ │
+
+ ▼
+
+useSelector()
+
+ │
+
+ ▼
+
+Counter Component
+
+ │
+
+ ▼
+
+Updated UI
+
+</pre>
+
+<hr>
+
+<h2>Why Reducers Return a New Object?</h2>
+
+<p>
+
+Redux compares object references to detect state changes.
+
+If we modify the existing object directly, Redux cannot reliably detect the update.
+
+Therefore reducers must always return a new object.
+
+</p>
+
+<h3>❌ Wrong</h3>
+
+<pre><code class="language-js">state.count++;
+return state;</code></pre>
+
+<h3>✅ Correct</h3>
+
+<pre><code class="language-js">return { ...state, count: state.count + 1 };</code></pre>
+
+<hr>
+
+<h2>Advantages of Using Constants</h2>
+
+<ul>
+
+<li>Avoids spelling mistakes.</li>
+
+<li>Provides auto-completion in editors.</li>
+
+<li>Easy to reuse across multiple reducers.</li>
+
+<li>Central place for action names.</li>
+
+</ul>
+
+<hr>
+
+<h2>Advantages of Action Creators</h2>
+
+<ul>
+
+<li>Reusable.</li>
+
+<li>Cleaner components.</li>
+
+<li>Easy to add payloads later.</li>
+
+<li>Business logic stays outside UI components.</li>
+
+</ul>
+
+<hr>
+
+<h2>Advantages of Root Reducer</h2>
+
+<ul>
+
+<li>Supports multiple reducers.</li>
+
+<li>Scales well for enterprise applications.</li>
+
+<li>Keeps store configuration clean.</li>
+
+</ul>
+
+<hr>
+
+<h2>Concept Summary</h2>
+
+<table>
+
+<tr>
+
+<th>Concept</th>
+
+<th>Description</th>
+
+</tr>
+
+<tr>
+
+<td>Store</td>
+
+<td>Global state container.</td>
+
+</tr>
+
+<tr>
+
+<td>Action</td>
+
+<td>Describes what happened.</td>
+
+</tr>
+
+<tr>
+
+<td>Constants</td>
+
+<td>Store action type names.</td>
+
+</tr>
+
+<tr>
+
+<td>Action Creator</td>
+
+<td>Returns an action object.</td>
+
+</tr>
+
+<tr>
+
+<td>Reducer</td>
+
+<td>Calculates and returns the new state.</td>
+
+</tr>
+
+<tr>
+
+<td>Root Reducer</td>
+
+<td>Combines multiple reducers.</td>
+
+</tr>
+
+<tr>
+
+<td>Provider</td>
+
+<td>Makes Redux available throughout React.</td>
+
+</tr>
+
+<tr>
+
+<td>useSelector()</td>
+
+<td>Reads state from the Store.</td>
+
+</tr>
+
+<tr>
+
+<td>useDispatch()</td>
+
+<td>Sends actions to Redux.</td>
+
+</tr>
+
+</table>
+
+<hr>
+
+<h2>Quick Revision</h2>
+
+<div class="highlight">
+
+<b>Flow</b>
+
+<pre>
+
+Click Button
+
+↓
+
+dispatch()
+
+↓
+
+Action Creator
+
+↓
+
+Action Object
+
+↓
+
+Reducer
+
+↓
+
+New State
+
+↓
+
+Store Updates
+
+↓
+
+useSelector()
+
+↓
+
+UI Updates
+
+</pre>
+
+</div>
+
+<hr>
+
+<h2>Traditional Redux Interview Questions</h2>
+
+<h3>1. What is Redux?</h3>
+
+<p>
+
+Redux is a predictable state container that allows us to manage global state in a single centralized store.
+
+</p>
+
+<h3>2. What is a Store?</h3>
+
+<p>
+
+A Store is an object that holds the application's global state.
+
+</p>
+
+<h3>3. What is an Action?</h3>
+
+<p>
+
+An Action is a plain JavaScript object that describes what happened.
+
+</p>
+
+<h3>4. What is an Action Creator?</h3>
+
+<p>
+
+A function that returns an Action object.
+
+</p>
+
+<h3>5. What is a Reducer?</h3>
+
+<p>
+
+A pure function that receives the current state and an action, then returns a new state.
+
+</p>
+
+<h3>6. What is useSelector()?</h3>
+
+<p>
+
+A React-Redux hook used to read data from the Redux Store.
+
+</p>
+
+<h3>7. What is useDispatch()?</h3>
+
+<p>
+
+A React-Redux hook used to dispatch actions to Redux.
+
+</p>
+
+<h3>8. Why should reducers never mutate state?</h3>
+
+<p>
+
+Because Redux depends on immutable updates to detect changes and trigger UI re-rendering correctly.
+
+</p>
+
+<hr>
+
+<h2>Traditional Redux Flow in One Line</h2>
+
+<div class="flow">
+
+Component
+
+→ Dispatch
+
+→ Action Creator
+
+→ Action
+
+→ Store
+
+→ Root Reducer
+
+→ Reducer
+
+→ New State
+
+→ Store Update
+
+→ useSelector
+
+→ UI Re-render
+
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-js.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+
+</body>
+</html>
