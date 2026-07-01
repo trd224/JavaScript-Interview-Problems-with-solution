@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!-- <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -356,6 +356,262 @@
 
   </div>
 
+
+  <div class="fixed-page-nav-spacer"></div>
+  <div class="fixed-page-nav">
+    <a href="004%20What%20is%20the%20virtual%20DOM%20and%20how%20does%20React%20use%20it.html">←</a>
+    <a href="006%20What%20is%20a%20React%20componen.html">→</a>
+  </div>
+</body>
+</html> -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>005 - Virtual DOM vs Real DOM</title>
+
+  <style>
+    body{margin:0;padding:0;background:#0f172a;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+    .container{max-width:1000px;margin:40px auto;background:#111827;padding:40px;border-radius:16px;box-shadow:0 0 20px rgba(0,0,0,.4)}
+    h1{color:#38bdf8;margin-bottom:30px}
+    h2{color:#a78bfa;margin-top:35px;margin-bottom:15px}
+    h3{color:#f472b6;margin-top:25px}
+    p{color:#cbd5e1}
+    ul{padding-left:22px}
+    li{margin-bottom:8px}
+    table{width:100%;border-collapse:collapse;margin-top:20px}
+    table th,table td{border:1px solid #334155;padding:14px;text-align:left}
+    table th{background:#1e293b;color:#38bdf8}
+    table td{background:#111827;color:#cbd5e1}
+    .highlight{background:#1e293b;padding:16px;border-left:5px solid #38bdf8;border-radius:8px;margin-top:15px}
+    .warning{background:#292524;padding:16px;border-left:5px solid #facc15;border-radius:8px;margin-top:15px;color:#fde68a}
+    pre{background:#020617;padding:20px;border-radius:10px;overflow-x:auto;border:1px solid #334155}
+    code{font-family:Consolas,monospace;font-size:15px}
+    .keyword{color:#c084fc}
+    .function{color:#38bdf8}
+    .string{color:#facc15}
+    .tag{color:#f472b6}
+    .variable{color:#4ade80}
+    .comment{color:#94a3b8}
+    .output{color:#4ade80}
+    .fixed-page-nav-spacer{height:110px}
+    .fixed-page-nav{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);width:calc(100% - 32px);max-width:1180px;display:flex;justify-content:space-between;gap:16px;z-index:9999;pointer-events:none}
+    .fixed-page-nav a,.fixed-page-nav span{width:52px;height:52px;display:flex;align-items:center;justify-content:center;text-align:center;text-decoration:none;background:#38bdf8;color:#020617;border-radius:50%;font-size:28px;font-weight:700;line-height:1;box-shadow:0 10px 30px rgba(0,0,0,.45);pointer-events:auto}
+    .fixed-page-nav span{background:#334155;color:#94a3b8;cursor:not-allowed}
+    @media(max-width:600px){.fixed-page-nav{bottom:14px;width:calc(100% - 20px)}.fixed-page-nav a,.fixed-page-nav span{width:46px;height:46px;font-size:24px}}
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <h1>005. How does the Virtual DOM differ from the Real DOM?</h1>
+
+    <h2>One-Line Definition</h2>
+    <div class="highlight">
+      Both Real DOM and Virtual DOM are object trees. The Real DOM is created by the browser and is connected to the actual screen, layout, CSS, paint, and events. The Virtual DOM is a lightweight JavaScript object tree created by React to calculate what changed before updating the Real DOM.
+    </div>
+
+    <h2>Important Correction</h2>
+    <div class="warning">
+      Do not say: <strong>“Real DOM is HTML and Virtual DOM is an object.”</strong><br/>
+      Correct answer: <strong>Real DOM is also exposed as JavaScript objects by the browser, but it is heavier because it is connected to rendering.</strong>
+    </div>
+
+    <h2>What Is the Real DOM?</h2>
+    <p>
+      The Real DOM is the browser-created object tree for your HTML document. It represents the actual webpage that the user sees.
+    </p>
+
+    <h3>HTML Written by Developer</h3>
+    <pre><code><span class="tag">&lt;body&gt;</span>
+  <span class="tag">&lt;h1&gt;</span>Hello<span class="tag">&lt;/h1&gt;</span>
+  <span class="tag">&lt;p&gt;</span>Welcome<span class="tag">&lt;/p&gt;</span>
+<span class="tag">&lt;/body&gt;</span></code></pre>
+
+    <h3>Browser Creates Real DOM Objects</h3>
+    <pre><code><span class="keyword">const</span> heading = document.querySelector(<span class="string">'h1'</span>);
+
+console.log(<span class="keyword">typeof</span> heading); <span class="comment">// object</span></code></pre>
+
+    <p>
+      So yes, the Real DOM is also an object. But it is not just a simple object. It is connected to the browser rendering system.
+    </p>
+
+    <h3>Real DOM Object Is Connected To</h3>
+    <ul>
+      <li>Browser screen</li>
+      <li>CSS engine</li>
+      <li>Layout calculation</li>
+      <li>Paint and repaint</li>
+      <li>Browser event system</li>
+    </ul>
+
+    <h2>Why Real DOM Updates Can Be Expensive</h2>
+    <p>
+      When you directly change the Real DOM, the browser may need to recalculate styles, update layout, and repaint pixels on the screen.
+    </p>
+
+    <pre><code>heading.innerText = <span class="string">'Hello Rizwan'</span>;</code></pre>
+
+    <p>
+      This change looks small, but the browser may need to do extra rendering work behind the scenes.
+    </p>
+
+    <h2>What Is the Virtual DOM?</h2>
+    <p>
+      The Virtual DOM is React's lightweight JavaScript object representation of the UI.
+    </p>
+
+    <h3>Example Virtual DOM</h3>
+    <pre><code><span class="keyword">const</span> virtualDOM = {
+  type: <span class="string">'h1'</span>,
+  props: {
+    children: <span class="string">'Hello'</span>
+  }
+};</code></pre>
+
+    <p>
+      This object is only data. It is not directly connected to the browser screen.
+    </p>
+
+    <h3>Virtual DOM Is Not Connected To</h3>
+    <ul>
+      <li>No direct screen rendering</li>
+      <li>No layout calculation</li>
+      <li>No repaint</li>
+      <li>No browser CSS engine connection</li>
+    </ul>
+
+    <h2>Main Difference</h2>
+    <table>
+      <tr>
+        <th>Virtual DOM</th>
+        <th>Real DOM</th>
+      </tr>
+      <tr>
+        <td>Created by React</td>
+        <td>Created by the browser</td>
+      </tr>
+      <tr>
+        <td>Plain lightweight JavaScript object tree</td>
+        <td>Browser DOM object tree</td>
+      </tr>
+      <tr>
+        <td>Not directly connected to the screen</td>
+        <td>Connected to the actual webpage screen</td>
+      </tr>
+      <tr>
+        <td>Cheap to create and compare</td>
+        <td>Expensive to update frequently</td>
+      </tr>
+      <tr>
+        <td>Used for diffing and reconciliation</td>
+        <td>Used for actual rendering</td>
+      </tr>
+      <tr>
+        <td>React updates it first</td>
+        <td>React updates it only where needed</td>
+      </tr>
+    </table>
+
+    <h2>How React Uses the Virtual DOM</h2>
+    <table>
+      <tr>
+        <th>Step</th>
+        <th>Process</th>
+      </tr>
+      <tr>
+        <td>1</td>
+        <td>State or props change</td>
+      </tr>
+      <tr>
+        <td>2</td>
+        <td>React creates a new Virtual DOM tree</td>
+      </tr>
+      <tr>
+        <td>3</td>
+        <td>React compares old Virtual DOM with new Virtual DOM</td>
+      </tr>
+      <tr>
+        <td>4</td>
+        <td>React finds the exact UI difference</td>
+      </tr>
+      <tr>
+        <td>5</td>
+        <td>React updates only the required part of the Real DOM</td>
+      </tr>
+    </table>
+
+    <h2>Example</h2>
+    <h3>Old UI</h3>
+    <pre><code><span class="tag">&lt;h1&gt;</span>Hello<span class="tag">&lt;/h1&gt;</span></code></pre>
+
+    <h3>New UI</h3>
+    <pre><code><span class="tag">&lt;h1&gt;</span>Hello Rizwan<span class="tag">&lt;/h1&gt;</span></code></pre>
+
+    <h3>React Comparison</h3>
+    <pre><code>Old Virtual DOM: children = <span class="string">'Hello'</span>
+New Virtual DOM: children = <span class="string">'Hello Rizwan'</span>
+
+Result: only text changed</code></pre>
+
+    <p>
+      React does not reload the full page. It updates only the changed text node in the Real DOM.
+    </p>
+
+    <h2>Example Code</h2>
+    <pre><code><span class="keyword">import</span> { useState } <span class="keyword">from</span> <span class="string">'react'</span>;
+
+<span class="keyword">function</span> <span class="function">Counter</span>() {
+  <span class="keyword">const</span> [count, setCount] = useState(0);
+
+  <span class="keyword">return</span> (
+    <span class="tag">&lt;div&gt;</span>
+      <span class="tag">&lt;h1&gt;</span>{count}<span class="tag">&lt;/h1&gt;</span>
+      <span class="tag">&lt;button</span> onClick={() => setCount(count + 1)}<span class="tag">&gt;</span>Increment<span class="tag">&lt;/button&gt;</span>
+    <span class="tag">&lt;/div&gt;</span>
+  );
+}
+
+<span class="keyword">export</span> <span class="keyword">default</span> Counter;</code></pre>
+
+    <h2>What Happens Internally?</h2>
+    <ul>
+      <li>Button click changes React state.</li>
+      <li>React creates a new Virtual DOM.</li>
+      <li>React compares old Virtual DOM and new Virtual DOM.</li>
+      <li>React finds that only <strong>count text</strong> changed.</li>
+      <li>React updates only that text in the Real DOM.</li>
+    </ul>
+
+    <h2>Real Project Use Case</h2>
+    <p>
+      Suppose you are building a live chat, OTP screen, stock dashboard, or notification system. Data changes again and again. React uses Virtual DOM comparison to avoid unnecessary Real DOM work and update only the changed UI parts.
+    </p>
+
+    <h2>Important Interview Points</h2>
+    <ul>
+      <li>Real DOM is also an object tree, created by the browser.</li>
+      <li>Virtual DOM is a lightweight object tree, created by React.</li>
+      <li>Real DOM is connected to rendering, layout, paint, CSS, and events.</li>
+      <li>Virtual DOM is only an in-memory UI representation.</li>
+      <li>React compares old and new Virtual DOM using diffing.</li>
+      <li>React updates the Real DOM using reconciliation.</li>
+      <li>Only changed Real DOM parts are updated.</li>
+    </ul>
+
+    <h2>Short Interview Answer</h2>
+    <div class="highlight">
+      The Real DOM is the browser-created object tree connected to the actual webpage rendering, while the Virtual DOM is React's lightweight JavaScript object tree used to calculate UI changes before updating the Real DOM.
+    </div>
+
+    <h2>One-Line Interview Answer</h2>
+    <div class="highlight">
+      Both are object trees, but the Real DOM belongs to the browser and affects the screen, while the Virtual DOM belongs to React and is used to efficiently find and apply changes.
+    </div>
+  </div>
 
   <div class="fixed-page-nav-spacer"></div>
   <div class="fixed-page-nav">

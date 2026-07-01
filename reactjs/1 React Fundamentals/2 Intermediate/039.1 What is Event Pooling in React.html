@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>039.1 - What is Event Pooling in React?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px}
+p,li{color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px}
+.success{background:#052e16;padding:18px;border-left:5px solid #22c55e;border-radius:10px;margin-top:15px}
+.warning{background:#1e1b4b;padding:18px;border-left:5px solid #fbbf24;border-radius:10px;margin-top:15px}
+.danger{background:#2a0f12;padding:18px;border-left:5px solid #ef4444;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;text-align:center;line-height:2;font-size:18px}
+.file-name{background:#111827;color:#93c5fd;padding:12px 16px;border-radius:10px;border:1px solid #1e293b;font-weight:bold;margin-top:20px;margin-bottom:10px}
+.badge{display:inline-block;background:#312e81;color:#ddd6fe;padding:4px 10px;border-radius:999px;font-size:13px;margin:4px 6px 4px 0}
+pre[class*="language-"],code[class*="language-"]{color:#f8f8f2;background:#1e1e1e;font-family:Consolas,Monaco,'Courier New',monospace;font-size:15px}
+.token.keyword{color:#c792ea}
+.token.string{color:#c3e88d}
+.token.function{color:#82aaff}
+.token.class-name{color:#ffcb6b}
+.token.number{color:#f78c6c}
+.token.operator{color:#89ddff}
+.token.punctuation{color:#89ddff}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>039.1 What is Event Pooling in React?</h1>
+
+<h2>One-Line Definition</h2>
+
+<div class="highlight">
+<b>Event Pooling</b> was an old React optimization where React reused <b>SyntheticEvent</b> objects instead of creating a new event object for every browser event.
+</div>
+
+<h2>First Understand SyntheticEvent</h2>
+
+<p>
+When you write an event in React, React does not directly give you only the browser's native event. React wraps it inside its own event object called <b>SyntheticEvent</b>.
+</p>
+
+<div class="file-name">Button.jsx</div>
+
+<pre class="language-jsx"><code class="language-jsx">function Button() {
+  function handleClick(event) {
+    console.log(event);
+  }
+
+  return &lt;button onClick={handleClick}&gt;Save&lt;/button&gt;;
+}</code></pre>
+
+<div class="success">
+Here, <b>event</b> is React's <b>SyntheticEvent</b>. It gives a consistent event API across browsers.
+</div>
+
+<h2>How Event Pooling Worked in React 16 and Earlier</h2>
+
+<p>
+In React 16 and earlier, React reused event objects. After your event handler finished, React cleared the event object properties and kept the object for the next event.
+</p>
+
+<div class="flow">
+User Clicks Button
+<br>↓<br>
+React Creates SyntheticEvent
+<br>↓<br>
+Your Handler Runs
+<br>↓<br>
+Handler Finishes
+<br>↓<br>
+React Clears Event Properties
+<br>↓<br>
+Same Event Object Is Reused Later
+</div>
+
+<h2>Why React Did This</h2>
+
+<div class="highlight">
+React used event pooling to reduce memory allocation. Instead of creating many new event objects, React reused old objects.
+</div>
+
+<table>
+<tr>
+<th>Reason</th>
+<th>Meaning</th>
+</tr>
+<tr>
+<td>Performance</td>
+<td>Fewer objects created again and again</td>
+</tr>
+<tr>
+<td>Memory Saving</td>
+<td>Old browsers benefited from object reuse</td>
+</tr>
+<tr>
+<td>Optimization</td>
+<td>React tried to make event handling cheaper</td>
+</tr>
+</table>
+
+<h2>The Main Problem</h2>
+
+<p>
+Because React cleared the event object after the handler finished, you could not safely use the event later inside asynchronous code.
+</p>
+
+<div class="file-name">React 16 Problem</div>
+
+<pre class="language-jsx"><code class="language-jsx">function Button() {
+  function handleClick(event) {
+    setTimeout(() =&gt; {
+      console.log(event.target);
+    }, 1000);
+  }
+
+  return &lt;button onClick={handleClick}&gt;Save&lt;/button&gt;;
+}</code></pre>
+
+<div class="danger">
+In React 16 and earlier, this could print <b>null</b>, because React already cleared the event properties before <b>setTimeout</b> executed.
+</div>
+
+<h2>Why event.target Became null</h2>
+
+<div class="flow">
+Click Event Happens
+<br>↓<br>
+handleClick(event) Runs
+<br>↓<br>
+setTimeout Is Registered
+<br>↓<br>
+Handler Finishes Immediately
+<br>↓<br>
+React Clears event.target
+<br>↓<br>
+1 Second Later setTimeout Runs
+<br>↓<br>
+event.target Is Already null
+</div>
+
+<h2>Old Solution: event.persist()</h2>
+
+<p>
+In old React, if you wanted to use the event later, you had to call <b>event.persist()</b>.
+</p>
+
+<div class="file-name">React 16 Fix</div>
+
+<pre class="language-jsx"><code class="language-jsx">function Button() {
+  function handleClick(event) {
+    event.persist();
+
+    setTimeout(() =&gt; {
+      console.log(event.target);
+    }, 1000);
+  }
+
+  return &lt;button onClick={handleClick}&gt;Save&lt;/button&gt;;
+}</code></pre>
+
+<div class="success">
+<b>event.persist()</b> told React: "Do not return this event object to the pool. Keep it alive."
+</div>
+
+<h2>Better Old Solution: Store Needed Value</h2>
+
+<p>
+Instead of keeping the whole event object, you could store the required value first.
+</p>
+
+<div class="file-name">Safer Pattern</div>
+
+<pre class="language-jsx"><code class="language-jsx">function Button() {
+  function handleChange(event) {
+    const value = event.target.value;
+
+    setTimeout(() =&gt; {
+      console.log(value);
+    }, 1000);
+  }
+
+  return &lt;input onChange={handleChange} /&gt;;
+}</code></pre>
+
+<div class="highlight">
+This pattern is still good because you usually need the value, not the full event object.
+</div>
+
+<h2>React 17 and Later</h2>
+
+<div class="warning">
+React 17 removed event pooling. So in React 17, React 18, and React 19, SyntheticEvent objects are no longer pooled.
+</div>
+
+<div class="file-name">React 17+</div>
+
+<pre class="language-jsx"><code class="language-jsx">function Button() {
+  function handleClick(event) {
+    setTimeout(() =&gt; {
+      console.log(event.target);
+    }, 1000);
+  }
+
+  return &lt;button onClick={handleClick}&gt;Save&lt;/button&gt;;
+}</code></pre>
+
+<div class="success">
+In modern React, you do not need <b>event.persist()</b> for normal React DOM events.
+</div>
+
+<h2>React 16 vs React 17+</h2>
+
+<table>
+<tr>
+<th>Feature</th>
+<th>React 16 and Earlier</th>
+<th>React 17+</th>
+</tr>
+<tr>
+<td>Event Pooling</td>
+<td>Yes</td>
+<td>No</td>
+</tr>
+<tr>
+<td>SyntheticEvent Reused</td>
+<td>Yes</td>
+<td>No</td>
+</tr>
+<tr>
+<td>Event Properties Cleared</td>
+<td>Yes</td>
+<td>No</td>
+</tr>
+<tr>
+<td>Need event.persist()</td>
+<td>Sometimes yes</td>
+<td>No</td>
+</tr>
+<tr>
+<td>Async Event Access</td>
+<td>Unsafe without persist/value copy</td>
+<td>Safe</td>
+</tr>
+</table>
+
+<h2>Important Point</h2>
+
+<div class="warning">
+Event pooling is mostly a historical React interview topic now. In modern React, you should know what it was, why it caused problems, and that it was removed in React 17.
+</div>
+
+<h2>Easy Way To Remember</h2>
+
+<div class="flow">
+Old React
+<br>↓<br>
+Reuse Event Object
+<br>↓<br>
+Clear Properties After Handler
+<br>↓<br>
+Async Code May Get null
+<br>↓<br>
+Use event.persist() Or Store Value
+</div>
+
+<br>
+
+<div class="flow">
+Modern React
+<br>↓<br>
+No Event Pooling
+<br>↓<br>
+No Need For event.persist()
+<br>↓<br>
+Async Event Access Works
+</div>
+
+<h2>Interview Answer</h2>
+
+<div class="highlight">
+Event Pooling was an optimization used in React 16 and earlier where React reused SyntheticEvent objects to reduce memory allocation. After an event handler finished, React cleared the event properties and returned the object to the pool. Because of this, accessing event properties asynchronously could return null unless event.persist() was used or the needed value was copied first. React 17 removed event pooling, so event.persist() is no longer needed in modern React.
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+Event Pooling means old React reused SyntheticEvent objects, cleared them after the handler, and required event.persist() for async access; modern React removed this behavior.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+
+</body>
+</html>

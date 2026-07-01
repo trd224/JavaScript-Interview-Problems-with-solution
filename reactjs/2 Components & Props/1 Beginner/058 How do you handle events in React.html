@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -407,6 +409,123 @@
     </p>
 
     <pre><code>event.stopPropagation()</code></pre>
+
+
+
+    <h2>Why stopPropagation() Does Not Stop React From Getting Event</h2>
+
+    <p>
+      Your doubt is correct: React normally keeps one real browser listener near the root. So it feels like if we stop propagation, the event should not reach React root.
+    </p>
+
+    <div class="highlight">
+      Main point: your React handler runs only after the browser event has already reached React root.
+    </div>
+
+    <h2>Step-by-Step Flow</h2>
+
+    <div class="flow">
+      Button Click
+      <br>↓<br>
+      Browser event bubbles upward
+      <br>↓<br>
+      Event reaches React root
+      <br>↓<br>
+      React catches the event
+      <br>↓<br>
+      React runs your button/form handler
+      <br>↓<br>
+      Now stopPropagation() can stop parent React handlers
+    </div>
+
+    <h2>Very Simple Example</h2>
+
+    <pre><code><span class="keyword">function</span> <span class="function">App</span>() {
+  <span class="keyword">function</span> <span class="function">parentClick</span>() { console.log(<span class="string">'Parent Clicked'</span>); }
+  <span class="keyword">function</span> <span class="function">buttonClick</span>(event) { event.stopPropagation(); console.log(<span class="string">'Button Clicked'</span>); }
+  <span class="keyword">return</span> <span class="tag">&lt;div</span> onClick={parentClick}<span class="tag">&gt;&lt;button</span> onClick={buttonClick}<span class="tag">&gt;</span>Click<span class="tag">&lt;/button&gt;&lt;/div&gt;</span>;
+}</code></pre>
+
+    <h2>Output</h2>
+
+    <pre class="output"><code>Button Clicked</code></pre>
+
+    <p>
+      Parent handler does not run because <strong>stopPropagation()</strong> stops React's next parent handler after the button handler has executed.
+    </p>
+
+    <h2>Without stopPropagation()</h2>
+
+    <div class="flow">
+      Button Click
+      <br>↓<br>
+      React root receives event
+      <br>↓<br>
+      Button handler runs
+      <br>↓<br>
+      Parent handler also runs
+    </div>
+
+    <pre class="output"><code>Button Clicked
+Parent Clicked</code></pre>
+
+    <h2>With stopPropagation()</h2>
+
+    <div class="flow">
+      Button Click
+      <br>↓<br>
+      React root receives event
+      <br>↓<br>
+      Button handler runs
+      <br>↓<br>
+      stopPropagation()
+      <br>↓<br>
+      Parent handler does not run
+    </div>
+
+    <pre class="output"><code>Button Clicked</code></pre>
+
+    <h2>Important Understanding</h2>
+
+    <div class="highlight">
+      stopPropagation() does not stop the event before React gets it. React already got the event first. It only stops the event from going to parent React handlers after the current handler runs.
+    </div>
+
+    <h2>Form Example Correction</h2>
+
+    <p>
+      In a form submit handler, usually you need <strong>preventDefault()</strong>, not <strong>stopPropagation()</strong>.
+    </p>
+
+    <pre><code><span class="keyword">function</span> <span class="function">App</span>() {
+  <span class="keyword">function</span> <span class="function">handleSubmit</span>(event) { event.preventDefault(); console.log(<span class="string">'Form Submitted'</span>); }
+  <span class="keyword">return</span> <span class="tag">&lt;form</span> onSubmit={handleSubmit}<span class="tag">&gt;&lt;button</span> type=<span class="string">"submit"</span><span class="tag">&gt;</span>Submit<span class="tag">&lt;/button&gt;&lt;/form&gt;</span>;
+}</code></pre>
+
+    <table>
+      <tr>
+        <th>Method</th>
+        <th>Meaning</th>
+        <th>Common Use</th>
+      </tr>
+      <tr>
+        <td>preventDefault()</td>
+        <td>Stops browser default behavior</td>
+        <td>Stop form page reload</td>
+      </tr>
+      <tr>
+        <td>stopPropagation()</td>
+        <td>Stops event from going to parent handlers</td>
+        <td>Modal, dropdown, nested click handlers</td>
+      </tr>
+    </table>
+
+    <h2>Easy Line to Remember</h2>
+
+    <div class="highlight">
+      React root receives the event first, then React runs your handler, and then stopPropagation() stops parent handlers.
+    </div>
+
 
     <h2>Real Project Use Cases</h2>
 
