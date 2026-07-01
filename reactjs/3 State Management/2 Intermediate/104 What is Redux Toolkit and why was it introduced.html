@@ -39,6 +39,29 @@ pre{border-radius:12px;overflow-x:auto}
 Redux Toolkit (RTK) is the official recommended way to write Redux code. It simplifies Redux setup and removes most of the boilerplate code required in traditional Redux.
 </div>
 
+<h2>Installation</h2>
+
+<p>
+Before writing any Redux Toolkit code, install the two required packages.
+</p>
+
+<pre><code class="language-bash">npm install @reduxjs/toolkit react-redux</code></pre>
+
+<table>
+<tr>
+<th>Package</th>
+<th>Purpose</th>
+</tr>
+<tr>
+<td>@reduxjs/toolkit</td>
+<td>Provides createSlice, configureStore, createAsyncThunk, and other RTK utilities.</td>
+</tr>
+<tr>
+<td>react-redux</td>
+<td>Connects the Redux store with React using Provider, useSelector, and useDispatch.</td>
+</tr>
+</table>
+
 <h2>What Problem Did Traditional Redux Have?</h2>
 
 <p>
@@ -253,11 +276,75 @@ const store = configureStore({
   }
 
 });
+
+export default store;
 </code></pre>
 
 <div class="highlight">
 configureStore automatically adds Redux DevTools support and useful middleware.
 </div>
+
+<h2>Connect the Store to the React App</h2>
+
+<p>
+Once the store is configured, it must be provided to the whole React app using the Provider component.
+</p>
+
+<h3>main.jsx</h3>
+
+<pre><code class="language-jsx">import React from 'react';
+import ReactDOM from 'react-dom/client';
+import { Provider } from 'react-redux';
+import store from './app/store';
+import App from './App';
+
+ReactDOM.createRoot(document.getElementById('root')).render(
+  &lt;Provider store={store}&gt;
+    &lt;App /&gt;
+  &lt;/Provider&gt;
+);
+</code></pre>
+
+<div class="highlight">
+Provider makes the Redux store available to every component in the app, so any component can access it without prop drilling.
+</div>
+
+<h2>Using Redux Toolkit Inside a Component</h2>
+
+<p>
+With the store connected, components read state with useSelector and update state with useDispatch.
+</p>
+
+<h3>components/ProductCard.jsx</h3>
+
+<pre><code class="language-jsx">import { useDispatch } from 'react-redux';
+import { addToCart } from '../features/cart/cartSlice';
+
+function ProductCard({ product }) {
+  const dispatch = useDispatch();
+
+  return (
+    &lt;button onClick={() =&gt; dispatch(addToCart(product))}&gt;
+      Add To Cart
+    &lt;/button&gt;
+  );
+}
+
+export default ProductCard;
+</code></pre>
+
+<h3>components/Navbar.jsx</h3>
+
+<pre><code class="language-jsx">import { useSelector } from 'react-redux';
+
+function Navbar() {
+  const items = useSelector(state =&gt; state.cart.items);
+
+  return &lt;h3&gt;Cart Items: {items.length}&lt;/h3&gt;;
+}
+
+export default Navbar;
+</code></pre>
 
 <h2>Immer Makes State Updates Easier</h2>
 
