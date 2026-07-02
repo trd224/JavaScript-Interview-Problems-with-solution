@@ -1,0 +1,1039 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Redux Thunk Complete Guide (Product Load & Display)</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet"/>
+
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+
+body{
+background:#000814;
+color:#e2e8f0;
+font-family:Arial,Helvetica,sans-serif;
+line-height:1.8;
+padding:30px;
+}
+
+.container{
+max-width:1200px;
+margin:auto;
+background:#020617;
+padding:40px;
+border-radius:18px;
+border:1px solid #1e293b;
+box-shadow:0 0 30px rgba(0,0,0,.8);
+}
+
+h1{
+font-size:40px;
+color:#f8fafc;
+margin-bottom:25px;
+}
+
+h2{
+color:#c084fc;
+margin-top:45px;
+margin-bottom:15px;
+}
+
+h3{
+color:#38bdf8;
+margin-top:25px;
+margin-bottom:10px;
+}
+
+p{
+color:#cbd5e1;
+margin-bottom:15px;
+}
+
+ul{
+margin-left:25px;
+}
+
+li{
+margin:8px 0;
+}
+
+.highlight{
+background:#0f172a;
+padding:20px;
+border-left:5px solid #38bdf8;
+border-radius:10px;
+margin:20px 0;
+}
+
+.flow{
+background:#020617;
+border:1px solid #334155;
+padding:25px;
+border-radius:10px;
+text-align:center;
+font-size:18px;
+line-height:2;
+margin-top:20px;
+}
+
+pre{
+border-radius:12px!important;
+overflow:auto!important;
+margin-top:15px;
+}
+
+table{
+width:100%;
+border-collapse:collapse;
+margin-top:20px;
+}
+
+th,td{
+border:1px solid #334155;
+padding:12px;
+}
+
+th{
+background:#0f172a;
+color:#38bdf8;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>Redux Thunk (Professional Architecture) — Product Load & Display</h1>
+
+<div class="highlight">
+
+Redux is a predictable state container that allows us to manage global state inside a single centralized store.
+
+Redux Thunk is a middleware that lets action creators return a <b>function</b> instead of a plain object, so we can perform async work (like an API call) before dispatching the actual action.
+
+</div>
+
+<h2>Why Redux Thunk?</h2>
+
+<p>
+
+A plain Redux action creator can only return an object — it has no way to wait for an API response.
+
+When we need to fetch data from a server (like a list of products), we need something that can:
+
+</p>
+
+<ul>
+<li>Dispatch a "loading" action immediately</li>
+<li>Call the API</li>
+<li>Dispatch a "success" action with the data, or a "failure" action with the error</li>
+</ul>
+
+<p>
+
+Thunk middleware makes this possible by letting <code>dispatch()</code> accept a function, not just an object.
+
+</p>
+
+<pre>
+
+App
+ │
+ ├── Header
+ │
+ ├── Dashboard
+ │      │
+ │      ├── Sidebar
+ │      │      │
+ │      │      └── Menu
+ │      │
+ │      └── Content (Product List)
+ │
+ └── Footer
+
+</pre>
+
+<hr>
+
+<h2>Professional Folder Structure</h2>
+
+<pre>
+
+src/
+│
+├── app/
+│   └── store.js
+│
+├── redux/
+│   │
+│   ├── constants/
+│   │   └── productConstants.js
+│   │
+│   ├── actions/
+│   │   └── productActions.js
+│   │
+│   ├── reducers/
+│   │   ├── productReducer.js
+│   │   └── rootReducer.js
+│   │
+│   └── types/
+│       └── index.js
+│
+├── features/
+│   └── products/
+│       ├── ProductList.js
+│       └── ProductLoader.js
+│
+├── components/
+│   ├── Header.js
+│   ├── Footer.js
+│
+├── App.js
+├── index.js
+└── index.css
+
+</pre>
+
+<div class="highlight">
+
+<b>Explanation</b>
+
+<ul>
+
+<li><b>app</b> → Store configuration (with thunk middleware applied)</li>
+
+<li><b>constants</b> → Action type constants (REQUEST / SUCCESS / FAILURE)</li>
+
+<li><b>actions</b> → Action creators, including the async thunk</li>
+
+<li><b>reducers</b> → State update logic (loading, data, error)</li>
+
+<li><b>rootReducer</b> → Combines multiple reducers</li>
+
+<li><b>features</b> → Feature-specific React components</li>
+
+<li><b>components</b> → Shared UI components</li>
+
+</ul>
+
+</div>
+
+<hr>
+
+<h2>Step 1 — Install Redux + Thunk</h2>
+
+<pre><code class="language-bash">npm install redux react-redux redux-thunk</code></pre>
+
+<table>
+
+<tr>
+
+<th>Package</th>
+
+<th>Purpose</th>
+
+</tr>
+
+<tr>
+
+<td>redux</td>
+
+<td>Creates and manages the Redux Store.</td>
+
+</tr>
+
+<tr>
+
+<td>react-redux</td>
+
+<td>Connects React Components with Redux.</td>
+
+</tr>
+
+<tr>
+
+<td>redux-thunk</td>
+
+<td>Middleware that allows action creators to return functions for async logic.</td>
+
+</tr>
+
+</table>
+
+<hr>
+
+<h2>Step 2 — Create Action Constants</h2>
+
+<h3>redux/constants/productConstants.js</h3>
+
+<pre><code class="language-js">export const PRODUCT_LOAD_REQUEST = "PRODUCT_LOAD_REQUEST";
+export const PRODUCT_LOAD_SUCCESS = "PRODUCT_LOAD_SUCCESS";
+export const PRODUCT_LOAD_FAIL = "PRODUCT_LOAD_FAIL";</code></pre>
+
+<div class="highlight">
+
+We use three constants instead of one because an async call has three possible stages:
+
+<b>started</b>, <b>succeeded</b>, and <b>failed</b>. The reducer will react differently to each one.
+
+</div>
+
+<hr>
+
+<h2>Step 3 — Create the Thunk Action Creator</h2>
+
+<h3>redux/actions/productActions.js</h3>
+
+<pre><code class="language-js">import {
+  PRODUCT_LOAD_REQUEST,
+  PRODUCT_LOAD_SUCCESS,
+  PRODUCT_LOAD_FAIL
+} from "../constants/productConstants";
+
+// A normal action creator returns an object.
+// A thunk action creator returns a FUNCTION that receives dispatch.
+export const loadProducts = () => {
+  return async (dispatch) => {
+    try {
+      dispatch({ type: PRODUCT_LOAD_REQUEST });
+
+      const response = await fetch("https://fakestoreapi.com/products");
+      const data = await response.json();
+
+      dispatch({
+        type: PRODUCT_LOAD_SUCCESS,
+        payload: data
+      });
+
+    } catch (error) {
+      dispatch({
+        type: PRODUCT_LOAD_FAIL,
+        payload: error.message
+      });
+    }
+  };
+};</code></pre>
+
+<div class="highlight">
+
+Instead of writing fetch logic directly inside components,
+
+we simply write
+
+<code>dispatch(loadProducts())</code>
+
+The thunk middleware sees that <code>loadProducts()</code> returned a function (not an object),
+
+so it calls that function with <code>dispatch</code> automatically, instead of passing it straight to the reducer.
+
+</div>
+
+<hr>
+
+<h2>Step 4 — Create Reducer</h2>
+
+<h3>redux/reducers/productReducer.js</h3>
+
+<pre><code class="language-js">import {
+  PRODUCT_LOAD_REQUEST,
+  PRODUCT_LOAD_SUCCESS,
+  PRODUCT_LOAD_FAIL
+} from "../constants/productConstants";
+
+const initialState = {
+  loading: false,
+  products: [],
+  error: null
+};
+
+export default function productReducer(state = initialState, action) {
+  switch (action.type) {
+
+    case PRODUCT_LOAD_REQUEST:
+      return { ...state, loading: true, error: null };
+
+    case PRODUCT_LOAD_SUCCESS:
+      return { ...state, loading: false, products: action.payload };
+
+    case PRODUCT_LOAD_FAIL:
+      return { ...state, loading: false, error: action.payload };
+
+    default:
+      return state;
+  }
+}</code></pre>
+
+<div class="highlight">
+
+Reducers never modify the existing state.
+
+They always return a brand-new state object — even during async flows, the reducer itself stays a pure,
+
+synchronous function. All the async work happens in the thunk, not here.
+
+</div>
+
+<hr>
+
+<h2>Step 5 — Create Root Reducer</h2>
+
+<h3>redux/reducers/rootReducer.js</h3>
+
+<pre><code class="language-js">import { combineReducers } from "redux";
+import productReducer from "./productReducer";
+
+const rootReducer = combineReducers({
+  productState: productReducer
+});
+
+export default rootReducer;</code></pre>
+
+<div class="highlight">
+
+Even if there is only one reducer today,
+
+using a Root Reducer makes scaling much easier.
+
+</div>
+
+<hr>
+
+<h2>Step 6 — Create Store with Thunk Middleware</h2>
+
+<h3>app/store.js</h3>
+
+<pre><code class="language-js">import { createStore, applyMiddleware } from "redux";
+import { thunk } from "redux-thunk";
+import rootReducer from "../redux/reducers/rootReducer";
+
+const store = createStore(rootReducer, applyMiddleware(thunk));
+
+export default store;</code></pre>
+
+<div class="highlight">
+
+<code>applyMiddleware(thunk)</code> is what teaches the Store to accept functions from action creators,
+
+not just plain objects. Without this line, dispatching <code>loadProducts()</code> would throw an error.
+
+</div>
+
+<hr>
+
+<h2>Step 7 — Connect Redux with React</h2>
+
+<h3>index.js</h3>
+
+<pre><code class="language-js">import React from "react";
+import ReactDOM from "react-dom/client";
+import { Provider } from "react-redux";
+import store from "./app/store";
+import App from "./App";
+
+const root = ReactDOM.createRoot(document.getElementById("root"));
+
+root.render(
+  &lt;Provider store={store}&gt;
+    &lt;App /&gt;
+  &lt;/Provider&gt;
+);</code></pre>
+
+<div class="highlight">
+
+The Provider makes the Redux Store (and the thunk-enabled dispatch) available to every React component.
+
+</div>
+
+<hr>
+
+<h2>Step 8 — Trigger the Thunk using useDispatch() + useEffect()</h2>
+
+<h3>features/products/ProductLoader.js</h3>
+
+<pre><code class="language-js">import { useEffect } from "react";
+import { useDispatch } from "react-redux";
+import { loadProducts } from "../../redux/actions/productActions";
+
+export default function ProductLoader({ children }) {
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    dispatch(loadProducts());
+  }, [dispatch]);
+
+  return children;
+}</code></pre>
+
+<div class="highlight">
+
+<b>useDispatch()</b> gives us the dispatch function.
+
+We call <code>dispatch(loadProducts())</code> once when the component mounts,
+
+which kicks off the request → success/fail flow inside the thunk.
+
+</div>
+
+<hr>
+
+<h2>Step 9 — Read Data using useSelector()</h2>
+
+<h3>features/products/ProductList.js</h3>
+
+<pre><code class="language-js">import { useSelector } from "react-redux";
+
+export default function ProductList() {
+  const { loading, products, error } = useSelector(
+    (state) => state.productState
+  );
+
+  if (loading) return &lt;p&gt;Loading products...&lt;/p&gt;;
+  if (error) return &lt;p&gt;Error: {error}&lt;/p&gt;;
+
+  return (
+    &lt;ul&gt;
+      {products.map((product) => (
+        &lt;li key={product.id}&gt;
+          {product.title} — ${product.price}
+        &lt;/li&gt;
+      ))}
+    &lt;/ul&gt;
+  );
+}</code></pre>
+
+<div class="highlight">
+
+<b>useSelector()</b> allows us to read the <code>loading</code>, <code>products</code>, and <code>error</code> fields from the Store.
+
+Whenever the reducer returns new state, React automatically re-renders this component —
+
+so the UI moves through "Loading..." → list of products (or an error message) without any manual wiring.
+
+</div>
+
+<hr>
+
+<h2>Step 10 — App.js</h2>
+
+<pre><code class="language-js">import ProductLoader from "./features/products/ProductLoader";
+import ProductList from "./features/products/ProductList";
+
+export default function App() {
+  return (
+    &lt;ProductLoader&gt;
+      &lt;ProductList /&gt;
+    &lt;/ProductLoader&gt;
+  );
+}</code></pre>
+
+<hr>
+
+<h2>Redux Thunk Data Flow</h2>
+
+<div class="flow">
+
+Component Mounts
+
+<br>
+
+↓
+
+<br>
+
+dispatch(loadProducts())
+
+<br>
+
+↓
+
+<br>
+
+Thunk Middleware Intercepts Function
+
+<br>
+
+↓
+
+<br>
+
+dispatch({ type: PRODUCT_LOAD_REQUEST })
+
+<br>
+
+↓
+
+<br>
+
+fetch("/products") called
+
+<br>
+
+↓
+
+<br>
+
+API Responds
+
+<br>
+
+↓
+
+<br>
+
+dispatch({ type: PRODUCT_LOAD_SUCCESS, payload })
+
+<br>
+
+↓
+
+<br>
+
+Reducer Returns New State
+
+<br>
+
+↓
+
+<br>
+
+Store Updated
+
+<br>
+
+↓
+
+<br>
+
+useSelector()
+
+<br>
+
+↓
+
+<br>
+
+React Component Re-renders
+
+</div>
+
+<hr>
+
+<h2>Complete Architecture</h2>
+
+<pre>
+
+Component (mounts)
+
+ │
+
+ ▼
+
+useDispatch()
+
+ │
+
+ ▼
+
+dispatch(loadProducts())
+
+ │
+
+ ▼
+
+Thunk Function Runs
+
+ │
+
+ ├──▶ dispatch(REQUEST) ──▶ Reducer ──▶ loading: true
+
+ │
+
+ ├──▶ fetch() ──▶ API
+
+ │
+
+ ├──▶ Success ──▶ dispatch(SUCCESS) ──▶ Reducer ──▶ products: [...]
+
+ │
+
+ └──▶ Failure ──▶ dispatch(FAIL) ──▶ Reducer ──▶ error: "..."
+
+ │
+
+ ▼
+
+Store Updated
+
+ │
+
+ ▼
+
+useSelector()
+
+ │
+
+ ▼
+
+ProductList Component
+
+ │
+
+ ▼
+
+Updated UI
+
+</pre>
+
+<hr>
+
+<h2>Why Three Action Types Instead of One?</h2>
+
+<p>
+
+A synchronous action (like incrementing a counter) finishes instantly, so one action type is enough.
+
+An async action (like calling an API) takes time and can fail, so Redux Thunk convention is to dispatch
+
+three actions across the lifecycle of a single request — this lets the UI show loading spinners and error
+
+messages instead of just a final result.
+
+</p>
+
+<h3>❌ Wrong (no loading/error state)</h3>
+
+<pre><code class="language-js">export const loadProducts = () => async (dispatch) => {
+  const res = await fetch("/products");
+  const data = await res.json();
+  dispatch({ type: "PRODUCTS_LOADED", payload: data });
+};</code></pre>
+
+<h3>✅ Correct (full request/success/fail lifecycle)</h3>
+
+<pre><code class="language-js">export const loadProducts = () => async (dispatch) => {
+  dispatch({ type: PRODUCT_LOAD_REQUEST });
+  try {
+    const res = await fetch("/products");
+    const data = await res.json();
+    dispatch({ type: PRODUCT_LOAD_SUCCESS, payload: data });
+  } catch (err) {
+    dispatch({ type: PRODUCT_LOAD_FAIL, payload: err.message });
+  }
+};</code></pre>
+
+<hr>
+
+<h2>Advantages of Using Constants</h2>
+
+<ul>
+
+<li>Avoids spelling mistakes.</li>
+
+<li>Provides auto-completion in editors.</li>
+
+<li>Easy to reuse across multiple reducers.</li>
+
+<li>Central place for action names.</li>
+
+</ul>
+
+<hr>
+
+<h2>Advantages of Thunk Action Creators</h2>
+
+<ul>
+
+<li>Keeps API/async logic out of components.</li>
+
+<li>Reusable across multiple components.</li>
+
+<li>Handles loading and error states consistently.</li>
+
+<li>Easy to extend (e.g. add pagination, filters, retries) later.</li>
+
+</ul>
+
+<hr>
+
+<h2>Advantages of Root Reducer</h2>
+
+<ul>
+
+<li>Supports multiple reducers (products, cart, user, etc.).</li>
+
+<li>Scales well for enterprise applications.</li>
+
+<li>Keeps store configuration clean.</li>
+
+</ul>
+
+<hr>
+
+<h2>Concept Summary</h2>
+
+<table>
+
+<tr>
+
+<th>Concept</th>
+
+<th>Description</th>
+
+</tr>
+
+<tr>
+
+<td>Store</td>
+
+<td>Global state container.</td>
+
+</tr>
+
+<tr>
+
+<td>Action</td>
+
+<td>Describes what happened.</td>
+
+</tr>
+
+<tr>
+
+<td>Constants</td>
+
+<td>Store action type names (REQUEST / SUCCESS / FAIL).</td>
+
+</tr>
+
+<tr>
+
+<td>Thunk Action Creator</td>
+
+<td>Returns a function instead of an object, enabling async logic.</td>
+
+</tr>
+
+<tr>
+
+<td>Thunk Middleware</td>
+
+<td>Lets the Store accept and run functions passed to dispatch().</td>
+
+</tr>
+
+<tr>
+
+<td>Reducer</td>
+
+<td>Calculates and returns the new state for each stage (loading/data/error).</td>
+
+</tr>
+
+<tr>
+
+<td>Root Reducer</td>
+
+<td>Combines multiple reducers.</td>
+
+</tr>
+
+<tr>
+
+<td>Provider</td>
+
+<td>Makes Redux available throughout React.</td>
+
+</tr>
+
+<tr>
+
+<td>useSelector()</td>
+
+<td>Reads state (loading, products, error) from the Store.</td>
+
+</tr>
+
+<tr>
+
+<td>useDispatch()</td>
+
+<td>Sends the thunk action to Redux.</td>
+
+</tr>
+
+</table>
+
+<hr>
+
+<h2>Quick Revision</h2>
+
+<div class="highlight">
+
+<b>Flow</b>
+
+<pre>
+
+Component Mounts
+
+↓
+
+dispatch(loadProducts())
+
+↓
+
+Thunk Runs
+
+↓
+
+dispatch(REQUEST) → loading: true
+
+↓
+
+fetch() → API
+
+↓
+
+dispatch(SUCCESS or FAIL)
+
+↓
+
+Reducer Returns New State
+
+↓
+
+Store Updates
+
+↓
+
+useSelector()
+
+↓
+
+UI Updates (List / Error / Spinner)
+
+</pre>
+
+</div>
+
+<hr>
+
+<h2>Redux Thunk Interview Questions</h2>
+
+<h3>1. What is Redux Thunk?</h3>
+
+<p>
+
+Redux Thunk is a middleware that allows action creators to return a function instead of a plain action object,
+
+so that asynchronous logic (like API calls) can run before dispatching the real action.
+
+</p>
+
+<h3>2. Why can't we call an API directly inside a normal action creator?</h3>
+
+<p>
+
+Because a normal action creator must return a plain object synchronously — it has no way to "wait" for a
+
+promise to resolve before returning.
+
+</p>
+
+<h3>3. What are the three common action types in an async thunk?</h3>
+
+<p>
+
+REQUEST (call started), SUCCESS (call completed with data), and FAIL (call failed with an error).
+
+</p>
+
+<h3>4. What does applyMiddleware(thunk) do?</h3>
+
+<p>
+
+It configures the Store so that dispatch() can accept and execute functions, not only plain objects.
+
+</p>
+
+<h3>5. Where should the fetch/axios call live?</h3>
+
+<p>
+
+Inside the thunk action creator, not inside the React component and not inside the reducer.
+
+</p>
+
+<h3>6. Why must reducers stay synchronous even in an async flow?</h3>
+
+<p>
+
+Because reducers must be pure functions — all asynchronous work is handled by the thunk before any
+
+action reaches the reducer.
+
+</p>
+
+<h3>7. What does useSelector() return in this example?</h3>
+
+<p>
+
+The current <code>loading</code>, <code>products</code>, and <code>error</code> fields from <code>state.productState</code>.
+
+</p>
+
+<h3>8. What triggers the initial data load?</h3>
+
+<p>
+
+A <code>useEffect()</code> hook that dispatches <code>loadProducts()</code> once when the component mounts.
+
+</p>
+
+<hr>
+
+<h2>Redux Thunk Flow in One Line</h2>
+
+<div class="flow">
+
+Component
+
+→ Dispatch(thunk)
+
+→ Thunk Runs
+
+→ REQUEST
+
+→ fetch()
+
+→ SUCCESS / FAIL
+
+→ Reducer
+
+→ New State
+
+→ Store Update
+
+→ useSelector
+
+→ UI Re-render
+
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-js.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+
+</body>
+</html>
