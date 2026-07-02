@@ -1,0 +1,4130 @@
+<!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>138 - What is useRef and what are its Use Cases?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+html{
+    scroll-behavior:smooth;
+}
+
+body{
+    background:#000814;
+    color:#e2e8f0;
+    font-family:Segoe UI,Arial,sans-serif;
+    line-height:1.8;
+    padding:40px;
+}
+
+.container{
+    max-width:1200px;
+    margin:auto;
+}
+
+h1{
+    color:#7dd3fc;
+    margin-bottom:15px;
+    border-bottom:2px solid #1e3a5f;
+    padding-bottom:15px;
+}
+
+h2{
+    margin-top:50px;
+    margin-bottom:20px;
+    color:#38bdf8;
+    border-left:6px solid #0ea5e9;
+    padding-left:15px;
+}
+
+h3{
+    margin-top:30px;
+    margin-bottom:15px;
+    color:#facc15;
+}
+
+h4{
+    margin-top:25px;
+    margin-bottom:10px;
+    color:#f472b6;
+}
+
+p{
+    margin:15px 0;
+}
+
+ul{
+    margin:15px 0 20px 35px;
+}
+
+li{
+    margin:10px 0;
+}
+
+code{
+    font-family:Consolas,monospace;
+}
+
+pre{
+    border-radius:10px;
+    margin:20px 0;
+    overflow:auto;
+    font-size:15px;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+    margin-top:25px;
+}
+
+table th{
+    background:#0f172a;
+    color:#7dd3fc;
+    padding:14px;
+    border:1px solid #334155;
+}
+
+table td{
+    border:1px solid #334155;
+    padding:14px;
+}
+
+.note{
+    background:#082032;
+    border-left:5px solid #38bdf8;
+    padding:18px;
+    margin:20px 0;
+    border-radius:8px;
+}
+
+.warning{
+    background:#2b0b0b;
+    border-left:5px solid #ef4444;
+    padding:18px;
+    margin:20px 0;
+    border-radius:8px;
+}
+
+.success{
+    background:#052e16;
+    border-left:5px solid #22c55e;
+    padding:18px;
+    margin:20px 0;
+    border-radius:8px;
+}
+
+hr{
+    border:none;
+    border-top:1px solid #334155;
+    margin:50px 0;
+}
+
+.badge{
+    display:inline-block;
+    background:#0369a1;
+    color:white;
+    padding:4px 12px;
+    border-radius:20px;
+    font-size:14px;
+    margin-bottom:20px;
+}
+
+.definition{
+    background:#111827;
+    padding:18px;
+    border-left:5px solid #06b6d4;
+    border-radius:8px;
+    margin:20px 0;
+}
+
+.example{
+    background:#071426;
+    padding:18px;
+    border-left:5px solid #8b5cf6;
+    border-radius:8px;
+    margin:20px 0;
+}
+
+.highlight{
+    color:#facc15;
+    font-weight:bold;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>138. What is useRef and what are its Use Cases?</h1>
+
+<div class="badge">React Hooks</div>
+
+<div class="definition">
+<strong>One-Line Definition</strong>
+
+<p>
+<b>useRef</b> is a React hook used to store mutable values and access DOM elements without causing re-renders.
+</p>
+
+<p>
+<b>Simple Understanding:</b> useRef creates a persistent object that stays the same between renders.
+</p>
+</div>
+
+<h2>Main Features</h2>
+
+<ul>
+<li>Stores mutable values</li>
+<li>Accesses DOM elements</li>
+<li>Does not trigger re-render</li>
+<li>Value persists across renders</li>
+</ul>
+
+<hr>
+<h2>1. Stores Mutable Values</h2>
+
+<div class="definition">
+
+<h3>Definition</h3>
+
+<p>
+<code>useRef</code> allows us to store a value that we can change without React treating it as component state.
+</p>
+
+<p>
+Unlike <code>useState</code>, changing a ref value does <span class="highlight">not</span> re-render our component.
+</p>
+
+</div>
+
+<h3>Example</h3>
+
+<pre><code class="language-jsx">
+import { useRef } from "react";
+
+export default function App() {
+
+    const countRef = useRef(0);
+
+    function increase() {
+        countRef.current++;
+        console.log(countRef.current);
+    }
+
+    return (
+        &lt;button onClick={increase}&gt;
+            Increase
+        &lt;/button&gt;
+    );
+}
+</code></pre>
+
+<div class="example">
+
+<h3>How it Works</h3>
+
+<p>Initially:</p>
+
+<pre><code class="language-js">
+countRef.current = 0;
+</code></pre>
+
+<p>After first click:</p>
+
+<pre><code class="language-js">
+countRef.current = 1;
+</code></pre>
+
+<p>After second click:</p>
+
+<pre><code class="language-js">
+countRef.current = 2;
+</code></pre>
+
+<p>After third click:</p>
+
+<pre><code class="language-js">
+countRef.current = 3;
+</code></pre>
+
+</div>
+
+<div class="note">
+
+<p>
+The value keeps changing, but the component never re-renders because React does not track changes to
+<code>ref.current</code>.
+</p>
+
+</div>
+
+<h3>Why Use Mutable Values?</h3>
+
+<p>
+Sometimes we need to remember information inside a component, but changing that information should not update the UI.
+In these situations, <code>useRef</code> is a better choice than <code>useState</code>.
+</p>
+
+<h3>Real-World Example 1 — Timer ID</h3>
+
+<p>
+When using <code>setInterval()</code>, we need to save the timer ID so that we can stop it later.
+Since the timer ID is not displayed on the screen, there is no reason to re-render the component.
+</p>
+
+<pre><code class="language-jsx">
+import { useRef } from "react";
+
+export default function App() {
+
+    const timerRef = useRef(null);
+
+    function startTimer() {
+        timerRef.current = setInterval(() => {
+            console.log("Running...");
+        }, 1000);
+    }
+
+    function stopTimer() {
+        clearInterval(timerRef.current);
+    }
+
+    return (
+        &lt;&gt;
+            &lt;button onClick={startTimer}&gt;Start&lt;/button&gt;
+            &lt;button onClick={stopTimer}&gt;Stop&lt;/button&gt;
+        &lt;/&gt;
+    );
+}
+</code></pre>
+<div class="success">
+
+<p>
+We are not using useEffect because the timer is started and stopped only when the user clicks the buttons, not automatically when the component renders.
+</p>
+
+</div>
+
+<div class="success">
+
+<p>
+The timer ID changes whenever a new timer starts, but React does not re-render because it is stored inside a ref.
+</p>
+
+</div>
+
+<h2>Does <code>setInterval()</code> Create a New Timer ID Every Time?</h2>
+
+<div class="definition">
+
+<p>
+Yes. Every time we call <code>setInterval()</code>, the browser creates a <strong>new interval</strong> and returns a <strong>new timer ID</strong>.
+</p>
+
+</div>
+
+<h3>Example</h3>
+
+<pre><code class="language-js">
+const id1 = setInterval(() => {
+    console.log("Running...");
+}, 1000);
+
+const id2 = setInterval(() => {
+    console.log("Running...");
+}, 1000);
+
+console.log(id1);
+console.log(id2);
+</code></pre>
+
+<p>
+Example Output (Browser)
+</p>
+
+<pre><code class="language-text">
+id1 = 1
+id2 = 2
+</code></pre>
+
+<p>
+or in Node.js
+</p>
+
+<pre><code class="language-text">
+Timeout { ... }
+Timeout { ... }
+</code></pre>
+
+<div class="note">
+
+<p>
+The actual values depend on the JavaScript environment, but <strong>each call to <code>setInterval()</code> returns a different timer ID.</strong>
+</p>
+
+</div>
+
+<hr>
+
+<h2>What Happens in Our Example?</h2>
+
+<pre><code class="language-jsx">
+const timerRef = useRef(null);
+
+function startTimer() {
+    timerRef.current = setInterval(() => {
+        console.log("Running...");
+    }, 1000);
+}
+</code></pre>
+
+<h3>First Click</h3>
+
+<pre><code class="language-js">
+timerRef.current = 1;
+</code></pre>
+
+<p>
+Timer <strong>#1</strong> starts running.
+</p>
+
+<h3>Second Click</h3>
+
+<pre><code class="language-js">
+timerRef.current = 2;
+</code></pre>
+
+<p>
+A new timer (<strong>#2</strong>) is created.
+</p>
+
+<p>
+Now <code>timerRef.current</code> points to Timer <strong>#2</strong>.
+</p>
+
+<div class="warning">
+
+<p>
+However, Timer <strong>#1</strong> is <strong>still running</strong> because we never stopped it.
+</p>
+
+</div>
+
+<hr>
+
+<h2>Problem</h2>
+
+<p>
+If the user clicks the <strong>Start</strong> button multiple times:
+</p>
+
+<pre><code class="language-text">
+Click 1
+   ↓
+Timer #1 starts
+
+Click 2
+   ↓
+Timer #2 starts
+
+Click 3
+   ↓
+Timer #3 starts
+</code></pre>
+
+<p>
+Now three timers are running simultaneously.
+</p>
+
+<p>
+When the user clicks the <strong>Stop</strong> button:
+</p>
+
+<pre><code class="language-js">
+clearInterval(timerRef.current);
+</code></pre>
+
+<p>
+Only the latest timer (<strong>Timer #3</strong>) is stopped because
+<code>timerRef.current</code> stores only the most recent timer ID.
+</p>
+
+<div class="warning">
+
+<p>
+Timers <strong>#1</strong> and <strong>#2</strong> continue running because their IDs have already been overwritten.
+</p>
+
+</div>
+
+<hr>
+
+<h2>Better Implementation</h2>
+
+<p>
+Before creating a new timer, first check whether one is already running.
+</p>
+
+<pre><code class="language-jsx">
+const timerRef = useRef(null);
+
+function startTimer() {
+
+    if (timerRef.current !== null)
+        return;
+
+    timerRef.current = setInterval(() => {
+        console.log("Running...");
+    }, 1000);
+}
+
+function stopTimer() {
+
+    clearInterval(timerRef.current);
+
+    timerRef.current = null;
+}
+</code></pre>
+
+<div class="success">
+
+<h3>How It Works</h3>
+
+<ul>
+<li>First click → A timer starts.</li>
+<li>Second click → Nothing happens because a timer is already running.</li>
+<li>Click <strong>Stop</strong> → The timer stops and <code>timerRef.current</code> becomes <code>null</code>.</li>
+<li>Click <strong>Start</strong> again → A brand-new timer is created and its ID is stored.</li>
+</ul>
+
+</div>
+
+<hr>
+
+<h2>Key Takeaways</h2>
+
+<ul>
+
+<li>
+Every call to <code>setInterval()</code> creates a new timer and returns a new timer ID.
+</li>
+
+<li>
+<code>useRef</code> stores only the latest timer ID.
+</li>
+
+<li>
+If multiple timers are started, older timer IDs are overwritten.
+</li>
+
+<li>
+Calling <code>clearInterval(timerRef.current)</code> stops only the latest timer.
+</li>
+
+<li>
+To avoid multiple timers running simultaneously, check whether a timer already exists before calling <code>setInterval()</code>.
+</li>
+
+</ul>
+
+<hr>
+
+<h3>Real-World Example 2 — Previous Value</h3>
+
+<p>
+We can also store the previous value of state without causing another render.
+</p>
+
+<pre><code class="language-jsx">
+import { useEffect, useRef, useState } from "react";
+
+export default function App() {
+
+    const [count, setCount] = useState(0);
+    const previousCount = useRef(0);
+
+    useEffect(() => {
+        previousCount.current = count;
+    }, [count]);
+
+    return (
+        &lt;&gt;
+            &lt;h2&gt;Current : {count}&lt;/h2&gt;
+            &lt;h2&gt;Previous : {previousCount.current}&lt;/h2&gt;
+
+            &lt;button onClick={() => setCount(count + 1)}&gt;
+                Increase
+            &lt;/button&gt;
+        &lt;/&gt;
+    );
+}
+</code></pre>
+
+<div class="note">
+
+<strong>Explanation</strong>
+
+<ul>
+    <li><code>count</code> stores the current value.</li>
+    <li><code>previousCount.current</code> stores the previous value.</li>
+    <li>Updating the ref does not trigger another render.</li>
+    <li>The UI updates only because <code>count</code> changes.</li>
+</ul>
+
+</div>
+
+<h3>Common Use Cases</h3>
+
+<ul>
+    <li>Store counters that are not displayed in the UI.</li>
+    <li>Store timer IDs.</li>
+    <li>Store previous state values.</li>
+    <li>Store API instances.</li>
+    <li>Store WebSocket connections.</li>
+    <li>Store mutable data without re-rendering.</li>
+</ul>
+
+<hr>
+<h2>2. Accesses DOM Elements</h2>
+
+<div class="definition">
+
+<h3>Definition</h3>
+
+<p>
+<code>useRef</code> allows us to get a direct reference to a DOM element so we can call its native methods or read its properties.
+</p>
+
+<p>
+Instead of searching for an element using
+<code>document.getElementById()</code> or
+<code>querySelector()</code>, React provides a cleaner way by attaching a
+<code>ref</code> to the element.
+</p>
+
+</div>
+
+<h3>Example</h3>
+
+<pre><code class="language-jsx">
+import { useRef } from "react";
+
+export default function App() {
+
+    const inputRef = useRef(null);
+
+    function focusInput() {
+        inputRef.current.focus();
+    }
+
+    return (
+        &lt;&gt;
+            &lt;input ref={inputRef} placeholder="Enter your name" /&gt;
+
+            &lt;button onClick={focusInput}&gt;
+                Focus Input
+            &lt;/button&gt;
+        &lt;/&gt;
+    );
+}
+</code></pre>
+
+<div class="example">
+
+<h3>How It Works</h3>
+
+<p>
+When React renders the input element,
+</p>
+
+<pre><code class="language-jsx">
+&lt;input ref={inputRef} /&gt;
+</code></pre>
+
+<p>
+React automatically stores the DOM element inside
+</p>
+
+<pre><code class="language-js">
+inputRef.current
+</code></pre>
+
+<p>
+So after rendering,
+</p>
+
+<pre><code class="language-js">
+console.log(inputRef.current);
+</code></pre>
+
+<p>
+outputs something similar to
+</p>
+
+<pre><code class="language-html">
+&lt;input&gt;
+</code></pre>
+
+<p>
+Now we can directly access the actual HTML element and use its built-in methods.
+</p>
+
+</div>
+
+<h3>Common DOM Methods</h3>
+
+<pre><code class="language-js">
+inputRef.current.focus();
+
+inputRef.current.blur();
+
+inputRef.current.select();
+</code></pre>
+
+<div class="success">
+
+<p>
+These are native DOM methods provided by the browser. Since
+<code>inputRef.current</code> points to the real input element, we can call them directly.
+</p>
+
+</div>
+
+<h3>Read Input Value</h3>
+
+<pre><code class="language-js">
+console.log(inputRef.current.value);
+</code></pre>
+
+<p>
+This reads the current value typed inside the input without using state.
+</p>
+
+<h3>Clear Input</h3>
+
+<pre><code class="language-js">
+inputRef.current.value = "";
+</code></pre>
+
+<p>
+This clears the input field immediately.
+</p>
+
+<h3>Scroll to an Element</h3>
+
+<pre><code class="language-jsx">
+const divRef = useRef(null);
+
+function scrollToSection() {
+    divRef.current.scrollIntoView({
+        behavior: "smooth"
+    });
+}
+
+return (
+    &lt;&gt;
+        &lt;div ref={divRef}&gt;
+            Welcome
+        &lt;/div&gt;
+
+        &lt;button onClick={scrollToSection}&gt;
+            Scroll
+        &lt;/button&gt;
+    &lt;/&gt;
+);
+</code></pre>
+
+<div class="note">
+
+<p>
+<code>scrollIntoView()</code> automatically scrolls the page until the referenced element becomes visible.
+</p>
+
+</div>
+
+<h3>Play or Pause a Video</h3>
+
+<pre><code class="language-jsx">
+const videoRef = useRef(null);
+
+function playVideo() {
+    videoRef.current.play();
+}
+
+function pauseVideo() {
+    videoRef.current.pause();
+}
+
+return (
+    &lt;&gt;
+        &lt;video ref={videoRef} src="movie.mp4"&gt;&lt;/video&gt;
+
+        &lt;button onClick={playVideo}&gt;
+            Play
+        &lt;/button&gt;
+
+        &lt;button onClick={pauseVideo}&gt;
+            Pause
+        &lt;/button&gt;
+    &lt;/&gt;
+);
+</code></pre>
+
+<div class="success">
+
+<p>
+Because <code>videoRef.current</code> refers to the actual
+<code>&lt;video&gt;</code> element, we can call methods like
+<code>play()</code> and <code>pause()</code>.
+</p>
+
+</div>
+
+<h3>Why Not Use document.getElementById()?</h3>
+
+<table>
+
+<tr>
+<th>document.getElementById()</th>
+<th>useRef()</th>
+</tr>
+
+<tr>
+<td>Searches the DOM every time.</td>
+<td>React already knows the element.</td>
+</tr>
+
+<tr>
+<td>Works outside React's rendering flow.</td>
+<td>Works naturally with React.</td>
+</tr>
+
+<tr>
+<td>Less reusable.</td>
+<td>Reusable and component-friendly.</td>
+</tr>
+
+<tr>
+<td>Can make components harder to maintain.</td>
+<td>Keeps components clean and predictable.</td>
+</tr>
+
+</table>
+
+<div class="note">
+
+<strong>Common Use Cases</strong>
+
+<ul>
+    <li>Focus an input field.</li>
+    <li>Select input text.</li>
+    <li>Read an input value.</li>
+    <li>Clear an input.</li>
+    <li>Scroll to an element.</li>
+    <li>Play or pause audio/video.</li>
+    <li>Measure an element's height or width.</li>
+</ul>
+
+</div>
+
+<hr>
+<h2>3. Does Not Trigger Re-render</h2>
+
+<div class="definition">
+
+<h3>Definition</h3>
+
+<p>
+Updating a value stored inside <code>useRef</code> does <strong>not</strong> cause React to render the component again.
+</p>
+
+<p>
+This is the biggest difference between <code>useRef</code> and <code>useState</code>.
+</p>
+
+</div>
+
+<h3>Example Using useState</h3>
+
+<pre><code class="language-jsx">
+import { useState } from "react";
+
+export default function App() {
+
+    const [count, setCount] = useState(0);
+
+    console.log("Component Rendered");
+
+    return (
+        &lt;&gt;
+            &lt;h2&gt;{count}&lt;/h2&gt;
+
+            &lt;button onClick={() => setCount(count + 1)}&gt;
+                Increase
+            &lt;/button&gt;
+        &lt;/&gt;
+    );
+}
+</code></pre>
+
+<p>
+Every time the button is clicked, the state changes.
+</p>
+
+<p>
+React detects the state change and renders the component again.
+</p>
+
+<pre><code class="language-text">
+Console Output
+
+Component Rendered
+Component Rendered
+Component Rendered
+Component Rendered
+</code></pre>
+
+<div class="success">
+
+<p>
+Changing state tells React that the UI may have changed, so React performs another render.
+</p>
+
+</div>
+
+<h3>Same Example Using useRef</h3>
+
+<pre><code class="language-jsx">
+import { useRef } from "react";
+
+export default function App() {
+
+    const countRef = useRef(0);
+
+    console.log("Component Rendered");
+
+    function increase() {
+        countRef.current++;
+        console.log(countRef.current);
+    }
+
+    return (
+        &lt;button onClick={increase}&gt;
+            Increase
+        &lt;/button&gt;
+    );
+}
+</code></pre>
+
+<p>
+Clicking the button changes the ref value.
+</p>
+
+<pre><code class="language-text">
+Console Output
+
+Component Rendered
+
+1
+2
+3
+4
+5
+</code></pre>
+
+<div class="note">
+
+<p>
+Notice that <strong>Component Rendered</strong> appears only once.
+</p>
+
+<p>
+Even though <code>countRef.current</code> keeps changing, React does not render the component again.
+</p>
+
+</div>
+
+<h3>Why Doesn't React Re-render?</h3>
+
+<p>
+React only re-renders when something affecting the UI changes.
+</p>
+
+<ul>
+<li>State changes (<code>useState</code>)</li>
+<li>Props change</li>
+<li>Context changes</li>
+</ul>
+
+<p>
+A ref is simply a mutable JavaScript object.
+</p>
+
+<p>
+React ignores changes made to <code>ref.current</code>, so updating it does not trigger another render.
+</p>
+
+<div class="warning">
+
+<h3>Important</h3>
+
+<p>
+If the value should be displayed on the screen, use <code>useState</code>.
+</p>
+
+<p>
+If the value is only needed internally and should not update the UI, use <code>useRef</code>.
+</p>
+
+</div>
+
+<hr>
+
+<h2>4. Value Persists Across Renders</h2>
+
+<div class="definition">
+
+<h3>Definition</h3>
+
+<p>
+The value inside <code>useRef</code> is preserved between renders.
+</p>
+
+<p>
+React creates the ref object only once and keeps using the same object every time the component renders.
+</p>
+
+</div>
+
+<h3>Example</h3>
+
+<pre><code class="language-jsx">
+import { useRef, useState } from "react";
+
+export default function App() {
+
+    const [count, setCount] = useState(0);
+
+    const renderCount = useRef(1);
+
+    renderCount.current++;
+
+    return (
+        &lt;&gt;
+            &lt;h2&gt;State : {count}&lt;/h2&gt;
+            &lt;h2&gt;Render Count : {renderCount.current}&lt;/h2&gt;
+
+            &lt;button onClick={() => setCount(count + 1)}&gt;
+                Re-render
+            &lt;/button&gt;
+        &lt;/&gt;
+    );
+}
+</code></pre>
+
+<h3>Initial Render</h3>
+
+<pre><code class="language-js">
+renderCount.current = 1;
+
+renderCount.current++;
+</code></pre>
+
+<p>
+Output
+</p>
+
+<pre><code class="language-text">
+Render Count : 2
+</code></pre>
+
+<p>
+Now click the button.
+</p>
+
+<p>
+Since the state changes, React renders the component again.
+</p>
+
+<p>
+However, React does not create a new ref object.
+</p>
+
+<p>
+It reuses the existing one.
+</p>
+
+<h3>Second Render</h3>
+
+<pre><code class="language-text">
+Render Count : 3
+</code></pre>
+
+<h3>Third Render</h3>
+
+<pre><code class="language-text">
+Render Count : 4
+</code></pre>
+
+<h3>Fourth Render</h3>
+
+<pre><code class="language-text">
+Render Count : 5
+</code></pre>
+
+<div class="success">
+
+<p>
+Because React reuses the same ref object, its value keeps increasing instead of resetting.
+</p>
+
+</div>
+
+<h3>Compare with a Normal Variable</h3>
+
+<pre><code class="language-jsx">
+export default function App() {
+
+    let count = 0;
+
+    count++;
+
+    return &lt;h1&gt;{count}&lt;/h1&gt;;
+}
+</code></pre>
+
+<p>
+Every render executes:
+</p>
+
+<pre><code class="language-js">
+count = 0;
+
+count++;
+</code></pre>
+
+<p>
+Output
+</p>
+
+<pre><code class="language-text">
+1
+1
+1
+1
+</code></pre>
+
+<div class="warning">
+
+<p>
+A normal variable is recreated every render, so its value is lost.
+</p>
+
+</div>
+
+<h3>Compare with useRef</h3>
+
+<pre><code class="language-js">
+const countRef = useRef(0);
+
+countRef.current++;
+</code></pre>
+
+<p>
+Output
+</p>
+
+<pre><code class="language-text">
+1
+2
+3
+4
+5
+</code></pre>
+
+<div class="note">
+
+<p>
+The ref object survives every render, so its value is preserved instead of being reset.
+</p>
+
+</div>
+
+<hr>
+<h2>Summary</h2>
+
+<table>
+
+<tr>
+    <th>Feature</th>
+    <th>Explanation</th>
+</tr>
+
+<tr>
+    <td><strong>Stores Mutable Values</strong></td>
+    <td>
+        Stores values that can change without using state. Updating the value does not trigger a component re-render.
+    </td>
+</tr>
+
+<tr>
+    <td><strong>Accesses DOM Elements</strong></td>
+    <td>
+        Provides direct access to DOM elements using <code>ref.current</code>, allowing us to call native methods like
+        <code>focus()</code>, <code>blur()</code>, <code>play()</code>, and <code>scrollIntoView()</code>.
+    </td>
+</tr>
+
+<tr>
+    <td><strong>Does Not Trigger Re-render</strong></td>
+    <td>
+        Updating <code>ref.current</code> changes the stored value, but React does not render the component again because
+        refs are not part of React's rendering process.
+    </td>
+</tr>
+
+<tr>
+    <td><strong>Value Persists Across Renders</strong></td>
+    <td>
+        React creates the ref object only once and reuses the same object on every render, so its value is preserved
+        instead of being reset.
+    </td>
+</tr>
+
+</table>
+
+<hr>
+
+<h2>Key Differences: useRef vs useState</h2>
+
+<table>
+
+<tr>
+    <th>useRef</th>
+    <th>useState</th>
+</tr>
+
+<tr>
+    <td>Stores mutable values.</td>
+    <td>Stores state values.</td>
+</tr>
+
+<tr>
+    <td>Does not trigger a re-render.</td>
+    <td>Triggers a re-render when updated.</td>
+</tr>
+
+<tr>
+    <td>Value is accessed using <code>ref.current</code>.</td>
+    <td>Value is accessed directly.</td>
+</tr>
+
+<tr>
+    <td>Best for timers, DOM elements, previous values, and mutable objects.</td>
+    <td>Best for data that should update the UI.</td>
+</tr>
+
+<tr>
+    <td>React ignores changes to <code>ref.current</code>.</td>
+    <td>React tracks state changes and updates the UI.</td>
+</tr>
+
+</table>
+
+<hr>
+
+<div class="success">
+
+<h2>Quick Revision</h2>
+
+<ul>
+
+<li>
+<strong>Stores Mutable Values</strong><br>
+Store values that can change without causing a component re-render.
+</li>
+
+<li>
+<strong>Accesses DOM Elements</strong><br>
+Get direct access to DOM elements using <code>ref.current</code>.
+</li>
+
+<li>
+<strong>Does Not Trigger Re-render</strong><br>
+Changing <code>ref.current</code> updates the value but React does not render the component again.
+</li>
+
+<li>
+<strong>Value Persists Across Renders</strong><br>
+The same ref object is reused on every render, so its value is preserved.
+</li>
+
+</ul>
+
+</div>
+
+<hr>
+
+<h2>Conclusion</h2>
+
+<p>
+<code>useRef</code> is a React hook that allows us to store mutable values and access DOM elements without causing component re-renders.
+</p>
+
+<p>
+Unlike <code>useState</code>, updating a ref does not tell React to update the UI, making it ideal for storing values that are needed internally, such as timer IDs, previous values, DOM references, API instances, and WebSocket connections.
+</p>
+
+<p>
+Whenever the UI should change after updating a value, <code>useState</code> should be used. Whenever the value should persist across renders but should not affect rendering, <code>useRef</code> is the appropriate choice.
+</p>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+
+<script>
+Prism.highlightAll();
+</script>
+
+</body>
+</html> -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>138. What is useRef and What are its Use Cases?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+    background:#000814;
+    color:#e2e8f0;
+    font-family:Segoe UI,Arial,sans-serif;
+    line-height:1.8;
+    padding:40px;
+}
+
+.container{
+    max-width:1200px;
+    margin:auto;
+}
+
+h1{
+    color:#7dd3fc;
+    border-bottom:2px solid #1e3a5f;
+    padding-bottom:15px;
+    margin-bottom:25px;
+}
+
+h2{
+    color:#38bdf8;
+    border-left:6px solid #0ea5e9;
+    padding-left:15px;
+    margin-top:50px;
+    margin-bottom:20px;
+}
+
+h3{
+    color:#facc15;
+    margin-top:25px;
+    margin-bottom:15px;
+}
+
+p{
+    margin:15px 0;
+}
+
+ul{
+    margin:15px 0 20px 35px;
+}
+
+li{
+    margin:8px 0;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+    margin:20px 0;
+}
+
+table th,
+table td{
+    border:1px solid #334155;
+    padding:14px;
+}
+
+table th{
+    background:#0f172a;
+    color:#7dd3fc;
+}
+
+pre{
+    margin:20px 0;
+    border-radius:8px;
+    overflow:auto;
+}
+
+.definition{
+    background:#111827;
+    border-left:5px solid #06b6d4;
+    padding:18px;
+    border-radius:8px;
+    margin:20px 0;
+}
+
+.note{
+    background:#082032;
+    border-left:5px solid #38bdf8;
+    padding:18px;
+    border-radius:8px;
+    margin:20px 0;
+}
+
+.warning{
+    background:#2b0b0b;
+    border-left:5px solid #ef4444;
+    padding:18px;
+    border-radius:8px;
+    margin:20px 0;
+}
+
+.success{
+    background:#052e16;
+    border-left:5px solid #22c55e;
+    padding:18px;
+    border-radius:8px;
+    margin:20px 0;
+}
+
+.badge{
+    display:inline-block;
+    background:#0369a1;
+    color:#fff;
+    padding:5px 15px;
+    border-radius:20px;
+    margin-bottom:20px;
+}
+
+.highlight{
+    color:#facc15;
+    font-weight:bold;
+}
+
+hr{
+    border:none;
+    border-top:1px solid #334155;
+    margin:50px 0;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>138. What is useRef and What are its Use Cases?</h1>
+
+<div class="badge">
+React Hooks
+</div>
+
+<div class="definition">
+
+<h3>One-Line Definition</h3>
+
+<p>
+<b>useRef</b> is a React hook that allows us to store mutable values and access DOM elements without causing component re-renders.
+</p>
+
+</div>
+
+<div class="definition">
+
+<h3>Simple Understanding</h3>
+
+<p>
+Before learning <code>useRef</code>, we first need to understand <strong>how React renders a component</strong>.
+</p>
+
+<p>
+Once we understand React's rendering process, it becomes much easier to understand why <code>useRef</code> exists.
+</p>
+
+</div>
+
+<hr>
+
+<h2>How React Rendering Works</h2>
+
+<p>
+
+Whenever React detects that something affecting the UI has changed, it executes the component function again.
+
+</p>
+
+<pre><code class="language-jsx">
+export default function App(){
+
+    console.log("Rendering...");
+
+    return(
+        &lt;h1&gt;Hello React&lt;/h1&gt;
+    );
+
+}
+</code></pre>
+
+<p>
+
+When the application loads, React calls the component.
+
+</p>
+
+<pre><code class="language-text">
+App()
+
+↓
+
+Returns JSX
+
+↓
+
+React Creates the UI
+</code></pre>
+
+<p>
+
+Now suppose we update a state.
+
+</p>
+
+<pre><code class="language-jsx">
+const [count,setCount] = useState(0);
+
+setCount(count + 1);
+</code></pre>
+
+<p>
+
+The state changed.
+
+React assumes the UI might also change.
+
+Therefore it renders the component again.
+
+</p>
+
+<pre><code class="language-text">
+State Changes
+
+↓
+
+React Detects Change
+
+↓
+
+App()
+
+↓
+
+Returns New JSX
+
+↓
+
+UI Updates
+</code></pre>
+
+<div class="success">
+
+<p>
+
+React re-renders because the UI depends on the state.
+
+</p>
+
+</div>
+
+<hr>
+
+<h2>What Happens During Every Re-render?</h2>
+
+<p>
+
+Many beginners think React only updates the changed line.
+
+Actually, React executes the <strong>entire component function again.</strong>
+
+</p>
+
+<pre><code class="language-jsx">
+export default function App(){
+
+    console.log("Rendering");
+
+    const name = "Rizwan";
+
+    const age = 25;
+
+    return(
+        &lt;h1&gt;Hello {name}&lt;/h1&gt;
+    );
+
+}
+</code></pre>
+
+<p>
+
+Every render executes this function from top to bottom.
+
+</p>
+
+<pre><code class="language-text">
+App()
+
+↓
+
+console.log()
+
+↓
+
+name created
+
+↓
+
+age created
+
+↓
+
+Returns JSX
+</code></pre>
+
+<div class="warning">
+
+<p>
+
+All normal variables are recreated during every render.
+
+</p>
+
+</div>
+
+<hr>
+
+<h2>The Problem</h2>
+
+<p>
+
+Suppose we want to store a timer ID.
+
+</p>
+
+<pre><code class="language-jsx">
+let timerId = null;
+
+function startTimer(){
+
+    timerId = setInterval(() => {
+        console.log("Running...");
+    },1000);
+
+}
+</code></pre>
+
+<p>
+
+At first, everything looks correct.
+
+</p>
+
+<p>
+
+However, imagine the component renders again because some state changes.
+
+</p>
+
+<pre><code class="language-text">
+App()
+
+↓
+
+let timerId = null
+
+↓
+
+State Changes
+
+↓
+
+App()
+
+↓
+
+let timerId = null
+</code></pre>
+
+<div class="warning">
+
+<p>
+
+The variable is created again.
+
+The previous timer ID is lost.
+
+</p>
+
+</div>
+
+<hr>
+
+<h2>Can We Store the Timer ID Inside useState?</h2>
+
+<p>
+
+Yes, but it creates another problem.
+
+</p>
+
+<pre><code class="language-jsx">
+const [timerId,setTimerId] = useState(null);
+
+function startTimer(){
+
+    const id = setInterval(() => {
+        console.log("Running...");
+    },1000);
+
+    setTimerId(id);
+
+}
+</code></pre>
+
+<p>
+
+This works.
+
+But every call to
+
+<code>setTimerId()</code>
+
+causes another component render.
+
+</p>
+
+<pre><code class="language-text">
+setTimerId(id)
+
+↓
+
+State Changes
+
+↓
+
+React Re-renders Component
+</code></pre>
+
+<div class="warning">
+
+<h3>But Do We Really Need a Re-render?</h3>
+
+<p>
+
+No.
+
+The timer ID is not displayed anywhere on the screen.
+
+It is only needed later when we call
+
+<code>clearInterval()</code>.
+
+</p>
+
+</div>
+
+<hr>
+
+<h2>This Is Why useRef Exists</h2>
+
+<p>
+
+React provides <code>useRef</code> for values that should survive re-renders but should <strong>not</strong> trigger another render when they change.
+
+</p>
+
+<pre><code class="language-jsx">
+const timerRef = useRef(null);
+
+function startTimer(){
+
+    timerRef.current = setInterval(() => {
+        console.log("Running...");
+    },1000);
+
+}
+</code></pre>
+
+<div class="success">
+
+<p>
+
+The timer ID is preserved across renders, and updating
+<code>timerRef.current</code>
+does not trigger another render.
+
+</p>
+
+</div>
+
+<hr>
+
+<h2>Main Features of useRef</h2>
+
+<ul>
+
+<li>Stores mutable values.</li>
+
+<li>Accesses DOM elements.</li>
+
+<li>Does not trigger component re-renders.</li>
+
+<li>Value persists across renders.</li>
+
+</ul>
+
+<hr>
+<h2>1. Stores Mutable Values</h2>
+
+<div class="definition">
+
+<h3>What Does "Stores Mutable Values" Mean?</h3>
+
+<p>
+A <strong>mutable value</strong> is a value that can change over time.
+</p>
+
+<p>
+Unlike a normal JavaScript variable, a value stored inside <code>useRef</code> is <strong>not recreated</strong> whenever the component re-renders.
+</p>
+
+<p>
+Instead, React creates the ref object only once and keeps using the same object throughout the component's lifetime.
+</p>
+
+</div>
+
+<hr>
+
+<h2>Why Do We Need It?</h2>
+
+<p>
+
+Remember how React works.
+
+</p>
+
+<pre><code class="language-text">
+State Changes
+
+↓
+
+React Calls App() Again
+
+↓
+
+All Normal Variables Are Created Again
+</code></pre>
+
+<p>
+
+Suppose we write:
+
+</p>
+
+<pre><code class="language-jsx">
+export default function App(){
+
+    let counter = 0;
+
+    function increase(){
+        counter++;
+        console.log(counter);
+    }
+
+    return(
+        &lt;button onClick={increase}&gt;
+            Increase
+        &lt;/button&gt;
+    );
+
+}
+</code></pre>
+
+<p>
+
+When the button is clicked, the value changes.
+
+</p>
+
+<pre><code class="language-text">
+counter = 1
+</code></pre>
+
+<p>
+
+Now imagine the component re-renders because some state changes.
+
+</p>
+
+<pre><code class="language-text">
+App()
+
+↓
+
+counter = 0
+</code></pre>
+
+<div class="warning">
+
+<p>
+
+The previous value is lost because the variable is created again.
+
+</p>
+
+</div>
+
+<hr>
+
+<h2>Solution: useRef</h2>
+
+<pre><code class="language-jsx">
+import { useRef } from "react";
+
+export default function App(){
+
+    const counterRef = useRef(0);
+
+    function increase(){
+
+        counterRef.current++;
+
+        console.log(counterRef.current);
+
+    }
+
+    return(
+        &lt;button onClick={increase}&gt;
+            Increase
+        &lt;/button&gt;
+    );
+
+}
+</code></pre>
+
+<div class="success">
+
+<p>
+
+React creates the ref object only once.
+
+During every render, React gives us the same object again.
+
+</p>
+
+</div>
+
+<hr>
+
+<h2>How React Stores the Ref</h2>
+
+<p>
+
+On the first render:
+
+</p>
+
+<pre><code class="language-text">
+React
+
+↓
+
+Creates Ref Object
+
+↓
+
+{
+    current: 0
+}
+</code></pre>
+
+<p>
+
+The variable
+
+<code>counterRef</code>
+
+points to that object.
+
+</p>
+
+<pre><code class="language-js">
+counterRef
+      │
+      ▼
+
+{
+    current: 0
+}
+</code></pre>
+
+<hr>
+
+<h2>After Clicking the Button</h2>
+
+<pre><code class="language-js">
+counterRef.current++;
+</code></pre>
+
+<p>
+
+The object becomes
+
+</p>
+
+<pre><code class="language-js">
+{
+    current: 1
+}
+</code></pre>
+
+<p>
+
+Click again
+
+</p>
+
+<pre><code class="language-js">
+{
+    current: 2
+}
+</code></pre>
+
+<p>
+
+Click again
+
+</p>
+
+<pre><code class="language-js">
+{
+    current: 3
+}
+</code></pre>
+
+<div class="note">
+
+<p>
+
+Notice that we are changing only the
+
+<code>current</code>
+
+property.
+
+We are not creating a new object.
+
+</p>
+
+</div>
+
+<hr>
+
+<h2>What Happens After a Re-render?</h2>
+
+<p>
+
+Suppose another state changes.
+
+</p>
+
+<pre><code class="language-jsx">
+setCount(count + 1);
+</code></pre>
+
+<p>
+
+React renders the component again.
+
+</p>
+
+<pre><code class="language-text">
+App()
+
+↓
+
+React Gives Back
+
+The Same Ref Object
+</code></pre>
+
+<p>
+
+So now
+
+</p>
+
+<pre><code class="language-js">
+counterRef.current
+</code></pre>
+
+<p>
+
+is still
+
+</p>
+
+<pre><code class="language-js">
+3
+</code></pre>
+
+<div class="success">
+
+<p>
+
+The value survives because React reused the same ref object.
+
+</p>
+
+</div>
+
+<hr>
+
+<h2>Real-World Example: Timer ID</h2>
+
+<p>
+
+Suppose we want to start a timer.
+
+</p>
+
+<pre><code class="language-jsx">
+const timerRef = useRef(null);
+
+function startTimer(){
+
+    timerRef.current = setInterval(() => {
+
+        console.log("Running...");
+
+    },1000);
+
+}
+</code></pre>
+
+<p>
+
+Every call to
+
+<code>setInterval()</code>
+
+creates a brand-new timer and returns a new timer ID.
+
+</p>
+
+<pre><code class="language-text">
+First Click
+
+↓
+
+Timer #1
+
+↓
+
+timerRef.current = 1
+</code></pre>
+
+<p>
+
+Second click
+
+</p>
+
+<pre><code class="language-text">
+Timer #2
+
+↓
+
+timerRef.current = 2
+</code></pre>
+
+<p>
+
+The ref always stores the latest timer ID.
+
+</p>
+
+<hr>
+
+<h2>Why Not Use useState?</h2>
+
+<pre><code class="language-jsx">
+const [timerId,setTimerId] = useState(null);
+</code></pre>
+
+<p>
+
+Updating it
+
+</p>
+
+<pre><code class="language-js">
+setTimerId(id);
+</code></pre>
+
+<p>
+
+causes
+
+</p>
+
+<pre><code class="language-text">
+State Changes
+
+↓
+
+React Re-renders Component
+</code></pre>
+
+<div class="warning">
+
+<p>
+
+The timer ID is not shown on the screen.
+
+Therefore, rendering the component again is unnecessary.
+
+</p>
+
+</div>
+
+<hr>
+
+<h2>Why Not Use useEffect?</h2>
+
+<p>
+
+Another common question is:
+
+</p>
+
+<p>
+
+<strong>"Why aren't we using useEffect() here?"</strong>
+
+</p>
+
+<p>
+
+Because the timer starts only when the user clicks the button.
+
+</p>
+
+<pre><code class="language-jsx">
+&lt;button onClick={startTimer}&gt;
+    Start
+&lt;/button&gt;
+</code></pre>
+
+<p>
+
+This is a user action, not a rendering side effect.
+
+</p>
+
+<p>
+
+If we wanted the timer to start automatically when the component mounted, then we would use
+
+<code>useEffect()</code>.
+
+</p>
+
+<pre><code class="language-jsx">
+useEffect(() => {
+
+    const id = setInterval(() => {
+
+        console.log("Running...");
+
+    },1000);
+
+    return () => clearInterval(id);
+
+},[]);
+</code></pre>
+
+<div class="success">
+
+<p>
+
+<strong>Rule:</strong>
+
+Use <code>useRef</code> to store the timer ID.
+
+Use <code>useEffect</code> only when the timer should start because of rendering or dependency changes.
+
+</p>
+
+</div>
+
+<hr>
+
+<h2>Key Points</h2>
+
+<ul>
+
+<li>Normal variables are recreated after every render.</li>
+
+<li><code>useRef</code> keeps the same object across renders.</li>
+
+<li>Changing <code>ref.current</code> does not trigger a re-render.</li>
+
+<li>Refs are perfect for storing timer IDs, previous values, API instances, and mutable objects.</li>
+
+<li>Use <code>useState</code> only when changing the value should update the UI.</li>
+
+</ul>
+
+<hr>
+
+<h2>2. Accesses DOM Elements</h2>
+
+<div class="definition">
+
+<h3>What Does "Accesses DOM Elements" Mean?</h3>
+
+<p>
+One of the most common uses of <code>useRef</code> is to get a direct reference to a DOM element created by React.
+</p>
+
+<p>
+Instead of searching the DOM using methods like
+<code>document.getElementById()</code> or
+<code>querySelector()</code>,
+React allows us to attach a <code>ref</code> directly to an element.
+</p>
+
+<p>
+After the element is rendered, React automatically stores that DOM element inside
+<code>ref.current</code>.
+</p>
+
+</div>
+
+<hr>
+
+<h2>How React Normally Renders an Element</h2>
+
+<pre><code class="language-jsx">
+function App(){
+
+    return(
+        &lt;input placeholder="Enter Name" /&gt;
+    );
+
+}
+</code></pre>
+
+<p>
+
+Rendering Flow
+
+</p>
+
+<pre><code class="language-text">
+App()
+
+↓
+
+Returns JSX
+
+↓
+
+React Creates
+
+&lt;input&gt;
+
+↓
+
+Browser Displays Input
+</code></pre>
+
+<p>
+
+At this point the input exists in the browser, but our component has no direct reference to it.
+
+</p>
+
+<hr>
+
+<h2>Getting the DOM Element with useRef</h2>
+
+<pre><code class="language-jsx">
+import { useRef } from "react";
+
+export default function App(){
+
+    const inputRef = useRef(null);
+
+    return(
+        &lt;input ref={inputRef} /&gt;
+    );
+
+}
+</code></pre>
+
+<p>
+
+When React renders the component, it notices
+
+</p>
+
+<pre><code class="language-jsx">
+ref={inputRef}
+</code></pre>
+
+<p>
+
+After creating the real HTML input element, React stores that element inside
+
+</p>
+
+<pre><code class="language-js">
+inputRef.current
+</code></pre>
+
+<pre><code class="language-text">
+inputRef
+
+↓
+
+{
+    current: &lt;input&gt;
+}
+</code></pre>
+
+<div class="success">
+
+<p>
+
+Unlike storing numbers or strings, the ref now stores an actual DOM element.
+
+</p>
+
+</div>
+
+<hr>
+
+<h2>Focusing an Input</h2>
+
+<pre><code class="language-jsx">
+import { useRef } from "react";
+
+export default function App(){
+
+    const inputRef = useRef(null);
+
+    function focusInput(){
+
+        inputRef.current.focus();
+
+    }
+
+    return(
+
+        &lt;&gt;
+
+            &lt;input ref={inputRef} /&gt;
+
+            &lt;button onClick={focusInput}&gt;
+                Focus
+            &lt;/button&gt;
+
+        &lt;/&gt;
+
+    );
+
+}
+</code></pre>
+
+<p>
+
+Flow
+
+</p>
+
+<pre><code class="language-text">
+User Clicks Button
+
+↓
+
+focusInput()
+
+↓
+
+inputRef.current.focus()
+
+↓
+
+Cursor Moves Into Input
+</code></pre>
+
+<div class="note">
+
+<p>
+
+The input itself never changes.
+
+We simply call one of its built-in DOM methods.
+
+No React re-render is needed.
+
+</p>
+
+</div>
+
+<hr>
+
+<h2>Reading the Input Value</h2>
+
+<pre><code class="language-js">
+console.log(inputRef.current.value);
+</code></pre>
+
+<p>
+
+Suppose the user types
+
+</p>
+
+<pre><code class="language-text">
+Rizwan
+</code></pre>
+
+<p>
+
+Then
+
+</p>
+
+<pre><code class="language-js">
+console.log(inputRef.current.value);
+</code></pre>
+
+<p>
+
+prints
+
+</p>
+
+<pre><code class="language-text">
+Rizwan
+</code></pre>
+
+<div class="success">
+
+<p>
+
+The value is read directly from the DOM.
+
+No state is required.
+
+</p>
+
+</div>
+
+<hr>
+
+<h2>Clearing an Input</h2>
+
+<pre><code class="language-js">
+inputRef.current.value = "";
+</code></pre>
+
+<p>
+
+Flow
+
+</p>
+
+<pre><code class="language-text">
+Input
+
+↓
+
+Current Value
+
+↓
+
+Set ""
+
+↓
+
+Input Becomes Empty
+</code></pre>
+
+<hr>
+
+<h2>Selecting All Text</h2>
+
+<pre><code class="language-js">
+inputRef.current.select();
+</code></pre>
+
+<p>
+
+This selects every character inside the input.
+
+</p>
+
+<hr>
+
+<h2>Scrolling to an Element</h2>
+
+<pre><code class="language-jsx">
+const sectionRef = useRef(null);
+
+function scrollToSection(){
+
+    sectionRef.current.scrollIntoView({
+        behavior:"smooth"
+    });
+
+}
+
+return(
+
+    &lt;&gt;
+
+        &lt;div ref={sectionRef}&gt;
+            React Section
+        &lt;/div&gt;
+
+        &lt;button onClick={scrollToSection}&gt;
+            Scroll
+        &lt;/button&gt;
+
+    &lt;/&gt;
+
+);
+</code></pre>
+
+<p>
+
+Flow
+
+</p>
+
+<pre><code class="language-text">
+Button Click
+
+↓
+
+scrollIntoView()
+
+↓
+
+Browser Scrolls
+
+↓
+
+Element Becomes Visible
+</code></pre>
+
+<hr>
+
+<h2>Playing a Video</h2>
+
+<pre><code class="language-jsx">
+const videoRef = useRef(null);
+
+function playVideo(){
+
+    videoRef.current.play();
+
+}
+
+function pauseVideo(){
+
+    videoRef.current.pause();
+
+}
+</code></pre>
+
+<p>
+
+Flow
+
+</p>
+
+<pre><code class="language-text">
+Button Click
+
+↓
+
+videoRef.current.play()
+
+↓
+
+Video Starts
+</code></pre>
+
+<hr>
+
+<h2>Why Doesn't This Cause a Re-render?</h2>
+
+<p>
+
+Notice that we never call
+
+</p>
+
+<pre><code class="language-js">
+setState(...)
+</code></pre>
+
+<p>
+
+Instead we call native DOM methods like
+
+</p>
+
+<pre><code class="language-js">
+focus()
+
+blur()
+
+select()
+
+play()
+
+pause()
+
+scrollIntoView()
+</code></pre>
+
+<p>
+
+These methods work directly on the DOM element.
+
+React's state never changes.
+
+Therefore React has no reason to render the component again.
+
+</p>
+
+<div class="success">
+
+<p>
+
+Changing the DOM through a ref is different from changing React state.
+
+Only state, props, or context changes trigger React re-renders.
+
+</p>
+
+</div>
+
+<hr>
+
+<h2>Why Not Use document.getElementById()?</h2>
+
+<table>
+
+<tr>
+<th>document.getElementById()</th>
+<th>useRef()</th>
+</tr>
+
+<tr>
+<td>Searches the DOM every time.</td>
+<td>React already provides the element.</td>
+</tr>
+
+<tr>
+<td>Works outside React.</td>
+<td>Designed specifically for React.</td>
+</tr>
+
+<tr>
+<td>Can become difficult to maintain.</td>
+<td>Keeps components clean and reusable.</td>
+</tr>
+
+<tr>
+<td>Not ideal for reusable components.</td>
+<td>Each component manages its own DOM reference.</td>
+</tr>
+
+</table>
+
+<hr>
+
+<h2>Key Points</h2>
+
+<ul>
+
+<li><code>useRef</code> can store a reference to a real DOM element.</li>
+
+<li>React automatically assigns the DOM element to <code>ref.current</code>.</li>
+
+<li>We can call native DOM methods such as <code>focus()</code>, <code>blur()</code>, <code>select()</code>, <code>play()</code>, and <code>scrollIntoView()</code>.</li>
+
+<li>Using these methods does not trigger a React re-render because React state is not changing.</li>
+
+<li>Refs provide a clean React way to interact with DOM elements without using <code>document.getElementById()</code>.</li>
+
+</ul>
+
+<hr>
+<h2>3. Does Not Trigger Re-render</h2>
+
+<div class="definition">
+
+<h3>Why Doesn't useRef Trigger a Re-render?</h3>
+
+<p>
+To understand this feature, we first need to remember <strong>when React re-renders a component.</strong>
+</p>
+
+<p>
+React re-renders a component only when something that affects the UI changes.
+</p>
+
+<ul>
+<li>State changes</li>
+<li>Props change</li>
+<li>Context changes</li>
+</ul>
+
+<p>
+A value stored inside <code>useRef</code> is <strong>not part of React's rendering system</strong>.
+</p>
+
+<p>
+Therefore, changing <code>ref.current</code> does not tell React to render the component again.
+</p>
+
+</div>
+
+<hr>
+
+<h2>Example Using useState</h2>
+
+<pre><code class="language-jsx">
+import { useState } from "react";
+
+export default function App(){
+
+    const [count,setCount] = useState(0);
+
+    console.log("Component Rendered");
+
+    function increase(){
+
+        setCount(count + 1);
+
+    }
+
+    return(
+
+        &lt;&gt;
+
+            &lt;h2&gt;{count}&lt;/h2&gt;
+
+            &lt;button onClick={increase}&gt;
+                Increase
+            &lt;/button&gt;
+
+        &lt;/&gt;
+
+    );
+
+}
+</code></pre>
+
+<p>
+
+Rendering Flow
+
+</p>
+
+<pre><code class="language-text">
+User Clicks Button
+
+↓
+
+setCount()
+
+↓
+
+State Changes
+
+↓
+
+React Detects Change
+
+↓
+
+App()
+
+↓
+
+Returns New JSX
+
+↓
+
+UI Updates
+</code></pre>
+
+<p>
+
+Console Output
+
+</p>
+
+<pre><code class="language-text">
+Component Rendered
+Component Rendered
+Component Rendered
+Component Rendered
+</code></pre>
+
+<div class="success">
+
+<p>
+
+Every call to <code>setCount()</code> causes React to render the component again because the UI depends on <code>count</code>.
+
+</p>
+
+</div>
+
+<hr>
+
+<h2>Same Example Using useRef</h2>
+
+<pre><code class="language-jsx">
+import { useRef } from "react";
+
+export default function App(){
+
+    const countRef = useRef(0);
+
+    console.log("Component Rendered");
+
+    function increase(){
+
+        countRef.current++;
+
+        console.log(countRef.current);
+
+    }
+
+    return(
+
+        &lt;button onClick={increase}&gt;
+            Increase
+        &lt;/button&gt;
+
+    );
+
+}
+</code></pre>
+
+<p>
+
+Rendering Flow
+
+</p>
+
+<pre><code class="language-text">
+User Clicks Button
+
+↓
+
+countRef.current++
+
+↓
+
+Ref Value Changes
+
+↓
+
+No State Changed
+
+↓
+
+No Re-render
+</code></pre>
+
+<p>
+
+Console Output
+
+</p>
+
+<pre><code class="language-text">
+Component Rendered
+
+1
+2
+3
+4
+5
+</code></pre>
+
+<div class="note">
+
+<p>
+
+Notice that
+
+<strong>Component Rendered</strong>
+
+appears only once.
+
+The numbers keep increasing because only the ref value changes.
+
+React never renders the component again.
+
+</p>
+
+</div>
+
+<hr>
+
+<h2>Why Doesn't React Re-render?</h2>
+
+<p>
+
+Internally, React tracks state values.
+
+</p>
+
+<pre><code class="language-js">
+const [count,setCount] = useState(0);
+</code></pre>
+
+<p>
+
+When
+
+</p>
+
+<pre><code class="language-js">
+setCount(...)
+</code></pre>
+
+<p>
+
+is called, React knows that something affecting the UI has changed.
+
+So React schedules another render.
+
+</p>
+
+<p>
+
+A ref works differently.
+
+</p>
+
+<pre><code class="language-js">
+countRef.current++;
+</code></pre>
+
+<p>
+
+This simply changes a property on an existing JavaScript object.
+
+React does not monitor changes to
+
+<code>ref.current</code>.
+
+</p>
+
+<div class="warning">
+
+<p>
+
+Updating a ref is just like changing the property of a normal object.
+
+React ignores it because it does not affect rendering.
+
+</p>
+
+</div>
+
+<hr>
+
+<h2>Visual Comparison</h2>
+
+<table>
+
+<tr>
+<th>useState</th>
+<th>useRef</th>
+</tr>
+
+<tr>
+<td>
+
+<pre><code class="language-text">
+setState()
+
+↓
+
+State Changes
+
+↓
+
+React Re-renders
+
+↓
+
+UI Updates
+</code></pre>
+
+</td>
+
+<td>
+
+<pre><code class="language-text">
+ref.current = ...
+
+↓
+
+Value Changes
+
+↓
+
+No Re-render
+</code></pre>
+
+</td>
+
+</tr>
+
+</table>
+
+<hr>
+
+<h2>Real-World Example: Timer ID</h2>
+
+<p>
+
+Suppose we start a timer.
+
+</p>
+
+<pre><code class="language-jsx">
+timerRef.current = setInterval(() => {
+
+    console.log("Running...");
+
+},1000);
+</code></pre>
+
+<p>
+
+The timer ID changes every time a new timer starts.
+
+</p>
+
+<p>
+
+However, the timer ID is never displayed in the UI.
+
+</p>
+
+<p>
+
+Therefore React does not need to render the component again.
+
+</p>
+
+<div class="success">
+
+<p>
+
+Using <code>useRef</code> avoids unnecessary renders while still remembering the latest timer ID.
+
+</p>
+
+</div>
+
+<hr>
+
+<h2>What If We Used useState?</h2>
+
+<pre><code class="language-jsx">
+const [timerId,setTimerId] = useState(null);
+
+function startTimer(){
+
+    const id = setInterval(() => {
+
+        console.log("Running...");
+
+    },1000);
+
+    setTimerId(id);
+
+}
+</code></pre>
+
+<p>
+
+Flow
+
+</p>
+
+<pre><code class="language-text">
+New Timer Created
+
+↓
+
+setTimerId(id)
+
+↓
+
+State Changes
+
+↓
+
+React Re-renders
+</code></pre>
+
+<div class="warning">
+
+<p>
+
+The timer ID is not part of the UI.
+
+Rendering the component again provides no benefit.
+
+This is an unnecessary re-render.
+
+</p>
+
+</div>
+
+<hr>
+
+<h2>When Should We Use useState Instead?</h2>
+
+<p>
+
+If the value is shown on the screen, use state.
+
+</p>
+
+<pre><code class="language-jsx">
+const [count,setCount] = useState(0);
+
+&lt;h2&gt;{count}&lt;/h2&gt;
+</code></pre>
+
+<p>
+
+Whenever <code>count</code> changes, the UI must update.
+
+Therefore React should re-render.
+
+</p>
+
+<hr>
+
+<h2>When Should We Use useRef?</h2>
+
+<p>
+
+If the value is used only internally and does not affect the UI, use a ref.
+
+</p>
+
+<p>
+
+Examples include:
+
+</p>
+
+<ul>
+
+<li>Timer IDs</li>
+
+<li>Previous state values</li>
+
+<li>DOM elements</li>
+
+<li>WebSocket connections</li>
+
+<li>API instances</li>
+
+<li>Mutable objects</li>
+
+</ul>
+
+<div class="success">
+
+<p>
+
+Rule to Remember:
+
+</p>
+
+<p>
+
+<strong>UI changes → useState</strong>
+
+</p>
+
+<p>
+
+<strong>Internal values that don't affect rendering → useRef</strong>
+
+</p>
+
+</div>
+
+<hr>
+
+<h2>Key Points</h2>
+
+<ul>
+
+<li>React re-renders only when state, props, or context change.</li>
+
+<li>Updating <code>ref.current</code> does not trigger a re-render.</li>
+
+<li>React does not track changes made to refs.</li>
+
+<li>Refs are perfect for storing values that should survive renders but should not update the UI.</li>
+
+<li>Using <code>useRef</code> avoids unnecessary renders and improves performance in these scenarios.</li>
+
+</ul>
+
+<hr>
+
+<h2>4. Value Persists Across Renders</h2>
+
+<div class="definition">
+
+<h3>What Does "Value Persists Across Renders" Mean?</h3>
+
+<p>
+When React re-renders a component, it executes the entire component function again.
+</p>
+
+<p>
+Normally, every local variable inside the component is created again.
+</p>
+
+<p>
+However, a value stored inside <code>useRef</code> is different.
+React creates the ref object only once and keeps reusing the same object on every render.
+</p>
+
+<p>
+Because the same object is reused, the value stored in
+<code>ref.current</code> is preserved across renders.
+</p>
+
+</div>
+
+<hr>
+
+<h2>How Normal Variables Behave</h2>
+
+<pre><code class="language-jsx">
+export default function App(){
+
+    let count = 0;
+
+    console.log(count);
+
+    return(
+        &lt;h2&gt;Hello&lt;/h2&gt;
+    );
+
+}
+</code></pre>
+
+<p>
+
+Whenever React renders the component, it executes:
+
+</p>
+
+<pre><code class="language-text">
+App()
+
+↓
+
+let count = 0
+
+↓
+
+console.log(count)
+
+↓
+
+Returns JSX
+</code></pre>
+
+<p>
+
+After every render,
+
+</p>
+
+<pre><code class="language-text">
+count = 0
+</code></pre>
+
+<div class="warning">
+
+<p>
+
+Because the variable is recreated every render, its previous value is lost.
+
+</p>
+
+</div>
+
+<hr>
+
+<h2>How useRef Behaves</h2>
+
+<pre><code class="language-jsx">
+import { useRef } from "react";
+
+export default function App(){
+
+    const countRef = useRef(0);
+
+    console.log(countRef.current);
+
+    return(
+        &lt;h2&gt;Hello&lt;/h2&gt;
+    );
+
+}
+</code></pre>
+
+<p>
+
+During the first render,
+
+</p>
+
+<pre><code class="language-text">
+React
+
+↓
+
+Creates
+
+{
+    current: 0
+}
+</code></pre>
+
+<p>
+
+The variable
+
+<code>countRef</code>
+
+points to that object.
+
+</p>
+
+<pre><code class="language-text">
+countRef
+
+↓
+
+{
+    current: 0
+}
+</code></pre>
+
+<div class="success">
+
+<p>
+
+React stores this object internally.
+
+It is not recreated on future renders.
+
+</p>
+
+</div>
+
+<hr>
+
+<h2>Changing the Value</h2>
+
+<pre><code class="language-js">
+countRef.current++;
+</code></pre>
+
+<p>
+
+Now the object becomes
+
+</p>
+
+<pre><code class="language-js">
+{
+    current: 1
+}
+</code></pre>
+
+<p>
+
+Another click
+
+</p>
+
+<pre><code class="language-js">
+{
+    current: 2
+}
+</code></pre>
+
+<p>
+
+Another click
+
+</p>
+
+<pre><code class="language-js">
+{
+    current: 3
+}
+</code></pre>
+
+<div class="note">
+
+<p>
+
+Notice that we are changing only the
+<code>current</code>
+property.
+
+The object itself remains the same.
+
+</p>
+
+</div>
+
+<hr>
+
+<h2>What Happens After a Re-render?</h2>
+
+<p>
+
+Suppose another state changes.
+
+</p>
+
+<pre><code class="language-jsx">
+setCount(count + 1);
+</code></pre>
+
+<p>
+
+React renders the component again.
+
+</p>
+
+<pre><code class="language-text">
+State Changes
+
+↓
+
+React Calls App()
+
+↓
+
+React Returns
+
+The Same Ref Object
+</code></pre>
+
+<p>
+
+Therefore,
+
+</p>
+
+<pre><code class="language-js">
+countRef.current
+</code></pre>
+
+<p>
+
+still contains
+
+</p>
+
+<pre><code class="language-text">
+3
+</code></pre>
+
+<div class="success">
+
+<p>
+
+The value survives because React reused the same ref object instead of creating a new one.
+
+</p>
+
+</div>
+
+<hr>
+
+<h2>Visual Comparison</h2>
+
+<table>
+
+<tr>
+<th>Normal Variable</th>
+<th>useRef</th>
+</tr>
+
+<tr>
+
+<td>
+
+<pre><code class="language-text">
+Render 1
+
+count = 0
+
+↓
+
+count++
+
+↓
+
+1
+
+↓
+
+Render Again
+
+↓
+
+count = 0
+</code></pre>
+
+</td>
+
+<td>
+
+<pre><code class="language-text">
+Render 1
+
+current = 0
+
+↓
+
+current++
+
+↓
+
+1
+
+↓
+
+Render Again
+
+↓
+
+current = 1
+</code></pre>
+
+</td>
+
+</tr>
+
+</table>
+
+<hr>
+
+<h2>Real-World Example</h2>
+
+<p>
+
+Suppose we store a timer ID.
+
+</p>
+
+<pre><code class="language-jsx">
+const timerRef = useRef(null);
+
+function startTimer(){
+
+    timerRef.current = setInterval(() => {
+
+        console.log("Running...");
+
+    },1000);
+
+}
+</code></pre>
+
+<p>
+
+Later another state changes.
+
+</p>
+
+<pre><code class="language-js">
+setCount(count + 1);
+</code></pre>
+
+<p>
+
+React renders the component again.
+
+</p>
+
+<p>
+
+But
+
+</p>
+
+<pre><code class="language-js">
+timerRef.current
+</code></pre>
+
+<p>
+
+still contains the timer ID.
+
+</p>
+
+<div class="success">
+
+<p>
+
+This allows us to stop the timer later using
+
+</p>
+
+<pre><code class="language-js">
+clearInterval(timerRef.current);
+</code></pre>
+
+</div>
+
+<hr>
+
+<h2>Why Is This Important?</h2>
+
+<p>
+
+If React recreated the ref object on every render,
+
+</p>
+
+<pre><code class="language-text">
+{
+    current: null
+}
+</code></pre>
+
+<p>
+
+would be created every time.
+
+The timer ID would disappear after each render.
+
+</p>
+
+<p>
+
+Instead, React preserves the same object.
+
+</p>
+
+<div class="success">
+
+<p>
+
+This is why refs are useful for storing values that must survive renders.
+
+</p>
+
+</div>
+
+<hr>
+
+<h2>Key Points</h2>
+
+<ul>
+
+<li>Normal variables are recreated during every render.</li>
+
+<li><code>useRef</code> creates its object only once.</li>
+
+<li>React reuses the same ref object on every render.</li>
+
+<li>Changing <code>ref.current</code> updates the stored value without creating a new object.</li>
+
+<li>The value survives across renders, making refs ideal for timers, DOM elements, previous values, API instances, and other mutable data.</li>
+
+</ul>
+
+<hr>
+
+<h2>useState vs useRef</h2>
+
+<p>
+Now that we understand how React re-renders components, the difference between
+<code>useState</code> and <code>useRef</code> becomes much clearer.
+</p>
+
+<hr>
+
+<table>
+
+<tr>
+<th>useState</th>
+<th>useRef</th>
+</tr>
+
+<tr>
+<td>Stores state that affects the UI.</td>
+<td>Stores mutable values that do not affect the UI.</td>
+</tr>
+
+<tr>
+<td>Updating the value triggers a re-render.</td>
+<td>Updating <code>ref.current</code> does not trigger a re-render.</td>
+</tr>
+
+<tr>
+<td>React tracks state changes.</td>
+<td>React does not track changes to <code>ref.current</code>.</td>
+</tr>
+
+<tr>
+<td>The updated value is shown in the UI.</td>
+<td>The updated value is used internally by the component.</td>
+</tr>
+
+<tr>
+<td>Best for counters, forms, loading states, themes, etc.</td>
+<td>Best for timer IDs, DOM elements, previous values, API instances, and WebSocket connections.</td>
+</tr>
+
+</table>
+
+<hr>
+
+<h2>Decision Flow</h2>
+
+<p>
+
+Whenever you have a value to store, ask yourself the following question.
+
+</p>
+
+<pre><code class="language-text">
+Does changing this value
+need to update the UI?
+
+        │
+        │
+     Yes ▼
+    useState
+
+        │
+        │
+      No ▼
+     useRef
+</code></pre>
+
+<div class="success">
+
+<p>
+
+A simple rule:
+
+</p>
+
+<ul>
+
+<li><strong>UI changes → useState</strong></li>
+
+<li><strong>No UI changes → useRef</strong></li>
+
+</ul>
+
+</div>
+
+<hr>
+
+<h2>Common Real-World Use Cases of useRef</h2>
+
+<table>
+
+<tr>
+<th>Use Case</th>
+<th>Why useRef?</th>
+</tr>
+
+<tr>
+<td>Timer IDs</td>
+<td>The timer ID is not displayed on the screen, so no re-render is needed.</td>
+</tr>
+
+<tr>
+<td>DOM Elements</td>
+<td>Allows calling methods like <code>focus()</code>, <code>blur()</code>, <code>play()</code>, and <code>scrollIntoView()</code>.</td>
+</tr>
+
+<tr>
+<td>Previous State Value</td>
+<td>Store the previous value without triggering another render.</td>
+</tr>
+
+<tr>
+<td>WebSocket Instance</td>
+<td>Keep the same WebSocket object across renders.</td>
+</tr>
+
+<tr>
+<td>API/Library Instance</td>
+<td>Reuse an object instead of recreating it after every render.</td>
+</tr>
+
+<tr>
+<td>Mutable Objects</td>
+<td>Store values that should survive renders but should not update the UI.</td>
+</tr>
+
+</table>
+
+<hr>
+
+<h2>Complete Rendering Comparison</h2>
+
+<h3>Using useState</h3>
+
+<pre><code class="language-text">
+User Click
+
+↓
+
+setState()
+
+↓
+
+State Changes
+
+↓
+
+React Detects Change
+
+↓
+
+Component Re-renders
+
+↓
+
+New JSX
+
+↓
+
+UI Updates
+</code></pre>
+
+<hr>
+
+<h3>Using useRef</h3>
+
+<pre><code class="language-text">
+User Click
+
+↓
+
+ref.current Changes
+
+↓
+
+No State Changed
+
+↓
+
+No Re-render
+
+↓
+
+UI Remains the Same
+</code></pre>
+
+<hr>
+
+<h2>Quick Revision</h2>
+
+<table>
+
+<tr>
+<th>Feature</th>
+<th>Explanation</th>
+</tr>
+
+<tr>
+<td><strong>Stores Mutable Values</strong></td>
+<td>Stores values that can change without using state.</td>
+</tr>
+
+<tr>
+<td><strong>Accesses DOM Elements</strong></td>
+<td>Provides direct access to DOM elements using <code>ref.current</code>.</td>
+</tr>
+
+<tr>
+<td><strong>Does Not Trigger Re-render</strong></td>
+<td>Changing <code>ref.current</code> does not cause React to render the component again.</td>
+</tr>
+
+<tr>
+<td><strong>Value Persists Across Renders</strong></td>
+<td>The same ref object is reused, so its value is preserved across renders.</td>
+</tr>
+
+</table>
+
+<hr>
+
+<h2>Interview Summary</h2>
+
+<div class="definition">
+
+<p>
+
+<b>What is useRef?</b>
+
+</p>
+
+<p>
+
+<code>useRef</code> is a React hook that creates a persistent object whose
+<code>current</code> property can store mutable values or DOM element references.
+
+Updating <code>ref.current</code> does not trigger a component re-render because React does not track changes to refs.
+
+</p>
+
+</div>
+
+<hr>
+
+<h2>Final Conclusion</h2>
+
+<p>
+
+React re-renders a component whenever <strong>state, props, or context</strong> change because these values can affect the UI.
+
+</p>
+
+<p>
+
+However, not every value inside a component is related to rendering.
+
+Some values are needed only internally, such as timer IDs, DOM references, previous values, WebSocket connections, or third-party library instances.
+
+</p>
+
+<p>
+
+If we stored these values in <code>useState</code>, React would perform unnecessary re-renders even though the UI would remain unchanged.
+
+</p>
+
+<p>
+
+To solve this problem, React provides <code>useRef</code>.
+
+A ref survives across renders, stores mutable values, gives direct access to DOM elements, and allows us to update its <code>current</code> property without causing another render.
+
+</p>
+
+<div class="success">
+
+<h3>Remember This Rule</h3>
+
+<ul>
+
+<li>If changing a value should update the UI, use <code>useState</code>.</li>
+
+<li>If changing a value should <strong>not</strong> update the UI but the value should survive renders, use <code>useRef</code>.</li>
+
+</ul>
+
+</div>
+
+<hr>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+
+<script>
+Prism.highlightAll();
+</script>
+
+</div>
+
+</body>
+</html>

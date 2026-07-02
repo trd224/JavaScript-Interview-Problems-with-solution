@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>143 - React.memo vs useMemo (Complete Explanation)</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px;margin-bottom:10px}
+p{color:#cbd5e1}
+ul{padding-left:24px}
+li{margin-bottom:10px;color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px;margin-top:15px}
+.warning{background:#1e1b4b;border-left:5px solid #fbbf24;padding:18px;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;margin-top:15px;text-align:center;line-height:2;font-size:18px}
+pre{border-radius:12px;overflow-x:auto}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>143. React.memo vs useMemo (Complete Explanation)</h1>
+
+<h2>One-Line Definition</h2>
+
+<div class="highlight">
+useMemo caches a value between renders, while React.memo caches an entire component and skips re-rendering it when its props stay the same. They solve two different problems, which is why beginners often confuse them.
+</div>
+
+<p>
+This guide explains, step by step:
+</p>
+
+<ul>
+<li>Why useMemo does not stop a component from re-rendering.</li>
+<li>Why we still need React.memo even after using useMemo.</li>
+<li>How both work together in real applications.</li>
+</ul>
+
+<h2>Step 1 — What is Re-rendering?</h2>
+
+<p>
+Whenever React executes a component function again, we say that the component has <b>re-rendered</b>.
+</p>
+
+<pre><code class="language-jsx">function App() {
+  console.log('App Rendered');
+  return &lt;h1&gt;Hello&lt;/h1&gt;;
+}</code></pre>
+
+<p>
+Whenever React calls <code>App()</code>, the component renders. If React calls <code>App()</code> again, the component re-renders.
+</p>
+
+<h2>Step 2 — When Does React Re-render a Component?</h2>
+
+<p>
+A component usually re-renders when:
+</p>
+
+<ul>
+<li>State changes</li>
+<li>Props change</li>
+<li>Context changes</li>
+<li>Its parent component re-renders</li>
+</ul>
+
+<pre><code class="language-jsx">const [count, setCount] = useState(0);</code></pre>
+
+<p>
+When <code>setCount(count + 1)</code> is executed, React immediately runs <code>App()</code> again.
+</p>
+
+<div class="highlight">
+Notice that React does not ask whether useMemo exists. It simply re-renders because the component's state changed.
+</div>
+
+<h2>Step 3 — What Does useMemo() Actually Do?</h2>
+
+<p>
+Suppose we write:
+</p>
+
+<pre><code class="language-jsx">const users = ['Rizwan', 'Ali', 'John'];</code></pre>
+
+<p>
+Every render creates a brand new array.
+</p>
+
+<div class="flow">
+Render 1
+<br>↓<br>
+users → Array A
+<br><br>
+Render 2
+<br>↓<br>
+users → Array B
+</div>
+
+<p>
+Although the values are identical (<code>["Rizwan","Ali","John"]</code>), the references are different.
+</p>
+
+<h3>Using useMemo()</h3>
+
+<pre><code class="language-jsx">const users = useMemo(() => {
+  return ['Rizwan', 'Ali', 'John'];
+}, []);</code></pre>
+
+<p>
+Now:
+</p>
+
+<div class="flow">
+Render 1
+<br>↓<br>
+users → Array A
+<br><br>
+Render 2
+<br>↓<br>
+users → Array A
+</div>
+
+<div class="highlight">
+useMemo() prevents creating a new array. It keeps the same reference until dependencies change.
+</div>
+
+<h2>Step 4 — Does useMemo Stop the Component From Re-rendering?</h2>
+
+<p>
+No. It only memoizes the value. It does not stop the component itself from rendering.
+</p>
+
+<pre><code class="language-jsx">function App() {
+  const [count, setCount] = useState(0);
+
+  const users = useMemo(() => {
+    console.log('Creating Array');
+    return ['Rizwan', 'Ali'];
+  }, []);
+
+  console.log('App Rendered');
+
+  return (
+    &lt;button onClick={() => setCount(count + 1)}&gt;
+      {count}
+    &lt;/button&gt;
+  );
+}</code></pre>
+
+<h3>Initial Render</h3>
+
+<pre><code class="language-text">Creating Array
+App Rendered</code></pre>
+
+<h3>Click Button</h3>
+
+<pre><code class="language-text">App Rendered</code></pre>
+
+<p>
+Notice that <code>Creating Array</code> did not execute again, because useMemo reused the previous array. However, <code>App Rendered</code> still appeared.
+</p>
+
+<div class="warning">
+This proves that useMemo does not stop App from re-rendering. It only prevents recreating the memoized value.
+</div>
+
+<h2>Step 5 — Now Let's Add a Child Component</h2>
+
+<pre><code class="language-jsx">function UserList({ users }) {
+  console.log('UserList Rendered');
+  return &lt;h1&gt;{users.length}&lt;/h1&gt;;
+}</code></pre>
+
+<p>
+Parent:
+</p>
+
+<pre><code class="language-jsx">&lt;UserList users={users} /&gt;</code></pre>
+
+<p>
+Now click the Increment button.
+</p>
+
+<div class="flow">
+App Rendered
+<br>↓<br>
+React renders UserList
+</div>
+
+<pre><code class="language-text">Console:
+
+App Rendered
+UserList Rendered</code></pre>
+
+<div class="warning">
+Even though useMemo returned the same array, the child still rendered.
+</div>
+
+<h3>Why?</h3>
+
+<p>
+Because React's default behavior is:
+</p>
+
+<div class="flow">
+Parent Rendered
+<br>↓<br>
+Render Every Child
+</div>
+
+<p>
+React does not compare props automatically.
+</p>
+
+<h2>Step 6 — Then Why Do We Need React.memo()?</h2>
+
+<p>
+At this point, a common question is:
+</p>
+
+<div class="highlight">
+<b>Question:</b> We already used useMemo(). It keeps the same array reference. So why do we still need React.memo()?
+</div>
+
+<p>
+The answer is simple.
+</p>
+
+<div class="warning">
+useMemo() only creates (or reuses) the value. It never tells React to skip rendering a component.
+</div>
+
+<p>
+Without React.memo(), React's rendering algorithm is simply:
+</p>
+
+<div class="flow">
+Parent Rendered
+<br>↓<br>
+Render Child
+<br>↓<br>
+Done
+</div>
+
+<p>
+Notice something important — there is <b>no props comparison</b>. React simply executes the child component again.
+</p>
+
+<h2>Step 7 — What Does React.memo() Do?</h2>
+
+<p>
+Now wrap the child:
+</p>
+
+<pre><code class="language-jsx">const UserList = React.memo(function UserList({ users }) {
+  console.log('UserList Rendered');
+  return &lt;h1&gt;{users.length}&lt;/h1&gt;;
+});</code></pre>
+
+<p>
+Now the rendering process changes.
+</p>
+
+<div class="flow">
+Parent Rendered
+<br>↓<br>
+React.memo
+<br>↓<br>
+Compare Previous Props
+<br>↓<br>
+Same?
+<br>↓<br>
+Yes
+<br>↓<br>
+Skip Rendering
+</div>
+
+<div class="highlight">
+React.memo adds a new rule: before rendering this component, compare its previous props with its current props.
+</div>
+
+<h2>Step 8 — How React.memo() Compares Props</h2>
+
+<p>
+Suppose during the first render:
+</p>
+
+<div class="flow">
+users → Array A
+</div>
+
+<p>
+After clicking Increment, because of useMemo():
+</p>
+
+<div class="flow">
+users → Array A
+</div>
+
+<p>
+Again React reaches <code>&lt;UserList users={users} /&gt;</code>. This time React.memo internally performs something similar to:
+</p>
+
+<pre><code class="language-jsx">previousProps.users === nextProps.users</code></pre>
+
+<p>
+which becomes:
+</p>
+
+<pre><code class="language-jsx">ArrayA === ArrayA // true</code></pre>
+
+<p>
+Since nothing changed, React skips rendering the child.
+</p>
+
+<div class="flow">
+App Rendered
+<br>↓<br>
+React.memo
+<br>↓<br>
+Props Same
+<br>↓<br>
+Skip UserList()
+</div>
+
+<h2>Step 9 — What Happens Without useMemo()?</h2>
+
+<p>
+Suppose we remove useMemo:
+</p>
+
+<pre><code class="language-jsx">const users = ['Rizwan', 'Ali', 'John'];</code></pre>
+
+<p>
+Now every render creates a new array.
+</p>
+
+<div class="flow">
+Render 1 → Array A
+<br><br>
+Render 2 → Array B
+</div>
+
+<p>
+Now React.memo compares:
+</p>
+
+<pre><code class="language-jsx">previousProps.users === nextProps.users
+// ArrayA === ArrayB → false</code></pre>
+
+<p>
+React thinks the prop changed. Therefore:
+</p>
+
+<div class="flow">
+Render Child Again
+</div>
+
+<h2>Step 10 — What Happens With Both useMemo() and React.memo()?</h2>
+
+<div class="flow">
+State Changed
+<br>↓<br>
+Parent Rendered
+<br>↓<br>
+useMemo()
+<br>↓<br>
+Same Array Returned
+<br>↓<br>
+React.memo()
+<br>↓<br>
+Compare Props
+<br>↓<br>
+Same?
+<br>↓<br>
+Yes
+<br>↓<br>
+Skip Child Rendering
+</div>
+
+<div class="highlight">
+This is why these two APIs are commonly used together.
+</div>
+
+<h2>Step 11 — Responsibilities</h2>
+
+<table>
+<tr>
+<th>API</th>
+<th>Responsibility</th>
+</tr>
+<tr>
+<td>useMemo()</td>
+<td>Keeps the same object, array, or calculated value until dependencies change.</td>
+</tr>
+<tr>
+<td>React.memo()</td>
+<td>Uses the stable props to decide whether the component should render again.</td>
+</tr>
+</table>
+
+<h2>Step 12 — Teacher &amp; Student Analogy</h2>
+
+<p>
+Imagine:
+</p>
+
+<ul>
+<li>Teacher = Parent Component</li>
+<li>Student = Child Component</li>
+<li>Notebook = users Array</li>
+</ul>
+
+<h3>Without React.memo()</h3>
+
+<div class="flow">
+Teacher
+<br>↓<br>
+Calls Student
+<br>↓<br>
+Student Comes
+<br>↓<br>
+Reads Notebook
+</div>
+
+<p>
+Even if the notebook is exactly the same, the teacher still calls the student every time.
+</p>
+
+<h3>With React.memo()</h3>
+
+<div class="flow">
+Teacher
+<br>↓<br>
+Calls Security Guard
+<br>↓<br>
+Guard Checks Notebook
+<br>↓<br>
+Same Notebook?
+<br>↓<br>
+Yes
+<br>↓<br>
+Don't Call Student
+</div>
+
+<p>
+Here, useMemo() keeps the notebook the same, and React.memo() is the security guard that checks whether the notebook changed.
+</p>
+
+<h2>Step 13 — Why Can't useMemo() Skip Rendering by Itself?</h2>
+
+<p>
+Because useMemo() has only one responsibility:
+</p>
+
+<div class="flow">
+Create Value
+<br>or<br>
+Reuse Previous Value
+</div>
+
+<p>
+It does not know anything about rendering child components. It never tells React <code>"Don't render UserList."</code> That responsibility belongs to React.memo().
+</p>
+
+<h2>Final Summary</h2>
+
+<table>
+<tr>
+<th>Question</th>
+<th>Answer</th>
+</tr>
+<tr>
+<td>Does useMemo stop App from rendering?</td>
+<td>No.</td>
+</tr>
+<tr>
+<td>Does useMemo keep the same reference?</td>
+<td>Yes.</td>
+</tr>
+<tr>
+<td>Does React compare props by default?</td>
+<td>No.</td>
+</tr>
+<tr>
+<td>Who compares props?</td>
+<td>React.memo()</td>
+</tr>
+<tr>
+<td>Who skips child rendering?</td>
+<td>React.memo()</td>
+</tr>
+<tr>
+<td>Why use useMemo then?</td>
+<td>To provide stable references (objects, arrays, calculations) so React.memo() can detect that the props haven't changed.</td>
+</tr>
+</table>
+
+<h2>Easy Way To Remember</h2>
+
+<div class="flow">
+useMemo → Keeps the Value Stable
+<br><br>
+React.memo → Skips Re-render When Props Are Stable
+</div>
+
+<h2>Interview Answer</h2>
+
+<div class="highlight">
+useMemo() memoizes a value and keeps its reference stable, whereas React.memo() memoizes a component and skips its re-render when its props remain unchanged. They are often used together because useMemo provides stable prop references, and React.memo uses those references to determine whether the child component should render again.
+</div>
+
+<h2>One-Line Interview Answer</h2>
+
+<div class="highlight">
+useMemo caches a value so it doesn't change between renders; React.memo uses that stable value to skip re-rendering a child component whose props haven't actually changed.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+
+</body>
+</html>
