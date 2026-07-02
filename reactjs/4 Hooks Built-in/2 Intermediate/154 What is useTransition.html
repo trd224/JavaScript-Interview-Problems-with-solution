@@ -51,10 +51,7 @@ Suppose we have a search box.
   const [search, setSearch] = useState('');
 
   return (
-    &lt;input
-      value={search}
-      onChange={e => setSearch(e.target.value)}
-    /&gt;
+    &lt;input value={search} onChange={e => setSearch(e.target.value)} /&gt;
   );
 
 }</code></pre>
@@ -115,8 +112,7 @@ useTransition allows us to tell React:
 
 <h2>Basic Syntax</h2>
 
-<pre><code class="language-jsx">const [isPending, startTransition] =
-  useTransition();</code></pre>
+<pre><code class="language-jsx">const [isPending, startTransition] = useTransition();</code></pre>
 
 <table>
 <tr>
@@ -167,15 +163,62 @@ Updates inside startTransition become non-urgent.
 Without useTransition:
 </p>
 
-<pre><code class="language-jsx">function Search() {
+<!-- <pre><code class="language-jsx">function Search() {
 
   const [query, setQuery] = useState('');
 
-  const filteredProducts = products.filter(product =>
-      product.name.includes(query)
+  const filteredProducts = products.filter(product => product.name.includes(query));
+
+}</code></pre> -->
+
+<pre><code class="language-jsx">import { useState } from "react";
+
+const products = [
+    { id: 1, name: "Laptop" },
+    { id: 2, name: "Mobile" },
+    { id: 3, name: "Keyboard" },
+    { id: 4, name: "Mouse" }
+];
+
+function Search() {
+
+    const [query, setQuery] = useState("");
+
+    const filteredProducts = products.filter(product =&gt;
+        product.name.toLowerCase().includes(query.toLowerCase())
     );
 
-}</code></pre>
+    //Here, filteredProducts is derived from query and products, so 
+    //there is no need to add derived state to React state.
+
+    return (
+
+        &lt;div&gt;
+
+            &lt;input
+                type="text"
+                placeholder="Search product..."
+                value={query}
+                onChange={(e) =&gt; setQuery(e.target.value)}
+            /&gt;
+
+            &lt;ul&gt;
+                {filteredProducts.map(product =&gt; (
+                    &lt;li key={product.id}&gt;
+                        {product.name}
+                    &lt;/li&gt;
+                ))}
+            &lt;/ul&gt;
+
+        &lt;/div&gt;
+
+    );
+
+}
+
+export default Search;
+
+</code></pre>
 
 <h3>What Happens?</h3>
 
@@ -193,34 +236,66 @@ Typing Feels Slow
 
 <h2>Using useTransition</h2>
 
-<pre><code class="language-jsx">function Search() {
+<pre><code class="language-jsx">import { useState, useTransition } from "react";
 
-  const [query, setQuery] = useState('');
+const products = [
+    { id: 1, name: "Laptop" },
+    { id: 2, name: "Mobile" },
+    { id: 3, name: "Keyboard" },
+    { id: 4, name: "Mouse" },
+    { id: 5, name: "Monitor" },
+    { id: 6, name: "Printer" }
+];
 
-  const [results, setResults] = useState([]);
+export default function Search() {
 
-  const [isPending, startTransition] =
-    useTransition();
+    const [query, setQuery] = useState('');
+    const [results, setResults] = useState([]);
 
-  function handleChange(e) {
+    const [isPending, startTransition] = useTransition();
 
-    const value = e.target.value;
+    function handleChange(e) {
 
-    setQuery(value);
+        const value = e.target.value;
 
-    startTransition(() => {
+        setQuery(value);
 
-      setResults(
-        products.filter(product =>
-          product.name.includes(value)
-        )
-      );
+        startTransition(() => {
 
-    });
+            setResults(
+                products.filter(product =&gt;
+                    product.name.toLowerCase().includes(value.toLowerCase())
+                )
+            );
 
-  }
+        });
 
-}</code></pre>
+    }
+
+    return (
+
+        &lt;div&gt;
+
+            &lt;input
+                type="text"
+                value={query}
+                onChange={handleChange}
+                placeholder="Search product..."
+            /&gt;
+
+            {isPending &amp;&amp; &lt;p&gt;Searching...&lt;/p&gt;}
+
+            &lt;ul&gt;
+                {results.map(product =&gt; &lt;li key={product.id}&gt;{product.name}&lt;/li&gt;)}
+            &lt;/ul&gt;
+
+        &lt;/div&gt;
+
+    );
+
+}
+
+</code></pre>
 
 <h3>Now What Happens?</h3>
 
@@ -272,8 +347,7 @@ It makes important updates happen first.
 isPending becomes true while React is processing the transition.
 </p>
 
-<pre><code class="language-jsx">const [isPending, startTransition] =
-  useTransition();</code></pre>
+<pre><code class="language-jsx">const [isPending, startTransition] = useTransition();</code></pre>
 
 <h3>Example</h3>
 

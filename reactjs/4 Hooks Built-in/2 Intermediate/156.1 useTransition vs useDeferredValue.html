@@ -180,7 +180,7 @@ That is why we do not need <code>const [query, setQuery] = useState('')</code> w
 
 <h2>useTransition Example</h2>
 
-<pre><code class="language-jsx">import { useState, useTransition } from 'react';
+<!-- <pre><code class="language-jsx">import { useState, useTransition } from 'react';
 
 function App() {
 
@@ -211,7 +211,101 @@ function App() {
     &lt;/&gt;
   );
 
-}</code></pre>
+}</code></pre> -->
+
+<pre><code class="language-jsx">import { useState, useTransition } from "react";
+
+// Large product list
+const products = Array.from({ length: 10000 }, (_, i) => ({
+    id: i + 1,
+    name: `Product ${i + 1}`,
+}));
+
+function App() {
+
+    const [input, setInput] = useState("");
+    const [query, setQuery] = useState("");
+
+    const [isPending, startTransition] = useTransition();
+
+    function handleChange(e) {
+
+        const value = e.target.value;
+
+        // High priority update
+        setInput(value);
+
+        // Low priority update
+        startTransition(() =&gt; {
+            setQuery(value);
+        });
+
+    }
+
+    return (
+
+        &lt;div style={{ padding: "20px", fontFamily: "Arial" }}&gt;
+
+            &lt;h2&gt;Search Products using useTransition&lt;/h2&gt;
+
+            &lt;input
+                type="text"
+                value={input}
+                onChange={handleChange}
+                placeholder="Search..."
+                style={{
+                    padding: "8px",
+                    width: "300px",
+                    marginBottom: "10px",
+                }}
+            /&gt;
+
+            {isPending && &lt;p&gt;Searching...&lt;/p&gt;}
+
+            &lt;ProductList query={query} /&gt;
+
+        &lt;/div&gt;
+
+    );
+
+}
+
+function ProductList({ query }) {
+
+    // Expensive filtering
+    const filteredProducts = products.filter(product =&gt;
+        product.name.toLowerCase().includes(query.toLowerCase())
+    );
+
+    return (
+
+        &lt;&gt;
+
+            &lt;p&gt;
+                &lt;strong&gt;Total Results:&lt;/strong&gt; {filteredProducts.length}
+            &lt;/p&gt;
+
+            &lt;ul&gt;
+
+                {filteredProducts.map(product =&gt; (
+
+                    &lt;li key={product.id}&gt;
+                        {product.name}
+                    &lt;/li&gt;
+
+                ))}
+
+            &lt;/ul&gt;
+
+        &lt;/&gt;
+
+    );
+
+}
+
+export default App;
+
+</code></pre>
 
 <div class="highlight">
 Here, <code>input</code> updates immediately and <code>query</code> updates with lower priority.

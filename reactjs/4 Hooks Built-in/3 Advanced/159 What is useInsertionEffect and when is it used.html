@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!-- <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -428,6 +428,679 @@ useEffect
 
 <div class="highlight">
 useInsertionEffect is a React 18 hook primarily designed for CSS-in-JS libraries. It runs after React commits DOM updates but before layout effects and before the browser paints. This allows style libraries to inject CSS before layout calculations occur, preventing flashes of unstyled content and ensuring accurate measurements. Most application developers rarely need it; it is mainly intended for library authors. The execution order is useInsertionEffect → useLayoutEffect → paint → useEffect.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+
+</body>
+</html> -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>159 - What is useInsertionEffect and When is it Used?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px}
+p,li{color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px}
+.success{background:#052e16;padding:18px;border-left:5px solid #22c55e;border-radius:10px;margin-top:15px}
+.warning{background:#1e1b4b;padding:18px;border-left:5px solid #fbbf24;border-radius:10px;margin-top:15px}
+.danger{background:#2a0f12;padding:18px;border-left:5px solid #ef4444;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;text-align:center;line-height:2;font-size:18px}
+.file-name{background:#111827;color:#93c5fd;padding:12px 16px;border-radius:10px;border:1px solid #1e293b;font-weight:bold;margin-top:20px;margin-bottom:10px}
+pre[class*="language-"],code[class*="language-"]{background:#1e1e1e}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>159. What is useInsertionEffect and When is it Used?</h1>
+
+<h2>One-Line Answer</h2>
+
+<div class="highlight">
+<b>useInsertionEffect</b> is a React 18 hook designed primarily for CSS-in-JS libraries. It runs immediately after React commits DOM updates but before the browser calculates styles and layout, allowing styles to be inserted at exactly the right time.
+</div>
+
+<h2>Why Was It Introduced?</h2>
+
+<p>
+React 18 introduced Concurrent Rendering.
+</p>
+
+<p>
+With concurrent rendering, React can:
+</p>
+
+<div class="flow">
+Start Rendering
+<br>↓
+Pause Rendering
+<br>↓
+Resume Rendering
+<br>↓
+Commit DOM
+</div>
+
+<p>
+CSS-in-JS libraries such as:
+</p>
+
+<ul>
+<li>Emotion</li>
+<li>Styled Components</li>
+<li>Stitches</li>
+</ul>
+
+<p>
+generate CSS dynamically while components render.
+</p>
+
+<div class="danger">
+If CSS is inserted too late, the browser may calculate the layout without those styles, causing incorrect layout calculations or a flash of unstyled content.
+</div>
+
+<h2>The Problem Before React 18</h2>
+
+<p>
+Many CSS-in-JS libraries used:
+</p>
+
+<pre class="language-jsx"><code class="language-jsx">useLayoutEffect(() => {
+  insertStyles();
+}, []);</code></pre>
+
+<p>
+This worked, but it wasn't the ideal place for inserting styles.
+</p>
+
+<div class="flow">
+DOM Commit
+<br>↓
+Browser Begins Preparing Layout
+<br>↓
+useLayoutEffect Inserts CSS
+<br>↓
+Browser May Need Another Layout Calculation
+</div>
+
+<div class="warning">
+React wanted CSS libraries to inject styles even earlier so the browser could calculate the layout correctly the first time.
+</div>
+
+<h2>React Added useInsertionEffect</h2>
+
+<div class="highlight">
+<b>useInsertionEffect</b> provides a dedicated lifecycle phase for CSS-in-JS libraries to insert styles before the browser performs its layout calculation.
+</div>
+
+<h2>Execution Order</h2>
+
+<div class="flow">
+React Render
+<br>↓
+DOM Commit
+<br>↓
+useInsertionEffect
+<br>↓
+Insert CSS (if needed)
+<br>↓
+Browser Calculates Styles &amp; Layout
+<br>↓
+useLayoutEffect
+<br>↓
+Read / Measure Computed Layout
+<br>↓
+Make Synchronous DOM Updates (if needed)
+<br>↓
+Paint Screen
+<br>↓
+useEffect
+</div>
+
+<h2>Most Important Interview Point</h2>
+
+<table>
+
+<tr>
+<th>Hook</th>
+<th>When It Runs</th>
+<th>Main Purpose</th>
+</tr>
+
+<tr>
+<td>useInsertionEffect</td>
+<td>Immediately after DOM commit and before layout calculation</td>
+<td>Insert CSS</td>
+</tr>
+
+<tr>
+<td>useLayoutEffect</td>
+<td>After layout is computed but before paint</td>
+<td>Read layout and update DOM synchronously</td>
+</tr>
+
+<tr>
+<td>useEffect</td>
+<td>After paint</td>
+<td>Run side effects</td>
+</tr>
+
+</table>
+
+<h2>Visual Timeline</h2>
+
+<div class="flow">
+React Render
+<br>↓
+DOM Commit
+<br>↓
+useInsertionEffect
+<br>↓
+Insert CSS
+<br>↓
+Browser Calculates Styles &amp; Layout
+<br>↓
+useLayoutEffect
+<br>↓
+Read / Measure Computed Layout
+<br>↓
+Optional DOM Updates
+<br>↓
+Paint Screen
+<br>↓
+useEffect
+</div>
+
+<div class="highlight">
+
+<b>Important Difference</b>
+
+<br><br>
+
+<b>Browser Calculates Styles &amp; Layout</b>
+
+<ul>
+<li>The browser computes the final width, height, position, margins, padding and other layout information for every element.</li>
+<li>This work is done automatically by the browser.</li>
+</ul>
+
+<b>Read / Measure Computed Layout</b>
+
+<ul>
+<li>Our JavaScript reads the values that the browser has already calculated.</li>
+<li>Common APIs include:</li>
+<ul>
+<li>offsetWidth</li>
+<li>offsetHeight</li>
+<li>clientWidth</li>
+<li>clientHeight</li>
+<li>scrollHeight</li>
+<li>getBoundingClientRect()</li>
+</ul>
+</ul>
+
+<p>
+The browser performs the calculations. Our code simply reads the computed values.
+</p>
+
+</div>
+<h2>Basic Example</h2>
+
+<div class="file-name">Example.jsx</div>
+
+<pre class="language-jsx"><code class="language-jsx">import { useInsertionEffect } from "react";
+
+function App() {
+
+  useInsertionEffect(() => {
+
+    console.log("Insert Styles");
+
+  }, []);
+
+  return &lt;h2&gt;Hello&lt;/h2&gt;;
+
+}
+
+export default App;
+</code></pre>
+
+<p>
+Execution order:
+</p>
+
+<div class="flow">
+React Render
+<br>↓
+DOM Commit
+<br>↓
+useInsertionEffect
+<br>↓
+Insert Styles
+<br>↓
+Browser Calculates Styles &amp; Layout
+<br>↓
+Paint
+</div>
+
+<div class="success">
+This example simply demonstrates when <b>useInsertionEffect</b> runs. Normally, only CSS-in-JS libraries use this hook.
+</div>
+
+<h2>Real CSS-in-JS Example</h2>
+
+<div class="file-name">Style Injection</div>
+
+<pre class="language-jsx"><code class="language-jsx">import { useInsertionEffect } from "react";
+
+function App() {
+
+  useInsertionEffect(() => {
+
+    const style =
+      document.createElement("style");
+
+    style.textContent =
+      ".title{color:red;font-size:32px;}";
+
+    document.head.appendChild(style);
+
+    return () => {
+
+      style.remove();
+
+    };
+
+  }, []);
+
+  return &lt;h1 className="title"&gt;Hello React&lt;/h1&gt;;
+
+}
+</code></pre>
+
+<div class="success">
+The CSS is inserted before the browser computes the layout, so the browser calculates the correct width, height, and position the first time.
+</div>
+
+<h2>Why Not useEffect?</h2>
+
+<pre class="language-jsx"><code class="language-jsx">useEffect(() => {
+
+  insertStyles();
+
+}, []);
+</code></pre>
+
+<p>
+Timeline:
+</p>
+
+<div class="flow">
+React Render
+<br>↓
+DOM Commit
+<br>↓
+Browser Calculates Layout
+<br>↓
+Paint Screen
+<br>↓
+useEffect
+<br>↓
+Insert CSS
+<br>↓
+Browser Recalculates Layout
+</div>
+
+<div class="danger">
+The user may briefly see unstyled content (FOUC), and the browser may need another layout calculation after the CSS is inserted.
+</div>
+
+<h2>Why Not useLayoutEffect?</h2>
+
+<pre class="language-jsx"><code class="language-jsx">useLayoutEffect(() => {
+
+  insertStyles();
+
+}, []);
+</code></pre>
+
+<p>
+<b>useLayoutEffect</b> runs before the browser paints, so it is much better than <b>useEffect</b>.
+</p>
+
+<p>
+However, React expects <b>useLayoutEffect</b> to read the layout that the browser has already computed—not to insert CSS.
+</p>
+
+<div class="flow">
+DOM Commit
+<br>↓
+Browser Calculates Styles &amp; Layout
+<br>↓
+useLayoutEffect
+<br>↓
+Insert New CSS
+<br>↓
+Browser Calculates Layout Again
+<br>↓
+Paint
+</div>
+
+<div class="warning">
+Because new CSS changes the appearance and size of elements, the browser may need to perform another layout calculation.
+</div>
+
+<div class="success">
+<b>useInsertionEffect</b> avoids this by inserting CSS before the browser performs its initial layout calculation.
+</div>
+
+<h2>Relationship With useLayoutEffect</h2>
+
+<p>
+The browser first computes the layout of every element.
+</p>
+
+<p>
+Then <b>useLayoutEffect</b> runs, allowing our code to read the computed layout and make synchronous DOM updates before the browser paints.
+</p>
+
+<div class="flow">
+Browser Calculates Styles &amp; Layout
+<br>↓
+useLayoutEffect
+<br>↓
+Read offsetWidth
+<br>↓
+Read getBoundingClientRect()
+<br>↓
+Optional DOM Updates
+<br>↓
+Paint
+</div>
+
+<div class="highlight">
+
+<b>Important Difference</b>
+
+<br><br>
+
+<b>Browser Calculates Styles &amp; Layout</b>
+
+<ul>
+<li>The browser computes each element's width, height, position, margins, padding, and other layout information.</li>
+<li>This calculation is performed automatically by the browser.</li>
+</ul>
+
+<b>Read / Measure Computed Layout</b>
+
+<ul>
+<li>Our JavaScript simply reads the values the browser has already calculated.</li>
+<li>Examples:</li>
+<ul>
+<li>offsetWidth</li>
+<li>offsetHeight</li>
+<li>clientWidth</li>
+<li>clientHeight</li>
+<li>scrollHeight</li>
+<li>getBoundingClientRect()</li>
+</ul>
+</ul>
+
+<p>
+The browser performs the calculations. Our code only reads the computed results.
+</p>
+
+</div>
+
+<div class="success">
+Since <b>useLayoutEffect</b> depends on accurate layout information, all required CSS must already exist. That is exactly why <b>useInsertionEffect</b> runs first.
+</div>
+
+<h2>Real World Example</h2>
+
+<p>
+Imagine a CSS-in-JS library like <b>Emotion</b> or <b>Styled Components</b>. It generates CSS dynamically while React renders components.
+</p>
+
+<h3>Using useInsertionEffect (Correct)</h3>
+
+<div class="flow">
+React Render
+<br>↓
+DOM Commit
+<br>↓
+Generate CSS
+<br>↓
+useInsertionEffect
+<br>↓
+Insert CSS
+<br>↓
+Browser Calculates Styles &amp; Layout
+<br>↓
+useLayoutEffect Reads Layout
+<br>↓
+Paint Screen
+</div>
+
+<div class="success">
+The browser performs the layout calculation only once because all required CSS already exists.
+</div>
+
+<h3>Using useLayoutEffect to Insert CSS</h3>
+
+<div class="flow">
+React Render
+<br>↓
+DOM Commit
+<br>↓
+Browser Calculates Styles &amp; Layout
+<br>↓
+useLayoutEffect
+<br>↓
+Insert CSS
+<br>↓
+Browser Calculates Styles &amp; Layout Again
+<br>↓
+Paint Screen
+</div>
+
+<div class="warning">
+Because new CSS was inserted after the browser had already computed the layout, the browser may need to calculate the layout again.
+</div>
+
+<h3>Using useEffect to Insert CSS</h3>
+
+<div class="flow">
+React Render
+<br>↓
+DOM Commit
+<br>↓
+Browser Calculates Styles &amp; Layout
+<br>↓
+Paint Screen
+<br>↓
+useEffect
+<br>↓
+Insert CSS
+<br>↓
+Browser Calculates Styles &amp; Layout Again
+</div>
+
+<div class="danger">
+Users may briefly see unstyled content (Flash Of Unstyled Content - FOUC), and the browser performs another layout calculation after the CSS is inserted.
+</div>
+
+<h2>Can Application Developers Use It?</h2>
+
+<div class="warning">
+Almost never.
+</div>
+
+<p>
+<b>useInsertionEffect</b> is not intended for normal application logic.
+</p>
+
+<p>
+Most React developers should continue using:
+</p>
+
+<ul>
+<li><b>useEffect</b> for API calls, subscriptions, timers and other side effects.</li>
+<li><b>useLayoutEffect</b> for reading layout information and making synchronous DOM updates before paint.</li>
+</ul>
+
+<p>
+Only library authors usually need:
+</p>
+
+<ul>
+<li><b>useInsertionEffect</b> to insert dynamically generated CSS.</li>
+</ul>
+
+<h2>What React Documentation Says</h2>
+
+<div class="highlight">
+<b>useInsertionEffect</b> is primarily intended for CSS-in-JS library authors. It is rarely needed in normal React applications.
+</div>
+
+<h2>Comparison Table</h2>
+
+<table>
+
+<tr>
+<th>Hook</th>
+<th>Main Purpose</th>
+<th>Runs</th>
+<th>Typical Use Cases</th>
+</tr>
+
+<tr>
+<td><b>useInsertionEffect</b></td>
+<td>Insert CSS before layout calculation</td>
+<td>Immediately after DOM commit and before the browser calculates layout</td>
+<td>Emotion, Styled Components, Stitches and other CSS-in-JS libraries</td>
+</tr>
+
+<tr>
+<td><b>useLayoutEffect</b></td>
+<td>Read measured layout and synchronously update the DOM</td>
+<td>After the browser computes layout but before paint</td>
+<td>Tooltips, animations, scrolling, measuring element size and position</td>
+</tr>
+
+<tr>
+<td><b>useEffect</b></td>
+<td>Run side effects</td>
+<td>After paint</td>
+<td>API calls, subscriptions, timers, logging, analytics</td>
+</tr>
+
+</table>
+
+<h2>Easy Way To Remember</h2>
+
+<div class="flow">
+
+Need to Insert CSS?
+<br>↓
+<b>useInsertionEffect</b>
+
+<br><br>
+
+Need to Read / Measure the DOM?
+<br>↓
+<b>useLayoutEffect</b>
+
+<br><br>
+
+Need Side Effects?
+<br>↓
+<b>useEffect</b>
+
+</div>
+
+<h2>Key Takeaways</h2>
+
+<ul>
+
+<li>
+<b>useInsertionEffect</b> is designed primarily for CSS-in-JS libraries.
+</li>
+
+<li>
+It runs immediately after React commits DOM updates but before the browser performs its layout calculation.
+</li>
+
+<li>
+Its purpose is to ensure all required CSS exists before the browser computes element sizes and positions.
+</li>
+
+<li>
+The browser performs the layout calculation automatically.
+</li>
+
+<li>
+<b>useLayoutEffect</b> does <b>not</b> calculate layout. It reads the layout that the browser has already computed using APIs like <code>offsetWidth</code> and <code>getBoundingClientRect()</code>.
+</li>
+
+<li>
+If CSS is inserted inside <b>useLayoutEffect</b>, the browser may need to calculate the layout again because the styles have changed.
+</li>
+
+<li>
+Using <b>useEffect</b> to insert CSS is even later, which can cause a Flash Of Unstyled Content (FOUC).
+</li>
+
+<li>
+Most React application developers rarely need <b>useInsertionEffect</b>. It is mainly intended for library authors.
+</li>
+
+</ul>
+
+<h2>Interview Answer</h2>
+
+<div class="highlight">
+
+<b>useInsertionEffect</b> is a React 18 hook primarily designed for CSS-in-JS libraries such as Emotion and Styled Components. It runs immediately after React commits DOM updates but before the browser calculates styles and layout. This allows libraries to inject CSS before the browser computes element sizes and positions, preventing unnecessary layout recalculations and flashes of unstyled content.
+
+<br><br>
+
+After the browser computes the layout, <b>useLayoutEffect</b> runs, allowing our code to read the computed layout using APIs like <code>offsetWidth</code> and <code>getBoundingClientRect()</code>, and make synchronous DOM updates before the screen is painted.
+
+<br><br>
+
+The execution order is:
+
+<br><br>
+
+<b>
+React Render → DOM Commit → useInsertionEffect → Insert CSS → Browser Calculates Styles &amp; Layout → useLayoutEffect → Read / Measure Computed Layout → Optional DOM Updates → Paint Screen → useEffect
+</b>
+
+<br><br>
+
+Most application developers rarely use <b>useInsertionEffect</b>; it is mainly intended for CSS-in-JS library authors.
+
 </div>
 
 </div>
