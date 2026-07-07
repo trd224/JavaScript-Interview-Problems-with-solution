@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>221 - How does use-context-selector library solve the re-render problem?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet"/>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+body{
+    font-family:Arial,Helvetica,sans-serif;
+    background:#0f172a;
+    color:#e2e8f0;
+    line-height:1.7;
+}
+.container{
+    max-width:1200px;
+    margin:auto;
+    padding:40px;
+}
+h1{
+    color:#38bdf8;
+    margin-bottom:25px;
+}
+h2{
+    color:#facc15;
+    margin:35px 0 15px;
+}
+h3{
+    color:#4ade80;
+    margin:25px 0 10px;
+}
+p{
+    margin:12px 0;
+}
+.card{
+    background:#1e293b;
+    border-left:5px solid #38bdf8;
+    padding:20px;
+    margin:20px 0;
+    border-radius:8px;
+}
+table{
+    width:100%;
+    border-collapse:collapse;
+    margin:20px 0;
+}
+th,td{
+    border:1px solid #334155;
+    padding:12px;
+    text-align:left;
+}
+th{
+    background:#1e293b;
+}
+code{
+    color:#facc15;
+}
+pre{
+    margin:20px 0;
+    border-radius:8px;
+}
+ul{
+    margin-left:20px;
+}
+li{
+    margin:8px 0;
+}
+.note{
+    background:#082f49;
+    padding:15px;
+    border-left:5px solid #0ea5e9;
+    margin:20px 0;
+}
+.warning{
+    background:#3f1d1d;
+    padding:15px;
+    border-left:5px solid #ef4444;
+    margin:20px 0;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>221. How does use-context-selector library solve the re-render problem?</h1>
+
+<div class="card">
+<strong>Definition</strong>
+
+<p>
+<b>use-context-selector</b> is a React library that allows us to subscribe to only the specific part of a Context value that our component needs. As a result, components re-render only when their selected value changes instead of whenever any value inside the Context changes.
+</p>
+</div>
+
+<h2>Why does React Context re-render?</h2>
+
+<p>
+Suppose our Context contains multiple values.
+</p>
+
+<pre><code class="language-js">
+const value = {
+  user,
+  theme,
+  cart
+};
+</code></pre>
+
+<p>
+Now imagine three components.
+</p>
+
+<table>
+<tr>
+<th>Component</th>
+<th>Uses</th>
+</tr>
+
+<tr>
+<td>UserProfile</td>
+<td>user</td>
+</tr>
+
+<tr>
+<td>ThemeButton</td>
+<td>theme</td>
+</tr>
+
+<tr>
+<td>CartBadge</td>
+<td>cart</td>
+</tr>
+
+</table>
+
+<p>
+When <code>cart</code> changes...
+</p>
+
+<pre><code class="language-js">
+setCart(newCart);
+</code></pre>
+
+<p>
+React creates a new Context value object.
+</p>
+
+<pre><code class="language-js">
+{
+  user,
+  theme,
+  cart: newCart
+}
+</code></pre>
+
+<p>
+Since the Context value reference changed, <strong>every component using useContext()</strong> re-renders, even if it only uses <code>theme</code> or <code>user</code>.
+</p>
+
+<div class="warning">
+This happens because useContext() subscribes to the entire Context object, not to individual properties.
+</div>
+
+<hr>
+
+<h2>How does use-context-selector solve this?</h2>
+
+<p>
+Instead of subscribing to the whole Context, each component selects only the value it needs.
+</p>
+
+<pre><code class="language-js">
+const theme = useContextSelector(
+  AppContext,
+  value => value.theme
+);
+</code></pre>
+
+<p>
+Now this component only watches <code>theme</code>.
+</p>
+
+<p>
+If <code>cart</code> changes, the selector still returns the same theme value.
+</p>
+
+<pre><code class="language-js">
+Old:
+theme = "dark"
+
+New:
+theme = "dark"
+</code></pre>
+
+<p>
+Since the selected value didn't change, React skips the re-render.
+</p>
+
+<hr>
+
+<h2>Example</h2>
+
+<h3>Create Context</h3>
+
+<pre><code class="language-js">
+import { createContext } from "use-context-selector";
+
+export const AppContext = createContext(null);
+</code></pre>
+
+<h3>Provider</h3>
+
+<pre><code class="language-js">
+const [user, setUser] = useState("John");
+const [theme, setTheme] = useState("dark");
+const [cart, setCart] = useState([]);
+
+<AppContext.Provider
+  value={{
+    user,
+    theme,
+    cart,
+    setUser,
+    setTheme,
+    setCart
+  }}
+>
+  {children}
+</AppContext.Provider>
+</code></pre>
+
+<h3>User Component</h3>
+
+<pre><code class="language-js">
+import { useContextSelector } from "use-context-selector";
+
+const user = useContextSelector(
+  AppContext,
+  value => value.user
+);
+</code></pre>
+
+<h3>Theme Component</h3>
+
+<pre><code class="language-js">
+const theme = useContextSelector(
+  AppContext,
+  value => value.theme
+);
+</code></pre>
+
+<h3>Cart Component</h3>
+
+<pre><code class="language-js">
+const cart = useContextSelector(
+  AppContext,
+  value => value.cart
+);
+</code></pre>
+
+<hr>
+
+<h2>What happens when cart changes?</h2>
+
+<table>
+
+<tr>
+<th>Component</th>
+<th>Selected Value</th>
+<th>Re-render?</th>
+</tr>
+
+<tr>
+<td>User Component</td>
+<td>user</td>
+<td>❌ No</td>
+</tr>
+
+<tr>
+<td>Theme Component</td>
+<td>theme</td>
+<td>❌ No</td>
+</tr>
+
+<tr>
+<td>Cart Component</td>
+<td>cart</td>
+<td>✅ Yes</td>
+</tr>
+
+</table>
+
+<hr>
+
+<h2>How does it work internally?</h2>
+
+<ol>
+
+<li>The Provider stores the Context value.</li>
+
+<li>Each consumer registers its selector function.</li>
+
+<li>When the Provider value changes, the library executes each selector.</li>
+
+<li>It compares the previous selected value with the new selected value using Object.is().</li>
+
+<li>If the selected value is unchanged, the component is not re-rendered.</li>
+
+<li>If the selected value changes, only that component re-renders.</li>
+
+</ol>
+
+<hr>
+
+<h2>Comparison</h2>
+
+<table>
+
+<tr>
+<th>useContext()</th>
+<th>use-context-selector</th>
+</tr>
+
+<tr>
+<td>Subscribes to entire Context</td>
+<td>Subscribes to selected value</td>
+</tr>
+
+<tr>
+<td>All consumers re-render</td>
+<td>Only affected consumers re-render</td>
+</tr>
+
+<tr>
+<td>Simple API</td>
+<td>Slightly more setup</td>
+</tr>
+
+<tr>
+<td>May cause unnecessary renders</td>
+<td>Avoids unnecessary renders</td>
+</tr>
+
+</table>
+
+<div class="note">
+<strong>Interview Tip:</strong><br><br>
+
+Normal <code>useContext()</code> subscribes to the entire Context object, so every consumer re-renders whenever the Provider value reference changes. The <code>use-context-selector</code> library lets each component subscribe only to the specific value it needs using a selector function. It compares the previously selected value with the new one using <code>Object.is()</code> and re-renders only the components whose selected value has changed.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+
+</body>
+</html>

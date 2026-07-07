@@ -1,0 +1,51 @@
+
+<!DOCTYPE html><html lang='en'><head><meta charset='UTF-8'><meta name='viewport' content='width=device-width,initial-scale=1.0'>
+<title>Context Selector Pattern - Complete Example</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+<style>body{margin:0;background:#000814;color:#e2e8f0;font-family:Arial}.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px}h1{color:#fff}h2{color:#c084fc}.highlight,.success{padding:16px;border-left:5px solid #38bdf8;background:#0f172a;margin:16px 0}.success{border-color:#22c55e;background:#052e16}pre{border-radius:10px}table{width:100%;border-collapse:collapse}td,th{border:1px solid #1e293b;padding:10px}th{background:#0f172a}</style></head><body><div class='container'>
+<h1>220. Context Selector Pattern - Complete Example</h1>
+<div class='highlight'>The Context Selector Pattern lets components subscribe only to the context value they need, preventing unnecessary re-renders.</div>
+<h2>Install</h2><pre><code class='language-bash'>npm install use-context-selector</code></pre>
+<h2>Folder Structure</h2><pre><code>src/
+├── App.js
+├── AppContext.js
+├── UserName.js
+├── ThemeButton.js
+├── CartCount.js
+└── index.js</code></pre>
+<h2>AppContext.js</h2><pre><code class='language-js'>import { createContext } from "use-context-selector";
+import { useState } from "react";
+
+export const AppContext=createContext(null);
+
+export function AppProvider({ children }){
+ const [user,setUser]=useState({name:"Rizwan",age:25});
+ const [theme,setTheme]=useState("Light");
+ const [cart,setCart]=useState([]);
+ 
+ return (
+    &lt;AppContext.Provider value={{user,setUser,theme,setTheme,cart,setCart}}&gt;
+        {children}
+    &lt;/AppContext.Provider&gt;);
+}</code></pre>
+<h2>UserName.js</h2><pre><code class='language-js'>const user=useContextSelector(AppContext,v=>v.user);
+return &lt;h2&gt;User : {user.name}&lt;/h2&gt;;</code></pre>
+<h2>ThemeButton.js</h2><pre><code class='language-js'>const theme=useContextSelector(AppContext,v=>v.theme);
+const setTheme=useContextSelector(AppContext,v=>v.setTheme);
+&lt;button onClick={()=&gt;setTheme(t=&gt;t==="Light"?"Dark":"Light")}&gt;Change Theme&lt;/button&gt;</code></pre>
+<h2>CartCount.js</h2><pre><code class='language-js'>const cart=useContextSelector(AppContext,v=>v.cart);
+const setCart=useContextSelector(AppContext,v=>v.setCart);
+&lt;button onClick={()=&gt;setCart(c=&gt;[...c,{id:Date.now(),name:"Laptop"}])}&gt;Add Item&lt;/button&gt;</code></pre>
+<h2>App.js</h2><pre><code class='language-js'>function App(){
+ return (
+    &lt;AppProvider&gt;
+        &lt;UserName/&gt;
+        &lt;ThemeButton/&gt;
+        &lt;CartCount/&gt;
+    &lt;/AppProvider&gt;);
+}</code></pre>
+<h2>index.js</h2><pre><code class='language-js'>import ReactDOM from "react-dom/client";
+ReactDOM.createRoot(document.getElementById("root")).render(&lt;App /&gt;);</code></pre>
+<h2>Render Behavior</h2><table><tr><th>Action</th><th>Component Re-rendered</th></tr><tr><td>Change Theme</td><td>ThemeButton only</td></tr><tr><td>Add Item</td><td>CartCount only</td></tr><tr><td>Update User</td><td>UserName only</td></tr></table>
+<div class='success'>Each component subscribes only to the slice of context it needs, improving performance.</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script></div></body></html>
