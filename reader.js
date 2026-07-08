@@ -349,6 +349,33 @@ function collectContent() {
 
         if (!text) return;
 
+        const isCodeBlock =
+            element.tagName.toLowerCase() === "pre";
+
+        if (isCodeBlock) {
+
+            // Code often has no periods/punctuation, so sentence
+            // splitting doesn't make sense here. Instead, announce
+            // clear start/end markers around the raw code text.
+            state.items.push({
+                element,
+                text: "Code block start"
+            });
+
+            state.items.push({
+                element,
+                text: text
+            });
+
+            state.items.push({
+                element,
+                text: "Code block end"
+            });
+
+            return;
+
+        }
+
         const sentences =
             text.match(/[^.!?]+[.!?]+|[^.!?]+$/g);
 
