@@ -640,14 +640,14 @@ function bindKeyboardShortcuts() {
         const tag = (e.target.tagName || "").toLowerCase();
         if (tag === "input" || tag === "select" || tag === "textarea") return;
 
-        // Space = Pause / Resume
+        // Space = Toggle Play / Pause / Resume
         if (e.code === "Space") {
 
             e.preventDefault();
 
-            if (!state.isPlaying) return;
-
-            if (state.isPaused) {
+            if (!state.isPlaying) {
+                playFromStart();
+            } else if (state.isPaused) {
                 resumeReading();
             } else {
                 pauseReading();
