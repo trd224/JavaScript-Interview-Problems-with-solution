@@ -54,7 +54,8 @@ let stopBtn;
 let prevBtn;
 let nextBtn;
 
-let voiceSelect;
+let voiceToggleBtn;
+let voicePanel;
 let speedSlider;
 
 let speedValue;
@@ -81,29 +82,34 @@ function injectStyles() {
     style.textContent = `
 
 .reader-toolbar{
-position:sticky;
-top:10px;
+position:fixed;
+top:0;
+left:0;
+bottom:0;
+width:60px;
 z-index:99999;
 display:flex;
-flex-wrap:wrap;
+flex-direction:column;
 align-items:center;
-gap:10px;
-padding:12px;
-margin-bottom:20px;
+gap:8px;
+padding:14px 6px;
 background:#0f172a;
-border:1px solid #1e293b;
-border-radius:10px;
-box-shadow:0 8px 20px rgba(0,0,0,.35);
+border-right:1px solid #1e293b;
+box-shadow:4px 0 20px rgba(0,0,0,.35);
+overflow-y:auto;
+box-sizing:border-box;
 }
 
 .reader-toolbar button{
+width:100%;
 background:#2563eb;
 color:#fff;
 border:none;
-padding:8px 16px;
+padding:8px 0;
 border-radius:6px;
 cursor:pointer;
-font-size:14px;
+font-size:16px;
+line-height:1;
 transition:.25s;
 }
 
@@ -117,31 +123,106 @@ cursor:not-allowed;
 opacity:.6;
 }
 
-.reader-toolbar select{
-padding:8px;
-background:#020617;
+.reader-dropdown{
+position:relative;
+width:100%;
+}
+
+.reader-dropdown-toggle{
+width:100%;
+background:#2563eb;
 color:#fff;
-border:1px solid #334155;
+border:none;
+padding:8px 0;
 border-radius:6px;
+cursor:pointer;
+font-size:16px;
+line-height:1;
+transition:.25s;
+}
+
+.reader-dropdown-toggle:hover{
+background:#1d4ed8;
+}
+
+.reader-dropdown-toggle.active{
+background:#1d4ed8;
+box-shadow:0 0 0 2px rgba(56,189,248,.5);
+}
+
+.reader-dropdown-panel{
+position:fixed;
+left:68px;
+min-width:240px;
+max-width:320px;
+max-height:60vh;
+overflow-y:auto;
+background:#0f172a;
+border:1px solid #1e293b;
+border-radius:10px;
+box-shadow:0 12px 30px rgba(0,0,0,.5);
+z-index:100000;
+padding:6px;
+display:none;
+}
+
+.reader-dropdown-panel.open{
+display:block;
+}
+
+.reader-voice-option{
+padding:9px 12px;
+border-radius:6px;
+font-size:14px;
+color:#e2e8f0;
+cursor:pointer;
+white-space:nowrap;
+overflow:hidden;
+text-overflow:ellipsis;
+transition:background .15s;
+}
+
+.reader-voice-option:hover{
+background:#1e293b;
+}
+
+.reader-voice-option.selected{
+background:#052e16;
+border-left:3px solid #22c55e;
+color:#bbf7d0;
 }
 
 .reader-toolbar input[type="range"]{
-width:120px;
+width:46px;
 cursor:pointer;
 }
 
 .reader-toolbar label{
 display:flex;
+flex-direction:column;
 align-items:center;
-gap:6px;
+gap:4px;
 font-size:14px;
-color:#fff;
+color:#94a3b8;
+width:100%;
+text-align:center;
+}
+
+.reader-toolbar hr{
+width:100%;
+border:none;
+border-top:1px solid #1e293b;
+margin:2px 0;
 }
 
 .reader-progress{
-margin-left:auto;
+margin-top:auto;
+padding-top:8px;
 font-weight:bold;
 color:#38bdf8;
+font-size:10px;
+text-align:center;
+line-height:1.3;
 }
 
 .reader-highlight{
@@ -162,6 +243,11 @@ border-radius:4px;
 background:rgba(56,189,248,.08);
 }
 
+body{
+padding-left:60px;
+box-sizing:border-box;
+}
+
 `;
 
     document.head.appendChild(style);
@@ -173,34 +259,41 @@ background:rgba(56,189,248,.08);
 
 function createToolbar() {
 
-    const container =
-        document.querySelector(".container") ||
-        document.body;
-
     toolbar = document.createElement("div");
 
     toolbar.className = "reader-toolbar";
 
     toolbar.innerHTML = `
-        <button id="readerPlay">▶ Play</button>
+        <button id="readerPlay" title="Play">▶</button>
 
-        <button id="readerPause">⏸ Pause</button>
+        <button id="readerPause" title="Pause">⏸</button>
 
-        <button id="readerResume">▶ Resume</button>
+        <button id="readerResume" title="Resume">↻</button>
 
-        <button id="readerStop">⏹ Stop</button>
+        <button id="readerStop" title="Stop">⏹</button>
 
-        <button id="readerPrev">⏮ Prev</button>
+        <button id="readerPrev" title="Previous">⏮</button>
 
-        <button id="readerNext">⏭ Next</button>
+        <button id="readerNext" title="Next">⏭</button>
 
-        <label>
-            Voice
-            <select id="readerVoice"></select>
-        </label>
+        <hr>
 
-        <label>
-            Speed
+        <div class="reader-dropdown" id="readerVoiceDropdown">
+            <button
+                id="readerVoiceToggle"
+                class="reader-dropdown-toggle"
+                title="Choose voice">
+                🗣️
+            </button>
+
+            <div
+                id="readerVoicePanel"
+                class="reader-dropdown-panel">
+            </div>
+        </div>
+
+        <label title="Speed">
+            ⚡
             <input
                 id="readerSpeed"
                 type="range"
@@ -208,20 +301,17 @@ function createToolbar() {
                 max="2"
                 step="0.1"
                 value="1">
+            <span id="readerSpeedValue">1x</span>
         </label>
-
-        <span id="readerSpeedValue">
-            1x
-        </span>
 
         <div class="reader-progress">
             <span id="readerProgress">
-                0 / 0
+                0/0
             </span>
         </div>
     `;
 
-    container.prepend(toolbar);
+    document.body.prepend(toolbar);
 
 }
 
@@ -243,7 +333,9 @@ function cacheControls() {
 
     nextBtn = document.getElementById("readerNext");
 
-    voiceSelect = document.getElementById("readerVoice");
+    voiceToggleBtn = document.getElementById("readerVoiceToggle");
+
+    voicePanel = document.getElementById("readerVoicePanel");
 
     speedSlider = document.getElementById("readerSpeed");
 
@@ -260,23 +352,68 @@ function loadVoices() {
 
     state.voices = speech.getVoices();
 
-    voiceSelect.innerHTML = "";
+    renderVoicePanel();
+
+    if (state.voices.length > 0 && !state.selectedVoice) {
+        state.selectedVoice = state.voices[0];
+    }
+
+}
+
+function renderVoicePanel() {
+
+    voicePanel.innerHTML = "";
 
     state.voices.forEach((voice, index) => {
 
-        const option = document.createElement("option");
+        const option = document.createElement("div");
 
-        option.value = index;
+        option.className = "reader-voice-option";
+
+        if (state.selectedVoice && voice.name === state.selectedVoice.name) {
+            option.classList.add("selected");
+        }
 
         option.textContent = `${voice.name} (${voice.lang})`;
 
-        voiceSelect.appendChild(option);
+        option.addEventListener("click", () => {
+
+            state.selectedVoice = state.voices[index];
+
+            renderVoicePanel();
+
+            closeVoicePanel();
+
+        });
+
+        voicePanel.appendChild(option);
 
     });
 
-    if (state.voices.length > 0) {
-        state.selectedVoice = state.voices[0];
-    }
+}
+
+function openVoicePanel() {
+
+    voicePanel.classList.add("open");
+
+    voiceToggleBtn.classList.add("active");
+
+    const rect = voiceToggleBtn.getBoundingClientRect();
+
+    const top = Math.min(
+        rect.top,
+        window.innerHeight - voicePanel.offsetHeight - 12
+    );
+
+    voicePanel.style.top = Math.max(top, 12) + "px";
+
+}
+
+function closeVoicePanel() {
+
+    voicePanel.classList.remove("open");
+
+    voiceToggleBtn.classList.remove("active");
 
 }
 
@@ -304,10 +441,31 @@ function bindToolbarEvents() {
 
     });
 
-    voiceSelect.addEventListener("change", () => {
+    voiceToggleBtn.addEventListener("click", (e) => {
 
-        state.selectedVoice =
-            state.voices[voiceSelect.selectedIndex];
+        e.stopPropagation();
+
+        if (voicePanel.classList.contains("open")) {
+            closeVoicePanel();
+        } else {
+            openVoicePanel();
+        }
+
+    });
+
+    document.addEventListener("click", (e) => {
+
+        if (!voicePanel.classList.contains("open")) return;
+
+        if (voicePanel.contains(e.target) || voiceToggleBtn.contains(e.target)) return;
+
+        closeVoicePanel();
+
+    });
+
+    document.addEventListener("keydown", (e) => {
+
+        if (e.key === "Escape") closeVoicePanel();
 
     });
 
