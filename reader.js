@@ -154,7 +154,7 @@ box-shadow:0 0 0 2px rgba(56,189,248,.5);
 position:fixed;
 left:68px;
 min-width:240px;
-max-width:320px;
+max-width:516px;
 max-height:60vh;
 overflow-y:auto;
 background:#0f172a;
@@ -339,14 +339,35 @@ function cacheControls() {
     Load Voices
 ====================================================*/
 
+function isNaturalVoice(voice) {
+
+    // Matches high-quality neural/online voices, e.g. Edge's
+    // "Microsoft Aria Online (Natural)" or Google WaveNet voices.
+    return /natural|neural|online|premium|enhanced|wavenet/i.test(voice.name);
+
+}
+
 function loadVoices() {
 
-    state.voices = speech.getVoices();
+    const rawVoices = speech.getVoices();
+
+    // Sort so natural-sounding voices appear first in the list
+    state.voices = rawVoices.slice().sort((a, b) => {
+        const aScore = isNaturalVoice(a) ? 0 : 1;
+        const bScore = isNaturalVoice(b) ? 0 : 1;
+        return aScore - bScore;
+    });
 
     renderVoicePanel();
 
     if (state.voices.length > 0 && !state.selectedVoice) {
-        state.selectedVoice = state.voices[0];
+
+        // Default to the best-sounding voice available rather than
+        // whatever happened to be first/alphabetical.
+        const bestVoice = state.voices.find(isNaturalVoice);
+
+        state.selectedVoice = bestVoice || state.voices[0];
+
     }
 
 }
@@ -365,7 +386,11 @@ function renderVoicePanel() {
             option.classList.add("selected");
         }
 
-        option.textContent = `${voice.name} (${voice.lang})`;
+        const label = isNaturalVoice(voice)
+            ? `(HD) ${voice.name} (${voice.lang})`
+            : `${voice.name} (${voice.lang})`;
+
+        option.textContent = label;
 
         option.addEventListener("click", () => {
 
