@@ -166,9 +166,7 @@ These client-side errors are usually not temporary, so retrying rarely helps.
 
 <pre><code class="language-javascript">import axios from 'axios';
 
-const api = axios.create({
-  baseURL: 'https://api.example.com'
-});
+const api = axios.create({ baseURL: 'https://api.example.com' });
 
 api.interceptors.response.use(
   response => response,
@@ -177,17 +175,13 @@ api.interceptors.response.use(
 
     if (!config) return Promise.reject(error);
 
-    config.retryCount = config.retryCount || 0;
+    config.retryCount ||= 0;
 
     const shouldRetry = !error.response || [500, 502, 503, 504].includes(error.response.status);
 
     if (shouldRetry && config.retryCount < 3) {
       config.retryCount++;
-
-      await new Promise(resolve =>
-        setTimeout(resolve, 1000)
-      );
-
+      await new Promise(resolve => setTimeout(resolve, 1000));
       return api(config);
     }
 
@@ -218,22 +212,12 @@ Send Request Again
 <pre><code class="language-javascript">import api from './api';
 
 async function getUsers() {
-
   try {
-
-    const response =
-      await api.get('/users');
-
-    return response.data;
-
+    const { data } = await api.get('/users');
+    return data;
   } catch (error) {
-
-    console.log(
-      'Request failed after retries'
-    );
-
+    console.log('Request failed after retries');
   }
-
 }</code></pre>
 
 <h2>Important Point</h2>
@@ -272,10 +256,7 @@ For POST requests, use idempotency keys when the backend supports them.
 </p>
 
 <pre><code class="language-javascript">api.post('/orders', orderData, {
-  headers: {
-    'Idempotency-Key':
-      uniqueRequestId
-  }
+  headers: { 'Idempotency-Key': uniqueRequestId }
 });</code></pre>
 
 <div class="success">
@@ -311,6 +292,7 @@ Retry logic automatically retries failed API requests using a retry count, delay
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+<script src="../../../reader.js"></script>
 
 </body>
 </html>

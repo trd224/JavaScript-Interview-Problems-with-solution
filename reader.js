@@ -153,6 +153,15 @@ box-shadow:0 0 0 1px rgba(34,197,94,.35), 0 6px 18px rgba(34,197,94,.25), 0 0 24
 transition:box-shadow .25s, background .25s, border-color .25s;
 }
 
+.reader-clickable{
+transition:background .2s;
+border-radius:4px;
+}
+
+.reader-clickable:hover{
+background:rgba(56,189,248,.08);
+}
+
 `;
 
     document.head.appendChild(style);
@@ -536,15 +545,9 @@ function goToPrev() {
 
     if (state.items.length === 0) return;
 
-    if (state.currentIndex > 0) {
-        state.currentIndex--;
-    }
+    const target = state.currentIndex > 0 ? state.currentIndex - 1 : 0;
 
-    state.isPlaying = true;
-
-    state.isPaused = false;
-
-    speakCurrent();
+    jumpToIndex(target);
 
 }
 
@@ -552,13 +555,7 @@ function goToNext() {
 
     if (state.items.length === 0) return;
 
-    state.currentIndex++;
-
-    state.isPlaying = true;
-
-    state.isPaused = false;
-
-    speakCurrent();
+    jumpToIndex(state.currentIndex + 1);
 
 }
 
@@ -588,25 +585,46 @@ function bindButtonActions() {
 
 function enableClickToRead() {
 
+    const seenElements = new Set();
+
     state.items.forEach((item, index) => {
+
+        // Only attach one click listener per element, even if that
+        // element contains multiple sentences. Without this, a
+        // paragraph with 3 sentences would get 3 competing click
+        // listeners firing back-to-back on click.
+        if (seenElements.has(item.element)) return;
+
+        seenElements.add(item.element);
+
+        item.element.classList.add("reader-clickable");
 
         item.element.style.cursor = "pointer";
 
         item.element.addEventListener("click", () => {
 
-            speech.cancel();
-
-            state.currentIndex = index;
-
-            state.isPlaying = true;
-
-            state.isPaused = false;
-
-            speakCurrent();
+            jumpToIndex(index);
 
         });
 
     });
+
+}
+
+function jumpToIndex(index) {
+
+    if (index < 0) return;
+
+    // Note: an index >= state.items.length is intentionally allowed
+    // through — speakCurrent() detects that and cleanly stops playback
+    // (used when Next is pressed on the very last item).
+    state.currentIndex = index;
+
+    state.isPlaying = true;
+
+    state.isPaused = false;
+
+    speakCurrent();
 
 }
 
