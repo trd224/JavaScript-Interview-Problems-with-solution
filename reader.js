@@ -630,6 +630,12 @@ function enableClickToRead() {
 
         item.element.addEventListener("click", () => {
 
+            const selection = window.getSelection();
+
+            // If the user has highlighted text (e.g. to copy it),
+            // don't hijack the click to jump playback.
+            if (selection && selection.toString().length > 0) return;
+
             jumpToIndex(index);
 
         });
