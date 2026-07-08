@@ -234,15 +234,6 @@ box-shadow:0 0 0 1px rgba(34,197,94,.35), 0 6px 18px rgba(34,197,94,.25), 0 0 24
 transition:box-shadow .25s, background .25s, border-color .25s;
 }
 
-.reader-clickable{
-transition:background .2s;
-border-radius:4px;
-}
-
-.reader-clickable:hover{
-background:rgba(56,189,248,.08);
-}
-
 body{
 padding-left:60px;
 box-sizing:border-box;
@@ -501,14 +492,22 @@ function collectContent() {
         // Skip anything inside the toolbar itself
         if (toolbar && toolbar.contains(element)) return;
 
-        const text = element.innerText
+        const rawText = element.innerText
             .replace(/\s+/g, " ")
             .trim();
 
-        if (!text) return;
+        if (!rawText) return;
 
         const isCodeBlock =
             element.tagName.toLowerCase() === "pre";
+
+        // Don't strip symbols from code (e.g. => syntax matters there),
+        // only from normal prose/headings/flow-diagram text.
+        const text = isCodeBlock
+            ? rawText
+            : cleanTextForSpeech(rawText);
+
+        if (!text) return;
 
         if (isCodeBlock) {
 
@@ -541,9 +540,13 @@ function collectContent() {
 
         sentences.forEach(sentence => {
 
+            const cleaned = sentence.trim();
+
+            if (!cleaned) return;
+
             state.items.push({
                 element,
-                text: sentence.trim()
+                text: cleaned
             });
 
         });
@@ -552,6 +555,30 @@ function collectContent() {
 
     progressLabel.textContent =
         `0 / ${state.items.length}`;
+
+}
+
+/*====================================================
+    Clean Text For Speech
+    (strips emoji, arrows, and other icon/symbol glyphs
+    so the voice never tries to read decorative characters)
+====================================================*/
+
+function cleanTextForSpeech(text) {
+
+    return text
+        // Emoji blocks (faces, objects, symbols, transport, etc.)
+        .replace(/[\u{1F000}-\u{1FFFF}]/gu, "")
+        // Misc symbols & dingbats (includes ▶ ⏸ ⏹ ⏮ ⏭ ✅ ❌ ⚡ etc.)
+        .replace(/[\u{2600}-\u{27BF}]/gu, "")
+        // Arrows (includes ↓ ↑ ← →)
+        .replace(/[\u{2190}-\u{21FF}]/gu, "")
+        // Misc symbols and arrows (supplemental block)
+        .replace(/[\u{2B00}-\u{2BFF}]/gu, "")
+        // Variation selectors & zero-width joiners used in emoji sequences
+        .replace(/[\u{FE0F}\u{200D}]/gu, "")
+        .replace(/\s+/g, " ")
+        .trim();
 
 }
 
@@ -825,6 +852,11 @@ function jumpToIndex(index) {
 
 function bindKeyboardShortcuts() {
 
+    const DOUBLE_TAP_MS = 400;
+
+    let lastRightArrowTime = 0;
+    let lastLeftArrowTime = 0;
+
     document.addEventListener("keydown", (e) => {
 
         // Ignore shortcuts while typing in inputs/selects
@@ -853,21 +885,179 @@ function bindKeyboardShortcuts() {
 
         }
 
-        // Right Arrow = Next
+        // Right Arrow = Next sentence/section
+        // Double-tap Right Arrow (within DOUBLE_TAP_MS) = jump to the next HTML page
         if (e.key === "ArrowRight") {
 
-            goToNext();
+            const now = Date.now();
+
+            if (now - lastRightArrowTime < DOUBLE_TAP_MS) {
+
+                lastRightArrowTime = 0;
+
+                navigateSiblingPage(1);
+
+            } else {
+
+                lastRightArrowTime = now;
+
+                goToNext();
+
+            }
 
         }
 
-        // Left Arrow = Prev
+        // Left Arrow = Prev sentence/section
+        // Double-tap Left Arrow (within DOUBLE_TAP_MS) = jump to the previous HTML page
         if (e.key === "ArrowLeft") {
 
-            goToPrev();
+            const now = Date.now();
+
+            if (now - lastLeftArrowTime < DOUBLE_TAP_MS) {
+
+                lastLeftArrowTime = 0;
+
+                navigateSiblingPage(-1);
+
+            } else {
+
+                lastLeftArrowTime = now;
+
+                goToPrev();
+
+            }
 
         }
 
     });
+
+}
+
+/*====================================================
+    Sibling Page Navigation
+    (double-tap Left/Right jumps between HTML files)
+
+    Preferred method: the page defines window.READER_PAGES,
+    an ordered array of filenames, e.g.:
+
+        <script>
+        window.READER_PAGES = [
+            "241 - What is Infinite Query (useInfiniteQuery).html",
+            "242 - Next Topic.html",
+            "243 - Another Topic.html"
+        ];
+        </script>
+
+    ...placed BEFORE <script src="reader.js"> in every page.
+    This works no matter how the files are opened (file://,
+    a static server, etc.) since it needs no network request.
+
+    Fallback method: if no manifest is defined, we try fetching
+    the parent folder URL and parsing it as a directory listing.
+    This only works when the files are served (not opened via
+    file://) by something that exposes a raw folder index
+    (e.g. `python -m http.server`).
+====================================================*/
+
+async function navigateSiblingPage(direction) {
+
+    const currentFile =
+        decodeURIComponent(window.location.pathname.split("/").pop());
+
+    const dirPath = window.location.pathname
+        .substring(0, window.location.pathname.lastIndexOf("/") + 1);
+
+    // --- Preferred: explicit manifest on the page ---
+    if (Array.isArray(window.READER_PAGES) && window.READER_PAGES.length > 0) {
+
+        const files = window.READER_PAGES;
+
+        const currentIndex = files.findIndex(f =>
+            f === currentFile || decodeURIComponent(f) === currentFile
+        );
+
+        if (currentIndex === -1) {
+            flashProgressMessage("Current page not in READER_PAGES");
+            return;
+        }
+
+        const targetIndex = currentIndex + direction;
+
+        if (targetIndex < 0 || targetIndex >= files.length) {
+            flashProgressMessage(direction > 0 ? "No next page" : "No previous page");
+            return;
+        }
+
+        speech.cancel();
+
+        window.location.href = dirPath + files[targetIndex];
+
+        return;
+
+    }
+
+    // --- Fallback: try to read a server-provided directory listing ---
+    try {
+
+        const res = await fetch(dirPath);
+
+        if (!res.ok) throw new Error("Directory listing not available");
+
+        const html = await res.text();
+
+        const parser = new DOMParser();
+
+        const doc = parser.parseFromString(html, "text/html");
+
+        const links = Array.from(doc.querySelectorAll("a"))
+            .map(a => decodeURIComponent(a.getAttribute("href") || ""))
+            .filter(href => href.toLowerCase().endsWith(".html"));
+
+        const files = Array.from(new Set(links)).sort((a, b) =>
+            a.localeCompare(b, undefined, { numeric: true, sensitivity: "base" })
+        );
+
+        const currentIndex = files.findIndex(f =>
+            f === currentFile || f.endsWith("/" + currentFile)
+        );
+
+        if (currentIndex === -1) {
+            flashProgressMessage("Page not found in folder");
+            return;
+        }
+
+        const targetIndex = currentIndex + direction;
+
+        if (targetIndex < 0 || targetIndex >= files.length) {
+            flashProgressMessage(direction > 0 ? "No next page" : "No previous page");
+            return;
+        }
+
+        speech.cancel();
+
+        window.location.href = dirPath + files[targetIndex];
+
+    } catch (err) {
+
+        console.warn("Reader: page navigation unavailable —", err.message);
+
+        flashProgressMessage("Page navigation unavailable");
+
+    }
+
+}
+
+function flashProgressMessage(message) {
+
+    if (!progressLabel) return;
+
+    const original = progressLabel.textContent;
+
+    progressLabel.textContent = message;
+
+    setTimeout(() => {
+        progressLabel.textContent = original;
+    }, 1600);
 
 }
 
