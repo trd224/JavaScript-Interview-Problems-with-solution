@@ -100,6 +100,95 @@ export const router=createBrowserRouter([
   }
 ]);</code></pre>
 
+<h2>Where Is App.jsx In The New Router?</h2>
+
+<p>
+In the Data Router API, App.jsx is usually not rendered directly inside main.jsx.
+</p>
+
+<p>
+Instead, RouterProvider renders the route tree defined in createBrowserRouter().
+</p>
+
+<div class="file-name">Traditional Flow</div>
+
+<div class="flow">
+root
+<br>↓
+App
+<br>↓
+Routes
+<br>↓
+Pages
+</div>
+
+<div class="file-name">Data Router Flow</div>
+
+<div class="flow">
+root
+<br>↓
+RouterProvider
+<br>↓
+router
+<br>↓
+Route Components
+</div>
+
+<div class="highlight">
+With the Data Router API, App.jsx is commonly used as a Layout Route instead of being rendered directly from main.jsx.
+</div>
+
+<div class="file-name">App.jsx</div>
+
+<pre><code class="language-jsx">import { Outlet } from 'react-router-dom';
+
+function App() {
+  return (
+    &lt;&gt;
+      &lt;h1&gt;My App&lt;/h1&gt;
+      &lt;Outlet /&gt;
+    &lt;/&gt;
+  );
+}
+
+export default App;</code></pre>
+
+<div class="file-name">router.jsx</div>
+
+<pre><code class="language-jsx">import { createBrowserRouter } from 'react-router-dom';
+import App from './App';
+import Home from './pages/Home';
+import Login from './pages/Login';
+
+export const router = createBrowserRouter([
+  {
+    path: '/',
+    element: &lt;App /&gt;,
+    children: [
+      { index: true, element: &lt;Home /&gt; },
+      { path: 'login', element: &lt;Login /&gt; }
+    ]
+  }
+]);</code></pre>
+
+<h3>How Rendering Works</h3>
+
+<div class="flow">
+root
+<br>↓
+RouterProvider
+<br>↓
+App (Layout Route)
+<br>↓
+Outlet
+<br>↓
+Home / Login / Products
+</div>
+
+<div class="success">
+In React Router v6.4+, App.jsx is typically a layout component rendered by the router configuration, while RouterProvider replaces BrowserRouter as the application's router entry point.
+</div>
+
 <h2>AppLayout Means Main Layout</h2>
 
 <div class="file-name">AppLayout.jsx</div>
