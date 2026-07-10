@@ -142,17 +142,7 @@ function LoginForm() {
       &lt;input placeholder="Email" {...register('email', { required: 'Email is required' })} /&gt;
       {errors.email && &lt;p&gt;{errors.email.message}&lt;/p&gt;}
 
-      &lt;input
-        type="password"
-        placeholder="Password"
-        {...register('password', {
-          required: 'Password is required',
-          minLength: {
-            value: 6,
-            message: 'Minimum 6 characters'
-          }
-        })}
-      /&gt;
+      &lt;input type="password" placeholder="Password" {...register('password', { required: 'Password is required', minLength: { value: 6, message: 'Minimum 6 characters' } })} /&gt;
 
       {errors.password && &lt;p&gt;{errors.password.message}&lt;/p&gt;}
 
@@ -197,7 +187,7 @@ function onSubmit(data) {
 After successful submission all fields become empty.
 </p>
 
-<h2>Step 5 - Watch Field Values</h2>
+<!-- <h2>Step 5 - Watch Field Values</h2>
 
 <div class="file-name">File: src/components/LoginForm.jsx</div>
 
@@ -209,7 +199,58 @@ console.log(email);</code></pre>
 
 <p>
 watch() tracks field changes in real time.
+</p> -->
+
+<h2>Step 5 - Watch Field Values</h2>
+
+<div class="file-name">File: src/components/LoginForm.jsx</div>
+
+<pre><code class="language-jsx">const { register, watch } = useForm();
+
+const email = watch('email');
+
+console.log(email);</code></pre>
+
+<p>
+watch() allows us to monitor field values in real time.
 </p>
+
+<p>
+Whenever the value of the email field changes, watch('email') returns the latest value.
+</p>
+
+<p>
+For example, if the user types:
+</p>
+
+<pre><code class="language-text">r
+ri
+riz
+rizwan@gmail.com</code></pre>
+
+<p>
+console.log(email) will output the latest value after each keystroke.
+</p>
+
+<div class="highlight">
+watch('email') returns the current value of the email field and updates whenever the user types.
+</div>
+
+<p>
+watch() is commonly used for live previews, password confirmation, conditional rendering, and displaying form values before submission.
+</p>
+
+<!-- <h2>Step 6 - Set Value Programmatically</h2>
+
+<div class="file-name">File: src/components/LoginForm.jsx</div>
+
+<pre><code class="language-jsx">const { register, setValue } = useForm();
+
+setValue('email', 'rizwan@gmail.com');</code></pre>
+
+<p>
+Useful when loading data from APIs.
+</p> -->
 
 <h2>Step 6 - Set Value Programmatically</h2>
 
@@ -220,8 +261,73 @@ watch() tracks field changes in real time.
 setValue('email', 'rizwan@gmail.com');</code></pre>
 
 <p>
-Useful when loading data from APIs.
+setValue() allows us to update a form field value programmatically.
 </p>
+
+<p>
+The first argument is the field name and the second argument is the value to assign.
+</p>
+
+<div class="flow">
+setValue()
+<br>↓<br>
+Update Field Value
+<br>↓<br>
+React Hook Form State Updated
+<br>↓<br>
+Input Displays New Value
+</div>
+
+<h3>Example</h3>
+
+<div class="file-name">File: src/components/LoginForm.jsx</div>
+
+<pre><code class="language-jsx">import { useForm } from 'react-hook-form';
+
+function LoginForm() {
+  const { register, setValue } = useForm();
+
+  return (
+    &lt;div&gt;
+      &lt;input placeholder="Email" {...register('email')} /&gt;
+
+      &lt;button
+        type="button"
+        onClick={() => setValue('email', 'rizwan@gmail.com')}
+      &gt;
+        Fill Email
+      &lt;/button&gt;
+    &lt;/div&gt;
+  );
+}
+
+export default LoginForm;</code></pre>
+
+<p>
+When the button is clicked, the email field is automatically populated with:
+</p>
+
+<pre><code class="language-text">rizwan@gmail.com</code></pre>
+
+<h3>Common Use Cases</h3>
+
+<ul>
+<li>Loading data from APIs</li>
+<li>Editing existing records</li>
+<li>Prefilling forms</li>
+<li>Auto-filling user information</li>
+<li>Setting default values after user actions</li>
+</ul>
+
+<div class="success">
+setValue() updates a field without requiring the user to type into the input.
+</div>
+
+<h3>One-Line Interview Answer</h3>
+
+<div class="highlight">
+setValue() is a React Hook Form method that allows us to update form field values programmatically.
+</div>
 
 <h2>Most Common Methods</h2>
 

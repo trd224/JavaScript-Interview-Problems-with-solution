@@ -112,6 +112,11 @@ function LoginForm() {
 }
 
 export default LoginForm;</code></pre>
+<h2>Submitted Data</h2>
+<pre><code class="language-js">{
+  email: 'rizwan@gmail.com',
+  password: '123456'
+}</code></pre>
 
 <h2>How It Works</h2>
 
@@ -181,6 +186,75 @@ register():
 <li>Collects form data</li>
 </ul>
 
+<h2>Why Do We Use {...register('email')}?</h2>
+
+<p>
+The <strong>...</strong> syntax is the JavaScript spread operator.
+</p>
+
+<p>
+The <strong>register('email')</strong> function returns an object containing the properties React Hook Form needs to connect the input field with the form.
+</p>
+
+<pre><code class="language-js">register('email');
+</code></pre>
+
+<p>
+Returns something similar to:
+</p>
+
+<pre><code class="language-js">{
+  name: 'email',
+  onChange: handleChange,
+  onBlur: handleBlur,
+  ref: inputRef
+}
+</code></pre>
+
+<p>
+Using the spread operator:
+</p>
+
+<pre><code class="language-jsx">&lt;input {...register('email')} /&gt;
+</code></pre>
+
+<p>
+is equivalent to:
+</p>
+
+<pre><code class="language-jsx">&lt;input
+  name="email"
+  onChange={handleChange}
+  onBlur={handleBlur}
+  ref={inputRef}
+/&gt;
+</code></pre>
+
+<div class="highlight">
+The spread operator automatically passes all properties returned by register() to the input, making the code shorter and easier to maintain.
+</div>
+
+<h3>Without Spread Operator</h3>
+
+<pre><code class="language-jsx">const field = register('email');
+
+&lt;input
+  name={field.name}
+  onChange={field.onChange}
+  onBlur={field.onBlur}
+  ref={field.ref}
+/&gt;
+</code></pre>
+
+<h3>With Spread Operator</h3>
+
+<pre><code class="language-jsx">&lt;input {...register('email')} /&gt;
+</code></pre>
+
+<div class="success">
+React Hook Form uses the spread operator so all required field properties can be attached to the input with a single line of code.
+</div>
+
 <h2>Validation Example</h2>
 
 <div class="file-name">File: src/components/LoginForm.jsx</div>
@@ -198,6 +272,10 @@ function LoginForm() {
     &lt;form onSubmit={handleSubmit(onSubmit)}&gt;
       &lt;input placeholder="Email" {...register('email', { required: 'Email is required' })} /&gt;
       {errors.email && &lt;p&gt;{errors.email.message}&lt;/p&gt;}
+
+      &lt;input type="password" placeholder="Password" {...register('password', { required: 'Password is required' })} /&gt;
+      {errors.password && &lt;p&gt;{errors.password.message}&lt;/p&gt;}
+
       &lt;button type="submit"&gt;Submit&lt;/button&gt;
     &lt;/form&gt;
   );

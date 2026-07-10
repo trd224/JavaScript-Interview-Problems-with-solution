@@ -137,6 +137,73 @@ Waits For Promise
 Updates UI
 </div>
 
+<h2>Where Does formData Come From?</h2>
+
+<p>
+Many developers wonder where the <code>formData</code> parameter comes from because it is never created manually.
+</p>
+
+<div class="highlight">
+When a form using a React 19 Form Action is submitted, React automatically creates a <code>FormData</code> object from the form fields and passes it as the first argument to the action function.
+</div>
+
+<div class="file-name">React Automatically Provides FormData</div>
+
+<pre class="language-jsx"><code class="language-jsx">async function saveUser(formData){
+
+  const email=formData.get('email');
+
+  console.log(email);
+
+}
+
+function SignupForm(){
+
+  return (
+    &lt;form action={saveUser}&gt;
+      &lt;input name="email"/&gt;
+      &lt;button&gt;Save&lt;/button&gt;
+    &lt;/form&gt;
+  );
+
+}</code></pre>
+
+<p>
+Internally, React performs something similar to:
+</p>
+
+<div class="file-name">Conceptual Example</div>
+
+<pre class="language-jsx"><code class="language-jsx">const formData = new FormData(formElement);
+
+saveUser(formData);</code></pre>
+
+<div class="success">
+No need to call <code>new FormData()</code>. React automatically collects all form fields and passes the resulting FormData object to the action function.
+</div>
+
+<h3>Accessing Field Values</h3>
+
+<pre class="language-jsx"><code class="language-jsx">async function saveUser(formData){
+
+  const email = formData.get('email');
+
+  const password = formData.get('password');
+
+}</code></pre>
+
+<div class="flow">
+User Submits Form
+<br>↓
+React Creates FormData
+<br>↓
+Collects Input Values
+<br>↓
+Calls Action Function
+<br>↓
+saveUser(formData)
+</div>
+
 <h2>Real-World Example</h2>
 
 <p>
@@ -229,8 +296,7 @@ async function createUser(prevState,formData){
 
 export default function SignupForm(){
 
-  const [message,formAction]=
-    useActionState(createUser,'');
+  const [message,formAction] = useActionState(createUser,'');
 
   return (
     &lt;form action={formAction}&gt;
