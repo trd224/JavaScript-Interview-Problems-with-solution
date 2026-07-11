@@ -1,0 +1,103 @@
+
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>220 - What is the Context Selector Pattern?</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+<style>
+body{margin:0;padding:0;background:#000814;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.7}
+.container{max-width:1000px;margin:40px auto;background:#020617;padding:40px;border-radius:18px;border:1px solid #0f172a;box-shadow:0 0 40px rgba(0,0,0,.95)}
+h1{color:#f8fafc;margin-bottom:30px;font-size:34px}
+h2{color:#c084fc;margin-top:35px;margin-bottom:15px;font-size:26px}
+h3{color:#38bdf8;margin-top:25px;margin-bottom:10px}
+p{color:#cbd5e1}
+ul{padding-left:24px}
+li{margin-bottom:10px;color:#cbd5e1}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+table th,table td{border:1px solid #1e293b;padding:14px;text-align:left;vertical-align:top}
+table th{background:#0f172a;color:#38bdf8}
+table td{background:#020617;color:#d1d5db}
+.highlight{background:#0f172a;padding:18px;border-left:5px solid #38bdf8;border-radius:10px;margin-top:15px}
+.warning{background:#3b0820;border-left:5px solid #ef4444;padding:18px;border-radius:10px;margin-top:15px}
+.success{background:#052e16;padding:18px;border-left:5px solid #22c55e;border-radius:10px;margin-top:15px}
+.flow{background:#020617;border:1px solid #1e293b;padding:20px;border-radius:10px;margin-top:15px;text-align:center;line-height:2;font-size:18px}
+pre{border-radius:12px;overflow-x:auto}
+</style>
+</head><body><div class="container">
+<h1>220. What is the Context Selector Pattern?</h1>
+<h2>One-Line Definition</h2>
+<div class="highlight">The Context Selector Pattern is a React optimization pattern that allows a component to subscribe only to the specific part of a Context value it needs, preventing unnecessary re-renders.</div>
+
+<h2>Why Do We Need It?</h2>
+<p>Normally, whenever a Context value changes, every component using <code>useContext()</code> re-renders even if it only needs one property.</p>
+
+<pre><code class="language-js">const AppContext = createContext();
+
+function UserName() {
+  const { user } = useContext(AppContext);
+  return &lt;h1&gt;{user.name}&lt;/h1&gt;;
+}
+
+function ThemeButton() {
+  const { theme } = useContext(AppContext);
+  return &lt;button&gt;{theme}&lt;/button&gt;;
+}</code></pre>
+
+<div class="warning">If only <b>theme</b> changes, both components re-render because React tracks the entire context value.</div>
+
+<h2>Context Selector Pattern</h2>
+<div class="flow">
+Context<br>├── user<br>├── theme<br>└── cart<br><br>
+UserName → user only<br>
+ThemeButton → theme only<br>
+CartCount → cart only
+</div>
+
+<ul>
+<li>Changing <b>theme</b> re-renders only ThemeButton.</li>
+<li>Changing <b>user</b> re-renders only UserName.</li>
+<li>Changing <b>cart</b> re-renders only CartCount.</li>
+</ul>
+
+<h2>Using use-context-selector</h2>
+<pre><code class="language-bash">npm install use-context-selector</code></pre>
+
+<pre><code class="language-js">// import { createContext } from 'react';
+import { createContext, useContextSelector } from "use-context-selector"; 
+
+const AppContext = createContext(null);
+
+function UserName() {
+  const user = useContextSelector(AppContext, value => value.user);
+  return &lt;h1&gt;{user.name}&lt;/h1&gt;;
+}
+
+function ThemeButton() {
+  const theme = useContextSelector(AppContext, value => value.theme);
+  return &lt;button&gt;{theme}&lt;/button&gt;;
+}</code></pre>
+
+<h2>Comparison</h2>
+<table>
+<tr><th>useContext()</th><th>Context Selector</th></tr>
+<tr><td>Subscribes to entire context</td><td>Subscribes only to selected value</td></tr>
+<tr><td>All consumers re-render</td><td>Only affected consumers re-render</td></tr>
+<tr><td>Built into React</td><td>Uses selector implementation</td></tr>
+</table>
+
+<h2>When Should You Use It?</h2>
+<ul>
+<li>Large contexts with many values.</li>
+<li>Different components need different data.</li>
+<li>Frequent updates cause unnecessary re-renders.</li>
+<li>Performance optimization is important.</li>
+</ul>
+
+<div class="success">Example: If a context contains user, theme, notifications, cart, and language, changing only <b>cart</b> re-renders only the CartBadge component.</div>
+
+<h2>One-Line Interview Answer</h2>
+<div class="highlight">The Context Selector Pattern lets components subscribe only to the specific context value they need, reducing unnecessary re-renders and improving performance.</div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+</body></html>

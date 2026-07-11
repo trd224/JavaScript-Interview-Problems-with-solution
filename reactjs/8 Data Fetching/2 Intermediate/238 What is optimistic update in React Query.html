@@ -207,46 +207,21 @@ const addTodoMutation = useMutation({
   mutationFn: addTodo,
 
   onMutate: async (newTodo) => {
+    await queryClient.cancelQueries({ queryKey: ['todos'] });
 
-    await queryClient.cancelQueries({
-      queryKey: ['todos']
-    });
+    const previousTodos = queryClient.getQueryData(['todos']);
 
-    const previousTodos =
-      queryClient.getQueryData(['todos']);
+    queryClient.setQueryData(['todos'], (old = []) => [...old, newTodo]);
 
-    queryClient.setQueryData(
-      ['todos'],
-      (old = []) => [
-        ...old,
-        newTodo
-      ]
-    );
-
-    return {
-      previousTodos
-    };
+    return { previousTodos };
   },
 
-  onError: (
-    error,
-    newTodo,
-    context
-  ) => {
-
-    queryClient.setQueryData(
-      ['todos'],
-      context.previousTodos
-    );
-
+  onError: (error, newTodo, context) => {
+    queryClient.setQueryData(['todos'], context.previousTodos);
   },
 
   onSettled: () => {
-
-    queryClient.invalidateQueries({
-      queryKey: ['todos']
-    });
-
+    queryClient.invalidateQueries({ queryKey: ['todos'] });
   }
 });</code></pre>
 
@@ -264,13 +239,7 @@ onMutate Runs
 
 <h3>Step 2 - Update Cache Immediately</h3>
 
-<pre><code class="language-js">queryClient.setQueryData(
-  ['todos'],
-  (old = []) => [
-    ...old,
-    newTodo
-  ]
-);</code></pre>
+<pre><code class="language-js">queryClient.setQueryData(['todos'], (old = []) => [...old, newTodo]);</code></pre>
 
 <p>
 UI updates instantly.
@@ -302,10 +271,7 @@ Nothing special needed. UI already shows the new item.
 React Query restores previous data:
 </p>
 
-<pre><code class="language-js">queryClient.setQueryData(
-  ['todos'],
-  context.previousTodos
-);</code></pre>
+<pre><code class="language-js">queryClient.setQueryData(['todos'], context.previousTodos);</code></pre>
 
 <div class="warning">
 This is called rollback.

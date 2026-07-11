@@ -161,6 +161,10 @@ Old items are removed and new items are rendered.
 </p>
 
 <div class="success">
+The important thing is that a single scroll does NOT replace the entire visible list. It only updates the items affected by the scroll.
+</div>
+
+<div class="success">
 The DOM stays small regardless of how many items exist.
 </div>
 
@@ -257,68 +261,37 @@ The most common virtualization library is:
 
 <pre><code class="language-jsx">import { FixedSizeList } from 'react-window';
 
-const products = Array.from(
-  { length: 50000 },
-  (_, index) =&gt; ({
-    id: index + 1,
-    name: `Product ${index + 1}`,
-    price: Math.floor(Math.random() * 10000)
-  })
-);
+const products = Array.from({ length: 50000 }, (_, index) =&gt; ({
+  id: index + 1,
+  name: `Product ${index + 1}`,
+  price: Math.floor(Math.random() * 10000)
+}));
 
 function ProductRow({ index, style }) {
-
   const product = products[index];
 
   return (
-
-    &lt;div
-      style={{
-        ...style,
-        padding: '10px',
-        borderBottom: '1px solid #ddd',
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center'
-      }}
-    &gt;
-
+    &lt;div style={{ ...style, padding: '10px', borderBottom: '1px solid #ddd', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}&gt;
       &lt;span&gt;{product.name}&lt;/span&gt;
-
       &lt;strong&gt;₹{product.price}&lt;/strong&gt;
-
     &lt;/div&gt;
-
   );
-
 }
 
-function App() {
-
+export default function App() {
   return (
-
     &lt;div&gt;
-
       &lt;h2&gt;Products ({products.length})&lt;/h2&gt;
 
-      &lt;FixedSizeList
-        height={500}
-        width={800}
-        itemCount={products.length}
-        itemSize={60}
-      &gt;
-
+      &lt;FixedSizeList height={500} width={800} itemCount={products.length} itemSize={60}&gt;
         {ProductRow}
-
       &lt;/FixedSizeList&gt;
 
     &lt;/div&gt;
-
   );
+}</code></pre>
 
-}
-
-export default App;</code></pre>
+<p>The style prop is provided automatically by react-window. You never create it yourself.</p>
 
 <h2>What Happens Internally?</h2>
 

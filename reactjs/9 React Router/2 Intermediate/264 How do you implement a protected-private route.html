@@ -82,9 +82,7 @@ File: src/components/ProtectedRoute.jsx
 function ProtectedRoute({ children }) {
   const isAuthenticated = localStorage.getItem('token');
 
-  return isAuthenticated
-    ? children
-    : &lt;Navigate to="/login" replace /&gt;;
+  return isAuthenticated ? children : &lt;Navigate to="/login" replace /&gt;;
 }
 
 export default ProtectedRoute;</code></pre>
@@ -123,11 +121,14 @@ export default Dashboard;</code></pre>
 File: src/pages/Login.jsx
 </div>
 
-<pre><code class="language-jsx">function Login() {
+<pre><code class="language-jsx">import { useNavigate } from 'react-router-dom';
+
+function Login() {
+  const navigate = useNavigate();
 
   function handleLogin() {
     localStorage.setItem('token', 'abc123');
-    window.location.href = '/dashboard';
+    navigate('/dashboard');
   }
 
   return (
@@ -150,7 +151,6 @@ File: src/App.jsx
 </div>
 
 <pre><code class="language-jsx">import { BrowserRouter, Routes, Route } from 'react-router-dom';
-
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
@@ -160,20 +160,9 @@ function App() {
   return (
     &lt;BrowserRouter&gt;
       &lt;Routes&gt;
-
         &lt;Route path="/" element={&lt;Home /&gt;} /&gt;
-
         &lt;Route path="/login" element={&lt;Login /&gt;} /&gt;
-
-        &lt;Route
-          path="/dashboard"
-          element={
-            &lt;ProtectedRoute&gt;
-              &lt;Dashboard /&gt;
-            &lt;/ProtectedRoute&gt;
-          }
-        /&gt;
-
+        &lt;Route path="/dashboard" element={&lt;ProtectedRoute&gt;&lt;Dashboard /&gt;&lt;/ProtectedRoute&gt;} /&gt;
       &lt;/Routes&gt;
     &lt;/BrowserRouter&gt;
   );
@@ -261,9 +250,7 @@ import { useAuth } from '../context/AuthContext';
 function ProtectedRoute({ children }) {
   const { user } = useAuth();
 
-  return user
-    ? children
-    : &lt;Navigate to="/login" replace /&gt;;
+  return user ? children : &lt;Navigate to="/login" replace /&gt;;
 }
 
 export default ProtectedRoute;</code></pre>

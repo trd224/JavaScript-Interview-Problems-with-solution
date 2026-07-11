@@ -242,8 +242,7 @@ The new message may not be included in the height calculation.
 
   });
 
-  listRef.current.scrollTop =
-    listRef.current.scrollHeight;
+  listRef.current.scrollTop = listRef.current.scrollHeight;
 
 }</code></pre>
 
@@ -259,6 +258,115 @@ Then scrolling happens.
 The scroll calculation uses the latest DOM.
 </div>
 
+<h2>Understanding scrollTop and scrollHeight</h2>
+
+<p>
+The following line is what actually scrolls the container to the bottom:
+</p>
+
+<pre><code class="language-jsx">listRef.current.scrollTop = listRef.current.scrollHeight;</code></pre>
+
+<h3>What does each part mean?</h3>
+
+<table>
+<tr>
+<th>Property</th>
+<th>Description</th>
+</tr>
+
+<tr>
+<td><code>listRef.current</code></td>
+<td>References the actual DOM element (for example, the messages container).</td>
+</tr>
+
+<tr>
+<td><code>scrollTop</code></td>
+<td>The current vertical scroll position of the element.</td>
+</tr>
+
+<tr>
+<td><code>scrollHeight</code></td>
+<td>The total height of all the content inside the element, including the part that is not currently visible.</td>
+</tr>
+</table>
+
+<p>
+When we write:
+</p>
+
+<pre><code class="language-jsx">listRef.current.scrollTop = listRef.current.scrollHeight;</code></pre>
+
+<p>
+we set the current scroll position equal to the total content height, causing the container to scroll all the way to the bottom.
+</p>
+
+<h3>Example</h3>
+
+<pre><code class="language-jsx">&lt;div
+  ref={listRef}
+  style={{
+    height: '150px',
+    overflowY: 'auto'
+  }}
+&gt;
+  {/* Messages */}
+&lt;/div&gt;</code></pre>
+
+<p>
+Suppose:
+</p>
+
+<ul>
+<li>Visible height (<code>clientHeight</code>) = <strong>150px</strong></li>
+<li>Total content height (<code>scrollHeight</code>) = <strong>800px</strong></li>
+</ul>
+
+<p>
+Initially:
+</p>
+
+<pre><code>scrollTop = 0</code></pre>
+
+<div class="flow">
+Top of List
+<br><br>
+Message 1
+<br>
+Message 2
+<br>
+Message 3
+</div>
+
+<p>
+After executing:
+</p>
+
+<pre><code class="language-jsx">listRef.current.scrollTop = listRef.current.scrollHeight;</code></pre>
+
+<p>
+The scroll position moves to the bottom of the container.
+</p>
+
+<pre><code>scrollTop = 800</code></pre>
+
+<div class="flow">
+Bottom of List
+<br><br>
+Message 28
+<br>
+Message 29
+<br>
+Message 30
+</div>
+
+<div class="success">
+This is why chat applications automatically show the newest message whenever one is added.
+</div>
+
+<div class="warning">
+Without <code>flushSync</code>, React may not have rendered the new message yet, so <code>scrollHeight</code> may still represent the old content height. Using <code>flushSync</code> ensures the DOM is updated before the scroll calculation runs.
+</div>
+
 <h2>Another Example - Measuring DOM Size</h2>
 
 <pre><code class="language-jsx">flushSync(() => {
@@ -267,8 +375,7 @@ The scroll calculation uses the latest DOM.
 
 });
 
-const height =
-  modalRef.current.offsetHeight;</code></pre>
+const height = modalRef.current.offsetHeight;</code></pre>
 
 <p>
 Without flushSync:

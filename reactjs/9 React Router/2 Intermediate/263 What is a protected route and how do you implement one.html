@@ -111,20 +111,9 @@ function App() {
   return (
     &lt;BrowserRouter&gt;
       &lt;Routes&gt;
-
         &lt;Route path="/" element={&lt;Home /&gt;} /&gt;
-
         &lt;Route path="/login" element={&lt;Login /&gt;} /&gt;
-
-        &lt;Route
-          path="/dashboard"
-          element={
-            &lt;ProtectedRoute&gt;
-              &lt;Dashboard /&gt;
-            &lt;/ProtectedRoute&gt;
-          }
-        /&gt;
-
+        &lt;Route path="/dashboard" element={&lt;ProtectedRoute&gt;&lt;Dashboard /&gt;&lt;/ProtectedRoute&gt;} /&gt;
       &lt;/Routes&gt;
     &lt;/BrowserRouter&gt;
   );
@@ -154,11 +143,14 @@ export default ProtectedRoute;</code></pre>
 File: src/pages/Login.jsx
 </div>
 
-<pre><code class="language-jsx">function Login() {
+<pre><code class="language-jsx">import { useNavigate } from 'react-router-dom';
+
+function Login() {
+  const navigate = useNavigate();
 
   function handleLogin() {
     localStorage.setItem('token', 'abc123');
-    window.location.href = '/dashboard';
+    navigate('/dashboard');
   }
 
   return (
@@ -173,6 +165,8 @@ File: src/pages/Login.jsx
 }
 
 export default Login;</code></pre>
+
+<p>Navigation is a side effect but Navigation From User Action (No useEffect Needed)</p>
 
 <div class="file-name">
 File: src/pages/Dashboard.jsx
@@ -216,6 +210,127 @@ Not Logged In
 
 <div class="success">
 Navigate is the modern replacement for Redirect in React Router v6.
+</div>
+
+<h2>Why Not Use useNavigate() Here?</h2>
+
+<p>
+ProtectedRoute performs authentication checking during rendering.
+</p>
+
+<p>
+For render-time redirection, React Router recommends using Navigate instead of useNavigate().
+</p>
+
+<h3>Using Navigate (Recommended)</h3>
+
+<pre><code class="language-jsx">if (!isAuthenticated) {
+  return &lt;Navigate to="/login" replace /&gt;;
+}</code></pre>
+
+<ul>
+<li>Redirects immediately during rendering.</li>
+<li>Simple and declarative.</li>
+<li>No hooks required.</li>
+<li>Common pattern for route guards.</li>
+</ul>
+
+<h3>Using useNavigate()</h3>
+
+<pre><code class="language-jsx">import { useNavigate } from 'react-router-dom';
+import { useEffect } from 'react';
+
+function ProtectedRoute({ children }) {
+  const isAuthenticated = localStorage.getItem('token');
+  const navigate = useNavigate();
+
+  useEffect(() =&gt; {
+    if (!isAuthenticated) {
+      navigate('/login', { replace: true });
+    }
+  }, [isAuthenticated, navigate]);
+
+  return isAuthenticated ? children : null;
+}</code></pre>
+
+<div class="warning">
+useNavigate() requires useEffect because navigation is a side effect. The component renders first and then redirects.
+</div>
+
+<h3>Problems With useNavigate() In ProtectedRoute</h3>
+
+<ul>
+<li>Requires additional code.</li>
+<li>Needs useEffect.</li>
+<li>Component renders once before redirecting.</li>
+<li>Usually requires returning null while redirecting.</li>
+</ul>
+
+<h2>Navigate vs useNavigate</h2>
+
+<table>
+<tr>
+<th>Navigate</th>
+<th>useNavigate</th>
+</tr>
+
+<tr>
+<td>Declarative navigation</td>
+<td>Imperative navigation</td>
+</tr>
+
+<tr>
+<td>Used during rendering</td>
+<td>Used inside functions and effects</td>
+</tr>
+
+<tr>
+<td>No useEffect needed</td>
+<td>Usually requires useEffect</td>
+</tr>
+
+<tr>
+<td>Best for ProtectedRoute</td>
+<td>Best for events and actions</td>
+</tr>
+</table>
+
+<h3>When To Use Each One</h3>
+
+<table>
+<tr>
+<th>Scenario</th>
+<th>Recommended</th>
+</tr>
+
+<tr>
+<td>Authentication check during render</td>
+<td>Navigate</td>
+</tr>
+
+<tr>
+<td>Login success redirect</td>
+<td>useNavigate()</td>
+</tr>
+
+<tr>
+<td>Logout redirect</td>
+<td>useNavigate()</td>
+</tr>
+
+<tr>
+<td>Form submission redirect</td>
+<td>useNavigate()</td>
+</tr>
+
+<tr>
+<td>Protected Route redirect</td>
+<td>Navigate</td>
+</tr>
+</table>
+
+<div class="success">
+ProtectedRoute is a render-time authentication check, so Navigate is the preferred solution in React Router v6.
 </div>
 
 <h2>Real-World Example</h2>
