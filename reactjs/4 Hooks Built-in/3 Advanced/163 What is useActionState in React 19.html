@@ -225,6 +225,188 @@ function LoginForm() {
 
 export default LoginForm;</code></pre>
 
+<h2>Important Point: What is <code>prevState</code>?</h2>
+
+<div class="highlight">
+<b>prevState</b> is the previous state returned by the last execution of the action function. React automatically passes it as the first argument whenever the action runs again.
+</div>
+
+<h3>Example</h3>
+
+<div class="file-name">LoginForm.jsx</div>
+
+<pre class="language-jsx"><code class="language-jsx">const [state, formAction, isPending] =
+  useActionState(login, { error: '', message: '' });
+
+async function login(prevState, formData) {
+  console.log(prevState);
+}</code></pre>
+
+<p>
+The initial state passed to <code>useActionState</code> is:
+</p>
+
+<pre class="language-js"><code class="language-js">{
+  error: '',
+  message: ''
+}</code></pre>
+
+<p>
+Therefore, during the <b>first form submission</b>, <code>prevState</code> will be:
+</p>
+
+<pre class="language-js"><code class="language-js">{
+  error: '',
+  message: ''
+}</code></pre>
+
+<h3>First Submission</h3>
+
+<p>
+Suppose the user clicks <b>Login</b> without entering an email.
+</p>
+
+<pre class="language-jsx"><code class="language-jsx">async function login(prevState, formData) {
+  const email = formData.get('email');
+
+  if (!email) {
+    return {
+      error: 'Email is required'
+    };
+  }
+}</code></pre>
+
+<p>
+The action returns:
+</p>
+
+<pre class="language-js"><code class="language-js">{
+  error: 'Email is required'
+}</code></pre>
+
+<p>
+React automatically stores this returned object as the new state.
+</p>
+
+<h3>Second Submission</h3>
+
+<p>
+When the form is submitted again, React passes the last returned state as <code>prevState</code>.
+</p>
+
+<pre class="language-js"><code class="language-js">prevState
+
+{
+  error: 'Email is required'
+}</code></pre>
+
+<p>
+Suppose this time both fields are filled correctly.
+</p>
+
+<pre class="language-jsx"><code class="language-jsx">return {
+  error: '',
+  message: 'Login successful'
+};</code></pre>
+
+<p>
+Now React updates the state again.
+</p>
+
+<h3>Third Submission</h3>
+
+<p>
+On the next submit, <code>prevState</code> becomes:
+</p>
+
+<pre class="language-js"><code class="language-js">{
+  error: '',
+  message: 'Login successful'
+}</code></pre>
+
+<h2>Execution Flow</h2>
+
+<div class="flow">
+Initial State
+<br>↓
+{ error: '', message: '' }
+<br><br>
+First Submit
+<br>↓
+prevState = { error: '', message: '' }
+<br>↓
+Returns
+<br>↓
+{ error: 'Email is required' }
+<br><br>
+Second Submit
+<br>↓
+prevState = { error: 'Email is required' }
+<br>↓
+Returns
+<br>↓
+{ error: '', message: 'Login successful' }
+<br><br>
+Third Submit
+<br>↓
+prevState = { error: '', message: 'Login successful' }
+</div>
+
+<h2>When is <code>prevState</code> Useful?</h2>
+
+<p>
+<code>prevState</code> is useful whenever the next state depends on the previous state.
+</p>
+
+<div class="file-name">Counter Example</div>
+
+<pre class="language-jsx"><code class="language-jsx">import { useActionState } from 'react';
+
+async function increment(prevState) {
+  return {
+    count: prevState.count + 1
+  };
+}
+
+function Counter() {
+  const [state, formAction] = useActionState(increment, { count: 0 });
+
+  return (
+    &lt;form action={formAction}&gt;
+      &lt;button&gt;Increment&lt;/button&gt;
+      &lt;p&gt;Count: {state.count}&lt;/p&gt;
+    &lt;/form&gt;
+  );
+}</code></pre>
+
+<div class="flow">
+Initial State
+<br>↓
+{ count: 0 }
+<br><br>
+First Click
+<br>↓
+prevState = { count: 0 }
+<br>↓
+Returns { count: 1 }
+<br><br>
+Second Click
+<br>↓
+prevState = { count: 1 }
+<br>↓
+Returns { count: 2 }
+<br><br>
+Third Click
+<br>↓
+prevState = { count: 2 }
+<br>↓
+Returns { count: 3 }
+</div>
+
+<div class="success">
+<b>Remember:</b> <code>prevState</code> always contains the state returned by the previous execution of the action function. This allows the next action to calculate a new state based on the previous one.
+</div>
+
 <h2>Why It Is Useful In React 19?</h2>
 
 <table>
