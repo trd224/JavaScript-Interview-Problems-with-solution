@@ -114,8 +114,138 @@ Bank Sees Valid Login Session
 Bank May Accept Request
 </div>
 
+<h3>Why Does The Browser Automatically Send Cookies?</h3>
+
+<p>
+Cookies belong to a specific domain. When a request is sent to that domain, the browser automatically attaches the matching cookies.
+</p>
+
+<div class="flow">
+Cookie Stored For bank.com
+<br>↓<br>
+Request Sent To bank.com
+<br>↓<br>
+Browser Finds Matching Cookie
+<br>↓<br>
+Browser Automatically Attaches Cookie
+</div>
+
+<div class="file-name">Example</div>
+
+<pre class="language-text"><code class="language-text">Stored Cookie:
+bank.com → sessionId=abc123</code></pre>
+
+<p>
+Later, when a request is sent to:
+</p>
+
+<pre class="language-text"><code class="language-text">https://bank.com/transfer</code></pre>
+
+<p>
+the browser automatically sends:
+</p>
+
+<pre class="language-http"><code class="language-http">POST /transfer
+Host: bank.com
+Cookie: sessionId=abc123</code></pre>
+
+<div class="success">
+The browser sends the cookie because the request URL matches the domain that owns the cookie.
+</div>
+
+<div class="danger">
+The attacker cannot read the cookie because of the Same-Origin Policy. However, the attacker can trick the browser into sending a request to the bank, and the browser automatically includes the bank's cookie.
+</div>
+
+<div class="flow">
+User Logged Into Bank
+<br>↓<br>
+Cookie Stored For bank.com
+<br>↓<br>
+User Visits evil.com
+<br>↓<br>
+evil.com Sends Request To bank.com
+<br>↓<br>
+Browser Automatically Sends bank.com Cookie
+<br>↓<br>
+Bank Thinks Request Came From User
+</div>
+
 <div class="warning">
 Important: CSRF happens mainly when authentication depends on cookies that browsers automatically send with requests.
+</div>
+
+<h3>Does The Browser Send Bank Cookies To evil.com?</h3>
+
+<div class="danger">
+No. The browser never sends bank.com cookies to evil.com.
+</div>
+
+<div class="file-name">Stored Cookies</div>
+
+<pre class="language-text"><code class="language-text">bank.com → sessionId=abc123
+evil.com → evilCookie=xyz789</code></pre>
+
+<p>
+When the user visits:
+</p>
+
+<pre class="language-text"><code class="language-text">https://evil.com</code></pre>
+
+<p>
+the browser sends only the cookies that belong to evil.com.
+</p>
+
+<pre class="language-http"><code class="language-http">GET /
+Host: evil.com
+Cookie: evilCookie=xyz789</code></pre>
+
+<div class="success">
+The browser does not send bank.com cookies to evil.com because cookies are restricted to their own domain.
+</div>
+
+<p>
+The attack works differently. evil.com creates a request whose destination is bank.com.
+</p>
+
+<div class="file-name">Request Created By evil.com</div>
+
+<pre class="language-html"><code class="language-html">&lt;form action="https://bank.com/transfer" method="POST"&gt;
+  &lt;input name="amount" value="10000"&gt;
+&lt;/form&gt;
+
+&lt;script&gt;
+document.forms[0].submit();
+&lt;/script&gt;</code></pre>
+
+<p>
+Now the browser sees that the destination is:
+</p>
+
+<pre class="language-text"><code class="language-text">https://bank.com/transfer</code></pre>
+
+<p>
+Since the request is going to bank.com, the browser automatically attaches the bank.com cookie.
+</p>
+
+<pre class="language-http"><code class="language-http">POST /transfer
+Host: bank.com
+Cookie: sessionId=abc123</code></pre>
+
+<div class="flow">
+User Opens evil.com
+<br>↓<br>
+evil.com Creates Request
+<br>↓<br>
+Request Destination Is bank.com
+<br>↓<br>
+Browser Attaches bank.com Cookie
+<br>↓<br>
+Request Reaches bank.com
+</div>
+
+<div class="highlight">
+CSRF does not work because bank.com cookies are sent to evil.com. CSRF works because evil.com tricks the browser into sending a request to bank.com, and the browser automatically attaches cookies that belong to bank.com.
 </div>
 
 <h2>Does React Protect Against CSRF?</h2>
@@ -297,6 +427,6 @@ CSRF tricks a logged-in browser into sending unwanted requests, and React does n
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-http.min.js"></script>
-
+<script src="../../../reader.js"></script>
 </body>
 </html>

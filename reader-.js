@@ -17,10 +17,7 @@ const config = {
     pitch: 1,
     volume: 1,
     autoScroll: true,
-    highlight: true,
-    // Small silence inserted between every spoken item (sentence,
-    // flow-diagram line, badge, etc). Set to 0 to disable.
-    pauseBetween: 300
+    highlight: true
 };
 
 /*====================================================
@@ -34,8 +31,7 @@ const state = {
     selectedVoice: null,
     utterance: null,
     isPlaying: false,
-    isPaused: false,
-    pauseTimer: null
+    isPaused: false
 };
 
 /*====================================================
@@ -512,12 +508,6 @@ function collectContent() {
         .highlight,
         .success,
         .warning,
-        .danger,
-        .info,
-        .note,
-        .tip,
-        .callout,
-        .alert,
         .flow,
         pre
     `);
@@ -527,16 +517,24 @@ function collectContent() {
         // Skip anything inside the toolbar itself
         if (toolbar && toolbar.contains(element)) return;
 
+        const rawText = element.innerText
+            .replace(/\s+/g, " ")
+            .trim();
+
+        if (!rawText) return;
+
         const isCodeBlock =
             element.tagName.toLowerCase() === "pre";
 
+        // Don't strip symbols from code (e.g. => syntax matters there),
+        // only from normal prose/headings/flow-diagram text.
+        const text = isCodeBlock
+            ? rawText
+            : cleanTextForSpeech(rawText);
+
+        if (!text) return;
+
         if (isCodeBlock) {
-
-            const rawText = element.innerText
-                .replace(/\s+/g, " ")
-                .trim();
-
-            if (!rawText) return;
 
             // Code often has no periods/punctuation, so sentence
             // splitting doesn't make sense here. Instead, announce
@@ -548,7 +546,7 @@ function collectContent() {
 
             state.items.push({
                 element,
-                text: rawText
+                text: text
             });
 
             state.items.push({
@@ -560,36 +558,20 @@ function collectContent() {
 
         }
 
-        // Split on real line-structure (<br> tags, badge/chip spans)
-        // BEFORE flattening to plain text, so multi-line content like
-        // flow diagrams or rows of badges become separate spoken items
-        // (with a pause between them) instead of one run-on sentence.
-        const lines = getSpeakableLines(element);
+        const sentences =
+            text.match(/[^.!?]+[.!?]+|[^.!?]+$/g);
 
-        lines.forEach(rawLine => {
+        if (!sentences) return;
 
-            // Strip symbols/emoji/arrows from normal prose/flow text
-            // (arrow-only lines like "↓" become empty and are skipped)
-            const text = cleanTextForSpeech(rawLine);
+        sentences.forEach(sentence => {
 
-            if (!text) return;
+            const cleaned = sentence.trim();
 
-            const sentences =
-                text.match(/[^.!?]+[.!?]+|[^.!?]+$/g);
+            if (!cleaned) return;
 
-            if (!sentences) return;
-
-            sentences.forEach(sentence => {
-
-                const cleaned = sentence.trim();
-
-                if (!cleaned) return;
-
-                state.items.push({
-                    element,
-                    text: cleaned
-                });
-
+            state.items.push({
+                element,
+                text: cleaned
             });
 
         });
@@ -598,56 +580,6 @@ function collectContent() {
 
     progressLabel.textContent =
         `0 / ${state.items.length}`;
-
-}
-
-/*====================================================
-    Speakable Line Splitting
-    (preserves <br> line breaks and isolates badge/chip
-    spans so they aren't all glued into one sentence)
-====================================================*/
-
-function getSpeakableLines(element) {
-
-    const BREAK = "\u0000";
-
-    let html = element.innerHTML;
-
-    // Isolate badge/chip-style spans onto their own line
-    html = html.replace(
-        /(<span[^>]*class="[^"]*\bbadge\b[^"]*"[^>]*>[\s\S]*?<\/span>)/gi,
-        BREAK + "$1" + BREAK
-    );
-
-    // Treat <br> tags as line breaks
-    html = html.replace(/<br\s*\/?>/gi, BREAK);
-
-    const parts = html.split(BREAK);
-
-    const lines = [];
-
-    parts.forEach(part => {
-
-        const temp = document.createElement("div");
-
-        temp.innerHTML = part;
-
-        const text = (temp.textContent || "")
-            .replace(/\s+/g, " ")
-            .trim();
-
-        if (text) lines.push(text);
-
-    });
-
-    if (lines.length > 0) return lines;
-
-    // Fallback: no <br>/badge structure found, behave as before
-    const fallback = (element.innerText || "")
-        .replace(/\s+/g, " ")
-        .trim();
-
-    return fallback ? [fallback] : [];
 
 }
 
@@ -724,11 +656,6 @@ function highlightCurrent() {
 
 function speakCurrent() {
 
-    if (state.pauseTimer) {
-        clearTimeout(state.pauseTimer);
-        state.pauseTimer = null;
-    }
-
     if (state.currentIndex < 0) {
         state.currentIndex = 0;
     }
@@ -782,23 +709,7 @@ function speakCurrent() {
 
         state.currentIndex++;
 
-        // Small gap between items so consecutive short lines
-        // (flow-diagram steps, badges, etc) don't run together.
-        if (config.pauseBetween > 0) {
-
-            state.pauseTimer = setTimeout(() => {
-
-                if (state.isPlaying && !state.isPaused) {
-                    speakCurrent();
-                }
-
-            }, config.pauseBetween);
-
-        } else {
-
-            speakCurrent();
-
-        }
+        speakCurrent();
 
     };
 
@@ -833,11 +744,6 @@ function pauseReading() {
     // and does NOT advance to the next item.
     state.isPaused = true;
 
-    if (state.pauseTimer) {
-        clearTimeout(state.pauseTimer);
-        state.pauseTimer = null;
-    }
-
     speech.cancel();
 
 }
@@ -862,11 +768,6 @@ function stopReading() {
     state.isPaused = false;
 
     state.currentIndex = 0;
-
-    if (state.pauseTimer) {
-        clearTimeout(state.pauseTimer);
-        state.pauseTimer = null;
-    }
 
     speech.cancel();
 

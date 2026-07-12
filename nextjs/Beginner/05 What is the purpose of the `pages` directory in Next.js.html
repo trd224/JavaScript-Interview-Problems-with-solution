@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Pages Directory, Pages Router and App Router in Next.js</title>
+<title>5. Pages Directory, Pages Router and App Router in Next.js</title>
 
 <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
 
@@ -106,7 +106,7 @@ td{
 
 <div class="container">
 
-<h1>What is the Purpose of the <code>pages</code> Directory in Next.js?</h1>
+<h1>5. What is the Purpose of the <code>pages</code> Directory in Next.js?</h1>
 
 <p>
 The <strong>pages</strong> directory is used for creating routes in traditional Next.js applications.
@@ -254,6 +254,8 @@ The pages directory can also contain backend API routes.
 </code></pre>
 </div>
 
+
+
 <h2>Special Files Inside pages</h2>
 
 <table>
@@ -286,6 +288,374 @@ The pages directory can also contain backend API routes.
 </tr>
 </tbody>
 </table>
+
+<h2>Special Files Explained</h2>
+
+<h3>1. pages/_app.js</h3>
+
+<p>
+Acts as the root component for all pages.
+</p>
+
+<div class="code-block">
+<div class="code-title">pages/_app.js</div>
+<pre><code class="language-jsx">export default function App({ Component, pageProps }) {
+
+  return &lt;Component {...pageProps} /&gt;;
+
+}
+</code></pre>
+</div>
+
+<p>Common use cases:</p>
+
+<ul>
+<li>Global CSS</li>
+<li>Redux Provider</li>
+<li>Context API</li>
+<li>Authentication Wrapper</li>
+<li>Shared Layouts</li>
+</ul>
+
+<div class="feature">
+Every page in the Pages Router passes through <code>_app.js</code>.
+</div>
+
+<h3>How _app.js Works Internally</h3>
+
+<p>
+Many developers get confused by this code:
+</p>
+
+<div class="code-block">
+<div class="code-title">pages/_app.js</div>
+<pre><code class="language-jsx">export default function App({ Component, pageProps }) {
+
+  return &lt;Component {...pageProps} /&gt;;
+
+}
+</code></pre>
+</div>
+
+<p>
+The <code>Component</code> prop represents the currently active page component.
+</p>
+
+<p>
+Next.js automatically changes the value of <code>Component</code> depending on the route being visited.
+</p>
+
+<div class="code-block">
+<div class="code-title">Project Structure</div>
+<pre><code class="language-text">my-project/
+├── pages/
+│   ├── _app.js
+│   ├── _document.js
+│   ├── index.js
+│   ├── about.js
+│   └── contact.js
+├── public/
+├── styles/
+└── package.json
+</code></pre>
+</div>
+
+<p>
+When the user visits the home page:
+</p>
+
+<div class="code-block">
+<div class="code-title">Home Route</div>
+<pre><code class="language-jsx">&lt;App Component={Home} /&gt;  //You never write this yourself, Next.js creates it internally.
+
+return &lt;Home /&gt;;
+</code></pre>
+</div>
+
+<p>
+When the user visits the About page:
+</p>
+
+<div class="code-block">
+<div class="code-title">About Route</div>
+<pre><code class="language-jsx">&lt;App Component={About} /&gt;
+
+return &lt;About /&gt;;
+</code></pre>
+</div>
+
+<p>
+When the user visits the Contact page:
+</p>
+
+<div class="code-block">
+<div class="code-title">Contact Route</div>
+<pre><code class="language-jsx">&lt;App Component={Contact} /&gt;
+
+return &lt;Contact /&gt;;
+</code></pre>
+</div>
+
+<div class="feature">
+Component = Current Page Component
+</div>
+
+<h3>Why _app.js is Useful</h3>
+
+<p>
+Because it allows us to wrap all pages with common UI.
+</p>
+
+<div class="code-block">
+<div class="code-title">Shared Layout Example</div>
+<pre><code class="language-jsx">export default function App({ Component, pageProps }) {
+
+  // Component, pageProps are passed by Next.js itself. Next.js calls it internally. 
+  // The pageProps value comes from the current page.
+
+  return (
+    &lt;&gt;
+      &lt;Header /&gt;
+      &lt;Component {...pageProps} /&gt;
+      &lt;Footer /&gt;
+    &lt;/&gt;
+  );
+
+}
+</code></pre>
+</div>
+
+<p>
+Now every page automatically gets the Header and Footer.
+</p>
+
+<div class="code-block">
+<div class="code-title">About Page Render</div>
+<pre><code class="language-jsx">&lt;&gt;
+  &lt;Header /&gt;
+  &lt;About /&gt;
+  &lt;Footer /&gt;
+&lt;/&gt;
+</code></pre>
+</div>
+
+<div class="code-block">
+<div class="code-title">Contact Page Render</div>
+<pre><code class="language-jsx">&lt;&gt;
+  &lt;Header /&gt;
+  &lt;Contact /&gt;
+  &lt;Footer /&gt;
+&lt;/&gt;
+</code></pre>
+</div>
+
+<h3>What is pageProps?</h3>
+
+<p>
+The <code>pageProps</code> object contains props returned from <code>getServerSideProps</code>, <code>getStaticProps</code>, or <code>getInitialProps</code>.
+</p>
+
+<div class="code-block">
+<div class="code-title">Page Data</div>
+<pre><code class="language-jsx">export async function getServerSideProps() {
+
+  return {
+    props: {
+      name: 'Rizwan'
+    }
+  };
+
+}
+</code></pre>
+</div>
+
+<p>
+Next.js passes those props to <code>_app.js</code>.
+</p>
+
+<div class="code-block">
+<div class="code-title">Props Passed to _app.js</div>
+<pre><code class="language-jsx">&lt;App
+  Component={Home}
+  pageProps={{ name: 'Rizwan' }}
+/&gt;
+</code></pre>
+</div>
+
+<p>
+Then:
+</p>
+
+<div class="code-block">
+<div class="code-title">Prop Forwarding</div>
+<pre><code class="language-jsx">&lt;Component {...pageProps} /&gt;
+</code></pre>
+</div>
+
+<p>
+Becomes:
+</p>
+
+<div class="code-block">
+<div class="code-title">Final Render</div>
+<pre><code class="language-jsx">&lt;Home name="Rizwan" /&gt;
+</code></pre>
+</div>
+
+<div class="summary">
+<strong>Interview Answer:</strong><br>
+In <code>_app.js</code>, the <code>Component</code> prop represents the current page being rendered and <code>pageProps</code> contains the props returned from data-fetching methods. Next.js automatically injects both values, allowing <code>_app.js</code> to wrap every page with common layouts, providers, and global CSS.
+</div>
+
+<h3>2. pages/_document.js</h3>
+
+<p>
+Used to customize the HTML document structure.
+</p>
+
+<div class="code-block">
+<div class="code-title">pages/_document.js</div>
+<pre><code class="language-jsx">import { Html, Head, Main, NextScript } from 'next/document';
+
+export default function Document() {
+
+  return (
+    &lt;Html lang="en"&gt;
+      &lt;Head /&gt;
+      &lt;body&gt;
+        &lt;Main /&gt;
+        &lt;NextScript /&gt;
+      &lt;/body&gt;
+    &lt;/Html&gt;
+  );
+
+}
+</code></pre>
+</div>
+
+<p>Common use cases:</p>
+
+<ul>
+<li>Set HTML language</li>
+<li>Add custom fonts</li>
+<li>Modify body attributes</li>
+<li>Customize document structure</li>
+</ul>
+
+<div class="feature">
+<code>_document.js</code> runs only on the server.
+</div>
+
+<h3>3. pages/_error.js</h3>
+
+<p>
+Custom error page used for handling application errors.
+</p>
+
+<div class="code-block">
+<div class="code-title">pages/_error.js</div>
+<pre><code class="language-jsx">function ErrorPage({ statusCode }) {
+
+  return &lt;h1&gt;Error {statusCode}&lt;/h1&gt;;
+
+}
+
+export default ErrorPage;
+</code></pre>
+</div>
+
+<p>
+It can handle errors such as 404, 500, and other HTTP errors.
+</p>
+
+<h3>4. pages/404.js</h3>
+
+<p>
+Displayed when a route does not exist.
+</p>
+
+<div class="code-block">
+<div class="code-title">pages/404.js</div>
+<pre><code class="language-jsx">export default function NotFound() {
+
+  return &lt;h1&gt;404 - Page Not Found&lt;/h1&gt;;
+
+}
+</code></pre>
+</div>
+
+<p>Example:</p>
+
+<div class="code-block">
+<div class="code-title">URL Request</div>
+<pre><code class="language-text">/about      ✓ exists
+/profile    ✗ does not exist
+</code></pre>
+</div>
+
+<p>
+Visiting <code>/profile</code> displays the custom 404 page.
+</p>
+
+<h3>5. pages/500.js</h3>
+
+<p>
+Displayed when a server-side error occurs.
+</p>
+
+<div class="code-block">
+<div class="code-title">pages/500.js</div>
+<pre><code class="language-jsx">export default function ServerError() {
+
+  return &lt;h1&gt;500 - Server Error&lt;/h1&gt;;
+
+}
+</code></pre>
+</div>
+
+<p>Example:</p>
+
+<div class="code-block">
+<div class="code-title">Server Error Example</div>
+<pre><code class="language-jsx">export async function getServerSideProps() {
+
+  throw new Error('Database Failed');
+
+}
+</code></pre>
+</div>
+
+<p>
+The user will see the custom 500 error page.
+</p>
+
+<h2>Pages Router Request Flow</h2>
+
+<div class="code-block">
+<div class="code-title">Request Lifecycle</div>
+<pre><code class="language-text">Request
+   │
+   ▼
+pages/_document.js
+   │
+   ▼
+pages/_app.js
+   │
+   ▼
+Requested Page
+   │
+   ├── Success → Render Page
+   │
+   ├── Not Found → 404.js
+   │
+   └── Server Error → 500.js / _error.js
+</code></pre>
+</div>
+
+<div class="summary">
+<strong>Interview Answer:</strong><br>
+<code>_app.js</code> wraps all pages and is used for global layouts, providers, and global CSS. <code>_document.js</code> customizes the HTML document structure and runs only on the server. <code>_error.js</code> is a custom error page. <code>404.js</code> handles not found routes, while <code>500.js</code> handles server-side errors.
+</div>
 
 <div class="summary">
 <strong>One-Line Definition:</strong><br>

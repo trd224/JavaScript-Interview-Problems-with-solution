@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>What is the redirect() Function in the App Router?</title>
+<title>20. What is the redirect() Function in the App Router?</title>
 
 <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
 
@@ -107,7 +107,7 @@ td{
 
 <div class="container">
 
-<h1>What is the redirect() Function in the App Router?</h1>
+<h1>20 What is the redirect() Function in the App Router?</h1>
 
 <p>
 The <code>redirect()</code> function is used in the Next.js App Router to immediately redirect users from one route to another.
@@ -280,6 +280,146 @@ Browser Navigates
 <td>❌</td>
 </tr>
 </table>
+
+<h2>Why Use redirect() Instead of router.push()?</h2>
+
+<p>
+The main difference is <strong>when</strong> and <strong>where</strong> navigation happens.
+</p>
+
+<table>
+<tr>
+<th>Feature</th>
+<th>redirect()</th>
+<th>router.push()</th>
+</tr>
+
+<tr>
+<td>Runs On</td>
+<td>Server Components, Server Actions, Route Handlers</td>
+<td>Client Components</td>
+</tr>
+
+<tr>
+<td>Navigation Happens</td>
+<td>During Rendering</td>
+<td>After User Interaction or Client-Side Code</td>
+</tr>
+
+<tr>
+<td>Stops Rendering</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+
+<tr>
+<td>Requires Browser</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+</table>
+
+<h3>Server-Side Redirect Example</h3>
+
+<div class="code-title">Using redirect()</div>
+
+<pre><code class="language-jsx">import { redirect } from 'next/navigation';
+
+export default async function Dashboard() {
+
+  const user = await getUser();
+
+  if (!user) {
+    redirect('/login');
+  }
+
+  return &lt;h1&gt;Dashboard&lt;/h1&gt;;
+
+}</code></pre>
+
+<p>
+Flow:
+</p>
+
+<pre><code class="language-text">Request /dashboard
+         │
+         ▼
+Check User
+         │
+         ▼
+Not Logged In
+         │
+         ▼
+redirect('/login')
+         │
+         ▼
+Login Page Sent
+</code></pre>
+
+<p>
+The Dashboard page never renders because rendering stops immediately when <code>redirect()</code> is called.
+</p>
+
+<h3>What If We Use router.push()?</h3>
+
+<div class="code-title">Using router.push()</div>
+
+<pre><code class="language-jsx">'use client';
+
+import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
+
+export default function Dashboard() {
+
+  const router = useRouter();
+
+  useEffect(() => {
+    router.push('/login');
+  }, []);
+
+  return &lt;h1&gt;Dashboard&lt;/h1&gt;;
+
+}</code></pre>
+
+<p>
+Flow:
+</p>
+
+<pre><code class="language-text">Dashboard Page Renders
+          │
+          ▼
+User Sees Dashboard
+          │
+          ▼
+JavaScript Loads
+          │
+          ▼
+router.push('/login')
+          │
+          ▼
+Navigate To Login
+</code></pre>
+
+<p>
+Problems:
+</p>
+
+<ul>
+  <li>Protected content may briefly appear.</li>
+  <li>JavaScript must load first.</li>
+  <li>Authentication logic runs on the client.</li>
+  <li>Redirect is slower than a server-side redirect.</li>
+</ul>
+
+<div class="feature">
+<strong>Rule of Thumb:</strong><br>
+Use <code>redirect()</code> when the server decides users should not stay on the page. Use <code>router.push()</code> for button clicks, links, and other user actions.
+</div>
+
+<pre><code class="language-text">Server Decision  → redirect()
+
+User Action      → router.push()
+</code></pre>
 
 <h2>Server Component Example</h2>
 

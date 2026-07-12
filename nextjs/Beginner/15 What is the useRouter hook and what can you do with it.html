@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>What is the useRouter Hook and What Can We Do With It?</title>
+<title>15. What is the useRouter Hook and What Can We Do With It?</title>
 
 <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
 
@@ -130,7 +130,7 @@ td{
 
 <div class="container">
 
-<h1>What is the useRouter Hook and What Can We Do With It?</h1>
+<h1>15. What is the useRouter Hook and What Can We Do With It?</h1>
 
 <p>
 The <strong>useRouter</strong> hook allows us to access and control the Next.js router programmatically from our components.
@@ -170,8 +170,7 @@ The usage depends on which routing system our application uses.
 <div class="code-block">
 <div class="code-title">Import useRouter</div>
 
-<pre><code class="language-jsx">import { useRouter }
-from 'next/router';
+<pre><code class="language-jsx">import { useRouter } from 'next/router';
 
 export default function Home() {
 
@@ -191,27 +190,16 @@ Instead of clicking a Link component, we can navigate using JavaScript.
 <div class="code-block">
 <div class="code-title">router.push()</div>
 
-<pre><code class="language-jsx">import { useRouter }
-from 'next/router';
+<pre><code class="language-jsx">import { useRouter } from 'next/router';
 
 export default function Home() {
-
   const router = useRouter();
 
-  const goToAbout = () => {
-
-    router.push('/about');
-
-  };
-
   return (
-    &lt;button
-      onClick={goToAbout}
-    &gt;
+    &lt;button onClick={() =&gt; router.push('/about')}&gt;
       About
     &lt;/button&gt;
   );
-
 }
 </code></pre>
 
@@ -327,9 +315,7 @@ Output:
 
 <pre><code class="language-jsx">const router = useRouter();
 
-console.log(
-  router.query.id
-);
+console.log(router.query.id);
 </code></pre>
 
 </div>
@@ -344,6 +330,190 @@ Output:
 <pre><code class="language-text">100
 </code></pre>
 
+</div>
+
+<h2>Why Do Both Return the Same Value?</h2>
+
+<p>
+Both examples return <code>100</code> because Next.js stores both
+dynamic route parameters and query string parameters inside
+<code>router.query</code>.
+</p>
+
+<table>
+<thead>
+<tr>
+<th>URL</th>
+<th>Source of id</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>/products/100</td>
+<td>Dynamic Route Parameter ([id])</td>
+<td>100</td>
+</tr>
+<tr>
+<td>/products?id=100</td>
+<td>Query String Parameter (?id=100)</td>
+<td>100</td>
+</tr>
+</tbody>
+</table>
+
+<p>
+Although both are accessed using <code>router.query.id</code>,
+they come from different parts of the URL.
+</p>
+
+<div class="code-block">
+<div class="code-title">Dynamic Route Parameter</div>
+
+<pre><code class="language-text">/products/100
+</code></pre>
+
+</div>
+
+<div class="code-block">
+<div class="code-title">Query String Parameter</div>
+
+<pre><code class="language-text">/products?id=100
+</code></pre>
+
+</div>
+
+<p>
+Next.js combines route parameters and query string parameters
+into a single <code>router.query</code> object.
+</p>
+
+<div class="code-block">
+<div class="code-title">Example</div>
+
+<pre><code class="language-text">/products/100?color=red
+</code></pre>
+
+</div>
+
+<div class="code-block">
+<div class="code-title">router.query</div>
+
+<pre><code class="language-js">{
+  id: '100',
+  color: 'red'
+}
+</code></pre>
+
+</div>
+
+<div class="feature">
+Dynamic route parameters come from the URL path, while query
+parameters come from the query string. Both are available through
+router.query in the Pages Router.
+</div>
+
+<h2>What Happens If Both Use the Same Name?</h2>
+
+<p>
+Consider the following URL:
+</p>
+
+<div class="code-block">
+<div class="code-title">URL</div>
+
+<pre><code class="language-text">/products/100?id=100
+</code></pre>
+
+</div>
+
+<p>
+In this case, the URL contains:
+</p>
+
+<ul>
+<li>A route parameter from <code>[id]</code>.</li>
+<li>A query string parameter from <code>?id=100</code>.</li>
+</ul>
+
+<p>
+Both use the same key name (<code>id</code>), so they are merged into the same
+<code>router.query</code> object.
+</p>
+
+<div class="code-block">
+<div class="code-title">Read Values</div>
+
+<pre><code class="language-jsx">const router = useRouter();
+
+console.log(router.query);
+</code></pre>
+
+</div>
+
+<div class="code-block">
+<div class="code-title">Output</div>
+
+<pre><code class="language-js">{
+  id: '100'
+}
+</code></pre>
+
+</div>
+
+<p>
+A more obvious example:
+</p>
+
+<div class="code-block">
+<div class="code-title">URL</div>
+
+<pre><code class="language-text">/products/100?id=200
+</code></pre>
+
+</div>
+
+<div class="code-block">
+<div class="code-title">Output</div>
+
+<pre><code class="language-js">{
+  id: '200'
+}
+</code></pre>
+
+</div>
+
+<p>
+The query string value overrides the route parameter when both use the same key.
+</p>
+
+<h3>Recommended Approach</h3>
+
+<p>
+Use different names for route parameters and query parameters.
+</p>
+
+<div class="code-block">
+<div class="code-title">URL</div>
+
+<pre><code class="language-text">/products/100?productId=200
+</code></pre>
+
+</div>
+
+<div class="code-block">
+<div class="code-title">router.query</div>
+
+<pre><code class="language-js">{
+  id: '100',
+  productId: '200'
+}
+</code></pre>
+
+</div>
+
+<div class="feature">
+If a route parameter and a query parameter have the same name, the query parameter value takes precedence in router.query.
 </div>
 
 <h2>Use Case 5: Replace Current Route</h2>
@@ -448,8 +618,7 @@ In the App Router, useRouter is imported from <code>next/navigation</code>.
 
 <pre><code class="language-jsx">'use client';
 
-import { useRouter }
-from 'next/navigation';
+import { useRouter } from 'next/navigation';
 
 export default function Home() {
 
