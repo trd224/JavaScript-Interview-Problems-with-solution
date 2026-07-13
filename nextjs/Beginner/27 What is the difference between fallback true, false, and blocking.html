@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>What is the Difference Between fallback: true, false, and 'blocking'?</title>
+<title>27. What is the Difference Between fallback: true, false, and 'blocking'?</title>
 
 <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
 
@@ -102,7 +102,7 @@ td{
 
 <div class="container">
 
-<h1>What is the Difference Between fallback: true, false, and 'blocking'?</h1>
+<h1>27. What is the Difference Between fallback: true, false, and 'blocking'?</h1>
 
 <p>
 The <code>fallback</code> option is returned from <code>getStaticPaths()</code> and controls what Next.js should do when a user requests a dynamic page that was not generated during the build process.
@@ -216,6 +216,63 @@ Use fallback: false when all pages are known during build time.
 </div>
 
 <hr>
+
+<h3>Why Does /products/3 Return 404?</h3>
+
+<p>
+Many developers think that if a page was not generated during the build, Next.js will automatically generate it when the user visits the page.
+</p>
+
+<p>
+That behavior only happens with <code>fallback: true</code> and <code>fallback: 'blocking'</code>.
+</p>
+
+<p>
+With <code>fallback: false</code>, Next.js is explicitly told:
+</p>
+
+<pre><code class="language-text">Generate only the pages listed in paths.
+
+If a requested page is not in paths:
+- Do NOT run getStaticProps()
+- Do NOT generate the page
+- Return 404
+</code></pre>
+
+<p>
+So when a user requests:
+</p>
+
+<pre><code class="language-text">/products/3</code></pre>
+
+<p>
+Next.js checks whether the route exists in the generated paths.
+Since only <code>/products/1</code> and <code>/products/2</code> were generated during the build, <code>/products/3</code> is considered missing and a 404 page is returned immediately.
+</p>
+
+<div class="code-title">Internal Decision Process</div>
+
+<pre><code class="language-text">Request /products/3
+        │
+        ▼
+Is 3 in paths?
+        │
+        ▼
+No
+        │
+        ▼
+fallback = false ?
+        │
+        ▼
+Yes
+        │
+        ▼
+Return 404
+</code></pre>
+
+<div class="feature">
+Important: For <code>fallback: false</code>, <code>getStaticProps()</code> is never executed for unknown routes.
+</div>
 
 <h2>fallback: true</h2>
 
