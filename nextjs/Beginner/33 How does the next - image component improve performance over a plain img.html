@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>How does the next/image component improve performance over a plain img?</title>
+<title>33. How does the next/image component improve performance over a plain img?</title>
 
 <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
 
@@ -102,7 +102,7 @@ td{
 
 <div class="container">
 
-<h1>How does the next/image component improve performance over a plain &lt;img&gt;?</h1>
+<h1>33. How does the next/image component improve performance over a plain &lt;img&gt;?</h1>
 
 <p>
 The <code>next/image</code> component is a built-in Next.js component that automatically optimizes images for better performance, faster loading, and improved Core Web Vitals.
@@ -362,6 +362,90 @@ This is useful for:
 <li>Above-the-fold Content</li>
 <li>Landing Pages</li>
 </ul>
+
+<h3>Why Do We Need priority If Above-the-Fold Images Already Load?</h3>
+
+<p>
+A common misconception is that <code>priority</code> is required to load above-the-fold images.
+</p>
+
+<p>
+Even without <code>priority</code>, an image that is visible in the viewport is not lazy loaded and will load automatically.
+</p>
+
+<div class="code-title">Without priority</div>
+
+<pre><code class="language-text">HTML Received
+      │
+      ▼
+Browser Parses HTML
+      │
+      ▼
+Finds Image
+      │
+      ▼
+Starts Downloading Image
+</code></pre>
+
+<p>
+The browser discovers the image while parsing the page and then starts downloading it.
+</p>
+
+<div class="code-title">With priority</div>
+
+<pre><code class="language-text">HTML Received
+      │
+      ▼
+Preload Image
+(rel="preload")
+      │
+      ▼
+Start Downloading Image ASAP
+      │
+      ▼
+Render Page
+</code></pre>
+
+<p>
+When <code>priority</code> is used, Next.js adds a preload hint so the browser can begin downloading the image earlier.
+</p>
+
+<div class="code-title">Internally</div>
+
+<pre><code class="language-html">&lt;link
+  rel="preload"
+  as="image"
+  href="/hero.jpg"
+/&gt;</code></pre>
+
+<p>
+This can improve Largest Contentful Paint (LCP) when the image is a major part of the page.
+</p>
+
+<table>
+<tr>
+<th>Behavior</th>
+<th>Above-the-Fold Image</th>
+<th>Below-the-Fold Image</th>
+</tr>
+
+<tr>
+<td>next/image</td>
+<td>Loads Automatically</td>
+<td>Lazy Loaded</td>
+</tr>
+
+<tr>
+<td>next/image + priority</td>
+<td>Preloaded and Higher Priority</td>
+<td>Usually Not Needed</td>
+</tr>
+</table>
+
+<div class="feature">
+<strong>Important:</strong><br>
+<code>priority</code> does not make an above-the-fold image load instead of lazy loading. The image would already load automatically. It simply tells the browser that the image is critical and should be fetched as early as possible.
+</div>
 
 <h2>What Happens Internally?</h2>
 

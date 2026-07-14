@@ -1,0 +1,395 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>45. How do you set environment variables in Next.js?</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+}
+
+body{
+  background:#0f172a;
+  color:#e2e8f0;
+  font-family:Arial,sans-serif;
+  line-height:1.8;
+  padding:40px 20px;
+}
+
+.container{
+  max-width:1000px;
+  margin:auto;
+  background:#111827;
+  padding:40px;
+  border-radius:16px;
+}
+
+h1{
+  color:#38bdf8;
+  margin-bottom:20px;
+}
+
+h2{
+  color:#a78bfa;
+  margin-top:30px;
+  margin-bottom:10px;
+}
+
+h3{
+  color:#fbbf24;
+  margin-top:25px;
+  margin-bottom:10px;
+}
+
+p{
+  margin-bottom:15px;
+}
+
+ul{
+  margin-left:20px;
+}
+
+li{
+  margin-bottom:8px;
+}
+
+.feature{
+  background:#1e293b;
+  border-left:5px solid #38bdf8;
+  padding:15px;
+  border-radius:8px;
+  margin:20px 0;
+}
+
+.code-title{
+  background:#1e293b;
+  color:#93c5fd;
+  padding:10px;
+  font-weight:bold;
+}
+
+pre[class*="language-"]{
+  margin:0!important;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:20px;
+}
+
+th{
+  background:#1e293b;
+  color:#38bdf8;
+  text-align:left;
+  padding:12px;
+}
+
+td{
+  padding:12px;
+  border-top:1px solid #334155;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>45. How do you set environment variables in Next.js?</h1>
+
+<p>
+Environment variables allow us to store configuration values outside of our code.
+</p>
+
+<div class="feature">
+They are commonly used for API URLs, database connections, secret keys, analytics IDs, and other environment-specific settings.
+</div>
+
+<h2>Why Use Environment Variables?</h2>
+
+<ul>
+<li>Keep sensitive values out of source code.</li>
+<li>Use different values for development and production.</li>
+<li>Avoid hardcoding configuration.</li>
+<li>Improve security and maintainability.</li>
+</ul>
+
+<h2>Environment Files</h2>
+
+<p>
+Next.js automatically loads environment variables from special files.
+</p>
+
+<div class="code-title">Project Structure</div>
+
+<pre><code class="language-text">my-app/
+
+├── .env
+├── .env.local
+├── .env.development
+├── .env.production
+├── app/
+└── package.json
+</code></pre>
+
+<h2>Basic Example</h2>
+
+<div class="code-title">.env.local</div>
+
+<pre><code class="language-text">API_URL=https://api.example.com
+
+DB_PASSWORD=my-secret-password
+</code></pre>
+
+<h2>Using Environment Variables on the Server</h2>
+
+<div class="code-title">Server Component</div>
+
+<pre><code class="language-jsx">export default function Page() {
+
+  console.log(
+    process.env.API_URL
+  );
+
+  return &lt;h1&gt;Home&lt;/h1&gt;;
+
+}</code></pre>
+
+<p>
+Server Components can access all environment variables.
+</p>
+
+<h2>Client Components</h2>
+
+<p>
+Client Components cannot access private environment variables.
+</p>
+
+<p>
+To expose a variable to the browser, it must start with:
+</p>
+
+<pre><code class="language-text">NEXT_PUBLIC_</code></pre>
+
+<div class="code-title">.env.local</div>
+
+<pre><code class="language-text">NEXT_PUBLIC_API_URL=https://api.example.com
+</code></pre>
+
+<div class="code-title">Client Component</div>
+
+<pre><code class="language-jsx">'use client';
+
+export default function Home() {
+
+  console.log(
+    process.env.NEXT_PUBLIC_API_URL
+  );
+
+  return &lt;h1&gt;Home&lt;/h1&gt;;
+
+}</code></pre>
+
+<h2>What Happens If NEXT_PUBLIC_ Is Missing?</h2>
+
+<div class="code-title">.env.local</div>
+
+<pre><code class="language-text">API_URL=https://api.example.com
+</code></pre>
+
+<div class="code-title">Client Component</div>
+
+<pre><code class="language-jsx">'use client';
+
+console.log(
+  process.env.API_URL
+);</code></pre>
+
+<p>
+Output:
+</p>
+
+<pre><code class="language-text">undefined</code></pre>
+
+<p>
+Private variables are not exposed to the browser.
+</p>
+
+<h2>Using Environment Variables in Route Handlers</h2>
+
+<div class="code-title">app/api/users/route.js</div>
+
+<pre><code class="language-js">export async function GET() {
+
+  const apiUrl =
+    process.env.API_URL;
+
+  return Response.json({
+    apiUrl
+  });
+
+}</code></pre>
+
+<h2>Using Environment Variables in Server Actions</h2>
+
+<div class="code-title">Example</div>
+
+<pre><code class="language-js">"use server";
+
+export async function saveUser() {
+
+  const secret =
+    process.env.DB_PASSWORD;
+
+}</code></pre>
+
+<h2>Environment-Specific Files</h2>
+
+<table>
+<tr>
+<th>File</th>
+<th>Purpose</th>
+</tr>
+
+<tr>
+<td>.env</td>
+<td>Default variables</td>
+</tr>
+
+<tr>
+<td>.env.local</td>
+<td>Local overrides</td>
+</tr>
+
+<tr>
+<td>.env.development</td>
+<td>Development only</td>
+</tr>
+
+<tr>
+<td>.env.production</td>
+<td>Production only</td>
+</tr>
+</table>
+
+<h2>Loading Order</h2>
+
+<div class="code-title">Priority</div>
+
+<pre><code class="language-text">.env.local
+      │
+      ▼
+.env.development
+or
+.env.production
+      │
+      ▼
+.env
+</code></pre>
+
+<p>
+Files higher in the list override files below them.
+</p>
+
+<h2>What Happens Internally?</h2>
+
+<div class="code-title">Flow</div>
+
+<pre><code class="language-text">npm run dev
+      │
+      ▼
+Read .env Files
+      │
+      ▼
+Load Variables
+      │
+      ▼
+Populate process.env
+      │
+      ▼
+Application Uses Variables
+</code></pre>
+
+<h2>Important Notes</h2>
+
+<div class="feature">
+Variables without the NEXT_PUBLIC_ prefix are available only on the server.
+</div>
+
+<div class="feature">
+Variables with the NEXT_PUBLIC_ prefix are included in the browser bundle and can be viewed by users.
+</div>
+
+<div class="feature">
+Whenever we change .env files, we must restart the development server because environment variables are loaded only during startup.
+</div>
+
+<h2>Server vs Client Access</h2>
+
+<table>
+<tr>
+<th>Variable</th>
+<th>Server</th>
+<th>Client</th>
+</tr>
+
+<tr>
+<td>API_URL</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+
+<tr>
+<td>NEXT_PUBLIC_API_URL</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+</table>
+
+<h2>Real-World Example</h2>
+
+<div class="code-title">.env.local</div>
+
+<pre><code class="language-text">DATABASE_URL=mongodb://localhost:27017/mydb
+
+NEXT_PUBLIC_API_URL=https://api.example.com
+
+NEXT_PUBLIC_APP_NAME=My App
+</code></pre>
+
+<div class="code-title">Usage</div>
+
+<pre><code class="language-jsx">const appName =
+  process.env.NEXT_PUBLIC_APP_NAME;
+
+const apiUrl =
+  process.env.NEXT_PUBLIC_API_URL;</code></pre>
+
+<h2>Interview Tip</h2>
+
+<div class="feature">
+A common mistake is storing secrets in variables that begin with NEXT_PUBLIC_. Any variable with this prefix becomes part of the client-side JavaScript bundle and is visible to users.
+</div>
+
+<div class="feature">
+<strong>One-Line Definition:</strong><br>
+Environment variables in Next.js are configuration values loaded from .env files and accessed through <code>process.env</code>, with only <code>NEXT_PUBLIC_</code> variables exposed to the browser.
+</div>
+
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+
+</body>
+</html>

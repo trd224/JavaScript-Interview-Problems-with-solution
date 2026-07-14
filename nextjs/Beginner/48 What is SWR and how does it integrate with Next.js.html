@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>What is SWR and how does it integrate with Next.js?</title>
+<title>48. What is SWR and how does it integrate with Next.js?</title>
 
 <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
 
@@ -102,7 +102,7 @@ td{
 
 <div class="container">
 
-<h1>What is SWR and how does it integrate with Next.js?</h1>
+<h1>48. What is SWR and how does it integrate with Next.js?</h1>
 
 <p>
 SWR is a React data fetching library created by Vercel that provides caching, automatic revalidation, request deduplication, polling, and real-time data synchronization.
@@ -177,31 +177,26 @@ SWR handles most of this automatically.
 
 import useSWR from 'swr';
 
-const fetcher = url =>
-  fetch(url).then(res => res.json());
+const fetcher = (url) => fetch(url).then(res=>res.json());
 
-export default function Users() {
+export default function Users(){
 
-  const {
-    data,
-    error,
-    isLoading
-  } = useSWR(
+  const {data, error, isLoading} = useSWR(
     '/api/users',
     fetcher
   );
 
-  if (isLoading) {
+  if(isLoading){
     return &lt;h2&gt;Loading...&lt;/h2&gt;;
   }
 
-  if (error) {
+  if(error){
     return &lt;h2&gt;Error Loading Users&lt;/h2&gt;;
   }
 
-  return (
+  return(
     &lt;div&gt;
-      {data.map(user => (
+      {data.map(user=>(
         &lt;p key={user.id}&gt;
           {user.name}
         &lt;/p&gt;
@@ -298,9 +293,7 @@ SWR automatically refetches data when:
 
 <div class="code-title">Example</div>
 
-<pre><code class="language-jsx">const {
-  data
-} = useSWR(
+<pre><code class="language-jsx">const {data}=useSWR(
   '/api/users',
   fetcher
 );</code></pre>
@@ -317,14 +310,10 @@ SWR can automatically refresh data at a specified interval.
 
 <div class="code-title">Auto Refresh Every 5 Seconds</div>
 
-<pre><code class="language-jsx">const {
-  data
-} = useSWR(
+<pre><code class="language-jsx">const {data}=useSWR(
   '/api/users',
   fetcher,
-  {
-    refreshInterval: 5000
-  }
+  {refreshInterval:5000}
 );</code></pre>
 
 <h2>Manual Revalidation</h2>
@@ -335,11 +324,9 @@ We can force SWR to refetch data.
 
 <div class="code-title">Example</div>
 
-<pre><code class="language-jsx">import useSWR, {
-  mutate
-} from 'swr';
+<pre><code class="language-jsx">import useSWR,{mutate} from 'swr';
 
-const refresh = () => {
+const refresh=()=>{
   mutate('/api/users');
 };</code></pre>
 
@@ -389,27 +376,23 @@ SWR works especially well with Next.js because both are maintained by Vercel.
 
 import useSWR from 'swr';
 
-const fetcher = url =>
-  fetch(url).then(res => res.json());
+const fetcher=url=>
+  fetch(url).then(res=>res.json());
 
-export default function UsersPage() {
+export default function UsersPage(){
 
-  const {
-    data,
-    isLoading
-  } = useSWR(
+  const {data,isLoading}=useSWR(
     '/api/users',
     fetcher
   );
 
-  if (isLoading) {
+  if(isLoading){
     return &lt;h2&gt;Loading...&lt;/h2&gt;;
   }
 
-  return (
+  return(
     &lt;div&gt;
-      Total Users:
-      {data.length}
+      Total Users: {data.length}
     &lt;/div&gt;
   );
 
@@ -421,19 +404,17 @@ export default function UsersPage() {
 
 <pre><code class="language-jsx">import useSWR from 'swr';
 
-const fetcher = url =>
-  fetch(url).then(res => res.json());
+const fetcher=url=>
+  fetch(url).then(res=>res.json());
 
-export default function Users() {
+export default function Users(){
 
-  const {
-    data
-  } = useSWR(
+  const {data}=useSWR(
     '/api/users',
     fetcher
   );
 
-  return (
+  return(
     &lt;div&gt;
       {data?.length}
     &lt;/div&gt;
