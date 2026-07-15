@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>What is the root layout and why is it required in the App Router?</title>
+<title>6. What is the root layout and why is it required in the App Router?</title>
 
 <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
 
@@ -87,7 +87,7 @@ td{
 
 <div class="container">
 
-<h1>What is the root layout and why is it required in the App Router?</h1>
+<h1>6. What is the root layout and why is it required in the App Router?</h1>
 
 <p>
 The Root Layout is the top-level layout of a Next.js App Router application. It is defined in <code>app/layout.tsx</code> and wraps every page and layout in the application.
@@ -120,9 +120,7 @@ Without a Root Layout, Next.js would not know how to construct the application's
 
 <div class="code-title">app/layout.tsx</div>
 
-<pre><code class="language-jsx">export default function RootLayout({
-  children
-}) {
+<pre><code class="language-jsx">export default function RootLayout({ children }) {
 
   return (
     &lt;html lang="en"&gt;
@@ -156,6 +154,67 @@ The Root Layout is responsible for generating the application's document structu
 Unlike nested layouts, the Root Layout must contain both the <code>html</code> and <code>body</code> tags.
 </p>
 
+<h2>Where Is the head Tag?</h2>
+
+<p>
+The Root Layout must contain the <code>html</code> and <code>body</code> tags, but you might notice that it does not contain a <code>head</code> tag.
+</p>
+
+<div class="code-title">Root Layout</div>
+
+<pre><code class="language-jsx">export default function RootLayout({ children }) {
+  return (
+    &lt;html lang="en"&gt;
+      &lt;body&gt;{children}&lt;/body&gt;
+    &lt;/html&gt;
+  );
+}</code></pre>
+
+<p>
+In the App Router, Next.js automatically generates the <code>head</code> element. We usually use the Metadata API instead of manually creating a <code>head</code> tag.
+</p>
+
+<div class="code-title">Metadata API</div>
+
+<pre><code class="language-jsx">export const metadata = {
+  title: 'My App',
+  description: 'Learning Next.js'
+};</code></pre>
+
+<p>
+Next.js converts this metadata into HTML inside the <code>head</code> element.
+</p>
+
+<div class="code-title">Generated HTML</div>
+
+<pre><code class="language-html">&lt;html&gt;
+  &lt;head&gt;
+    &lt;title&gt;My App&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;...&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+
+<p>
+Although uncommon, a <code>head</code> tag can also be added manually.
+</p>
+
+<div class="code-title">Manual head Tag</div>
+
+<pre><code class="language-jsx">export default function RootLayout({ children }) {
+  return (
+    &lt;html&gt;
+      &lt;head&gt;
+        &lt;meta name="author" content="Rizwan" /&gt;
+      &lt;/head&gt;
+      &lt;body&gt;{children}&lt;/body&gt;
+    &lt;/html&gt;
+  );
+}</code></pre>
+
+<div class="feature">
+The Root Layout must define the <code>html</code> and <code>body</code> tags. The <code>head</code> tag is usually generated automatically by Next.js from the Metadata API.
+</div>
+
 <h2>Folder Structure</h2>
 
 <div class="code-title">App Router</div>
@@ -173,6 +232,17 @@ Unlike nested layouts, the Root Layout must contain both the <code>html</code> a
 <p>
 The Root Layout sits at the top of the layout hierarchy.
 </p>
+
+<h2>Dashboard layout (Nested Layout)</h3>
+
+<pre><code class="language-jsx">export default function DashboardLayout({ children }) {
+  return (
+    &lt;section&gt;
+      &lt;nav&gt;Dashboard Menu&lt;/nav&gt;
+      {children}
+    &lt;/section&gt;
+  );
+}</code></pre>
 
 <h2>Rendering Hierarchy</h2>
 
@@ -198,29 +268,162 @@ Every page is rendered inside the Root Layout.
 <pre><code class="language-jsx">import Header from './Header';
 import Footer from './Footer';
 
-export default function RootLayout({
-  children
-}) {
-
+export default function RootLayout({ children }) {
   return (
     &lt;html lang="en"&gt;
       &lt;body&gt;
-
         &lt;Header /&gt;
-
         {children}
-
         &lt;Footer /&gt;
-
       &lt;/body&gt;
     &lt;/html&gt;
   );
-
 }</code></pre>
 
 <p>
 The Header and Footer automatically appear on every page.
 </p>
+
+<h2>What If We Do Not Want Header and Footer Everywhere?</h2>
+
+<p>
+If the Header and Footer are placed inside the Root Layout, they automatically appear on every route.
+</p>
+
+<div class="code-title">Root Layout</div>
+
+<pre><code class="language-jsx">export default function RootLayout({ children }) {
+  return (
+    &lt;html lang="en"&gt;
+      &lt;body&gt;
+        &lt;Header /&gt;
+        {children}
+        &lt;Footer /&gt;
+      &lt;/body&gt;
+    &lt;/html&gt;
+  );
+}</code></pre>
+
+<div class="code-title">Result</div>
+
+<pre><code class="language-text">/
+│
+├─ Header
+├─ Page
+└─ Footer
+
+/dashboard
+│
+├─ Header
+├─ Dashboard
+└─ Footer
+</code></pre>
+
+<p>
+Sometimes we want public pages to show a Header and Footer, but dashboard pages should use a completely different layout.
+</p>
+
+<div class="code-title">Route Groups</div>
+
+<pre><code class="language-text">app/
+│
+├── layout.js
+│
+├── (site)/
+│   ├── layout.js
+│   ├── page.js
+│   └── about/page.js
+│
+└── dashboard/
+    ├── layout.js
+    └── page.js
+</code></pre>
+
+<p>
+The Root Layout becomes minimal and only contains the application's HTML structure.
+</p>
+
+<div class="code-title">Minimal Root Layout</div>
+
+<pre><code class="language-jsx">export default function RootLayout({ children }) {
+  return (
+    &lt;html lang="en"&gt;
+      &lt;body&gt;{children}&lt;/body&gt;
+    &lt;/html&gt;
+  );
+}</code></pre>
+
+<p>
+The public site layout contains the Header and Footer.
+</p>
+
+<div class="code-title">(site)/layout.js</div>
+
+<pre><code class="language-jsx">export default function SiteLayout({ children }) {
+  return (
+    &lt;&gt;
+      &lt;Header /&gt;
+      {children}
+      &lt;Footer /&gt;
+    &lt;/&gt;
+  );
+}</code></pre>
+
+<p>
+The dashboard layout contains only dashboard-specific UI.
+</p>
+
+<div class="code-title">dashboard/layout.js</div>
+
+<pre><code class="language-jsx">export default function DashboardLayout({
+  children
+}) {
+  return (
+    &lt;&gt;
+      &lt;Sidebar /&gt;
+      {children}
+    &lt;/&gt;
+  );
+}</code></pre>
+
+<div class="code-title">Rendering</div>
+
+<pre><code class="language-text">/about
+
+Root Layout
+      │
+      ▼
+Site Layout
+      │
+      ▼
+Page
+
+Result
+
+Header
+About Page
+Footer
+</code></pre>
+
+<pre><code class="language-text">/dashboard
+
+Root Layout
+      │
+      ▼
+Dashboard Layout
+      │
+      ▼
+Dashboard Page
+
+Result
+
+Sidebar
+Dashboard Page
+</code></pre>
+
+<div class="feature">
+Nested layouts do not replace the Root Layout. They are rendered inside the Root Layout. Route Groups allow different sections of the application to have different layouts while still sharing the same Root Layout.
+</div>
 
 <h2>Using Providers</h2>
 
@@ -232,22 +435,16 @@ The Root Layout is commonly used for global providers.
 
 <pre><code class="language-jsx">import ThemeProvider from './ThemeProvider';
 
-export default function RootLayout({
-  children
-}) {
-
+export default function RootLayout({ children }) {
   return (
     &lt;html lang="en"&gt;
       &lt;body&gt;
-
         &lt;ThemeProvider&gt;
           {children}
         &lt;/ThemeProvider&gt;
-
       &lt;/body&gt;
     &lt;/html&gt;
   );
-
 }</code></pre>
 
 <p>

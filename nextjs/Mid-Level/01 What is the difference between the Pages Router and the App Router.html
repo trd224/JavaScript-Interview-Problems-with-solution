@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>What is the Difference Between the Pages Router and the App Router?</title>
+<title>1. What is the Difference Between the Pages Router and the App Router?</title>
 
 <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
 
@@ -77,7 +77,7 @@ td{
 
 <div class="container">
 
-<h1>What is the Difference Between the Pages Router and the App Router?</h1>
+<h1>1. What is the Difference Between the Pages Router and the App Router?</h1>
 
 <p>
 The Pages Router and App Router are two routing systems in Next.js. The Pages Router uses the <code>pages</code> directory and traditional data-fetching methods, while the App Router uses the <code>app</code> directory and introduces Server Components, nested layouts, streaming, and the Metadata API.
@@ -154,9 +154,7 @@ This also creates:
       .then(res => res.json());
 
   return {
-    props: {
-      products
-    }
+    props: { products: products }
   };
 
 }
@@ -205,10 +203,9 @@ Uses a shared layout pattern manually.
 
 <div class="code-title">pages/_app.js</div>
 
-<pre><code class="language-js">export default function App({
-  Component,
-  pageProps
-}) {
+<pre><code class="language-js">import Layout from '../components/Layout';
+
+export default function App({ Component, pageProps }) {
 
   return (
     &lt;Layout&gt;
@@ -218,6 +215,43 @@ Uses a shared layout pattern manually.
 
 }</code></pre>
 
+Layout
+<pre><code class="language-js">export default function Layout({ children }) {
+  return (
+    &lt;&gt;
+      &lt;header&gt;
+        Header
+      &lt;/header&gt;
+
+      &lt;main&gt;
+        {children}
+      &lt;/main&gt;
+
+      &lt;footer&gt;
+        Footer
+      &lt;/footer&gt;
+    &lt;/&gt;
+  );
+}</code></pre>
+or
+<pre><code class="language-js">import Header from '../components/Header';
+import Footer from '../components/Footer';
+
+export default function MyApp({ Component, pageProps }) {
+
+  return (
+    &lt;&gt;
+      &lt;Header /&gt;
+
+      &lt;Component {...pageProps} /&gt;
+
+      &lt;Footer /&gt;
+    &lt;/&gt;
+  );
+
+}
+</code></pre>
+
 <h3>App Router</h3>
 
 <p>
@@ -226,9 +260,7 @@ Has built-in nested layouts.
 
 <div class="code-title">app/layout.js</div>
 
-<pre><code class="language-js">export default function RootLayout({
-  children
-}) {
+<pre><code class="language-js">export default function RootLayout({ children }) {
 
   return (
     &lt;html&gt;
