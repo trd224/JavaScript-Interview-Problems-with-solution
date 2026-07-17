@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>56.1. revalidatePath vs revalidateTag vs router.refresh</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0f172a;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.8;padding:40px 20px}
+.container{max-width:1000px;margin:auto;background:#111827;padding:40px;border-radius:16px}
+h1{color:#38bdf8;margin-bottom:20px}
+h2{color:#a78bfa;margin-top:30px;margin-bottom:10px}
+p{margin-bottom:15px}
+.feature{background:#1e293b;border-left:5px solid #38bdf8;padding:15px;border-radius:8px;margin:20px 0}
+.warning{background:#451a1a;border-left:5px solid #f87171;padding:15px;border-radius:8px;margin:20px 0}
+.code-title{background:#1e293b;color:#93c5fd;padding:10px;font-weight:bold}
+pre[class*="language-"]{margin:0!important}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+th{background:#1e293b;color:#38bdf8;text-align:left;padding:12px}
+td{padding:12px;border-top:1px solid #334155}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+<h1>56.1. revalidatePath() vs revalidateTag() vs router.refresh()</h1>
+
+<p>
+All three are related to getting fresh data, but they work at different levels.
+</p>
+
+<table>
+<tr>
+<th>API</th>
+<th>Runs Where?</th>
+<th>Purpose</th>
+</tr>
+<tr>
+<td>router.refresh()</td>
+<td>Client Component</td>
+<td>Re-fetch current route Server Components</td>
+</tr>
+<tr>
+<td>revalidatePath()</td>
+<td>Server Action / Route Handler</td>
+<td>Invalidate cache for a specific route</td>
+</tr>
+<tr>
+<td>revalidateTag()</td>
+<td>Server Action / Route Handler</td>
+<td>Invalidate tagged data across routes</td>
+</tr>
+</table>
+
+<h2>1. router.refresh()</h2>
+
+<div class="code-title">Client Component</div>
+<pre><code class="language-ts">'use client';
+
+import { useRouter } from 'next/navigation';
+
+export default function AddToCartButton() {
+  const router = useRouter();
+
+  async function handleClick() {
+    await updateCart();
+    router.refresh();
+  }
+
+  return &lt;button onClick={handleClick}&gt;Add To Cart&lt;/button&gt;;
+}</code></pre>
+
+<div class="feature">
+<strong>What it does:</strong><br>
+Requests the current route again and re-runs Server Components.
+</div>
+
+<div class="code-title">Flow</div>
+<pre><code class="language-text">Client Component
+        ↓
+router.refresh()
+        ↓
+Current Route Requested Again
+        ↓
+Server Components Re-run
+        ↓
+Fresh UI</code></pre>
+
+<div class="warning">
+<strong>Important:</strong><br>
+router.refresh() does not invalidate cache. If data is still cached, the refreshed route may receive the same cached data.
+</div>
+
+<h2>2. revalidatePath()</h2>
+
+<div class="code-title">Server Action</div>
+<pre><code class="language-ts">'use server';
+
+import { revalidatePath } from 'next/cache';
+
+export async function updateCart(productId: string) {
+  await db.cart.add(productId);
+
+  revalidatePath('/cart');
+}</code></pre>
+
+<div class="feature">
+<strong>What it does:</strong><br>
+Marks a specific route cache as stale so the next render gets fresh data.
+</div>
+
+<div class="code-title">Flow</div>
+<pre><code class="language-text">Database Updated
+        ↓
+revalidatePath('/cart')
+        ↓
+Cart Route Cache Invalidated
+        ↓
+Fresh Data Generated</code></pre>
+
+<h2>3. revalidateTag()</h2>
+
+<div class="code-title">Tag Data</div>
+<pre><code class="language-ts">await fetch('/api/products', {
+  next: {
+    tags: ['products']
+  }
+});</code></pre>
+
+<div class="code-title">Invalidate Tag</div>
+<pre><code class="language-ts">'use server';
+
+import { revalidateTag } from 'next/cache';
+
+export async function addProduct() {
+  await db.products.create(...);
+
+  revalidateTag('products');
+}</code></pre>
+
+<div class="feature">
+<strong>What it does:</strong><br>
+Invalidates all cached data that uses the same tag.
+</div>
+
+<div class="code-title">Flow</div>
+<pre><code class="language-text">Tagged Data
+      ↓
+revalidateTag('products')
+      ↓
+All Matching Cached Data Invalidated
+      ↓
+Fresh Data Generated</code></pre>
+
+<h2>Which One Should You Use?</h2>
+
+<table>
+<tr>
+<th>Situation</th>
+<th>Best Choice</th>
+</tr>
+<tr>
+<td>Refresh current page UI</td>
+<td>router.refresh()</td>
+</tr>
+<tr>
+<td>Invalidate one route</td>
+<td>revalidatePath()</td>
+</tr>
+<tr>
+<td>Invalidate shared data across pages</td>
+<td>revalidateTag()</td>
+</tr>
+<tr>
+<td>Server Action updates database</td>
+<td>revalidatePath() or revalidateTag()</td>
+</tr>
+</table>
+
+<div class="feature">
+<strong>Easy Memory Trick:</strong><br>
+router.refresh() = Refresh Current Route<br>
+revalidatePath() = Refresh One Route's Cache<br>
+revalidateTag() = Refresh Shared Data Cache
+</div>
+
+
+<div class="warning">
+<strong>Important:</strong><br>
+router.refresh() does not invalidate cache.
+
+<br><br>
+
+If the data is still cached, the refreshed route may receive the same cached data.
+
+<pre><code class="language-text">router.refresh()
+       ↓
+Request Current Route Again
+       ↓
+Cached Data Still Exists
+       ↓
+Same Data Returned</code></pre>
+
+<br>
+
+Think of it like this:
+
+<pre><code class="language-text">router.refresh()
+       =
+Reload Current Route
+
+revalidatePath()
+       =
+Clear Route Cache
+
+revalidateTag()
+       =
+Clear Tagged Data Cache</code></pre>
+
+<br>
+
+If you refresh without invalidating cache:
+
+<pre><code class="language-text">Refresh
+   ↓
+Cached Data
+   ↓
+Same Result</code></pre>
+
+<br>
+
+If you invalidate cache:
+
+<pre><code class="language-text">Database Updated
+      ↓
+revalidatePath('/cart')
+      ↓
+Cache Cleared
+      ↓
+Next Render Gets Fresh Data</code></pre>
+
+<br>
+
+For Server Actions, the recommended pattern is usually:
+
+<pre><code class="language-ts">'use server';
+
+import { revalidatePath } from 'next/cache';
+
+export async function updateCart(productId: string) {
+  await db.cart.add(productId);
+
+  revalidatePath('/cart');
+}</code></pre>
+
+In many cases, <code>revalidatePath()</code> or <code>revalidateTag()</code> is enough and you do not need <code>router.refresh()</code>.
+
+Use <code>router.refresh()</code> when you specifically need to refresh the current route from a Client Component.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-tsx.min.js"></script>
+
+</body>
+</html>

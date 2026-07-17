@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>What are Server Actions in Next.js and what problem do they solve?</title>
+<title>28. What are Server Actions in Next.js and what problem do they solve?</title>
 
 <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
 
@@ -30,7 +30,7 @@ td{padding:12px;border-top:1px solid #334155}
 
 <div class="container">
 
-<h1>What are Server Actions in Next.js and what problem do they solve?</h1>
+<h1>28. What are Server Actions in Next.js and what problem do they solve?</h1>
 
 <p>
 Server Actions are server-side functions that can be called directly from forms, Server Components, and Client Components without creating separate API routes.
@@ -321,9 +321,7 @@ import { createUser } from './actions';
 export default function Button() {
 
   return (
-    &lt;button
-      onClick={() =&gt; createUser()}
-    &gt;
+    &lt;button onClick={() =&gt; createUser()}&gt;
       Create User
     &lt;/button&gt;
   );
@@ -399,6 +397,155 @@ Server Actions are mainly for communication between our Next.js frontend and bac
 </p>
 
 <hr>
+
+<hr>
+
+<h2>Common Interview Doubt</h2>
+
+<p>
+If Server Components already run on the server, why do Server Actions need
+<code>'use server'</code>?
+</p>
+
+<div class="feature">
+<strong>Short Answer:</strong><br>
+Because a Server Component and a Server Action are two different concepts.
+</div>
+
+<h3>Case 1: Normal Function Inside a Server Component</h3>
+
+<div class="code-title">Example</div>
+
+<pre><code class="language-tsx">export default async function Page() {
+
+  async function getUsers() {
+    return db.user.findMany();
+  }
+
+  const users = await getUsers();
+
+  return (
+    &lt;div&gt;
+      {users.length}
+    &lt;/div&gt;
+  );
+
+}</code></pre>
+
+<p>
+Flow:
+</p>
+
+<pre><code class="language-text">Browser
+   ↓
+Page() runs on server
+   ↓
+getUsers() runs on server
+</code></pre>
+
+<p>
+Here, <code>getUsers()</code> is called by another server function
+(<code>Page()</code>), so Next.js already knows it will run on the server.
+</p>
+
+<p>
+No <code>'use server'</code> is required.
+</p>
+
+<hr>
+
+<h3>Case 2: Server Action</h3>
+
+<div class="code-title">Server Action</div>
+
+<pre><code class="language-ts">'use server';
+
+export async function createUser( formData: FormData ) {
+
+  await db.user.create({
+    data: {
+      name: formData.get('name')
+    }
+  });
+
+}</code></pre>
+
+<div class="code-title">Form</div>
+
+<pre><code class="language-tsx">&lt;form action={createUser}&gt;
+  ...
+&lt;/form&gt;</code></pre>
+
+<p>
+Flow:
+</p>
+
+<pre><code class="language-text">Browser
+   ↓
+createUser()
+</code></pre>
+
+<p>
+Now the browser is trying to call <code>createUser()</code> directly.
+</p>
+
+<p>
+Next.js must create a special server endpoint so that the browser can execute
+this function on the server.
+</p>
+
+<p>
+That is why we add:
+</p>
+
+<pre><code class="language-ts">'use server';</code></pre>
+
+<p>
+This tells Next.js:
+</p>
+
+<div class="feature">
+Create a server endpoint for this function and execute it on the server whenever
+the browser calls it.
+</div>
+
+<hr>
+
+<h2>Easy Rule</h2>
+
+<table>
+<tr>
+<th>Scenario</th>
+<th>Need 'use server'?</th>
+</tr>
+
+<tr>
+<td>Function called inside a Server Component</td>
+<td>❌ No</td>
+</tr>
+
+<tr>
+<td>Function used in form action</td>
+<td>✅ Yes</td>
+</tr>
+
+<tr>
+<td>Function called from a Client Component</td>
+<td>✅ Yes</td>
+</tr>
+
+<tr>
+<td>Function called directly by the browser</td>
+<td>✅ Yes</td>
+</tr>
+</table>
+
+<div class="feature">
+<strong>Remember:</strong><br>
+The reason for <code>'use server'</code> is not that the function runs on the
+server. The reason is that the browser needs a way to call that function on the
+server.
+</div>
 
 <h2>Server Components vs Server Actions</h2>
 
@@ -569,6 +716,261 @@ export async function createUser(formData: FormData) {
 <p>
 Here the Server Action does not access the database directly. Instead, it forwards the request to the backend API.
 </p>
+
+<hr>
+
+<h2>If We Can Use fetch(), Why Use a Server Action?</h2>
+
+<p>
+A common question is:
+</p>
+
+<div class="feature">
+<strong>Question:</strong><br>
+If we already have a .NET, Java, Node.js, or Laravel backend, why not simply call it directly using <code>fetch()</code>?
+</div>
+
+<p>
+In many cases, that is exactly what we do.
+</p>
+
+<div class="code-title">Direct API Call</div>
+
+<pre><code class="language-tsx">'use client';
+
+async function saveUser() {
+
+  await fetch(
+    'https://api.company.com/users',
+    {
+      method: 'POST',
+      body: JSON.stringify({
+        name: 'Rizwan'
+      })
+    }
+  );
+
+}</code></pre>
+
+<p>
+Architecture:
+</p>
+
+<pre><code class="language-text">Browser
+   ↓
+fetch()
+   ↓
+.NET API
+   ↓
+Database
+</code></pre>
+
+<p>
+No Server Action is required.
+</p>
+
+<hr>
+
+<h3>Then Why Would We Use a Server Action?</h3>
+
+<h3>1. Hide Secrets and Tokens</h3>
+
+<p>
+Suppose the backend API requires a secret token.
+</p>
+
+<div class="code-title">Server Action</div>
+
+<pre><code class="language-ts">'use server';
+
+export async function createUser(
+  formData: FormData
+) {
+
+  await fetch(
+    'https://api.company.com/users',
+    {
+      headers: {
+        Authorization:
+          `Bearer ${process.env.API_TOKEN}`
+      }
+    }
+  );
+
+}</code></pre>
+
+<p>
+Because the code runs on the server, the token is never exposed to the browser.
+</p>
+
+<hr>
+
+<h3>2. Access Server-Only Features</h3>
+
+<p>
+Server Actions can use server-only APIs such as:
+</p>
+
+<ul>
+<li>cookies()</li>
+<li>headers()</li>
+<li>Environment Variables</li>
+<li>Database Access</li>
+<li>File System Access</li>
+</ul>
+
+<div class="code-title">Example</div>
+
+<pre><code class="language-ts">'use server';
+
+import { cookies } from 'next/headers';
+
+export async function createUser() {
+
+  const token =
+    (await cookies()).get('token');
+
+  await fetch(...);
+
+}</code></pre>
+
+<hr>
+
+<h3>3. Hide Backend URLs</h3>
+
+<p>
+Without a Server Action:
+</p>
+
+<pre><code class="language-text">Browser
+   ↓
+https://api.company.com/users
+</code></pre>
+
+<p>
+With a Server Action:
+</p>
+
+<pre><code class="language-text">Browser
+   ↓
+Server Action
+   ↓
+https://api.company.com/users
+</code></pre>
+
+<p>
+The browser never directly communicates with the backend API.
+</p>
+
+<hr>
+
+<h3>4. Simpler Form Handling</h3>
+
+<div class="code-title">Server Action Form</div>
+
+<pre><code class="language-tsx">&lt;form action={createUser}&gt;
+  ...
+&lt;/form&gt;</code></pre>
+
+<p>
+Instead of:
+</p>
+
+<div class="code-title">Traditional Form</div>
+
+<pre><code class="language-tsx">&lt;form onSubmit={handleSubmit}&gt;
+  ...
+&lt;/form&gt;
+
+async function handleSubmit(e) {
+
+  e.preventDefault();
+
+  await fetch(
+    'https://api.company.com/users',
+    {
+      method: 'POST'
+    }
+  );
+
+}</code></pre>
+
+<p>
+Server Actions reduce some of the client-side form handling code.
+</p>
+
+<hr>
+
+<h2>What Do Most Enterprise Applications Use?</h2>
+
+<p>
+Most enterprise applications already have a dedicated backend.
+</p>
+
+<pre><code class="language-text">React / Next.js
+       ↓
+.NET API
+       ↓
+Database
+</code></pre>
+
+<p>
+In these projects, developers commonly call the backend directly using
+<code>fetch()</code>.
+</p>
+
+<div class="code-title">Example</div>
+
+<pre><code class="language-ts">await fetch(
+  'https://api.company.com/users',
+  {
+    method: 'POST'
+  }
+);</code></pre>
+
+<div class="feature">
+<strong>Important:</strong><br>
+If a separate backend already exists, Server Actions are optional, not mandatory.
+Many teams simply use <code>fetch()</code> to communicate directly with the backend API.
+</div>
+
+<hr>
+
+<h2>Easy Rule</h2>
+
+<table>
+<tr>
+<th>Scenario</th>
+<th>Recommended Approach</th>
+</tr>
+
+<tr>
+<td>Next.js owns the database</td>
+<td>✅ Server Actions</td>
+</tr>
+
+<tr>
+<td>Need secrets or server-only APIs</td>
+<td>✅ Server Actions</td>
+</tr>
+
+<tr>
+<td>Need to hide backend URLs</td>
+<td>✅ Server Actions</td>
+</tr>
+
+<tr>
+<td>Already have .NET / Java / Node backend</td>
+<td>✅ Direct fetch() is usually enough</td>
+</tr>
+</table>
+
+<div class="feature">
+<strong>Interview Answer:</strong><br>
+When a separate backend already exists, we can often call it directly using
+<code>fetch()</code>. Server Actions are mainly useful when we need server-side
+secrets, server-only APIs, hidden endpoints, or a simpler form handling model.
+</div>
 
 <h3>For Projects Like Aadhaar Authentication</h3>
 

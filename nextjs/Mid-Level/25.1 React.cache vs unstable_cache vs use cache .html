@@ -1,0 +1,805 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>25.1. React.cache vs unstable_cache vs use cache</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0f172a;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.8;padding:40px 20px}
+.container{max-width:1000px;margin:auto;background:#111827;padding:40px;border-radius:16px}
+h1{color:#38bdf8;margin-bottom:20px}
+h2{color:#a78bfa;margin-top:30px;margin-bottom:10px}
+h3{color:#fbbf24;margin-top:25px;margin-bottom:10px}
+p{margin-bottom:15px}
+.feature{background:#1e293b;border-left:5px solid #38bdf8;padding:15px;border-radius:8px;margin:20px 0}
+.code-title{background:#1e293b;color:#93c5fd;padding:10px;font-weight:bold}
+pre[class*="language-"]{margin:0!important}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+th{background:#1e293b;color:#38bdf8;text-align:left;padding:12px}
+td{padding:12px;border-top:1px solid #334155}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>25.1. React.cache() vs unstable_cache() vs 'use cache'</h1>
+
+<p>
+Next.js provides multiple caching mechanisms. Each solves a different problem.
+</p>
+
+<div class="feature">
+<strong>Quick Rule</strong><br>
+React.cache() → Request-level memoization<br>
+unstable_cache() → Persistent data cache<br>
+'use cache' → Modern replacement for unstable_cache()
+</div>
+
+<h2>1. React.cache()</h2>
+
+<p>
+<code>React.cache()</code> memoizes function results during a single server request.
+</p>
+
+<div class="feature">
+It prevents duplicate database queries, session checks, and custom async functions from running multiple times during the same render.
+</div>
+
+<h3>Without React.cache()</h3>
+
+<div class="code-title">lib/user.ts</div>
+
+<pre><code class="language-tsx">export async function getUser() {
+  console.log('DB Query');
+  return db.user.findFirst();
+}</code></pre>
+
+<div class="code-title">Usage</div>
+
+<pre><code class="language-tsx">await getUser();
+await getUser();
+await getUser();</code></pre>
+
+<div class="code-title">Result</div>
+
+<pre><code class="language-text">DB Query
+DB Query
+DB Query</code></pre>
+
+<h3>With React.cache()</h3>
+
+<div class="code-title">lib/user.ts</div>
+
+<pre><code class="language-tsx">import { cache } from 'react';
+
+export const getUser = cache(
+  async () => {
+    console.log('DB Query');
+    return db.user.findFirst();
+  }
+);</code></pre>
+
+<div class="code-title">Usage</div>
+
+<pre><code class="language-tsx">await getUser();
+await getUser();
+await getUser();</code></pre>
+
+<div class="code-title">Result</div>
+
+<pre><code class="language-text">DB Query</code></pre>
+
+<h3>Request Flow</h3>
+
+<pre><code class="language-text">Request 1
+   ↓
+getUser()
+   ↓
+DB Query
+   ↓
+Memory Cache
+
+getUser()
+   ↓
+Cached Result
+
+getUser()
+   ↓
+Cached Result</code></pre>
+
+<h3>New Request</h3>
+
+<pre><code class="language-text">Request 2
+   ↓
+DB Query Again
+</code></pre>
+
+<p>
+React.cache() cache is cleared after every request.
+</p>
+
+<h3>Example With Arguments</h3>
+
+<div class="code-title">lib/product.ts</div>
+
+<pre><code class="language-tsx">import { cache } from 'react';
+
+export const getProduct = cache(
+  async (id) => {
+    return db.product.findUnique({
+      where:{id}
+    });
+  }
+);</code></pre>
+
+<div class="code-title">Usage</div>
+
+<pre><code class="language-tsx">await getProduct('1');
+await getProduct('1');
+await getProduct('2');</code></pre>
+
+<div class="code-title">Result</div>
+
+<pre><code class="language-text">getProduct('1') → Query
+getProduct('1') → Cached
+getProduct('2') → Query</code></pre>
+
+<h3>Best Use Cases</h3>
+
+<ul>
+<li>Database Queries</li>
+<li>Session Checks</li>
+<li>Prisma Queries</li>
+<li>Mongo Queries</li>
+<li>Authentication Logic</li>
+</ul>
+
+<div class="feature">
+<strong>Interview Answer:</strong><br>
+React.cache() memoizes custom function results during a single server request, preventing duplicate executions and reusing the same result within that request.
+</div>
+
+<h2>2. unstable_cache()</h2>
+
+<p>
+<code>unstable_cache()</code> is a Next.js Data Cache API that stores function results across requests.
+</p>
+
+<div class="feature">
+Unlike React.cache(), the cache survives between requests and can be shared across users.
+</div>
+
+<h3>Why Do We Need unstable_cache()?</h3>
+
+<p>
+Database queries can be expensive. If the same data is requested repeatedly, we can cache it and avoid hitting the database every time.
+</p>
+
+<div class="code-title">Without unstable_cache()</div>
+
+<pre><code class="language-tsx">async function getProducts() {
+  return db.product.findMany();
+}</code></pre>
+
+<div class="code-title">Request Flow</div>
+
+<pre><code class="language-text">Request 1
+   ↓
+Database Query
+
+Request 2
+   ↓
+Database Query
+
+Request 3
+   ↓
+Database Query
+</code></pre>
+
+<h3>Using unstable_cache()</h3>
+
+<div class="code-title">lib/products.ts</div>
+
+<pre><code class="language-tsx">import { unstable_cache } from 'next/cache';
+
+export const getProducts = unstable_cache(
+    async () => {
+      return db.product.findMany();
+    },
+    ['products']
+  );</code></pre>
+
+<div class="code-title">Usage</div>
+
+<pre><code class="language-tsx">const products = await getProducts();</code></pre>
+
+<div class="code-title">Request Flow</div>
+
+<pre><code class="language-text">Request 1
+   ↓
+Database Query
+   ↓
+Store In Cache
+
+Request 2
+   ↓
+Cached Result
+
+Request 3
+   ↓
+Cached Result
+</code></pre>
+
+<h3>Using Revalidation</h3>
+
+<p>
+Cache can automatically expire after a specified time.
+</p>
+
+<div class="code-title">Revalidate Every Hour</div>
+
+<pre><code class="language-tsx">import { unstable_cache } from 'next/cache';
+
+export const getProducts = unstable_cache(
+    async () => {
+      return db.product.findMany();
+    },
+    ['products'],
+    {
+      revalidate: 3600
+    }
+  );</code></pre>
+
+<div class="code-title">Flow</div>
+
+<pre><code class="language-text">Hour 1
+   ↓
+Database Query
+
+Next Requests
+   ↓
+Cached Result
+
+After 3600 Seconds
+   ↓
+Cache Expires
+
+Next Request
+   ↓
+Database Query Again
+</code></pre>
+
+<h3>Using Tags</h3>
+
+<p>
+Tags allow manual cache invalidation.
+</p>
+
+<div class="code-title">Tagged Cache</div>
+
+<pre><code class="language-tsx">import { unstable_cache } from 'next/cache';
+
+export const getProducts = unstable_cache(
+    async () => {
+      return db.product.findMany();
+    },
+    ['products'],
+    {
+      tags:['products']
+    }
+  );</code></pre>
+
+<div class="code-title">Revalidate Tag</div>
+
+<pre><code class="language-tsx">import { revalidateTag } from 'next/cache';
+
+revalidateTag( 'products' );</code></pre>
+
+<div class="code-title">Flow</div>
+
+<pre><code class="language-text">Request 1
+   ↓
+Database Query
+   ↓
+Cache Stored
+
+Request 2
+   ↓
+Cached Result
+
+revalidateTag('products')
+   ↓
+Cache Cleared
+
+Request 3
+   ↓
+Database Query Again
+</code></pre>
+
+<h3>Example With Parameters</h3>
+
+<div class="code-title">Product By ID</div>
+
+<pre><code class="language-tsx">import { unstable_cache } from 'next/cache';
+
+export const getProduct = unstable_cache(
+    async (id) => {
+      return db.product.findUnique({
+        where:{id}
+      });
+    },
+    ['product']
+  );</code></pre>
+
+<p>
+Be careful when using parameters. Cache keys must uniquely identify data.
+</p>
+
+<h3>React.cache() vs unstable_cache()</h3>
+
+<table>
+<tr>
+<th>Feature</th>
+<th>React.cache()</th>
+<th>unstable_cache()</th>
+</tr>
+
+<tr>
+<td>Provided By</td>
+<td>React</td>
+<td>Next.js</td>
+</tr>
+
+<tr>
+<td>Cache Lifetime</td>
+<td>One Request</td>
+<td>Across Requests</td>
+</tr>
+
+<tr>
+<td>Shared Between Users</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+
+<tr>
+<td>Revalidation</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+
+<tr>
+<td>Tags</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+
+<tr>
+<td>Best For</td>
+<td>Memoization</td>
+<td>Data Cache</td>
+</tr>
+</table>
+
+<h3>When Should We Use unstable_cache()?</h3>
+
+<ul>
+<li>Product Lists</li>
+<li>Category Lists</li>
+<li>Blog Posts</li>
+<li>CMS Data</li>
+<li>Frequently Read Database Data</li>
+</ul>
+
+<h3>When Not To Use It?</h3>
+
+<ul>
+<li>User Sessions</li>
+<li>Authentication Data</li>
+<li>User-Specific Information</li>
+<li>Request-Specific Data</li>
+</ul>
+
+<div class="feature">
+<strong>Interview Answer:</strong><br>
+unstable_cache() caches server function results in Next.js Data Cache, allowing data to be reused across requests with support for revalidation and tag-based invalidation.
+</div>
+
+<h2>3. 'use cache'</h2>
+
+<p>
+<code>'use cache'</code> is the modern Next.js caching directive that replaces many <code>unstable_cache()</code> use cases.
+</p>
+
+<div class="feature">
+Think of 'use cache' as the new, cleaner, and more powerful way to create persistent Data Cache entries in Next.js.
+</div>
+
+<h3>Basic Example</h3>
+
+<div class="code-title">lib/products.ts</div>
+
+<pre><code class="language-tsx">async function getProducts() {
+  'use cache';
+
+  return db.product.findMany();
+}</code></pre>
+
+<div class="code-title">Usage</div>
+
+<pre><code class="language-tsx">const products = await getProducts();</code></pre>
+
+<div class="code-title">Request Flow</div>
+
+<pre><code class="language-text">Request 1
+   ↓
+Database Query
+   ↓
+Store In Cache
+
+Request 2
+   ↓
+Cached Result
+
+Request 3
+   ↓
+Cached Result
+</code></pre>
+
+<h3>Adding Cache Lifetime</h3>
+
+<p>
+<code>cacheLife()</code> controls how long the cached data remains valid.
+</p>
+
+<div class="code-title">Cache For Minutes</div>
+
+<pre><code class="language-tsx">import { cacheLife } from 'next/cache';
+
+async function getProducts() {
+  'use cache';
+
+  cacheLife('minutes');
+
+  return db.product.findMany();
+}</code></pre>
+
+<div class="code-title">Cache For Hours</div>
+
+<pre><code class="language-tsx">import { cacheLife } from 'next/cache';
+
+async function getProducts() {
+  'use cache';
+
+  cacheLife('hours');
+
+  return db.product.findMany();
+}</code></pre>
+
+<p>All options</p>
+<pre><code class="language-tsx">import { cacheLife } from 'next/cache';
+
+cacheLife('seconds');
+cacheLife('minutes');
+cacheLife('hours');
+cacheLife('days');
+cacheLife('weeks');
+cacheLife('max');
+</code></pre>
+
+<div>
+  <table>
+  <thead>
+    <tr>
+      <th>Profile</th>
+      <th>Revalidate</th>
+      <th>Expire</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>seconds</code></td>
+      <td>1 second</td>
+      <td>1 minute</td>
+    </tr>
+    <tr>
+      <td><code>minutes</code></td>
+      <td>1 minute</td>
+      <td>1 hour</td>
+    </tr>
+    <tr>
+      <td><code>hours</code></td>
+      <td>1 hour</td>
+      <td>1 day</td>
+    </tr>
+    <tr>
+      <td><code>days</code></td>
+      <td>1 day</td>
+      <td>1 week</td>
+    </tr>
+    <tr>
+      <td><code>weeks</code></td>
+      <td>1 week</td>
+      <td>30 days</td>
+    </tr>
+    <tr>
+      <td><code>max</code></td>
+      <td>30 days</td>
+      <td>Nearly indefinite</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<h3>Adding Cache Tags</h3>
+
+<p>
+Tags allow selective cache invalidation.
+</p>
+
+<div class="code-title">Tagged Cache</div>
+
+<pre><code class="language-tsx">import { cacheTag } from 'next/cache';
+
+async function getProducts() {
+  'use cache';
+
+  cacheTag('products');
+
+  return db.product.findMany();
+}</code></pre>
+
+<div class="code-title">Invalidate Tag</div>
+
+<pre><code class="language-tsx">import { revalidateTag } from 'next/cache';
+
+revalidateTag(
+  'products'
+);</code></pre>
+
+<div class="code-title">Flow</div>
+
+<pre><code class="language-text">Request 1
+   ↓
+Database Query
+   ↓
+Cache Stored
+
+Request 2
+   ↓
+Cached Result
+
+revalidateTag('products')
+   ↓
+Cache Cleared
+
+Request 3
+   ↓
+Database Query Again
+</code></pre>
+
+<h3>Using cacheLife + cacheTag Together</h3>
+
+<div class="code-title">Recommended Pattern</div>
+
+<pre><code class="language-tsx">import { cacheLife, cacheTag } from 'next/cache';
+
+async function getProducts() {
+  'use cache';
+
+  cacheLife('hours');
+  cacheTag('products');
+
+  return db.product.findMany();
+}</code></pre>
+
+<h3>Real World Example</h3>
+
+<div class="code-title">Blog Posts</div>
+
+<pre><code class="language-tsx">import { cacheLife, cacheTag } from 'next/cache';
+
+async function getPosts() {
+  'use cache';
+
+  cacheLife('hours');
+  cacheTag('posts');
+
+  return db.post.findMany();
+}</code></pre>
+
+<div class="code-title">After Creating New Post</div>
+
+<pre><code class="language-tsx">revalidateTag('posts');</code></pre>
+
+<p>
+The next request automatically gets fresh data.
+</p>
+
+<h2>React.cache() vs unstable_cache() vs 'use cache'</h2>
+
+<table>
+<tr>
+<th>Feature</th>
+<th>React.cache()</th>
+<th>unstable_cache()</th>
+<th>'use cache'</th>
+</tr>
+
+<tr>
+<td>Provided By</td>
+<td>React</td>
+<td>Next.js</td>
+<td>Next.js</td>
+</tr>
+
+<tr>
+<td>Cache Scope</td>
+<td>Current Request</td>
+<td>Data Cache</td>
+<td>Data Cache</td>
+</tr>
+
+<tr>
+<td>Across Requests</td>
+<td>❌</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+
+<tr>
+<td>Shared Between Users</td>
+<td>❌</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+
+<tr>
+<td>Revalidation</td>
+<td>❌</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+
+<tr>
+<td>Tags</td>
+<td>❌</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+
+<tr>
+<td>cacheLife()</td>
+<td>❌</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+
+<tr>
+<td>cacheTag()</td>
+<td>❌</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+
+<tr>
+<td>Memoization</td>
+<td>✅</td>
+<td>❌</td>
+<td>❌</td>
+</tr>
+
+<tr>
+<td>Recommended</td>
+<td>✅</td>
+<td>Legacy</td>
+<td>✅</td>
+</tr>
+</table>
+
+<h2>Visual Memory Trick</h2>
+
+<div class="code-title">Think Like This</div>
+
+<pre><code class="language-text">Same Request
+      ↓
+React.cache()
+
+
+Multiple Requests
+      ↓
+unstable_cache()
+
+
+Multiple Requests
++ Tags
++ cacheLife
++ Modern API
+      ↓
+'use cache'
+</code></pre>
+
+<h2>Which One Should We Use?</h2>
+
+<table>
+<tr>
+<th>Scenario</th>
+<th>Recommended</th>
+</tr>
+
+<tr>
+<td>Prisma Query Used By Multiple Components</td>
+<td>React.cache()</td>
+</tr>
+
+<tr>
+<td>Session Lookup</td>
+<td>React.cache()</td>
+</tr>
+
+<tr>
+<td>Product Catalog</td>
+<td>'use cache'</td>
+</tr>
+
+<tr>
+<td>Blog Posts</td>
+<td>'use cache'</td>
+</tr>
+
+<tr>
+<td>CMS Content</td>
+<td>'use cache'</td>
+</tr>
+
+<tr>
+<td>Shared Database Data</td>
+<td>'use cache'</td>
+</tr>
+
+<tr>
+<td>Legacy Next.js Cache Code</td>
+<td>unstable_cache()</td>
+</tr>
+</table>
+
+<div class="feature">
+<strong>Easy Rule:</strong><br><br>
+
+React.cache()
+<br>
+= Prevent duplicate function calls during one request.
+<br><br>
+
+unstable_cache()
+<br>
+= Old Next.js persistent Data Cache.
+<br><br>
+
+'use cache'
+<br>
+= Modern Next.js persistent Data Cache with cacheLife() and cacheTag().
+</div>
+
+<div class="feature">
+<strong>Final Interview Answer:</strong><br>
+React.cache() provides request-level memoization, unstable_cache() provides persistent Data Cache across requests, and 'use cache' is the modern Next.js caching API that offers persistent caching with cacheLife() and cacheTag() support.
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-tsx.min.js"></script>
+
+</body>
+</html>
+
