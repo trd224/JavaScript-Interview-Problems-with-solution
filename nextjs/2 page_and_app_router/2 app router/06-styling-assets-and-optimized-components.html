@@ -1,0 +1,2330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>06 - Styling, Assets & Optimized Components | Next.js App Router Guide</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:#0f172a;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.8;display:flex;min-height:100vh}
+a{color:inherit;text-decoration:none}
+.sidebar{width:290px;flex-shrink:0;background:#0b1220;border-right:1px solid #1e293b;padding:24px 18px;position:sticky;top:0;height:100vh;overflow-y:auto}
+.brand{color:#38bdf8;font-size:18px;font-weight:800;margin-bottom:4px}
+.brand small{display:block;color:#64748b;font-weight:400;font-size:12px;margin-top:4px}
+.chapter-nav{margin-top:22px}
+.chapter-nav a{display:block;padding:8px 10px;border-radius:8px;font-size:13px;color:#94a3b8;margin-bottom:4px;border-left:3px solid transparent}
+.chapter-nav a:hover{background:#111827;color:#e2e8f0}
+.chapter-nav a.active{background:#111827;color:#38bdf8;border-left:3px solid #38bdf8;font-weight:bold}
+.chapter-nav .chnum{display:inline-block;width:22px;color:#475569;font-family:monospace}
+.toc{margin-top:22px;border-top:1px solid #1e293b;padding-top:16px}
+.toc-title{color:#fbbf24;font-size:12px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px}
+.toc a{display:block;font-size:12.5px;color:#8ea3c2;padding:5px 8px;border-radius:6px;line-height:1.4}
+.toc a:hover{background:#111827;color:#e2e8f0}
+.main{flex:1;padding:40px 48px;max-width:980px}
+.container{max-width:900px}
+h1.page-title{color:#38bdf8;margin-bottom:6px;font-size:30px}
+.page-sub{color:#64748b;margin-bottom:28px;font-size:14px}
+h2.section-title{color:#a78bfa;margin-top:52px;margin-bottom:14px;font-size:23px;border-top:1px solid #1e293b;padding-top:38px}
+h2.section-title .secnum{color:#475569;font-family:monospace;margin-right:10px;font-size:16px}
+h3{color:#fbbf24;margin-top:25px;margin-bottom:10px;font-size:17px}
+h4{color:#38bdf8;margin-top:18px;margin-bottom:8px;font-size:15px}
+h5{color:#93c5fd;margin-top:14px;margin-bottom:6px;font-size:14px}
+p{margin-bottom:15px}
+ul,ol{margin-left:20px;margin-bottom:15px}
+li{margin-bottom:8px}
+strong{color:#f1f5f9}
+code{color:#93c5fd;font-family:'JetBrains Mono',monospace;font-size:.92em}
+.feature{background:#1e293b;border-left:5px solid #38bdf8;padding:15px;border-radius:8px;margin:20px 0}
+.warning{background:#2a1a1a;border-left:5px solid #f87171;padding:15px;border-radius:8px;margin:20px 0}
+.summary{background:#1a2a1e;border-left:5px solid #34d399;padding:15px;border-radius:8px;margin:20px 0}
+.note{background:#1e293b;border-left:5px solid #a78bfa;padding:15px;border-radius:8px;margin:20px 0}
+.code-title{background:#1e293b;color:#93c5fd;padding:10px;font-weight:bold;border-radius:6px 6px 0 0;font-size:13px;font-family:monospace}
+pre[class*="language-"]{margin:0 0 20px 0!important;border-radius:0 0 6px 6px}
+pre code{white-space:pre}
+table{width:100%;border-collapse:collapse;margin:20px 0}
+th{background:#1e293b;color:#38bdf8;text-align:left;padding:12px}
+td{padding:12px;border-top:1px solid #334155}
+hr{border:none;border-top:1px solid #1e293b;margin:30px 0}
+.chapnav{display:flex;justify-content:space-between;margin-top:60px;padding-top:24px;border-top:1px solid #1e293b}
+.chapnav a{background:#111827;padding:12px 18px;border-radius:10px;border:1px solid #1e293b;font-size:14px;color:#94a3b8}
+.chapnav a:hover{color:#38bdf8;border-color:#38bdf8}
+.chapnav .prev::before{content:"<- "}
+.chapnav .next::after{content:" ->"}
+@media(max-width:900px){body{flex-direction:column}.sidebar{position:relative;height:auto;width:100%}}
+</style>
+</head>
+<body>
+<div class="sidebar">
+<div class="brand">Next.js App Router<small>Complete Step-by-Step Guide</small></div>
+<div class="chapter-nav"><a class="" href="01-foundations-of-the-app-router.html"><span class="chnum">01</span>Foundations of the App Router</a><a class="" href="02-routing-layouts-and-file-conventions.html"><span class="chnum">02</span>Routing, Layouts & File Conventions</a><a class="" href="03-rendering-data-fetching-and-caching.html"><span class="chnum">03</span>Rendering, Data Fetching & Caching</a><a class="" href="04-server-actions-and-mutations.html"><span class="chnum">04</span>Server Actions & Mutations</a><a class="" href="05-route-handlers-client-data-and-metadata-seo.html"><span class="chnum">05</span>Route Handlers, Client Data & Metadata (SEO)</a><a class="active" href="06-styling-assets-and-optimized-components.html"><span class="chnum">06</span>Styling, Assets & Optimized Components</a><a class="" href="07-performance-and-optimization.html"><span class="chnum">07</span>Performance & Optimization</a></div>
+<div class="toc"><div class="toc-title">On this page</div><a href="#06-01">How do you add global CSS to a Next.js application?</a><a href="#06-02">What are CSS Modules and how do you use them in Next.js?</a><a href="#06-03">What built-in CSS-in-JS solution does Next.js support in the App Router?</a><a href="#06-04">How do you configure Tailwind CSS with Next.js?</a><a href="#06-05">How does the next/image component improve performance over a plain <img>?</a><a href="#06-06">What is the priority prop on next/image and when must you set it?</a><a href="#06-07">How do you configure remote image domains in next.config.js?</a><a href="#06-08">What is next/font and how does it eliminate layout shift from font loading?</a><a href="#06-09">How do you use a Google Font vs a local font with next/font?</a><a href="#06-10">How do you import and use SVG files as React components in Next.js?</a></div>
+</div><div class="main"><div class="container"><h1 class="page-title">06 - Styling, Assets & Optimized Components</h1><div class="page-sub">Part 06 of 7 &middot; 10 topics &middot; Next.js App Router Guide</div><h2 class="section-title" id="06-01"><span class="secnum">06-01</span>How do you add global CSS to a Next.js application?</h2>
+<p>
+Global CSS is CSS that applies to the entire application instead of a single component.
+</p>
+<div class="feature">
+Global CSS allows us to define styles such as fonts, resets, colors, layouts, and utility classes that can be used throughout our application.
+</div>
+<h3>Why Do We Need Global CSS?</h3>
+<p>
+Some styles should be available everywhere.
+</p>
+
+Examples:
+
+<ul>
+<li>Font Family</li>
+<li>CSS Reset</li>
+<li>Body Background</li>
+<li>Text Colors</li>
+<li>Global Utility Classes</li>
+</ul>
+<h3>Pages Router</h3>
+<p>
+In the Pages Router, global CSS is imported inside <code>pages/_app.js</code>.
+</p>
+<h4>Step 1: Create Global CSS File</h4>
+<div class="code-title">styles/globals.css</div>
+<pre><code class="language-css">body {
+  font-family: Arial, sans-serif;
+  background: #f5f5f5;
+}
+h1 {
+  color: blue;
+}</code></pre>
+<h4>Step 2: Import Global CSS</h4>
+<div class="code-title">pages/_app.js</div>
+<pre><code class="language-jsx">import '../styles/globals.css';
+export default function MyApp({ Component, pageProps }) {
+  return (
+    &lt;Component {...pageProps} /&gt;
+  );
+}</code></pre>
+<h4>Project Structure</h4>
+<div class="code-title">Pages Router</div>
+<pre><code class="language-text">pages/
+├── _app.js
+├── index.js
+styles/
+└── globals.css</code></pre>
+<h3>App Router</h3>
+<p>
+In the App Router, global CSS is imported inside <code>app/layout.js</code>.
+</p>
+<h4>Step 1: Create Global CSS File</h4>
+<div class="code-title">app/globals.css</div>
+<pre><code class="language-css">body {
+  font-family: Arial, sans-serif;
+  background: #f5f5f5;
+}
+h1 {
+  color: blue;
+}</code></pre>
+<h4>Step 2: Import Global CSS</h4>
+<div class="code-title">app/layout.js</div>
+<pre><code class="language-jsx">import './globals.css';
+export default function RootLayout({ children }) {
+  return (
+    &lt;html lang="en"&gt;
+      &lt;body&gt;
+        {children}
+      &lt;/body&gt;
+    &lt;/html&gt;
+  );
+}</code></pre>
+<h4>Project Structure</h4>
+<div class="code-title">App Router</div>
+<pre><code class="language-text">app/
+├── layout.js
+├── page.js
+└── globals.css</code></pre>
+<h3>What Happens Internally?</h3>
+<div class="code-title">Pages Router</div>
+<pre><code class="language-text">globals.css
+      │
+      ▼
+Imported In _app.js
+      │
+      ▼
+Available To All Pages</code></pre>
+<div class="code-title">App Router</div>
+<pre><code class="language-text">globals.css
+      │
+      ▼
+Imported In layout.js
+      │
+      ▼
+Available To Entire App</code></pre>
+<h3>Can We Import Global CSS Anywhere?</h3>
+<p>
+No.
+</p>
+<p>
+Global CSS can only be imported in special root files.
+</p>
+<table>
+<tr>
+<th>Router</th>
+<th>Import Location</th>
+</tr>
+<tr>
+<td>Pages Router</td>
+<td>pages/_app.js</td>
+</tr>
+<tr>
+<td>App Router</td>
+<td>app/layout.js</td>
+</tr>
+</table>
+<h4>Incorrect Example</h4>
+<div class="code-title">components/Header.js</div>
+<pre><code class="language-jsx">import './globals.css';</code></pre>
+<p>
+This will cause a build error.
+</p>
+<h3>Global CSS vs CSS Modules</h3>
+<table>
+<tr>
+<th>Feature</th>
+<th>Global CSS</th>
+<th>CSS Modules</th>
+</tr>
+<tr>
+<td>Scope</td>
+<td>Entire Application</td>
+<td>Single Component</td>
+</tr>
+<tr>
+<td>Class Name Collision</td>
+<td>Possible</td>
+<td>Prevented</td>
+</tr>
+<tr>
+<td>Use Case</td>
+<td>Global Styles</td>
+<td>Component Styles</td>
+</tr>
+</table>
+<h3>Real Example</h3>
+<div class="code-title">app/globals.css</div>
+<pre><code class="language-css">body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+}
+.container {
+  max-width: 1200px;
+  margin: auto;
+}</code></pre>
+<div class="code-title">app/page.js</div>
+<pre><code class="language-jsx">export default function Home() {
+  return (
+    &lt;div className="container"&gt;
+      &lt;h1&gt;Home Page&lt;/h1&gt;
+    &lt;/div&gt;
+  );
+}</code></pre>
+<p>
+The <code>container</code> class is available because it was defined globally.
+</p>
+<h3>Interview Tip</h3>
+<div class="feature">
+A common misconception is that global CSS can be imported into any component. In reality, Next.js only allows global CSS imports in <code>pages/_app.js</code> (Pages Router) or <code>app/layout.js</code> (App Router).
+</div>
+<div class="feature">
+<strong>One-Line Definition:</strong><br/>
+Global CSS in Next.js is added by creating a global stylesheet and importing it in <code>pages/_app.js</code> (Pages Router) or <code>app/layout.js</code> (App Router), making the styles available throughout our application.
+</div>
+<h2 class="section-title" id="06-02"><span class="secnum">06-02</span>What are CSS Modules and how do you use them in Next.js?</h2>
+<p>
+CSS Modules are CSS files whose styles are scoped locally to a specific component.
+</p>
+<div class="feature">
+CSS Modules allow us to write component-specific CSS without worrying about class name conflicts in our application.
+</div>
+<h3>Why Do We Need CSS Modules?</h3>
+<p>
+Suppose we have two components:
+</p>
+<div class="code-title">Header.css</div>
+<pre><code class="language-css">.title {
+  color: blue;
+}</code></pre>
+<div class="code-title">Footer.css</div>
+<pre><code class="language-css">.title {
+  color: red;
+}</code></pre>
+<p>
+Both files use the same class name:
+</p>
+<pre><code class="language-text">title</code></pre>
+<p>
+This can cause style conflicts when using normal CSS.
+</p>
+<h3>How CSS Modules Solve This</h3>
+<p>
+Next.js automatically generates unique class names.
+</p>
+<div class="code-title">Generated Internally</div>
+<pre><code class="language-text">title
+      │
+      ▼
+Header_title__a12bc
+title
+      │
+      ▼
+Footer_title__x78yz</code></pre>
+<p>
+Now both classes are unique and cannot conflict.
+</p>
+<h3>Creating a CSS Module</h3>
+<p>
+CSS Module files must end with <code>.module.css</code>.
+</p>
+<div class="code-title">Button.module.css</div>
+<pre><code class="language-css">.button {
+  background: blue;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+}</code></pre>
+<h3>Using a CSS Module</h3>
+<div class="code-title">Button.js</div>
+<pre><code class="language-jsx">import styles from './Button.module.css';
+export default function Button() {
+  return (
+    &lt;button className={styles.button}&gt;
+      Click Me
+    &lt;/button&gt;
+  );
+}</code></pre>
+<h3>Project Structure</h3>
+<div class="code-title">Example</div>
+<pre><code class="language-text">components/
+├── Button.js
+└── Button.module.css</code></pre>
+<h3>What Happens Internally?</h3>
+<div class="code-title">Flow</div>
+<pre><code class="language-text">Button.module.css
+        │
+        ▼
+Import styles Object
+        │
+        ▼
+styles.button
+        │
+        ▼
+Generated Class Name
+Button_button__a1b2c</code></pre>
+<h3>Example with Multiple Classes</h3>
+<div class="code-title">Card.module.css</div>
+<pre><code class="language-css">.card {
+  padding: 20px;
+  border: 1px solid gray;
+}
+.title {
+  color: blue;
+}</code></pre>
+<div class="code-title">Card.js</div>
+<pre><code class="language-jsx">import styles from './Card.module.css';
+export default function Card() {
+  return (
+    &lt;div className={styles.card}&gt;
+      &lt;h2 className={styles.title}&gt;
+        Product
+      &lt;/h2&gt;
+    &lt;/div&gt;
+  );
+}</code></pre>
+<h3>Using Multiple Module Classes</h3>
+<div class="code-title">Button.module.css</div>
+<pre><code class="language-css">.button {
+  padding: 10px;
+}
+.primary {
+  background: blue;
+}</code></pre>
+<div class="code-title">Button.js</div>
+<pre><code class="language-jsx">import styles from './Button.module.css';
+export default function Button() {
+  return (
+    &lt;button
+      className={`${styles.button} ${styles.primary}`}
+    &gt;
+      Save
+    &lt;/button&gt;
+  );
+}</code></pre>
+<h3>Pages Router Example</h3>
+<div class="code-title">pages/index.js</div>
+<pre><code class="language-jsx">import styles from '../styles/Home.module.css';
+export default function Home() {
+  return (
+    &lt;h1 className={styles.title}&gt;
+      Home Page
+    &lt;/h1&gt;
+  );
+}</code></pre>
+<h3>App Router Example</h3>
+<div class="code-title">app/page.js</div>
+<pre><code class="language-jsx">import styles from './page.module.css';
+export default function Home() {
+  return (
+    &lt;h1 className={styles.title}&gt;
+      Home Page
+    &lt;/h1&gt;
+  );
+}</code></pre>
+<div class="code-title">app/page.module.css</div>
+<pre><code class="language-css">.title {
+  color: blue;
+}</code></pre>
+<h3>CSS Modules vs Global CSS</h3>
+<table>
+<tr>
+<th>Feature</th>
+<th>CSS Modules</th>
+<th>Global CSS</th>
+</tr>
+<tr>
+<td>Scope</td>
+<td>Single Component</td>
+<td>Entire Application</td>
+</tr>
+<tr>
+<td>Class Name Conflicts</td>
+<td>No</td>
+<td>Possible</td>
+</tr>
+<tr>
+<td>Import Location</td>
+<td>Any Component</td>
+<td>Root Files Only</td>
+</tr>
+<tr>
+<td>Best For</td>
+<td>Component Styles</td>
+<td>App-Wide Styles</td>
+</tr>
+</table>
+<h3>Real-World Example</h3>
+<p>
+Suppose our application contains:
+</p>
+<div class="code-title">Components</div>
+<pre><code class="language-text">Navbar
+Sidebar
+ProductCard
+Footer</code></pre>
+<p>
+Each component can have its own CSS Module:
+</p>
+<div class="code-title">Structure</div>
+<pre><code class="language-text">Navbar.module.css
+Sidebar.module.css
+ProductCard.module.css
+Footer.module.css</code></pre>
+<p>
+This keeps styles isolated and easy to maintain.
+</p>
+<h3>Advantages of CSS Modules</h3>
+<ul>
+<li>No class name collisions.</li>
+<li>Component-level styling.</li>
+<li>Easy maintenance.</li>
+<li>Automatic unique class generation.</li>
+<li>Works in both Pages Router and App Router.</li>
+</ul>
+<h3>Important Note</h3>
+<div class="feature">
+A common misconception is that CSS Modules are global. In reality, CSS Modules are locally scoped to the component that imports them.
+</div>
+<h3>Interview Tip</h3>
+<div class="feature">
+When we write <code>styles.button</code>, Next.js automatically maps it to a unique generated class name behind the scenes.
+</div>
+<div class="feature">
+<strong>One-Line Definition:</strong><br/>
+CSS Modules are locally scoped CSS files that allow us to create component-specific styles without class name conflicts by using files that end with <code>.module.css</code>.
+</div>
+<h2 class="section-title" id="06-03"><span class="secnum">06-03</span>What built-in CSS-in-JS solution does Next.js support in the App Router?</h2>
+<p>
+Next.js supports <code>styled-jsx</code> as its built-in CSS-in-JS solution.
+</p>
+<div class="feature">
+<code>styled-jsx</code> allows us to write component-scoped CSS directly inside our JSX without needing separate CSS files.
+</div>
+<h3>What is CSS-in-JS?</h3>
+<p>
+CSS-in-JS means writing CSS directly inside JavaScript or React components.
+</p>
+<p>
+Instead of creating:
+</p>
+<div class="code-title">Separate CSS File</div>
+<pre><code class="language-text">Button.js
+Button.css</code></pre>
+<p>
+We can keep styles inside the component itself.
+</p>
+<h3>Built-in Solution: styled-jsx</h3>
+<div class="code-title">Example</div>
+<pre><code class="language-jsx">export default function Home() {
+  return (
+    &lt;div&gt;
+      &lt;h1&gt;Hello Next.js&lt;/h1&gt;
+      &lt;style jsx&gt;{`
+        h1 {
+          color: blue;
+        }
+      `}&lt;/style&gt;
+    &lt;/div&gt;
+  );
+}</code></pre>
+<p>
+The CSS is scoped only to this component.
+</p>
+<h3>What Happens Internally?</h3>
+<div class="code-title">Flow</div>
+<pre><code class="language-text">Component
+      │
+      ▼
+styled-jsx
+      │
+      ▼
+Generate Unique Class
+      │
+      ▼
+Apply CSS Only
+To This Component</code></pre>
+<h3>Example of Style Isolation</h3>
+<div class="code-title">Component A</div>
+<pre><code class="language-jsx">export default function A() {
+  return (
+    &lt;&gt;
+      &lt;h1&gt;A&lt;/h1&gt;
+      &lt;style jsx&gt;{`
+        h1 {
+          color: red;
+        }
+      `}&lt;/style&gt;
+    &lt;/&gt;
+  );
+}</code></pre>
+<div class="code-title">Component B</div>
+<pre><code class="language-jsx">export default function B() {
+  return (
+    &lt;&gt;
+      &lt;h1&gt;B&lt;/h1&gt;
+      &lt;style jsx&gt;{`
+        h1 {
+          color: blue;
+        }
+      `}&lt;/style&gt;
+    &lt;/&gt;
+  );
+}</code></pre>
+<p>
+Both components can style <code>h1</code> differently without conflicts.
+</p>
+<h3>Global Styles with styled-jsx</h3>
+<p>
+We can also create global styles.
+</p>
+<div class="code-title">Global Style</div>
+<pre><code class="language-jsx">&lt;style jsx global&gt;{`
+  body {
+    margin: 0;
+    background: #111827;
+  }
+`}&lt;/style&gt;</code></pre>
+<p>
+Using <code>global</code> removes style scoping.
+</p>
+<h3>App Router Recommendation</h3>
+<p>
+Although styled-jsx is supported, the App Router documentation generally recommends:
+</p>
+<ul>
+<li>CSS Modules</li>
+<li>Tailwind CSS</li>
+<li>Global CSS</li>
+</ul>
+<p>
+for most styling needs.
+</p>
+<h3>CSS Modules Example</h3>
+<div class="code-title">Button.module.css</div>
+<pre><code class="language-css">.button {
+  background: blue;
+  color: white;
+}</code></pre>
+<div class="code-title">Button.js</div>
+<pre><code class="language-jsx">import styles from './Button.module.css';
+export default function Button() {
+  return (
+    &lt;button className={styles.button}&gt;
+      Save
+    &lt;/button&gt;
+  );
+}</code></pre>
+<h3>Does Next.js Include styled-components?</h3>
+<p>
+No.
+</p>
+<p>
+Next.js does not include styled-components by default.
+</p>
+<p>
+We must install it separately.
+</p>
+<div class="code-title">Install</div>
+<pre><code class="language-bash">npm install styled-components</code></pre>
+<h3>Does Next.js Include Emotion?</h3>
+<p>
+No.
+</p>
+<p>
+Emotion must also be installed separately.
+</p>
+<div class="code-title">Install</div>
+<pre><code class="language-bash">npm install @emotion/react @emotion/styled</code></pre>
+<h3>Built-in vs External CSS-in-JS</h3>
+<table>
+<tr>
+<th>Library</th>
+<th>Built Into Next.js</th>
+</tr>
+<tr>
+<td>styled-jsx</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>styled-components</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>Emotion</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>Stitches</td>
+<td>❌</td>
+</tr>
+</table>
+<h3>Important App Router Note</h3>
+<div class="feature">
+A common misconception is that styled-jsx is the recommended styling solution for the App Router. In reality, while styled-jsx is still supported, Next.js generally recommends CSS Modules, Tailwind CSS, and Global CSS for most App Router applications.
+</div>
+<h3>When Should We Use styled-jsx?</h3>
+<ul>
+<li>Small component-specific styles.</li>
+<li>Quick prototypes.</li>
+<li>Simple isolated styling.</li>
+<li>When we want styles inside the component file.</li>
+</ul>
+<h3>When Should We Prefer CSS Modules?</h3>
+<ul>
+<li>Large applications.</li>
+<li>Reusable components.</li>
+<li>Better maintainability.</li>
+<li>Team projects.</li>
+</ul>
+<h3>Interview Tip</h3>
+<div class="feature">
+The built-in CSS-in-JS solution in Next.js is <code>styled-jsx</code>, but in modern App Router projects, CSS Modules and Tailwind CSS are more commonly used.
+</div>
+<div class="feature">
+<strong>One-Line Definition:</strong><br/>
+Next.js supports <code>styled-jsx</code> as its built-in CSS-in-JS solution, allowing us to write component-scoped CSS directly inside JSX without class name conflicts.
+</div>
+<h2 class="section-title" id="06-04"><span class="secnum">06-04</span>How do you configure Tailwind CSS with Next.js?</h2>
+<p>
+Tailwind CSS is a utility-first CSS framework that allows us to style our Next.js application using utility classes directly inside JSX.
+</p>
+<div class="feature">
+In modern Next.js projects, Tailwind CSS can be added during project creation, or manually installed using Tailwind CSS packages and PostCSS configuration.
+</div>
+<h3>Method 1: Configure Tailwind During Project Creation</h3>
+<p>
+The easiest way is to select Tailwind CSS while creating a new Next.js project.
+</p>
+<div class="code-title">Create Next.js App</div>
+<pre><code class="language-bash">npx create-next-app@latest my-app</code></pre>
+<p>
+During setup, choose:
+</p>
+<div class="code-title">CLI Option</div>
+<pre><code class="language-text">Would you like to use Tailwind CSS? Yes</code></pre>
+<p>
+Next.js will automatically create the required Tailwind setup.
+</p>
+<h3>Method 2: Manual Setup</h3>
+<p>
+If our application already exists, we can install Tailwind CSS manually.
+</p>
+<h4>Step 1: Install Tailwind CSS</h4>
+<div class="code-title">Terminal</div>
+<pre><code class="language-bash">npm install tailwindcss @tailwindcss/postcss postcss</code></pre>
+<p>
+In the latest Tailwind setup, <code>@tailwindcss/postcss</code> is used as the PostCSS plugin.
+</p>
+<h4>Step 2: Create PostCSS Config</h4>
+<div class="code-title">postcss.config.mjs</div>
+<pre><code class="language-jsx">const config = {
+  plugins: {
+    '@tailwindcss/postcss': {}
+  }
+};
+export default config;</code></pre>
+<h4>Step 3: Import Tailwind in Global CSS</h4>
+<div class="code-title">app/globals.css</div>
+<pre><code class="language-css">@import 'tailwindcss';</code></pre>
+<h4>Step 4: Import Global CSS in Root Layout</h4>
+<div class="code-title">app/layout.js</div>
+<pre><code class="language-jsx">import './globals.css';
+export default function RootLayout({ children }) {
+  return (
+    &lt;html lang="en"&gt;
+      &lt;body&gt;{children}&lt;/body&gt;
+    &lt;/html&gt;
+  );
+}</code></pre>
+<h4>Step 5: Use Tailwind Classes</h4>
+<div class="code-title">app/page.js</div>
+<pre><code class="language-jsx">export default function Home() {
+  return (
+    &lt;main className="min-h-screen bg-slate-900 p-10 text-white"&gt;
+      &lt;h1 className="text-4xl font-bold text-sky-400"&gt;
+        Hello Tailwind
+      &lt;/h1&gt;
+    &lt;/main&gt;
+  );
+}</code></pre>
+<h3>Project Structure</h3>
+<div class="code-title">App Router Structure</div>
+<pre><code class="language-text">my-app/
+├── app/
+│   ├── globals.css
+│   ├── layout.js
+│   └── page.js
+├── postcss.config.mjs
+├── package.json
+└── next.config.js</code></pre>
+<h3>What Happens Internally?</h3>
+<div class="code-title">Flow</div>
+<pre><code class="language-text">Tailwind Classes In JSX
+        │
+        ▼
+Tailwind CSS Compiler
+        │
+        ▼
+Generate Required CSS
+        │
+        ▼
+PostCSS Processes CSS
+        │
+        ▼
+Browser Receives Final CSS</code></pre>
+<h3>Example UI</h3>
+<div class="code-title">Tailwind Card Example</div>
+<pre><code class="language-jsx">export default function Card() {
+  return (
+    &lt;div className="rounded-xl bg-white p-6 shadow-lg"&gt;
+      &lt;h2 className="text-2xl font-bold text-gray-900"&gt;
+        Product Card
+      &lt;/h2&gt;
+      &lt;p className="mt-2 text-gray-600"&gt;
+        This card is styled using Tailwind CSS.
+      &lt;/p&gt;
+    &lt;/div&gt;
+  );
+}</code></pre>
+<h3>Tailwind with Pages Router</h3>
+<p>
+In the Pages Router, global CSS is imported inside <code>pages/_app.js</code>.
+</p>
+<div class="code-title">styles/globals.css</div>
+<pre><code class="language-css">@import 'tailwindcss';</code></pre>
+<div class="code-title">pages/_app.js</div>
+<pre><code class="language-jsx">import '../styles/globals.css';
+export default function MyApp({ Component, pageProps }) {
+  return &lt;Component {...pageProps} /&gt;;
+}</code></pre>
+<h3>Tailwind v3 Setup Note</h3>
+<p>
+Older projects using Tailwind CSS v3 commonly use <code>tailwind.config.js</code> and these CSS directives:
+</p>
+<div class="code-title">Tailwind v3 globals.css</div>
+<pre><code class="language-css">@tailwind base;
+@tailwind components;
+@tailwind utilities;</code></pre>
+<div class="code-title">tailwind.config.js</div>
+<pre><code class="language-jsx">module.exports = {
+  content: [
+    './app/**/*.{js,ts,jsx,tsx,mdx}',
+    './pages/**/*.{js,ts,jsx,tsx,mdx}',
+    './components/**/*.{js,ts,jsx,tsx,mdx}'
+  ],
+  theme: {
+    extend: {}
+  },
+  plugins: []
+};</code></pre>
+<p>
+For new projects, the latest Tailwind setup uses <code>@import 'tailwindcss'</code> and <code>@tailwindcss/postcss</code>. :contentReference[oaicite:0]{index=0}
+</p>
+<h3>Common Mistakes</h3>
+<table>
+<tr>
+<th>Mistake</th>
+<th>Fix</th>
+</tr>
+<tr>
+<td>Tailwind classes not working</td>
+<td>Make sure <code>globals.css</code> is imported in <code>layout.js</code> or <code>_app.js</code></td>
+</tr>
+<tr>
+<td>Using old Tailwind directives in new setup</td>
+<td>Use <code>@import 'tailwindcss'</code> for latest Tailwind</td>
+</tr>
+<tr>
+<td>Missing PostCSS config</td>
+<td>Create <code>postcss.config.mjs</code></td>
+</tr>
+<tr>
+<td>Wrong file location</td>
+<td>Use <code>app/globals.css</code> for App Router or <code>styles/globals.css</code> for Pages Router</td>
+</tr>
+</table>
+<h3>When Should We Use Tailwind CSS?</h3>
+<ul>
+<li>When we want fast UI development.</li>
+<li>When we want utility-first styling.</li>
+<li>When we want consistent spacing, colors, and typography.</li>
+<li>When we want to avoid writing many custom CSS files.</li>
+<li>When our application needs responsive design quickly.</li>
+</ul>
+<h3>Interview Tip</h3>
+<div class="feature">
+A common misconception is that Tailwind replaces CSS completely. In reality, Tailwind provides utility classes, but it still generates normal CSS behind the scenes.
+</div>
+<div class="feature">
+<strong>One-Line Definition:</strong><br/>
+Tailwind CSS is configured in Next.js by installing Tailwind packages, adding the PostCSS plugin, importing Tailwind in global CSS, and then using utility classes directly inside our JSX.
+</div>
+<h2 class="section-title" id="06-05"><span class="secnum">06-05</span>How does the next/image component improve performance over a plain <img>?</h2>
+<p>
+The <code>next/image</code> component is a built-in Next.js component that automatically optimizes images for better performance, faster loading, and improved Core Web Vitals.
+</p>
+<div class="feature">
+Unlike a normal <code>&lt;img&gt;</code> tag, <code>next/image</code> automatically resizes, compresses, lazy loads, and serves modern image formats when possible.
+</div>
+<h3>Plain img Example</h3>
+<div class="code-title">Regular HTML Image</div>
+<pre><code class="language-html">&lt;img
+  src="/product.jpg"
+  alt="Product"
+/&gt;</code></pre>
+<p>
+The browser downloads exactly the image file that exists on the server.
+</p>
+<p>
+No optimization happens automatically.
+</p>
+<h3>next/image Example</h3>
+<div class="code-title">Next.js Image Component</div>
+<pre><code class="language-jsx">import Image from 'next/image';
+export default function Product() {
+  return (
+    &lt;Image
+      src="/product.jpg"
+      alt="Product"
+      width={500}
+      height={300}
+    /&gt;
+  );
+}</code></pre>
+<p>
+Next.js automatically optimizes the image before sending it to the browser.
+</p>
+<h3>Why Do We Need Image Optimization?</h3>
+<p>
+Suppose our original image is:
+</p>
+<div class="code-title">Original Image</div>
+<pre><code class="language-text">4000 × 3000 Pixels
+5 MB</code></pre>
+<p>
+But our page displays it at:
+</p>
+<div class="code-title">Displayed Size</div>
+<pre><code class="language-text">400 × 300 Pixels</code></pre>
+<p>
+Using a normal img:
+</p>
+<pre><code class="language-text">Download Full 5 MB Image</code></pre>
+<p>
+Most of those pixels are never used.
+</p>
+<p>
+This wastes bandwidth and slows page loading.
+</p>
+<h3>Automatic Image Resizing</h3>
+<p>
+The Image component generates properly sized images.
+</p>
+<div class="code-title">What Happens Internally</div>
+<pre><code class="language-text">Original Image
+4000x3000
+      │
+      ▼
+Next.js Creates
+500x375
+1000x750
+1500x1125
+      │
+      ▼
+Browser Downloads
+Only Required Size</code></pre>
+<h3>Automatic Lazy Loading</h3>
+<p>
+Images below the viewport are not loaded immediately.
+</p>
+<div class="code-title">Normal img</div>
+<pre><code class="language-text">Page Opens
+      │
+      ▼
+Download All Images</code></pre>
+<div class="code-title">next/image</div>
+<pre><code class="language-text">Page Opens
+      │
+      ▼
+Download Visible Images
+User Scrolls
+      │
+      ▼
+Download Remaining Images</code></pre>
+<p>
+This significantly improves initial page load performance.
+</p>
+<h3>Modern Image Formats</h3>
+<p>
+Next.js can automatically serve newer formats such as:
+</p>
+<ul>
+<li>WebP</li>
+<li>AVIF</li>
+</ul>
+<div class="code-title">Flow</div>
+<pre><code class="language-text">Original JPG
+      │
+      ▼
+Next.js Optimization
+      │
+      ▼
+WebP / AVIF
+      │
+      ▼
+Smaller File Size</code></pre>
+<h3>Preventing Layout Shift</h3>
+<p>
+One of the biggest benefits of next/image is preventing layout shifts.
+</p>
+<h4>Without Width and Height</h4>
+<div class="code-title">Plain img</div>
+<pre><code class="language-html">&lt;img
+  src="/banner.jpg"
+  alt="Banner"
+/&gt;</code></pre>
+<p>
+The browser does not know the image size initially.
+</p>
+<p>
+When the image loads:
+</p>
+<pre><code class="language-text">Content Moves Down
+Layout Shifts</code></pre>
+<h4>With next/image</h4>
+<div class="code-title">Image Component</div>
+<pre><code class="language-jsx">&lt;Image
+  src="/banner.jpg"
+  alt="Banner"
+  width={1200}
+  height={500}
+/&gt;</code></pre>
+<p>
+The browser reserves space before loading the image.
+</p>
+<p>
+No layout shift occurs.
+</p>
+<h3>Responsive Images</h3>
+<div class="code-title">Responsive Example</div>
+<pre><code class="language-jsx">&lt;Image
+  src="/hero.jpg"
+  alt="Hero"
+  fill
+  sizes="100vw"
+/&gt;</code></pre>
+<p>
+Next.js automatically serves different image sizes for:
+</p>
+<pre><code class="language-text">Mobile
+Tablet
+Desktop</code></pre>
+<h3>Priority Loading</h3>
+<p>
+Important images can be loaded immediately.
+</p>
+<div class="code-title">Hero Image</div>
+<pre><code class="language-jsx">&lt;Image
+  src="/hero.jpg"
+  alt="Hero"
+  width={1200}
+  height={600}
+  priority
+/&gt;</code></pre>
+<p>
+This is useful for:
+</p>
+<ul>
+<li>Hero Images</li>
+<li>Above-the-fold Content</li>
+<li>Landing Pages</li>
+</ul>
+<h4>Why Do We Need priority If Above-the-Fold Images Already Load?</h4>
+<p>
+A common misconception is that <code>priority</code> is required to load above-the-fold images.
+</p>
+<p>
+Even without <code>priority</code>, an image that is visible in the viewport is not lazy loaded and will load automatically.
+</p>
+<div class="code-title">Without priority</div>
+<pre><code class="language-text">HTML Received
+      │
+      ▼
+Browser Parses HTML
+      │
+      ▼
+Finds Image
+      │
+      ▼
+Starts Downloading Image</code></pre>
+<p>
+The browser discovers the image while parsing the page and then starts downloading it.
+</p>
+<div class="code-title">With priority</div>
+<pre><code class="language-text">HTML Received
+      │
+      ▼
+Preload Image
+(rel="preload")
+      │
+      ▼
+Start Downloading Image ASAP
+      │
+      ▼
+Render Page</code></pre>
+<p>
+When <code>priority</code> is used, Next.js adds a preload hint so the browser can begin downloading the image earlier.
+</p>
+<div class="code-title">Internally</div>
+<pre><code class="language-html">&lt;link
+  rel="preload"
+  as="image"
+  href="/hero.jpg"
+/&gt;</code></pre>
+<p>
+This can improve Largest Contentful Paint (LCP) when the image is a major part of the page.
+</p>
+<table>
+<tr>
+<th>Behavior</th>
+<th>Above-the-Fold Image</th>
+<th>Below-the-Fold Image</th>
+</tr>
+<tr>
+<td>next/image</td>
+<td>Loads Automatically</td>
+<td>Lazy Loaded</td>
+</tr>
+<tr>
+<td>next/image + priority</td>
+<td>Preloaded and Higher Priority</td>
+<td>Usually Not Needed</td>
+</tr>
+</table>
+<div class="feature">
+<strong>Important:</strong><br/>
+<code>priority</code> does not make an above-the-fold image load instead of lazy loading. The image would already load automatically. It simply tells the browser that the image is critical and should be fetched as early as possible.
+</div>
+<h3>What Happens Internally?</h3>
+<div class="code-title">Plain img</div>
+<pre><code class="language-text">Browser
+   │
+   ▼
+Download Original Image
+   │
+   ▼
+Display Image</code></pre>
+<div class="code-title">next/image</div>
+<pre><code class="language-text">Browser
+   │
+   ▼
+Request Image
+   │
+   ▼
+Next.js Image Optimizer
+   │
+   ├── Resize
+   ├── Compress
+   ├── Convert Format
+   └── Cache
+   │
+   ▼
+Send Optimized Image</code></pre>
+<h3>next/image vs img</h3>
+<table>
+<tr>
+<th>Feature</th>
+<th>next/image</th>
+<th>img</th>
+</tr>
+<tr>
+<td>Automatic Optimization</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>Lazy Loading</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>Responsive Images</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>WebP / AVIF</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>Prevent Layout Shift</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>Priority Loading</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+</table>
+<h3>When Should We Use next/image?</h3>
+<ul>
+<li>Product Images</li>
+<li>Blog Images</li>
+<li>Hero Banners</li>
+<li>Gallery Images</li>
+<li>Marketing Websites</li>
+</ul>
+<h3>When Might We Use img?</h3>
+<ul>
+<li>Very small icons.</li>
+<li>External content where optimization is unnecessary.</li>
+<li>Special edge cases requiring raw image behavior.</li>
+</ul>
+<h3>Interview Tip</h3>
+<div class="feature">
+A common misconception is that next/image is just a React wrapper around img. In reality, it includes automatic resizing, compression, lazy loading, responsive image generation, caching, and modern format conversion.
+</div>
+<div class="feature">
+<strong>One-Line Definition:</strong><br/>
+The <code>next/image</code> component improves performance by automatically optimizing images through resizing, compression, lazy loading, responsive image generation, caching, and layout shift prevention, whereas a plain <code>&lt;img&gt;</code> tag does none of these automatically.
+</div>
+<h2 class="section-title" id="06-06"><span class="secnum">06-06</span>What is the priority prop on next/image and when must you set it?</h2>
+<p>
+The <code>priority</code> prop tells Next.js that an image is important and should be loaded immediately instead of being lazy-loaded.
+</p>
+<div class="feature">
+<strong>Simple Meaning:</strong><br/>
+Use <code>priority</code> for the most important image visible when the page first loads, usually the Hero or LCP image.
+</div>
+<hr/>
+<h3>Why Does next/image Lazy Load By Default?</h3>
+<p>
+Next.js automatically lazy-loads most images to improve performance.
+</p>
+<div class="code-title">Default Image</div>
+<pre><code class="language-tsx">import Image from 'next/image';
+export default function Page() {
+  return (
+    &lt;Image
+      src="/product.jpg"
+      alt="Product"
+      width={600}
+      height={400}
+    /&gt;
+  );
+}</code></pre>
+<div class="code-title">Flow</div>
+<pre><code class="language-text">Page Loads
+      ↓
+Visible Content Loads
+      ↓
+Image Loads When Needed</code></pre>
+<p>
+This is good for most images.
+</p>
+<hr/>
+<h3>What Does priority Do?</h3>
+<p>
+The <code>priority</code> prop tells Next.js to preload the image and fetch it as soon as possible.
+</p>
+<div class="code-title">Priority Image</div>
+<pre><code class="language-tsx">import Image from 'next/image';
+export default function Page() {
+  return (
+    &lt;Image
+      src="/hero.jpg"
+      alt="Hero"
+      width={1200}
+      height={600}
+      priority
+    /&gt;
+  );
+}</code></pre>
+<div class="code-title">Flow</div>
+<pre><code class="language-text">Page Starts Loading
+      ↓
+Image Request Starts Immediately
+      ↓
+Hero Image Appears Faster</code></pre>
+<hr/>
+<h3>What Problem Does It Solve?</h3>
+<p>
+Many websites have a large hero image at the top of the page.
+</p>
+<div class="code-title">Without priority</div>
+<pre><code class="language-text">HTML Loads
+      ↓
+CSS Loads
+      ↓
+JavaScript Loads
+      ↓
+Hero Image Loads Later
+      ↓
+Slow LCP Score</code></pre>
+<div class="code-title">With priority</div>
+<pre><code class="language-text">HTML Loads
+      ↓
+Hero Image Preloaded
+      ↓
+Hero Image Appears Faster
+      ↓
+Better LCP Score</code></pre>
+<hr/>
+<h3>What Is LCP?</h3>
+<p>
+LCP (Largest Contentful Paint) measures how quickly the largest visible content appears on the screen.
+</p>
+<p>
+Often the LCP element is:
+</p>
+<ul>
+<li>Hero image</li>
+<li>Banner image</li>
+<li>Large product image</li>
+<li>Landing page image</li>
+</ul>
+<div class="feature">
+<strong>Important:</strong><br/>
+If an image becomes the LCP element, Next.js usually recommends adding the <code>priority</code> prop.
+</div>
+<hr/>
+<h3>Real World Example</h3>
+<div class="code-title">E-Commerce Hero Banner</div>
+<pre><code class="language-tsx">import Image from 'next/image';
+export default function HomePage() {
+  return (
+    &lt;Image
+      src="/banner.jpg"
+      alt="Summer Sale"
+      width={1600}
+      height={700}
+      priority
+    /&gt;
+  );
+}</code></pre>
+<p>
+Because the banner is visible immediately after page load, it should use <code>priority</code>.
+</p>
+<hr/>
+<h3>When Must You Use priority?</h3>
+<table>
+<tr>
+<th>Image Type</th>
+<th>Use priority?</th>
+</tr>
+<tr>
+<td>Main Hero Image</td>
+<td>✅ Yes</td>
+</tr>
+<tr>
+<td>LCP Image</td>
+<td>✅ Yes</td>
+</tr>
+<tr>
+<td>Above-the-Fold Banner</td>
+<td>✅ Yes</td>
+</tr>
+<tr>
+<td>Logo (Large &amp; Visible)</td>
+<td>Sometimes</td>
+</tr>
+<tr>
+<td>Gallery Images</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td>Below-the-Fold Images</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td>Product Images Far Down Page</td>
+<td>❌ No</td>
+</tr>
+</table>
+<hr/>
+<h3>When Should You Avoid priority?</h3>
+<p>
+Do not add <code>priority</code> to every image.
+</p>
+<div class="warning">
+<strong>Bad Practice:</strong><br/>
+Using <code>priority</code> on many images forces the browser to download all of them immediately, which can slow down the page.
+</div>
+<div class="code-title">Bad Example</div>
+<pre><code class="language-tsx">&lt;Image src="/img1.jpg" alt="" width={400} height={300} priority /&gt;
+&lt;Image src="/img2.jpg" alt="" width={400} height={300} priority /&gt;
+&lt;Image src="/img3.jpg" alt="" width={400} height={300} priority /&gt;
+&lt;Image src="/img4.jpg" alt="" width={400} height={300} priority /&gt;</code></pre>
+<p>
+Usually only one or two important images should use it.
+</p>
+<hr/>
+<h3>What Happens Internally?</h3>
+<p>
+When <code>priority</code> is used, Next.js automatically inserts preload hints.
+</p>
+<div class="code-title">Conceptual Output</div>
+<pre><code class="language-html">&lt;link
+  rel="preload"
+  as="image"
+  href="/hero.jpg"
+/&gt;</code></pre>
+<p>
+This tells the browser to fetch the image earlier.
+</p>
+<hr/>
+<h3>priority vs Lazy Loading</h3>
+<table>
+<tr>
+<th>Feature</th>
+<th>priority</th>
+<th>Default Image</th>
+</tr>
+<tr>
+<td>Preloaded</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>Lazy Loaded</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Good For LCP</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>Good For Below Fold</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+</table>
+<hr/>
+<h3>Common Interview Question</h3>
+<div class="code-title">Question</div>
+<pre><code class="language-text">Should we add priority to all images?</code></pre>
+<div class="code-title">Answer</div>
+<pre><code class="language-text">No.
+Only use priority for the most important
+above-the-fold image, usually the LCP image.</code></pre>
+<hr/>
+<h3>Easy Memory Trick</h3>
+<div class="code-title">Remember</div>
+<pre><code class="language-text">Normal Image
+      ↓
+Lazy Load
+Hero Image
+      ↓
+priority
+      ↓
+Preload</code></pre>
+<div class="feature">
+<strong>One-Line Definition:</strong><br/>
+The <code>priority</code> prop tells Next.js to preload an important image immediately and should be used for the main above-the-fold or LCP image to improve loading performance.
+</div>
+<h2 class="section-title" id="06-07"><span class="secnum">06-07</span>How do you configure remote image domains in next.config.js?</h2>
+<p>
+By default, the <code>next/image</code> component only optimizes local images and trusted remote sources.
+</p>
+<div class="feature">
+To use external images with <code>next/image</code>, we must explicitly allow the image domain in <code>next.config.js</code>.
+</div>
+<h3>Why Is Configuration Required?</h3>
+<p>
+Suppose our application displays an image from:
+</p>
+<div class="code-title">Remote Image URL</div>
+<pre><code class="language-text">https://images.example.com/product.jpg</code></pre>
+<p>
+Using it directly:
+</p>
+<div class="code-title">Image Component</div>
+<pre><code class="language-jsx">import Image from 'next/image';
+export default function Product() {
+  return (
+    &lt;Image
+      src="https://images.example.com/product.jpg"
+      alt="Product"
+      width={500}
+      height={300}
+    /&gt;
+  );
+}</code></pre>
+<p>
+Will produce an error because Next.js does not trust unknown domains.
+</p>
+<h3>Error Example</h3>
+<div class="code-title">Runtime Error</div>
+<pre><code class="language-text">Invalid src prop
+Hostname "images.example.com"
+is not configured under images
+in your next.config.js</code></pre>
+<h3>Solution: Configure Remote Domains</h3>
+<div class="code-title">next.config.js</div>
+<pre><code class="language-js">/** @type {import('next').NextConfig} */
+const nextConfig = {
+  images: {
+    domains: [
+      'images.example.com'
+    ]
+  }
+};
+module.exports = nextConfig;</code></pre>
+<p>
+Now Next.js allows images from:
+</p>
+<pre><code class="language-text">https://images.example.com</code></pre>
+<h3>Complete Example</h3>
+<div class="code-title">next.config.js</div>
+<pre><code class="language-js">const nextConfig = {
+  images: {
+    domains: [
+      'images.example.com'
+    ]
+  }
+};
+module.exports = nextConfig;</code></pre>
+<div class="code-title">app/page.js</div>
+<pre><code class="language-jsx">import Image from 'next/image';
+export default function Home() {
+  return (
+    &lt;Image
+      src="https://images.example.com/product.jpg"
+      alt="Product"
+      width={600}
+      height={400}
+    /&gt;
+  );
+}</code></pre>
+<h3>Modern Approach: remotePatterns</h3>
+<p>
+In newer versions of Next.js, <code>remotePatterns</code> is preferred because it provides more control.
+</p>
+<div class="code-title">next.config.js</div>
+<pre><code class="language-js">const nextConfig = {
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'images.example.com',
+        pathname: '/**'
+      }
+    ]
+  }
+};
+module.exports = nextConfig;</code></pre>
+<h3>Why remotePatterns Is Better?</h3>
+<p>
+With <code>domains</code>, all images from the domain are allowed.
+</p>
+<p>
+With <code>remotePatterns</code>, we can restrict:
+</p>
+<ul>
+<li>Protocol</li>
+<li>Hostname</li>
+<li>Port</li>
+<li>Pathname</li>
+</ul>
+<h4>Example</h4>
+<div class="code-title">Specific Folder Only</div>
+<pre><code class="language-js">const nextConfig = {
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'images.example.com',
+        pathname: '/products/**'
+      }
+    ]
+  }
+};
+module.exports = nextConfig;</code></pre>
+<p>
+Allowed:
+</p>
+<pre><code class="language-text">https://images.example.com/products/shirt.jpg
+https://images.example.com/products/shoes.jpg</code></pre>
+<p>
+Blocked:
+</p>
+<pre><code class="language-text">https://images.example.com/users/profile.jpg</code></pre>
+<h3>Multiple Domains</h3>
+<div class="code-title">next.config.js</div>
+<pre><code class="language-js">const nextConfig = {
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'images.example.com'
+      },
+      {
+        protocol: 'https',
+        hostname: 'cdn.example.com'
+      }
+    ]
+  }
+};
+module.exports = nextConfig;</code></pre>
+<h3>What Happens Internally?</h3>
+<div class="code-title">Request Flow</div>
+<pre><code class="language-text">Browser Requests Image
+          │
+          ▼
+next/image
+          │
+          ▼
+Check next.config.js
+          │
+          ▼
+Domain Allowed?
+     │         │
+    Yes        No
+     │         │
+     ▼         ▼
+Optimize    Throw Error
+Image</code></pre>
+<h3>Why Does Next.js Restrict Domains?</h3>
+<ul>
+<li>Security</li>
+<li>Performance</li>
+<li>Prevent Abuse</li>
+<li>Control Optimization Sources</li>
+</ul>
+<p>
+Next.js needs to know which remote images it is allowed to download and optimize.
+</p>
+<h3>domains vs remotePatterns</h3>
+<table>
+<tr>
+<th>Feature</th>
+<th>domains</th>
+<th>remotePatterns</th>
+</tr>
+<tr>
+<td>Simple Setup</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>Control Protocol</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Control Path</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Control Port</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Recommended</td>
+<td>Older Approach</td>
+<td>Modern Approach</td>
+</tr>
+</table>
+<h3>Common Mistake</h3>
+<div class="code-title">Incorrect</div>
+<pre><code class="language-jsx">&lt;Image
+  src="https://images.example.com/photo.jpg"
+  alt="Photo"
+  width={500}
+  height={300}
+/&gt;</code></pre>
+<p>
+Without updating <code>next.config.js</code>, this will fail.
+</p>
+<h3>After Updating Configuration</h3>
+<div class="code-title">Correct</div>
+<pre><code class="language-text">next.config.js
+      │
+      ▼
+Allow Domain
+      │
+      ▼
+Restart Dev Server
+      │
+      ▼
+Image Works Correctly</code></pre>
+<h3>Important Note</h3>
+<div class="feature">
+After changing <code>next.config.js</code>, we must restart the Next.js development server because configuration files are loaded only during startup.
+</div>
+<h3>Interview Tip</h3>
+<div class="feature">
+A common misconception is that next/image can load any remote image automatically. In reality, remote image domains must be explicitly configured in <code>next.config.js</code> before Next.js will optimize and serve them.
+</div>
+<div class="feature">
+<strong>One-Line Definition:</strong><br/>
+Remote image domains are configured in <code>next.config.js</code> using <code>images.domains</code> or the recommended <code>images.remotePatterns</code> option, allowing Next.js to securely optimize external images.
+</div>
+<h2 class="section-title" id="06-08"><span class="secnum">06-08</span>What is next/font and how does it eliminate layout shift from font loading?</h2>
+<p>
+<code>next/font</code> is a built-in Next.js feature that optimizes font loading by downloading, self-hosting, and serving fonts directly from our application.
+</p>
+<div class="feature">
+<code>next/font</code> helps eliminate layout shift caused by font loading and improves Core Web Vitals such as CLS (Cumulative Layout Shift).
+</div>
+<h3>Why Do We Need next/font?</h3>
+<p>
+Traditionally, web fonts are loaded from external servers such as Google Fonts.
+</p>
+<div class="code-title">Traditional Method</div>
+<pre><code class="language-html">&lt;link
+  href="https://fonts.googleapis.com/css2?family=Roboto"
+  rel="stylesheet"
+/&gt;</code></pre>
+<p>
+This causes an extra network request before the font becomes available.
+</p>
+<h3>The Layout Shift Problem</h3>
+<p>
+Suppose our page contains:
+</p>
+<div class="code-title">HTML</div>
+<pre><code class="language-html">&lt;h1&gt;Welcome To Next.js&lt;/h1&gt;</code></pre>
+<p>
+When the page loads:
+</p>
+<div class="code-title">Step 1</div>
+<pre><code class="language-text">Font Not Loaded Yet
+Browser Uses
+Fallback Font
+Welcome To Next.js</code></pre>
+<p>
+After the font downloads:
+</p>
+<div class="code-title">Step 2</div>
+<pre><code class="language-text">Custom Font Loaded
+Welcome To Next.js</code></pre>
+<p>
+The text width and height may change.
+</p>
+<p>
+This causes content movement on the screen.
+</p>
+<h3>What is Layout Shift?</h3>
+<div class="code-title">Without next/font</div>
+<pre><code class="language-text">Page Loads
+      │
+      ▼
+Fallback Font
+Welcome To Next.js
+      │
+      ▼
+Font Downloads
+      │
+      ▼
+Text Resizes
+      │
+      ▼
+Content Moves</code></pre>
+<p>
+Users see the page jump unexpectedly.
+</p>
+<h3>How next/font Solves This</h3>
+<p>
+Next.js downloads the font during the build process and serves it directly from our application.
+</p>
+<div class="code-title">next/font Flow</div>
+<pre><code class="language-text">Build Application
+      │
+      ▼
+Download Font
+      │
+      ▼
+Self Host Font
+      │
+      ▼
+Deploy
+User Visits Page
+      │
+      ▼
+Font Available Immediately
+      │
+      ▼
+No Layout Shift</code></pre>
+<h3>Using Google Fonts</h3>
+<div class="code-title">app/layout.js</div>
+<pre><code class="language-jsx">import { Inter } from 'next/font/google';
+const inter = Inter({
+  subsets: ['latin']
+});
+export default function RootLayout({
+  children
+}) {
+  return (
+    &lt;html lang="en"&gt;
+      &lt;body className={inter.className}&gt;
+        {children}
+      &lt;/body&gt;
+    &lt;/html&gt;
+  );
+}</code></pre>
+<h3>Using Local Fonts</h3>
+<div class="code-title">app/layout.js</div>
+<pre><code class="language-jsx">import localFont from 'next/font/local';
+const myFont = localFont({
+  src: './fonts/MyFont.woff2'
+});
+export default function RootLayout({
+  children
+}) {
+  return (
+    &lt;html&gt;
+      &lt;body className={myFont.className}&gt;
+        {children}
+      &lt;/body&gt;
+    &lt;/html&gt;
+  );
+}</code></pre>
+<h3>Project Structure</h3>
+<div class="code-title">Local Font Example</div>
+<pre><code class="language-text">app/
+├── fonts/
+│   └── MyFont.woff2
+├── layout.js
+└── page.js</code></pre>
+<h3>What Happens Internally?</h3>
+<div class="code-title">Traditional Google Fonts</div>
+<pre><code class="language-text">User Visits Page
+      │
+      ▼
+Download HTML
+      │
+      ▼
+Request Google Fonts
+      │
+      ▼
+Wait For Font
+      │
+      ▼
+Render Font</code></pre>
+<div class="code-title">next/font</div>
+<pre><code class="language-text">Build Time
+      │
+      ▼
+Download Font
+      │
+      ▼
+Store In Application
+User Visits Page
+      │
+      ▼
+Font Already Available
+      │
+      ▼
+Render Immediately</code></pre>
+<h3>Font Display Optimization</h3>
+<p>
+Next.js automatically applies font loading optimizations.
+</p>
+<div class="code-title">Example</div>
+<pre><code class="language-jsx">const inter = Inter({
+  subsets: ['latin'],
+  display: 'swap'
+});</code></pre>
+<p>
+This helps improve perceived loading performance.
+</p>
+<h3>Benefits of next/font</h3>
+<ul>
+<li>Eliminates layout shift from font loading.</li>
+<li>Self-hosts fonts automatically.</li>
+<li>Removes extra font requests.</li>
+<li>Improves CLS score.</li>
+<li>Improves page performance.</li>
+<li>Works with Google Fonts and local fonts.</li>
+</ul>
+<h3>next/font vs Traditional Google Fonts</h3>
+<table>
+<tr>
+<th>Feature</th>
+<th>next/font</th>
+<th>Google Font Link</th>
+</tr>
+<tr>
+<td>Self Hosted</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>Extra Network Request</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Automatic Optimization</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>Layout Shift Reduction</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>Core Web Vitals Friendly</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+</table>
+<h3>Real-World Example</h3>
+<p>
+Suppose our application uses the Inter font on every page.
+</p>
+<div class="code-title">Without next/font</div>
+<pre><code class="language-text">Load HTML
+      │
+      ▼
+Request Google Fonts
+      │
+      ▼
+Wait
+      │
+      ▼
+Render Font
+      │
+      ▼
+Possible Layout Shift</code></pre>
+<div class="code-title">With next/font</div>
+<pre><code class="language-text">Load HTML
+      │
+      ▼
+Font Already Available
+      │
+      ▼
+Render Immediately
+      │
+      ▼
+No Layout Shift</code></pre>
+<h3>Pages Router Example</h3>
+<div class="code-title">pages/_app.js</div>
+<pre><code class="language-jsx">import { Inter } from 'next/font/google';
+const inter = Inter({
+  subsets: ['latin']
+});
+export default function MyApp({
+  Component,
+  pageProps
+}) {
+  return (
+    &lt;main className={inter.className}&gt;
+      &lt;Component {...pageProps} /&gt;
+    &lt;/main&gt;
+  );
+}</code></pre>
+<h3>Interview Tip</h3>
+<div class="feature">
+A common misconception is that next/font only downloads fonts. In reality, it downloads, self-hosts, optimizes, and serves fonts in a way that minimizes layout shifts and improves performance.
+</div>
+<div class="feature">
+<strong>One-Line Definition:</strong><br/>
+<code>next/font</code> is a built-in Next.js font optimization feature that self-hosts fonts and eliminates layout shift by ensuring optimized fonts are available immediately when the page renders.
+</div>
+<h2 class="section-title" id="06-09"><span class="secnum">06-09</span>How do you use a Google Font vs a local font with next/font?</h2>
+<p>
+The <code>next/font</code> package allows us to use both Google Fonts and local fonts with automatic optimization, self-hosting, and layout shift prevention.
+</p>
+<div class="feature">
+Google Fonts are imported from <code>next/font/google</code>, while local fonts are imported from <code>next/font/local</code>.
+</div>
+<h3>Google Font</h3>
+<p>
+Use Google Fonts when the font is available in the Google Fonts library.
+</p>
+<h4>Import a Google Font</h4>
+<div class="code-title">app/layout.js</div>
+<pre><code class="language-jsx">import { Inter } from 'next/font/google';
+const inter = Inter({
+  subsets: ['latin']
+});
+export default function RootLayout({ children }) {
+  return (
+    &lt;html lang="en"&gt;
+      &lt;body className={inter.className}&gt;
+        {children}
+      &lt;/body&gt;
+    &lt;/html&gt;
+  );
+}</code></pre>
+<h4>What Happens Internally?</h4>
+<div class="code-title">Flow</div>
+<pre><code class="language-text">Build Time
+      │
+      ▼
+Download Inter Font
+      │
+      ▼
+Self Host Font
+      │
+      ▼
+Deploy Application
+      │
+      ▼
+Font Available Immediately</code></pre>
+<h3>Using Multiple Weights</h3>
+<div class="code-title">Example</div>
+<pre><code class="language-jsx">import { Inter } from 'next/font/google';
+const inter = Inter({
+  subsets: ['latin'],
+  weight: ['400', '700']
+});</code></pre>
+<h3>Using Multiple Styles</h3>
+<div class="code-title">Example</div>
+<pre><code class="language-jsx">import { Roboto } from 'next/font/google';
+const roboto = Roboto({
+  subsets: ['latin'],
+  weight: ['400', '700'],
+  style: ['normal', 'italic']
+});</code></pre>
+<h3>Local Font</h3>
+<p>
+Use a local font when the font file exists inside our project.
+</p>
+<h4>Project Structure</h4>
+<div class="code-title">Example</div>
+<pre><code class="language-text">app/
+├── fonts/
+│   └── MyFont.woff2
+├── layout.js
+└── page.js</code></pre>
+<h4>Import a Local Font</h4>
+<div class="code-title">app/layout.js</div>
+<pre><code class="language-jsx">import localFont from 'next/font/local';
+const myFont = localFont({
+  src: './fonts/MyFont.woff2'
+});
+export default function RootLayout({ children }) {
+  return (
+    &lt;html lang="en"&gt;
+      &lt;body className={myFont.className}&gt;
+        {children}
+      &lt;/body&gt;
+    &lt;/html&gt;
+  );
+}</code></pre>
+<h4>What Happens Internally?</h4>
+<div class="code-title">Flow</div>
+<pre><code class="language-text">Local Font File
+      │
+      ▼
+Build Process
+      │
+      ▼
+Optimize Font
+      │
+      ▼
+Self Host Font
+      │
+      ▼
+Serve Font To Browser</code></pre>
+<h3>Local Font with Multiple Files</h3>
+<p>
+Many fonts have separate files for different weights.
+</p>
+<div class="code-title">Example</div>
+<pre><code class="language-jsx">import localFont from 'next/font/local';
+const myFont = localFont({
+  src: [
+    {
+      path: './fonts/MyFont-Regular.woff2',
+      weight: '400',
+      style: 'normal'
+    },
+    {
+      path: './fonts/MyFont-Bold.woff2',
+      weight: '700',
+      style: 'normal'
+    }
+  ]
+});</code></pre>
+<h3>Using CSS Variables</h3>
+<p>
+Fonts can be exposed as CSS variables.
+</p>
+<div class="code-title">Example</div>
+<pre><code class="language-jsx">import { Inter } from 'next/font/google';
+const inter = Inter({
+  subsets: ['latin'],
+  variable: '--font-inter'
+});
+export default function RootLayout({ children }) {
+  return (
+    &lt;html
+      lang="en"
+      className={inter.variable}
+    &gt;
+      &lt;body&gt;{children}&lt;/body&gt;
+    &lt;/html&gt;
+  );
+}</code></pre>
+<div class="code-title">globals.css</div>
+<pre><code class="language-css">body {
+  font-family: var(--font-inter);
+}</code></pre>
+<h3>Google Font vs Local Font</h3>
+<table>
+<tr>
+<th>Feature</th>
+<th>Google Font</th>
+<th>Local Font</th>
+</tr>
+<tr>
+<td>Import From</td>
+<td>next/font/google</td>
+<td>next/font/local</td>
+</tr>
+<tr>
+<td>Requires Font File</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Google Fonts Library</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>Custom Fonts Supported</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Self Hosted</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Layout Shift Prevention</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+</table>
+<h3>Real-World Example</h3>
+<p>
+Suppose our company uses a custom brand font.
+</p>
+<div class="code-title">Recommended</div>
+<pre><code class="language-text">Use next/font/local</code></pre>
+<p>
+Suppose we want a popular font like Inter or Roboto.
+</p>
+<div class="code-title">Recommended</div>
+<pre><code class="language-text">Use next/font/google</code></pre>
+<h3>Pages Router Example</h3>
+<div class="code-title">pages/_app.js</div>
+<pre><code class="language-jsx">import { Inter } from 'next/font/google';
+const inter = Inter({
+  subsets: ['latin']
+});
+export default function MyApp({ Component, pageProps }) {
+  return (
+    &lt;main className={inter.className}&gt;
+      &lt;Component {...pageProps} /&gt;
+    &lt;/main&gt;
+  );
+}</code></pre>
+<h3>Interview Tip</h3>
+<div class="feature">
+A common misconception is that Google Fonts loaded through next/font are fetched from Google every time a user visits the site. In reality, Next.js downloads and self-hosts the fonts during the build process.
+</div>
+<div class="feature">
+<strong>One-Line Definition:</strong><br/>
+Google Fonts are used through <code>next/font/google</code>, local fonts are used through <code>next/font/local</code>, and both are automatically optimized and self-hosted by Next.js to improve performance and eliminate layout shift.
+</div>
+<h2 class="section-title" id="06-10"><span class="secnum">06-10</span>How do you import and use SVG files as React components in Next.js?</h2>
+<p>
+SVG files can be used in Next.js in multiple ways, but to use an SVG as a React component we typically use <code>SVGR</code>.
+</p>
+<div class="feature">
+Using SVG as a React component allows us to pass props, apply CSS classes, change colors, control width and height, and reuse SVGs like normal React components.
+</div>
+<h3>Method 1: Use SVG from the public Folder</h3>
+<p>
+The simplest method is storing SVG files in the public folder.
+</p>
+<div class="code-title">Project Structure</div>
+<pre><code class="language-text">public/
+└── logo.svg</code></pre>
+<div class="code-title">Usage</div>
+<pre><code class="language-jsx">export default function Home() {
+  return (
+    &lt;img
+      src="/logo.svg"
+      alt="Logo"
+    /&gt;
+  );
+}</code></pre>
+<p>
+This works, but the SVG behaves like a normal image.
+</p>
+<p>
+We cannot easily change SVG properties using React props.
+</p>
+<h3>Method 2: Use next/image</h3>
+<div class="code-title">Example</div>
+<pre><code class="language-jsx">import Image from 'next/image';
+export default function Home() {
+  return (
+    &lt;Image
+      src="/logo.svg"
+      alt="Logo"
+      width={100}
+      height={100}
+    /&gt;
+  );
+}</code></pre>
+<p>
+This is useful when SVG behaves like a static image.
+</p>
+<h3>Method 3: Import SVG as a React Component (Recommended)</h3>
+<p>
+To use SVG files as React components, we need SVGR.
+</p>
+<h4>Step 1: Install SVGR</h4>
+<div class="code-title">Terminal</div>
+<pre><code class="language-bash">npm install -D @svgr/webpack</code></pre>
+<h4>Step 2: Configure next.config.js</h4>
+<div class="code-title">next.config.js</div>
+<pre><code class="language-js">const nextConfig = {
+  webpack(config) {
+    config.module.rules.push({
+      test: /\.svg$/i,
+      issuer: /\.[jt]sx?$/,
+      use: ['@svgr/webpack']
+    });
+    return config;
+  }
+};
+module.exports = nextConfig;</code></pre>
+<h4>Step 3: Create SVG File</h4>
+<div class="code-title">assets/logo.svg</div>
+<pre><code class="language-html">&lt;svg
+  xmlns="http://www.w3.org/2000/svg"
+  viewBox="0 0 100 100"
+&gt;
+  &lt;circle
+    cx="50"
+    cy="50"
+    r="40"
+    fill="green"
+  /&gt;
+&lt;/svg&gt;</code></pre>
+<h4>Step 4: Import SVG as Component</h4>
+<div class="code-title">app/page.js</div>
+<pre><code class="language-jsx">import Logo from '../assets/logo.svg';
+export default function Home() {
+  return (
+    &lt;Logo /&gt;
+  );
+}</code></pre>
+<h3>What Happens Internally?</h3>
+<div class="code-title">Flow</div>
+<pre><code class="language-text">logo.svg
+     │
+     ▼
+SVGR Loader
+     │
+     ▼
+React Component
+     │
+     ▼
+&lt;Logo /&gt;</code></pre>
+<h3>Passing Props to SVG Components</h3>
+<div class="code-title">Example</div>
+<pre><code class="language-jsx">import Logo from '../assets/logo.svg';
+export default function Home() {
+  return (
+    &lt;Logo
+      width={200}
+      height={200}
+    /&gt;
+  );
+}</code></pre>
+<h3>Applying CSS Classes</h3>
+<div class="code-title">Example</div>
+<pre><code class="language-jsx">import Logo from '../assets/logo.svg';
+export default function Home() {
+  return (
+    &lt;Logo className="logo" /&gt;
+  );
+}</code></pre>
+<div class="code-title">CSS</div>
+<pre><code class="language-css">.logo {
+  width: 200px;
+  height: 200px;
+}</code></pre>
+<h3>Changing SVG Color</h3>
+<p>
+If the SVG uses <code>currentColor</code>, we can control its color through CSS.
+</p>
+<div class="code-title">SVG</div>
+<pre><code class="language-html">&lt;svg&gt;
+  &lt;path
+    fill="currentColor"
+  /&gt;
+&lt;/svg&gt;</code></pre>
+<div class="code-title">Usage</div>
+<pre><code class="language-jsx">&lt;Logo
+  style={{
+    color: 'red'
+  }}
+/&gt;</code></pre>
+<h3>Project Structure</h3>
+<div class="code-title">Example</div>
+<pre><code class="language-text">app/
+├── page.js
+assets/
+└── logo.svg
+next.config.js</code></pre>
+<h3>SVG Component vs SVG Image</h3>
+<table>
+<tr>
+<th>Feature</th>
+<th>SVG Component</th>
+<th>SVG Image</th>
+</tr>
+<tr>
+<td>Use React Props</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>Apply Dynamic Styles</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>Change Color Easily</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>Use Event Handlers</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>Simple Setup</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+</table>
+<h3>Real-World Example</h3>
+<p>
+Suppose our application contains:
+</p>
+<div class="code-title">Icons</div>
+<pre><code class="language-text">Home Icon
+Profile Icon
+Settings Icon
+Logout Icon</code></pre>
+<p>
+Importing them as React components allows us to:
+</p>
+<ul>
+<li>Resize icons using props.</li>
+<li>Change colors dynamically.</li>
+<li>Add click events.</li>
+<li>Reuse icons across the application.</li>
+</ul>
+<h3>App Router and Pages Router</h3>
+<p>
+SVG component support works the same in both routers because it is configured through Webpack.
+</p>
+<table>
+<tr>
+<th>Router</th>
+<th>SVG Component Support</th>
+</tr>
+<tr>
+<td>Pages Router</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>App Router</td>
+<td>✅</td>
+</tr>
+</table>
+<h3>Important Note</h3>
+<div class="feature">
+A common misconception is that SVG files can be imported as React components by default. In reality, Next.js requires SVGR configuration before SVG files can be imported and used as React components.
+</div>
+<h3>Interview Tip</h3>
+<div class="feature">
+If an SVG only needs to be displayed, storing it in the public folder is usually enough. If we need dynamic colors, props, event handlers, or reusable icons, importing it as a React component using SVGR is the better approach.
+</div>
+<div class="feature">
+<strong>One-Line Definition:</strong><br/>
+SVG files can be used as React components in Next.js by configuring SVGR, allowing us to import SVG files and use them like normal React components with props, styles, and event handlers.
+</div><div class="chapnav"><a class="prev" href="05-route-handlers-client-data-and-metadata-seo.html">05 - Route Handlers, Client Data & Metadata (SEO)</a><a class="next" href="07-performance-and-optimization.html">07 - Performance & Optimization</a></div></div></div><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-tsx.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+</body>
+</html>

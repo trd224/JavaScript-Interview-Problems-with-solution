@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>P6 - SEO & Metadata (Pages Router) | Next.js App Router Guide</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:#0f172a;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.8;display:flex;min-height:100vh}
+a{color:inherit;text-decoration:none}
+.sidebar{width:290px;flex-shrink:0;background:#0b1220;border-right:1px solid #1e293b;padding:24px 18px;position:sticky;top:0;height:100vh;overflow-y:auto}
+.brand{color:#38bdf8;font-size:18px;font-weight:800;margin-bottom:4px}
+.brand small{display:block;color:#64748b;font-weight:400;font-size:12px;margin-top:4px}
+.chapter-nav{margin-top:22px}
+.chapter-nav a{display:block;padding:8px 10px;border-radius:8px;font-size:13px;color:#94a3b8;margin-bottom:4px;border-left:3px solid transparent}
+.chapter-nav a:hover{background:#111827;color:#e2e8f0}
+.chapter-nav a.active{background:#111827;color:#38bdf8;border-left:3px solid #38bdf8;font-weight:bold}
+.chapter-nav .chnum{display:inline-block;width:22px;color:#475569;font-family:monospace}
+.toc{margin-top:22px;border-top:1px solid #1e293b;padding-top:16px}
+.toc-title{color:#fbbf24;font-size:12px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px}
+.toc a{display:block;font-size:12.5px;color:#8ea3c2;padding:5px 8px;border-radius:6px;line-height:1.4}
+.toc a:hover{background:#111827;color:#e2e8f0}
+.main{flex:1;padding:40px 48px;max-width:980px}
+.container{max-width:900px}
+h1.page-title{color:#38bdf8;margin-bottom:6px;font-size:30px}
+.page-sub{color:#64748b;margin-bottom:28px;font-size:14px}
+h2.section-title{color:#a78bfa;margin-top:52px;margin-bottom:14px;font-size:23px;border-top:1px solid #1e293b;padding-top:38px}
+h2.section-title .secnum{color:#475569;font-family:monospace;margin-right:10px;font-size:16px}
+h3{color:#fbbf24;margin-top:25px;margin-bottom:10px;font-size:17px}
+h4{color:#38bdf8;margin-top:18px;margin-bottom:8px;font-size:15px}
+h5{color:#93c5fd;margin-top:14px;margin-bottom:6px;font-size:14px}
+p{margin-bottom:15px}
+ul,ol{margin-left:20px;margin-bottom:15px}
+li{margin-bottom:8px}
+strong{color:#f1f5f9}
+code{color:#93c5fd;font-family:'JetBrains Mono',monospace;font-size:.92em}
+.feature{background:#1e293b;border-left:5px solid #38bdf8;padding:15px;border-radius:8px;margin:20px 0}
+.warning{background:#2a1a1a;border-left:5px solid #f87171;padding:15px;border-radius:8px;margin:20px 0}
+.summary{background:#1a2a1e;border-left:5px solid #34d399;padding:15px;border-radius:8px;margin:20px 0}
+.note{background:#1e293b;border-left:5px solid #a78bfa;padding:15px;border-radius:8px;margin:20px 0}
+.code-title{background:#1e293b;color:#93c5fd;padding:10px;font-weight:bold;border-radius:6px 6px 0 0;font-size:13px;font-family:monospace}
+pre[class*="language-"]{margin:0 0 20px 0!important;border-radius:0 0 6px 6px}
+pre code{white-space:pre}
+table{width:100%;border-collapse:collapse;margin:20px 0}
+th{background:#1e293b;color:#38bdf8;text-align:left;padding:12px}
+td{padding:12px;border-top:1px solid #334155}
+hr{border:none;border-top:1px solid #1e293b;margin:30px 0}
+.chapnav{display:flex;justify-content:space-between;margin-top:60px;padding-top:24px;border-top:1px solid #1e293b}
+.chapnav a{background:#111827;padding:12px 18px;border-radius:10px;border:1px solid #1e293b;font-size:14px;color:#94a3b8}
+.chapnav a:hover{color:#38bdf8;border-color:#38bdf8}
+.chapnav .prev::before{content:"<- "}
+.chapnav .next::after{content:" ->"}
+@media(max-width:900px){body{flex-direction:column}.sidebar{position:relative;height:auto;width:100%}}
+</style>
+</head>
+<body>
+<div class="sidebar">
+<div class="brand">Next.js Pages Router<small>Complete Step-by-Step Guide</small></div>
+<div class="chapter-nav"><a class="" href="pages-P1-introduction-to-next.js-and-the-pages-router.html"><span class="chnum">P1</span>Introduction to Next.js & the Pages Router</a><a class="" href="pages-P2-file-based-routing-and-navigation.html"><span class="chnum">P2</span>File-Based Routing & Navigation</a><a class="" href="pages-P3-rendering-and-data-fetching.html"><span class="chnum">P3</span>Rendering & Data Fetching</a><a class="" href="pages-P4-api-routes-backend-in-next.js.html"><span class="chnum">P4</span>API Routes (Backend in Next.js)</a><a class="" href="pages-P5-styling-and-assets.html"><span class="chnum">P5</span>Styling & Assets</a><a class="active" href="pages-P6-seo-and-metadata-pages-router.html"><span class="chnum">P6</span>SEO & Metadata (Pages Router)</a><a class="" href="pages-P7-configuration-build-and-deployment.html"><span class="chnum">P7</span>Configuration, Build & Deployment</a></div>
+<div class="toc"><div class="toc-title">On this page</div><a href="#P6-01">How do you add meta tags using the Head component ? (Pages Router)</a><a href="#P6-02">Why is SSR/SSG Better for SEO than Pure CSR?</a></div>
+</div><div class="main"><div class="container"><h1 class="page-title">P6 - SEO & Metadata (Pages Router)</h1><div class="page-sub">Part P6 of 7 &middot; 2 topics &middot; Next.js Pages Router Guide</div><h2 class="section-title" id="P6-01"><span class="secnum">P6-01</span>How do you add meta tags using the Head component ? (Pages Router)</h2>
+<p>
+In the <strong>Pages Router</strong>, we use the <code>Head</code> component from <code>next/head</code> to add meta tags, title, description, Open Graph tags, and other <code>&lt;head&gt;</code> elements for a page.
+</p>
+<h3>Example</h3>
+<div class="code-title">pages/about.js</div>
+<pre><code class="language-jsx">import Head from 'next/head';
+export default function About() {
+  return (
+    &lt;&gt;
+      &lt;Head&gt;
+        &lt;title&gt;About Us&lt;/title&gt;
+        &lt;meta name="description" content="Learn more about our company." /&gt;
+        &lt;meta name="keywords" content="Next.js, React, Web Development" /&gt;
+        &lt;meta property="og:title" content="About Us" /&gt;
+      &lt;/Head&gt;
+      &lt;h1&gt;About Page&lt;/h1&gt;
+    &lt;/&gt;
+  );
+}</code></pre>
+<h3>Generated HTML</h3>
+<div class="code-title">HTML Output</div>
+<pre><code class="language-html">&lt;html&gt;
+&lt;head&gt;
+  &lt;title&gt;About Us&lt;/title&gt;
+  &lt;meta name="description" content="Learn more about our company." /&gt;
+  &lt;meta name="keywords" content="Next.js, React, Web Development" /&gt;
+  &lt;meta property="og:title" content="About Us" /&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;h1&gt;About Page&lt;/h1&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+<h3>Key Points</h3>
+<ul>
+<li><code>Head</code> is imported from <code>next/head</code>.</li>
+<li>Meta tags added inside <code>Head</code> are rendered inside the page's <code>&lt;head&gt;</code> section.</li>
+<li>Each page can have its own title and SEO metadata.</li>
+<li>Common tags include <code>title</code>, <code>description</code>, <code>keywords</code>, Open Graph <code>og:*</code>, and Twitter Card tags.</li>
+</ul>
+<div class="feature">
+<strong>One-Line Definition:</strong><br/>
+<code>Head</code> is a Next.js component used in the Pages Router to add page-specific metadata and elements inside the HTML <code>&lt;head&gt;</code> section.
+</div>
+<h2 class="section-title" id="P6-02"><span class="secnum">P6-02</span>Why is SSR/SSG Better for SEO than Pure CSR?</h2>
+<p>
+SSR (Server-Side Rendering) and SSG (Static Site Generation) are generally better for SEO because search engines receive fully rendered HTML immediately, whereas pure CSR (Client-Side Rendering) initially sends very little content.
+</p>
+<div class="feature">
+Search engines can index SSR and SSG pages more easily because the content already exists in the HTML response.
+</div>
+<h3>Pure CSR Example</h3>
+<div class="code-title">React SPA</div>
+<pre><code class="language-html">&lt;body&gt;
+  &lt;div id="root"&gt;&lt;/div&gt;
+  &lt;script src="bundle.js"&gt;&lt;/script&gt;
+&lt;/body&gt;</code></pre>
+<p>
+When the browser first receives this page, there is almost no content.
+</p>
+<h3>CSR Rendering Flow</h3>
+<div class="code-title">CSR Flow</div>
+<pre><code class="language-text">Request
+   │
+   ▼
+Empty HTML
+   │
+   ▼
+Download JavaScript
+   │
+   ▼
+Execute JavaScript
+   │
+   ▼
+Fetch Data
+   │
+   ▼
+Render Content</code></pre>
+<p>
+The crawler may need to execute JavaScript before it can see the page content.
+</p>
+<h3>SSR Example</h3>
+<div class="code-title">Server-Side Rendering</div>
+<pre><code class="language-html">&lt;body&gt;
+  &lt;h1&gt;iPhone 15&lt;/h1&gt;
+  &lt;p&gt;Latest Apple smartphone&lt;/p&gt;
+&lt;/body&gt;</code></pre>
+<p>
+The content already exists in the HTML response sent by the server.
+</p>
+<h3>SSR Rendering Flow</h3>
+<div class="code-title">SSR Flow</div>
+<pre><code class="language-text">Request
+   │
+   ▼
+Server Renders HTML
+   │
+   ▼
+Send Complete HTML
+   │
+   ▼
+Crawler Reads Content</code></pre>
+<h3>SSG Example</h3>
+<div class="code-title">Static Site Generation</div>
+<pre><code class="language-text">Build Time
+    │
+    ▼
+Generate HTML
+    │
+    ▼
+Store HTML File
+    │
+    ▼
+Serve HTML Directly</code></pre>
+<p>
+The page is generated during the build and can be served instantly.
+</p>
+<h3>What Does Google See?</h3>
+<div class="code-title">CSR</div>
+<pre><code class="language-html">&lt;body&gt;
+  &lt;div id="root"&gt;&lt;/div&gt;
+&lt;/body&gt;</code></pre>
+<div class="code-title">SSR / SSG</div>
+<pre><code class="language-html">&lt;body&gt;
+  &lt;h1&gt;iPhone 15&lt;/h1&gt;
+  &lt;p&gt;Latest Apple smartphone&lt;/p&gt;
+&lt;/body&gt;</code></pre>
+<p>
+SSR and SSG provide actual content immediately, making crawling and indexing easier.
+</p>
+<h3>SEO Advantages of SSR/SSG</h3>
+<ul>
+<li>Content is available immediately.</li>
+<li>Faster indexing.</li>
+<li>Better metadata visibility.</li>
+<li>Better Open Graph previews.</li>
+<li>Improved crawl efficiency.</li>
+<li>Faster initial page load.</li>
+</ul>
+<h3>Metadata Example</h3>
+<div class="code-title">SSR / SSG</div>
+<pre><code class="language-html">&lt;head&gt;
+  &lt;title&gt;iPhone 15&lt;/title&gt;
+  &lt;meta
+    name="description"
+    content="Latest Apple smartphone"
+  /&gt;
+&lt;/head&gt;</code></pre>
+<p>
+Search engines can immediately read the title and description.
+</p>
+<h3>Can Google Index CSR?</h3>
+<p>
+Yes.
+</p>
+<p>
+Modern Google crawlers can execute JavaScript and index CSR applications.
+</p>
+<div class="feature">
+The problem is not that Google cannot index CSR. The problem is that CSR requires an extra rendering step, which can delay indexing and make crawling less efficient.
+</div>
+<h3>Real-World Example</h3>
+<table>
+<tr>
+<th>Website Type</th>
+<th>Recommended</th>
+</tr>
+<tr>
+<td>Blog</td>
+<td>SSG</td>
+</tr>
+<tr>
+<td>Documentation</td>
+<td>SSG</td>
+</tr>
+<tr>
+<td>Marketing Website</td>
+<td>SSG</td>
+</tr>
+<tr>
+<td>E-Commerce Product Page</td>
+<td>SSR / ISR</td>
+</tr>
+<tr>
+<td>Dashboard</td>
+<td>CSR</td>
+</tr>
+<tr>
+<td>Admin Panel</td>
+<td>CSR</td>
+</tr>
+</table>
+<h3>SSR vs SSG vs CSR</h3>
+<table>
+<tr>
+<th>Feature</th>
+<th>SSR</th>
+<th>SSG</th>
+<th>CSR</th>
+</tr>
+<tr>
+<td>SEO</td>
+<td>✅</td>
+<td>✅</td>
+<td>⚠️</td>
+</tr>
+<tr>
+<td>Initial HTML Content</td>
+<td>✅</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>Fast First Paint</td>
+<td>✅</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>Requires JS To See Content</td>
+<td>❌</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+</table>
+<h3>Important Note</h3>
+<div class="feature">
+The biggest SEO advantage of SSR and SSG is that search engines receive meaningful HTML immediately instead of needing to execute JavaScript before seeing page content.
+</div>
+<h3>Interview Tip</h3>
+<div class="feature">
+Google can index CSR applications, but SSR and SSG are generally preferred for SEO because content and metadata are already present in the initial HTML response.
+</div>
+<div class="feature">
+<strong>One-Line Definition:</strong><br/>
+SSR and SSG are better for SEO than pure CSR because search engines receive fully rendered HTML and metadata immediately, making crawling and indexing faster and more reliable.
+</div><div class="chapnav"><a class="prev" href="pages-P5-styling-and-assets.html">P5 - Styling & Assets</a><a class="next" href="pages-P7-configuration-build-and-deployment.html">P7 - Configuration, Build & Deployment</a></div></div></div><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-tsx.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+</body>
+</html>

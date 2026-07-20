@@ -1,0 +1,3272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>P3 - Rendering & Data Fetching | Next.js App Router Guide</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:#0f172a;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.8;display:flex;min-height:100vh}
+a{color:inherit;text-decoration:none}
+.sidebar{width:290px;flex-shrink:0;background:#0b1220;border-right:1px solid #1e293b;padding:24px 18px;position:sticky;top:0;height:100vh;overflow-y:auto}
+.brand{color:#38bdf8;font-size:18px;font-weight:800;margin-bottom:4px}
+.brand small{display:block;color:#64748b;font-weight:400;font-size:12px;margin-top:4px}
+.chapter-nav{margin-top:22px}
+.chapter-nav a{display:block;padding:8px 10px;border-radius:8px;font-size:13px;color:#94a3b8;margin-bottom:4px;border-left:3px solid transparent}
+.chapter-nav a:hover{background:#111827;color:#e2e8f0}
+.chapter-nav a.active{background:#111827;color:#38bdf8;border-left:3px solid #38bdf8;font-weight:bold}
+.chapter-nav .chnum{display:inline-block;width:22px;color:#475569;font-family:monospace}
+.toc{margin-top:22px;border-top:1px solid #1e293b;padding-top:16px}
+.toc-title{color:#fbbf24;font-size:12px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px}
+.toc a{display:block;font-size:12.5px;color:#8ea3c2;padding:5px 8px;border-radius:6px;line-height:1.4}
+.toc a:hover{background:#111827;color:#e2e8f0}
+.main{flex:1;padding:40px 48px;max-width:980px}
+.container{max-width:900px}
+h1.page-title{color:#38bdf8;margin-bottom:6px;font-size:30px}
+.page-sub{color:#64748b;margin-bottom:28px;font-size:14px}
+h2.section-title{color:#a78bfa;margin-top:52px;margin-bottom:14px;font-size:23px;border-top:1px solid #1e293b;padding-top:38px}
+h2.section-title .secnum{color:#475569;font-family:monospace;margin-right:10px;font-size:16px}
+h3{color:#fbbf24;margin-top:25px;margin-bottom:10px;font-size:17px}
+h4{color:#38bdf8;margin-top:18px;margin-bottom:8px;font-size:15px}
+h5{color:#93c5fd;margin-top:14px;margin-bottom:6px;font-size:14px}
+p{margin-bottom:15px}
+ul,ol{margin-left:20px;margin-bottom:15px}
+li{margin-bottom:8px}
+strong{color:#f1f5f9}
+code{color:#93c5fd;font-family:'JetBrains Mono',monospace;font-size:.92em}
+.feature{background:#1e293b;border-left:5px solid #38bdf8;padding:15px;border-radius:8px;margin:20px 0}
+.warning{background:#2a1a1a;border-left:5px solid #f87171;padding:15px;border-radius:8px;margin:20px 0}
+.summary{background:#1a2a1e;border-left:5px solid #34d399;padding:15px;border-radius:8px;margin:20px 0}
+.note{background:#1e293b;border-left:5px solid #a78bfa;padding:15px;border-radius:8px;margin:20px 0}
+.code-title{background:#1e293b;color:#93c5fd;padding:10px;font-weight:bold;border-radius:6px 6px 0 0;font-size:13px;font-family:monospace}
+pre[class*="language-"]{margin:0 0 20px 0!important;border-radius:0 0 6px 6px}
+pre code{white-space:pre}
+table{width:100%;border-collapse:collapse;margin:20px 0}
+th{background:#1e293b;color:#38bdf8;text-align:left;padding:12px}
+td{padding:12px;border-top:1px solid #334155}
+hr{border:none;border-top:1px solid #1e293b;margin:30px 0}
+.chapnav{display:flex;justify-content:space-between;margin-top:60px;padding-top:24px;border-top:1px solid #1e293b}
+.chapnav a{background:#111827;padding:12px 18px;border-radius:10px;border:1px solid #1e293b;font-size:14px;color:#94a3b8}
+.chapnav a:hover{color:#38bdf8;border-color:#38bdf8}
+.chapnav .prev::before{content:"<- "}
+.chapnav .next::after{content:" ->"}
+@media(max-width:900px){body{flex-direction:column}.sidebar{position:relative;height:auto;width:100%}}
+</style>
+</head>
+<body>
+<div class="sidebar">
+<div class="brand">Next.js Pages Router<small>Complete Step-by-Step Guide</small></div>
+<div class="chapter-nav"><a class="" href="pages-P1-introduction-to-next.js-and-the-pages-router.html"><span class="chnum">P1</span>Introduction to Next.js & the Pages Router</a><a class="" href="pages-P2-file-based-routing-and-navigation.html"><span class="chnum">P2</span>File-Based Routing & Navigation</a><a class="active" href="pages-P3-rendering-and-data-fetching.html"><span class="chnum">P3</span>Rendering & Data Fetching</a><a class="" href="pages-P4-api-routes-backend-in-next.js.html"><span class="chnum">P4</span>API Routes (Backend in Next.js)</a><a class="" href="pages-P5-styling-and-assets.html"><span class="chnum">P5</span>Styling & Assets</a><a class="" href="pages-P6-seo-and-metadata-pages-router.html"><span class="chnum">P6</span>SEO & Metadata (Pages Router)</a><a class="" href="pages-P7-configuration-build-and-deployment.html"><span class="chnum">P7</span>Configuration, Build & Deployment</a></div>
+<div class="toc"><div class="toc-title">On this page</div><a href="#P3-01">Why Does Pages Router Hydrate Everything While App Router Doesn't?</a><a href="#P3-02">What is Server-Side Rendering (SSR) in Next.js?</a><a href="#P3-03">What is Static Site Generation (SSG) in Next.js?</a><a href="#P3-04">What is Client-Side Rendering (CSR) and When Should We Choose It?</a><a href="#P3-05">What is getStaticProps and When is it Called?</a><a href="#P3-06">What is getServerSideProps and How Does It Differ from getStaticProps?</a><a href="#P3-07">What is getStaticPaths and What Does It Return?</a><a href="#P3-08">What is the Difference Between fallback: true, false, and 'blocking'?</a><a href="#P3-09">What is Incremental Static Regeneration (ISR) and How Do You Enable It?</a><a href="#P3-10">How do you fetch data on the client side in a Next.js app?</a><a href="#P3-11">What is SWR and how does it integrate with Next.js?</a></div>
+</div><div class="main"><div class="container"><h1 class="page-title">P3 - Rendering & Data Fetching</h1><div class="page-sub">Part P3 of 7 &middot; 11 topics &middot; Next.js Pages Router Guide</div><h2 class="section-title" id="P3-01"><span class="secnum">P3-01</span>Why Does Pages Router Hydrate Everything While App Router Doesn't?</h2>
+<p>
+The main difference is that the <strong>Pages Router</strong> was built around full-page hydration, while the <strong>App Router</strong> uses React Server Components to avoid sending unnecessary JavaScript to the browser.
+</p>
+<div class="feature">
+Pages Router renders HTML on the server, but then still sends page JavaScript and React JavaScript to the browser so React can hydrate the whole page.
+</div>
+<h3>Step 1: What Happens in Pages Router?</h3>
+<p>
+In the Pages Router, even if the server already sends HTML, the browser still receives the page JavaScript and React JavaScript.
+</p>
+<div class="code-title">pages/index.js</div>
+<pre><code class="language-js">export default function Page() {
+  return &lt;h1&gt;Hello&lt;/h1&gt;;
+}</code></pre>
+<h3>Pages Router Rendering Flow</h3>
+<div class="code-title">Flow</div>
+<pre><code class="language-text">Request
+   │
+   ▼
+Server Runs Page()
+   │
+   ▼
+Generate HTML
+   │
+   ▼
+Send HTML
+   +
+Send page.js
+   +
+Send react.js
+   │
+   ▼
+Browser Downloads JavaScript
+   │
+   ▼
+Hydration
+   │
+   ▼
+Browser Runs Page() Again</code></pre>
+<p>
+So in the Pages Router, the component runs on the server first and then runs again in the browser during hydration.
+</p>
+<div class="code-title">Result</div>
+<pre><code class="language-text">Page() runs on Server  ✅
+Page() runs on Browser ✅</code></pre>
+<h3>Why Does Pages Router Send page.js and react.js?</h3>
+<p>
+Because the Pages Router architecture assumes that every page is a React application that must be hydrated in the browser.
+</p>
+<div class="feature">
+It does not matter whether the current page is interactive or not. Pages Router was designed to hydrate the whole page.
+</div>
+<h3>What Is Hydration?</h3>
+<p>
+Hydration means React attaches browser-side JavaScript behavior to the HTML that was already generated on the server.
+</p>
+<div class="code-title">Server HTML</div>
+<pre><code class="language-html">&lt;button&gt;Click Me&lt;/button&gt;</code></pre>
+<p>
+This HTML is visible, but it does not know anything about React state or click handlers.
+</p>
+<div class="code-title">React Component</div>
+<pre><code class="language-js">export default function Button() {
+  return (
+    &lt;button onClick={() =&gt; alert('Hello')}&gt;
+      Click Me
+    &lt;/button&gt;
+  );
+}</code></pre>
+<p>
+The browser needs JavaScript to attach the <code>onClick</code> behavior.
+</p>
+<div class="code-title">Hydration Flow</div>
+<pre><code class="language-text">HTML Already Visible
+      │
+      ▼
+Download React.js
+      │
+      ▼
+Download page.js
+      │
+      ▼
+React Connects Events
+      │
+      ▼
+Button Becomes Interactive</code></pre>
+<h3>But What If There Is No Interaction?</h3>
+<p>
+This is the exact problem.
+</p>
+<div class="code-title">Static Page</div>
+<pre><code class="language-js">export default function Product() {
+  return &lt;h1&gt;iPhone 15&lt;/h1&gt;;
+}</code></pre>
+<p>
+This page has no:
+</p>
+<div class="code-title">No Browser Features</div>
+<pre><code class="language-text">useState
+useEffect
+onClick
+window
+localStorage</code></pre>
+<p>
+Still, Pages Router sends:
+</p>
+<div class="code-title">Sent To Browser</div>
+<pre><code class="language-text">HTML
++
+Product.js
++
+React.js</code></pre>
+<p>
+Why? Because Pages Router follows one fixed rule:
+</p>
+<div class="code-title">Pages Router Rule</div>
+<pre><code class="language-text">Every Page
+   │
+   ▼
+Hydrate Everything</code></pre>
+<h3>Why Was Pages Router Built Like This?</h3>
+<p>
+Pages Router was built before React Server Components existed.
+</p>
+<p>
+At that time, React had only one main server rendering model:
+</p>
+<div class="code-title">Old React Model</div>
+<pre><code class="language-text">Server Generates HTML
+      │
+      ▼
+Browser Hydrates Entire React App</code></pre>
+<p>
+So React's older assumption was:
+</p>
+<div class="code-title">Old Assumption</div>
+<pre><code class="language-text">Any Page Might Become Interactive
+        │
+        ▼
+Send JavaScript For The Whole Page</code></pre>
+<h3>Example of Interactive Page</h3>
+<div class="code-title">Counter Component</div>
+<pre><code class="language-js">import { useState } from 'react';
+export default function Counter() {
+  const [count, setCount] = useState(0);
+  return (
+    &lt;button onClick={() =&gt; setCount(count + 1)}&gt;
+      {count}
+    &lt;/button&gt;
+  );
+}</code></pre>
+<p>
+For this page, the browser definitely needs JavaScript.
+</p>
+<div class="code-title">Without JavaScript</div>
+<pre><code class="language-text">Server Sends:
+&lt;button&gt;0&lt;/button&gt;
+User Clicks Button
+      │
+      ▼
+Nothing Happens ❌</code></pre>
+<div class="code-title">With JavaScript</div>
+<pre><code class="language-text">Server Sends HTML
+      +
+Browser Gets React.js
+      +
+Browser Gets Counter.js
+      │
+      ▼
+Click Updates Count ✅</code></pre>
+<h3>The Problem With Pages Router</h3>
+<p>
+The problem is that Pages Router sends JavaScript even when the page does not need browser interaction.
+</p>
+<div class="code-title">Static Content Example</div>
+<pre><code class="language-js">export default function BlogPost() {
+  return (
+    &lt;article&gt;
+      &lt;h1&gt;Next.js Guide&lt;/h1&gt;
+      &lt;p&gt;This is a static blog article.&lt;/p&gt;
+    &lt;/article&gt;
+  );
+}</code></pre>
+<p>
+This content is readable HTML. It does not need React in the browser.
+</p>
+<div class="code-title">But Pages Router Still Sends</div>
+<pre><code class="language-text">BlogPost.js
+React.js
+Next.js Runtime</code></pre>
+<h3>Step 2: What Changed in App Router?</h3>
+<p>
+The App Router uses React Server Components.
+</p>
+<div class="feature">
+React Server Components allow components to execute only on the server and not send their component JavaScript to the browser.
+</div>
+<div class="code-title">app/page.js</div>
+<pre><code class="language-js">export default function Page() {
+  return &lt;h1&gt;Hello&lt;/h1&gt;;
+}</code></pre>
+<p>
+In the App Router, this component is a Server Component by default because there is no <code>'use client'</code>.
+</p>
+<h3>App Router Server Component Flow</h3>
+<div class="code-title">Flow</div>
+<pre><code class="language-text">Request
+   │
+   ▼
+Server Runs Page()
+   │
+   ▼
+Generate HTML
+   │
+   ▼
+Send HTML
+   │
+   ▼
+Browser Displays HTML
+No page.js for this component
+No hydration for this component</code></pre>
+<div class="code-title">Result</div>
+<pre><code class="language-text">Page() runs on Server  ✅
+Page() runs on Browser ❌</code></pre>
+<h3>App Router Rule</h3>
+<p>
+App Router follows a smarter rule:
+</p>
+<div class="code-title">App Router Rule</div>
+<pre><code class="language-text">Need Browser Features?
+      │
+ ┌────┴────┐
+ │         │
+No        Yes
+ │         │
+ ▼         ▼
+HTML     Send JS
+Only</code></pre>
+<h3>Server Component Example</h3>
+<div class="code-title">app/products/page.js</div>
+<pre><code class="language-js">export default async function Products() {
+  const res = await fetch('https://dummyjson.com/products');
+  const data = await res.json();
+  return (
+    &lt;ul&gt;
+      {data.products.map(product =&gt; (
+        &lt;li key={product.id}&gt;{product.title}&lt;/li&gt;
+      ))}
+    &lt;/ul&gt;
+  );
+}</code></pre>
+<p>
+This component fetches data and renders HTML on the server.
+</p>
+<div class="code-title">Sent To Browser</div>
+<pre><code class="language-text">HTML Output Only
+No Products.js
+No React hydration for Products component</code></pre>
+<h3>Client Component Example</h3>
+<p>
+If our component needs browser interaction, we mark it with <code>'use client'</code>.
+</p>
+<div class="code-title">app/Counter.js</div>
+<pre><code class="language-js">'use client';
+import { useState } from 'react';
+export default function Counter() {
+  const [count, setCount] = useState(0);
+  return (
+    &lt;button onClick={() =&gt; setCount(count + 1)}&gt;
+      {count}
+    &lt;/button&gt;
+  );
+}</code></pre>
+<p>
+Now Next.js sends JavaScript for this component because it needs browser features.
+</p>
+<div class="code-title">Sent To Browser</div>
+<pre><code class="language-text">Counter.js
+React.js
+Required Client JavaScript</code></pre>
+<h3>Mixing Server and Client Components</h3>
+<div class="code-title">app/page.js</div>
+<pre><code class="language-js">import Counter from './Counter';
+export default function Page() {
+  return (
+    &lt;&gt;
+      &lt;h1&gt;Product Page&lt;/h1&gt;
+      &lt;p&gt;This content is server-rendered.&lt;/p&gt;
+      &lt;Counter /&gt;
+    &lt;/&gt;
+  );
+}</code></pre>
+<div class="code-title">app/Counter.js</div>
+<pre><code class="language-js">'use client';
+import { useState } from 'react';
+export default function Counter() {
+  const [count, setCount] = useState(0);
+  return (
+    &lt;button onClick={() =&gt; setCount(count + 1)}&gt;
+      {count}
+    &lt;/button&gt;
+  );
+}</code></pre>
+<p>
+In this example:
+</p>
+<table>
+<tr>
+<th>Part</th>
+<th>Type</th>
+<th>Sent As JS?</th>
+</tr>
+<tr>
+<td>Product Page Text</td>
+<td>Server Component</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td>Counter Button</td>
+<td>Client Component</td>
+<td>✅ Yes</td>
+</tr>
+</table>
+<h3>Pages Router vs App Router Rendering Difference</h3>
+<table>
+<tr>
+<th>Question</th>
+<th>Pages Router</th>
+<th>App Router</th>
+</tr>
+<tr>
+<td>Does server generate HTML?</td>
+<td>✅ Yes</td>
+<td>✅ Yes</td>
+</tr>
+<tr>
+<td>Does browser receive component JS?</td>
+<td>✅ Yes, for the page</td>
+<td>Only for Client Components</td>
+</tr>
+<tr>
+<td>Does browser hydrate everything?</td>
+<td>✅ Yes</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td>Can component stay server-only?</td>
+<td>❌ No</td>
+<td>✅ Yes</td>
+</tr>
+<tr>
+<td>Supports React Server Components?</td>
+<td>❌ No</td>
+<td>✅ Yes</td>
+</tr>
+</table>
+<h3>Execution Difference</h3>
+<div class="code-title">Pages Router</div>
+<pre><code class="language-text">Component Executes On Server
+      │
+      ▼
+HTML Generated
+      │
+      ▼
+Component JS Sent To Browser
+      │
+      ▼
+Component Executes Again In Browser</code></pre>
+<div class="code-title">App Router Server Component</div>
+<pre><code class="language-text">Component Executes On Server
+      │
+      ▼
+HTML Generated
+      │
+      ▼
+No Component JS Sent
+      │
+      ▼
+Component Does Not Execute In Browser</code></pre>
+<h3>Why React Does Not Need Control in App Router?</h3>
+<p>
+React does not need browser control for components that have no browser behavior.
+</p>
+<p>
+For example:
+</p>
+<div class="code-title">Server-Only Content</div>
+<pre><code class="language-text">Header
+Footer
+Blog Content
+Product Details
+Article Content
+FAQ Section</code></pre>
+<p>
+These components usually only display data. They do not need:
+</p>
+<div class="code-title">Browser Features</div>
+<pre><code class="language-text">useState
+useEffect
+onClick
+window
+localStorage</code></pre>
+<p>
+So App Router keeps them on the server and avoids sending their JavaScript.
+</p>
+<h3>Simple Memory Trick</h3>
+<div class="code-title">Pages Router</div>
+<pre><code class="language-text">HTML + JS for whole page</code></pre>
+<div class="code-title">App Router</div>
+<pre><code class="language-text">HTML for server parts
+JS only for interactive parts</code></pre>
+<h3>Final Comparison</h3>
+<table>
+<tr>
+<th>Component Type</th>
+<th>Server</th>
+<th>Browser</th>
+</tr>
+<tr>
+<td>Pages Router Page</td>
+<td>✅ Runs</td>
+<td>✅ Runs Again</td>
+</tr>
+<tr>
+<td>App Router Server Component</td>
+<td>✅ Runs</td>
+<td>❌ Does Not Run</td>
+</tr>
+<tr>
+<td>App Router Client Component</td>
+<td>✅ Pre-rendered</td>
+<td>✅ Hydrated</td>
+</tr>
+</table>
+<h3>Interview Tip</h3>
+<div class="feature">
+Pages Router was built before React Server Components, so it hydrates the entire page in the browser. App Router uses React Server Components, so non-interactive components can stay on the server and only interactive Client Components are hydrated.
+</div>
+<div class="feature">
+<strong>One-Line Definition:</strong><br/>
+Pages Router sends HTML plus JavaScript for the whole page because it hydrates every page, while App Router sends JavaScript only for Client Components and keeps Server Components on the server.
+</div>
+<h2 class="section-title" id="P3-02"><span class="secnum">P3-02</span>What is Server-Side Rendering (SSR) in Next.js?</h2>
+<p>
+Server-Side Rendering (SSR) is a rendering technique where Next.js generates the HTML for a page on the server for every request before sending it to the browser.
+</p>
+<div class="feature">
+SSR allows us to fetch fresh data on every request and send a fully rendered HTML page to the browser.
+</div>
+<h3>Why Do We Need SSR?</h3>
+<p>
+Some pages require the latest data every time a user visits them.
+</p>
+
+Examples:
+
+<ul>
+<li>Stock Market Prices</li>
+<li>Weather Data</li>
+<li>Live Dashboard</li>
+<li>News Websites</li>
+<li>E-commerce Product Inventory</li>
+</ul>
+<p>
+For such pages, generating HTML at build time is not enough because the data changes frequently.
+</p>
+<h3>How SSR Works</h3>
+<div class="code-title">SSR Flow</div>
+<pre><code class="language-text">User Requests Page
+        │
+        ▼
+Next.js Server
+        │
+        ▼
+Fetch Latest Data
+        │
+        ▼
+Generate HTML
+        │
+        ▼
+Send HTML To Browser
+        │
+        ▼
+Hydration Happens</code></pre>
+<h3>Real Example</h3>
+<p>
+Suppose our application displays the current Bitcoin price.
+</p>
+<div class="code-title">User Opens</div>
+<pre><code class="language-text">/bitcoin-price</code></pre>
+<p>
+Next.js performs:
+</p>
+<div class="code-title">Server</div>
+<pre><code class="language-text">1. Fetch Latest Bitcoin Price
+2. Generate HTML
+3. Send HTML To Browser</code></pre>
+<p>
+Every user gets the latest data.
+</p>
+<h3>SSR in the Pages Router</h3>
+<p>
+In the Pages Router, SSR is implemented using <code>getServerSideProps()</code>.
+</p>
+<div class="code-title">pages/products.js</div>
+<pre><code class="language-jsx">export async function getServerSideProps() {
+  const res = await fetch(
+    'https://api.example.com/products'
+  );
+  const products = await res.json();
+  return {
+    props: { products }
+  };
+}
+export default function Products({ products }) {
+  return (
+    &lt;h1&gt;
+      Total Products: {products.length}
+    &lt;/h1&gt;
+  );
+}</code></pre>
+<h3>What Happens Internally?</h3>
+<div class="code-title">Request Flow</div>
+<pre><code class="language-text">Request #1
+      │
+      ▼
+getServerSideProps()
+      │
+      ▼
+Fresh Data
+      │
+      ▼
+HTML Generated
+Request #2
+      │
+      ▼
+getServerSideProps()
+      │
+      ▼
+Fresh Data Again
+      │
+      ▼
+New HTML Generated</code></pre>
+<p>
+The function runs for every request.
+</p>
+<h3>SSR in the App Router</h3>
+<p>
+The App Router does not use <code>getServerSideProps()</code>.
+</p>
+<p>
+Instead, Server Components can directly fetch data.
+</p>
+<div class="code-title">app/products/page.js</div>
+<pre><code class="language-jsx">async function getProducts() {
+  const res = await fetch(
+    'https://api.example.com/products',
+    { cache: 'no-store' }
+  );
+  return res.json();
+}
+export default async function Products() {
+  const products = await getProducts();
+  return (
+    &lt;h1&gt;
+      Total Products: {products.length}
+    &lt;/h1&gt;
+  );
+}</code></pre>
+<h3>Why cache: 'no-store'?</h3>
+<p>
+The <code>cache: 'no-store'</code> option tells Next.js:
+</p>
+<div class="code-title">Meaning</div>
+<pre><code class="language-text">Do Not Cache
+Fetch Fresh Data
+For Every Request</code></pre>
+<p>
+This behavior is equivalent to SSR.
+</p>
+<h3>SSR vs CSR</h3>
+<table>
+<tr>
+<th>Feature</th>
+<th>SSR</th>
+<th>CSR</th>
+</tr>
+<tr>
+<td>HTML Generated</td>
+<td>Server</td>
+<td>Browser</td>
+</tr>
+<tr>
+<td>Initial Load</td>
+<td>Fast</td>
+<td>Usually Slower</td>
+</tr>
+<tr>
+<td>SEO</td>
+<td>Excellent</td>
+<td>Limited</td>
+</tr>
+<tr>
+<td>Fresh Data</td>
+<td>Every Request</td>
+<td>Client Fetches Data</td>
+</tr>
+</table>
+<h3>SSR vs SSG</h3>
+<table>
+<tr>
+<th>Feature</th>
+<th>SSR</th>
+<th>SSG</th>
+</tr>
+<tr>
+<td>HTML Generation Time</td>
+<td>Every Request</td>
+<td>Build Time</td>
+</tr>
+<tr>
+<td>Performance</td>
+<td>Slower</td>
+<td>Faster</td>
+</tr>
+<tr>
+<td>Fresh Data</td>
+<td>Always</td>
+<td>Only At Build Time</td>
+</tr>
+<tr>
+<td>Server Required</td>
+<td>Yes</td>
+<td>No</td>
+</tr>
+</table>
+<h3>Advantages of SSR</h3>
+<ul>
+<li>Always fresh data.</li>
+<li>Excellent SEO.</li>
+<li>Better social media previews.</li>
+<li>Faster first content display.</li>
+<li>Works well for dynamic content.</li>
+</ul>
+<h3>Disadvantages of SSR</h3>
+<ul>
+<li>Runs on every request.</li>
+<li>Higher server load.</li>
+<li>Slower than SSG.</li>
+<li>Requires server resources.</li>
+</ul>
+<h3>When Should We Use SSR?</h3>
+<ul>
+<li>Frequently changing data.</li>
+<li>User-specific dashboards.</li>
+<li>Live statistics.</li>
+<li>Stock prices.</li>
+<li>Weather information.</li>
+<li>Real-time inventory.</li>
+</ul>
+<h3>Interview Tip</h3>
+<div class="feature">
+A common misconception is that SSR means rendering on the server once. In reality, SSR generates fresh HTML on the server for every incoming request.
+</div>
+<div class="feature">
+<strong>One-Line Definition:</strong><br/>
+Server-Side Rendering (SSR) is a rendering technique in Next.js where the server generates fresh HTML for every request before sending it to the browser.
+</div>
+<h2 class="section-title" id="P3-03"><span class="secnum">P3-03</span>What is Static Site Generation (SSG) in Next.js?</h2>
+<p>
+Static Site Generation (SSG) is a rendering technique where Next.js generates HTML pages during the build process and stores them as static files.
+</p>
+<div class="feature">
+SSG allows us to generate pages once at build time and serve the same pre-generated HTML to all users.
+</div>
+<h3>Why Do We Need SSG?</h3>
+<p>
+Many pages do not change frequently.
+</p>
+
+Examples:
+
+<ul>
+<li>Blog Posts</li>
+<li>Documentation Websites</li>
+<li>Marketing Pages</li>
+<li>Landing Pages</li>
+<li>Company Information Pages</li>
+</ul>
+<p>
+Generating these pages on every request would be unnecessary.
+</p>
+<p>
+Instead, we can generate them once during the build process.
+</p>
+<h3>How SSG Works</h3>
+<div class="code-title">SSG Flow</div>
+<pre><code class="language-text">npm run build
+       │
+       ▼
+Fetch Data
+       │
+       ▼
+Generate HTML
+       │
+       ▼
+Store Static Files
+       │
+       ▼
+Deploy
+       │
+       ▼
+Users Receive Same HTML</code></pre>
+<h3>What Happens Internally?</h3>
+<div class="code-title">Build Time</div>
+<pre><code class="language-text">Build Starts
+      │
+      ▼
+Fetch Data Once
+      │
+      ▼
+Generate HTML Once
+      │
+      ▼
+Save HTML File</code></pre>
+<p>
+After deployment:
+</p>
+<div class="code-title">Runtime</div>
+<pre><code class="language-text">User A Request
+      │
+      ▼
+Serve Existing HTML
+User B Request
+      │
+      ▼
+Serve Same HTML
+User C Request
+      │
+      ▼
+Serve Same HTML</code></pre>
+<p>
+No new HTML is generated when users visit the page.
+</p>
+<h3>Real Example</h3>
+<p>
+Suppose our application has a blog.
+</p>
+<div class="code-title">Blog Page</div>
+<pre><code class="language-text">/blog/react-hooks</code></pre>
+<p>
+During build:
+</p>
+<div class="code-title">Build Process</div>
+<pre><code class="language-text">1. Fetch Blog Content
+2. Generate HTML
+3. Save HTML File</code></pre>
+<p>
+After deployment:
+</p>
+<div class="code-title">User Requests</div>
+<pre><code class="language-text">User A → Existing HTML
+User B → Same HTML
+User C → Same HTML</code></pre>
+<h3>SSG in the Pages Router</h3>
+<p>
+In the Pages Router, SSG is implemented using <code>getStaticProps()</code>.
+</p>
+<div class="code-title">pages/blog.js</div>
+<pre><code class="language-jsx">export async function getStaticProps() {
+  const res = await fetch(
+    'https://api.example.com/posts'
+  );
+  const posts = await res.json();
+  return {
+    props: { posts }
+  };
+}
+export default function Blog({ posts }) {
+  return (
+    &lt;h1&gt;
+      Total Posts: {posts.length}
+    &lt;/h1&gt;
+  );
+}</code></pre>
+<h3>Dynamic SSG Pages</h3>
+<p>
+For dynamic routes, we use <code>getStaticPaths()</code>.
+</p>
+<div class="code-title">pages/posts/[id].js</div>
+<pre><code class="language-jsx">export async function getStaticPaths() {
+  return {
+    paths: [
+      { params: { id: '1' } },
+      { params: { id: '2' } }
+    ],
+    fallback: false
+  };
+}
+export async function getStaticProps({ params }) {
+  return {
+    props: {
+      id: params.id
+    }
+  };
+}</code></pre>
+<h3>SSG in the App Router</h3>
+<p>
+The App Router does not use <code>getStaticProps()</code>.
+</p>
+<p>
+By default, many App Router pages are statically generated when possible.
+</p>
+<div class="code-title">app/blog/page.js</div>
+<pre><code class="language-jsx">async function getPosts() {
+  const res = await fetch(
+    'https://api.example.com/posts'
+  );
+  return res.json();
+}
+export default async function Blog() {
+  const posts = await getPosts();
+  return (
+    &lt;h1&gt;
+      Total Posts: {posts.length}
+    &lt;/h1&gt;
+  );
+}</code></pre>
+<p>
+If the data is static and cacheable, Next.js may generate the page during the build process.
+</p>
+<h3>SSR vs SSG</h3>
+<table>
+<tr>
+<th>Feature</th>
+<th>SSR</th>
+<th>SSG</th>
+</tr>
+<tr>
+<td>HTML Generated</td>
+<td>Every Request</td>
+<td>Build Time</td>
+</tr>
+<tr>
+<td>Data Fetching</td>
+<td>Every Request</td>
+<td>Build Time</td>
+</tr>
+<tr>
+<td>Performance</td>
+<td>Slower</td>
+<td>Very Fast</td>
+</tr>
+<tr>
+<td>Server Load</td>
+<td>Higher</td>
+<td>Minimal</td>
+</tr>
+<tr>
+<td>Fresh Data</td>
+<td>Always Fresh</td>
+<td>Can Become Outdated</td>
+</tr>
+</table>
+<h3>SSG vs CSR</h3>
+<table>
+<tr>
+<th>Feature</th>
+<th>SSG</th>
+<th>CSR</th>
+</tr>
+<tr>
+<td>HTML Generated</td>
+<td>Build Time</td>
+<td>Browser</td>
+</tr>
+<tr>
+<td>SEO</td>
+<td>Excellent</td>
+<td>Limited</td>
+</tr>
+<tr>
+<td>First Load</td>
+<td>Very Fast</td>
+<td>Usually Slower</td>
+</tr>
+</table>
+<h3>Advantages of SSG</h3>
+<ul>
+<li>Very fast page loading.</li>
+<li>Excellent SEO.</li>
+<li>Low server cost.</li>
+<li>Can be served from a CDN.</li>
+<li>Highly scalable.</li>
+</ul>
+<h3>Disadvantages of SSG</h3>
+<ul>
+<li>Data can become outdated.</li>
+<li>Requires rebuilding for content updates.</li>
+<li>Large sites may have longer build times.</li>
+</ul>
+<h3>When Should We Use SSG?</h3>
+<ul>
+<li>Blogs</li>
+<li>Documentation Sites</li>
+<li>Landing Pages</li>
+<li>Portfolio Websites</li>
+<li>Marketing Pages</li>
+<li>Company Websites</li>
+</ul>
+<h3>Important Difference Between SSR and SSG</h3>
+<div class="feature">
+<strong>SSR:</strong><br/>
+HTML is generated every time a user requests the page.
+</div>
+<div class="feature">
+<strong>SSG:</strong><br/>
+HTML is generated once during the build process and the same HTML is served to all users.
+</div>
+<div class="code-title">Comparison</div>
+<pre><code class="language-text">SSR
+User A Request
+      │
+      ▼
+Generate HTML #1
+User B Request
+      │
+      ▼
+Generate HTML #2
+User C Request
+      │
+      ▼
+Generate HTML #3
+SSG
+npm run build
+      │
+      ▼
+Generate HTML Once
+      │
+      ▼
+Store HTML File
+      │
+      ▼
+All Users Receive Same HTML</code></pre>
+<div class="feature">
+<strong>One-Line Definition:</strong><br/>
+Static Site Generation (SSG) is a rendering technique in Next.js where HTML pages are generated during the build process and served as static files to all users.
+</div>
+<h2 class="section-title" id="P3-04"><span class="secnum">P3-04</span>What is Client-Side Rendering (CSR) and When Should We Choose It?</h2>
+<p>
+Client-Side Rendering (CSR) is a rendering technique where the browser downloads JavaScript and generates the page UI on the client side.
+</p>
+<div class="feature">
+In CSR, the server sends a minimal HTML page and JavaScript bundle, and the browser renders the application after the JavaScript executes.
+</div>
+<h3>Why Do We Need CSR?</h3>
+<p>
+Some applications are highly interactive and depend heavily on user actions.
+</p>
+
+Examples:
+
+<ul>
+<li>Admin Dashboards</li>
+<li>Project Management Tools</li>
+<li>Chat Applications</li>
+<li>Internal Business Applications</li>
+<li>Analytics Dashboards</li>
+</ul>
+<p>
+For these applications, SEO is usually less important than user interaction.
+</p>
+<h3>How CSR Works</h3>
+<div class="code-title">CSR Flow</div>
+<pre><code class="language-text">User Requests Page
+        │
+        ▼
+Server Sends HTML + JS
+        │
+        ▼
+Browser Downloads JS
+        │
+        ▼
+React Executes
+        │
+        ▼
+Fetch Data
+        │
+        ▼
+Generate UI</code></pre>
+<h3>What Happens Internally?</h3>
+<div class="code-title">Request Flow</div>
+<pre><code class="language-text">User Opens Page
+       │
+       ▼
+HTML Sent
+&lt;div id="root"&gt;&lt;/div&gt;
+       │
+       ▼
+JavaScript Downloads
+       │
+       ▼
+React Starts
+       │
+       ▼
+API Call
+       │
+       ▼
+Data Received
+       │
+       ▼
+UI Rendered</code></pre>
+<h3>Real Example</h3>
+<p>
+Suppose our application contains a dashboard showing user information.
+</p>
+<div class="code-title">Dashboard Page</div>
+<pre><code class="language-text">/dashboard</code></pre>
+<p>
+Browser Process:
+</p>
+<div class="code-title">Flow</div>
+<pre><code class="language-text">1. Download JavaScript
+2. Fetch User Data
+3. Render Dashboard</code></pre>
+<h3>CSR Example in React</h3>
+<div class="code-title">Client-Side Data Fetching</div>
+<pre><code class="language-jsx">import { useEffect, useState } from 'react';
+export default function Users() {
+  const [users, setUsers] = useState([]);
+  useEffect(() =&gt; {
+    fetch('/api/users')
+      .then(res =&gt; res.json())
+      .then(data =&gt; setUsers(data));
+  }, []);
+  return (
+    &lt;h1&gt;
+      Users: {users.length}
+    &lt;/h1&gt;
+  );
+}</code></pre>
+<h3>CSR in Next.js</h3>
+<p>
+In Next.js App Router, Client Components use CSR behavior.
+</p>
+<div class="code-title">Client Component</div>
+<pre><code class="language-jsx">'use client';
+import { useEffect, useState } from 'react';
+export default function Dashboard() {
+  const [users, setUsers] = useState([]);
+  useEffect(() =&gt; {
+    fetch('/api/users')
+      .then(res =&gt; res.json())
+      .then(data =&gt; setUsers(data));
+  }, []);
+  return (
+    &lt;h1&gt;
+      Users: {users.length}
+    &lt;/h1&gt;
+  );
+}</code></pre>
+<h3>What Does the Server Send?</h3>
+<p>
+Initially the server sends very little HTML.
+</p>
+<div class="code-title">Initial HTML</div>
+<pre><code class="language-html">&lt;div id="root"&gt;&lt;/div&gt;</code></pre>
+<p>
+Then JavaScript builds the UI in the browser.
+</p>
+<h3>SSR vs CSR</h3>
+<table>
+<tr>
+<th>Feature</th>
+<th>SSR</th>
+<th>CSR</th>
+</tr>
+<tr>
+<td>HTML Generated</td>
+<td>Server</td>
+<td>Browser</td>
+</tr>
+<tr>
+<td>SEO</td>
+<td>Excellent</td>
+<td>Limited</td>
+</tr>
+<tr>
+<td>Initial Content</td>
+<td>Immediately Available</td>
+<td>Waits For JS</td>
+</tr>
+<tr>
+<td>Server Load</td>
+<td>Higher</td>
+<td>Lower</td>
+</tr>
+<tr>
+<td>User Interaction</td>
+<td>Good</td>
+<td>Excellent</td>
+</tr>
+</table>
+<h3>SSG vs CSR</h3>
+<table>
+<tr>
+<th>Feature</th>
+<th>SSG</th>
+<th>CSR</th>
+</tr>
+<tr>
+<td>HTML Generated</td>
+<td>Build Time</td>
+<td>Browser</td>
+</tr>
+<tr>
+<td>SEO</td>
+<td>Excellent</td>
+<td>Limited</td>
+</tr>
+<tr>
+<td>Performance</td>
+<td>Very Fast</td>
+<td>Depends On JS</td>
+</tr>
+<tr>
+<td>Data Freshness</td>
+<td>Build Time Data</td>
+<td>Latest Client Data</td>
+</tr>
+</table>
+<h3>Advantages of CSR</h3>
+<ul>
+<li>Highly interactive UI.</li>
+<li>Less server work.</li>
+<li>Fast page transitions after initial load.</li>
+<li>Good for authenticated applications.</li>
+<li>Works well with real-time updates.</li>
+</ul>
+<h3>Disadvantages of CSR</h3>
+<ul>
+<li>Poorer SEO.</li>
+<li>Slower first page load.</li>
+<li>Requires JavaScript.</li>
+<li>Users may initially see loading states.</li>
+</ul>
+<h3>When Should We Choose CSR?</h3>
+<ul>
+<li>Admin Dashboards</li>
+<li>Internal Company Tools</li>
+<li>Chat Applications</li>
+<li>Project Management Systems</li>
+<li>Analytics Dashboards</li>
+<li>User-Specific Applications</li>
+</ul>
+<h3>When Should We Avoid CSR?</h3>
+<ul>
+<li>Marketing Pages</li>
+<li>Blogs</li>
+<li>News Websites</li>
+<li>Documentation Sites</li>
+<li>SEO-Focused Pages</li>
+</ul>
+<h3>Important Difference Between SSR and CSR</h3>
+<div class="feature">
+<strong>SSR:</strong><br/>
+The server generates HTML before sending it to the browser.
+</div>
+<div class="feature">
+<strong>CSR:</strong><br/>
+The browser downloads JavaScript and generates the UI after the page loads.
+</div>
+<div class="code-title">Comparison</div>
+<pre><code class="language-text">SSR
+Request
+   │
+   ▼
+Server Generates HTML
+   │
+   ▼
+Browser Receives Ready UI
+CSR
+Request
+   │
+   ▼
+Server Sends JS
+   │
+   ▼
+Browser Runs React
+   │
+   ▼
+Fetch Data
+   │
+   ▼
+Generate UI</code></pre>
+<div class="feature">
+<strong>One-Line Definition:</strong><br/>
+Client-Side Rendering (CSR) is a rendering technique where the browser executes JavaScript and generates the page UI on the client side after the page loads.
+</div>
+<h2 class="section-title" id="P3-05"><span class="secnum">P3-05</span>What is getStaticProps and When is it Called?</h2>
+<p>
+<code>getStaticProps()</code> is a special Next.js function used in the Pages Router to fetch data at build time for Static Site Generation (SSG).
+</p>
+<div class="feature">
+<code>getStaticProps()</code> runs during the build process, generates static HTML, and provides the fetched data as props to the page component.
+</div>
+<h3>Why Do We Need getStaticProps()?</h3>
+<p>
+Some pages contain data that does not change frequently.
+</p>
+
+Examples:
+
+<ul>
+<li>Blog Posts</li>
+<li>Documentation Pages</li>
+<li>Landing Pages</li>
+<li>Company Information Pages</li>
+<li>Marketing Websites</li>
+</ul>
+<p>
+Instead of fetching data for every request, we can fetch it once during the build process.
+</p>
+<h3>Basic Example</h3>
+<div class="code-title">pages/posts.js</div>
+<pre><code class="language-jsx">export async function getStaticProps() {
+  const res = await fetch(
+    'https://api.example.com/posts'
+  );
+  const posts = await res.json();
+  return {
+    props: { posts }
+  };
+}
+export default function Posts({ posts }) {
+  return (
+    &lt;h1&gt;
+      Total Posts: {posts.length}
+    &lt;/h1&gt;
+  );
+}</code></pre>
+<h3>When is getStaticProps() Called?</h3>
+<div class="feature">
+The most important thing to remember is that <code>getStaticProps()</code> is NOT called when users visit the page.
+</div>
+<h4>Called During Build</h4>
+<div class="code-title">Build Process</div>
+<pre><code class="language-text">npm run build
+       │
+       ▼
+getStaticProps()
+       │
+       ▼
+Fetch Data
+       │
+       ▼
+Generate HTML
+       │
+       ▼
+Save Static File</code></pre>
+<p>
+This happens only during the build process.
+</p>
+<h4>User Requests</h4>
+<div class="code-title">After Deployment</div>
+<pre><code class="language-text">User A Request
+      │
+      ▼
+Serve Existing HTML
+User B Request
+      │
+      ▼
+Serve Same HTML
+User C Request
+      │
+      ▼
+Serve Same HTML</code></pre>
+<p>
+Notice that <code>getStaticProps()</code> is not executed for these requests.
+</p>
+<h3>What Happens Internally?</h3>
+<div class="code-title">Full Flow</div>
+<pre><code class="language-text">npm run build
+      │
+      ▼
+getStaticProps()
+Runs Once
+      │
+      ▼
+Fetch Data
+      │
+      ▼
+Generate HTML
+      │
+      ▼
+Store HTML File
+      │
+      ▼
+Deploy
+────────────────────
+User Requests Page
+      │
+      ▼
+Serve Existing HTML
+      │
+      ▼
+No Data Fetching
+      │
+      ▼
+No getStaticProps()
+Execution</code></pre>
+<h3>Real Example</h3>
+<p>
+Suppose our application contains a blog page.
+</p>
+<div class="code-title">Route</div>
+<pre><code class="language-text">/blog</code></pre>
+<p>
+During build:
+</p>
+<div class="code-title">Build Time</div>
+<pre><code class="language-text">Fetch Blog Posts
+      │
+      ▼
+Generate HTML
+      │
+      ▼
+Save blog.html</code></pre>
+<p>
+After deployment:
+</p>
+<div class="code-title">Runtime</div>
+<pre><code class="language-text">User Visits /blog
+      │
+      ▼
+Serve Existing blog.html</code></pre>
+<p>
+No database query or API request occurs at runtime.
+</p>
+<h3>What Does getStaticProps() Return?</h3>
+<div class="code-title">Return Object</div>
+<pre><code class="language-jsx">return {
+  props: {
+    posts
+  }
+};</code></pre>
+<p>
+The returned props are passed directly to the page component.
+</p>
+<div class="code-title">Page Component</div>
+<pre><code class="language-jsx">export default function Posts({ posts }) {
+  return (
+    &lt;h1&gt;
+      {posts.length}
+    &lt;/h1&gt;
+  );
+}</code></pre>
+<h3>Using revalidate (ISR)</h3>
+<p>
+We can regenerate the page periodically using Incremental Static Regeneration (ISR).
+</p>
+<div class="code-title">ISR Example</div>
+<pre><code class="language-jsx">export async function getStaticProps() {
+  const posts = await fetchPosts();
+  return {
+    props: { posts },
+    revalidate: 60
+  };
+}</code></pre>
+<p>
+Meaning:
+</p>
+<div class="code-title">ISR Flow</div>
+<pre><code class="language-text">Generate Page
+After 60 Seconds
+Next Request
+      │
+      ▼
+Regenerate Page
+In Background</code></pre>
+<h3>getStaticProps vs getServerSideProps</h3>
+<table>
+<tr>
+<th>Feature</th>
+<th>getStaticProps</th>
+<th>getServerSideProps</th>
+</tr>
+<tr>
+<td>Called</td>
+<td>Build Time</td>
+<td>Every Request</td>
+</tr>
+<tr>
+<td>Rendering Type</td>
+<td>SSG</td>
+<td>SSR</td>
+</tr>
+<tr>
+<td>Performance</td>
+<td>Very Fast</td>
+<td>Slower</td>
+</tr>
+<tr>
+<td>Fresh Data</td>
+<td>Build Time Data</td>
+<td>Always Fresh</td>
+</tr>
+<tr>
+<td>Server Load</td>
+<td>Low</td>
+<td>Higher</td>
+</tr>
+</table>
+<h3>Important Limitations</h3>
+<ul>
+<li>Only works in the Pages Router.</li>
+<li>Cannot access request-specific data.</li>
+<li>Cannot access cookies or headers.</li>
+<li>Cannot access authenticated user information.</li>
+</ul>
+<h3>App Router Equivalent</h3>
+<p>
+The App Router does not use <code>getStaticProps()</code>.
+</p>
+<p>
+Instead, static generation happens automatically when data is cacheable.
+</p>
+<div class="code-title">App Router</div>
+<pre><code class="language-jsx">async function getPosts() {
+  const res = await fetch(
+    'https://api.example.com/posts'
+  );
+  return res.json();
+}
+export default async function Blog() {
+  const posts = await getPosts();
+  return (
+    &lt;h1&gt;
+      {posts.length}
+    &lt;/h1&gt;
+  );
+}</code></pre>
+<h3>Interview Tip</h3>
+<div class="feature">
+A common misconception is that <code>getStaticProps()</code> runs when users visit the page. In reality, it runs during the build process and the generated HTML is reused for all users.
+</div>
+<div class="feature">
+<strong>One-Line Definition:</strong><br/>
+<code>getStaticProps()</code> is a Pages Router function that fetches data during the build process and provides it to a statically generated page.
+</div>
+<h2 class="section-title" id="P3-06"><span class="secnum">P3-06</span>What is getServerSideProps and How Does It Differ from getStaticProps?</h2>
+<p>
+<code>getServerSideProps()</code> is a special Next.js function used in the Pages Router to fetch data on every request and generate fresh HTML for each user request.
+</p>
+<div class="feature">
+<code>getServerSideProps()</code> runs on every request, while <code>getStaticProps()</code> runs during the build process.
+</div>
+<h3>Why Do We Need getServerSideProps()?</h3>
+<p>
+Some pages require fresh data every time users visit them.
+</p>
+
+Examples:
+
+<ul>
+<li>Stock Prices</li>
+<li>Weather Information</li>
+<li>User Dashboards</li>
+<li>Live Reports</li>
+<li>Real-Time Analytics</li>
+</ul>
+<p>
+In these cases, build-time data may become outdated.
+</p>
+<h3>Basic Example</h3>
+<div class="code-title">pages/products.js</div>
+<pre><code class="language-jsx">export async function getServerSideProps() {
+  const res = await fetch(
+    'https://api.example.com/products'
+  );
+  const products = await res.json();
+  return {
+    props: { products }
+  };
+}
+export default function Products({ products }) {
+  return (
+    &lt;h1&gt;
+      Total Products: {products.length}
+    &lt;/h1&gt;
+  );
+}</code></pre>
+<h3>When is getServerSideProps() Called?</h3>
+<div class="feature">
+Unlike getStaticProps(), getServerSideProps() runs every time a user requests the page.
+</div>
+<div class="code-title">Request Flow</div>
+<pre><code class="language-text">User A Requests Page
+         │
+         ▼
+getServerSideProps()
+         │
+         ▼
+Fetch Fresh Data
+         │
+         ▼
+Generate HTML
+         │
+         ▼
+Send HTML
+User B Requests Page
+         │
+         ▼
+getServerSideProps()
+         │
+         ▼
+Fetch Fresh Data Again
+         │
+         ▼
+Generate New HTML
+         │
+         ▼
+Send HTML</code></pre>
+<h3>What Happens Internally?</h3>
+<div class="code-title">SSR Flow</div>
+<pre><code class="language-text">Browser Request
+       │
+       ▼
+Next.js Server
+       │
+       ▼
+getServerSideProps()
+       │
+       ▼
+Fetch Data
+       │
+       ▼
+Generate HTML
+       │
+       ▼
+Send HTML To Browser</code></pre>
+<p>
+This process happens for every request.
+</p>
+<h3>Real Example</h3>
+<p>
+Suppose our application displays today's weather.
+</p>
+<div class="code-title">Route</div>
+<pre><code class="language-text">/weather</code></pre>
+<p>
+10:00 AM:
+</p>
+<div class="code-title">Request #1</div>
+<pre><code class="language-text">Fetch Weather
+Generate HTML
+Send HTML</code></pre>
+<p>
+10:05 AM:
+</p>
+<div class="code-title">Request #2</div>
+<pre><code class="language-text">Fetch Latest Weather Again
+Generate New HTML
+Send New HTML</code></pre>
+<p>
+Each request receives fresh data.
+</p>
+<h3>Accessing Request Information</h3>
+<p>
+One major advantage of getServerSideProps() is access to request-specific data.
+</p>
+<div class="code-title">Context Object</div>
+<pre><code class="language-jsx">export async function getServerSideProps(context) {
+  console.log(context.req);
+  console.log(context.res);
+  console.log(context.query);
+}</code></pre>
+<p>
+This allows us to access:
+</p>
+<ul>
+<li>Cookies</li>
+<li>Headers</li>
+<li>Query Parameters</li>
+<li>User Information</li>
+<li>Authentication Tokens</li>
+</ul>
+<h3>Example: Authentication</h3>
+<div class="code-title">Protected Page</div>
+<pre><code class="language-jsx">export async function getServerSideProps(context) {
+  const token = context.req.cookies.token;
+  if (!token) {
+    return {
+      redirect: {
+        destination: '/login',
+        permanent: false
+      }
+    };
+  }
+  return {
+    props: {}
+  };
+}</code></pre>
+<p>
+This is impossible with getStaticProps() because build-time code has no access to user requests.
+</p>
+<h3>How Does It Differ from getStaticProps?</h3>
+<table>
+<tr>
+<th>Feature</th>
+<th>getServerSideProps</th>
+<th>getStaticProps</th>
+</tr>
+<tr>
+<td>Rendering Type</td>
+<td>SSR</td>
+<td>SSG</td>
+</tr>
+<tr>
+<td>Runs</td>
+<td>Every Request</td>
+<td>Build Time</td>
+</tr>
+<tr>
+<td>Fresh Data</td>
+<td>Always Fresh</td>
+<td>Build-Time Data</td>
+</tr>
+<tr>
+<td>Performance</td>
+<td>Slower</td>
+<td>Very Fast</td>
+</tr>
+<tr>
+<td>Server Load</td>
+<td>Higher</td>
+<td>Lower</td>
+</tr>
+<tr>
+<td>Access Cookies</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>Access Headers</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>Access Request Data</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+</table>
+<h3>Visual Comparison</h3>
+<h4>getStaticProps()</h4>
+<div class="code-title">Build Time</div>
+<pre><code class="language-text">npm run build
+      │
+      ▼
+getStaticProps()
+Runs Once
+      │
+      ▼
+Generate HTML
+      │
+      ▼
+Store Static File
+      │
+      ▼
+All Users Receive Same HTML</code></pre>
+<h4>getServerSideProps()</h4>
+<div class="code-title">Runtime</div>
+<pre><code class="language-text">User A Request
+      │
+      ▼
+getServerSideProps()
+      │
+      ▼
+Generate HTML #1
+User B Request
+      │
+      ▼
+getServerSideProps()
+      │
+      ▼
+Generate HTML #2
+User C Request
+      │
+      ▼
+getServerSideProps()
+      │
+      ▼
+Generate HTML #3</code></pre>
+<h3>When Should We Use getServerSideProps()?</h3>
+<ul>
+<li>User-Specific Pages</li>
+<li>Authentication</li>
+<li>Real-Time Data</li>
+<li>Stock Prices</li>
+<li>Weather Information</li>
+<li>Live Dashboards</li>
+</ul>
+<h3>When Should We Avoid It?</h3>
+<ul>
+<li>Blogs</li>
+<li>Documentation Sites</li>
+<li>Marketing Pages</li>
+<li>Landing Pages</li>
+<li>Static Content</li>
+</ul>
+<h3>Important Note</h3>
+<div class="feature">
+A common misconception is that getServerSideProps() runs once when the application starts. In reality, it executes for every incoming request and generates fresh HTML each time.
+</div>
+<h3>App Router Equivalent</h3>
+<p>
+The App Router does not use getServerSideProps().
+</p>
+<p>
+Instead, SSR is achieved by fetching data inside a Server Component using:
+</p>
+<div class="code-title">App Router SSR</div>
+<pre><code class="language-jsx">async function getProducts() {
+  const res = await fetch(
+    'https://api.example.com/products',
+    { cache: 'no-store' }
+  );
+  return res.json();
+}
+export default async function Products() {
+  const products = await getProducts();
+  return (
+    &lt;h1&gt;
+      {products.length}
+    &lt;/h1&gt;
+  );
+}</code></pre>
+<p>
+Using <code>cache: 'no-store'</code> ensures fresh data on every request.
+</p>
+<div class="feature">
+<strong>One-Line Definition:</strong><br/>
+<code>getServerSideProps()</code> is a Pages Router function that runs on every request, fetches fresh data, and generates HTML on the server before sending it to the browser.
+</div>
+<h2 class="section-title" id="P3-07"><span class="secnum">P3-07</span>What is getStaticPaths and What Does It Return?</h2>
+<p>
+<code>getStaticPaths()</code> is a special Next.js function used with dynamic routes in the Pages Router to tell Next.js which pages should be generated at build time.
+</p>
+<div class="feature">
+<code>getStaticPaths()</code> runs during the build process and returns a list of dynamic route parameters that Next.js should pre-generate.
+</div>
+<h3>Why Do We Need getStaticPaths()?</h3>
+<p>
+Suppose our application has dynamic product pages.
+</p>
+<div class="code-title">Dynamic Route</div>
+<pre><code class="language-text">pages/products/[id].js</code></pre>
+<p>
+Next.js does not know which product IDs exist.
+</p>
+<p>
+We must tell Next.js which pages should be generated.
+</p>
+<h3>Example Problem</h3>
+<p>
+Suppose our database contains:
+</p>
+<div class="code-title">Products</div>
+<pre><code class="language-text">Product 1
+Product 2
+Product 3</code></pre>
+<p>
+We want these pages:
+</p>
+<div class="code-title">Generated Routes</div>
+<pre><code class="language-text">/products/1
+/products/2
+/products/3</code></pre>
+<p>
+This is exactly what <code>getStaticPaths()</code> provides.
+</p>
+<h3>Basic Example</h3>
+<div class="code-title">pages/products/[id].js</div>
+<pre><code class="language-jsx">export async function getStaticPaths() {
+  return {
+    paths: [
+      { params: { id: '1' } },
+      { params: { id: '2' } },
+      { params: { id: '3' } }
+    ],
+    fallback: false
+  };
+}</code></pre>
+<h3>What Does It Return?</h3>
+<p>
+<code>getStaticPaths()</code> returns an object containing:
+</p>
+<div class="code-title">Return Structure</div>
+<pre><code class="language-jsx">return {
+  paths: [],
+  fallback: false
+};</code></pre>
+<table>
+<tr>
+<th>Property</th>
+<th>Purpose</th>
+</tr>
+<tr>
+<td>paths</td>
+<td>List of dynamic pages to generate</td>
+</tr>
+<tr>
+<td>fallback</td>
+<td>Controls behavior for non-generated pages</td>
+</tr>
+</table>
+<h3>Understanding paths</h3>
+<div class="code-title">Example</div>
+<pre><code class="language-jsx">paths: [
+  { params: { id: '1' } },
+  { params: { id: '2' } },
+  { params: { id: '3' } }
+]</code></pre>
+<p>
+Next.js generates:
+</p>
+<div class="code-title">Generated Pages</div>
+<pre><code class="language-text">/products/1
+/products/2
+/products/3</code></pre>
+<h3>What Happens Internally?</h3>
+<div class="code-title">Build Process</div>
+<pre><code class="language-text">npm run build
+      │
+      ▼
+getStaticPaths()
+      │
+      ▼
+Get IDs
+      │
+      ▼
+1, 2, 3
+      │
+      ▼
+Generate Pages
+/products/1
+/products/2
+/products/3</code></pre>
+<p>
+After deployment, these pages already exist as static HTML files.
+</p>
+<h3>Using getStaticProps with getStaticPaths</h3>
+<div class="code-title">Complete Example</div>
+<pre><code class="language-jsx">export async function getStaticPaths() {
+  return {
+    paths: [
+      { params: { id: '1' } },
+      { params: { id: '2' } }
+    ],
+    fallback: false
+  };
+}
+export async function getStaticProps({ params }) {
+  return {
+    props: {
+      id: params.id
+    }
+  };
+}
+export default function Product({ id }) {
+  return &lt;h1&gt;Product {id}&lt;/h1&gt;;
+}</code></pre>
+<h3>Build Flow</h3>
+<div class="code-title">Generation Process</div>
+<pre><code class="language-text">getStaticPaths()
+       │
+       ▼
+Returns IDs
+1
+2
+       │
+       ▼
+getStaticProps()
+Runs For ID 1
+       │
+       ▼
+Generate /products/1
+       │
+       ▼
+getStaticProps()
+Runs For ID 2
+       │
+       ▼
+Generate /products/2</code></pre>
+<h3>Understanding fallback</h3>
+<h4>fallback: false</h4>
+<div class="code-title">Example</div>
+<pre><code class="language-jsx">return {
+  paths: [
+    { params: { id: '1' } }
+  ],
+  fallback: false
+};</code></pre>
+<p>
+Generated:
+</p>
+<pre><code class="language-text">/products/1</code></pre>
+<p>
+Request:
+</p>
+<pre><code class="language-text">/products/2</code></pre>
+<p>
+Result:
+</p>
+<pre><code class="language-text">404 Page</code></pre>
+<h4>fallback: true</h4>
+<div class="code-title">Example</div>
+<pre><code class="language-jsx">return {
+  paths: [
+    { params: { id: '1' } }
+  ],
+  fallback: true
+};</code></pre>
+<p>
+If users visit:
+</p>
+<pre><code class="language-text">/products/2</code></pre>
+<p>
+Next.js generates it on demand.
+</p>
+<h4>fallback: 'blocking'</h4>
+<div class="code-title">Example</div>
+<pre><code class="language-jsx">return {
+  paths: [
+    { params: { id: '1' } }
+  ],
+  fallback: 'blocking'
+};</code></pre>
+<p>
+Next.js waits for page generation before sending the response.
+</p>
+<h3>getStaticPaths vs getStaticProps</h3>
+<table>
+<tr>
+<th>Feature</th>
+<th>getStaticPaths</th>
+<th>getStaticProps</th>
+</tr>
+<tr>
+<td>Purpose</td>
+<td>Provides Route Parameters</td>
+<td>Provides Page Data</td>
+</tr>
+<tr>
+<td>Used For</td>
+<td>Dynamic Routes</td>
+<td>Static Generation</td>
+</tr>
+<tr>
+<td>Runs</td>
+<td>Build Time</td>
+<td>Build Time</td>
+</tr>
+<tr>
+<td>Returns</td>
+<td>paths + fallback</td>
+<td>props</td>
+</tr>
+</table>
+<h3>Important Limitations</h3>
+<ul>
+<li>Only works in the Pages Router.</li>
+<li>Only used with dynamic routes.</li>
+<li>Runs only during build.</li>
+<li>Usually used together with getStaticProps().</li>
+</ul>
+<h3>App Router Equivalent</h3>
+<p>
+The App Router does not use <code>getStaticPaths()</code>.
+</p>
+<p>
+Instead, it uses <code>generateStaticParams()</code>.
+</p>
+<div class="code-title">App Router</div>
+<pre><code class="language-jsx">export async function generateStaticParams() {
+  return [
+    { id: '1' },
+    { id: '2' },
+    { id: '3' }
+  ];
+}</code></pre>
+<p>
+This serves the same purpose as getStaticPaths().
+</p>
+<h3>Interview Tip</h3>
+<div class="feature">
+A common misconception is that getStaticPaths() fetches page data. In reality, it only provides route parameters. The actual page data is usually fetched inside getStaticProps().
+</div>
+<div class="feature">
+<strong>One-Line Definition:</strong><br/>
+<code>getStaticPaths()</code> is a Pages Router function that returns a list of dynamic route parameters and tells Next.js which pages should be statically generated during the build process.
+</div>
+<h2 class="section-title" id="P3-08"><span class="secnum">P3-08</span>What is the Difference Between fallback: true, false, and 'blocking'?</h2>
+<p>
+The <code>fallback</code> option is returned from <code>getStaticPaths()</code> in Next.js. It controls one specific thing: <strong>what should happen when a visitor requests a dynamic page whose path was NOT included in the <code>paths</code> array during build time.</strong>
+</p>
+<div class="feature">
+Think of <code>paths</code> as "the list of pages I already know about." <code>fallback</code> answers the question: "What do I do about pages that AREN'T on that list?"
+</div>
+<h3>Why Does This Option Exist?</h3>
+<p>
+Imagine an e-commerce site with 50,000 products. Pre-building all 50,000 pages at deploy time would make builds extremely slow. So Next.js lets you pre-build only the important/popular pages (say, the top 20) and decide what to do for the other 49,980 when someone actually visits them.
+</p>
+<p>
+That decision is exactly what <code>fallback</code> controls, and it has 3 possible values:
+</p>
+<ul>
+<li><code>false</code> — unknown paths are not allowed at all</li>
+<li><code>true</code> — unknown paths are generated on first visit, with a loading state</li>
+<li><code>'blocking'</code> — unknown paths are generated on first visit, with no loading state (server waits)</li>
+</ul>
+<h3>Example Setup</h3>
+<p>
+Suppose our application has a products database with 5 products, but during the build we only pre-generate pages for 2 of them.
+</p>
+<div class="code-title">Database (5 products)</div>
+<pre><code class="language-text">Product 1
+Product 2
+Product 3
+Product 4
+Product 5</code></pre>
+<div class="code-title">File Structure</div>
+<pre><code class="language-text">pages/
+  products/
+    [id].js</code></pre>
+<div class="code-title">Paths Generated at Build Time</div>
+<pre><code class="language-text">/products/1
+/products/2</code></pre>
+<p>
+Now a user opens their browser and visits:
+</p>
+<pre><code class="language-text">/products/3</code></pre>
+<p>
+What happens next depends entirely on the value of <code>fallback</code> in <code>getStaticPaths()</code>. Let's walk through all 3 cases with complete, runnable code.
+</p>
+<hr/>
+<h3>fallback: false</h3>
+<p>
+"Strict mode." Only the pages listed in <code>paths</code> exist. Anything else is a 404, no matter what.
+</p>
+<div class="code-title">pages/products/[id].js — Complete Example</div>
+<pre><code class="language-jsx">export async function getStaticPaths() {
+  return {
+    paths: [
+      { params: { id: '1' } },
+      { params: { id: '2' } }
+    ],
+    fallback: false
+  };
+}
+export async function getStaticProps({ params }) {
+  const res = await fetch(`https://api.example.com/products/${params.id}`);
+  const product = await res.json();
+  return {
+    props: { product: product }
+  };
+}
+//or
+//export default function Product(props) {
+//  return (
+//    &lt;div&gt;
+//      &lt;h1&gt;{props.product.name}&lt;/h1&gt;
+//      &lt;p&gt;Price: ${propsproduct.price}&lt;/p&gt;
+//    &lt;/div&gt;
+//  );
+//}
+export default function Product({ product }) {
+  return (
+    &lt;div&gt;
+      &lt;h1&gt;{product.name}&lt;/h1&gt;
+      &lt;p&gt;Price: ${product.price}&lt;/p&gt;
+    &lt;/div&gt;
+  );
+}</code></pre>
+<h4>What Gets Generated at Build Time</h4>
+<pre><code class="language-text">/products/1  ✅ built
+/products/2  ✅ built</code></pre>
+<h4>What Happens on Each Request</h4>
+<pre><code class="language-text">/products/1  →  Product 1 page (from cache)
+/products/2  →  Product 2 page (from cache)
+/products/3  →  404 Page</code></pre>
+<h4>Step-by-Step Flow for /products/3</h4>
+<pre><code class="language-text">Request /products/3
+        │
+        ▼
+Is "3" inside the paths array?
+        │
+        ▼
+       No
+        │
+        ▼
+fallback is false
+        │
+        ▼
+Next.js does NOT call getStaticProps()
+        │
+        ▼
+Return 404 immediately</code></pre>
+<div class="warning">
+Common misconception: many developers assume Next.js will "just generate the page anyway" when a route is missing. With <code>fallback: false</code> that never happens — <code>getStaticProps()</code> is never even called for an unknown route.
+</div>
+<div class="feature">
+<strong>Use fallback: false when:</strong> the full list of valid pages is small and fully known ahead of time — e.g. a blog with 30 posts, a documentation site, a marketing site with a fixed set of pages.
+</div>
+<hr/>
+<h3>fallback: true</h3>
+<p>
+"Generate on demand, with a loading state." Unknown pages are built the first time someone visits them, and while that build is happening, the browser shows a fallback/loading version of the page.
+</p>
+<div class="code-title">pages/products/[id].js — Complete Example</div>
+<pre><code class="language-jsx">import { useRouter } from 'next/router';
+export async function getStaticPaths() {
+  return {
+    paths: [
+      { params: { id: '1' } },
+      { params: { id: '2' } }
+    ],
+    fallback: true
+  };
+}
+export async function getStaticProps({ params }) {
+  const res = await fetch(`https://api.example.com/products/${params.id}`);
+  const product = await res.json();
+  return {
+    props: { product },
+    revalidate: 60
+  };
+}
+export default function Product({ product }) {
+  const router = useRouter();
+  if (router.isFallback) {
+    return &lt;h1&gt;Loading...&lt;/h1&gt;;
+  }
+  return (
+    &lt;div&gt;
+      &lt;h1&gt;{product.name}&lt;/h1&gt;
+      &lt;p&gt;Price: ${product.price}&lt;/p&gt;
+    &lt;/div&gt;
+  );
+}</code></pre>
+<div class="warning">
+<code>router.isFallback</code> is required with <code>fallback: true</code>. On the very first visit to an ungenerated page, <code>product</code> is not available yet — the component renders BEFORE <code>getStaticProps()</code> finishes. Skipping this check causes a crash like "Cannot read property 'name' of undefined."
+</div>
+<h4>First Visit to /products/3 — Timeline</h4>
+<pre><code class="language-text">t=0ms     Browser requests /products/3
+t=1ms     Next.js has no pre-built page for "3"
+t=2ms     Sends back a "fallback" HTML shell instantly
+t=2ms     React hydrates, router.isFallback = true
+t=2ms     Page shows "Loading..."
+t=350ms   getStaticProps() finishes fetching product 3
+t=351ms   Page re-renders with real data
+t=351ms   router.isFallback = false
+t=351ms   Page now shows "Product 3"
+t=351ms   This HTML is cached on the server</code></pre>
+<h4>Every Visit After That</h4>
+<pre><code class="language-text">/products/3  →  Product 3 page served instantly (from cache)
+                No loading state, no delay</code></pre>
+<div class="feature">
+<strong>Use fallback: true when:</strong> you have thousands of pages, most of them are rarely visited, and a brief "Loading..." flash is an acceptable trade-off — e.g. a huge product catalog or user-generated content site.
+</div>
+<hr/>
+<h3>fallback: 'blocking'</h3>
+<p>
+"Generate on demand, no loading state." Unknown pages are still built on first visit, but instead of sending a loading shell to the browser, the server holds the response and waits until the full page is ready before sending anything at all.
+</p>
+<div class="code-title">pages/products/[id].js — Complete Example</div>
+<pre><code class="language-jsx">export async function getStaticPaths() {
+  return {
+    paths: [
+      { params: { id: '1' } },
+      { params: { id: '2' } }
+    ],
+    fallback: 'blocking'
+  };
+}
+export async function getStaticProps({ params }) {
+  const res = await fetch(`https://api.example.com/products/${params.id}`);
+  const product = await res.json();
+  return {
+    props: { product },
+    revalidate: 60
+  };
+}
+export default function Product({ product }) {
+  return (
+    &lt;div&gt;
+      &lt;h1&gt;{product.name}&lt;/h1&gt;
+      &lt;p&gt;Price: ${product.price}&lt;/p&gt;
+    &lt;/div&gt;
+  );
+}</code></pre>
+<div class="feature">
+Notice there is no <code>router.isFallback</code> check here — it isn't needed. The component only ever renders once <code>product</code> is already available, because the browser doesn't get a response until the full HTML is ready.
+</div>
+<h4>First Visit to /products/3 — Timeline</h4>
+<pre><code class="language-text">t=0ms     Browser requests /products/3
+t=1ms     Next.js has no pre-built page for "3"
+t=1ms     Server does NOT respond yet — browser tab shows a spinner
+t=350ms   getStaticProps() finishes fetching product 3
+t=351ms   Full HTML is generated on the server
+t=352ms   Complete "Product 3" HTML is sent to the browser
+t=352ms   This HTML is cached on the server</code></pre>
+<h4>Every Visit After That</h4>
+<pre><code class="language-text">/products/3  →  Product 3 page served instantly (from cache)</code></pre>
+<div class="feature">
+<strong>Use fallback: 'blocking' when:</strong> SEO matters and you don't want search engine crawlers or users to ever see a "Loading..." state — e.g. news articles, product pages that get shared on social media, anything where the crawler needs finished HTML immediately.
+</div>
+<hr/>
+<h3>Side-by-Side: What the User Sees</h3>
+<table>
+<tr>
+<th>User Visits /products/3</th>
+<th>fallback: false</th>
+<th>fallback: true</th>
+<th>fallback: 'blocking'</th>
+</tr>
+<tr>
+<td>Browser response</td>
+<td>404 page</td>
+<td>Instant "Loading..." shell</td>
+<td>Nothing until page is ready</td>
+</tr>
+<tr>
+<td>What user sees</td>
+<td>Not Found</td>
+<td>Loading → Product 3</td>
+<td>Blank/spinner → Product 3</td>
+</tr>
+<tr>
+<td>URL bar changes immediately?</td>
+<td>Yes (to 404)</td>
+<td>Yes</td>
+<td>No, waits for content</td>
+</tr>
+</table>
+<h3>Full Technical Comparison</h3>
+<table>
+<tr>
+<th>Feature</th>
+<th>false</th>
+<th>true</th>
+<th>'blocking'</th>
+</tr>
+<tr>
+<td>Unknown route behavior</td>
+<td>404</td>
+<td>Generated on demand</td>
+<td>Generated on demand</td>
+</tr>
+<tr>
+<td>Loading/fallback UI needed</td>
+<td>❌ Not applicable</td>
+<td>✅ Required (router.isFallback)</td>
+<td>❌ Not needed</td>
+</tr>
+<tr>
+<td>getStaticProps() runs for unknown route</td>
+<td>❌ Never</td>
+<td>✅ Yes, after page renders</td>
+<td>✅ Yes, before page renders</td>
+</tr>
+<tr>
+<td>User sees blank/loading state</td>
+<td>❌</td>
+<td>✅ Briefly</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>Time to first response</td>
+<td>Instant (404)</td>
+<td>Instant (fallback shell)</td>
+<td>Slower (waits for data)</td>
+</tr>
+<tr>
+<td>SEO friendly for first crawl</td>
+<td>✅ (page doesn't exist anyway)</td>
+<td>⚠️ Crawler may see "Loading..."</td>
+<td>✅ Crawler gets full HTML</td>
+</tr>
+<tr>
+<td>Page cached after first generation</td>
+<td>❌ Not applicable</td>
+<td>✅ Yes</td>
+<td>✅ Yes</td>
+</tr>
+<tr>
+<td>Good for</td>
+<td>Small, fixed set of pages</td>
+<td>Huge catalogs, UX-first sites</td>
+<td>SEO-critical, shareable pages</td>
+</tr>
+</table>
+<h3>When to Use Which — Decision Guide</h3>
+<table>
+<tr>
+<th>Situation</th>
+<th>Recommended fallback</th>
+</tr>
+<tr>
+<td>You know every page ahead of time (30 blog posts, 10 marketing pages)</td>
+<td><code>false</code></td>
+</tr>
+<tr>
+<td>Millions of product pages, most rarely visited, UX can tolerate a brief loading flash</td>
+<td><code>true</code></td>
+</tr>
+<tr>
+<td>Pages get shared on social media / indexed by Google and must never show "Loading..."</td>
+<td><code>'blocking'</code></td>
+</tr>
+<tr>
+<td>You want unknown pages to behave like a normal 404 for security/product reasons</td>
+<td><code>false</code></td>
+</tr>
+</table>
+<h3>Interview Tips</h3>
+<div class="feature">
+<strong>Key misconception to call out:</strong> <code>fallback</code> does NOT affect pages already listed in <code>paths</code> — those are always pre-built at compile time regardless of the fallback value. It only changes what happens for paths NOT in that list.
+</div>
+<div class="feature">
+<strong>One-line definitions to memorize:</strong>
+<ul>
+<li><code>fallback: false</code> → unknown pages return a 404, getStaticProps never runs for them</li>
+<li><code>fallback: true</code> → unknown pages show a loading state first, then render once data arrives</li>
+<li><code>fallback: 'blocking'</code> → unknown pages wait server-side and only render fully-formed HTML, no loading state</li>
+</ul>
+</div>
+<div class="warning">
+Both <code>true</code> and <code>'blocking'</code> cache the generated page after the first request, just like <code>revalidate</code> in ISR (Incremental Static Regeneration). The difference between them is purely about what the FIRST visitor experiences — not about long-term caching behavior.
+</div>
+<h2 class="section-title" id="P3-09"><span class="secnum">P3-09</span>What is Incremental Static Regeneration (ISR) and How Do You Enable It?</h2>
+<p>
+Incremental Static Regeneration (ISR) is a Next.js feature that combines the speed of Static Site Generation (SSG) with the ability to update static pages after deployment.
+</p>
+<div class="feature">
+ISR allows us to regenerate static pages in the background at a specified interval without rebuilding the entire application.
+</div>
+<h3>Why Do We Need ISR?</h3>
+<p>
+SSG generates pages during the build process.
+</p>
+<p>
+The problem is that data may change after deployment.
+</p>
+<p>
+Without ISR:
+</p>
+<div class="code-title">Problem</div>
+<pre><code class="language-text">Build Application
+       │
+       ▼
+Generate HTML
+       │
+       ▼
+Deploy
+Data Changes Later
+       │
+       ▼
+HTML Becomes Outdated</code></pre>
+<p>
+To get fresh data, we would need to rebuild and redeploy the application.
+</p>
+<p>
+ISR solves this problem.
+</p>
+<h3>How ISR Works</h3>
+<div class="code-title">ISR Flow</div>
+<pre><code class="language-text">Build Application
+       │
+       ▼
+Generate Static HTML
+       │
+       ▼
+Deploy
+After Revalidate Time
+       │
+       ▼
+Next Request Arrives
+       │
+       ▼
+Regenerate Page
+In Background
+       │
+       ▼
+Update Cached Page</code></pre>
+<h3>Basic Example</h3>
+<div class="code-title">pages/posts.js</div>
+<pre><code class="language-jsx">export async function getStaticProps() {
+  const res = await fetch(
+    'https://api.example.com/posts'
+  );
+  const posts = await res.json();
+  return {
+    props: { posts },
+    revalidate: 60
+  };
+}
+export default function Posts({ posts }) {
+  return (
+    &lt;h1&gt;
+      Total Posts: {posts.length}
+    &lt;/h1&gt;
+  );
+}</code></pre>
+<h3>How Do We Enable ISR?</h3>
+<p>
+ISR is enabled by returning the <code>revalidate</code> property from <code>getStaticProps()</code>.
+</p>
+<div class="code-title">Enable ISR</div>
+<pre><code class="language-jsx">return {
+  props: { posts },
+  revalidate: 60
+};</code></pre>
+<p>
+Meaning:
+</p>
+<pre><code class="language-text">Regenerate Page
+Every 60 Seconds</code></pre>
+<h3>What Happens Internally?</h3>
+<div class="code-title">Timeline</div>
+<pre><code class="language-text">12:00 PM
+      │
+      ▼
+Build Generates Page
+12:01 PM
+      │
+      ▼
+User Visits Page
+      │
+      ▼
+Serve Cached HTML
+12:02 PM
+      │
+      ▼
+User Visits Page
+      │
+      ▼
+Serve Cached HTML
+12:03 PM
+(60 Seconds Passed)
+      │
+      ▼
+User Visits Page
+      │
+      ▼
+Serve Old HTML
+      │
+      ▼
+Regenerate Page
+In Background
+      │
+      ▼
+Cache Updated HTML
+Next User
+      │
+      ▼
+Receives New HTML</code></pre>
+<h3>Important Point</h3>
+<div class="feature">
+The user who triggers regeneration still receives the old cached page. Regeneration happens in the background, and future users receive the updated page.
+</div>
+<h3>Real Example</h3>
+<p>
+Suppose our application displays product information.
+</p>
+<div class="code-title">Route</div>
+<pre><code class="language-text">/products</code></pre>
+<p>
+Products rarely change, but updates may occur every few minutes.
+</p>
+<div class="code-title">ISR Configuration</div>
+<pre><code class="language-jsx">return {
+  props: { products },
+  revalidate: 300
+};</code></pre>
+<p>
+Meaning:
+</p>
+<pre><code class="language-text">Regenerate Page
+Every 5 Minutes</code></pre>
+<p>
+We get:
+</p>
+<ul>
+<li>Static page performance.</li>
+<li>Automatic updates.</li>
+<li>No manual rebuilds.</li>
+</ul>
+<h3>ISR with Dynamic Routes</h3>
+<div class="code-title">pages/products/[id].js</div>
+<pre><code class="language-jsx">export async function getStaticPaths() {
+  return {
+    paths: [
+      { params: { id: '1' } }
+    ],
+    fallback: 'blocking'
+  };
+}
+export async function getStaticProps({ params }) {
+  const res = await fetch(`https://api.example.com/products/${params.id}`);
+  const product = await res.json();
+  return {
+    props: { product },
+    revalidate: 60
+  };
+}</code></pre>
+<p>
+Each generated page can be regenerated independently.
+</p>
+<h3>SSR vs SSG vs ISR</h3>
+<table>
+<tr>
+<th>Feature</th>
+<th>SSR</th>
+<th>SSG</th>
+<th>ISR</th>
+</tr>
+<tr>
+<td>HTML Generated</td>
+<td>Every Request</td>
+<td>Build Time</td>
+<td>Build Time + Regeneration</td>
+</tr>
+<tr>
+<td>Fresh Data</td>
+<td>Always</td>
+<td>Build Time Data</td>
+<td>Periodic Updates</td>
+</tr>
+<tr>
+<td>Performance</td>
+<td>Slower</td>
+<td>Fastest</td>
+<td>Very Fast</td>
+</tr>
+<tr>
+<td>Server Load</td>
+<td>High</td>
+<td>Very Low</td>
+<td>Low</td>
+</tr>
+</table>
+<h3>When Should We Use ISR?</h3>
+<ul>
+<li>Blogs</li>
+<li>News Websites</li>
+<li>Product Catalogs</li>
+<li>E-commerce Websites</li>
+<li>Documentation Sites</li>
+<li>Marketing Websites</li>
+</ul>
+<p>
+These pages need occasional updates but do not require fresh data on every request.
+</p>
+<h3>When Should We Avoid ISR?</h3>
+<ul>
+<li>User Dashboards</li>
+<li>Stock Prices</li>
+<li>Live Sports Scores</li>
+<li>Real-Time Analytics</li>
+</ul>
+<p>
+These pages require SSR because data must always be fresh.
+</p>
+<h3>App Router Equivalent</h3>
+<p>
+In the App Router, ISR is enabled using the <code>revalidate</code> export.
+</p>
+<div class="code-title">app/posts/page.js</div>
+<pre><code class="language-jsx">export const revalidate = 60;
+async function getPosts() {
+  const res = await fetch(
+    'https://api.example.com/posts'
+  );
+  return res.json();
+}
+export default async function Posts() {
+  const posts = await getPosts();
+  return (
+    &lt;h1&gt;
+      {posts.length}
+    &lt;/h1&gt;
+  );
+}</code></pre>
+<p>
+Meaning:
+</p>
+<pre><code class="language-text">Regenerate Page
+Every 60 Seconds</code></pre>
+<h3>Interview Tip</h3>
+<div class="feature">
+A common misconception is that ISR regenerates pages exactly when the revalidate time expires. In reality, regeneration happens only when a new request arrives after the revalidate period has passed.
+</div>
+<div class="feature">
+<strong>One-Line Definition:</strong><br/>
+Incremental Static Regeneration (ISR) is a Next.js feature that allows statically generated pages to be automatically regenerated in the background after a specified interval without rebuilding the entire application.
+</div>
+<h3>Does ISR Regenerate Automatically?</h3>
+<div class="feature">
+<strong>Important:</strong><br/>
+A common misconception is that ISR automatically regenerates pages exactly when the revalidate time expires. This is not true.
+</div>
+<p>
+ISR does not regenerate pages automatically when the timer expires.
+</p>
+<p>
+Instead, Next.js waits for a new request after the revalidate period has passed.
+</p>
+<div class="code-title">Actual ISR Rule</div>
+<pre><code class="language-text">Revalidate Time Expires
+          +
+New Request Arrives
+          =
+Regeneration Happens</code></pre>
+<p>
+Not:
+</p>
+<div class="code-title">Incorrect Assumption</div>
+<pre><code class="language-text">Revalidate Time Expires
+          =
+Regeneration Happens ❌</code></pre>
+<h4>Example Timeline</h4>
+<div class="code-title">Timeline</div>
+<pre><code class="language-text">12:00 PM
+      │
+      ▼
+Page Generated
+12:01 PM
+      │
+      ▼
+Data Changes In Database
+12:02 PM
+(60 Seconds Passed)
+      │
+      ▼
+No User Visits
+      │
+      ▼
+Nothing Happens
+12:05 PM
+      │
+      ▼
+First User Visits
+      │
+      ▼
+Serve Old Cached Page
+      │
+      ▼
+Regenerate Page In Background
+      │
+      ▼
+Update Cache
+12:06 PM
+      │
+      ▼
+Next User Visits
+      │
+      ▼
+Receives Updated Page</code></pre>
+<p>
+The first user after the revalidate period usually receives the old cached page while regeneration happens in the background.
+</p>
+<div class="feature">
+ISR regeneration is triggered by a request after the revalidate period has passed, not by the timer itself.
+</div>
+<h2 class="section-title" id="P3-10"><span class="secnum">P3-10</span>How do you fetch data on the client side in a Next.js app?</h2>
+<p>
+Client-side data fetching means fetching data in the browser after the page has loaded.
+</p>
+<div class="feature">
+In Next.js, we fetch data on the client side by using a Client Component with <code>'use client'</code>, then calling an API inside <code>useEffect()</code> or using a library like SWR or React Query.
+</div>
+<h3>When Do We Use Client-Side Fetching?</h3>
+<p>
+Client-side fetching is useful when data depends on browser interaction or user-specific state.
+</p>
+<ul>
+<li>Dashboard data</li>
+<li>User profile data</li>
+<li>Search results</li>
+<li>Filters</li>
+<li>Pagination</li>
+<li>Live updates</li>
+<li>Data after button click</li>
+</ul>
+<h3>Basic Client-Side Fetching</h3>
+<p>
+In the App Router, we must use <code>'use client'</code> because <code>useEffect()</code> runs only in the browser.
+</p>
+<div class="code-title">app/users/page.js</div>
+<pre><code class="language-jsx">'use client';
+import { useEffect, useState } from 'react';
+export default function UsersPage() {
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  useEffect(() =&gt; {
+    async function fetchUsers() {
+      const res = await fetch('/api/users');
+      const data = await res.json();
+      setUsers(data);
+      setLoading(false);
+    }
+    fetchUsers();
+  }, []);
+  if (loading) {
+    return &lt;h2&gt;Loading...&lt;/h2&gt;;
+  }
+  return (
+    &lt;div&gt;
+      &lt;h1&gt;Users&lt;/h1&gt;
+      {users.map(user =&gt; (
+        &lt;p key={user.id}&gt;{user.name}&lt;/p&gt;
+      ))}
+    &lt;/div&gt;
+  );
+}</code></pre>
+<h3>What Happens Internally?</h3>
+<div class="code-title">Client-Side Fetching Flow</div>
+<pre><code class="language-text">Page Loads
+    │
+    ▼
+React Component Renders
+    │
+    ▼
+useEffect Runs In Browser
+    │
+    ▼
+API Request Sent
+    │
+    ▼
+Data Received
+    │
+    ▼
+State Updates
+    │
+    ▼
+UI Re-renders</code></pre>
+<h3>Fetching Data After Button Click</h3>
+<p>
+Sometimes we do not want to fetch data immediately. We may fetch data only after a user action.
+</p>
+<div class="code-title">Button Click Fetch</div>
+<pre><code class="language-jsx">'use client';
+import { useState } from 'react';
+export default function ProductsPage() {
+  const [products, setProducts] = useState([]);
+  const loadProducts = async () =&gt; {
+    const res = await fetch('/api/products');
+    const data = await res.json();
+    setProducts(data);
+  };
+  return (
+    &lt;div&gt;
+      &lt;button onClick={loadProducts}&gt;Load Products&lt;/button&gt;
+      {products.map(product =&gt; (
+        &lt;p key={product.id}&gt;{product.name}&lt;/p&gt;
+      ))}
+    &lt;/div&gt;
+  );
+}</code></pre>
+<h3>Using SWR</h3>
+<p>
+SWR is a popular data fetching library from Vercel.
+</p>
+<p>
+It handles caching, loading states, revalidation, and refetching automatically.
+</p>
+<div class="code-title">Install SWR</div>
+<pre><code class="language-bash">npm install swr</code></pre>
+<div class="code-title">SWR Example</div>
+<pre><code class="language-jsx">'use client';
+import useSWR from 'swr';
+const fetcher = url =&gt; fetch(url).then(res =&gt; res.json());
+export default function UsersPage() {
+  const { data, error, isLoading } = useSWR('/api/users', fetcher);
+  if (isLoading) {
+    return &lt;h2&gt;Loading...&lt;/h2&gt;;
+  }
+  if (error) {
+    return &lt;h2&gt;Failed to load users&lt;/h2&gt;;
+  }
+  return (
+    &lt;div&gt;
+      {data.map(user =&gt; (
+        &lt;p key={user.id}&gt;{user.name}&lt;/p&gt;
+      ))}
+    &lt;/div&gt;
+  );
+}</code></pre>
+<h3>Why Use SWR?</h3>
+<table>
+<tr>
+<th>Feature</th>
+<th>useEffect + fetch</th>
+<th>SWR</th>
+</tr>
+<tr>
+<td>Manual Loading State</td>
+<td>Required</td>
+<td>Built-in</td>
+</tr>
+<tr>
+<td>Error Handling</td>
+<td>Manual</td>
+<td>Built-in</td>
+</tr>
+<tr>
+<td>Caching</td>
+<td>Manual</td>
+<td>Built-in</td>
+</tr>
+<tr>
+<td>Revalidation</td>
+<td>Manual</td>
+<td>Built-in</td>
+</tr>
+<tr>
+<td>Best For</td>
+<td>Simple cases</td>
+<td>Real applications</td>
+</tr>
+</table>
+<h3>Client-Side Fetching in Pages Router</h3>
+<p>
+In the Pages Router, client-side fetching is also done using <code>useEffect()</code>.
+</p>
+<div class="code-title">pages/users.js</div>
+<pre><code class="language-jsx">import { useEffect, useState } from 'react';
+export default function UsersPage() {
+  const [users, setUsers] = useState([]);
+  useEffect(() =&gt; {
+    async function fetchUsers() {
+      const res = await fetch('/api/users');
+      const data = await res.json();
+      setUsers(data);
+    }
+    fetchUsers();
+  }, []);
+  return (
+    &lt;div&gt;
+      {users.map(user =&gt; (
+        &lt;p key={user.id}&gt;{user.name}&lt;/p&gt;
+      ))}
+    &lt;/div&gt;
+  );
+}</code></pre>
+<h3>Client-Side Fetching vs Server-Side Fetching</h3>
+<table>
+<tr>
+<th>Feature</th>
+<th>Client-Side Fetching</th>
+<th>Server-Side Fetching</th>
+</tr>
+<tr>
+<td>Where Data Fetches</td>
+<td>Browser</td>
+<td>Server</td>
+</tr>
+<tr>
+<td>SEO</td>
+<td>Weaker</td>
+<td>Better</td>
+</tr>
+<tr>
+<td>Initial HTML</td>
+<td>May not include data</td>
+<td>Includes data</td>
+</tr>
+<tr>
+<td>Best For</td>
+<td>Interactive/user-specific data</td>
+<td>SEO/fresh server-rendered data</td>
+</tr>
+<tr>
+<td>Loading State</td>
+<td>Usually needed</td>
+<td>Often not needed initially</td>
+</tr>
+</table>
+<h3>When Should We Choose Client-Side Fetching?</h3>
+<ul>
+<li>When data is not important for SEO.</li>
+<li>When data depends on user interaction.</li>
+<li>When data is private or user-specific.</li>
+<li>When we need live updates.</li>
+<li>When fetching should happen after the page loads.</li>
+</ul>
+<h3>When Should We Avoid Client-Side Fetching?</h3>
+<ul>
+<li>SEO-focused pages</li>
+<li>Blogs</li>
+<li>Marketing pages</li>
+<li>Product pages that need search engine indexing</li>
+<li>Pages where content should be visible immediately in HTML</li>
+</ul>
+<h3>Important Note</h3>
+<div class="feature">
+Client-side fetching means users may initially see a loading state because the data is fetched after JavaScript runs in the browser.
+</div>
+<h3>Interview Tip</h3>
+<div class="feature">
+A common misconception is that all data fetching in Next.js should happen on the server. In reality, client-side fetching is still useful for interactive, user-specific, and frequently changing data.
+</div>
+<div class="feature">
+<strong>One-Line Definition:</strong><br/>
+Client-side data fetching in Next.js means fetching data in the browser using a Client Component with <code>useEffect()</code>, <code>fetch()</code>, or a library like SWR, usually for interactive or user-specific data.
+</div>
+<h2 class="section-title" id="P3-11"><span class="secnum">P3-11</span>What is SWR and how does it integrate with Next.js?</h2>
+<p>
+SWR is a React data fetching library created by Vercel that provides caching, automatic revalidation, request deduplication, polling, and real-time data synchronization.
+</p>
+<div class="feature">
+SWR stands for <strong>Stale-While-Revalidate</strong>. It immediately shows cached data (stale data), then fetches fresh data in the background and updates the UI automatically.
+</div>
+<h3>Why Do We Need SWR?</h3>
+<p>
+Without SWR, we often write repetitive code for:
+</p>
+<ul>
+<li>Loading states</li>
+<li>Error handling</li>
+<li>Caching</li>
+<li>Refetching</li>
+<li>Revalidation</li>
+</ul>
+<div class="code-title">Without SWR</div>
+<pre><code class="language-jsx">'use client';
+import { useEffect, useState } from 'react';
+export default function Users() {
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  useEffect(() =&gt; {
+    async function loadUsers() {
+      const res = await fetch('/api/users');
+      const data = await res.json();
+      setUsers(data);
+      setLoading(false);
+    }
+    loadUsers();
+  }, []);
+  return loading
+    ? &lt;h2&gt;Loading...&lt;/h2&gt;
+    : &lt;div&gt;{users.length}&lt;/div&gt;;
+}</code></pre>
+<p>
+SWR handles most of this automatically.
+</p>
+<h3>Install SWR</h3>
+<div class="code-title">Terminal</div>
+<pre><code class="language-bash">npm install swr</code></pre>
+<h3>Basic SWR Example</h3>
+<div class="code-title">Client Component</div>
+<pre><code class="language-jsx">'use client';
+import useSWR from 'swr';
+const fetcher = (url) =&gt; fetch(url).then(res=&gt;res.json());
+export default function Users(){
+  const {data, error, isLoading} = useSWR(
+    '/api/users',
+    fetcher
+  );
+  if(isLoading){
+    return &lt;h2&gt;Loading...&lt;/h2&gt;;
+  }
+  if(error){
+    return &lt;h2&gt;Error Loading Users&lt;/h2&gt;;
+  }
+  return(
+    &lt;div&gt;
+      {data.map(user=&gt;(
+        &lt;p key={user.id}&gt;
+          {user.name}
+        &lt;/p&gt;
+      ))}
+    &lt;/div&gt;
+  );
+}</code></pre>
+<h3>What Does SWR Mean?</h3>
+<div class="code-title">Stale-While-Revalidate Flow</div>
+<pre><code class="language-text">Cached Data
+      │
+      ▼
+Show Immediately
+      │
+      ▼
+Fetch Fresh Data
+In Background
+      │
+      ▼
+Update Cache
+      │
+      ▼
+Re-render UI</code></pre>
+<h3>Example Timeline</h3>
+<div class="code-title">Timeline</div>
+<pre><code class="language-text">First Visit
+      │
+      ▼
+API Request
+      │
+      ▼
+Cache Result
+      │
+      ▼
+User Leaves Page
+      │
+      ▼
+Returns Later
+      │
+      ▼
+Show Cached Data
+Immediately
+      │
+      ▼
+Fetch Latest Data
+      │
+      ▼
+Update Screen</code></pre>
+<h3>Why Is SWR Fast?</h3>
+<p>
+Because cached data can be displayed instantly.
+</p>
+<p>
+Users do not always need to wait for a new API request.
+</p>
+<h3>Automatic Revalidation</h3>
+<p>
+SWR automatically refetches data when:
+</p>
+<ul>
+<li>User returns to the tab.</li>
+<li>Network reconnects.</li>
+<li>Component remounts.</li>
+</ul>
+<div class="code-title">Example</div>
+<pre><code class="language-jsx">const {data}=useSWR(
+  '/api/users',
+  fetcher
+);</code></pre>
+<p>
+These behaviors work automatically.
+</p>
+<h3>Polling Data</h3>
+<p>
+SWR can automatically refresh data at a specified interval.
+</p>
+<div class="code-title">Auto Refresh Every 5 Seconds</div>
+<pre><code class="language-jsx">const {data}=useSWR(
+  '/api/users',
+  fetcher,
+  {refreshInterval:5000}
+);</code></pre>
+<h3>Manual Revalidation</h3>
+<p>
+We can force SWR to refetch data.
+</p>
+<div class="code-title">Example</div>
+<pre><code class="language-jsx">import useSWR,{mutate} from 'swr';
+const refresh=()=&gt;{
+  mutate('/api/users');
+};</code></pre>
+<h3>What Happens Internally?</h3>
+<div class="code-title">SWR Flow</div>
+<pre><code class="language-text">Component Mounts
+       │
+       ▼
+Check Cache
+       │
+       ├── Exists
+       │      │
+       │      ▼
+       │   Show Data
+       │
+       ▼
+Fetch Latest Data
+       │
+       ▼
+Update Cache
+       │
+       ▼
+Update UI</code></pre>
+<h3>How Does SWR Integrate With Next.js?</h3>
+<p>
+SWR works especially well with Next.js because both are maintained by Vercel.
+</p>
+<ul>
+<li>Works in Client Components.</li>
+<li>Works with API Routes.</li>
+<li>Works with Route Handlers.</li>
+<li>Works with Server Components + Client Components.</li>
+<li>Supports Next.js caching strategies.</li>
+</ul>
+<h3>App Router Example</h3>
+<div class="code-title">app/users/page.js</div>
+<pre><code class="language-jsx">'use client';
+import useSWR from 'swr';
+const fetcher=url=&gt;
+  fetch(url).then(res=&gt;res.json());
+export default function UsersPage(){
+  const {data,isLoading}=useSWR(
+    '/api/users',
+    fetcher
+  );
+  if(isLoading){
+    return &lt;h2&gt;Loading...&lt;/h2&gt;;
+  }
+  return(
+    &lt;div&gt;
+      Total Users: {data.length}
+    &lt;/div&gt;
+  );
+}</code></pre>
+<h3>Pages Router Example</h3>
+<div class="code-title">pages/users.js</div>
+<pre><code class="language-jsx">import useSWR from 'swr';
+const fetcher=url=&gt;
+  fetch(url).then(res=&gt;res.json());
+export default function Users(){
+  const {data}=useSWR(
+    '/api/users',
+    fetcher
+  );
+  return(
+    &lt;div&gt;
+      {data?.length}
+    &lt;/div&gt;
+  );
+}</code></pre>
+<h3>SWR vs useEffect</h3>
+<table>
+<tr>
+<th>Feature</th>
+<th>useEffect + fetch</th>
+<th>SWR</th>
+</tr>
+<tr>
+<td>Loading State</td>
+<td>Manual</td>
+<td>Built-in</td>
+</tr>
+<tr>
+<td>Error Handling</td>
+<td>Manual</td>
+<td>Built-in</td>
+</tr>
+<tr>
+<td>Caching</td>
+<td>Manual</td>
+<td>Built-in</td>
+</tr>
+<tr>
+<td>Revalidation</td>
+<td>Manual</td>
+<td>Built-in</td>
+</tr>
+<tr>
+<td>Polling</td>
+<td>Manual</td>
+<td>Built-in</td>
+</tr>
+<tr>
+<td>Request Deduplication</td>
+<td>Manual</td>
+<td>Built-in</td>
+</tr>
+</table>
+<h3>When Should We Use SWR?</h3>
+<ul>
+<li>User dashboards.</li>
+<li>Profile pages.</li>
+<li>Live statistics.</li>
+<li>Search results.</li>
+<li>Admin panels.</li>
+<li>Frequently changing data.</li>
+</ul>
+<h3>When Should We Avoid SWR?</h3>
+<ul>
+<li>SEO-critical pages.</li>
+<li>Static marketing pages.</li>
+<li>Pages that should be rendered fully on the server.</li>
+</ul>
+<h3>Important Note</h3>
+<div class="feature">
+SWR runs in Client Components. If we need SEO-friendly data fetching, Server Components or server-side data fetching should usually be preferred.
+</div>
+<h3>Interview Tip</h3>
+<div class="feature">
+A common misconception is that SWR replaces server-side rendering. In reality, SWR is primarily for client-side data fetching, caching, and revalidation.
+</div>
+<div class="feature">
+<strong>One-Line Definition:</strong><br/>
+SWR is a React data fetching library from Vercel that integrates seamlessly with Next.js by providing client-side caching, automatic revalidation, polling, and stale-while-revalidate data fetching.
+</div><div class="chapnav"><a class="prev" href="pages-P2-file-based-routing-and-navigation.html">P2 - File-Based Routing & Navigation</a><a class="next" href="pages-P4-api-routes-backend-in-next.js.html">P4 - API Routes (Backend in Next.js)</a></div></div></div><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-tsx.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+</body>
+</html>

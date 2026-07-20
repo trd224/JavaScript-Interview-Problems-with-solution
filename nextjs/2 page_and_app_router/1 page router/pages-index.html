@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Next.js Pages Router - Complete Guide | Next.js App Router Guide</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:#0f172a;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.8;display:flex;min-height:100vh}
+a{color:inherit;text-decoration:none}
+.sidebar{width:290px;flex-shrink:0;background:#0b1220;border-right:1px solid #1e293b;padding:24px 18px;position:sticky;top:0;height:100vh;overflow-y:auto}
+.brand{color:#38bdf8;font-size:18px;font-weight:800;margin-bottom:4px}
+.brand small{display:block;color:#64748b;font-weight:400;font-size:12px;margin-top:4px}
+.chapter-nav{margin-top:22px}
+.chapter-nav a{display:block;padding:8px 10px;border-radius:8px;font-size:13px;color:#94a3b8;margin-bottom:4px;border-left:3px solid transparent}
+.chapter-nav a:hover{background:#111827;color:#e2e8f0}
+.chapter-nav a.active{background:#111827;color:#38bdf8;border-left:3px solid #38bdf8;font-weight:bold}
+.chapter-nav .chnum{display:inline-block;width:22px;color:#475569;font-family:monospace}
+.toc{margin-top:22px;border-top:1px solid #1e293b;padding-top:16px}
+.toc-title{color:#fbbf24;font-size:12px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px}
+.toc a{display:block;font-size:12.5px;color:#8ea3c2;padding:5px 8px;border-radius:6px;line-height:1.4}
+.toc a:hover{background:#111827;color:#e2e8f0}
+.main{flex:1;padding:40px 48px;max-width:980px}
+.container{max-width:900px}
+h1.page-title{color:#38bdf8;margin-bottom:6px;font-size:30px}
+.page-sub{color:#64748b;margin-bottom:28px;font-size:14px}
+h2.section-title{color:#a78bfa;margin-top:52px;margin-bottom:14px;font-size:23px;border-top:1px solid #1e293b;padding-top:38px}
+h2.section-title .secnum{color:#475569;font-family:monospace;margin-right:10px;font-size:16px}
+h3{color:#fbbf24;margin-top:25px;margin-bottom:10px;font-size:17px}
+h4{color:#38bdf8;margin-top:18px;margin-bottom:8px;font-size:15px}
+h5{color:#93c5fd;margin-top:14px;margin-bottom:6px;font-size:14px}
+p{margin-bottom:15px}
+ul,ol{margin-left:20px;margin-bottom:15px}
+li{margin-bottom:8px}
+strong{color:#f1f5f9}
+code{color:#93c5fd;font-family:'JetBrains Mono',monospace;font-size:.92em}
+.feature{background:#1e293b;border-left:5px solid #38bdf8;padding:15px;border-radius:8px;margin:20px 0}
+.warning{background:#2a1a1a;border-left:5px solid #f87171;padding:15px;border-radius:8px;margin:20px 0}
+.summary{background:#1a2a1e;border-left:5px solid #34d399;padding:15px;border-radius:8px;margin:20px 0}
+.note{background:#1e293b;border-left:5px solid #a78bfa;padding:15px;border-radius:8px;margin:20px 0}
+.code-title{background:#1e293b;color:#93c5fd;padding:10px;font-weight:bold;border-radius:6px 6px 0 0;font-size:13px;font-family:monospace}
+pre[class*="language-"]{margin:0 0 20px 0!important;border-radius:0 0 6px 6px}
+pre code{white-space:pre}
+table{width:100%;border-collapse:collapse;margin:20px 0}
+th{background:#1e293b;color:#38bdf8;text-align:left;padding:12px}
+td{padding:12px;border-top:1px solid #334155}
+hr{border:none;border-top:1px solid #1e293b;margin:30px 0}
+.chapnav{display:flex;justify-content:space-between;margin-top:60px;padding-top:24px;border-top:1px solid #1e293b}
+.chapnav a{background:#111827;padding:12px 18px;border-radius:10px;border:1px solid #1e293b;font-size:14px;color:#94a3b8}
+.chapnav a:hover{color:#38bdf8;border-color:#38bdf8}
+.chapnav .prev::before{content:"<- "}
+.chapnav .next::after{content:" ->"}
+@media(max-width:900px){body{flex-direction:column}.sidebar{position:relative;height:auto;width:100%}}
+
+.hero{padding:10px 0 30px}
+.hero h1{color:#38bdf8;font-size:34px;margin-bottom:12px}
+.hero p{color:#94a3b8;max-width:640px;font-size:15px}
+.stats{display:flex;gap:14px;margin:22px 0 10px;flex-wrap:wrap}
+.stat{background:#111827;border:1px solid #1e293b;border-radius:10px;padding:14px 18px}
+.stat b{color:#38bdf8;font-size:20px;display:block}
+.stat span{color:#64748b;font-size:12px}
+.chapters{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:20px}
+@media(max-width:800px){.chapters{grid-template-columns:1fr}}
+.chapcard{background:#111827;border:1px solid #1e293b;border-radius:12px;padding:20px;transition:.15s}
+.chapcard:hover{border-color:#38bdf8}
+.chapcard .num{color:#475569;font-family:monospace;font-size:13px}
+.chapcard h3{color:#a78bfa;margin:6px 0 10px;font-size:18px}
+.chapcard ol{margin-left:18px;color:#94a3b8;font-size:13px}
+.chapcard li{margin-bottom:4px}
+.chapcard .go{display:inline-block;margin-top:12px;color:#38bdf8;font-size:13px;font-weight:bold}
+</style>
+</head>
+<body>
+<div class="sidebar">
+<div class="brand">Next.js Pages Router<small>Complete Step-by-Step Guide</small></div>
+<div class="chapter-nav"><a href="pages-P1-introduction-to-next.js-and-the-pages-router.html"><span class="chnum">P1</span>Introduction to Next.js & the Pages Router</a><a href="pages-P2-file-based-routing-and-navigation.html"><span class="chnum">P2</span>File-Based Routing & Navigation</a><a href="pages-P3-rendering-and-data-fetching.html"><span class="chnum">P3</span>Rendering & Data Fetching</a><a href="pages-P4-api-routes-backend-in-next.js.html"><span class="chnum">P4</span>API Routes (Backend in Next.js)</a><a href="pages-P5-styling-and-assets.html"><span class="chnum">P5</span>Styling & Assets</a><a href="pages-P6-seo-and-metadata-pages-router.html"><span class="chnum">P6</span>SEO & Metadata (Pages Router)</a><a href="pages-P7-configuration-build-and-deployment.html"><span class="chnum">P7</span>Configuration, Build & Deployment</a></div>
+</div><div class="main"><div class="container"><div class="hero">
+<h1>The Next.js Pages Router — Complete Guide</h1>
+<p>A step-by-step, chapter-based walkthrough of the Pages Router: file-based routing, _app.js / _document.js, getStaticProps / getServerSideProps / getStaticPaths, ISR, API routes, styling, SEO with the Head component, and configuration/build.</p>
+</div><div class="stats">
+<div class="stat"><b>7</b><span>Chapters</span></div>
+<div class="stat"><b>57</b><span>Topics covered</span></div>
+<div class="stat"><b>Pages Router only</b><span>pages/ directory</span></div>
+</div><div class="chapters"><div class="chapcard">
+<div class="num">Part P1 &middot; 6 topics</div>
+<h3>Introduction to Next.js & the Pages Router</h3>
+<ol><li>What is Next.js and how does it differ from React?</li><li>What are the Main Features of Next.js?</li><li>What is the Difference Between Next.js and a Plain React App (Create React App)?</li><li>How do you create a new Next.js project?</li><li>What is the Difference Between the Pages Router and the App Router?</li><li>What is the Purpose of the pages Directory in Next.js?</li></ol>
+<a class="go" href="pages-P1-introduction-to-next.js-and-the-pages-router.html">Start this chapter &rarr;</a>
+</div><div class="chapcard">
+<div class="num">Part P2 &middot; 12 topics</div>
+<h3>File-Based Routing & Navigation</h3>
+<ol><li>What is File-Based Routing in Next.js?</li><li>What is _app.js and What is it Used For?</li><li>What is _document.js and When Would We Use It?</li><li>How does Dynamic Routing work in Next.js?</li><li>What is the Difference Between [id] and [...slug] in Next.js Routing?</li><li>What is the Difference Between [[...slug]] and [...slug]?</li><li>...and 6 more</li></ol>
+<a class="go" href="pages-P2-file-based-routing-and-navigation.html">Start this chapter &rarr;</a>
+</div><div class="chapcard">
+<div class="num">Part P3 &middot; 11 topics</div>
+<h3>Rendering & Data Fetching</h3>
+<ol><li>Why Does Pages Router Hydrate Everything While App Router Doesn't?</li><li>What is Server-Side Rendering (SSR) in Next.js?</li><li>What is Static Site Generation (SSG) in Next.js?</li><li>What is Client-Side Rendering (CSR) and When Should We Choose It?</li><li>What is getStaticProps and When is it Called?</li><li>What is getServerSideProps and How Does It Differ from getStaticProps?</li><li>...and 5 more</li></ol>
+<a class="go" href="pages-P3-rendering-and-data-fetching.html">Start this chapter &rarr;</a>
+</div><div class="chapcard">
+<div class="num">Part P4 &middot; 2 topics</div>
+<h3>API Routes (Backend in Next.js)</h3>
+<ol><li>What Are API Routes in Next.js and Where Do We Place Them?</li><li>How Do We Handle Different HTTP Methods in a Single API Route?</li></ol>
+<a class="go" href="pages-P4-api-routes-backend-in-next.js.html">Start this chapter &rarr;</a>
+</div><div class="chapcard">
+<div class="num">Part P5 &middot; 10 topics</div>
+<h3>Styling & Assets</h3>
+<ol><li>How do you add global CSS to a Next.js application?</li><li>What are CSS Modules and how do you use them in Next.js?</li><li>What built-in CSS-in-JS solution does Next.js support in the App Router?</li><li>How does the next/image component improve performance over a plain <img>?</li><li>What is the public folder used for?</li><li>How do you configure Tailwind CSS with Next.js?</li><li>...and 4 more</li></ol>
+<a class="go" href="pages-P5-styling-and-assets.html">Start this chapter &rarr;</a>
+</div><div class="chapcard">
+<div class="num">Part P6 &middot; 2 topics</div>
+<h3>SEO & Metadata (Pages Router)</h3>
+<ol><li>How do you add meta tags using the Head component ? (Pages Router)</li><li>Why is SSR/SSG Better for SEO than Pure CSR?</li></ol>
+<a class="go" href="pages-P6-seo-and-metadata-pages-router.html">Start this chapter &rarr;</a>
+</div><div class="chapcard">
+<div class="num">Part P7 &middot; 14 topics</div>
+<h3>Configuration, Build & Deployment</h3>
+<ol><li>What is next.config.js / next.config.ts and what can you configure in it?</li><li>How do you set environment variables in Next.js?</li><li>What Is the Difference Between NEXT_PUBLIC_ and Non-Prefixed Env Variables?</li><li>What is Turbopack and Why is it the Default Dev Bundler in Next.js 15?</li><li>What is Fast Refresh and how does it improve DX?</li><li>What TypeScript Support Does Next.js Have Out of the Box?</li><li>...and 8 more</li></ol>
+<a class="go" href="pages-P7-configuration-build-and-deployment.html">Start this chapter &rarr;</a>
+</div></div></div></div></body></html>

@@ -1,0 +1,4902 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>03 - Rendering, Data Fetching & Caching | Next.js App Router Guide</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:#0f172a;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.8;display:flex;min-height:100vh}
+a{color:inherit;text-decoration:none}
+.sidebar{width:290px;flex-shrink:0;background:#0b1220;border-right:1px solid #1e293b;padding:24px 18px;position:sticky;top:0;height:100vh;overflow-y:auto}
+.brand{color:#38bdf8;font-size:18px;font-weight:800;margin-bottom:4px}
+.brand small{display:block;color:#64748b;font-weight:400;font-size:12px;margin-top:4px}
+.chapter-nav{margin-top:22px}
+.chapter-nav a{display:block;padding:8px 10px;border-radius:8px;font-size:13px;color:#94a3b8;margin-bottom:4px;border-left:3px solid transparent}
+.chapter-nav a:hover{background:#111827;color:#e2e8f0}
+.chapter-nav a.active{background:#111827;color:#38bdf8;border-left:3px solid #38bdf8;font-weight:bold}
+.chapter-nav .chnum{display:inline-block;width:22px;color:#475569;font-family:monospace}
+.toc{margin-top:22px;border-top:1px solid #1e293b;padding-top:16px}
+.toc-title{color:#fbbf24;font-size:12px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px}
+.toc a{display:block;font-size:12.5px;color:#8ea3c2;padding:5px 8px;border-radius:6px;line-height:1.4}
+.toc a:hover{background:#111827;color:#e2e8f0}
+.main{flex:1;padding:40px 48px;max-width:980px}
+.container{max-width:900px}
+h1.page-title{color:#38bdf8;margin-bottom:6px;font-size:30px}
+.page-sub{color:#64748b;margin-bottom:28px;font-size:14px}
+h2.section-title{color:#a78bfa;margin-top:52px;margin-bottom:14px;font-size:23px;border-top:1px solid #1e293b;padding-top:38px}
+h2.section-title .secnum{color:#475569;font-family:monospace;margin-right:10px;font-size:16px}
+h3{color:#fbbf24;margin-top:25px;margin-bottom:10px;font-size:17px}
+h4{color:#38bdf8;margin-top:18px;margin-bottom:8px;font-size:15px}
+h5{color:#93c5fd;margin-top:14px;margin-bottom:6px;font-size:14px}
+p{margin-bottom:15px}
+ul,ol{margin-left:20px;margin-bottom:15px}
+li{margin-bottom:8px}
+strong{color:#f1f5f9}
+code{color:#93c5fd;font-family:'JetBrains Mono',monospace;font-size:.92em}
+.feature{background:#1e293b;border-left:5px solid #38bdf8;padding:15px;border-radius:8px;margin:20px 0}
+.warning{background:#2a1a1a;border-left:5px solid #f87171;padding:15px;border-radius:8px;margin:20px 0}
+.summary{background:#1a2a1e;border-left:5px solid #34d399;padding:15px;border-radius:8px;margin:20px 0}
+.note{background:#1e293b;border-left:5px solid #a78bfa;padding:15px;border-radius:8px;margin:20px 0}
+.code-title{background:#1e293b;color:#93c5fd;padding:10px;font-weight:bold;border-radius:6px 6px 0 0;font-size:13px;font-family:monospace}
+pre[class*="language-"]{margin:0 0 20px 0!important;border-radius:0 0 6px 6px}
+pre code{white-space:pre}
+table{width:100%;border-collapse:collapse;margin:20px 0}
+th{background:#1e293b;color:#38bdf8;text-align:left;padding:12px}
+td{padding:12px;border-top:1px solid #334155}
+hr{border:none;border-top:1px solid #1e293b;margin:30px 0}
+.chapnav{display:flex;justify-content:space-between;margin-top:60px;padding-top:24px;border-top:1px solid #1e293b}
+.chapnav a{background:#111827;padding:12px 18px;border-radius:10px;border:1px solid #1e293b;font-size:14px;color:#94a3b8}
+.chapnav a:hover{color:#38bdf8;border-color:#38bdf8}
+.chapnav .prev::before{content:"<- "}
+.chapnav .next::after{content:" ->"}
+@media(max-width:900px){body{flex-direction:column}.sidebar{position:relative;height:auto;width:100%}}
+</style>
+</head>
+<body>
+<div class="sidebar">
+<div class="brand">Next.js App Router<small>Complete Step-by-Step Guide</small></div>
+<div class="chapter-nav"><a class="" href="01-foundations-of-the-app-router.html"><span class="chnum">01</span>Foundations of the App Router</a><a class="" href="02-routing-layouts-and-file-conventions.html"><span class="chnum">02</span>Routing, Layouts & File Conventions</a><a class="active" href="03-rendering-data-fetching-and-caching.html"><span class="chnum">03</span>Rendering, Data Fetching & Caching</a><a class="" href="04-server-actions-and-mutations.html"><span class="chnum">04</span>Server Actions & Mutations</a><a class="" href="05-route-handlers-client-data-and-metadata-seo.html"><span class="chnum">05</span>Route Handlers, Client Data & Metadata (SEO)</a><a class="" href="06-styling-assets-and-optimized-components.html"><span class="chnum">06</span>Styling, Assets & Optimized Components</a><a class="" href="07-performance-and-optimization.html"><span class="chnum">07</span>Performance & Optimization</a></div>
+<div class="toc"><div class="toc-title">On this page</div><a href="#03-01">Are getStaticProps() and getServerSideProps() Available in the App Router?</a><a href="#03-02">How does async data fetching work directly inside Server Components?</a><a href="#03-03">What is the Extended fetch API in Next.js and what caching options does it add?</a><a href="#03-04">What is the difference between cache: 'force-cache' and cache: 'no-store'?</a><a href="#03-05">What does next: { revalidate: N } do in a fetch call?</a><a href="#03-06">What is on-demand revalidation and how do we trigger it via an API route?</a><a href="#03-07">How does Next.js on-demand revalidation work with another backend like .NET or Java?</a><a href="#03-08">What is revalidatePath vs revalidateTag?</a><a href="#03-09">revalidatePath() vs revalidateTag() vs router.refresh()</a><a href="#03-10">What is unstable_cache and when would you use it over fetch caching?</a><a href="#03-11">What is Request Deduplication (Memoization) in Next.js Fetch Calls?</a><a href="#03-12">How do you use React.cache for per-request memoization of non-fetch calls?</a><a href="#03-13">What is the use cache directive introduced in Next.js 15 and how does it differ from unstable_cache?</a><a href="#03-14">React.cache() vs unstable_cache() vs 'use cache'</a><a href="#03-15">What are cacheLife and cacheTag APIs in Next.js 15?</a><a href="#03-16">Difference Between cacheLife and cacheRevalidate in Next.js 15</a><a href="#03-17">How does next/after allow post-response work in Next.js 15?</a><a href="#03-18">What is Partial Prerendering (PPR) Introduced as Stable in Next.js 15?</a><a href="#03-19">What changed with cookies(), headers(), and params becoming async in Next.js 15?</a><a href="#03-20">What is the connection() API introduced in Next.js 15?</a></div>
+</div><div class="main"><div class="container"><h1 class="page-title">03 - Rendering, Data Fetching & Caching</h1><div class="page-sub">Part 03 of 7 &middot; 20 topics &middot; Next.js App Router Guide</div><h2 class="section-title" id="03-01"><span class="secnum">03-01</span>Are getStaticProps() and getServerSideProps() Available in the App Router?</h2>
+<p>
+No. <code>getStaticProps()</code> and <code>getServerSideProps()</code> are only available in the Pages Router.
+</p>
+<div class="feature">
+The App Router does not use <code>getStaticProps()</code>, <code>getServerSideProps()</code>, or <code>getStaticPaths()</code>. Instead, it uses Server Components, fetch caching options, and special exports such as <code>revalidate</code> and <code>generateStaticParams()</code>.
+</div>
+<h3>Pages Router</h3>
+<div class="code-title">pages/posts.js</div>
+<pre><code class="language-jsx">export async function getStaticProps() {
+  return {
+    props: {}
+  };
+}
+export async function getServerSideProps() {
+  return {
+    props: {}
+  };
+}</code></pre>
+<p>
+These APIs work only inside the Pages Router.
+</p>
+<h3>App Router</h3>
+<div class="code-title">app/posts/page.js</div>
+<pre><code class="language-jsx">export default async function Posts() {
+  const res = await fetch(
+    'https://api.example.com/posts'
+  );
+  const posts = await res.json();
+  return (
+    &lt;h1&gt;{posts.length}&lt;/h1&gt;
+  );
+}</code></pre>
+<p>
+There is no getStaticProps() or getServerSideProps() here.
+</p>
+<h3>Why Were They Removed?</h3>
+<p>
+In the Pages Router, Next.js needed separate APIs:
+</p>
+<table>
+<tr>
+<th>Purpose</th>
+<th>API</th>
+</tr>
+<tr>
+<td>SSG</td>
+<td>getStaticProps()</td>
+</tr>
+<tr>
+<td>SSR</td>
+<td>getServerSideProps()</td>
+</tr>
+<tr>
+<td>Dynamic SSG</td>
+<td>getStaticPaths() + getStaticProps()</td>
+</tr>
+</table>
+<p>
+In the App Router, data fetching is built directly into Server Components.
+</p>
+<p>
+Instead of choosing special functions, we control rendering behavior through caching options.
+</p>
+<h3>App Router Replacement for SSG</h3>
+<p>
+Static generation happens automatically when data can be cached.
+</p>
+<div class="code-title">SSG Style</div>
+<pre><code class="language-jsx">async function getPosts() {
+  const res = await fetch(
+    'https://api.example.com/posts'
+  );
+  return res.json();
+}
+export default async function Posts() {
+  const posts = await getPosts();
+  return (
+    &lt;h1&gt;{posts.length}&lt;/h1&gt;
+  );
+}</code></pre>
+<p>
+Next.js may generate this page during the build process.
+</p>
+<h3>App Router Replacement for SSR</h3>
+<div class="code-title">SSR Style</div>
+<pre><code class="language-jsx">async function getPosts() {
+  const res = await fetch(
+    'https://api.example.com/posts',
+    { cache: 'no-store' }
+  );
+  return res.json();
+}
+export default async function Posts() {
+  const posts = await getPosts();
+  return (
+    &lt;h1&gt;{posts.length}&lt;/h1&gt;
+  );
+}</code></pre>
+<p>
+The <code>cache: 'no-store'</code> option forces fresh data on every request.
+</p>
+<p>
+This is equivalent to SSR.
+</p>
+<h3>App Router Replacement for ISR</h3>
+<div class="code-title">ISR Style</div>
+<pre><code class="language-jsx">export const revalidate = 60;
+async function getPosts() {
+  const res = await fetch(
+    'https://api.example.com/posts'
+  );
+  return res.json();
+}
+export default async function Posts() {
+  const posts = await getPosts();
+  return (
+    &lt;h1&gt;{posts.length}&lt;/h1&gt;
+  );
+}</code></pre>
+<p>
+This regenerates the page when a request arrives after 60 seconds.
+</p>
+<h3>App Router Replacement for getStaticPaths()</h3>
+<div class="code-title">generateStaticParams()</div>
+<pre><code class="language-jsx">export async function generateStaticParams() {
+  return [
+    { id: '1' },
+    { id: '2' },
+    { id: '3' }
+  ];
+}</code></pre>
+<p>
+This replaces getStaticPaths().
+</p>
+<h3>Mapping Old APIs to New APIs</h3>
+<table>
+<tr>
+<th>Pages Router</th>
+<th>App Router</th>
+</tr>
+<tr>
+<td>getServerSideProps()</td>
+<td>Server Component + fetch(..., { cache: 'no-store' })</td>
+</tr>
+<tr>
+<td>getStaticProps()</td>
+<td>Server Component + fetch() (default cache)</td>
+</tr>
+<tr>
+<td>getStaticPaths()</td>
+<td>generateStaticParams()</td>
+</tr>
+<tr>
+<td>ISR via revalidate</td>
+<td>Server Component + export const revalidate</td>
+</tr>
+</table>
+<h3>What Happens Internally?</h3>
+<div class="code-title">Pages Router</div>
+<pre><code class="language-text">Need SSG?
+     │
+     ▼
+getStaticProps()
+Need SSR?
+     │
+     ▼
+getServerSideProps()</code></pre>
+<div class="code-title">App Router</div>
+<pre><code class="language-text">Need SSG?
+     │
+     ▼
+Normal fetch()
+Need SSR?
+     │
+     ▼
+fetch(..., { cache: 'no-store' })
+Need ISR?
+     │
+     ▼
+export const revalidate = 60</code></pre>
+<h3>Interview Tip</h3>
+<div class="feature">
+A common misconception is that getStaticProps() and getServerSideProps() still work in the App Router. They do not. The App Router uses Server Components and fetch caching strategies instead of these special data-fetching functions.
+</div>
+<div class="feature">
+<strong>One-Line Definition:</strong><br/>
+No, <code>getStaticProps()</code> and <code>getServerSideProps()</code> are not available in the App Router. Their functionality is replaced by Server Components, fetch caching options, <code>revalidate</code>, and <code>generateStaticParams()</code>.
+</div>
+<h2 class="section-title" id="03-02"><span class="secnum">03-02</span>How does async data fetching work directly inside Server Components?</h2>
+<p>
+In the Next.js App Router, Server Components can be async functions. This allows us to fetch data directly inside the component before returning JSX.
+</p>
+<div class="feature">
+Server Components run on the server, so we can use <code>async</code> and <code>await</code> directly inside them to fetch API data, database data, or session data before HTML is sent to the browser.
+</div>
+<h3>Basic Example</h3>
+<div class="code-title">app/products/page.tsx</div>
+<pre><code class="language-tsx">export default async function ProductsPage() {
+  const res = await fetch('https://api.example.com/products');
+  const products = await res.json();
+  return (
+    &lt;div&gt;
+      &lt;h1&gt;Products&lt;/h1&gt;
+      {products.map(product =&gt; &lt;p key={product.id}&gt;{product.name}&lt;/p&gt;)}
+    &lt;/div&gt;
+  );
+}</code></pre>
+<p>
+Here, <code>ProductsPage</code> is a Server Component because it does not use <code>'use client'</code>.
+</p>
+<h3>What Happens Internally?</h3>
+<div class="code-title">Flow</div>
+<pre><code class="language-text">User requests /products
+        ↓
+Server runs ProductsPage()
+        ↓
+fetch() waits for product data
+        ↓
+Server creates HTML with products
+        ↓
+Browser receives ready HTML</code></pre>
+<h3>No useEffect Needed</h3>
+<p>
+In Client Components, we usually fetch data with <code>useEffect()</code>.
+</p>
+<div class="code-title">Client Component Style</div>
+<pre><code class="language-tsx">'use client';
+import { useEffect, useState } from 'react';
+export default function ProductsPage() {
+  const [products, setProducts] = useState([]);
+  useEffect(() =&gt; {
+    fetch('/api/products').then(res =&gt; res.json()).then(data =&gt; setProducts(data));
+  }, []);
+  return &lt;div&gt;{products.map(product =&gt; &lt;p key={product.id}&gt;{product.name}&lt;/p&gt;)}</code></pre>
+<p>
+But in Server Components, we can fetch before rendering, so the browser does not need to wait for JavaScript to load the data.
+</p>
+<h3>Server Component Style</h3>
+<div class="code-title">Better App Router Pattern</div>
+<pre><code class="language-tsx">export default async function ProductsPage() {
+  const res = await fetch('https://api.example.com/products');
+  const products = await res.json();
+  return &lt;div&gt;{products.map(product =&gt; &lt;p key={product.id}&gt;{product.name}&lt;/p&gt;)}</code></pre>
+<div class="feature">
+The data is fetched on the server, and the browser receives HTML that already contains the product list.
+</div>
+<h3>Fetching From A Database</h3>
+<p>
+Because Server Components run on the server, we can also call a database directly.
+</p>
+<div class="code-title">app/users/page.tsx</div>
+<pre><code class="language-tsx">import { db } from '@/lib/db';
+export default async function UsersPage() {
+  const users = await db.user.findMany();
+  return (
+    &lt;div&gt;
+      &lt;h1&gt;Users&lt;/h1&gt;
+      {users.map(user =&gt; &lt;p key={user.id}&gt;{user.name}&lt;/p&gt;)}
+    &lt;/div&gt;
+  );
+}</code></pre>
+<p>
+This is safe because database credentials and server logic are not sent to the browser.
+</p>
+<h3>Passing Data To A Client Component</h3>
+<p>
+A common pattern is to fetch data in a Server Component, then pass it to a Client Component for interactivity.
+</p>
+<div class="code-title">app/products/page.tsx</div>
+<pre><code class="language-tsx">import ProductList from './ProductList';
+export default async function ProductsPage() {
+  const res = await fetch('https://api.example.com/products');
+  const products = await res.json();
+  return &lt;ProductList products={products} /&gt;;
+}</code></pre>
+<div class="code-title">app/products/ProductList.tsx</div>
+<pre><code class="language-tsx">'use client';
+export default function ProductList({ products }) {
+  return (
+    &lt;div&gt;
+      {products.map(product =&gt; &lt;button key={product.id}&gt;{product.name}&lt;/button&gt;)}
+    &lt;/div&gt;
+  );
+}</code></pre>
+<p>
+The Server Component fetches the data. The Client Component handles browser interaction.
+</p>
+<h3>Important: Async Component Means Server Component</h3>
+<p>
+This is valid:
+</p>
+<div class="code-title">Server Component</div>
+<pre><code class="language-tsx">export default async function Page() {
+  const data = await getData();
+  return &lt;h1&gt;{data.title}&lt;/h1&gt;;
+}</code></pre>
+<p>
+But this is not the normal Client Component pattern:
+</p>
+<div class="code-title">Wrong Client Component Pattern</div>
+<pre><code class="language-tsx">'use client';
+export default async function Page() {
+  const data = await getData();
+  return &lt;h1&gt;{data.title}&lt;/h1&gt;;
+}</code></pre>
+<div class="feature">
+Client Components use <code>useEffect()</code>, event handlers, and state. Server Components can be async and fetch data before rendering.
+</div>
+<h3>Static, Dynamic, and Cached Data</h3>
+<table>
+<tr>
+<th>Data Type</th>
+<th>Example</th>
+<th>Behavior</th>
+</tr>
+<tr>
+<td>Static Data</td>
+<td>Blog content</td>
+<td>Can be cached/prerendered</td>
+</tr>
+<tr>
+<td>Dynamic Data</td>
+<td>User session, cookies, request data</td>
+<td>Rendered at request time</td>
+</tr>
+<tr>
+<td>Revalidated Data</td>
+<td>Product list every 60 seconds</td>
+<td>Updated after revalidation</td>
+</tr>
+</table>
+<h3>Example With Revalidation</h3>
+<div class="code-title">ISR-style Fetch</div>
+<pre><code class="language-tsx">export default async function ProductsPage() {
+  const res = await fetch('https://api.example.com/products', {
+    next: {
+      revalidate: 60
+    }
+  });
+  const products = await res.json();
+  return &lt;div&gt;{products.map(product =&gt; &lt;p key={product.id}&gt;{product.name}&lt;/p&gt;)}</code></pre>
+<p>
+This tells Next.js to reuse cached data and refresh it after 60 seconds.
+</p>
+<h3>Example With Fresh Data Every Request</h3>
+<div class="code-title">Dynamic Fetch</div>
+<pre><code class="language-tsx">export default async function DashboardPage() {
+  const res = await fetch('https://api.example.com/stats', { cache: 'no-store' });
+  const stats = await res.json();
+  return &lt;h1&gt;Total Users: {stats.totalUsers}&lt;/h1&gt;;
+}</code></pre>
+<p>
+This fetch runs fresh for every request.
+</p>
+<h3>Slow Data and Suspense</h3>
+<p>
+If a Server Component is slow, it can block rendering until the data is ready.
+</p>
+<div class="code-title">Slow Component</div>
+<pre><code class="language-tsx">export default async function UserStats() {
+  const stats = await getSlowStats();
+  return &lt;h2&gt;Users: {stats.users}&lt;/h2&gt;;
+}</code></pre>
+<p>
+We can wrap it in Suspense to show a fallback while it loads.
+</p>
+<div class="code-title">page.tsx</div>
+<pre><code class="language-tsx">import { Suspense } from 'react';
+import UserStats from './UserStats';
+export default function Page() {
+  return (
+    &lt;&gt;
+      &lt;h1&gt;Dashboard&lt;/h1&gt;
+      &lt;Suspense fallback={&lt;p&gt;Loading stats...&lt;/p&gt;}&gt;
+        &lt;UserStats /&gt;
+      &lt;/Suspense&gt;
+    &lt;/&gt;
+  );
+}</code></pre>
+<div class="feature">
+Suspense allows the rest of the page to render while the slow Server Component finishes loading.
+</div>
+<h3>Server Component vs Client Component Fetching</h3>
+<table>
+<tr>
+<th>Feature</th>
+<th>Server Component</th>
+<th>Client Component</th>
+</tr>
+<tr>
+<td>Can be async</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>Can query database directly</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>Can use useEffect</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Can use browser APIs</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Data available in initial HTML</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>Requires client JS for fetching</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+</table>
+<h3>Easy Memory Trick</h3>
+<div class="code-title">Remember</div>
+<pre><code class="language-text">Server Component
+→ fetch before HTML is sent
+Client Component
+→ fetch after JavaScript runs in browser</code></pre>
+<div class="feature">
+<strong>One-Line Definition:</strong><br/>
+Async data fetching inside Server Components means the component runs on the server, waits for data using <code>await</code>, renders HTML with that data, and then sends the ready HTML to the browser.
+</div>
+<h2 class="section-title" id="03-03"><span class="secnum">03-03</span>What is the Extended fetch API in Next.js and what caching options does it add?</h2>
+<p>
+Next.js extends the standard JavaScript <code>fetch()</code> API by adding built-in caching, revalidation, deduplication, and data cache controls.
+</p>
+<div class="feature">
+The browser's fetch API only downloads data. Next.js fetch can also control how long data is cached and when it should be refreshed.
+</div>
+<hr/>
+<h3>Normal JavaScript fetch()</h3>
+<p>
+In plain React or Node.js:
+</p>
+<div class="code-title">Standard Fetch</div>
+<pre><code class="language-ts">const res = await fetch('https://api.example.com/products');
+const products = await res.json();</code></pre>
+<p>
+This simply requests data.
+</p>
+<p>
+There is no built-in:
+</p>
+<ul>
+<li>ISR</li>
+<li>Data Cache</li>
+<li>Automatic Revalidation</li>
+<li>Cache Tags</li>
+</ul>
+<hr/>
+<h3>Next.js Extended fetch()</h3>
+<p>
+Next.js adds additional options:
+</p>
+<div class="code-title">Extended Fetch</div>
+<pre><code class="language-ts">const res = await fetch('https://api.example.com/products', {
+  cache: 'force-cache',
+  next: {
+    revalidate: 60,
+    tags: ['products']
+  }
+});</code></pre>
+<p>
+These options do not exist in the normal browser fetch API.
+</p>
+<hr/>
+<h3>1. cache: 'force-cache'</h3>
+<p>
+This tells Next.js to cache the result.
+</p>
+<div class="code-title">Example</div>
+<pre><code class="language-ts">const res = await fetch('https://api.example.com/products', {
+  cache: 'force-cache'
+});</code></pre>
+<h4>Flow</h4>
+<pre><code class="language-text">First Request
+      ↓
+Fetch API
+      ↓
+Save In Cache
+Second Request
+      ↓
+Read From Cache</code></pre>
+<p>
+Good for:
+</p>
+<ul>
+<li>Blog Posts</li>
+<li>Documentation</li>
+<li>Static Content</li>
+</ul>
+<div class="feature">
+This is similar to SSG-style caching.
+</div>
+<hr/>
+<h3>2. cache: 'no-store'</h3>
+<p>
+This disables caching completely.
+</p>
+<div class="code-title">Example</div>
+<pre><code class="language-ts">const res = await fetch('https://api.example.com/stats', {
+  cache: 'no-store'
+});</code></pre>
+<h4>Flow</h4>
+<pre><code class="language-text">Request
+   ↓
+Fetch API
+   ↓
+Return Data
+Next Request
+   ↓
+Fetch Again</code></pre>
+<p>
+Every request gets fresh data.
+</p>
+<p>
+Good for:
+</p>
+<ul>
+<li>User Dashboard</li>
+<li>Live Statistics</li>
+<li>Stock Prices</li>
+<li>User Session Data</li>
+</ul>
+<div class="feature">
+This makes the route dynamic (SSR).
+</div>
+<hr/>
+<h3>3. next.revalidate</h3>
+<p>
+This enables ISR-style revalidation.
+</p>
+<div class="code-title">Example</div>
+<pre><code class="language-ts">const res = await fetch('https://api.example.com/products', {
+  next: {
+    revalidate: 60
+  }
+});</code></pre>
+<p>
+Meaning:
+</p>
+<pre><code class="language-text">Cache Data
+      ↓
+Keep For 60 Seconds
+      ↓
+Refresh On Next Request</code></pre>
+<h4>Timeline</h4>
+<pre><code class="language-text">0 sec
+   ↓
+Fetch Product Data
+30 sec
+   ↓
+Use Cache
+60 sec
+   ↓
+Cache Expired
+61 sec
+   ↓
+Fetch New Data</code></pre>
+<p>
+Good for:
+</p>
+<ul>
+<li>Product Catalog</li>
+<li>News Articles</li>
+<li>Public Content</li>
+</ul>
+<div class="feature">
+This is the most common ISR pattern in the App Router.
+</div>
+<hr/>
+<h3>4. next.tags</h3>
+<p>
+Allows data to be grouped using tags.
+</p>
+<div class="code-title">Example</div>
+<pre><code class="language-ts">const res = await fetch('https://api.example.com/products', {
+  next: {
+    tags: ['products']
+  }
+});</code></pre>
+<p>
+Now this cache belongs to:
+</p>
+<pre><code class="language-text">products</code></pre>
+<p>
+tag.
+</p>
+<hr/>
+<h3>Revalidating By Tag</h3>
+<p>
+Suppose an admin updates a product.
+</p>
+<div class="code-title">Server Action</div>
+<pre><code class="language-ts">import { revalidateTag } from 'next/cache';
+await updateProduct();
+revalidateTag('products');</code></pre>
+<h4>Flow</h4>
+<pre><code class="language-text">Product Updated
+       ↓
+revalidateTag('products')
+       ↓
+Products Cache Cleared
+       ↓
+Next Request Gets Fresh Data</code></pre>
+<div class="feature">
+Instead of waiting 60 seconds, we can refresh immediately.
+</div>
+<hr/>
+<h3>5. Request Deduplication</h3>
+<p>
+Next.js automatically deduplicates identical fetch requests.
+</p>
+<div class="code-title">Example</div>
+<pre><code class="language-ts">const users1 = fetch('https://api.example.com/users');
+const users2 = fetch('https://api.example.com/users');
+const users3 = fetch('https://api.example.com/users');</code></pre>
+<p>
+Next.js performs:
+</p>
+<pre><code class="language-text">1 Network Request</code></pre>
+<p>
+instead of:
+</p>
+<pre><code class="language-text">3 Network Requests</code></pre>
+<p>
+This improves performance automatically.
+</p>
+<hr/>
+<h3>Real World Examples</h3>
+<h4>Product Catalog</h4>
+<div class="code-title">ISR</div>
+<pre><code class="language-ts">await fetch(url, {
+  next: {
+    revalidate: 60
+  }
+});</code></pre>
+<p>
+Products update every minute.
+</p>
+<h4>User Dashboard</h4>
+<div class="code-title">SSR</div>
+<pre><code class="language-ts">await fetch(url, {
+  cache: 'no-store'
+});</code></pre>
+<p>
+Fresh data every request.
+</p>
+<h4>Blog Posts</h4>
+<div class="code-title">Static Cache</div>
+<pre><code class="language-ts">await fetch(url, {
+  cache: 'force-cache'
+});</code></pre>
+<p>
+Cache forever until rebuild or revalidation.
+</p>
+<hr/>
+<h3>Most Common Fetch Options</h3>
+<table>
+<tr>
+<th>Option</th>
+<th>Behavior</th>
+<th>Rendering</th>
+</tr>
+<tr>
+<td>cache: 'force-cache'</td>
+<td>Use Cache</td>
+<td>SSG</td>
+</tr>
+<tr>
+<td>cache: 'no-store'</td>
+<td>Fresh Every Request</td>
+<td>SSR</td>
+</tr>
+<tr>
+<td>next: { revalidate: 60 }</td>
+<td>Cache For 60 Seconds</td>
+<td>ISR</td>
+</tr>
+<tr>
+<td>next: { tags: ['products'] }</td>
+<td>Tag-Based Cache</td>
+<td>ISR</td>
+</tr>
+</table>
+<hr/>
+<h3>Visual Comparison</h3>
+<div class="code-title">Three Main Modes</div>
+<pre><code class="language-text">force-cache
+      ↓
+Use Cached Data
+no-store
+      ↓
+Always Fetch New Data
+revalidate: 60
+      ↓
+Use Cache
+      ↓
+Refresh Every 60 Seconds</code></pre>
+<hr/>
+<h3>Easy Memory Trick</h3>
+<div class="code-title">Remember</div>
+<pre><code class="language-text">force-cache
+      ↓
+SSG
+revalidate
+      ↓
+ISR
+no-store
+      ↓
+SSR</code></pre>
+<div class="feature">
+<strong>One-Line Definition:</strong><br/>
+Next.js extends the standard <code>fetch()</code> API by adding caching, ISR revalidation, cache tags, and request deduplication, allowing us to control when data is cached and refreshed.
+</div>
+<h2 class="section-title" id="03-04"><span class="secnum">03-04</span>What is the difference between cache: 'force-cache' and cache: 'no-store'?</h2>
+<p>
+These are two caching modes provided by the Next.js extended fetch API.
+</p>
+<div class="feature">
+<code>force-cache</code> tells Next.js to reuse cached data, while <code>no-store</code> tells Next.js to fetch fresh data on every request.
+</div>
+<hr/>
+<h3>cache: 'force-cache'</h3>
+<p>
+Next.js fetches the data once and stores it in the Data Cache.
+</p>
+<div class="code-title">Example</div>
+<pre><code class="language-ts">const res = await fetch('https://api.example.com/products', {
+  cache: 'force-cache'
+});
+const products = await res.json();</code></pre>
+<h4>Flow</h4>
+<pre><code class="language-text">First Request
+      ↓
+Fetch API Called
+      ↓
+Data Stored In Cache
+Second Request
+      ↓
+Use Cached Data
+Third Request
+      ↓
+Use Cached Data</code></pre>
+<h4>Result</h4>
+<pre><code class="language-text">Same Data Returned
+Without Calling API Again</code></pre>
+<div class="feature">
+This is similar to SSG behavior because cached data is reused.
+</div>
+<hr/>
+<h3>cache: 'no-store'</h3>
+<p>
+Next.js skips the cache completely.
+</p>
+<div class="code-title">Example</div>
+<pre><code class="language-ts">const res = await fetch('https://api.example.com/products', {
+  cache: 'no-store'
+});
+const products = await res.json();</code></pre>
+<h4>Flow</h4>
+<pre><code class="language-text">Request 1
+     ↓
+Call API
+Request 2
+     ↓
+Call API Again
+Request 3
+     ↓
+Call API Again</code></pre>
+<h4>Result</h4>
+<pre><code class="language-text">Fresh Data
+Every Request</code></pre>
+<div class="feature">
+This makes the route dynamic and behaves like SSR.
+</div>
+<hr/>
+<h3>Real World Example</h3>
+<h4>Product Catalog</h4>
+<p>
+Products rarely change.
+</p>
+<div class="code-title">Good Candidate For force-cache</div>
+<pre><code class="language-ts">const res = await fetch('/api/products', {
+  cache: 'force-cache'
+});</code></pre>
+<p>
+Users can safely see cached data.
+</p>
+<hr/>
+<h4>User Dashboard</h4>
+<p>
+Data changes constantly.
+</p>
+<div class="code-title">Good Candidate For no-store</div>
+<pre><code class="language-ts">const res = await fetch('/api/dashboard', {
+  cache: 'no-store'
+});</code></pre>
+<p>
+Every user should receive fresh data.
+</p>
+<hr/>
+<h3>The Biggest Difference</h3>
+<p>
+Suppose the API currently returns:
+</p>
+<div class="code-title">API Response</div>
+<pre><code class="language-json">{
+  "price": 100
+}</code></pre>
+<p>
+Now the database price changes:
+</p>
+<div class="code-title">New Database Value</div>
+<pre><code class="language-json">{
+  "price": 120
+}</code></pre>
+<h4>Using force-cache</h4>
+<pre><code class="language-text">Database Price
+      ↓
+120
+Cache Still Contains
+      ↓
+100
+User Sees
+      ↓
+100</code></pre>
+<p>
+Until cache is cleared or revalidated.
+</p>
+<hr/>
+<h4>Using no-store</h4>
+<pre><code class="language-text">Database Price
+      ↓
+120
+Request Arrives
+      ↓
+API Called Again
+      ↓
+User Sees
+      ↓
+120</code></pre>
+<p>
+Fresh data is always returned.
+</p>
+<hr/>
+<h3>What Happens To Rendering?</h3>
+<h4>force-cache</h4>
+<div class="code-title">Example</div>
+<pre><code class="language-ts">export default async function ProductsPage() {
+  const res = await fetch('/api/products', {
+    cache: 'force-cache'
+  });
+  return &lt;h1&gt;Products&lt;/h1&gt;;
+}</code></pre>
+<p>
+Next.js can cache the result and treat the page like static content.
+</p>
+<h4>Result</h4>
+<pre><code class="language-text">SSG Style Rendering</code></pre>
+<hr/>
+<h4>no-store</h4>
+<div class="code-title">Example</div>
+<pre><code class="language-ts">export default async function DashboardPage() {
+  const res = await fetch('/api/dashboard', {
+    cache: 'no-store'
+  });
+  return &lt;h1&gt;Dashboard&lt;/h1&gt;;
+}</code></pre>
+<h4>Result</h4>
+<pre><code class="language-text">SSR Style Rendering
+Fetch Runs
+Every Request</code></pre>
+<hr/>
+<h3>Comparison Table</h3>
+<table>
+<tr>
+<th>Feature</th>
+<th>force-cache</th>
+<th>no-store</th>
+</tr>
+<tr>
+<td>Uses Cache</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>Fresh Data Every Request</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Can Become Static</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>SSR Style Rendering</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Good For Product Lists</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>Good For User Dashboard</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+</table>
+<hr/>
+<h3>Common Interview Question</h3>
+<div class="code-title">Question</div>
+<pre><code class="language-text">Price Changed In Database
+What Happens?</code></pre>
+<h4>force-cache</h4>
+<pre><code class="language-text">User May See Old Price
+Until Cache Refreshes</code></pre>
+<h4>no-store</h4>
+<pre><code class="language-text">User Always Sees
+Latest Price</code></pre>
+<hr/>
+<h3>Easy Memory Trick</h3>
+<div class="code-title">Remember</div>
+<pre><code class="language-text">force-cache
+      ↓
+Reuse Old Data
+no-store
+      ↓
+Always Fetch New Data</code></pre>
+<div class="feature">
+<strong>One-Line Definition:</strong><br/>
+<code>cache: 'force-cache'</code> reuses cached data and behaves like static rendering, while <code>cache: 'no-store'</code> bypasses the cache and fetches fresh data on every request, resulting in dynamic SSR rendering.
+</div>
+<h2 class="section-title" id="03-05"><span class="secnum">03-05</span>What does next: { revalidate: N } do in a fetch call?</h2>
+<p>
+The <code>next.revalidate</code> option tells Next.js how long fetched data should stay in cache before being refreshed.
+</p>
+<div class="feature">
+<code>next: { revalidate: N }</code> enables ISR (Incremental Static Regeneration). Data is cached and automatically refreshed after <strong>N seconds</strong>.
+</div>
+<h3>Basic Example</h3>
+<div class="code-title">Products Page</div>
+<pre><code class="language-tsx">export default async function ProductsPage() {
+  const res = await fetch('https://api.example.com/products', { next: { revalidate: 60 } });
+  const products = await res.json();
+  return &lt;h1&gt;Products&lt;/h1&gt;;
+}</code></pre>
+<p>
+This means:
+</p>
+<pre><code class="language-text">Cache Product Data
+        ↓
+Keep Cache For 60 Seconds
+        ↓
+Refresh Cache Automatically</code></pre>
+<h3>How It Works</h3>
+<div class="code-title">Timeline</div>
+<pre><code class="language-text">0 Seconds
+    ↓
+Fetch API
+    ↓
+Save Data In Cache
+30 Seconds
+    ↓
+Use Cached Data
+50 Seconds
+    ↓
+Use Cached Data
+60 Seconds
+    ↓
+Cache Becomes Stale
+Next Request
+    ↓
+Fetch New Data
+    ↓
+Update Cache</code></pre>
+<h3>Real Example</h3>
+<p>
+Suppose the API initially returns:
+</p>
+<div class="code-title">Initial API Response</div>
+<pre><code class="language-json">{
+  "price": 100
+}</code></pre>
+<p>
+After 30 seconds the database changes:
+</p>
+<div class="code-title">Database Update</div>
+<pre><code class="language-json">{
+  "price": 120
+}</code></pre>
+<h4>User Visits At 45 Seconds</h4>
+<div class="code-title">Result</div>
+<pre><code class="language-text">Price = 100</code></pre>
+<p>
+Because the cache is still valid.
+</p>
+<h4>User Visits At 61 Seconds</h4>
+<div class="code-title">Result</div>
+<pre><code class="language-text">Price = 120</code></pre>
+<p>
+Because Next.js regenerates the cache after it becomes stale.
+</p>
+<h3>Visual Comparison</h3>
+<table>
+<tr>
+<th>Option</th>
+<th>Behavior</th>
+<th>Rendering Type</th>
+</tr>
+<tr>
+<td>cache: 'force-cache'</td>
+<td>Cache Forever</td>
+<td>SSG</td>
+</tr>
+<tr>
+<td>next: { revalidate: 60 }</td>
+<td>Refresh Every 60 Seconds</td>
+<td>ISR</td>
+</tr>
+<tr>
+<td>cache: 'no-store'</td>
+<td>Fetch Every Request</td>
+<td>SSR</td>
+</tr>
+</table>
+<h3>Difference From force-cache</h3>
+<div class="code-title">force-cache</div>
+<pre><code class="language-tsx">const res = await fetch(url, { cache: 'force-cache' });</code></pre>
+<p>
+Data remains cached indefinitely until a rebuild or manual revalidation occurs.
+</p>
+<h3>Difference From no-store</h3>
+<div class="code-title">no-store</div>
+<pre><code class="language-tsx">const res = await fetch(url, { cache: 'no-store' });</code></pre>
+<p>
+Data is fetched again on every request.
+</p>
+<h3>Most Important Interview Question</h3>
+<div class="code-title">Question</div>
+<pre><code class="language-text">Database Changed At 30 Seconds
+revalidate = 60
+What Will User See At 45 Seconds?</code></pre>
+<div class="code-title">Answer</div>
+<pre><code class="language-text">Old Cached Data</code></pre>
+<p>
+Because the cache has not expired.
+</p>
+<div class="code-title">Question</div>
+<pre><code class="language-text">Database Changed At 30 Seconds
+revalidate = 60
+What Will User See At 61 Seconds?</code></pre>
+<div class="code-title">Answer</div>
+<pre><code class="language-text">Fresh Data</code></pre>
+<p>
+Because the cache is regenerated after becoming stale.
+</p>
+<h3>Easy Memory Trick</h3>
+<div class="code-title">Remember</div>
+<pre><code class="language-text">force-cache
+      ↓
+Static Forever
+revalidate: 60
+      ↓
+Static + Auto Refresh
+no-store
+      ↓
+Always Dynamic</code></pre>
+<div class="feature">
+<strong>One-Line Definition:</strong><br/>
+<code>next: { revalidate: N }</code> tells Next.js to cache fetched data and automatically refresh it after <strong>N seconds</strong>, enabling ISR (Incremental Static Regeneration).
+</div>
+<h2 class="section-title" id="03-06"><span class="secnum">03-06</span>What is on-demand revalidation and how do we trigger it via an API route?</h2>
+<p>
+On-demand revalidation means manually clearing cached data when something changes, instead of waiting for <code>revalidate: 60</code>, <code>revalidate: 3600</code>, or another time-based interval.
+</p>
+<div class="feature">
+In simple words, on-demand revalidation lets us refresh cached pages or cached data immediately after an event, such as product update, blog publish, CMS webhook, or admin action.
+</div>
+<h3>Problem Without On-Demand Revalidation</h3>
+<p>
+Suppose our product page uses ISR.
+</p>
+<div class="code-title">app/products/page.tsx</div>
+<pre><code class="language-tsx">export default async function ProductsPage() {
+  const res = await fetch('https://api.example.com/products', { next: { revalidate: 3600 } });
+  const products = await res.json();
+  return &lt;h1&gt;Products&lt;/h1&gt;;
+}</code></pre>
+<p>
+This means cached data can remain old for 1 hour.
+</p>
+<div class="code-title">Problem</div>
+<pre><code class="language-text">Product Updated Now
+        ↓
+Cache Still Valid For 1 Hour
+        ↓
+User May See Old Data</code></pre>
+<h3>Solution: On-Demand Revalidation</h3>
+<p>
+When product data changes, we manually tell Next.js:
+</p>
+<div class="code-title">Meaning</div>
+<pre><code class="language-text">Clear Cache Now
+        ↓
+Next Request Gets Fresh Data</code></pre>
+<p>
+This is called on-demand revalidation.
+</p>
+<h3>Two Main Functions</h3>
+<table>
+<tr>
+<th>Function</th>
+<th>Purpose</th>
+</tr>
+<tr>
+<td>revalidatePath()</td>
+<td>Refresh a specific page or route path</td>
+</tr>
+<tr>
+<td>revalidateTag()</td>
+<td>Refresh all cached fetches using a specific tag</td>
+</tr>
+</table>
+<h3>1. Revalidate By Path</h3>
+<p>
+Use <code>revalidatePath()</code> when we want to refresh a specific route.
+</p>
+<div class="code-title">Example</div>
+<pre><code class="language-ts">revalidatePath('/products');</code></pre>
+<p>
+This tells Next.js to invalidate the cache for the <code>/products</code> page.
+</p>
+<h3>API Route Example</h3>
+<div class="code-title">app/api/revalidate/route.ts</div>
+<pre><code class="language-ts">import { revalidatePath } from 'next/cache';
+import { NextRequest } from 'next/server';
+export async function POST(request: NextRequest) {
+  const secret = request.headers.get('x-revalidate-secret');
+  if (secret !== process.env.REVALIDATE_SECRET) {
+    return Response.json({ message: 'Invalid secret' }, { status: 401 });
+  }
+  revalidatePath('/products');
+  return Response.json({ revalidated: true, path: '/products' });
+}</code></pre>
+<h3>How To Trigger This API Route</h3>
+<div class="code-title">POST Request</div>
+<pre><code class="language-ts">await fetch('https://example.com/api/revalidate', {
+  method: 'POST',
+  headers: { 'x-revalidate-secret': 'my-secret-key' }
+});</code></pre>
+<h3>Flow</h3>
+<div class="code-title">On-Demand Revalidation Flow</div>
+<pre><code class="language-text">Admin Updates Product
+        ↓
+Call /api/revalidate
+        ↓
+Check Secret Key
+        ↓
+revalidatePath('/products')
+        ↓
+Products Cache Invalidated
+        ↓
+Next User Gets Fresh Data</code></pre>
+<h3>2. Revalidate By Tag</h3>
+<p>
+Use <code>revalidateTag()</code> when multiple pages use the same cached data.
+</p>
+<div class="code-title">Tagged Fetch</div>
+<pre><code class="language-tsx">export default async function ProductsPage() {
+  const res = await fetch('https://api.example.com/products', { next: { tags: ['products'] } });
+  const products = await res.json();
+  return &lt;h1&gt;Products&lt;/h1&gt;;
+}</code></pre>
+<p>
+Now this fetch is connected to the <code>products</code> tag.
+</p>
+<h3>API Route Using revalidateTag()</h3>
+<div class="code-title">app/api/revalidate-products/route.ts</div>
+<pre><code class="language-ts">import { revalidateTag } from 'next/cache';
+import { NextRequest } from 'next/server';
+export async function POST(request: NextRequest) {
+  const secret = request.headers.get('x-revalidate-secret');
+  if (secret !== process.env.REVALIDATE_SECRET) {
+    return Response.json({ message: 'Invalid secret' }, { status: 401 });
+  }
+  revalidateTag('products', 'max');
+  return Response.json({ revalidated: true, tag: 'products' });
+}</code></pre>
+<h3>When To Use Path vs Tag?</h3>
+<table>
+<tr>
+<th>Use Case</th>
+<th>Best Choice</th>
+</tr>
+<tr>
+<td>Refresh one page</td>
+<td>revalidatePath('/products')</td>
+</tr>
+<tr>
+<td>Refresh many pages using same data</td>
+<td>revalidateTag('products', 'max')</td>
+</tr>
+<tr>
+<td>CMS updated one blog page</td>
+<td>revalidatePath('/blog/my-post')</td>
+</tr>
+<tr>
+<td>Product data used on home, products, cart</td>
+<td>revalidateTag('products', 'max')</td>
+</tr>
+</table>
+<h3>Real World Example</h3>
+<p>
+Suppose an admin changes a product price.
+</p>
+<div class="code-title">Before Update</div>
+<pre><code class="language-json">{
+  "price": 100
+}</code></pre>
+<div class="code-title">After Update</div>
+<pre><code class="language-json">{
+  "price": 120
+}</code></pre>
+<p>
+Without on-demand revalidation, users may still see old cached price.
+</p>
+<div class="code-title">Without Revalidation</div>
+<pre><code class="language-text">Database Price = 120
+Cache Price    = 100
+User Sees      = 100</code></pre>
+<p>
+With on-demand revalidation:
+</p>
+<div class="code-title">With Revalidation</div>
+<pre><code class="language-text">Product Updated
+        ↓
+API Route Called
+        ↓
+Cache Invalidated
+        ↓
+Next User Sees 120</code></pre>
+<h3>Environment Variable</h3>
+<div class="code-title">.env.local</div>
+<pre><code class="language-text">REVALIDATE_SECRET=my-secret-key</code></pre>
+<p>
+The secret prevents anyone from publicly calling our revalidation API.
+</p>
+<h3>Complete Example</h3>
+<div class="code-title">app/products/page.tsx</div>
+<pre><code class="language-tsx">export default async function ProductsPage() {
+  const res = await fetch('https://api.example.com/products', { next: { tags: ['products'] } });
+  const products = await res.json();
+  return &lt;h1&gt;Products&lt;/h1&gt;;
+}</code></pre>
+<div class="code-title">app/api/revalidate-products/route.ts</div>
+<pre><code class="language-ts">import { revalidateTag } from 'next/cache';
+import { NextRequest } from 'next/server';
+export async function POST(request: NextRequest) {
+  const secret = request.headers.get('x-revalidate-secret');
+  if (secret !== process.env.REVALIDATE_SECRET) {
+    return Response.json({ message: 'Invalid secret' }, { status: 401 });
+  }
+  revalidateTag('products', 'max');
+  return Response.json({ revalidated: true });
+}</code></pre>
+<div class="code-title">Trigger API</div>
+<pre><code class="language-ts">await fetch('/api/revalidate-products', {
+  method: 'POST',
+  headers: { 'x-revalidate-secret': 'my-secret-key' }
+});</code></pre>
+<h3>Important Note</h3>
+<div class="feature">
+On-demand revalidation does not mean the browser automatically refreshes instantly. It invalidates the server cache, so the next request or navigation gets fresh data.
+</div>
+<h3>Easy Memory Trick</h3>
+<div class="code-title">Remember</div>
+<pre><code class="language-text">revalidatePath()
+        ↓
+Refresh One Route
+revalidateTag()
+        ↓
+Refresh All Data With Same Tag</code></pre>
+<div class="feature">
+<strong>One-Line Definition:</strong><br/>
+On-demand revalidation means manually invalidating cached pages or cached data using <code>revalidatePath()</code> or <code>revalidateTag()</code>, usually from a Route Handler API after data changes.
+</div>
+<h2 class="section-title" id="03-07"><span class="secnum">03-07</span>How does Next.js on-demand revalidation work with another backend like .NET or Java?</h2>
+<p>
+In a real-world project, we can use Next.js as our frontend and use another backend like .NET, Java, PHP, or Node.js for business logic and database work.
+</p>
+<div class="feature">
+Next.js is not only frontend. In the App Router, Next.js also has a small server layer for Server Components, SSR, caching, and revalidation.
+</div>
+<h3>Real Architecture</h3>
+<div class="code-title">Production Setup</div>
+<pre><code class="language-text">https://myshop.com
+      ↓
+Next.js App
+https://api.myshop.com
+      ↓
+.NET Backend</code></pre>
+<p>
+Here:
+</p>
+<ul>
+<li><code>https://myshop.com</code> is our Next.js website.</li>
+<li><code>https://api.myshop.com</code> is our .NET backend API.</li>
+</ul>
+<h3>Normal User Flow</h3>
+<div class="code-title">User Opens Product Page</div>
+<pre><code class="language-text">Browser
+   ↓
+https://myshop.com/products
+   ↓
+Next.js Product Page
+   ↓
+https://api.myshop.com/products
+   ↓
+.NET Backend
+   ↓
+Database</code></pre>
+<h3>Next.js Product Page</h3>
+<div class="code-title">app/products/page.tsx</div>
+<pre><code class="language-tsx">export default async function ProductsPage() {
+  const res = await fetch('https://api.myshop.com/products', { next: { tags: ['products'] } });
+  //If you don't specify cache, Next.js uses force-cache by default for fetch requests in Server Components.
+  const products = await res.json();
+  return &lt;div&gt;{products.map(product =&gt; &lt;p key={product.id}&gt;{product.name} - ₹{product.price}&lt;/p&gt;)}&lt;/div&gt;;
+}</code></pre>
+<p>
+Next.js fetches product data from the .NET backend and stores it in the Next.js Data Cache using the tag <code>products</code>.
+</p>
+<div class="feature">
+The product data is coming from .NET, but the cache belongs to Next.js.
+</div>
+<h3>Why Cache Problem Happens?</h3>
+<p>
+Suppose the product price is:
+</p>
+<div class="code-title">Old Price</div>
+<pre><code class="language-json">{
+  "name": "Shoes",
+  "price": 100
+}</code></pre>
+<p>
+Next.js caches this data.
+</p>
+<p>
+Now admin changes the price in the .NET backend:
+</p>
+<div class="code-title">New Price In Database</div>
+<pre><code class="language-json">{
+  "name": "Shoes",
+  "price": 120
+}</code></pre>
+<p>
+But Next.js cache may still have the old price:
+</p>
+<div class="code-title">Next.js Cache</div>
+<pre><code class="language-json">{
+  "name": "Shoes",
+  "price": 100
+}</code></pre>
+<div class="feature">
+So the database has fresh data, but Next.js may still show old cached data until the cache is cleared.
+</div>
+<h3>Solution: On-Demand Revalidation</h3>
+<p>
+After the .NET backend updates the product, it makes a backend-to-backend HTTP call to Next.js.
+</p>
+<div class="code-title">Backend To Backend Call</div>
+<pre><code class="language-text">.NET Backend
+     ↓
+POST https://myshop.com/api/revalidate-products
+     ↓
+Next.js API Route
+     ↓
+revalidateTag('products')
+     ↓
+Next.js Cache Cleared</code></pre>
+<h3>Important Point</h3>
+<div class="feature">
+<code>https://myshop.com/api/revalidate-products</code> belongs to Next.js only if <code>myshop.com</code> is hosted by Next.js. It is different from <code>https://api.myshop.com</code>, which belongs to .NET.
+</div>
+<h3>Correct Domain Separation</h3>
+<table>
+<tr>
+<th>URL</th>
+<th>Technology</th>
+<th>Purpose</th>
+</tr>
+<tr>
+<td>https://myshop.com</td>
+<td>Next.js</td>
+<td>Frontend, SSR, Server Components, Cache</td>
+</tr>
+<tr>
+<td>https://myshop.com/api/revalidate-products</td>
+<td>Next.js</td>
+<td>Small revalidation API</td>
+</tr>
+<tr>
+<td>https://api.myshop.com/products</td>
+<td>.NET</td>
+<td>Main backend API</td>
+</tr>
+<tr>
+<td>Database</td>
+<td>SQL Server / MongoDB</td>
+<td>Actual data storage</td>
+</tr>
+</table>
+<h3>Next.js Revalidate API Route</h3>
+<div class="code-title">app/api/revalidate-products/route.ts</div>
+<pre><code class="language-ts">import { revalidateTag } from 'next/cache';
+export async function POST(request: Request) {
+  const secret = request.headers.get('x-revalidate-secret');
+  if (secret !== process.env.REVALIDATE_SECRET) {
+    return Response.json({ message: 'Invalid secret' }, { status: 401 });
+  }
+  revalidateTag('products', 'max');
+  return Response.json({ revalidated: true, tag: 'products' });
+}</code></pre>
+<p>
+This API route exists only to clear the Next.js cache.
+</p>
+<h3>.NET Backend Calls Next.js API</h3>
+<div class="code-title">.NET Example</div>
+<pre><code class="language-csharp">using var client = new HttpClient();
+client.DefaultRequestHeaders.Add("x-revalidate-secret", "my-secret-key");
+await client.PostAsync("https://myshop.com/api/revalidate-products", null);</code></pre>
+<p>
+This is a normal HTTP request from one backend to another backend.
+</p>
+<h3>Full Real-World Flow</h3>
+<div class="code-title">Complete Flow</div>
+<pre><code class="language-text">1. User opens https://myshop.com/products
+        ↓
+2. Next.js fetches products from https://api.myshop.com/products
+        ↓
+3. .NET backend reads products from database
+        ↓
+4. Next.js caches product data with tag "products"
+        ↓
+5. User sees product price = 100
+6. Admin updates product price in admin panel
+        ↓
+7. .NET backend updates database price from 100 to 120
+        ↓
+8. .NET backend sends POST request to https://myshop.com/api/revalidate-products
+        ↓
+9. Next.js runs revalidateTag('products')
+        ↓
+10. Next.js clears products cache
+        ↓
+11. Next user opens products page
+        ↓
+12. Next.js fetches fresh data from .NET backend
+        ↓
+13. User sees product price = 120</code></pre>
+<h3>Why .NET Cannot Directly Run revalidateTag()</h3>
+<p>
+Because <code>revalidateTag()</code> is a Next.js function.
+</p>
+<div class="code-title">Runtime Difference</div>
+<pre><code class="language-text">.NET Backend
+   Can update database
+   Can run C# code
+   Cannot run revalidateTag()
+Next.js Server
+   Can render Server Components
+   Can manage Next.js cache
+   Can run revalidateTag()</code></pre>
+<div class="feature">
+The cache belongs to Next.js, so only Next.js can clear it.
+</div>
+<h3>Why This Is Not Two Main Backends</h3>
+<p>
+The .NET backend is still the main backend.
+</p>
+<div class="code-title">Responsibility</div>
+<pre><code class="language-text">.NET Backend
+   → Business logic
+   → Product update
+   → Database
+   → Authentication APIs
+   → Payment APIs
+Next.js Server
+   → Frontend rendering
+   → Server Components
+   → Data Cache
+   → Revalidation API</code></pre>
+<p>
+The Next.js API route is just a small helper endpoint for cache clearing.
+</p>
+<h3>If /api Already Belongs To .NET</h3>
+<p>
+If your domain is configured like this:
+</p>
+<div class="code-title">Problem Setup</div>
+<pre><code class="language-text">https://myshop.com/api/products
+      ↓
+.NET Backend</code></pre>
+<p>
+Then this URL:
+</p>
+<pre><code class="language-text">https://myshop.com/api/revalidate-products</code></pre>
+<p>
+will also go to .NET, not Next.js.
+</p>
+<h4>Solution</h4>
+<p>
+Use a separate route for Next.js revalidation:
+</p>
+<div class="code-title">Possible Next.js Revalidate URLs</div>
+<pre><code class="language-text">https://myshop.com/internal/revalidate-products
+https://myshop.com/next-revalidate/products
+https://frontend.myshop.com/api/revalidate-products</code></pre>
+<p>
+The important thing is that the URL must reach the Next.js server, not the .NET server.
+</p>
+<h3>Final Architecture Diagram</h3>
+<div class="code-title">Final Setup</div>
+<pre><code class="language-text">Browser
+   ↓
+https://myshop.com
+   ↓
+Next.js App
+   ↓
+fetch('https://api.myshop.com/products')
+   ↓
+.NET Backend
+   ↓
+Database
+Admin Updates Product
+   ↓
+.NET Backend
+   ↓
+Database Updated
+   ↓
+POST https://myshop.com/api/revalidate-products
+   ↓
+Next.js Revalidate API
+   ↓
+revalidateTag('products')
+   ↓
+Next.js Cache Cleared</code></pre>
+<h3>Easy Memory Trick</h3>
+<div class="code-title">Remember</div>
+<pre><code class="language-text">Data update
+   ↓
+.NET / Java backend
+Page render and cache
+   ↓
+Next.js
+Cache clear
+   ↓
+Next.js revalidate API
+Backend-to-backend call
+   ↓
+.NET calls Next.js URL</code></pre>
+<div class="feature">
+<strong>One-Line Definition:</strong><br/>
+When using Next.js with a .NET or Java backend, the main backend updates the database, then sends a backend-to-backend HTTP request to a small Next.js revalidation endpoint so Next.js can clear its own cache.
+</div>
+<h2 class="section-title" id="03-08"><span class="secnum">03-08</span>What is revalidatePath vs revalidateTag?</h2>
+<p>
+Both <code>revalidatePath()</code> and <code>revalidateTag()</code> are used for on-demand revalidation in Next.js.
+</p>
+<div class="feature">
+The main difference is:
+<br/><br/>
+<strong>revalidatePath()</strong> refreshes a specific route.
+<br/>
+<strong>revalidateTag()</strong> refreshes cached data associated with a tag.
+</div>
+<hr/>
+<h3>revalidatePath()</h3>
+<p>
+Used when we want to invalidate a specific page or route.
+</p>
+<div class="code-title">Example</div>
+<pre><code class="language-ts">revalidatePath('/products');</code></pre>
+<p>
+This tells Next.js:
+</p>
+<pre><code class="language-text">Clear Cache For
+/products</code></pre>
+<h4>Flow</h4>
+<pre><code class="language-text">Product Updated
+       ↓
+revalidatePath('/products')
+       ↓
+Products Page Cache Cleared
+       ↓
+Next Visit Regenerates Page</code></pre>
+<hr/>
+<h3>Real Example</h3>
+<div class="code-title">Product Page</div>
+<pre><code class="language-tsx">export default async function ProductsPage() {
+  const res = await fetch('https://api.myshop.com/products');
+  const products = await res.json();
+  return &lt;h1&gt;Products&lt;/h1&gt;;
+}</code></pre>
+<p>
+After product update:
+</p>
+<div class="code-title">API Route</div>
+<pre><code class="language-ts">import { revalidatePath } from 'next/cache';
+revalidatePath('/products');</code></pre>
+<p>
+Only the <code>/products</code> page is refreshed.
+</p>
+<hr/>
+<h3>Problem With revalidatePath()</h3>
+<p>
+Suppose product data appears on multiple pages:
+</p>
+<pre><code class="language-text">/products
+/home
+/cart
+/search</code></pre>
+<p>
+If we only run:
+</p>
+<pre><code class="language-ts">revalidatePath('/products');</code></pre>
+<p>
+Then:
+</p>
+<pre><code class="language-text">/products      ✅ Updated
+/home          ❌ Old Data
+/cart          ❌ Old Data
+/search        ❌ Old Data</code></pre>
+<div class="feature">
+revalidatePath() only affects the specified route.
+</div>
+<hr/>
+<h3>revalidateTag()</h3>
+<p>
+Used when multiple pages share the same cached data.
+</p>
+<h4>Step 1: Tag Fetches</h4>
+<div class="code-title">Products Page</div>
+<pre><code class="language-tsx">const res = await fetch('https://api.myshop.com/products', {
+  next: { tags: ['products'] }
+});</code></pre>
+<p>
+Now this fetch belongs to:
+</p>
+<pre><code class="language-text">products</code></pre>
+<p>
+tag.
+</p>
+<hr/>
+<h4>Step 2: Revalidate Tag</h4>
+<div class="code-title">API Route</div>
+<pre><code class="language-ts">import { revalidateTag } from 'next/cache';
+revalidateTag('products', 'max');</code></pre>
+<h4>Flow</h4>
+<pre><code class="language-text">Product Updated
+       ↓
+revalidateTag('products')
+       ↓
+All Product Cache Cleared
+       ↓
+Next Requests Get Fresh Data</code></pre>
+<hr/>
+<h3>Real World Example</h3>
+<p>
+Product data is used in:
+</p>
+<pre><code class="language-text">Home Page
+Products Page
+Cart Page
+Search Page</code></pre>
+<p>
+All pages fetch using:
+</p>
+<div class="code-title">Tagged Fetch</div>
+<pre><code class="language-tsx">await fetch('https://api.myshop.com/products', {
+  next: { tags: ['products'] }
+});</code></pre>
+<p>
+After update:
+</p>
+<div class="code-title">Revalidate</div>
+<pre><code class="language-ts">revalidateTag('products', 'max');</code></pre>
+<p>
+Result:
+</p>
+<pre><code class="language-text">Home Page      ✅ Updated
+Products Page  ✅ Updated
+Cart Page      ✅ Updated
+Search Page    ✅ Updated</code></pre>
+<div class="feature">
+One tag refreshes every page using that data.
+</div>
+<hr/>
+<h3>Visual Comparison</h3>
+<h4>revalidatePath()</h4>
+<pre><code class="language-text">Product Updated
+       ↓
+revalidatePath('/products')
+       ↓
+Only /products Refreshed</code></pre>
+<h4>revalidateTag()</h4>
+<pre><code class="language-text">Product Updated
+       ↓
+revalidateTag('products')
+       ↓
+Every Fetch Using
+products Tag Refreshed</code></pre>
+<hr/>
+<h3>Complete Example</h3>
+<h4>Home Page</h4>
+<div class="code-title">app/page.tsx</div>
+<pre><code class="language-tsx">const res = await fetch('https://api.myshop.com/products', {
+  next: { tags: ['products'] }
+});</code></pre>
+<h4>Products Page</h4>
+<div class="code-title">app/products/page.tsx</div>
+<pre><code class="language-tsx">const res = await fetch('https://api.myshop.com/products', {
+  next: { tags: ['products'] }
+});</code></pre>
+<h4>Cart Page</h4>
+<div class="code-title">app/cart/page.tsx</div>
+<pre><code class="language-tsx">const res = await fetch('https://api.myshop.com/products', {
+  next: { tags: ['products'] }
+});</code></pre>
+<h4>After Product Update</h4>
+<div class="code-title">Revalidation</div>
+<pre><code class="language-ts">revalidateTag('products', 'max');</code></pre>
+<p>
+All three pages automatically get fresh data.
+</p>
+<hr/>
+<h3>When To Use Which?</h3>
+<table>
+<tr>
+<th>Situation</th>
+<th>Best Choice</th>
+</tr>
+<tr>
+<td>Refresh one page</td>
+<td>revalidatePath()</td>
+</tr>
+<tr>
+<td>Refresh many pages using same data</td>
+<td>revalidateTag()</td>
+</tr>
+<tr>
+<td>Blog post updated</td>
+<td>revalidatePath('/blog/post-1')</td>
+</tr>
+<tr>
+<td>Product data updated</td>
+<td>revalidateTag('products')</td>
+</tr>
+<tr>
+<td>User profile page updated</td>
+<td>revalidatePath('/profile')</td>
+</tr>
+<tr>
+<td>Shared catalog data updated</td>
+<td>revalidateTag('catalog')</td>
+</tr>
+</table>
+<hr/>
+<h3>Most Important Interview Question</h3>
+<div class="code-title">Question</div>
+<pre><code class="language-text">Product Data Appears On
+Home
+Products
+Cart
+Search
+What Should We Use?</code></pre>
+<div class="code-title">Answer</div>
+<pre><code class="language-text">revalidateTag('products')</code></pre>
+<p>
+Because one product update affects multiple pages.
+</p>
+<hr/>
+<h3>Easy Memory Trick</h3>
+<div class="code-title">Remember</div>
+<pre><code class="language-text">revalidatePath()
+        ↓
+Refresh One Route
+revalidateTag()
+        ↓
+Refresh Shared Data
+Across Many Routes</code></pre>
+<div class="feature">
+<strong>One-Line Definition:</strong><br/>
+<code>revalidatePath()</code> invalidates a specific route's cache, while <code>revalidateTag()</code> invalidates all cached fetches associated with a specific tag, regardless of which pages use them.
+</div>
+<h2 class="section-title" id="03-09"><span class="secnum">03-09</span>revalidatePath() vs revalidateTag() vs router.refresh()</h2>
+<p>
+All three are related to getting fresh data, but they work at different levels.
+</p>
+<table>
+<tr>
+<th>API</th>
+<th>Runs Where?</th>
+<th>Purpose</th>
+</tr>
+<tr>
+<td>router.refresh()</td>
+<td>Client Component</td>
+<td>Re-fetch current route Server Components</td>
+</tr>
+<tr>
+<td>revalidatePath()</td>
+<td>Server Action / Route Handler</td>
+<td>Invalidate cache for a specific route</td>
+</tr>
+<tr>
+<td>revalidateTag()</td>
+<td>Server Action / Route Handler</td>
+<td>Invalidate tagged data across routes</td>
+</tr>
+</table>
+<h3>1. router.refresh()</h3>
+<div class="code-title">Client Component</div>
+<pre><code class="language-ts">'use client';
+import { useRouter } from 'next/navigation';
+export default function AddToCartButton() {
+  const router = useRouter();
+  async function handleClick() {
+    await updateCart();
+    router.refresh();
+  }
+  return &lt;button onClick={handleClick}&gt;Add To Cart&lt;/button&gt;;
+}</code></pre>
+<div class="feature">
+<strong>What it does:</strong><br/>
+Requests the current route again and re-runs Server Components.
+</div>
+<div class="code-title">Flow</div>
+<pre><code class="language-text">Client Component
+        ↓
+router.refresh()
+        ↓
+Current Route Requested Again
+        ↓
+Server Components Re-run
+        ↓
+Fresh UI</code></pre>
+<div class="warning">
+<strong>Important:</strong><br/>
+router.refresh() does not invalidate cache. If data is still cached, the refreshed route may receive the same cached data.
+</div>
+<h3>2. revalidatePath()</h3>
+<div class="code-title">Server Action</div>
+<pre><code class="language-ts">'use server';
+import { revalidatePath } from 'next/cache';
+export async function updateCart(productId: string) {
+  await db.cart.add(productId);
+  revalidatePath('/cart');
+}</code></pre>
+<div class="feature">
+<strong>What it does:</strong><br/>
+Marks a specific route cache as stale so the next render gets fresh data.
+</div>
+<div class="code-title">Flow</div>
+<pre><code class="language-text">Database Updated
+        ↓
+revalidatePath('/cart')
+        ↓
+Cart Route Cache Invalidated
+        ↓
+Fresh Data Generated</code></pre>
+<h3>3. revalidateTag()</h3>
+<div class="code-title">Tag Data</div>
+<pre><code class="language-ts">await fetch('/api/products', {
+  next: {
+    tags: ['products']
+  }
+});</code></pre>
+<div class="code-title">Invalidate Tag</div>
+<pre><code class="language-ts">'use server';
+import { revalidateTag } from 'next/cache';
+export async function addProduct() {
+  await db.products.create(...);
+  revalidateTag('products');
+}</code></pre>
+<div class="feature">
+<strong>What it does:</strong><br/>
+Invalidates all cached data that uses the same tag.
+</div>
+<div class="code-title">Flow</div>
+<pre><code class="language-text">Tagged Data
+      ↓
+revalidateTag('products')
+      ↓
+All Matching Cached Data Invalidated
+      ↓
+Fresh Data Generated</code></pre>
+<h3>Which One Should You Use?</h3>
+<table>
+<tr>
+<th>Situation</th>
+<th>Best Choice</th>
+</tr>
+<tr>
+<td>Refresh current page UI</td>
+<td>router.refresh()</td>
+</tr>
+<tr>
+<td>Invalidate one route</td>
+<td>revalidatePath()</td>
+</tr>
+<tr>
+<td>Invalidate shared data across pages</td>
+<td>revalidateTag()</td>
+</tr>
+<tr>
+<td>Server Action updates database</td>
+<td>revalidatePath() or revalidateTag()</td>
+</tr>
+</table>
+<div class="feature">
+<strong>Easy Memory Trick:</strong><br/>
+router.refresh() = Refresh Current Route<br/>
+revalidatePath() = Refresh One Route's Cache<br/>
+revalidateTag() = Refresh Shared Data Cache
+</div>
+<div class="warning">
+<strong>Important:</strong><br/>
+router.refresh() does not invalidate cache.
+
+<br/><br/>
+
+If the data is still cached, the refreshed route may receive the same cached data.
+
+<pre><code class="language-text">router.refresh()
+       ↓
+Request Current Route Again
+       ↓
+Cached Data Still Exists
+       ↓
+Same Data Returned</code></pre>
+<br/>
+
+Think of it like this:
+
+<pre><code class="language-text">router.refresh()
+       =
+Reload Current Route
+revalidatePath()
+       =
+Clear Route Cache
+revalidateTag()
+       =
+Clear Tagged Data Cache</code></pre>
+<br/>
+
+If you refresh without invalidating cache:
+
+<pre><code class="language-text">Refresh
+   ↓
+Cached Data
+   ↓
+Same Result</code></pre>
+<br/>
+
+If you invalidate cache:
+
+<pre><code class="language-text">Database Updated
+      ↓
+revalidatePath('/cart')
+      ↓
+Cache Cleared
+      ↓
+Next Render Gets Fresh Data</code></pre>
+<br/>
+
+For Server Actions, the recommended pattern is usually:
+
+<pre><code class="language-ts">'use server';
+import { revalidatePath } from 'next/cache';
+export async function updateCart(productId: string) {
+  await db.cart.add(productId);
+  revalidatePath('/cart');
+}</code></pre>
+
+In many cases, <code>revalidatePath()</code> or <code>revalidateTag()</code> is enough and you do not need <code>router.refresh()</code>.
+
+Use <code>router.refresh()</code> when you specifically need to refresh the current route from a Client Component.
+</div>
+<h2 class="section-title" id="03-10"><span class="secnum">03-10</span>What is unstable_cache and when would you use it over fetch caching?</h2>
+<p>
+<code>unstable_cache()</code> is a Next.js API that allows us to cache the result of any async function, not just <code>fetch()</code> requests.
+</p>
+<div class="feature">
+<strong>fetch caching</strong> caches API requests.<br/>
+<strong>unstable_cache</strong> caches custom server-side functions such as database queries, expensive calculations, CMS SDK calls, and third-party libraries.
+</div>
+<hr/>
+<h3>The Problem With fetch Caching</h3>
+<p>
+Next.js caching works automatically when using:
+</p>
+<div class="code-title">Fetch Caching</div>
+<pre><code class="language-tsx">const res = await fetch('https://api.myshop.com/products', {
+  next: { revalidate: 60 }
+});
+const products = await res.json();</code></pre>
+<p>
+This is great because Next.js can cache the HTTP request.
+</p>
+<p>
+But what if there is no fetch?
+</p>
+<hr/>
+<h3>Example: Database Query</h3>
+<div class="code-title">Direct Database Access</div>
+<pre><code class="language-tsx">import { db } from '@/lib/db';
+export default async function ProductsPage() {
+  const products = await db.product.findMany();
+  return &lt;h1&gt;Products&lt;/h1&gt;;
+}</code></pre>
+<p>
+There is no <code>fetch()</code> here.
+</p>
+<p>
+So:
+</p>
+<pre><code class="language-text">No HTTP Request
+No Fetch Cache
+Database Runs Every Request</code></pre>
+<div class="feature">
+This is where <code>unstable_cache()</code> becomes useful.
+</div>
+<hr/>
+<h3>Basic unstable_cache Example</h3>
+<div class="code-title">Cached Database Query</div>
+<pre><code class="language-tsx">import { unstable_cache } from 'next/cache';
+import { db } from '@/lib/db';
+const getProducts = unstable_cache(
+  async () =&gt; {
+    return db.product.findMany();
+  },
+  ['products'],
+  { revalidate: 60 }
+);
+export default async function ProductsPage() {
+  const products = await getProducts();
+  return &lt;h1&gt;Products&lt;/h1&gt;;
+}</code></pre>
+<p>
+Now:
+</p>
+<pre><code class="language-text">First Request
+      ↓
+Query Database
+      ↓
+Save Result In Cache
+Second Request
+      ↓
+Use Cache
+60 Seconds Later
+      ↓
+Refresh Cache</code></pre>
+<hr/>
+<h3>Why Not Use fetch?</h3>
+<p>
+Sometimes data comes from:
+</p>
+<ul>
+<li>Prisma</li>
+<li>MongoDB Driver</li>
+<li>Mongoose</li>
+<li>Redis</li>
+<li>Firebase SDK</li>
+<li>Stripe SDK</li>
+<li>CMS SDK</li>
+</ul>
+<p>
+These do not use HTTP fetch requests.
+</p>
+<div class="feature">
+<code>unstable_cache()</code> allows us to cache any async function regardless of where the data comes from.
+</div>
+<hr/>
+<h3>Real World Example</h3>
+<p>
+Suppose we have:
+</p>
+<div class="code-title">Database</div>
+<pre><code class="language-text">Products Table
+   ↓
+50,000 Products</code></pre>
+<p>
+Every request executes:
+</p>
+<div class="code-title">Expensive Query</div>
+<pre><code class="language-tsx">const products = await db.product.findMany();</code></pre>
+<p>
+Without caching:
+</p>
+<pre><code class="language-text">User 1
+   ↓
+Database Query
+User 2
+   ↓
+Database Query
+User 3
+   ↓
+Database Query</code></pre>
+<p>
+Database gets hit every time.
+</p>
+<hr/>
+<h4>With unstable_cache</h4>
+<div class="code-title">Cached Query</div>
+<pre><code class="language-tsx">const getProducts = unstable_cache(
+  async () =&gt; db.product.findMany(),
+  ['products'],
+  { revalidate: 60 }
+);</code></pre>
+<p>
+Now:
+</p>
+<pre><code class="language-text">User 1
+   ↓
+Database Query
+   ↓
+Cache Result
+User 2
+   ↓
+Use Cache
+User 3
+   ↓
+Use Cache</code></pre>
+<hr/>
+<h3>Using Tags</h3>
+<p>
+Just like fetch caching, unstable_cache can use tags.
+</p>
+<div class="code-title">Tagged Cache</div>
+<pre><code class="language-tsx">const getProducts = unstable_cache(
+  async () =&gt; db.product.findMany(),
+  ['products'],
+  {
+    tags: ['products'],
+    revalidate: 60
+  }
+);</code></pre>
+<p>
+Now we can clear the cache:
+</p>
+<div class="code-title">On-Demand Revalidation</div>
+<pre><code class="language-ts">import { revalidateTag } from 'next/cache';
+revalidateTag('products', 'max');</code></pre>
+<hr/>
+<h3>Fetch Cache vs unstable_cache</h3>
+<table>
+<tr>
+<th>Feature</th>
+<th>fetch Cache</th>
+<th>unstable_cache</th>
+</tr>
+<tr>
+<td>Caches HTTP Requests</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>Caches Database Queries</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Caches Custom Functions</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Supports Revalidation</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Supports Tags</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Works With Prisma</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Works With MongoDB Driver</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+</table>
+<hr/>
+<h3>When To Use fetch Cache?</h3>
+<div class="code-title">Use fetch Cache</div>
+<pre><code class="language-tsx">const res = await fetch('https://api.myshop.com/products', {
+  next: { revalidate: 60 }
+});</code></pre>
+<p>
+When data comes from:
+</p>
+<ul>
+<li>REST APIs</li>
+<li>External Services</li>
+<li>Backend APIs</li>
+</ul>
+<hr/>
+<h3>When To Use unstable_cache?</h3>
+<div class="code-title">Use unstable_cache</div>
+<pre><code class="language-tsx">const users = await db.user.findMany();</code></pre>
+<p>
+When data comes from:
+</p>
+<ul>
+<li>Prisma</li>
+<li>MongoDB</li>
+<li>Redis</li>
+<li>Firebase SDK</li>
+<li>Custom Server Functions</li>
+<li>Expensive Computations</li>
+</ul>
+<hr/>
+<h3>Real Interview Scenario</h3>
+<div class="code-title">Question</div>
+<pre><code class="language-text">You Fetch Products Using Prisma
+Which Cache Should You Use?</code></pre>
+<div class="code-title">Answer</div>
+<pre><code class="language-text">unstable_cache()</code></pre>
+<p>
+Because Prisma does not use fetch().
+</p>
+<hr/>
+<div class="code-title">Question</div>
+<pre><code class="language-text">You Fetch Products From
+https://api.myshop.com/products
+Which Cache Should You Use?</code></pre>
+<div class="code-title">Answer</div>
+<pre><code class="language-text">fetch(..., {
+  next: { revalidate: 60 }
+})</code></pre>
+<p>
+Because it is an HTTP request.
+</p>
+<hr/>
+<h3>Easy Memory Trick</h3>
+<div class="code-title">Remember</div>
+<pre><code class="language-text">HTTP Request
+      ↓
+fetch Cache
+Database Query
+      ↓
+unstable_cache
+Custom Function
+      ↓
+unstable_cache</code></pre>
+<div class="feature">
+<strong>One-Line Definition:</strong><br/>
+<code>unstable_cache()</code> is used to cache the result of custom async functions such as database queries and expensive server-side operations, while fetch caching is used specifically for HTTP requests made with <code>fetch()</code>.
+</div>
+<h2 class="section-title" id="03-11"><span class="secnum">03-11</span>What is Request Deduplication (Memoization) in Next.js Fetch Calls?</h2>
+<p>
+Request Deduplication means that if multiple Server Components make the same <code>fetch()</code> request during a single render, Next.js automatically performs only one network request and shares the result with all components.
+</p>
+<div class="feature">
+Request Deduplication = Multiple identical fetch calls → One network request.
+</div>
+<hr/>
+<h3>The Problem Without Deduplication</h3>
+<p>
+Suppose three components need the same user data.
+</p>
+<div class="code-title">Header.tsx</div>
+<pre><code class="language-tsx">export default async function Header() {
+  const user = await fetch('https://api.myshop.com/user').then(res =&gt; res.json());
+  return &lt;h1&gt;{user.name}&lt;/h1&gt;;
+}</code></pre>
+<div class="code-title">Sidebar.tsx</div>
+<pre><code class="language-tsx">export default async function Sidebar() {
+  const user = await fetch('https://api.myshop.com/user').then(res =&gt; res.json());
+  return &lt;p&gt;{user.email}&lt;/p&gt;;
+}</code></pre>
+<div class="code-title">Profile.tsx</div>
+<pre><code class="language-tsx">export default async function Profile() {
+  const user = await fetch('https://api.myshop.com/user').then(res =&gt; res.json());
+  return &lt;p&gt;{user.role}&lt;/p&gt;;
+}</code></pre>
+<p>
+Without deduplication:
+</p>
+<pre><code class="language-text">Header
+   ↓
+API Call
+Sidebar
+   ↓
+API Call
+Profile
+   ↓
+API Call</code></pre>
+<p>
+Result:
+</p>
+<pre><code class="language-text">3 Network Requests</code></pre>
+<hr/>
+<h3>What Next.js Does</h3>
+<p>
+Next.js notices that all fetch calls are identical:
+</p>
+<div class="code-title">Same URL</div>
+<pre><code class="language-tsx">fetch('https://api.myshop.com/user')
+fetch('https://api.myshop.com/user')
+fetch('https://api.myshop.com/user')</code></pre>
+<p>
+So Next.js performs:
+</p>
+<pre><code class="language-text">1 Network Request
+       ↓
+Result Shared
+       ↓
+Header
+Sidebar
+Profile</code></pre>
+<div class="feature">
+This is called Request Deduplication (Memoization).
+</div>
+<hr/>
+<h3>Real Example</h3>
+<div class="code-title">Page</div>
+<pre><code class="language-tsx">import Header from './Header';
+import Sidebar from './Sidebar';
+import Profile from './Profile';
+export default function Page() {
+  return (
+    &lt;&gt;
+      &lt;Header /&gt;
+      &lt;Sidebar /&gt;
+      &lt;Profile /&gt;
+    &lt;/&gt;
+  );
+}</code></pre>
+<p>
+All three components call:
+</p>
+<div class="code-title">Identical Fetch</div>
+<pre><code class="language-tsx">await fetch('https://api.myshop.com/user');</code></pre>
+<p>
+Next.js internally does:
+</p>
+<pre><code class="language-text">First Fetch
+      ↓
+Call API
+Second Fetch
+      ↓
+Reuse Result
+Third Fetch
+      ↓
+Reuse Result</code></pre>
+<hr/>
+<h3>Important Rule</h3>
+<p>
+Deduplication only works for identical requests.
+</p>
+<div class="code-title">Deduplicated</div>
+<pre><code class="language-tsx">fetch('https://api.myshop.com/user')
+fetch('https://api.myshop.com/user')
+fetch('https://api.myshop.com/user')</code></pre>
+<p>
+Result:
+</p>
+<pre><code class="language-text">1 Network Request</code></pre>
+<hr/>
+<div class="code-title">Not Deduplicated</div>
+<pre><code class="language-tsx">fetch('https://api.myshop.com/user')
+fetch('https://api.myshop.com/user/1')
+fetch('https://api.myshop.com/user/2')</code></pre>
+<p>
+Result:
+</p>
+<pre><code class="language-text">3 Network Requests</code></pre>
+<hr/>
+<h3>How Is It Different From Cache?</h3>
+<p>
+Many developers confuse memoization with caching.
+</p>
+<table>
+<tr>
+<th>Feature</th>
+<th>Memoization</th>
+<th>Cache</th>
+</tr>
+<tr>
+<td>Purpose</td>
+<td>Avoid duplicate requests in same render</td>
+<td>Reuse data across requests</td>
+</tr>
+<tr>
+<td>Lifetime</td>
+<td>Current request only</td>
+<td>Multiple requests</td>
+</tr>
+<tr>
+<td>Uses Data Cache</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Network Calls Saved</td>
+<td>Same render</td>
+<td>Future renders</td>
+</tr>
+</table>
+<hr/>
+<h3>Example Timeline</h3>
+<div class="code-title">Memoization</div>
+<pre><code class="language-text">Request #1
+Header
+Sidebar
+Profile
+      ↓
+One API Call
+Request #2
+Header
+Sidebar
+Profile
+      ↓
+One API Call Again</code></pre>
+<p>
+Memoization resets on every new request.
+</p>
+<hr/>
+<div class="code-title">Caching</div>
+<pre><code class="language-text">Request #1
+      ↓
+API Call
+      ↓
+Store In Cache
+Request #2
+      ↓
+Use Cache
+Request #3
+      ↓
+Use Cache</code></pre>
+<p>
+Cache survives across requests.
+</p>
+<hr/>
+<h3>Memoization + Cache Together</h3>
+<p>
+In Next.js both can work together.
+</p>
+<div class="code-title">Example</div>
+<pre><code class="language-tsx">const res = await fetch('https://api.myshop.com/products', {
+  next: { revalidate: 60 }
+});</code></pre>
+<p>
+During one render:
+</p>
+<pre><code class="language-text">Deduplication
+      ↓
+One Network Request</code></pre>
+<p>
+Across future requests:
+</p>
+<pre><code class="language-text">Cache
+      ↓
+Reuse Data For 60 Seconds</code></pre>
+<hr/>
+<h3>Real Interview Question</h3>
+<div class="code-title">Question</div>
+<pre><code class="language-text">Header, Sidebar and Profile
+all call the same fetch URL.
+How many API calls occur?</code></pre>
+<div class="code-title">Answer</div>
+<pre><code class="language-text">One API Call</code></pre>
+<p>
+Because Next.js deduplicates identical fetch requests.
+</p>
+<hr/>
+<h3>Visual Flow</h3>
+<div class="code-title">Request Deduplication</div>
+<pre><code class="language-text">Header
+   ↓
+fetch('/user')
+Sidebar
+   ↓
+fetch('/user')
+Profile
+   ↓
+fetch('/user')
+        ↓
+Next.js
+        ↓
+One Network Request
+        ↓
+Shared Result</code></pre>
+<hr/>
+<h3>Easy Memory Trick</h3>
+<div class="code-title">Remember</div>
+<pre><code class="language-text">Memoization
+      ↓
+Same Render
+      ↓
+One API Call
+Caching
+      ↓
+Future Requests
+      ↓
+Reuse Data</code></pre>
+<div class="feature">
+<strong>One-Line Definition:</strong><br/>
+Request Deduplication (Memoization) is a Next.js optimization that automatically combines identical fetch requests made during the same render into a single network request and shares the result with all components.
+</div>
+<h2 class="section-title" id="03-12"><span class="secnum">03-12</span>How do you use React.cache for per-request memoization of non-fetch calls?</h2>
+<p>
+<code>React.cache()</code> is used to memoize the result of a function during a single server request.
+</p>
+<div class="feature">
+In simple words, <code>React.cache()</code> prevents the same non-fetch function from running again and again during the same render request.
+</div>
+<h3>Why Do We Need React.cache?</h3>
+<p>
+Next.js automatically deduplicates identical <code>fetch()</code> calls, but it does not automatically memoize custom functions like database queries, Prisma calls, MongoDB calls, or session functions.
+</p>
+<div class="code-title">Fetch Deduplication Works Automatically</div>
+<pre><code class="language-tsx">await fetch('https://api.myshop.com/user');
+await fetch('https://api.myshop.com/user');
+await fetch('https://api.myshop.com/user');</code></pre>
+<p>
+Next.js can make only one request for the same fetch call during one render.
+</p>
+<div class="code-title">But Non-Fetch Calls Are Different</div>
+<pre><code class="language-tsx">await getUser();
+await getUser();
+await getUser();</code></pre>
+<p>
+Without <code>React.cache()</code>, this custom function can run multiple times.
+</p>
+<h3>Basic Example Without React.cache</h3>
+<div class="code-title">lib/user.ts</div>
+<pre><code class="language-tsx">export async function getUser() {
+  console.log('Database query running...');
+  return db.user.findFirst();
+}</code></pre>
+<div class="code-title">Header.tsx</div>
+<pre><code class="language-tsx">import { getUser } from './lib/user';
+export default async function Header() {
+  const user = await getUser();
+  return &lt;h1&gt;Hello {user.name}&lt;/h1&gt;;
+}</code></pre>
+<div class="code-title">Sidebar.tsx</div>
+<pre><code class="language-tsx">import { getUser } from './lib/user';
+export default async function Sidebar() {
+  const user = await getUser();
+  return &lt;p&gt;{user.email}&lt;/p&gt;;
+}</code></pre>
+<div class="code-title">Profile.tsx</div>
+<pre><code class="language-tsx">import { getUser } from './lib/user';
+export default async function Profile() {
+  const user = await getUser();
+  return &lt;p&gt;{user.role}&lt;/p&gt;;
+}</code></pre>
+<p>
+If all three components render in the same request, <code>getUser()</code> can run three times.
+</p>
+<div class="code-title">Without cache()</div>
+<pre><code class="language-text">Header calls getUser()
+        ↓
+Database query
+Sidebar calls getUser()
+        ↓
+Database query
+Profile calls getUser()
+        ↓
+Database query</code></pre>
+<h3>Using React.cache</h3>
+<div class="code-title">lib/user.ts</div>
+<pre><code class="language-tsx">import { cache } from 'react';
+export const getUser = cache(async () =&gt; {
+  console.log('Database query running...');
+  return db.user.findFirst();
+});</code></pre>
+<p>
+Now, during the same server request, repeated calls to <code>getUser()</code> reuse the first result.
+</p>
+<div class="code-title">With cache()</div>
+<pre><code class="language-text">Header calls getUser()
+        ↓
+Database query runs once
+Sidebar calls getUser()
+        ↓
+Reuses cached result
+Profile calls getUser()
+        ↓
+Reuses cached result</code></pre>
+<h3>Full Page Example</h3>
+<div class="code-title">app/dashboard/page.tsx</div>
+<pre><code class="language-tsx">import Header from './Header';
+import Sidebar from './Sidebar';
+import Profile from './Profile';
+export default function DashboardPage() {
+  return (
+    &lt;&gt;
+      &lt;Header /&gt;
+      &lt;Sidebar /&gt;
+      &lt;Profile /&gt;
+    &lt;/&gt;
+  );
+}</code></pre>
+<p>
+All components can call <code>getUser()</code>, but the database query runs only once per request.
+</p>
+<h3>Important: Per-Request Memoization</h3>
+<p>
+<code>React.cache()</code> does not cache forever.
+</p>
+<div class="feature">
+React invalidates memoized cache for each new server request. Each request gets its own cache scope.
+</div>
+<div class="code-title">Request Flow</div>
+<pre><code class="language-text">Request 1
+   ↓
+getUser() runs once
+   ↓
+Other calls reuse result
+Request 2
+   ↓
+getUser() runs once again
+   ↓
+Other calls reuse result
+Request 3
+   ↓
+getUser() runs once again
+   ↓
+Other calls reuse result</code></pre>
+<p>
+So <code>React.cache()</code> is not long-term caching like <code>unstable_cache()</code> or <code>fetch(..., { next: { revalidate } })</code>.
+</p>
+<h3>Example With Arguments</h3>
+<p>
+<code>React.cache()</code> memoizes based on function arguments.
+</p>
+<div class="code-title">lib/product.ts</div>
+<pre><code class="language-tsx">import { cache } from 'react';
+export const getProduct = cache(async (id: string) =&gt; {
+  console.log('Product query running:', id);
+  return db.product.findUnique({ where: { id } });
+});</code></pre>
+<div class="code-title">Usage</div>
+<pre><code class="language-tsx">await getProduct('1');
+await getProduct('1');
+await getProduct('2');</code></pre>
+<div class="code-title">Result</div>
+<pre><code class="language-text">getProduct('1') → runs once
+getProduct('1') → reuses result
+getProduct('2') → runs separately</code></pre>
+<h3>When Should We Use React.cache?</h3>
+<ul>
+<li>Same database query is used in multiple Server Components.</li>
+<li>Same session check is needed in layout, page, and components.</li>
+<li>Same custom async function may run multiple times in one request.</li>
+<li>We want request-level memoization, not long-term caching.</li>
+</ul>
+<h3>Session Example</h3>
+<div class="code-title">lib/session.ts</div>
+<pre><code class="language-tsx">import { cache } from 'react';
+import { cookies } from 'next/headers';
+export const getSession = cache(async () =&gt; {
+  const token = (await cookies()).get('token')?.value;
+  if (!token) return null;
+  return verifyToken(token);
+});</code></pre>
+<div class="code-title">Usage In Multiple Components</div>
+<pre><code class="language-tsx">const session = await getSession();</code></pre>
+<p>
+Now layout, page, and child components can call <code>getSession()</code> without repeating the same verification work during the same request.
+</p>
+<h3>React.cache vs Fetch Memoization vs unstable_cache</h3>
+<table>
+<tr>
+<th>Feature</th>
+<th>React.cache</th>
+<th>Fetch Memoization</th>
+<th>unstable_cache</th>
+</tr>
+<tr>
+<td>Works With fetch()</td>
+<td>Possible, but usually not needed</td>
+<td>✅ Automatic</td>
+<td>Possible</td>
+</tr>
+<tr>
+<td>Works With DB Queries</td>
+<td>✅</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Lifetime</td>
+<td>One request</td>
+<td>One render/request</td>
+<td>Across requests</td>
+</tr>
+<tr>
+<td>Good For Session Checks</td>
+<td>✅</td>
+<td>❌</td>
+<td>Sometimes</td>
+</tr>
+<tr>
+<td>Long-Term Cache</td>
+<td>❌</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Manual Revalidation</td>
+<td>❌</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+</table>
+<h3>When Not To Use React.cache?</h3>
+<ul>
+<li>When using normal <code>fetch()</code>; Next.js already memoizes identical fetch requests.</li>
+<li>When we need persistent cache across users or requests.</li>
+<li>When data should be shared for minutes or hours.</li>
+<li>When we need tag-based revalidation.</li>
+</ul>
+<h3>Easy Memory Trick</h3>
+<div class="code-title">Remember</div>
+<pre><code class="language-text">fetch()
+   ↓
+Next.js deduplicates automatically
+custom function / DB query / session check
+   ↓
+Use React.cache()
+Need long-term cache
+   ↓
+Use unstable_cache()</code></pre>
+<div class="feature">
+<strong>One-Line Definition:</strong><br/>
+<code>React.cache()</code> memoizes non-fetch function results during a single server request, so repeated calls with the same arguments reuse the same result instead of running the function again.
+</div>
+<p>
+React documentation notes that cached functions are invalidated for each server request, and Next.js documentation also describes React.cache as scoped to the current request only.
+</p>
+<h2 class="section-title" id="03-13"><span class="secnum">03-13</span>What is the use cache directive introduced in Next.js 15 and how does it differ from unstable_cache?</h2>
+<p>
+Next.js 15 introduced the <code>'use cache'</code> directive as a simpler and more modern way to cache Server Components and async functions.
+</p>
+<div class="feature">
+Think of <code>'use cache'</code> as the future replacement for many <code>unstable_cache()</code> use cases.
+</div>
+<hr/>
+<h3>The Old Way: unstable_cache()</h3>
+<p>
+Before Next.js 15, if we wanted to cache a database query, we wrote:
+</p>
+<div class="code-title">unstable_cache Example</div>
+<pre><code class="language-tsx">import { unstable_cache } from 'next/cache';
+const getProducts = unstable_cache(
+  async () =&gt; {
+    return db.product.findMany();
+  },
+  ['products'],
+  { revalidate: 60 }
+);</code></pre>
+<p>
+This works, but the syntax is quite verbose.
+</p>
+<hr/>
+<h3>The New Way: use cache</h3>
+<p>
+Next.js 15 allows us to write:
+</p>
+<div class="code-title">use cache Example</div>
+<pre><code class="language-tsx">async function getProducts() {
+  'use cache';
+  return db.product.findMany();
+}</code></pre>
+<p>
+Much simpler.
+</p>
+<div class="feature">
+Instead of wrapping functions with <code>unstable_cache()</code>, we place <code>'use cache'</code> inside the function body.
+</div>
+<hr/>
+<h3>Server Component Example</h3>
+<div class="code-title">Products Page</div>
+<pre><code class="language-tsx">async function getProducts() {
+  'use cache';
+  return db.product.findMany();
+}
+export default async function ProductsPage() {
+  const products = await getProducts();
+  return &lt;h1&gt;Products&lt;/h1&gt;;
+}</code></pre>
+<p>
+Now Next.js can cache the result of <code>getProducts()</code>.
+</p>
+<hr/>
+<h3>What Problem Does It Solve?</h3>
+<p>
+Suppose:
+</p>
+<div class="code-title">Database Query</div>
+<pre><code class="language-tsx">await db.product.findMany();</code></pre>
+<p>
+Without caching:
+</p>
+<pre><code class="language-text">Request 1
+    ↓
+Database Query
+Request 2
+    ↓
+Database Query
+Request 3
+    ↓
+Database Query</code></pre>
+<p>
+Database gets hit every time.
+</p>
+<hr/>
+<p>
+With:
+</p>
+<div class="code-title">Cached Function</div>
+<pre><code class="language-tsx">async function getProducts() {
+  'use cache';
+  return db.product.findMany();
+}</code></pre>
+<p>
+Next.js can reuse cached results.
+</p>
+<hr/>
+<h3>How Is It Different From React.cache?</h3>
+<p>
+Many developers confuse these two.
+</p>
+<div class="code-title">React.cache()</div>
+<pre><code class="language-tsx">import { cache } from 'react';
+export const getProducts = cache(async () =&gt; {
+  return db.product.findMany();
+});</code></pre>
+<p>
+Lifetime:
+</p>
+<pre><code class="language-text">Current Request Only</code></pre>
+<hr/>
+<div class="code-title">use cache</div>
+<pre><code class="language-tsx">async function getProducts() {
+  'use cache';
+  return db.product.findMany();
+}</code></pre>
+<p>
+Lifetime:
+</p>
+<pre><code class="language-text">Across Requests</code></pre>
+<div class="feature">
+React.cache() = request memoization.<br/>
+use cache = persistent Next.js cache.
+</div>
+<hr/>
+<h3>How Is It Different From unstable_cache()?</h3>
+<p>
+Both create persistent cache entries.
+</p>
+<p>
+The main difference is syntax and future direction.
+</p>
+<div class="code-title">unstable_cache</div>
+<pre><code class="language-tsx">const getProducts = unstable_cache(
+  async () =&gt; {
+    return db.product.findMany();
+  },
+  ['products'],
+  { revalidate: 60 }
+);</code></pre>
+<hr/>
+<div class="code-title">use cache</div>
+<pre><code class="language-tsx">async function getProducts() {
+  'use cache';
+  return db.product.findMany();
+}</code></pre>
+<p>
+The second version is much easier to read.
+</p>
+<hr/>
+<h3>Real World Example</h3>
+<p>
+Suppose we have:
+</p>
+<pre><code class="language-text">50,000 Products</code></pre>
+<p>
+Fetching all products is expensive.
+</p>
+<div class="code-title">Cached Query</div>
+<pre><code class="language-tsx">async function getProducts() {
+  'use cache';
+  return db.product.findMany();
+}</code></pre>
+<p>
+Now:
+</p>
+<pre><code class="language-text">First Request
+      ↓
+Database Query
+      ↓
+Cache Result
+Second Request
+      ↓
+Use Cache
+Third Request
+      ↓
+Use Cache</code></pre>
+<hr/>
+<h3>Using Cache Tags</h3>
+<p>
+use cache can work with cache tags.
+</p>
+<div class="code-title">Tagged Function</div>
+<pre><code class="language-tsx">import { cacheTag } from 'next/cache';
+async function getProducts() {
+  'use cache';
+  cacheTag('products');
+  return db.product.findMany();
+}</code></pre>
+<p>
+Now we can invalidate:
+</p>
+<div class="code-title">Revalidate Tag</div>
+<pre><code class="language-ts">import { revalidateTag } from 'next/cache';
+revalidateTag('products', 'max');</code></pre>
+<hr/>
+<h3>Using Cache Lifetime</h3>
+<div class="code-title">Example</div>
+<pre><code class="language-tsx">import { cacheLife } from 'next/cache';
+async function getProducts() {
+  'use cache';
+  cacheLife('minutes');
+  return db.product.findMany();
+}</code></pre>
+<p>
+This controls how long the cached value remains valid.
+</p>
+<hr/>
+<h3>Visual Comparison</h3>
+<table>
+<tr>
+<th>Feature</th>
+<th>React.cache</th>
+<th>unstable_cache</th>
+<th>use cache</th>
+</tr>
+<tr>
+<td>Request Memoization</td>
+<td>✅</td>
+<td>❌</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>Persistent Cache</td>
+<td>❌</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Across Requests</td>
+<td>❌</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Tags</td>
+<td>❌</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Revalidation</td>
+<td>❌</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Simple Syntax</td>
+<td>✅</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Future Direction</td>
+<td>Memoization</td>
+<td>Legacy Style</td>
+<td>Recommended</td>
+</tr>
+</table>
+<hr/>
+<h3>When Should We Use use cache?</h3>
+<ul>
+<li>Database queries.</li>
+<li>CMS data.</li>
+<li>Expensive computations.</li>
+<li>Third-party SDK calls.</li>
+<li>Server-side helper functions.</li>
+</ul>
+<p>
+Basically anywhere we previously considered:
+</p>
+<pre><code class="language-tsx">unstable_cache(...)</code></pre>
+<hr/>
+<h3>Easy Memory Trick</h3>
+<div class="code-title">Remember</div>
+<pre><code class="language-text">React.cache()
+      ↓
+Current Request Only
+unstable_cache()
+      ↓
+Persistent Cache
+(Old API)
+'use cache'
+      ↓
+Persistent Cache
+(New API)</code></pre>
+<div class="feature">
+<strong>One-Line Definition:</strong><br/>
+<code>'use cache'</code> is a Next.js 15 caching directive that creates persistent server-side cache entries for functions and Server Components, providing a simpler and more modern alternative to <code>unstable_cache()</code>.
+</div>
+<h2 class="section-title" id="03-14"><span class="secnum">03-14</span>React.cache() vs unstable_cache() vs 'use cache'</h2>
+<p>
+Next.js provides multiple caching mechanisms. Each solves a different problem.
+</p>
+<div class="feature">
+<strong>Quick Rule</strong><br/>
+React.cache() → Request-level memoization<br/>
+unstable_cache() → Persistent data cache<br/>
+'use cache' → Modern replacement for unstable_cache()
+</div>
+<h3>1. React.cache()</h3>
+<p>
+<code>React.cache()</code> memoizes function results during a single server request.
+</p>
+<div class="feature">
+It prevents duplicate database queries, session checks, and custom async functions from running multiple times during the same render.
+</div>
+<h4>Without React.cache()</h4>
+<div class="code-title">lib/user.ts</div>
+<pre><code class="language-tsx">export async function getUser() {
+  console.log('DB Query');
+  return db.user.findFirst();
+}</code></pre>
+<div class="code-title">Usage</div>
+<pre><code class="language-tsx">await getUser();
+await getUser();
+await getUser();</code></pre>
+<div class="code-title">Result</div>
+<pre><code class="language-text">DB Query
+DB Query
+DB Query</code></pre>
+<h4>With React.cache()</h4>
+<div class="code-title">lib/user.ts</div>
+<pre><code class="language-tsx">import { cache } from 'react';
+export const getUser = cache(
+  async () =&gt; {
+    console.log('DB Query');
+    return db.user.findFirst();
+  }
+);</code></pre>
+<div class="code-title">Usage</div>
+<pre><code class="language-tsx">await getUser();
+await getUser();
+await getUser();</code></pre>
+<div class="code-title">Result</div>
+<pre><code class="language-text">DB Query</code></pre>
+<h4>Request Flow</h4>
+<pre><code class="language-text">Request 1
+   ↓
+getUser()
+   ↓
+DB Query
+   ↓
+Memory Cache
+getUser()
+   ↓
+Cached Result
+getUser()
+   ↓
+Cached Result</code></pre>
+<h4>New Request</h4>
+<pre><code class="language-text">Request 2
+   ↓
+DB Query Again</code></pre>
+<p>
+React.cache() cache is cleared after every request.
+</p>
+<h4>Example With Arguments</h4>
+<div class="code-title">lib/product.ts</div>
+<pre><code class="language-tsx">import { cache } from 'react';
+export const getProduct = cache(
+  async (id) =&gt; {
+    return db.product.findUnique({
+      where:{id}
+    });
+  }
+);</code></pre>
+<div class="code-title">Usage</div>
+<pre><code class="language-tsx">await getProduct('1');
+await getProduct('1');
+await getProduct('2');</code></pre>
+<div class="code-title">Result</div>
+<pre><code class="language-text">getProduct('1') → Query
+getProduct('1') → Cached
+getProduct('2') → Query</code></pre>
+<h4>Best Use Cases</h4>
+<ul>
+<li>Database Queries</li>
+<li>Session Checks</li>
+<li>Prisma Queries</li>
+<li>Mongo Queries</li>
+<li>Authentication Logic</li>
+</ul>
+<div class="feature">
+<strong>Interview Answer:</strong><br/>
+React.cache() memoizes custom function results during a single server request, preventing duplicate executions and reusing the same result within that request.
+</div>
+<h3>2. unstable_cache()</h3>
+<p>
+<code>unstable_cache()</code> is a Next.js Data Cache API that stores function results across requests.
+</p>
+<div class="feature">
+Unlike React.cache(), the cache survives between requests and can be shared across users.
+</div>
+<h4>Why Do We Need unstable_cache()?</h4>
+<p>
+Database queries can be expensive. If the same data is requested repeatedly, we can cache it and avoid hitting the database every time.
+</p>
+<div class="code-title">Without unstable_cache()</div>
+<pre><code class="language-tsx">async function getProducts() {
+  return db.product.findMany();
+}</code></pre>
+<div class="code-title">Request Flow</div>
+<pre><code class="language-text">Request 1
+   ↓
+Database Query
+Request 2
+   ↓
+Database Query
+Request 3
+   ↓
+Database Query</code></pre>
+<h4>Using unstable_cache()</h4>
+<div class="code-title">lib/products.ts</div>
+<pre><code class="language-tsx">import { unstable_cache } from 'next/cache';
+export const getProducts = unstable_cache(
+    async () =&gt; {
+      return db.product.findMany();
+    },
+    ['products']
+  );</code></pre>
+<div class="code-title">Usage</div>
+<pre><code class="language-tsx">const products = await getProducts();</code></pre>
+<div class="code-title">Request Flow</div>
+<pre><code class="language-text">Request 1
+   ↓
+Database Query
+   ↓
+Store In Cache
+Request 2
+   ↓
+Cached Result
+Request 3
+   ↓
+Cached Result</code></pre>
+<h4>Using Revalidation</h4>
+<p>
+Cache can automatically expire after a specified time.
+</p>
+<div class="code-title">Revalidate Every Hour</div>
+<pre><code class="language-tsx">import { unstable_cache } from 'next/cache';
+export const getProducts = unstable_cache(
+    async () =&gt; {
+      return db.product.findMany();
+    },
+    ['products'],
+    {
+      revalidate: 3600
+    }
+  );</code></pre>
+<div class="code-title">Flow</div>
+<pre><code class="language-text">Hour 1
+   ↓
+Database Query
+Next Requests
+   ↓
+Cached Result
+After 3600 Seconds
+   ↓
+Cache Expires
+Next Request
+   ↓
+Database Query Again</code></pre>
+<h4>Using Tags</h4>
+<p>
+Tags allow manual cache invalidation.
+</p>
+<div class="code-title">Tagged Cache</div>
+<pre><code class="language-tsx">import { unstable_cache } from 'next/cache';
+export const getProducts = unstable_cache(
+    async () =&gt; {
+      return db.product.findMany();
+    },
+    ['products'],
+    {
+      tags:['products']
+    }
+  );</code></pre>
+<div class="code-title">Revalidate Tag</div>
+<pre><code class="language-tsx">import { revalidateTag } from 'next/cache';
+revalidateTag( 'products' );</code></pre>
+<div class="code-title">Flow</div>
+<pre><code class="language-text">Request 1
+   ↓
+Database Query
+   ↓
+Cache Stored
+Request 2
+   ↓
+Cached Result
+revalidateTag('products')
+   ↓
+Cache Cleared
+Request 3
+   ↓
+Database Query Again</code></pre>
+<h4>Example With Parameters</h4>
+<div class="code-title">Product By ID</div>
+<pre><code class="language-tsx">import { unstable_cache } from 'next/cache';
+export const getProduct = unstable_cache(
+    async (id) =&gt; {
+      return db.product.findUnique({
+        where:{id}
+      });
+    },
+    ['product']
+  );</code></pre>
+<p>
+Be careful when using parameters. Cache keys must uniquely identify data.
+</p>
+<h4>React.cache() vs unstable_cache()</h4>
+<table>
+<tr>
+<th>Feature</th>
+<th>React.cache()</th>
+<th>unstable_cache()</th>
+</tr>
+<tr>
+<td>Provided By</td>
+<td>React</td>
+<td>Next.js</td>
+</tr>
+<tr>
+<td>Cache Lifetime</td>
+<td>One Request</td>
+<td>Across Requests</td>
+</tr>
+<tr>
+<td>Shared Between Users</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Revalidation</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Tags</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Best For</td>
+<td>Memoization</td>
+<td>Data Cache</td>
+</tr>
+</table>
+<h4>When Should We Use unstable_cache()?</h4>
+<ul>
+<li>Product Lists</li>
+<li>Category Lists</li>
+<li>Blog Posts</li>
+<li>CMS Data</li>
+<li>Frequently Read Database Data</li>
+</ul>
+<h4>When Not To Use It?</h4>
+<ul>
+<li>User Sessions</li>
+<li>Authentication Data</li>
+<li>User-Specific Information</li>
+<li>Request-Specific Data</li>
+</ul>
+<div class="feature">
+<strong>Interview Answer:</strong><br/>
+unstable_cache() caches server function results in Next.js Data Cache, allowing data to be reused across requests with support for revalidation and tag-based invalidation.
+</div>
+<h3>3. 'use cache'</h3>
+<p>
+<code>'use cache'</code> is the modern Next.js caching directive that replaces many <code>unstable_cache()</code> use cases.
+</p>
+<div class="feature">
+Think of 'use cache' as the new, cleaner, and more powerful way to create persistent Data Cache entries in Next.js.
+</div>
+<h4>Basic Example</h4>
+<div class="code-title">lib/products.ts</div>
+<pre><code class="language-tsx">async function getProducts() {
+  'use cache';
+  return db.product.findMany();
+}</code></pre>
+<div class="code-title">Usage</div>
+<pre><code class="language-tsx">const products = await getProducts();</code></pre>
+<div class="code-title">Request Flow</div>
+<pre><code class="language-text">Request 1
+   ↓
+Database Query
+   ↓
+Store In Cache
+Request 2
+   ↓
+Cached Result
+Request 3
+   ↓
+Cached Result</code></pre>
+<h4>Adding Cache Lifetime</h4>
+<p>
+<code>cacheLife()</code> controls how long the cached data remains valid.
+</p>
+<div class="code-title">Cache For Minutes</div>
+<pre><code class="language-tsx">import { cacheLife } from 'next/cache';
+async function getProducts() {
+  'use cache';
+  cacheLife('minutes');
+  return db.product.findMany();
+}</code></pre>
+<div class="code-title">Cache For Hours</div>
+<pre><code class="language-tsx">import { cacheLife } from 'next/cache';
+async function getProducts() {
+  'use cache';
+  cacheLife('hours');
+  return db.product.findMany();
+}</code></pre>
+<p>All options</p>
+<pre><code class="language-tsx">import { cacheLife } from 'next/cache';
+cacheLife('seconds');
+cacheLife('minutes');
+cacheLife('hours');
+cacheLife('days');
+cacheLife('weeks');
+cacheLife('max');</code></pre>
+<div>
+<table>
+<thead>
+<tr>
+<th>Profile</th>
+<th>Revalidate</th>
+<th>Expire</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>seconds</code></td>
+<td>1 second</td>
+<td>1 minute</td>
+</tr>
+<tr>
+<td><code>minutes</code></td>
+<td>1 minute</td>
+<td>1 hour</td>
+</tr>
+<tr>
+<td><code>hours</code></td>
+<td>1 hour</td>
+<td>1 day</td>
+</tr>
+<tr>
+<td><code>days</code></td>
+<td>1 day</td>
+<td>1 week</td>
+</tr>
+<tr>
+<td><code>weeks</code></td>
+<td>1 week</td>
+<td>30 days</td>
+</tr>
+<tr>
+<td><code>max</code></td>
+<td>30 days</td>
+<td>Nearly indefinite</td>
+</tr>
+</tbody>
+</table>
+</div>
+<h4>Adding Cache Tags</h4>
+<p>
+Tags allow selective cache invalidation.
+</p>
+<div class="code-title">Tagged Cache</div>
+<pre><code class="language-tsx">import { cacheTag } from 'next/cache';
+async function getProducts() {
+  'use cache';
+  cacheTag('products');
+  return db.product.findMany();
+}</code></pre>
+<div class="code-title">Invalidate Tag</div>
+<pre><code class="language-tsx">import { revalidateTag } from 'next/cache';
+revalidateTag(
+  'products'
+);</code></pre>
+<div class="code-title">Flow</div>
+<pre><code class="language-text">Request 1
+   ↓
+Database Query
+   ↓
+Cache Stored
+Request 2
+   ↓
+Cached Result
+revalidateTag('products')
+   ↓
+Cache Cleared
+Request 3
+   ↓
+Database Query Again</code></pre>
+<h4>Using cacheLife + cacheTag Together</h4>
+<div class="code-title">Recommended Pattern</div>
+<pre><code class="language-tsx">import { cacheLife, cacheTag } from 'next/cache';
+async function getProducts() {
+  'use cache';
+  cacheLife('hours');
+  cacheTag('products');
+  return db.product.findMany();
+}</code></pre>
+<h4>Real World Example</h4>
+<div class="code-title">Blog Posts</div>
+<pre><code class="language-tsx">import { cacheLife, cacheTag } from 'next/cache';
+async function getPosts() {
+  'use cache';
+  cacheLife('hours');
+  cacheTag('posts');
+  return db.post.findMany();
+}</code></pre>
+<div class="code-title">After Creating New Post</div>
+<pre><code class="language-tsx">revalidateTag('posts');</code></pre>
+<p>
+The next request automatically gets fresh data.
+</p>
+<h3>React.cache() vs unstable_cache() vs 'use cache'</h3>
+<table>
+<tr>
+<th>Feature</th>
+<th>React.cache()</th>
+<th>unstable_cache()</th>
+<th>'use cache'</th>
+</tr>
+<tr>
+<td>Provided By</td>
+<td>React</td>
+<td>Next.js</td>
+<td>Next.js</td>
+</tr>
+<tr>
+<td>Cache Scope</td>
+<td>Current Request</td>
+<td>Data Cache</td>
+<td>Data Cache</td>
+</tr>
+<tr>
+<td>Across Requests</td>
+<td>❌</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Shared Between Users</td>
+<td>❌</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Revalidation</td>
+<td>❌</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Tags</td>
+<td>❌</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>cacheLife()</td>
+<td>❌</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>cacheTag()</td>
+<td>❌</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Memoization</td>
+<td>✅</td>
+<td>❌</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>Recommended</td>
+<td>✅</td>
+<td>Legacy</td>
+<td>✅</td>
+</tr>
+</table>
+<h3>Visual Memory Trick</h3>
+<div class="code-title">Think Like This</div>
+<pre><code class="language-text">Same Request
+      ↓
+React.cache()
+Multiple Requests
+      ↓
+unstable_cache()
+Multiple Requests
++ Tags
++ cacheLife
++ Modern API
+      ↓
+'use cache'</code></pre>
+<h3>Which One Should We Use?</h3>
+<table>
+<tr>
+<th>Scenario</th>
+<th>Recommended</th>
+</tr>
+<tr>
+<td>Prisma Query Used By Multiple Components</td>
+<td>React.cache()</td>
+</tr>
+<tr>
+<td>Session Lookup</td>
+<td>React.cache()</td>
+</tr>
+<tr>
+<td>Product Catalog</td>
+<td>'use cache'</td>
+</tr>
+<tr>
+<td>Blog Posts</td>
+<td>'use cache'</td>
+</tr>
+<tr>
+<td>CMS Content</td>
+<td>'use cache'</td>
+</tr>
+<tr>
+<td>Shared Database Data</td>
+<td>'use cache'</td>
+</tr>
+<tr>
+<td>Legacy Next.js Cache Code</td>
+<td>unstable_cache()</td>
+</tr>
+</table>
+<div class="feature">
+<strong>Easy Rule:</strong><br/><br/>
+
+React.cache()
+<br/>
+= Prevent duplicate function calls during one request.
+<br/><br/>
+
+unstable_cache()
+<br/>
+= Old Next.js persistent Data Cache.
+<br/><br/>
+
+'use cache'
+<br/>
+= Modern Next.js persistent Data Cache with cacheLife() and cacheTag().
+</div>
+<div class="feature">
+<strong>Final Interview Answer:</strong><br/>
+React.cache() provides request-level memoization, unstable_cache() provides persistent Data Cache across requests, and 'use cache' is the modern Next.js caching API that offers persistent caching with cacheLife() and cacheTag() support.
+</div>
+<h2 class="section-title" id="03-15"><span class="secnum">03-15</span>What are cacheLife and cacheTag APIs in Next.js 15?</h2>
+<p>
+When using the new <code>'use cache'</code> directive, Next.js provides two helper APIs:
+</p>
+<ul>
+<li><code>cacheLife()</code> → Controls how long cached data lives.</li>
+<li><code>cacheTag()</code> → Assigns tags to cached data for later invalidation.</li>
+</ul>
+<div class="feature">
+Think of it like this:
+<br/><br/>
+<strong>cacheLife = When should cache expire?</strong>
+<br/>
+<strong>cacheTag = Which cache should be cleared?</strong>
+</div>
+<p>
+Both APIs are designed to work together with the <code>'use cache'</code> directive. :contentReference[oaicite:0]{index=0}
+</p>
+<hr/>
+<h3>1. cacheLife()</h3>
+<p>
+<code>cacheLife()</code> controls the lifetime of a cached function or component. :contentReference[oaicite:1]{index=1}
+</p>
+<div class="code-title">Basic Example</div>
+<pre><code class="language-tsx">import { cacheLife } from 'next/cache';
+async function getProducts() {
+  'use cache';
+  cacheLife('hours');
+  return db.product.findMany();
+}</code></pre>
+<p>
+Meaning:
+</p>
+<pre><code class="language-text">First Request
+      ↓
+Query Database
+      ↓
+Store In Cache
+Next Requests
+      ↓
+Use Cache
+After Cache Life Ends
+      ↓
+Generate Fresh Data</code></pre>
+<hr/>
+<h3>What Problem Does cacheLife Solve?</h3>
+<p>
+Suppose we have:
+</p>
+<div class="code-title">Database Query</div>
+<pre><code class="language-tsx">return db.product.findMany();</code></pre>
+<p>
+Without caching:
+</p>
+<pre><code class="language-text">Request 1
+   ↓
+Database Query
+Request 2
+   ↓
+Database Query
+Request 3
+   ↓
+Database Query</code></pre>
+<p>
+With:
+</p>
+<div class="code-title">cacheLife()</div>
+<pre><code class="language-tsx">cacheLife('hours');</code></pre>
+<p>
+The query result can be reused instead of hitting the database every time. :contentReference[oaicite:2]{index=2}
+</p>
+<hr/>
+<h3>2. cacheTag()</h3>
+<p>
+<code>cacheTag()</code> attaches one or more tags to cached data. Later, we can clear that cache using <code>revalidateTag()</code>. :contentReference[oaicite:3]{index=3}
+</p>
+<div class="code-title">Basic Example</div>
+<pre><code class="language-tsx">import { cacheTag } from 'next/cache';
+async function getProducts() {
+  'use cache';
+  cacheTag('products');
+  return db.product.findMany();
+}</code></pre>
+<p>
+Now this cached data belongs to:
+</p>
+<pre><code class="language-text">products</code></pre>
+<p>
+tag.
+</p>
+<hr/>
+<h3>Clearing Tagged Cache</h3>
+<div class="code-title">Revalidate</div>
+<pre><code class="language-ts">import { revalidateTag } from 'next/cache';
+revalidateTag('products', 'max');</code></pre>
+<p>
+Flow:
+</p>
+<pre><code class="language-text">Product Updated
+      ↓
+revalidateTag('products')
+      ↓
+Products Cache Cleared
+      ↓
+Next Request Gets Fresh Data</code></pre>
+<hr/>
+<h3>Real World Example</h3>
+<p>
+Suppose we have an e-commerce site.
+</p>
+<div class="code-title">Products Function</div>
+<pre><code class="language-tsx">import { cacheLife, cacheTag } from 'next/cache';
+async function getProducts() {
+  'use cache';
+  cacheLife('hours');
+  cacheTag('products');
+  return db.product.findMany();
+}</code></pre>
+<p>
+Here:
+</p>
+<table>
+<tr>
+<th>API</th>
+<th>Purpose</th>
+</tr>
+<tr>
+<td>cacheLife('hours')</td>
+<td>How long cache stays valid</td>
+</tr>
+<tr>
+<td>cacheTag('products')</td>
+<td>Identifies the cache entry</td>
+</tr>
+</table>
+<hr/>
+<h3>Admin Updates Product</h3>
+<p>
+Admin changes:
+</p>
+<div class="code-title">Database</div>
+<pre><code class="language-json">{
+  "price": 120
+}</code></pre>
+<p>
+Backend then triggers:
+</p>
+<div class="code-title">Invalidate Cache</div>
+<pre><code class="language-ts">revalidateTag('products', 'max');</code></pre>
+<p>
+Result:
+</p>
+<pre><code class="language-text">Old Products Cache
+       ↓
+Deleted
+Next Request
+       ↓
+Fresh Database Query
+       ↓
+New Cache Created</code></pre>
+<hr/>
+<h3>How cacheLife and cacheTag Work Together</h3>
+<div class="code-title">Combined Example</div>
+<pre><code class="language-tsx">import { cacheLife, cacheTag } from 'next/cache';
+async function getProducts() {
+  'use cache';
+  cacheLife('hours');
+  cacheTag('products');
+  return db.product.findMany();
+}</code></pre>
+<p>
+Meaning:
+</p>
+<pre><code class="language-text">products
+   ↓
+Cache Entry
+cacheLife
+   ↓
+How Long It Lives
+cacheTag
+   ↓
+How To Find It Later
+revalidateTag
+   ↓
+How To Clear It</code></pre>
+<hr/>
+<h3>Comparison</h3>
+<table>
+<tr>
+<th>Feature</th>
+<th>cacheLife()</th>
+<th>cacheTag()</th>
+</tr>
+<tr>
+<td>Controls Expiration</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>Assigns Cache Name</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Used With use cache</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Works With revalidateTag()</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Controls Cache Lifetime</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+</table>
+<hr/>
+<h3>Easy Memory Trick</h3>
+<div class="code-title">Remember</div>
+<pre><code class="language-text">cacheLife()
+      ↓
+How Long?
+cacheTag()
+      ↓
+Which Cache?
+revalidateTag()
+      ↓
+Clear Which Cache?</code></pre>
+<div class="feature">
+<strong>One-Line Definition:</strong><br/>
+<code>cacheLife()</code> controls how long a <code>'use cache'</code> entry remains valid, while <code>cacheTag()</code> labels cached data so it can be selectively invalidated later using <code>revalidateTag()</code>. :contentReference[oaicite:4]{index=4}
+</div>
+<h2 class="section-title" id="03-16"><span class="secnum">03-16</span>Difference Between cacheLife and cacheRevalidate in Next.js 15</h2>
+<p>
+In Next.js 15, both <code>cacheLife()</code> and <code>cacheRevalidate()</code> are used with the <code>'use cache'</code> directive, but they are not exactly the same.
+</p>
+<div class="feature">
+<strong>Simple meaning:</strong><br/>
+<code>cacheRevalidate()</code> controls when cache should refresh.<br/>
+<code>cacheLife()</code> controls the full cache lifecycle: Fresh, Stale, and Expire.
+</div>
+<hr/>
+<h3>Basic use cache Example</h3>
+<div class="code-title">Cached Function</div>
+<pre><code class="language-tsx">import { cacheLife } from 'next/cache';
+async function getProducts() {
+  'use cache';
+  cacheLife('hours');
+  return db.product.findMany();
+}</code></pre>
+<p>
+Here, Next.js stores the result of <code>getProducts()</code> in cache.
+</p>
+<hr/>
+<h3>What is cacheRevalidate?</h3>
+<p>
+<code>cacheRevalidate()</code> tells Next.js when cached data should become stale and refresh.
+</p>
+<div class="code-title">cacheRevalidate Example</div>
+<pre><code class="language-tsx">import { cacheRevalidate } from 'next/cache';
+async function getProducts() {
+  'use cache';
+  cacheRevalidate({ seconds: 3600 });
+  return db.product.findMany();
+}</code></pre>
+<p>
+This means:
+</p>
+<pre><code class="language-text">Cache is fresh for 1 hour.
+After 1 hour:
+Cache becomes stale.
+Old cache can still be returned.
+Refresh happens in background.</code></pre>
+<hr/>
+<h3>cacheRevalidate Timeline</h3>
+<pre><code class="language-text">10:00 Cache created
+      Data = ₹100
+10:30 Request
+      ↓
+      Fresh cache returned
+      User sees ₹100
+11:00 Revalidate time reached
+11:05 Request
+      ↓
+      User gets OLD cache ₹100 immediately
+      ↓
+      Background DB/API fetch starts
+      ↓
+      DB has latest data ₹120
+      ↓
+      Cache updated to ₹120
+11:06 Request
+      ↓
+      User gets NEW cache ₹120</code></pre>
+<div class="feature">
+In <code>cacheRevalidate()</code>, old cache is still allowed after revalidate time. It refreshes in background.
+</div>
+<hr/>
+<h3>What is Expire in cacheLife?</h3>
+<p>
+<code>cacheLife()</code> gives one extra important stage: <strong>Expire</strong>.
+</p>
+<div class="code-title">cacheLife Example</div>
+<pre><code class="language-tsx">import { cacheLife } from 'next/cache';
+async function getProducts() {
+  'use cache';
+  cacheLife('hours');
+  return db.product.findMany();
+}</code></pre>
+<p>
+Conceptually, cacheLife creates this flow:
+</p>
+<pre><code class="language-text">Fresh → Stale → Expired</code></pre>
+<hr/>
+<h3>cacheLife Timeline</h3>
+<pre><code class="language-text">10:00 Cache created
+      Data = ₹100
+10:30 Request
+      ↓
+      Fresh cache returned
+      User sees ₹100
+11:00 Fresh time finished
+11:05 Request
+      ↓
+      User gets OLD cache ₹100 immediately
+      ↓
+      Background DB/API fetch starts
+      ↓
+      DB has latest data ₹120
+      ↓
+      Cache updated to ₹120
+11:06 Request
+      ↓
+      User gets NEW cache ₹120</code></pre>
+<p>
+Until this point, <code>cacheLife()</code> looks similar to <code>cacheRevalidate()</code>.
+</p>
+<hr/>
+<h3>The Real Difference Appears at Expire</h3>
+<pre><code class="language-text">24:00 Cache expired completely
+24:05 Request
+      ↓
+      OLD cache is NOT allowed
+      ↓
+      Must fetch DB/API first
+      ↓
+      DB has latest data ₹150
+      ↓
+      New cache created
+      ↓
+      User gets ₹150</code></pre>
+<div class="warning">
+<strong>Important:</strong><br/>
+After cache expires, old cache cannot be returned to the user. Next.js must fetch fresh data first.
+</div>
+<hr/>
+<h3>Main Difference</h3>
+<h4>cacheRevalidate</h4>
+<pre><code class="language-text">Revalidate time reached
+      ↓
+Old cache is still allowed
+      ↓
+User gets old data immediately
+      ↓
+Refresh happens in background</code></pre>
+<h4>cacheLife Expire</h4>
+<pre><code class="language-text">Expire time reached
+      ↓
+Old cache is NOT allowed
+      ↓
+User must wait
+      ↓
+Fresh DB/API data is fetched
+      ↓
+New cache is created</code></pre>
+<hr/>
+<h3>Example with Slow DB</h3>
+<p>
+Suppose the database takes 5 seconds.
+</p>
+<h4>cacheRevalidate</h4>
+<pre><code class="language-text">11:05 Request
+      ↓
+      User gets OLD cache immediately
+      Response time = almost 0 second
+      ↓
+      DB fetch runs in background for 5 seconds
+      ↓
+      Cache updated</code></pre>
+<h4>cacheLife Expire</h4>
+<pre><code class="language-text">24:05 Request
+      ↓
+      Old cache is expired
+      ↓
+      User waits 5 seconds
+      ↓
+      DB fetch completes
+      ↓
+      New cache created
+      ↓
+      User gets response</code></pre>
+<hr/>
+<h3>Visual Comparison</h3>
+<table>
+<tr>
+<th>Point</th>
+<th>cacheRevalidate</th>
+<th>cacheLife Expire</th>
+</tr>
+<tr>
+<td>Old cache after time finished</td>
+<td>Allowed</td>
+<td>Not allowed</td>
+</tr>
+<tr>
+<td>User waits for DB/API?</td>
+<td>No</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>Refresh type</td>
+<td>Background refresh</td>
+<td>Blocking refresh</td>
+</tr>
+<tr>
+<td>Response speed</td>
+<td>Fast</td>
+<td>Depends on DB/API speed</td>
+</tr>
+<tr>
+<td>Purpose</td>
+<td>Refresh cache after time</td>
+<td>Stop trusting old cache after expiry</td>
+</tr>
+</table>
+<hr/>
+<h3>Why Use cacheLife?</h3>
+<p>
+We use <code>cacheLife()</code> when we want more control than only revalidation.
+</p>
+<ul>
+<li>How long cache should be fresh.</li>
+<li>How long stale cache can still be used.</li>
+<li>When old cache must be completely rejected.</li>
+</ul>
+<div class="feature">
+<code>cacheRevalidate()</code> answers: <strong>When should cache refresh?</strong><br/>
+<code>cacheLife()</code> answers: <strong>When should cache refresh, and when should old cache completely expire?</strong>
+</div>
+<hr/>
+<h3>Easy Memory Trick</h3>
+<pre><code class="language-text">cacheRevalidate
+      ↓
+Old cache allowed
+Refresh in background
+cacheLife Expire
+      ↓
+Old cache not allowed
+Fetch fresh data first</code></pre>
+<hr/>
+<h3>Final One-Line Definition</h3>
+<div class="feature">
+<strong>cacheRevalidate</strong> means old cache can still be served while Next.js refreshes it in the background, but <strong>cacheLife expire</strong> means old cache is no longer trusted and Next.js must fetch fresh data before returning the response.
+</div>
+<h2 class="section-title" id="03-17"><span class="secnum">03-17</span>How does next/after allow post-response work in Next.js 15?</h2>
+<p>
+<code>after()</code> allows us to run code after Next.js has finished sending the response to the browser.
+</p>
+<div class="feature">
+<strong>Simple meaning:</strong><br/>
+Response first, background work after that.
+</div>
+<hr/>
+<h3>1. Without after()</h3>
+<p>
+Without <code>after()</code>, if we run logging, analytics, or audit code before returning the UI, the user has to wait.
+</p>
+<div class="code-title">Without after()</div>
+<pre><code class="language-tsx">export default async function Page() {
+  await saveAnalytics();
+  return &lt;h1&gt;Products&lt;/h1&gt;;
+}</code></pre>
+<p>
+Flow:
+</p>
+<pre><code class="language-text">Request
+   ↓
+saveAnalytics()
+   ↓
+Render Page
+   ↓
+Send Response</code></pre>
+<p>
+Here, the page response is delayed because <code>saveAnalytics()</code> runs before the response.
+</p>
+<hr/>
+<h3>2. With after()</h3>
+<p>
+With <code>after()</code>, we can schedule non-critical work after the response is finished.
+</p>
+<div class="code-title">With after()</div>
+<pre><code class="language-tsx">import { after } from 'next/server';
+export default function Page() {
+  after(async () =&gt; {
+    await saveAnalytics();
+  });
+  return &lt;h1&gt;Products&lt;/h1&gt;;
+}</code></pre>
+<p>
+Flow:
+</p>
+<pre><code class="language-text">Request
+   ↓
+Render Page
+   ↓
+Send Response
+   ↓
+saveAnalytics()</code></pre>
+<div class="feature">
+Now the user gets the page first, and analytics work runs after the response.
+</div>
+<hr/>
+<h3>Real World Example</h3>
+<p>
+Suppose our product page needs to save a page-view record.
+</p>
+<div class="code-title">Product Page Visit Tracking</div>
+<pre><code class="language-tsx">import { after } from 'next/server';
+export default async function ProductPage() {
+  const products = await getProducts();
+  after(async () =&gt; {
+    await db.pageViews.create({
+      page: '/products',
+      viewedAt: new Date()
+    });
+  });
+  return &lt;ProductList products={products} /&gt;;
+}</code></pre>
+<p>
+Here:
+</p>
+<table>
+<tr>
+<th>Work</th>
+<th>When It Happens</th>
+</tr>
+<tr>
+<td>Get products</td>
+<td>Before response, because UI needs products</td>
+</tr>
+<tr>
+<td>Render product page</td>
+<td>Before response</td>
+</tr>
+<tr>
+<td>Save page view</td>
+<td>After response</td>
+</tr>
+</table>
+<hr/>
+<h3>Common Use Cases</h3>
+<ul>
+<li>Analytics tracking</li>
+<li>Logging</li>
+<li>Audit records</li>
+<li>Sending webhooks</li>
+<li>Updating counters</li>
+<li>Background notifications</li>
+</ul>
+<hr/>
+<h3>Important Point</h3>
+<p>
+<code>after()</code> does not make a page dynamic by itself.
+</p>
+<div class="code-title">Static Page With after()</div>
+<pre><code class="language-tsx">import { after } from 'next/server';
+export default function Page() {
+  after(() =&gt; {
+    console.log('Logged after response');
+  });
+  return &lt;h1&gt;Static Page&lt;/h1&gt;;
+}</code></pre>
+<p>
+This page can still be static. Using <code>after()</code> only schedules post-response work.
+</p>
+<hr/>
+<h3>Where Can We Use after()?</h3>
+<table>
+<tr>
+<th>Place</th>
+<th>Can Use after()?</th>
+</tr>
+<tr>
+<td>Server Components</td>
+<td>✅ Yes</td>
+</tr>
+<tr>
+<td>Server Actions / Server Functions</td>
+<td>✅ Yes</td>
+</tr>
+<tr>
+<td>Route Handlers</td>
+<td>✅ Yes</td>
+</tr>
+<tr>
+<td>Client Components</td>
+<td>❌ No</td>
+</tr>
+</table>
+<hr/>
+<h3>Easy Memory Trick</h3>
+<div class="code-title">Remember</div>
+<pre><code class="language-text">Normal Code
+     ↓
+Runs before response
+after()
+     ↓
+Runs after response</code></pre>
+<div class="feature">
+<strong>One-Line Definition:</strong><br/>
+<code>after()</code> is a Next.js API that allows us to execute non-critical work after the response is sent, without delaying page rendering.
+</div>
+<h2 class="section-title" id="03-18"><span class="secnum">03-18</span>What is Partial Prerendering (PPR) Introduced as Stable in Next.js 15?</h2>
+<p>
+Partial Prerendering (PPR) is a rendering strategy that combines static rendering and dynamic rendering on the same page.
+</p>
+<div class="feature">
+PPR allows us to prerender the static parts of a page at build time while dynamically rendering only the parts that require fresh data.
+</div>
+<h3>Why Was PPR Introduced?</h3>
+<p>
+Before PPR, we usually had two choices:
+</p>
+<ul>
+<li>Generate the entire page statically (SSG).</li>
+<li>Render the entire page dynamically (SSR).</li>
+</ul>
+<p>
+This created a problem because many pages contain both static and dynamic content.
+</p>
+<h3>Example Problem</h3>
+<p>
+Suppose our homepage contains:
+</p>
+<div class="code-title">Homepage</div>
+<pre><code class="language-text">Header
+Hero Section
+Features Section
+Latest Notifications
+Current User Data
+Footer</code></pre>
+<p>
+Static content:
+</p>
+<pre><code class="language-text">Header
+Hero Section
+Features Section
+Footer</code></pre>
+<p>
+Dynamic content:
+</p>
+<pre><code class="language-text">Latest Notifications
+Current User Data</code></pre>
+<p>
+Before PPR:
+</p>
+<pre><code class="language-text">Entire Page = SSR
+OR
+Entire Page = SSG</code></pre>
+<p>
+There was no built-in way to mix both efficiently.
+</p>
+<h3>How PPR Solves This</h3>
+<div class="code-title">PPR Page</div>
+<pre><code class="language-text">Static HTML
+      │
+      ├── Header
+      ├── Hero
+      ├── Features
+      └── Footer
+Dynamic Islands
+      │
+      ├── Notifications
+      └── User Profile</code></pre>
+<p>
+The static content is served immediately.
+</p>
+<p>
+Dynamic sections are streamed and filled in later.
+</p>
+<h3>What Happens Internally?</h3>
+<div class="code-title">PPR Flow</div>
+<pre><code class="language-text">Build Time
+      │
+      ▼
+Generate Static Shell
+      │
+      ▼
+Deploy
+User Requests Page
+      │
+      ▼
+Serve Static Shell Immediately
+      │
+      ▼
+Dynamic Sections Render
+      │
+      ▼
+Stream Dynamic Content
+      │
+      ▼
+Page Complete</code></pre>
+<h3>Visual Comparison</h3>
+<h4>Traditional SSR</h4>
+<pre><code class="language-text">Request
+   │
+   ▼
+Wait For Entire Page
+   │
+   ▼
+Send HTML</code></pre>
+<h4>PPR</h4>
+<pre><code class="language-text">Request
+   │
+   ▼
+Send Static Parts Immediately
+   │
+   ▼
+Load Dynamic Parts Later</code></pre>
+<h3>Example Component Structure</h3>
+<div class="code-title">Dashboard Page</div>
+<pre><code class="language-jsx">export default function Dashboard() {
+  return (
+    &lt;&gt;
+      &lt;Header /&gt;
+      &lt;Hero /&gt;
+      &lt;Suspense fallback="Loading..."&gt;
+        &lt;UserStats /&gt;
+      &lt;/Suspense&gt;
+      &lt;Footer /&gt;
+    &lt;/&gt;
+  );
+}</code></pre>
+<p>
+Static parts:
+</p>
+<pre><code class="language-text">Header
+Hero
+Footer</code></pre>
+<p>
+Dynamic part:
+</p>
+<pre><code class="language-text">UserStats</code></pre>
+<h3>Why Suspense is Important?</h3>
+<p>
+PPR relies heavily on React Suspense boundaries.
+</p>
+<div class="code-title">Example</div>
+<pre><code class="language-jsx">&lt;Suspense fallback="Loading..."&gt;
+  &lt;UserStats /&gt;
+&lt;/Suspense&gt;</code></pre>
+<p>
+The Suspense boundary tells Next.js:
+</p>
+<pre><code class="language-text">Static Content Can Be Sent Now
+UserStats Can Arrive Later</code></pre>
+<p>
+Without Suspense :
+</p>
+<pre><code class="language-text">❌ No boundary exists to separate static and dynamic content.
+❌ PPR cannot create a static shell around UserStats.
+❌ The route falls back to full dynamic rendering (SSR).</code></pre>
+<h3>SSR vs SSG vs PPR</h3>
+<table>
+<tr>
+<th>Feature</th>
+<th>SSR</th>
+<th>SSG</th>
+<th>PPR</th>
+</tr>
+<tr>
+<td>Static Content</td>
+<td>❌</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Dynamic Content</td>
+<td>✅</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Page Generated</td>
+<td>Every Request</td>
+<td>Build Time</td>
+<td>Mixed</td>
+</tr>
+<tr>
+<td>Performance</td>
+<td>Good</td>
+<td>Excellent</td>
+<td>Excellent</td>
+</tr>
+<tr>
+<td>Fresh Data</td>
+<td>Always</td>
+<td>No</td>
+<td>Only Dynamic Parts</td>
+</tr>
+</table>
+<h3>Real-World Example</h3>
+<p>
+Consider an e-commerce homepage:
+</p>
+<div class="code-title">Homepage Sections</div>
+<pre><code class="language-text">Logo
+Navigation
+Banner
+Categories
+Live Cart Count
+Recommended Products
+Footer</code></pre>
+<p>
+PPR may prerender:
+</p>
+<pre><code class="language-text">Logo
+Navigation
+Banner
+Categories
+Footer</code></pre>
+<p>
+And dynamically render:
+</p>
+<pre><code class="language-text">Live Cart Count
+Recommended Products</code></pre>
+<h3>Benefits of PPR</h3>
+<ul>
+<li>Faster initial page load.</li>
+<li>Better user experience.</li>
+<li>Keeps dynamic content fresh.</li>
+<li>Reduces server work.</li>
+<li>Combines benefits of SSG and SSR.</li>
+</ul>
+<h3>Important Note</h3>
+<div class="feature">
+A common misconception is that PPR generates the entire page statically. In reality, PPR generates only the static shell and streams dynamic sections separately.
+</div>
+<h3>When Should We Use PPR?</h3>
+<ul>
+<li>Dashboards</li>
+<li>E-commerce Websites</li>
+<li>News Portals</li>
+<li>Personalized Homepages</li>
+<li>Applications with mixed static and dynamic content</li>
+</ul>
+<h3>Interview Tip</h3>
+<div class="feature">
+Think of PPR as "SSG for static sections + SSR for dynamic sections" on the same page.
+</div>
+<div class="feature">
+<strong>One-Line Definition:</strong><br/>
+Partial Prerendering (PPR) is a Next.js 15 rendering strategy that prerenders static parts of a page while dynamically rendering and streaming only the sections that require fresh data.
+</div>
+<h2 class="section-title" id="03-19"><span class="secnum">03-19</span>What changed with cookies(), headers(), and params becoming async in Next.js 15?</h2>
+<p>
+In Next.js 15, <code>cookies()</code>, <code>headers()</code>, <code>params</code>, and <code>searchParams</code> became asynchronous APIs.
+</p>
+<div class="feature">
+Before Next.js 15, these APIs could be accessed directly. In Next.js 15, we must use <code>await</code> because they now return Promises.
+</div>
+<h3>Why Did Next.js Make Them Async?</h3>
+<p>
+This change helps Next.js support:
+</p>
+<ul>
+<li>Streaming</li>
+<li>Partial Prerendering (PPR)</li>
+<li>Server Components</li>
+<li>Future rendering optimizations</li>
+</ul>
+<p>
+Making these APIs asynchronous gives Next.js more flexibility when preparing and rendering pages.
+</p>
+<h3>cookies() Before Next.js 15</h3>
+<div class="code-title">Old Version</div>
+<pre><code class="language-jsx">import { cookies } from 'next/headers';
+export default function Page() {
+  const cookieStore = cookies();
+  const token = cookieStore.get('token');
+  return &lt;h1&gt;{token?.value}&lt;/h1&gt;;
+}</code></pre>
+<h3>cookies() In Next.js 15</h3>
+<div class="code-title">Next.js 15</div>
+<pre><code class="language-jsx">import { cookies } from 'next/headers';
+export default async function Page() {
+  const cookieStore = await cookies();
+  const token = cookieStore.get('token');
+  return &lt;h1&gt;{token?.value}&lt;/h1&gt;;
+}</code></pre>
+<p>
+Or more commonly:
+</p>
+<div class="code-title">Compact Version</div>
+<pre><code class="language-jsx">const token = (await cookies()).get('token')?.value;</code></pre>
+<h3>headers() Before Next.js 15</h3>
+<div class="code-title">Old Version</div>
+<pre><code class="language-jsx">import { headers } from 'next/headers';
+export default function Page() {
+  const headerList = headers();
+  const userAgent = headerList.get('user-agent');
+  return &lt;h1&gt;{userAgent}&lt;/h1&gt;;
+}</code></pre>
+<h3>headers() In Next.js 15</h3>
+<div class="code-title">Next.js 15</div>
+<pre><code class="language-jsx">import { headers } from 'next/headers';
+export default async function Page() {
+  const headerList = await headers();
+  const userAgent = headerList.get('user-agent');
+  return &lt;h1&gt;{userAgent}&lt;/h1&gt;;
+}</code></pre>
+<h3>params Before Next.js 15</h3>
+<div class="code-title">Old Version</div>
+<pre><code class="language-jsx">export default function Product({ params }) {
+  return &lt;h1&gt;{params.id}&lt;/h1&gt;;
+}</code></pre>
+<h3>params In Next.js 15</h3>
+<div class="code-title">Next.js 15</div>
+<pre><code class="language-jsx">export default async function Product({ params }) {
+  const { id } = await params;
+  return &lt;h1&gt;{id}&lt;/h1&gt;;
+}</code></pre>
+<h3>searchParams In Next.js 15</h3>
+<div class="code-title">Example</div>
+<pre><code class="language-jsx">export default async function Products({ searchParams }) {
+  const { page } = await searchParams;
+  return &lt;h1&gt;Page {page}&lt;/h1&gt;;
+}</code></pre>
+<h3>What Happens Internally?</h3>
+<div class="code-title">Before Next.js 15</div>
+<pre><code class="language-text">Request
+   │
+   ▼
+cookies()
+   │
+   ▼
+Return Value
+Immediately</code></pre>
+<div class="code-title">Next.js 15</div>
+<pre><code class="language-text">Request
+   │
+   ▼
+cookies()
+   │
+   ▼
+Promise
+   │
+   ▼
+await
+   │
+   ▼
+Cookie Store</code></pre>
+<h3>Migration Example</h3>
+<div class="code-title">Before</div>
+<pre><code class="language-jsx">const token = cookies().get('token')?.value;</code></pre>
+<div class="code-title">After</div>
+<pre><code class="language-jsx">const token = (await cookies()).get('token')?.value;</code></pre>
+<h3>Common Error</h3>
+<div class="code-title">Incorrect</div>
+<pre><code class="language-jsx">const cookieStore = cookies();
+cookieStore.get('token');</code></pre>
+<p>
+Error:
+</p>
+<pre><code class="language-text">cookieStore.get is not a function</code></pre>
+<p>
+Because:
+</p>
+<pre><code class="language-text">cookieStore is a Promise
+not a CookieStore</code></pre>
+<h3>Real-World Example</h3>
+<div class="code-title">Authentication Check</div>
+<pre><code class="language-jsx">import { cookies } from 'next/headers';
+export default async function Dashboard() {
+  const token = (await cookies()).get('token')?.value;
+  if (!token) {
+    return &lt;h1&gt;Unauthorized&lt;/h1&gt;;
+  }
+  return &lt;h1&gt;Dashboard&lt;/h1&gt;;
+}</code></pre>
+<h3>Summary Table</h3>
+<table>
+<tr>
+<th>API</th>
+<th>Before Next.js 15</th>
+<th>Next.js 15</th>
+</tr>
+<tr>
+<td>cookies()</td>
+<td>Synchronous</td>
+<td>Asynchronous</td>
+</tr>
+<tr>
+<td>headers()</td>
+<td>Synchronous</td>
+<td>Asynchronous</td>
+</tr>
+<tr>
+<td>params</td>
+<td>Object</td>
+<td>Promise</td>
+</tr>
+<tr>
+<td>searchParams</td>
+<td>Object</td>
+<td>Promise</td>
+</tr>
+</table>
+<h3>Important Note</h3>
+<div class="feature">
+After upgrading to Next.js 15, one of the most common migration issues is forgetting to add <code>await</code> when accessing cookies(), headers(), params, or searchParams.
+</div>
+<h3>Interview Tip</h3>
+<div class="feature">
+A common misconception is that only cookies() and headers() became async. In reality, params and searchParams also became asynchronous and should be awaited in Next.js 15.
+</div>
+<div class="feature">
+<strong>One-Line Definition:</strong><br/>
+In Next.js 15, <code>cookies()</code>, <code>headers()</code>, <code>params</code>, and <code>searchParams</code> became asynchronous APIs, requiring us to use <code>await</code> before accessing their values.
+</div>
+<h2 class="section-title" id="03-20"><span class="secnum">03-20</span>What is the connection() API introduced in Next.js 15?</h2>
+<p>
+The <code>connection()</code> API is a new Next.js 15 function that allows us to explicitly wait for an incoming request before rendering a page.
+</p>
+<div class="feature">
+The primary purpose of <code>connection()</code> is to tell Next.js that this page must be rendered dynamically at request time and cannot be prerendered ahead of time.
+</div>
+<h3>Why Was connection() Introduced?</h3>
+<p>
+Sometimes a page depends on request-specific information such as:
+</p>
+<ul>
+<li>Cookies</li>
+<li>Headers</li>
+<li>User Session</li>
+<li>Request Metadata</li>
+<li>Random Values</li>
+<li>Current Time</li>
+</ul>
+<p>
+Next.js cannot prerender such pages during build time because the request does not exist yet.
+</p>
+<h3>Before Next.js 15</h3>
+<p>
+We commonly used:
+</p>
+<div class="code-title">Old Approach</div>
+<pre><code class="language-jsx">export const dynamic = 'force-dynamic';</code></pre>
+<p>
+to force dynamic rendering.
+</p>
+<p>The Pages Router does not have force-dynamic.
+
+Instead, use getServerSideProps(), which automatically renders the page on every request:</p>
+<h3>Next.js 15 Approach</h3>
+<div class="code-title">connection()</div>
+<pre><code class="language-jsx">import { connection } from 'next/server';
+export default async function Page() {
+  await connection();
+  return Dynamic Page;
+}</code></pre>
+<p>
+This tells Next.js:
+</p>
+<pre><code class="language-text">Wait For Request
+      │
+      ▼
+Render Page</code></pre>
+<h3>What Happens Internally?</h3>
+<div class="code-title">Without connection()</div>
+<pre><code class="language-text">Build Time
+    │
+    ▼
+Generate HTML
+    │
+    ▼
+Cache Page
+    │
+    ▼
+Serve Cached HTML</code></pre>
+<div class="code-title">With connection()</div>
+<pre><code class="language-text">User Request
+    │
+    ▼
+await connection()
+    │
+    ▼
+Request Available
+    │
+    ▼
+Render Page
+    │
+    ▼
+Send HTML</code></pre>
+<h3>Real Example</h3>
+<p>
+Suppose we want to display the current time.
+</p>
+<div class="code-title">Example</div>
+<pre><code class="language-jsx">import { connection } from 'next/server';
+export default async function Page() {
+  await connection();
+  const now = new Date();
+  return &lt;h1&gt;{now.toLocaleTimeString()}&lt;/h1&gt;;
+}</code></pre>
+<p>
+Every request gets a fresh time value.
+</p>
+<h3>Why Is connection() Needed Here?</h3>
+<p>
+Without it, Next.js might try to prerender:
+</p>
+<div class="code-title">Build Time</div>
+<pre><code class="language-text">10:00 AM</code></pre>
+<p>
+Then every user would see:
+</p>
+<pre><code class="language-text">10:00 AM</code></pre>
+<p>
+even hours later.
+</p>
+<h3>Using Request-Specific Data</h3>
+<div class="code-title">Cookie Example</div>
+<pre><code class="language-jsx">import { connection } from 'next/server';
+import { cookies } from 'next/headers';
+export default async function Page() {
+  await connection();
+  const token = (await cookies()).get('token')?.value;
+  return &lt;h1&gt;{token}&lt;/h1&gt;;
+}</code></pre>
+<p>
+This page depends on the current request's cookies.
+</p>
+<h3>connection() vs force-dynamic</h3>
+<table>
+<tr>
+<th>Feature</th>
+<th>connection()</th>
+<th>force-dynamic</th>
+</tr>
+<tr>
+<td>Explicit Request Wait</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>Dynamic Rendering</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Recommended in Next.js 15</td>
+<td>✅</td>
+<td>Less Preferred</td>
+</tr>
+<tr>
+<td>More Expressive</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+</table>
+<h3>How Does connection() Relate to PPR?</h3>
+<p>
+Partial Prerendering (PPR) allows part of a page to be prerendered and part to wait for request-time data.
+</p>
+<div class="code-title">PPR Flow</div>
+<pre><code class="language-text">Static Content
+      │
+      ▼
+Prerendered
+Dynamic Content
+      │
+      ▼
+await connection()
+      │
+      ▼
+Rendered Per Request</code></pre>
+<p>
+This helps Next.js determine which parts depend on the request.
+</p>
+<h3>When Should We Use connection()?</h3>
+<ul>
+<li>Current time display.</li>
+<li>Random values.</li>
+<li>User-specific pages.</li>
+<li>Cookie-based rendering.</li>
+<li>Header-based rendering.</li>
+<li>Request-dependent content.</li>
+</ul>
+<h3>When Should We Avoid connection()?</h3>
+<ul>
+<li>Static pages.</li>
+<li>Blogs.</li>
+<li>Marketing pages.</li>
+<li>Documentation pages.</li>
+<li>Pages that can be prerendered.</li>
+</ul>
+<h3>Important Note</h3>
+<div class="feature">
+Calling <code>await connection()</code> opts the route into request-time rendering because the page now explicitly depends on an incoming request.
+</div>
+<h3>Interview Tip</h3>
+<div class="feature">
+A common misconception is that connection() fetches data. In reality, connection() does not fetch anything—it simply waits for an incoming request and tells Next.js that rendering should happen at request time.
+</div>
+<div class="feature">
+<strong>One-Line Definition:</strong><br/>
+The <code>connection()</code> API in Next.js 15 explicitly waits for an incoming request and marks a route as request-time dynamic, preventing prerendering when content depends on request-specific information.
+</div><div class="chapnav"><a class="prev" href="02-routing-layouts-and-file-conventions.html">02 - Routing, Layouts & File Conventions</a><a class="next" href="04-server-actions-and-mutations.html">04 - Server Actions & Mutations</a></div></div></div><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-tsx.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+</body>
+</html>

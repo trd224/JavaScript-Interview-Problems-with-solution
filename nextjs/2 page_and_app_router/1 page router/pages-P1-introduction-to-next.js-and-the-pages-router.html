@@ -1,0 +1,1663 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>P1 - Introduction to Next.js & the Pages Router | Next.js App Router Guide</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:#0f172a;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.8;display:flex;min-height:100vh}
+a{color:inherit;text-decoration:none}
+.sidebar{width:290px;flex-shrink:0;background:#0b1220;border-right:1px solid #1e293b;padding:24px 18px;position:sticky;top:0;height:100vh;overflow-y:auto}
+.brand{color:#38bdf8;font-size:18px;font-weight:800;margin-bottom:4px}
+.brand small{display:block;color:#64748b;font-weight:400;font-size:12px;margin-top:4px}
+.chapter-nav{margin-top:22px}
+.chapter-nav a{display:block;padding:8px 10px;border-radius:8px;font-size:13px;color:#94a3b8;margin-bottom:4px;border-left:3px solid transparent}
+.chapter-nav a:hover{background:#111827;color:#e2e8f0}
+.chapter-nav a.active{background:#111827;color:#38bdf8;border-left:3px solid #38bdf8;font-weight:bold}
+.chapter-nav .chnum{display:inline-block;width:22px;color:#475569;font-family:monospace}
+.toc{margin-top:22px;border-top:1px solid #1e293b;padding-top:16px}
+.toc-title{color:#fbbf24;font-size:12px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px}
+.toc a{display:block;font-size:12.5px;color:#8ea3c2;padding:5px 8px;border-radius:6px;line-height:1.4}
+.toc a:hover{background:#111827;color:#e2e8f0}
+.main{flex:1;padding:40px 48px;max-width:980px}
+.container{max-width:900px}
+h1.page-title{color:#38bdf8;margin-bottom:6px;font-size:30px}
+.page-sub{color:#64748b;margin-bottom:28px;font-size:14px}
+h2.section-title{color:#a78bfa;margin-top:52px;margin-bottom:14px;font-size:23px;border-top:1px solid #1e293b;padding-top:38px}
+h2.section-title .secnum{color:#475569;font-family:monospace;margin-right:10px;font-size:16px}
+h3{color:#fbbf24;margin-top:25px;margin-bottom:10px;font-size:17px}
+h4{color:#38bdf8;margin-top:18px;margin-bottom:8px;font-size:15px}
+h5{color:#93c5fd;margin-top:14px;margin-bottom:6px;font-size:14px}
+p{margin-bottom:15px}
+ul,ol{margin-left:20px;margin-bottom:15px}
+li{margin-bottom:8px}
+strong{color:#f1f5f9}
+code{color:#93c5fd;font-family:'JetBrains Mono',monospace;font-size:.92em}
+.feature{background:#1e293b;border-left:5px solid #38bdf8;padding:15px;border-radius:8px;margin:20px 0}
+.warning{background:#2a1a1a;border-left:5px solid #f87171;padding:15px;border-radius:8px;margin:20px 0}
+.summary{background:#1a2a1e;border-left:5px solid #34d399;padding:15px;border-radius:8px;margin:20px 0}
+.note{background:#1e293b;border-left:5px solid #a78bfa;padding:15px;border-radius:8px;margin:20px 0}
+.code-title{background:#1e293b;color:#93c5fd;padding:10px;font-weight:bold;border-radius:6px 6px 0 0;font-size:13px;font-family:monospace}
+pre[class*="language-"]{margin:0 0 20px 0!important;border-radius:0 0 6px 6px}
+pre code{white-space:pre}
+table{width:100%;border-collapse:collapse;margin:20px 0}
+th{background:#1e293b;color:#38bdf8;text-align:left;padding:12px}
+td{padding:12px;border-top:1px solid #334155}
+hr{border:none;border-top:1px solid #1e293b;margin:30px 0}
+.chapnav{display:flex;justify-content:space-between;margin-top:60px;padding-top:24px;border-top:1px solid #1e293b}
+.chapnav a{background:#111827;padding:12px 18px;border-radius:10px;border:1px solid #1e293b;font-size:14px;color:#94a3b8}
+.chapnav a:hover{color:#38bdf8;border-color:#38bdf8}
+.chapnav .prev::before{content:"<- "}
+.chapnav .next::after{content:" ->"}
+@media(max-width:900px){body{flex-direction:column}.sidebar{position:relative;height:auto;width:100%}}
+</style>
+</head>
+<body>
+<div class="sidebar">
+<div class="brand">Next.js Pages Router<small>Complete Step-by-Step Guide</small></div>
+<div class="chapter-nav"><a class="active" href="pages-P1-introduction-to-next.js-and-the-pages-router.html"><span class="chnum">P1</span>Introduction to Next.js & the Pages Router</a><a class="" href="pages-P2-file-based-routing-and-navigation.html"><span class="chnum">P2</span>File-Based Routing & Navigation</a><a class="" href="pages-P3-rendering-and-data-fetching.html"><span class="chnum">P3</span>Rendering & Data Fetching</a><a class="" href="pages-P4-api-routes-backend-in-next.js.html"><span class="chnum">P4</span>API Routes (Backend in Next.js)</a><a class="" href="pages-P5-styling-and-assets.html"><span class="chnum">P5</span>Styling & Assets</a><a class="" href="pages-P6-seo-and-metadata-pages-router.html"><span class="chnum">P6</span>SEO & Metadata (Pages Router)</a><a class="" href="pages-P7-configuration-build-and-deployment.html"><span class="chnum">P7</span>Configuration, Build & Deployment</a></div>
+<div class="toc"><div class="toc-title">On this page</div><a href="#P1-01">What is Next.js and how does it differ from React?</a><a href="#P1-02">What are the Main Features of Next.js?</a><a href="#P1-03">What is the Difference Between Next.js and a Plain React App (Create React App)?</a><a href="#P1-04">How do you create a new Next.js project?</a><a href="#P1-05">What is the Difference Between the Pages Router and the App Router?</a><a href="#P1-06">What is the Purpose of the pages Directory in Next.js?</a></div>
+</div><div class="main"><div class="container"><h1 class="page-title">P1 - Introduction to Next.js & the Pages Router</h1><div class="page-sub">Part P1 of 7 &middot; 6 topics &middot; Next.js Pages Router Guide</div><h2 class="section-title" id="P1-01"><span class="secnum">P1-01</span>What is Next.js and how does it differ from React?</h2>
+<p>
+<strong>React</strong> is a JavaScript library used to build user interfaces.
+      It mainly helps us create reusable UI components.
+    </p>
+<p>
+<strong>Next.js</strong> is a React framework used to build complete web applications.
+      It gives extra features like routing, server-side rendering, static pages,
+      API routes, caching, and performance optimization.
+    </p>
+<h3>React Example</h3>
+<div class="code-block">
+<div class="code-title">React Component</div>
+<pre><code>function Welcome() {
+  return &lt;h1&gt;Hello, world!&lt;/h1&gt;;
+}</code></pre>
+</div>
+<p>
+      In React, you create components and use them to build the UI.
+      But React does not provide routing, SSR, SSG, or API routes by default.
+    </p>
+<h3>Next.js Example</h3>
+<div class="code-block">
+<div class="code-title">Next.js File-Based Routing</div>
+<pre><code>app/
+  page.js
+  about/
+    page.js</code></pre>
+</div>
+<p>
+      In Next.js, routes are created automatically using files and folders.
+      For example, <strong>app/about/page.js</strong> automatically creates the
+      <strong>/about</strong> route.
+    </p>
+<h3>Main Difference Between React and Next.js</h3>
+<table>
+<thead>
+<tr>
+<th>React</th>
+<th>Next.js</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>JavaScript UI library</td>
+<td>React framework</td>
+</tr>
+<tr>
+<td>Used mainly for building UI components</td>
+<td>Used for building complete web applications</td>
+</tr>
+<tr>
+<td>Routing needs React Router</td>
+<td>File-based routing is built in</td>
+</tr>
+<tr>
+<td>Client-side rendering by default</td>
+<td>Supports SSR, SSG, ISR, and client-side rendering</td>
+</tr>
+<tr>
+<td>No built-in API routes</td>
+<td>API routes are built in</td>
+</tr>
+<tr>
+<td>Needs extra setup for optimization</td>
+<td>Includes image, font, caching, and performance optimization</td>
+</tr>
+</tbody>
+</table>
+<h3>Simple Explanation</h3>
+<p>
+      React is like an <strong>engine</strong> for building UI.
+      Next.js is like a <strong>complete car</strong> built using that engine.
+    </p>
+<h3>When to Use React?</h3>
+<p>
+      Use React when you are building a small single page application,
+      learning React basics, or adding UI components inside an existing project.
+    </p>
+<h3>When to Use Next.js?</h3>
+<p>
+      Use Next.js when you need SEO, routing, server rendering, static pages,
+      API routes, better performance, and a production-ready project structure.
+    </p>
+<div class="note">
+<strong>Final Answer:</strong>
+      React is a UI library, while Next.js is a full React framework that provides
+      routing, rendering options, APIs, caching, and optimization features.
+    </div>
+<h2 class="section-title" id="P1-02"><span class="secnum">P1-02</span>What are the Main Features of Next.js?</h2>
+<p>
+Next.js is a React framework that provides many built-in features for building
+fast, scalable, SEO-friendly, and production-ready web applications.
+</p>
+<h3>1. File-Based Routing</h3>
+<div class="feature">
+Pages and routes are created automatically from files and folders.
+</div>
+<div class="code-block">
+<div class="code-title">File-Based Routing Example</div>
+<pre><code class="language-text">app/
+├── page.js
+├── about/
+│   └── page.js
+└── contact/
+    └── page.js</code></pre>
+</div>
+<p>This automatically creates these routes:</p>
+<ul>
+<li>/</li>
+<li>/about</li>
+<li>/contact</li>
+</ul>
+<h3>2. Server-Side Rendering (SSR)</h3>
+<div class="feature">
+Next.js can render pages on the server before sending them to the browser.
+</div>
+<p>Benefits:</p>
+<ul>
+<li>Better SEO</li>
+<li>Faster first page load</li>
+<li>Improved performance</li>
+</ul>
+<h3>3. Static Site Generation (SSG)</h3>
+<div class="feature">
+Next.js can generate static HTML pages during build time.
+</div>
+<p>Benefits:</p>
+<ul>
+<li>Very fast loading</li>
+<li>Reduced server load</li>
+<li>Good for blogs, landing pages, and documentation websites</li>
+</ul>
+<h3>4. Incremental Static Regeneration (ISR)</h3>
+<div class="feature">
+Static pages can be updated automatically after a fixed time without rebuilding the full app.
+</div>
+<div class="code-block">
+<div class="code-title">ISR Example</div>
+<pre><code class="language-javascript">export const revalidate = 60;</code></pre>
+</div>
+<p>
+This means the page can be regenerated after 60 seconds when a new request comes.
+</p>
+<h3>5. API Routes</h3>
+<div class="feature">
+You can create backend API endpoints inside the same Next.js project.
+</div>
+<div class="code-block">
+<div class="code-title">API Route Structure</div>
+<pre><code class="language-text">app/
+└── api/
+    └── users/
+        └── route.js</code></pre>
+</div>
+<div class="code-block">
+<div class="code-title">API Route Example</div>
+<pre><code class="language-javascript">export async function GET() {
+  return Response.json({
+    users: []
+  });
+}</code></pre>
+</div>
+<h3>6. React Server Components</h3>
+<div class="feature">
+In the App Router, components are Server Components by default.
+</div>
+<p>Benefits:</p>
+<ul>
+<li>Less JavaScript sent to the browser</li>
+<li>Better performance</li>
+<li>Secure server-side data fetching</li>
+</ul>
+<h3>7. Client Components</h3>
+<div class="feature">
+For browser features like click events, state, and effects, we use <strong>"use client"</strong>.
+</div>
+<div class="code-block">
+<div class="code-title">Client Component Example</div>
+<pre><code class="language-jsx">'use client';
+import { useState } from 'react';
+export default function Counter() {
+  const [count, setCount] = useState(0);
+  return (
+    &lt;button onClick={() =&gt; setCount(count + 1)}&gt;
+      {count}
+    &lt;/button&gt;
+  );
+}</code></pre>
+</div>
+<h3>8. Image Optimization</h3>
+<div class="feature">
+Next.js provides an Image component that optimizes images automatically.
+</div>
+<div class="code-block">
+<div class="code-title">Image Component Example</div>
+<pre><code class="language-jsx">import Image from 'next/image';
+export default function Home() {
+  return (
+    &lt;Image
+      src="/photo.jpg"
+      width={500}
+      height={300}
+      alt="Photo"
+    /&gt;
+  );
+}</code></pre>
+</div>
+<h3>9. Built-in SEO Support</h3>
+<div class="feature">
+Next.js makes it easy to add title, description, and metadata for pages.
+</div>
+<div class="code-block">
+<div class="code-title">Metadata Example</div>
+<pre><code class="language-javascript">export const metadata = {
+  title: 'My Website',
+  description: 'Learning Next.js'
+};</code></pre>
+</div>
+<h3>10. Automatic Code Splitting</h3>
+<div class="feature">
+Next.js loads only the JavaScript needed for the current page.
+</div>
+<p>Benefits:</p>
+<ul>
+<li>Smaller bundle size</li>
+<li>Faster page load</li>
+<li>Better performance</li>
+</ul>
+<h3>11. Built-in TypeScript Support</h3>
+<div class="feature">
+Next.js supports TypeScript with very little configuration.
+</div>
+<div class="code-block">
+<div class="code-title">TypeScript Example</div>
+<pre><code class="language-typescript">type User = {
+  id: number;
+  name: string;
+};
+const user: User = {
+  id: 1,
+  name: 'Rizwan'
+};</code></pre>
+</div>
+<h3>12. Fast Refresh</h3>
+<div class="feature">
+During development, changes appear instantly in the browser without losing component state.
+</div>
+<h3>Summary Table</h3>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr><td>File-Based Routing</td><td>Create routes using files and folders</td></tr>
+<tr><td>SSR</td><td>Render pages on the server</td></tr>
+<tr><td>SSG</td><td>Generate static pages at build time</td></tr>
+<tr><td>ISR</td><td>Update static pages automatically</td></tr>
+<tr><td>API Routes</td><td>Create backend APIs</td></tr>
+<tr><td>Server Components</td><td>Reduce client-side JavaScript</td></tr>
+<tr><td>Client Components</td><td>Add browser interactivity</td></tr>
+<tr><td>Image Optimization</td><td>Optimize images automatically</td></tr>
+<tr><td>SEO Support</td><td>Manage page metadata</td></tr>
+<tr><td>Code Splitting</td><td>Load only required JavaScript</td></tr>
+<tr><td>TypeScript Support</td><td>Use TypeScript easily</td></tr>
+<tr><td>Fast Refresh</td><td>Instant development updates</td></tr>
+</tbody>
+</table>
+<div class="summary">
+<strong>One-Line Definition:</strong><br/>
+Next.js is a React framework that provides routing, server rendering, static generation,
+API routes, SEO support, image optimization, code splitting, and other production-ready
+features out of the box.
+</div>
+<h2 class="section-title" id="P1-03"><span class="secnum">P1-03</span>What is the Difference Between Next.js and a Plain React App (Create React App)?</h2>
+<p>
+Both <strong>Next.js</strong> and <strong>Create React App (CRA)</strong> use React,
+but they serve different purposes.
+</p>
+<div class="feature">
+Create React App creates a basic React Single Page Application (SPA), while Next.js is a full React framework with built-in routing, server rendering, API routes, SEO support, and performance optimizations.
+</div>
+<h3>What is Create React App (CRA)?</h3>
+<p>
+Create React App is a tool that sets up a React application with minimal configuration.
+The application runs entirely in the browser.
+</p>
+<div class="code-block">
+<div class="code-title">CRA Rendering Flow</div>
+<pre><code class="language-text">Browser
+   │
+   ▼
+index.html
+   │
+   ▼
+main.js Bundle
+   │
+   ▼
+React Renders UI</code></pre>
+</div>
+<p>
+This approach is called <strong>Client-Side Rendering (CSR)</strong>.
+</p>
+<h3>What is Next.js?</h3>
+<p>
+Next.js is a React framework that supports multiple rendering strategies and includes many production-ready features.
+</p>
+<div class="code-block">
+<div class="code-title">Next.js Rendering Flow</div>
+<pre><code class="language-text">User Request
+      │
+      ▼
+Next.js Server
+      │
+      ▼
+Rendered HTML
+      │
+      ▼
+Browser</code></pre>
+</div>
+<p>
+Because HTML can be generated before reaching the browser, Next.js generally provides better SEO and faster initial page loads.
+</p>
+<h3>Routing Comparison</h3>
+<h4>Create React App</h4>
+<p>
+CRA requires React Router to create routes.
+</p>
+<div class="code-block">
+<div class="code-title">CRA Routing Example</div>
+<pre><code class="language-jsx">import {
+  BrowserRouter,
+  Routes,
+  Route
+} from 'react-router-dom';
+function App() {
+  return (
+    &lt;BrowserRouter&gt;
+      &lt;Routes&gt;
+        &lt;Route path="/" element={&lt;Home /&gt;} /&gt;
+        &lt;Route path="/about" element={&lt;About /&gt;} /&gt;
+      &lt;/Routes&gt;
+    &lt;/BrowserRouter&gt;
+  );
+}</code></pre>
+</div>
+<h4>Next.js</h4>
+<p>
+Routes are automatically created from files and folders.
+</p>
+<div class="code-block">
+<div class="code-title">Next.js File-Based Routing</div>
+<pre><code class="language-text">app/
+├── page.js
+└── about/
+    └── page.js</code></pre>
+</div>
+<p>
+No React Router is required.
+</p>
+<h3>Backend API Comparison</h3>
+<h4>Create React App</h4>
+<p>
+Requires a separate backend application.
+</p>
+<div class="code-block">
+<div class="code-title">CRA Architecture</div>
+<pre><code class="language-text">React App
+     │
+     ▼
+Node.js API Server
+     │
+     ▼
+Database</code></pre>
+</div>
+<h4>Next.js</h4>
+<p>
+Frontend and backend APIs can exist in the same project.
+</p>
+<div class="code-block">
+<div class="code-title">Next.js Architecture</div>
+<pre><code class="language-text">Next.js App
+     │
+     ├── Frontend
+     └── API Routes</code></pre>
+</div>
+<h3>SEO Comparison</h3>
+<table>
+<thead>
+<tr>
+<th>Create React App</th>
+<th>Next.js</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Poor SEO by default</td>
+<td>Excellent SEO support</td>
+</tr>
+<tr>
+<td>Content generated in browser</td>
+<td>Content can be generated on server</td>
+</tr>
+<tr>
+<td>Search engines may wait for JavaScript</td>
+<td>Search engines receive HTML immediately</td>
+</tr>
+</tbody>
+</table>
+<h3>Performance Comparison</h3>
+<table>
+<thead>
+<tr>
+<th>Create React App</th>
+<th>Next.js</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Client-side rendering only</td>
+<td>CSR, SSR, SSG, ISR</td>
+</tr>
+<tr>
+<td>Larger initial bundle</td>
+<td>Better optimization</td>
+</tr>
+<tr>
+<td>Manual optimization setup</td>
+<td>Built-in optimization</td>
+</tr>
+<tr>
+<td>No image optimization</td>
+<td>Built-in image optimization</td>
+</tr>
+</tbody>
+</table>
+<h3>Main Differences</h3>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>Create React App</th>
+<th>Next.js</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Type</td>
+<td>React application setup tool</td>
+<td>React framework</td>
+</tr>
+<tr>
+<td>Rendering</td>
+<td>CSR only</td>
+<td>CSR, SSR, SSG, ISR</td>
+</tr>
+<tr>
+<td>Routing</td>
+<td>Requires React Router</td>
+<td>Built-in routing</td>
+</tr>
+<tr>
+<td>SEO</td>
+<td>Limited</td>
+<td>Excellent</td>
+</tr>
+<tr>
+<td>API Routes</td>
+<td>No</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>Image Optimization</td>
+<td>No</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>Code Splitting</td>
+<td>Basic</td>
+<td>Automatic</td>
+</tr>
+<tr>
+<td>Server Components</td>
+<td>No</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>TypeScript Support</td>
+<td>Manual setup</td>
+<td>Built-in</td>
+</tr>
+</tbody>
+</table>
+<h3>When Should You Use Create React App?</h3>
+<ul>
+<li>Learning React fundamentals</li>
+<li>Small internal tools</li>
+<li>Simple Single Page Applications</li>
+<li>Projects where SEO is not important</li>
+</ul>
+<h3>When Should You Use Next.js?</h3>
+<ul>
+<li>Production applications</li>
+<li>E-commerce websites</li>
+<li>Blogs</li>
+<li>Marketing websites</li>
+<li>SEO-focused applications</li>
+<li>Full-stack React applications</li>
+</ul>
+<div class="summary">
+<strong>One-Line Definition:</strong><br/>
+Create React App builds a client-side React application, while Next.js is a full React framework that provides routing, server rendering, static generation, API routes, SEO support, and performance optimizations out of the box.
+</div>
+<h2 class="section-title" id="P1-04"><span class="secnum">P1-04</span>How do you create a new Next.js project?</h2>
+<p>
+A new Next.js project can be created using the official
+<strong>create-next-app</strong> command-line tool.
+</p>
+<div class="feature">
+The create-next-app tool automatically sets up a Next.js project with all required dependencies and configuration.
+</div>
+<h3>Step 1: Verify Node.js Installation</h3>
+<p>
+Before creating a Next.js project, ensure Node.js is installed.
+</p>
+<div class="code-block">
+<div class="code-title">Check Node.js Version</div>
+<pre><code class="language-bash">node -v</code></pre>
+</div>
+<p>
+Example Output:
+</p>
+<div class="code-block">
+<div class="code-title">Output</div>
+<pre><code class="language-text">v22.15.0</code></pre>
+</div>
+<h3>Step 2: Create a New Next.js Project</h3>
+<div class="code-block">
+<div class="code-title">Create Project</div>
+<pre><code class="language-bash">npx create-next-app@latest my-app</code></pre>
+</div>
+<p>
+Replace <strong>my-app</strong> with your project name.
+</p>
+<h3>Step 3: Select Project Options</h3>
+<p>
+The installer will ask several questions.
+</p>
+<div class="code-block">
+<div class="code-title">Interactive Setup</div>
+<pre><code class="language-text">✔ Would you like to use TypeScript? › Yes
+✔ Would you like to use ESLint? › Yes
+✔ Would you like to use Tailwind CSS? › Yes
+✔ Would you like your code inside a src/ directory? › Yes
+✔ Would you like to use App Router? › Yes
+✔ Would you like to use Turbopack? › Yes
+✔ Would you like to customize the import alias? › No</code></pre>
+</div>
+<h3>Step 4: Move Into Project Folder</h3>
+<div class="code-block">
+<div class="code-title">Navigate to Project</div>
+<pre><code class="language-bash">cd my-app</code></pre>
+</div>
+<h3>Step 5: Start Development Server</h3>
+<div class="code-block">
+<div class="code-title">Run Development Server</div>
+<pre><code class="language-bash">npm run dev</code></pre>
+</div>
+<p>
+Example Output:
+</p>
+<div class="code-block">
+<div class="code-title">Output</div>
+<pre><code class="language-text">▲ Next.js
+Local:   http://localhost:3000
+Ready in 2.1s</code></pre>
+</div>
+<h3>Step 6: Open the Application</h3>
+<p>
+Open the following URL in your browser:
+</p>
+<div class="code-block">
+<div class="code-title">Application URL</div>
+<pre><code class="language-text">http://localhost:3000</code></pre>
+</div>
+<h3>Default Project Structure</h3>
+<div class="code-block">
+<div class="code-title">Next.js Project Structure</div>
+<pre><code class="language-text">my-app/
+├── app/
+│   ├── page.js
+│   ├── layout.js
+│
+├── public/
+│
+├── node_modules/
+│
+├── package.json
+├── next.config.js
+└── README.md</code></pre>
+</div>
+<h3>Important Files</h3>
+<table>
+<thead>
+<tr>
+<th>File / Folder</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>app/</td>
+<td>Contains application routes and pages</td>
+</tr>
+<tr>
+<td>page.js</td>
+<td>Represents a route/page</td>
+</tr>
+<tr>
+<td>layout.js</td>
+<td>Shared layout for pages</td>
+</tr>
+<tr>
+<td>public/</td>
+<td>Stores static assets</td>
+</tr>
+<tr>
+<td>package.json</td>
+<td>Project dependencies and scripts</td>
+</tr>
+<tr>
+<td>next.config.js</td>
+<td>Next.js configuration</td>
+</tr>
+</tbody>
+</table>
+<h3>Create a Project with TypeScript</h3>
+<div class="code-block">
+<div class="code-title">TypeScript Project</div>
+<pre><code class="language-bash">npx create-next-app@latest my-app --typescript</code></pre>
+</div>
+<h3>Create a Project Without Prompts</h3>
+<div class="code-block">
+<div class="code-title">Automatic Setup</div>
+<pre><code class="language-bash">npx create-next-app@latest my-app \
+  --typescript \
+  --tailwind \
+  --eslint \
+  --src-dir \
+  --app</code></pre>
+</div>
+<h3>Development Workflow</h3>
+<ol>
+<li>Create the project using create-next-app.</li>
+<li>Navigate to the project folder.</li>
+<li>Run npm run dev.</li>
+<li>Open http://localhost:3000.</li>
+<li>Edit files inside the app folder.</li>
+<li>See changes instantly using Fast Refresh.</li>
+</ol>
+<div class="summary">
+<strong>One-Line Definition:</strong><br/>
+A new Next.js project is created using the <code>npx create-next-app@latest project-name</code> command, which automatically sets up a complete Next.js application with routing, configuration, and development tools.
+</div>
+<h2 class="section-title" id="P1-05"><span class="secnum">P1-05</span>What is the Difference Between the Pages Router and the App Router?</h2>
+<p>
+The Pages Router and App Router are two routing systems in Next.js. The Pages Router uses the <code>pages</code> directory and traditional data-fetching methods, while the App Router uses the <code>app</code> directory and introduces Server Components, nested layouts, streaming, and the Metadata API.
+</p>
+<div class="feature">
+The App Router is the modern routing system introduced in Next.js 13 and is now the recommended approach for new applications.
+</div>
+<h3>Pages Router</h3>
+<p>
+The Pages Router uses the <code>pages</code> folder to create routes.
+</p>
+<div class="code-title">Project Structure</div>
+<pre><code class="language-text">pages
+├── index.js
+├── about.js
+└── products
+    └── [id].js</code></pre>
+<div class="code-title">pages/about.js</div>
+<pre><code class="language-js">export default function About() {
+  return &lt;h1&gt;About Page&lt;/h1&gt;;
+}</code></pre>
+<p>
+This creates:
+</p>
+<pre><code class="language-text">/about</code></pre>
+<h3>App Router</h3>
+<p>
+The App Router uses the <code>app</code> folder.
+</p>
+<div class="code-title">Project Structure</div>
+<pre><code class="language-text">app
+├── page.js
+├── about
+│   └── page.js
+└── products
+    └── [id]
+        └── page.js</code></pre>
+<div class="code-title">app/about/page.js</div>
+<pre><code class="language-js">export default function About() {
+  return &lt;h1&gt;About Page&lt;/h1&gt;;
+}</code></pre>
+<p>
+This also creates:
+</p>
+<pre><code class="language-text">/about</code></pre>
+<h3>Data Fetching</h3>
+<h4>Pages Router</h4>
+<div class="code-title">pages/products.js</div>
+<pre><code class="language-js">export async function getServerSideProps() {
+  const products =
+    await fetch('https://api.example.com/products')
+      .then(res =&gt; res.json());
+  return {
+    props: { products: products }
+  };
+}
+export default function Products({
+  products
+}) {
+  return (
+    &lt;div&gt;
+      {products.length}
+    &lt;/div&gt;
+  );
+}</code></pre>
+<h4>App Router</h4>
+<div class="code-title">app/products/page.js</div>
+<pre><code class="language-js">export default async function Page() {
+  const products =
+    await fetch('https://api.example.com/products')
+      .then(res =&gt; res.json());
+  return (
+    &lt;div&gt;
+      {products.length}
+    &lt;/div&gt;
+  );
+}</code></pre>
+<p>
+No <code>getServerSideProps()</code> is required.
+</p>
+<h3>Layouts</h3>
+<h4>Pages Router</h4>
+<p>
+Uses a shared layout pattern manually.
+</p>
+<div class="code-title">pages/_app.js</div>
+<pre><code class="language-js">import Layout from '../components/Layout';
+export default function App({ Component, pageProps }) {
+  return (
+    &lt;Layout&gt;
+      &lt;Component {...pageProps} /&gt;
+    &lt;/Layout&gt;
+  );
+}</code></pre>
+
+Layout
+<pre><code class="language-js">export default function Layout({ children }) {
+  return (
+    &lt;&gt;
+      &lt;header&gt;
+        Header
+      &lt;/header&gt;
+      &lt;main&gt;
+        {children}
+      &lt;/main&gt;
+      &lt;footer&gt;
+        Footer
+      &lt;/footer&gt;
+    &lt;/&gt;
+  );
+}</code></pre>
+or
+<pre><code class="language-js">import Header from '../components/Header';
+import Footer from '../components/Footer';
+export default function MyApp({ Component, pageProps }) {
+  return (
+    &lt;&gt;
+      &lt;Header /&gt;
+      &lt;Component {...pageProps} /&gt;
+      &lt;Footer /&gt;
+    &lt;/&gt;
+  );
+}</code></pre>
+<h4>App Router</h4>
+<p>
+Has built-in nested layouts.
+</p>
+<div class="code-title">app/layout.js</div>
+<pre><code class="language-js">export default function RootLayout({ children }) {
+  return (
+    &lt;html&gt;
+      &lt;body&gt;
+        {children}
+      &lt;/body&gt;
+    &lt;/html&gt;
+  );
+}</code></pre>
+<h3>Metadata</h3>
+<h4>Pages Router</h4>
+<div class="code-title">pages/about.js</div>
+<pre><code class="language-js">import Head from 'next/head';
+export default function About() {
+  return (
+    &lt;&gt;
+      &lt;Head&gt;
+        &lt;title&gt;About&lt;/title&gt;
+      &lt;/Head&gt;
+      &lt;h1&gt;About&lt;/h1&gt;
+    &lt;/&gt;
+  );
+}</code></pre>
+<h4>App Router</h4>
+<div class="code-title">app/about/page.js</div>
+<pre><code class="language-js">export const metadata = {
+  title: 'About'
+};
+export default function About() {
+  return &lt;h1&gt;About&lt;/h1&gt;;
+}</code></pre>
+<h3>Loading UI</h3>
+<h4>Pages Router</h4>
+<p>
+Manual loading state management is required.
+</p>
+<h4>App Router</h4>
+<div class="code-title">app/loading.js</div>
+<pre><code class="language-js">export default function Loading() {
+  return &lt;p&gt;Loading...&lt;/p&gt;;
+}</code></pre>
+<p>
+Automatic loading UI support.
+</p>
+<h3>Error Handling</h3>
+<h4>Pages Router</h4>
+<p>
+Requires custom error handling.
+</p>
+<h4>App Router</h4>
+<div class="code-title">app/error.js</div>
+<pre><code class="language-js">'use client';
+export default function Error({
+  error
+}) {
+  return (
+    &lt;h1&gt;
+      Something went wrong
+    &lt;/h1&gt;
+  );
+}</code></pre>
+<h3>Server Components</h3>
+<h4>Pages Router</h4>
+<pre><code class="language-text">❌ Not Supported</code></pre>
+<h4>App Router</h4>
+<pre><code class="language-text">✅ Supported By Default</code></pre>
+<div class="code-title">Server Component</div>
+<pre><code class="language-js">export default async function Page() {
+  const data =
+    await fetch('https://api.example.com');
+  return &lt;h1&gt;Hello&lt;/h1&gt;;
+}</code></pre>
+<h3>Streaming</h3>
+<h4>Pages Router</h4>
+<pre><code class="language-text">❌ Not Supported</code></pre>
+<h4>App Router</h4>
+<pre><code class="language-text">✅ Supported</code></pre>
+<div class="code-title">Example</div>
+<pre><code class="language-js">import { Suspense } from 'react';
+export default function Page() {
+  return (
+    &lt;Suspense fallback="Loading..."&gt;
+      &lt;Products /&gt;
+    &lt;/Suspense&gt;
+  );
+}</code></pre>
+<h3>Route Handlers</h3>
+<h4>Pages Router</h4>
+<div class="code-title">pages/api/users.js</div>
+<pre><code class="language-js">export default function handler(
+  req,
+  res
+) {
+  res.json({
+    users: []
+  });
+}</code></pre>
+<h4>App Router</h4>
+<div class="code-title">app/api/users/route.js</div>
+<pre><code class="language-js">export async function GET() {
+  return Response.json({
+    users: []
+  });
+}</code></pre>
+<h3>Rendering Features</h3>
+<table>
+<tr>
+<th>Feature</th>
+<th>Pages Router</th>
+<th>App Router</th>
+</tr>
+<tr>
+<td>SSG</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>SSR</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>ISR</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Server Components</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Streaming</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Nested Layouts</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Metadata API</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Route Handlers</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+</table>
+<h3>When to Use Each?</h3>
+<table>
+<tr>
+<th>Scenario</th>
+<th>Recommended</th>
+</tr>
+<tr>
+<td>Existing Older Project</td>
+<td>Pages Router</td>
+</tr>
+<tr>
+<td>New Project</td>
+<td>App Router</td>
+</tr>
+<tr>
+<td>Server Components</td>
+<td>App Router</td>
+</tr>
+<tr>
+<td>Streaming</td>
+<td>App Router</td>
+</tr>
+<tr>
+<td>Modern Next.js Features</td>
+<td>App Router</td>
+</tr>
+</table>
+<h3>Evolution</h3>
+<div class="code-title">Timeline</div>
+<pre><code class="language-text">Next.js 1 - 12
+      │
+      ▼
+Pages Router
+Next.js 13+
+      │
+      ▼
+App Router
+Next.js 15
+      │
+      ▼
+App Router Recommended</code></pre>
+<h3>Important Note</h3>
+<div class="feature">
+Both routers can coexist in the same project. Next.js allows gradual migration from the Pages Router to the App Router.
+</div>
+<h3>Interview Tip</h3>
+<div class="feature">
+The biggest differences are that the App Router provides Server Components, nested layouts, streaming, Route Handlers, and the Metadata API, while the Pages Router relies on getServerSideProps, getStaticProps, and the Head component.
+</div>
+<div class="feature">
+<strong>One-Line Definition:</strong><br/>
+The Pages Router is the traditional routing system based on the <code>pages</code> directory, while the App Router is the modern routing system based on the <code>app</code> directory that adds Server Components, nested layouts, streaming, and the Metadata API.
+</div>
+<h2 class="section-title" id="P1-06"><span class="secnum">P1-06</span>What is the Purpose of the pages Directory in Next.js?</h2>
+<p>
+The <strong>pages</strong> directory is used for creating routes in traditional Next.js applications.
+</p>
+<div class="feature">
+Every file inside the <strong>pages</strong> directory automatically becomes a route in your application.
+</div>
+<h3>Why is the pages Directory Important?</h3>
+<p>
+Instead of manually configuring routes using React Router, Next.js automatically creates routes based on the files inside the pages folder.
+</p>
+<p>
+This feature is called <strong>File-Based Routing</strong>.
+</p>
+<h3>Basic Example</h3>
+<div class="code-block">
+<div class="code-title">Pages Router Structure</div>
+<pre><code class="language-text">pages/
+├── index.js
+├── about.js
+└── contact.js</code></pre>
+</div>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Route</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>pages/index.js</td>
+<td>/</td>
+</tr>
+<tr>
+<td>pages/about.js</td>
+<td>/about</td>
+</tr>
+<tr>
+<td>pages/contact.js</td>
+<td>/contact</td>
+</tr>
+</tbody>
+</table>
+<h3>Home Page Example</h3>
+<div class="code-block">
+<div class="code-title">pages/index.js</div>
+<pre><code class="language-jsx">export default function Home() {
+  return (
+    &lt;h1&gt;Home Page&lt;/h1&gt;
+  );
+}</code></pre>
+</div>
+<h3>Nested Routes</h3>
+<div class="code-block">
+<div class="code-title">Nested Route Example</div>
+<pre><code class="language-text">pages/
+└── blog/
+    └── index.js</code></pre>
+</div>
+<p>This creates the route:</p>
+<div class="code-block">
+<div class="code-title">Generated Route</div>
+<pre><code class="language-text">/blog</code></pre>
+</div>
+<h3>Dynamic Routes</h3>
+<div class="code-block">
+<div class="code-title">Dynamic Route File</div>
+<pre><code class="language-text">pages/
+└── products/
+    └── [id].js</code></pre>
+</div>
+<p>This route can handle:</p>
+<div class="code-block">
+<div class="code-title">Example URLs</div>
+<pre><code class="language-text">/products/1
+/products/2
+/products/100</code></pre>
+</div>
+<div class="code-block">
+<div class="code-title">pages/products/[id].js</div>
+<pre><code class="language-jsx">import { useRouter } from 'next/router';
+export default function Product() {
+  const router = useRouter();
+  return (
+    &lt;h1&gt;Product ID: {router.query.id}&lt;/h1&gt;
+  );
+}</code></pre>
+</div>
+<h3>API Routes in pages/api</h3>
+<p>
+The pages directory can also contain backend API routes.
+</p>
+<div class="code-block">
+<div class="code-title">API Route Structure</div>
+<pre><code class="language-text">pages/
+└── api/
+    └── users.js</code></pre>
+</div>
+<div class="code-block">
+<div class="code-title">pages/api/users.js</div>
+<pre><code class="language-javascript">export default function handler(req, res) {
+  res.status(200).json({
+    users: []
+  });
+}</code></pre>
+</div>
+<h3>Special Files Inside pages</h3>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>_app.js</td>
+<td>Custom App component</td>
+</tr>
+<tr>
+<td>_document.js</td>
+<td>Customize HTML document structure</td>
+</tr>
+<tr>
+<td>_error.js</td>
+<td>Custom error page</td>
+</tr>
+<tr>
+<td>404.js</td>
+<td>Custom 404 page</td>
+</tr>
+<tr>
+<td>500.js</td>
+<td>Custom 500 page</td>
+</tr>
+</tbody>
+</table>
+<h3>Special Files Explained</h3>
+<h4>1. pages/_app.js</h4>
+<p>
+Acts as the root component for all pages.
+</p>
+<div class="code-block">
+<div class="code-title">pages/_app.js</div>
+<pre><code class="language-jsx">export default function App({ Component, pageProps }) {
+  return &lt;Component {...pageProps} /&gt;;
+}</code></pre>
+</div>
+<p>Common use cases:</p>
+<ul>
+<li>Global CSS</li>
+<li>Redux Provider</li>
+<li>Context API</li>
+<li>Authentication Wrapper</li>
+<li>Shared Layouts</li>
+</ul>
+<div class="feature">
+Every page in the Pages Router passes through <code>_app.js</code>.
+</div>
+<h4>How _app.js Works Internally</h4>
+<p>
+Many developers get confused by this code:
+</p>
+<div class="code-block">
+<div class="code-title">pages/_app.js</div>
+<pre><code class="language-jsx">export default function App({ Component, pageProps }) {
+  return &lt;Component {...pageProps} /&gt;;
+}</code></pre>
+</div>
+<p>
+The <code>Component</code> prop represents the currently active page component.
+</p>
+<p>
+Next.js automatically changes the value of <code>Component</code> depending on the route being visited.
+</p>
+<div class="code-block">
+<div class="code-title">Project Structure</div>
+<pre><code class="language-text">my-project/
+├── pages/
+│   ├── _app.js
+│   ├── _document.js
+│   ├── index.js
+│   ├── about.js
+│   └── contact.js
+├── public/
+├── styles/
+└── package.json</code></pre>
+</div>
+<p>
+When the user visits the home page:
+</p>
+<div class="code-block">
+<div class="code-title">Home Route</div>
+<pre><code class="language-jsx">&lt;App Component={Home} /&gt;  //You never write this yourself, Next.js creates it internally.
+return &lt;Home /&gt;;</code></pre>
+</div>
+<p>
+When the user visits the About page:
+</p>
+<div class="code-block">
+<div class="code-title">About Route</div>
+<pre><code class="language-jsx">&lt;App Component={About} /&gt;
+return &lt;About /&gt;;</code></pre>
+</div>
+<p>
+When the user visits the Contact page:
+</p>
+<div class="code-block">
+<div class="code-title">Contact Route</div>
+<pre><code class="language-jsx">&lt;App Component={Contact} /&gt;
+return &lt;Contact /&gt;;</code></pre>
+</div>
+<div class="feature">
+Component = Current Page Component
+</div>
+<h4>Why _app.js is Useful</h4>
+<p>
+Because it allows us to wrap all pages with common UI.
+</p>
+<div class="code-block">
+<div class="code-title">Shared Layout Example</div>
+<pre><code class="language-jsx">export default function App({ Component, pageProps }) {
+  // Component, pageProps are passed by Next.js itself. Next.js calls it internally.
+  // The pageProps value comes from the current page.
+  return (
+    &lt;&gt;
+      &lt;Header /&gt;
+      &lt;Component {...pageProps} /&gt;
+      &lt;Footer /&gt;
+    &lt;/&gt;
+  );
+}</code></pre>
+</div>
+<p>
+Now every page automatically gets the Header and Footer.
+</p>
+<div class="code-block">
+<div class="code-title">About Page Render</div>
+<pre><code class="language-jsx">&lt;&gt;
+  &lt;Header /&gt;
+  &lt;About /&gt;
+  &lt;Footer /&gt;
+&lt;/&gt;</code></pre>
+</div>
+<div class="code-block">
+<div class="code-title">Contact Page Render</div>
+<pre><code class="language-jsx">&lt;&gt;
+  &lt;Header /&gt;
+  &lt;Contact /&gt;
+  &lt;Footer /&gt;
+&lt;/&gt;</code></pre>
+</div>
+<h4>What is pageProps?</h4>
+<p>
+The <code>pageProps</code> object contains props returned from <code>getServerSideProps</code>, <code>getStaticProps</code>, or <code>getInitialProps</code>.
+</p>
+<div class="code-block">
+<div class="code-title">Page Data</div>
+<pre><code class="language-jsx">export async function getServerSideProps() {
+  return {
+    props: {
+      name: 'Rizwan'
+    }
+  };
+}</code></pre>
+</div>
+<p>
+Next.js passes those props to <code>_app.js</code>.
+</p>
+<div class="code-block">
+<div class="code-title">Props Passed to _app.js</div>
+<pre><code class="language-jsx">&lt;App
+  Component={Home}
+  pageProps={{ name: 'Rizwan' }}
+/&gt;</code></pre>
+</div>
+<p>
+Then:
+</p>
+<div class="code-block">
+<div class="code-title">Prop Forwarding</div>
+<pre><code class="language-jsx">&lt;Component {...pageProps} /&gt;</code></pre>
+</div>
+<p>
+Becomes:
+</p>
+<div class="code-block">
+<div class="code-title">Final Render</div>
+<pre><code class="language-jsx">&lt;Home name="Rizwan" /&gt;</code></pre>
+</div>
+<div class="summary">
+<strong>Interview Answer:</strong><br/>
+In <code>_app.js</code>, the <code>Component</code> prop represents the current page being rendered and <code>pageProps</code> contains the props returned from data-fetching methods. Next.js automatically injects both values, allowing <code>_app.js</code> to wrap every page with common layouts, providers, and global CSS.
+</div>
+<h4>2. pages/_document.js</h4>
+<p>
+Used to customize the HTML document structure.
+</p>
+<div class="code-block">
+<div class="code-title">pages/_document.js</div>
+<pre><code class="language-jsx">import { Html, Head, Main, NextScript } from 'next/document';
+export default function Document() {
+  return (
+    &lt;Html lang="en"&gt;
+      &lt;Head /&gt;
+      &lt;body&gt;
+        &lt;Main /&gt;
+        &lt;NextScript /&gt;
+      &lt;/body&gt;
+    &lt;/Html&gt;
+  );
+}</code></pre>
+</div>
+<p>Common use cases:</p>
+<ul>
+<li>Set HTML language</li>
+<li>Add custom fonts</li>
+<li>Modify body attributes</li>
+<li>Customize document structure</li>
+</ul>
+<div class="feature">
+<code>_document.js</code> runs only on the server.
+</div>
+<h4>3. pages/_error.js</h4>
+<p>
+Custom error page used for handling application errors.
+</p>
+<div class="code-block">
+<div class="code-title">pages/_error.js</div>
+<pre><code class="language-jsx">function ErrorPage({ statusCode }) {
+  return &lt;h1&gt;Error {statusCode}&lt;/h1&gt;;
+}
+export default ErrorPage;</code></pre>
+</div>
+<p>
+It can handle errors such as 404, 500, and other HTTP errors.
+</p>
+<h4>4. pages/404.js</h4>
+<p>
+Displayed when a route does not exist.
+</p>
+<div class="code-block">
+<div class="code-title">pages/404.js</div>
+<pre><code class="language-jsx">export default function NotFound() {
+  return &lt;h1&gt;404 - Page Not Found&lt;/h1&gt;;
+}</code></pre>
+</div>
+<p>Example:</p>
+<div class="code-block">
+<div class="code-title">URL Request</div>
+<pre><code class="language-text">/about      ✓ exists
+/profile    ✗ does not exist</code></pre>
+</div>
+<p>
+Visiting <code>/profile</code> displays the custom 404 page.
+</p>
+<h4>5. pages/500.js</h4>
+<p>
+Displayed when a server-side error occurs.
+</p>
+<div class="code-block">
+<div class="code-title">pages/500.js</div>
+<pre><code class="language-jsx">export default function ServerError() {
+  return &lt;h1&gt;500 - Server Error&lt;/h1&gt;;
+}</code></pre>
+</div>
+<p>Example:</p>
+<div class="code-block">
+<div class="code-title">Server Error Example</div>
+<pre><code class="language-jsx">export async function getServerSideProps() {
+  throw new Error('Database Failed');
+}</code></pre>
+</div>
+<p>
+The user will see the custom 500 error page.
+</p>
+<h3>Pages Router Request Flow</h3>
+<div class="code-block">
+<div class="code-title">Request Lifecycle</div>
+<pre><code class="language-text">Request
+   │
+   ▼
+pages/_document.js
+   │
+   ▼
+pages/_app.js
+   │
+   ▼
+Requested Page
+   │
+   ├── Success → Render Page
+   │
+   ├── Not Found → 404.js
+   │
+   └── Server Error → 500.js / _error.js</code></pre>
+</div>
+<div class="summary">
+<strong>Interview Answer:</strong><br/>
+<code>_app.js</code> wraps all pages and is used for global layouts, providers, and global CSS. <code>_document.js</code> customizes the HTML document structure and runs only on the server. <code>_error.js</code> is a custom error page. <code>404.js</code> handles not found routes, while <code>500.js</code> handles server-side errors.
+</div>
+<div class="summary">
+<strong>One-Line Definition:</strong><br/>
+The <code>pages</code> directory in Next.js is used to create application routes automatically, where each file becomes a URL route and <code>pages/api</code> can be used for API endpoints.
+</div>
+<hr class="section-divider"/>
+<h1>Pages Router vs App Router in Next.js</h1>
+<p>
+Next.js supports two routing systems:
+</p>
+<ul>
+<li><strong>Pages Router</strong> - older routing system</li>
+<li><strong>App Router</strong> - newer routing system introduced in Next.js 13</li>
+</ul>
+<div class="feature">
+The App Router is recommended for new Next.js projects, but many existing projects still use the Pages Router.
+</div>
+<h3>1. Pages Router</h3>
+<p>
+Pages Router uses the <strong>pages</strong> directory. Every file inside the pages folder becomes a route.
+</p>
+<div class="code-block">
+<div class="code-title">Pages Router Structure</div>
+<pre><code class="language-text">pages/
+├── index.js
+├── about.js
+└── contact.js</code></pre>
+</div>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Route</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>pages/index.js</td>
+<td>/</td>
+</tr>
+<tr>
+<td>pages/about.js</td>
+<td>/about</td>
+</tr>
+<tr>
+<td>pages/contact.js</td>
+<td>/contact</td>
+</tr>
+</tbody>
+</table>
+<div class="code-block">
+<div class="code-title">pages/about.js</div>
+<pre><code class="language-jsx">export default function About() {
+  return (
+    &lt;h1&gt;About Page&lt;/h1&gt;
+  );
+}</code></pre>
+</div>
+<h3>2. App Router</h3>
+<p>
+App Router uses the <strong>app</strong> directory. Each route is represented by a folder containing a <strong>page.js</strong> file.
+</p>
+<div class="code-block">
+<div class="code-title">App Router Structure</div>
+<pre><code class="language-text">app/
+├── page.js
+├── about/
+│   └── page.js
+└── contact/
+    └── page.js</code></pre>
+</div>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Route</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>app/page.js</td>
+<td>/</td>
+</tr>
+<tr>
+<td>app/about/page.js</td>
+<td>/about</td>
+</tr>
+<tr>
+<td>app/contact/page.js</td>
+<td>/contact</td>
+</tr>
+</tbody>
+</table>
+<div class="code-block">
+<div class="code-title">app/about/page.js</div>
+<pre><code class="language-jsx">export default function About() {
+  return (
+    &lt;h1&gt;About Page&lt;/h1&gt;
+  );
+}</code></pre>
+</div>
+<h3>Main Differences</h3>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>Pages Router</th>
+<th>App Router</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Folder Name</td>
+<td>pages</td>
+<td>app</td>
+</tr>
+<tr>
+<td>Routing Style</td>
+<td>File-based routing</td>
+<td>Folder-based routing</td>
+</tr>
+<tr>
+<td>Page File</td>
+<td>about.js</td>
+<td>about/page.js</td>
+</tr>
+<tr>
+<td>Home Page</td>
+<td>pages/index.js</td>
+<td>app/page.js</td>
+</tr>
+<tr>
+<td>Layouts</td>
+<td>Custom _app.js</td>
+<td>layout.js</td>
+</tr>
+<tr>
+<td>Router Hook</td>
+<td>next/router</td>
+<td>next/navigation</td>
+</tr>
+<tr>
+<td>Server Components</td>
+<td>No</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>Loading UI</td>
+<td>Manual</td>
+<td>loading.js</td>
+</tr>
+<tr>
+<td>Error UI</td>
+<td>Manual</td>
+<td>error.js</td>
+</tr>
+<tr>
+<td>Recommended for New Projects</td>
+<td>No</td>
+<td>Yes</td>
+</tr>
+</tbody>
+</table>
+<h3>Very Important Difference</h3>
+<table>
+<thead>
+<tr>
+<th>Router Type</th>
+<th>Correct Folder Structure</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Pages Router</td>
+<td><code>pages/about.js</code></td>
+</tr>
+<tr>
+<td>App Router</td>
+<td><code>app/about/page.js</code></td>
+</tr>
+</tbody>
+</table>
+<h3>Which One Should You Learn?</h3>
+<p>
+You should learn both because older projects may use Pages Router, while new Next.js projects mostly use App Router.
+</p>
+<ul>
+<li>Use <strong>Pages Router</strong> when working on older Next.js projects.</li>
+<li>Use <strong>App Router</strong> for new modern Next.js projects.</li>
+<li>In interviews, questions can come from both routing systems.</li>
+</ul>
+<div class="summary">
+<strong>One-Line Definition:</strong><br/>
+Pages Router uses the <code>pages</code> directory where each file becomes a route, while App Router uses the <code>app</code> directory where each route is represented by a folder containing a <code>page.js</code> file and supports modern features like Server Components, layouts, loading UI, and error UI.
+</div><div class="chapnav"><a class="prev" href="pages-index.html">Guide Home</a><a class="next" href="pages-P2-file-based-routing-and-navigation.html">P2 - File-Based Routing & Navigation</a></div></div></div><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-tsx.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+</body>
+</html>

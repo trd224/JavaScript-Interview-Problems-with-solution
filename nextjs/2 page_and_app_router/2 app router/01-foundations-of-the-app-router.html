@@ -1,0 +1,1806 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>01 - Foundations of the App Router | Next.js App Router Guide</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:#0f172a;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.8;display:flex;min-height:100vh}
+a{color:inherit;text-decoration:none}
+.sidebar{width:290px;flex-shrink:0;background:#0b1220;border-right:1px solid #1e293b;padding:24px 18px;position:sticky;top:0;height:100vh;overflow-y:auto}
+.brand{color:#38bdf8;font-size:18px;font-weight:800;margin-bottom:4px}
+.brand small{display:block;color:#64748b;font-weight:400;font-size:12px;margin-top:4px}
+.chapter-nav{margin-top:22px}
+.chapter-nav a{display:block;padding:8px 10px;border-radius:8px;font-size:13px;color:#94a3b8;margin-bottom:4px;border-left:3px solid transparent}
+.chapter-nav a:hover{background:#111827;color:#e2e8f0}
+.chapter-nav a.active{background:#111827;color:#38bdf8;border-left:3px solid #38bdf8;font-weight:bold}
+.chapter-nav .chnum{display:inline-block;width:22px;color:#475569;font-family:monospace}
+.toc{margin-top:22px;border-top:1px solid #1e293b;padding-top:16px}
+.toc-title{color:#fbbf24;font-size:12px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px}
+.toc a{display:block;font-size:12.5px;color:#8ea3c2;padding:5px 8px;border-radius:6px;line-height:1.4}
+.toc a:hover{background:#111827;color:#e2e8f0}
+.main{flex:1;padding:40px 48px;max-width:980px}
+.container{max-width:900px}
+h1.page-title{color:#38bdf8;margin-bottom:6px;font-size:30px}
+.page-sub{color:#64748b;margin-bottom:28px;font-size:14px}
+h2.section-title{color:#a78bfa;margin-top:52px;margin-bottom:14px;font-size:23px;border-top:1px solid #1e293b;padding-top:38px}
+h2.section-title .secnum{color:#475569;font-family:monospace;margin-right:10px;font-size:16px}
+h3{color:#fbbf24;margin-top:25px;margin-bottom:10px;font-size:17px}
+h4{color:#38bdf8;margin-top:18px;margin-bottom:8px;font-size:15px}
+h5{color:#93c5fd;margin-top:14px;margin-bottom:6px;font-size:14px}
+p{margin-bottom:15px}
+ul,ol{margin-left:20px;margin-bottom:15px}
+li{margin-bottom:8px}
+strong{color:#f1f5f9}
+code{color:#93c5fd;font-family:'JetBrains Mono',monospace;font-size:.92em}
+.feature{background:#1e293b;border-left:5px solid #38bdf8;padding:15px;border-radius:8px;margin:20px 0}
+.warning{background:#2a1a1a;border-left:5px solid #f87171;padding:15px;border-radius:8px;margin:20px 0}
+.summary{background:#1a2a1e;border-left:5px solid #34d399;padding:15px;border-radius:8px;margin:20px 0}
+.note{background:#1e293b;border-left:5px solid #a78bfa;padding:15px;border-radius:8px;margin:20px 0}
+.code-title{background:#1e293b;color:#93c5fd;padding:10px;font-weight:bold;border-radius:6px 6px 0 0;font-size:13px;font-family:monospace}
+pre[class*="language-"]{margin:0 0 20px 0!important;border-radius:0 0 6px 6px}
+pre code{white-space:pre}
+table{width:100%;border-collapse:collapse;margin:20px 0}
+th{background:#1e293b;color:#38bdf8;text-align:left;padding:12px}
+td{padding:12px;border-top:1px solid #334155}
+hr{border:none;border-top:1px solid #1e293b;margin:30px 0}
+.chapnav{display:flex;justify-content:space-between;margin-top:60px;padding-top:24px;border-top:1px solid #1e293b}
+.chapnav a{background:#111827;padding:12px 18px;border-radius:10px;border:1px solid #1e293b;font-size:14px;color:#94a3b8}
+.chapnav a:hover{color:#38bdf8;border-color:#38bdf8}
+.chapnav .prev::before{content:"<- "}
+.chapnav .next::after{content:" ->"}
+@media(max-width:900px){body{flex-direction:column}.sidebar{position:relative;height:auto;width:100%}}
+</style>
+</head>
+<body>
+<div class="sidebar">
+<div class="brand">Next.js App Router<small>Complete Step-by-Step Guide</small></div>
+<div class="chapter-nav"><a class="active" href="01-foundations-of-the-app-router.html"><span class="chnum">01</span>Foundations of the App Router</a><a class="" href="02-routing-layouts-and-file-conventions.html"><span class="chnum">02</span>Routing, Layouts & File Conventions</a><a class="" href="03-rendering-data-fetching-and-caching.html"><span class="chnum">03</span>Rendering, Data Fetching & Caching</a><a class="" href="04-server-actions-and-mutations.html"><span class="chnum">04</span>Server Actions & Mutations</a><a class="" href="05-route-handlers-client-data-and-metadata-seo.html"><span class="chnum">05</span>Route Handlers, Client Data & Metadata (SEO)</a><a class="" href="06-styling-assets-and-optimized-components.html"><span class="chnum">06</span>Styling, Assets & Optimized Components</a><a class="" href="07-performance-and-optimization.html"><span class="chnum">07</span>Performance & Optimization</a></div>
+<div class="toc"><div class="toc-title">On this page</div><a href="#01-01">What is the app Directory Introduced in Next.js 13?</a><a href="#01-02">What is the Difference Between the Pages Router and the App Router?</a><a href="#01-03">What are React Server Components (RSC) and how does Next.js leverage them?</a><a href="#01-04">Why Does Pages Router Hydrate Everything While App Router Doesn't?</a><a href="#01-05">What is the Difference Between Server Components and Client Components?</a><a href="#01-06">How do you mark a component as a Client Component with 'use client'?</a></div>
+</div><div class="main"><div class="container"><h1 class="page-title">01 - Foundations of the App Router</h1><div class="page-sub">Part 01 of 7 &middot; 6 topics &middot; Next.js App Router Guide</div><h2 class="section-title" id="01-01"><span class="secnum">01-01</span>What is the app Directory Introduced in Next.js 13?</h2>
+<p>
+The <strong>app</strong> directory is a new routing system introduced in Next.js 13 that uses the <strong>App Router</strong>.
+</p>
+<div class="feature">
+The app directory is used to create routes, layouts, loading states, error pages, and Server Components using a folder-based structure.
+</div>
+<h3>Why Was the app Directory Introduced?</h3>
+<p>
+The older <strong>pages</strong> directory worked well, but it had limitations when building large applications.
+</p>
+<p>
+The app directory was introduced to provide:
+</p>
+<ul>
+<li>Server Components</li>
+<li>Nested Layouts</li>
+<li>Streaming</li>
+<li>Loading UI</li>
+<li>Error UI</li>
+<li>Better Data Fetching</li>
+<li>Improved Performance</li>
+</ul>
+<h3>Basic app Directory Structure</h3>
+<div class="code-block">
+<div class="code-title">App Router Structure</div>
+<pre><code class="language-text">app/
+├── page.js
+├── layout.js
+├── about/
+│   └── page.js
+└── contact/
+    └── page.js</code></pre>
+</div>
+<h3>Generated Routes</h3>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Route</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>app/page.js</td>
+<td>/</td>
+</tr>
+<tr>
+<td>app/about/page.js</td>
+<td>/about</td>
+</tr>
+<tr>
+<td>app/contact/page.js</td>
+<td>/contact</td>
+</tr>
+</tbody>
+</table>
+<h3>page.js</h3>
+<p>
+Every route must contain a <strong>page.js</strong> file.
+</p>
+<div class="code-block">
+<div class="code-title">app/about/page.js</div>
+<pre><code class="language-jsx">export default function About() {
+  return (
+    &lt;h1&gt;About Page&lt;/h1&gt;
+  );
+}</code></pre>
+</div>
+<p>
+This creates:
+</p>
+<div class="code-block">
+<div class="code-title">Generated Route</div>
+<pre><code class="language-text">/about</code></pre>
+</div>
+<h3>layout.js</h3>
+<p>
+A layout is shared UI that appears across multiple pages.
+</p>
+<div class="code-block">
+<div class="code-title">app/layout.js</div>
+<pre><code class="language-jsx">export default function RootLayout({ children }) {
+  return (
+    &lt;html&gt;
+      &lt;body&gt;
+        {children}
+      &lt;/body&gt;
+    &lt;/html&gt;
+  );
+}</code></pre>
+</div>
+<p>
+The layout wraps every page inside the application.
+</p>
+<h3>Server Components</h3>
+<div class="feature">
+Components inside the app directory are Server Components by default.
+</div>
+<div class="code-block">
+<div class="code-title">Server Component Example</div>
+<pre><code class="language-jsx">export default async function Users() {
+  const response = await fetch(
+    'https://api.example.com/users'
+  );
+  const users = await response.json();
+  return (
+    &lt;div&gt;{users.length}&lt;/div&gt;
+  );
+}</code></pre>
+</div>
+<p>
+This code runs on the server, not in the browser.
+</p>
+<h3>Client Components</h3>
+<p>
+To use state, effects, or browser APIs, add:
+</p>
+<div class="code-block">
+<div class="code-title">Client Component Example</div>
+<pre><code class="language-jsx">'use client';
+import { useState } from 'react';
+export default function Counter() {
+  const [count, setCount] = useState(0);
+  return (
+    &lt;button onClick={() =&gt; setCount(count + 1)}&gt;
+      {count}
+    &lt;/button&gt;
+  );
+}</code></pre>
+</div>
+<h3>loading.js</h3>
+<p>
+Displays a loading UI while a route is loading.
+</p>
+<div class="code-block">
+<div class="code-title">app/loading.js</div>
+<pre><code class="language-jsx">export default function Loading() {
+  return (
+    &lt;h2&gt;Loading...&lt;/h2&gt;
+  );
+}</code></pre>
+</div>
+<h3>error.js</h3>
+<p>
+Displays an error UI when an error occurs.
+</p>
+<div class="code-block">
+<div class="code-title">app/error.js</div>
+<pre><code class="language-jsx">'use client';
+//In Next.js App Router, error.js must be a Client Component
+export default function Error({ error }) {
+  return (
+    &lt;h2&gt;Something went wrong&lt;/h2&gt;
+  );
+}</code></pre>
+</div>
+<h3>Nested Layouts</h3>
+<p>
+Different sections can have their own layouts.
+</p>
+<div class="code-block">
+<div class="code-title">Nested Layout Example</div>
+<pre><code class="language-text">app/
+├── layout.js
+├── dashboard/
+│   ├── layout.js
+│   └── page.js</code></pre>
+</div>
+<p>
+Dashboard pages will use the dashboard layout automatically.
+</p>
+<h3>Comparison with pages Directory</h3>
+<table>
+<thead>
+<tr>
+<th>pages Directory</th>
+<th>app Directory</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Pages Router</td>
+<td>App Router</td>
+</tr>
+<tr>
+<td>about.js</td>
+<td>about/page.js</td>
+</tr>
+<tr>
+<td>Custom _app.js</td>
+<td>layout.js</td>
+</tr>
+<tr>
+<td>No Server Components</td>
+<td>Server Components by default</td>
+</tr>
+<tr>
+<td>Manual loading UI</td>
+<td>loading.js</td>
+</tr>
+<tr>
+<td>Manual error UI</td>
+<td>error.js</td>
+</tr>
+<tr>
+<td>Older approach</td>
+<td>Modern approach</td>
+</tr>
+</tbody>
+</table>
+<h3>Complete Example</h3>
+<div class="code-block">
+<div class="code-title">App Directory Example</div>
+<pre><code class="language-text">app/
+├── layout.js
+├── page.js
+├── loading.js
+├── error.js
+├── about/
+│   └── page.js
+├── dashboard/
+│   ├── layout.js
+│   └── page.js
+└── contact/
+    └── page.js</code></pre>
+</div>
+<div class="summary">
+<strong>One-Line Definition:</strong><br/>
+The <code>app</code> directory introduced in Next.js 13 is the new App Router system that uses folder-based routing and provides built-in support for layouts, Server Components, loading states, error handling, and improved performance.
+</div>
+<h2 class="section-title" id="01-02"><span class="secnum">01-02</span>What is the Difference Between the Pages Router and the App Router?</h2>
+<p>
+The Pages Router and App Router are two routing systems in Next.js. The Pages Router uses the <code>pages</code> directory and traditional data-fetching methods, while the App Router uses the <code>app</code> directory and introduces Server Components, nested layouts, streaming, and the Metadata API.
+</p>
+<div class="feature">
+The App Router is the modern routing system introduced in Next.js 13 and is now the recommended approach for new applications.
+</div>
+<h3>Pages Router</h3>
+<p>
+The Pages Router uses the <code>pages</code> folder to create routes.
+</p>
+<div class="code-title">Project Structure</div>
+<pre><code class="language-text">pages
+├── index.js
+├── about.js
+└── products
+    └── [id].js</code></pre>
+<div class="code-title">pages/about.js</div>
+<pre><code class="language-js">export default function About() {
+  return &lt;h1&gt;About Page&lt;/h1&gt;;
+}</code></pre>
+<p>
+This creates:
+</p>
+<pre><code class="language-text">/about</code></pre>
+<h3>App Router</h3>
+<p>
+The App Router uses the <code>app</code> folder.
+</p>
+<div class="code-title">Project Structure</div>
+<pre><code class="language-text">app
+├── page.js
+├── about
+│   └── page.js
+└── products
+    └── [id]
+        └── page.js</code></pre>
+<div class="code-title">app/about/page.js</div>
+<pre><code class="language-js">export default function About() {
+  return &lt;h1&gt;About Page&lt;/h1&gt;;
+}</code></pre>
+<p>
+This also creates:
+</p>
+<pre><code class="language-text">/about</code></pre>
+<h3>Data Fetching</h3>
+<h4>Pages Router</h4>
+<div class="code-title">pages/products.js</div>
+<pre><code class="language-js">export async function getServerSideProps() {
+  const products =
+    await fetch('https://api.example.com/products')
+      .then(res =&gt; res.json());
+  return {
+    props: { products: products }
+  };
+}
+export default function Products({
+  products
+}) {
+  return (
+    &lt;div&gt;
+      {products.length}
+    &lt;/div&gt;
+  );
+}</code></pre>
+<h4>App Router</h4>
+<div class="code-title">app/products/page.js</div>
+<pre><code class="language-js">export default async function Page() {
+  const products =
+    await fetch('https://api.example.com/products')
+      .then(res =&gt; res.json());
+  return (
+    &lt;div&gt;
+      {products.length}
+    &lt;/div&gt;
+  );
+}</code></pre>
+<p>
+No <code>getServerSideProps()</code> is required.
+</p>
+<h3>Layouts</h3>
+<h4>Pages Router</h4>
+<p>
+Uses a shared layout pattern manually.
+</p>
+<div class="code-title">pages/_app.js</div>
+<pre><code class="language-js">import Layout from '../components/Layout';
+export default function App({ Component, pageProps }) {
+  return (
+    &lt;Layout&gt;
+      &lt;Component {...pageProps} /&gt;
+    &lt;/Layout&gt;
+  );
+}</code></pre>
+
+Layout
+<pre><code class="language-js">export default function Layout({ children }) {
+  return (
+    &lt;&gt;
+      &lt;header&gt;
+        Header
+      &lt;/header&gt;
+      &lt;main&gt;
+        {children}
+      &lt;/main&gt;
+      &lt;footer&gt;
+        Footer
+      &lt;/footer&gt;
+    &lt;/&gt;
+  );
+}</code></pre>
+or
+<pre><code class="language-js">import Header from '../components/Header';
+import Footer from '../components/Footer';
+export default function MyApp({ Component, pageProps }) {
+  return (
+    &lt;&gt;
+      &lt;Header /&gt;
+      &lt;Component {...pageProps} /&gt;
+      &lt;Footer /&gt;
+    &lt;/&gt;
+  );
+}</code></pre>
+<h4>App Router</h4>
+<p>
+Has built-in nested layouts.
+</p>
+<div class="code-title">app/layout.js</div>
+<pre><code class="language-js">export default function RootLayout({ children }) {
+  return (
+    &lt;html&gt;
+      &lt;body&gt;
+        {children}
+      &lt;/body&gt;
+    &lt;/html&gt;
+  );
+}</code></pre>
+<h3>Metadata</h3>
+<h4>Pages Router</h4>
+<div class="code-title">pages/about.js</div>
+<pre><code class="language-js">import Head from 'next/head';
+export default function About() {
+  return (
+    &lt;&gt;
+      &lt;Head&gt;
+        &lt;title&gt;About&lt;/title&gt;
+      &lt;/Head&gt;
+      &lt;h1&gt;About&lt;/h1&gt;
+    &lt;/&gt;
+  );
+}</code></pre>
+<h4>App Router</h4>
+<div class="code-title">app/about/page.js</div>
+<pre><code class="language-js">export const metadata = {
+  title: 'About'
+};
+export default function About() {
+  return &lt;h1&gt;About&lt;/h1&gt;;
+}</code></pre>
+<h3>Loading UI</h3>
+<h4>Pages Router</h4>
+<p>
+Manual loading state management is required.
+</p>
+<h4>App Router</h4>
+<div class="code-title">app/loading.js</div>
+<pre><code class="language-js">export default function Loading() {
+  return &lt;p&gt;Loading...&lt;/p&gt;;
+}</code></pre>
+<p>
+Automatic loading UI support.
+</p>
+<h3>Error Handling</h3>
+<h4>Pages Router</h4>
+<p>
+Requires custom error handling.
+</p>
+<h4>App Router</h4>
+<div class="code-title">app/error.js</div>
+<pre><code class="language-js">'use client';
+export default function Error({
+  error
+}) {
+  return (
+    &lt;h1&gt;
+      Something went wrong
+    &lt;/h1&gt;
+  );
+}</code></pre>
+<h3>Server Components</h3>
+<h4>Pages Router</h4>
+<pre><code class="language-text">❌ Not Supported</code></pre>
+<h4>App Router</h4>
+<pre><code class="language-text">✅ Supported By Default</code></pre>
+<div class="code-title">Server Component</div>
+<pre><code class="language-js">export default async function Page() {
+  const data =
+    await fetch('https://api.example.com');
+  return &lt;h1&gt;Hello&lt;/h1&gt;;
+}</code></pre>
+<h3>Streaming</h3>
+<h4>Pages Router</h4>
+<pre><code class="language-text">❌ Not Supported</code></pre>
+<h4>App Router</h4>
+<pre><code class="language-text">✅ Supported</code></pre>
+<div class="code-title">Example</div>
+<pre><code class="language-js">import { Suspense } from 'react';
+export default function Page() {
+  return (
+    &lt;Suspense fallback="Loading..."&gt;
+      &lt;Products /&gt;
+    &lt;/Suspense&gt;
+  );
+}</code></pre>
+<h3>Route Handlers</h3>
+<h4>Pages Router</h4>
+<div class="code-title">pages/api/users.js</div>
+<pre><code class="language-js">export default function handler(
+  req,
+  res
+) {
+  res.json({
+    users: []
+  });
+}</code></pre>
+<h4>App Router</h4>
+<div class="code-title">app/api/users/route.js</div>
+<pre><code class="language-js">export async function GET() {
+  return Response.json({
+    users: []
+  });
+}</code></pre>
+<h3>Rendering Features</h3>
+<table>
+<tr>
+<th>Feature</th>
+<th>Pages Router</th>
+<th>App Router</th>
+</tr>
+<tr>
+<td>SSG</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>SSR</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>ISR</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Server Components</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Streaming</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Nested Layouts</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Metadata API</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Route Handlers</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+</table>
+<h3>When to Use Each?</h3>
+<table>
+<tr>
+<th>Scenario</th>
+<th>Recommended</th>
+</tr>
+<tr>
+<td>Existing Older Project</td>
+<td>Pages Router</td>
+</tr>
+<tr>
+<td>New Project</td>
+<td>App Router</td>
+</tr>
+<tr>
+<td>Server Components</td>
+<td>App Router</td>
+</tr>
+<tr>
+<td>Streaming</td>
+<td>App Router</td>
+</tr>
+<tr>
+<td>Modern Next.js Features</td>
+<td>App Router</td>
+</tr>
+</table>
+<h3>Evolution</h3>
+<div class="code-title">Timeline</div>
+<pre><code class="language-text">Next.js 1 - 12
+      │
+      ▼
+Pages Router
+Next.js 13+
+      │
+      ▼
+App Router
+Next.js 15
+      │
+      ▼
+App Router Recommended</code></pre>
+<h3>Important Note</h3>
+<div class="feature">
+Both routers can coexist in the same project. Next.js allows gradual migration from the Pages Router to the App Router.
+</div>
+<h3>Interview Tip</h3>
+<div class="feature">
+The biggest differences are that the App Router provides Server Components, nested layouts, streaming, Route Handlers, and the Metadata API, while the Pages Router relies on getServerSideProps, getStaticProps, and the Head component.
+</div>
+<div class="feature">
+<strong>One-Line Definition:</strong><br/>
+The Pages Router is the traditional routing system based on the <code>pages</code> directory, while the App Router is the modern routing system based on the <code>app</code> directory that adds Server Components, nested layouts, streaming, and the Metadata API.
+</div>
+<h2 class="section-title" id="01-03"><span class="secnum">01-03</span>What are React Server Components (RSC) and how does Next.js leverage them?</h2>
+<p>
+React Server Components (RSC) are React components that execute on the server instead of the browser. They can fetch data, access backend resources, and generate UI without sending their JavaScript code to the client.
+</p>
+<div class="feature">
+In the App Router, all components are React Server Components by default unless we add the <code>'use client'</code> directive.
+</div>
+<h3>Why Were Server Components Introduced?</h3>
+<p>
+Traditional React applications send component JavaScript to the browser.
+</p>
+<div class="code-title">Traditional React</div>
+<pre><code class="language-text">Server
+   │
+   ▼
+Send HTML + JavaScript
+   │
+   ▼
+Browser Downloads JS
+   │
+   ▼
+Hydration
+   │
+   ▼
+Interactive UI</code></pre>
+<p>
+Large applications can send a lot of JavaScript to the browser.
+</p>
+<p>
+React Server Components reduce the amount of JavaScript sent to users.
+</p>
+<h3>Server Component Example</h3>
+<div class="code-title">app/products/page.js</div>
+<pre><code class="language-js">export default async function Page() {
+  const products =
+    await fetch(
+      'https://dummyjson.com/products'
+    ).then(res =&gt; res.json());
+  return (
+    &lt;ul&gt;
+      {products.products.map(product =&gt; (
+        &lt;li key={product.id}&gt;
+          {product.title}
+        &lt;/li&gt;
+      ))}
+    &lt;/ul&gt;
+  );
+}</code></pre>
+<p>
+This component runs on the server.
+</p>
+<p>api response</p>
+<pre><code class="language-js">{
+  "products": [
+    {
+      "id": 1,
+      "title": "iPhone 9"
+    },
+    {
+      "id": 2,
+      "title": "iPhone X"
+    }
+  ],
+  "total": 194,
+  "skip": 0,
+  "limit": 30
+}</code></pre>
+<p>
+No JavaScript for this component is sent to the browser.
+</p>
+<h3>Client Component Example</h3>
+<div class="code-title">app/components/Counter.js</div>
+<pre><code class="language-js">'use client';
+import { useState } from 'react';
+export default function Counter() {
+  const [count, setCount] = useState(0);
+  return (
+    &lt;button
+      onClick={() =&gt; setCount(count + 1)}
+    &gt;
+      {count}
+    &lt;/button&gt;
+  );
+}</code></pre>
+<p>
+This component runs in the browser because it uses:
+</p>
+<ul>
+<li>useState</li>
+<li>useEffect</li>
+<li>Event handlers</li>
+<li>Browser APIs</li>
+</ul>
+<h3>Server Component Rules</h3>
+<div class="code-title">Allowed</div>
+<pre><code class="language-js">await fetch(...)
+await database.query(...)
+await cookies()
+await headers()</code></pre>
+<div class="code-title">Not Allowed</div>
+<pre><code class="language-js">useState()
+useEffect()
+onClick={...}
+window.localStorage</code></pre>
+<p>
+Server Components cannot use browser-only features.
+</p>
+<h3>How Next.js Leverages RSC</h3>
+<p>
+Next.js App Router is built around React Server Components.
+</p>
+<div class="code-title">app/page.js</div>
+<pre><code class="language-js">export default function Page() {
+  return &lt;h1&gt;Home Page&lt;/h1&gt;;
+}</code></pre>
+<p>
+Even this simple component is a Server Component because there is no <code>'use client'</code>.
+</p>
+<h3>Mixing Server and Client Components</h3>
+<div class="code-title">app/page.js</div>
+<pre><code class="language-js">import Counter from './Counter';
+export default function Page() {
+  return (
+    &lt;&gt;
+      &lt;h1&gt;Dashboard&lt;/h1&gt;
+      &lt;Counter /&gt;
+    &lt;/&gt;
+  );
+}</code></pre>
+<div class="code-title">app/Counter.js</div>
+<pre><code class="language-js">'use client';
+import { useState } from 'react';
+export default function Counter() {
+  const [count, setCount] = useState(0);
+  return (
+    &lt;button
+      onClick={() =&gt; setCount(count + 1)}
+    &gt;
+      {count}
+    &lt;/button&gt;
+  );
+}</code></pre>
+<p>
+Here:
+</p>
+<ul>
+<li>Page → Server Component.</li>
+<li>Counter → Client Component.</li>
+</ul>
+<h3>Rendering Flow</h3>
+<div class="code-title">Flow</div>
+<pre><code class="language-text">Request
+   │
+   ▼
+Server Component Executes
+   │
+   ▼
+Fetch Data
+   │
+   ▼
+Generate HTML
+   │
+   ▼
+Send HTML To Browser
+   │
+   ▼
+Hydrate Client Components Only</code></pre>
+<h3>Biggest Advantage</h3>
+<p>
+Only Client Components are hydrated.
+</p>
+<div class="code-title">Without RSC</div>
+<pre><code class="language-text">Header JS
+Sidebar JS
+Products JS
+Footer JS
+Counter JS
+Download Everything</code></pre>
+<div class="code-title">With RSC</div>
+<pre><code class="language-text">Header (Server)
+Sidebar (Server)
+Products (Server)
+Footer (Server)
+Counter (Client)
+Download Only Counter JS</code></pre>
+<h3>Benefits of RSC</h3>
+<ul>
+<li>Smaller JavaScript bundles.</li>
+<li>Faster page loads.</li>
+<li>Direct server-side data fetching.</li>
+<li>Reduced hydration cost.</li>
+<li>Better performance.</li>
+<li>Improved SEO.</li>
+</ul>
+<h3>Pages Router vs App Router</h3>
+<table>
+<tr>
+<th>Feature</th>
+<th>Pages Router</th>
+<th>App Router</th>
+</tr>
+<tr>
+<td>React Server Components</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Server Data Fetching</td>
+<td>getServerSideProps</td>
+<td>Direct fetch()</td>
+</tr>
+<tr>
+<td>Client Components</td>
+<td>All Components</td>
+<td>Only use client Components</td>
+</tr>
+<tr>
+<td>JavaScript Sent To Browser</td>
+<td>More</td>
+<td>Less</td>
+</tr>
+</table>
+<h3>Important Note</h3>
+<div class="feature">
+React Server Components are not the same as SSR. SSR determines where HTML is generated, while RSC determines where the React component executes.
+</div>
+<div class="code-title">Difference</div>
+<pre><code class="language-text">SSR
+=
+Where HTML Is Generated
+RSC
+=
+Where React Component Runs</code></pre>
+<h3>Real-World Example</h3>
+<div class="code-title">E-Commerce Product Page</div>
+<pre><code class="language-text">Product Details
+Reviews
+Images
+Description
+Server Components
+Add To Cart Button
+Client Component</code></pre>
+<p>
+Most of the page remains on the server while only interactive parts run in the browser.
+</p>
+<h3>Interview Tip</h3>
+<div class="feature">
+The App Router uses React Server Components by default. A component becomes a Client Component only when we add the <code>'use client'</code> directive.
+</div>
+<div class="feature">
+<strong>One-Line Definition:</strong><br/>
+React Server Components (RSC) are React components that execute on the server and send rendered UI instead of component JavaScript to the browser, and Next.js App Router uses them by default to reduce bundle size and improve performance.
+</div>
+<h2 class="section-title" id="01-04"><span class="secnum">01-04</span>Why Does Pages Router Hydrate Everything While App Router Doesn't?</h2>
+<p>
+The main difference is that the <strong>Pages Router</strong> was built around full-page hydration, while the <strong>App Router</strong> uses React Server Components to avoid sending unnecessary JavaScript to the browser.
+</p>
+<div class="feature">
+Pages Router renders HTML on the server, but then still sends page JavaScript and React JavaScript to the browser so React can hydrate the whole page.
+</div>
+<h3>Step 1: What Happens in Pages Router?</h3>
+<p>
+In the Pages Router, even if the server already sends HTML, the browser still receives the page JavaScript and React JavaScript.
+</p>
+<div class="code-title">pages/index.js</div>
+<pre><code class="language-js">export default function Page() {
+  return &lt;h1&gt;Hello&lt;/h1&gt;;
+}</code></pre>
+<h3>Pages Router Rendering Flow</h3>
+<div class="code-title">Flow</div>
+<pre><code class="language-text">Request
+   │
+   ▼
+Server Runs Page()
+   │
+   ▼
+Generate HTML
+   │
+   ▼
+Send HTML
+   +
+Send page.js
+   +
+Send react.js
+   │
+   ▼
+Browser Downloads JavaScript
+   │
+   ▼
+Hydration
+   │
+   ▼
+Browser Runs Page() Again</code></pre>
+<p>
+So in the Pages Router, the component runs on the server first and then runs again in the browser during hydration.
+</p>
+<div class="code-title">Result</div>
+<pre><code class="language-text">Page() runs on Server  ✅
+Page() runs on Browser ✅</code></pre>
+<h3>Why Does Pages Router Send page.js and react.js?</h3>
+<p>
+Because the Pages Router architecture assumes that every page is a React application that must be hydrated in the browser.
+</p>
+<div class="feature">
+It does not matter whether the current page is interactive or not. Pages Router was designed to hydrate the whole page.
+</div>
+<h3>What Is Hydration?</h3>
+<p>
+Hydration means React attaches browser-side JavaScript behavior to the HTML that was already generated on the server.
+</p>
+<div class="code-title">Server HTML</div>
+<pre><code class="language-html">&lt;button&gt;Click Me&lt;/button&gt;</code></pre>
+<p>
+This HTML is visible, but it does not know anything about React state or click handlers.
+</p>
+<div class="code-title">React Component</div>
+<pre><code class="language-js">export default function Button() {
+  return (
+    &lt;button onClick={() =&gt; alert('Hello')}&gt;
+      Click Me
+    &lt;/button&gt;
+  );
+}</code></pre>
+<p>
+The browser needs JavaScript to attach the <code>onClick</code> behavior.
+</p>
+<div class="code-title">Hydration Flow</div>
+<pre><code class="language-text">HTML Already Visible
+      │
+      ▼
+Download React.js
+      │
+      ▼
+Download page.js
+      │
+      ▼
+React Connects Events
+      │
+      ▼
+Button Becomes Interactive</code></pre>
+<h3>But What If There Is No Interaction?</h3>
+<p>
+This is the exact problem.
+</p>
+<div class="code-title">Static Page</div>
+<pre><code class="language-js">export default function Product() {
+  return &lt;h1&gt;iPhone 15&lt;/h1&gt;;
+}</code></pre>
+<p>
+This page has no:
+</p>
+<div class="code-title">No Browser Features</div>
+<pre><code class="language-text">useState
+useEffect
+onClick
+window
+localStorage</code></pre>
+<p>
+Still, Pages Router sends:
+</p>
+<div class="code-title">Sent To Browser</div>
+<pre><code class="language-text">HTML
++
+Product.js
++
+React.js</code></pre>
+<p>
+Why? Because Pages Router follows one fixed rule:
+</p>
+<div class="code-title">Pages Router Rule</div>
+<pre><code class="language-text">Every Page
+   │
+   ▼
+Hydrate Everything</code></pre>
+<h3>Why Was Pages Router Built Like This?</h3>
+<p>
+Pages Router was built before React Server Components existed.
+</p>
+<p>
+At that time, React had only one main server rendering model:
+</p>
+<div class="code-title">Old React Model</div>
+<pre><code class="language-text">Server Generates HTML
+      │
+      ▼
+Browser Hydrates Entire React App</code></pre>
+<p>
+So React's older assumption was:
+</p>
+<div class="code-title">Old Assumption</div>
+<pre><code class="language-text">Any Page Might Become Interactive
+        │
+        ▼
+Send JavaScript For The Whole Page</code></pre>
+<h3>Example of Interactive Page</h3>
+<div class="code-title">Counter Component</div>
+<pre><code class="language-js">import { useState } from 'react';
+export default function Counter() {
+  const [count, setCount] = useState(0);
+  return (
+    &lt;button onClick={() =&gt; setCount(count + 1)}&gt;
+      {count}
+    &lt;/button&gt;
+  );
+}</code></pre>
+<p>
+For this page, the browser definitely needs JavaScript.
+</p>
+<div class="code-title">Without JavaScript</div>
+<pre><code class="language-text">Server Sends:
+&lt;button&gt;0&lt;/button&gt;
+User Clicks Button
+      │
+      ▼
+Nothing Happens ❌</code></pre>
+<div class="code-title">With JavaScript</div>
+<pre><code class="language-text">Server Sends HTML
+      +
+Browser Gets React.js
+      +
+Browser Gets Counter.js
+      │
+      ▼
+Click Updates Count ✅</code></pre>
+<h3>The Problem With Pages Router</h3>
+<p>
+The problem is that Pages Router sends JavaScript even when the page does not need browser interaction.
+</p>
+<div class="code-title">Static Content Example</div>
+<pre><code class="language-js">export default function BlogPost() {
+  return (
+    &lt;article&gt;
+      &lt;h1&gt;Next.js Guide&lt;/h1&gt;
+      &lt;p&gt;This is a static blog article.&lt;/p&gt;
+    &lt;/article&gt;
+  );
+}</code></pre>
+<p>
+This content is readable HTML. It does not need React in the browser.
+</p>
+<div class="code-title">But Pages Router Still Sends</div>
+<pre><code class="language-text">BlogPost.js
+React.js
+Next.js Runtime</code></pre>
+<h3>Step 2: What Changed in App Router?</h3>
+<p>
+The App Router uses React Server Components.
+</p>
+<div class="feature">
+React Server Components allow components to execute only on the server and not send their component JavaScript to the browser.
+</div>
+<div class="code-title">app/page.js</div>
+<pre><code class="language-js">export default function Page() {
+  return &lt;h1&gt;Hello&lt;/h1&gt;;
+}</code></pre>
+<p>
+In the App Router, this component is a Server Component by default because there is no <code>'use client'</code>.
+</p>
+<h3>App Router Server Component Flow</h3>
+<div class="code-title">Flow</div>
+<pre><code class="language-text">Request
+   │
+   ▼
+Server Runs Page()
+   │
+   ▼
+Generate HTML
+   │
+   ▼
+Send HTML
+   │
+   ▼
+Browser Displays HTML
+No page.js for this component
+No hydration for this component</code></pre>
+<div class="code-title">Result</div>
+<pre><code class="language-text">Page() runs on Server  ✅
+Page() runs on Browser ❌</code></pre>
+<h3>App Router Rule</h3>
+<p>
+App Router follows a smarter rule:
+</p>
+<div class="code-title">App Router Rule</div>
+<pre><code class="language-text">Need Browser Features?
+      │
+ ┌────┴────┐
+ │         │
+No        Yes
+ │         │
+ ▼         ▼
+HTML     Send JS
+Only</code></pre>
+<h3>Server Component Example</h3>
+<div class="code-title">app/products/page.js</div>
+<pre><code class="language-js">export default async function Products() {
+  const res = await fetch('https://dummyjson.com/products');
+  const data = await res.json();
+  return (
+    &lt;ul&gt;
+      {data.products.map(product =&gt; (
+        &lt;li key={product.id}&gt;{product.title}&lt;/li&gt;
+      ))}
+    &lt;/ul&gt;
+  );
+}</code></pre>
+<p>
+This component fetches data and renders HTML on the server.
+</p>
+<div class="code-title">Sent To Browser</div>
+<pre><code class="language-text">HTML Output Only
+No Products.js
+No React hydration for Products component</code></pre>
+<h3>Client Component Example</h3>
+<p>
+If our component needs browser interaction, we mark it with <code>'use client'</code>.
+</p>
+<div class="code-title">app/Counter.js</div>
+<pre><code class="language-js">'use client';
+import { useState } from 'react';
+export default function Counter() {
+  const [count, setCount] = useState(0);
+  return (
+    &lt;button onClick={() =&gt; setCount(count + 1)}&gt;
+      {count}
+    &lt;/button&gt;
+  );
+}</code></pre>
+<p>
+Now Next.js sends JavaScript for this component because it needs browser features.
+</p>
+<div class="code-title">Sent To Browser</div>
+<pre><code class="language-text">Counter.js
+React.js
+Required Client JavaScript</code></pre>
+<h3>Mixing Server and Client Components</h3>
+<div class="code-title">app/page.js</div>
+<pre><code class="language-js">import Counter from './Counter';
+export default function Page() {
+  return (
+    &lt;&gt;
+      &lt;h1&gt;Product Page&lt;/h1&gt;
+      &lt;p&gt;This content is server-rendered.&lt;/p&gt;
+      &lt;Counter /&gt;
+    &lt;/&gt;
+  );
+}</code></pre>
+<div class="code-title">app/Counter.js</div>
+<pre><code class="language-js">'use client';
+import { useState } from 'react';
+export default function Counter() {
+  const [count, setCount] = useState(0);
+  return (
+    &lt;button onClick={() =&gt; setCount(count + 1)}&gt;
+      {count}
+    &lt;/button&gt;
+  );
+}</code></pre>
+<p>
+In this example:
+</p>
+<table>
+<tr>
+<th>Part</th>
+<th>Type</th>
+<th>Sent As JS?</th>
+</tr>
+<tr>
+<td>Product Page Text</td>
+<td>Server Component</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td>Counter Button</td>
+<td>Client Component</td>
+<td>✅ Yes</td>
+</tr>
+</table>
+<h3>Pages Router vs App Router Rendering Difference</h3>
+<table>
+<tr>
+<th>Question</th>
+<th>Pages Router</th>
+<th>App Router</th>
+</tr>
+<tr>
+<td>Does server generate HTML?</td>
+<td>✅ Yes</td>
+<td>✅ Yes</td>
+</tr>
+<tr>
+<td>Does browser receive component JS?</td>
+<td>✅ Yes, for the page</td>
+<td>Only for Client Components</td>
+</tr>
+<tr>
+<td>Does browser hydrate everything?</td>
+<td>✅ Yes</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td>Can component stay server-only?</td>
+<td>❌ No</td>
+<td>✅ Yes</td>
+</tr>
+<tr>
+<td>Supports React Server Components?</td>
+<td>❌ No</td>
+<td>✅ Yes</td>
+</tr>
+</table>
+<h3>Execution Difference</h3>
+<div class="code-title">Pages Router</div>
+<pre><code class="language-text">Component Executes On Server
+      │
+      ▼
+HTML Generated
+      │
+      ▼
+Component JS Sent To Browser
+      │
+      ▼
+Component Executes Again In Browser</code></pre>
+<div class="code-title">App Router Server Component</div>
+<pre><code class="language-text">Component Executes On Server
+      │
+      ▼
+HTML Generated
+      │
+      ▼
+No Component JS Sent
+      │
+      ▼
+Component Does Not Execute In Browser</code></pre>
+<h3>Why React Does Not Need Control in App Router?</h3>
+<p>
+React does not need browser control for components that have no browser behavior.
+</p>
+<p>
+For example:
+</p>
+<div class="code-title">Server-Only Content</div>
+<pre><code class="language-text">Header
+Footer
+Blog Content
+Product Details
+Article Content
+FAQ Section</code></pre>
+<p>
+These components usually only display data. They do not need:
+</p>
+<div class="code-title">Browser Features</div>
+<pre><code class="language-text">useState
+useEffect
+onClick
+window
+localStorage</code></pre>
+<p>
+So App Router keeps them on the server and avoids sending their JavaScript.
+</p>
+<h3>Simple Memory Trick</h3>
+<div class="code-title">Pages Router</div>
+<pre><code class="language-text">HTML + JS for whole page</code></pre>
+<div class="code-title">App Router</div>
+<pre><code class="language-text">HTML for server parts
+JS only for interactive parts</code></pre>
+<h3>Final Comparison</h3>
+<table>
+<tr>
+<th>Component Type</th>
+<th>Server</th>
+<th>Browser</th>
+</tr>
+<tr>
+<td>Pages Router Page</td>
+<td>✅ Runs</td>
+<td>✅ Runs Again</td>
+</tr>
+<tr>
+<td>App Router Server Component</td>
+<td>✅ Runs</td>
+<td>❌ Does Not Run</td>
+</tr>
+<tr>
+<td>App Router Client Component</td>
+<td>✅ Pre-rendered</td>
+<td>✅ Hydrated</td>
+</tr>
+</table>
+<h3>Interview Tip</h3>
+<div class="feature">
+Pages Router was built before React Server Components, so it hydrates the entire page in the browser. App Router uses React Server Components, so non-interactive components can stay on the server and only interactive Client Components are hydrated.
+</div>
+<div class="feature">
+<strong>One-Line Definition:</strong><br/>
+Pages Router sends HTML plus JavaScript for the whole page because it hydrates every page, while App Router sends JavaScript only for Client Components and keeps Server Components on the server.
+</div>
+<h2 class="section-title" id="01-05"><span class="secnum">01-05</span>What is the Difference Between Server Components and Client Components?</h2>
+<p>
+Server Components run only on the server and do not send their component JavaScript to the browser, while Client Components run in the browser and support interactivity such as state, effects, and event handlers.
+</p>
+<div class="feature">
+In the App Router, components are Server Components by default. A component becomes a Client Component only when we add the <code>'use client'</code> directive.
+</div>
+<h3>Server Component Example</h3>
+<div class="code-title">app/page.js</div>
+<pre><code class="language-js">export default async function Page() {
+  const products =
+    await fetch(
+      'https://dummyjson.com/products'
+    ).then(res =&gt; res.json());
+  return (
+    &lt;ul&gt;
+      {products.products.map(product =&gt; (
+        &lt;li key={product.id}&gt;
+          {product.title}
+        &lt;/li&gt;
+      ))}
+    &lt;/ul&gt;
+  );
+}</code></pre>
+<p>
+This is a Server Component because there is no <code>'use client'</code>.
+</p>
+<h3>Server Component Rendering Flow</h3>
+<div class="code-title">Flow</div>
+<pre><code class="language-text">Request
+   │
+   ▼
+Server Executes Component
+   │
+   ▼
+Fetch Data
+   │
+   ▼
+Generate HTML
+   │
+   ▼
+Send HTML To Browser</code></pre>
+<div class="code-title">Execution</div>
+<pre><code class="language-text">Server  ✅
+Browser ❌</code></pre>
+<h3>Client Component Example</h3>
+<div class="code-title">app/Counter.js</div>
+<pre><code class="language-js">'use client';
+import { useState } from 'react';
+export default function Counter() {
+  const [count, setCount] = useState(0);
+  return (
+    &lt;button
+      onClick={() =&gt; setCount(count + 1)}
+    &gt;
+      {count}
+    &lt;/button&gt;
+  );
+}</code></pre>
+<p>
+This is a Client Component because it contains the <code>'use client'</code> directive.
+</p>
+<h3>Client Component Rendering Flow</h3>
+<div class="code-title">Flow</div>
+<pre><code class="language-text">Request
+   │
+   ▼
+Server Pre-renders HTML
+   │
+   ▼
+Send HTML
++
+Counter.js
++
+React.js
+   │
+   ▼
+Hydration
+   │
+   ▼
+Browser Executes Component</code></pre>
+<div class="code-title">Execution</div>
+<pre><code class="language-text">Server  ✅
+Browser ✅</code></pre>
+<h3>What Can Server Components Do?</h3>
+<div class="code-title">Allowed</div>
+<pre><code class="language-js">await fetch(...)
+await cookies()
+await headers()
+await database.query(...)</code></pre>
+<ul>
+<li>Fetch data directly.</li>
+<li>Access databases.</li>
+<li>Access cookies.</li>
+<li>Access request headers.</li>
+<li>Keep secrets on the server.</li>
+</ul>
+<h3>What Server Components Cannot Do?</h3>
+<div class="code-title">Not Allowed</div>
+<pre><code class="language-js">useState()
+useEffect()
+onClick={...}
+window.localStorage</code></pre>
+<p>
+Server Components cannot use browser APIs or React client hooks.
+</p>
+<h3>What Can Client Components Do?</h3>
+<ul>
+<li>useState</li>
+<li>useEffect</li>
+<li>useRef</li>
+<li>Event handlers</li>
+<li>Browser APIs</li>
+<li>Animations</li>
+<li>Forms</li>
+</ul>
+<div class="code-title">Example</div>
+<pre><code class="language-js">'use client';
+import { useState } from 'react';
+export default function Login() {
+  const [email, setEmail] = useState('');
+  return (
+    &lt;input
+      value={email}
+      onChange={e =&gt; setEmail(e.target.value)}
+    /&gt;
+  );
+}</code></pre>
+<h3>Mixing Server and Client Components</h3>
+<div class="code-title">app/page.js</div>
+<pre><code class="language-js">import Counter from './Counter';
+export default function Page() {
+  return (
+    &lt;&gt;
+      &lt;h1&gt;Dashboard&lt;/h1&gt;
+      &lt;Counter /&gt;
+    &lt;/&gt;
+  );
+}</code></pre>
+<div class="code-title">app/Counter.js</div>
+<pre><code class="language-js">'use client';
+import { useState } from 'react';
+export default function Counter() {
+  const [count, setCount] = useState(0);
+  return (
+    &lt;button
+      onClick={() =&gt; setCount(count + 1)}
+    &gt;
+      {count}
+    &lt;/button&gt;
+  );
+}</code></pre>
+<p>
+Here:
+</p>
+<div class="code-title">Component Types</div>
+<pre><code class="language-text">Page      → Server Component
+Counter   → Client Component</code></pre>
+<h3>Why Use Server Components?</h3>
+<p>
+Because they reduce the amount of JavaScript sent to the browser.
+</p>
+<div class="code-title">Without Server Components</div>
+<pre><code class="language-text">Header.js
+Sidebar.js
+Products.js
+Footer.js
+↓ Sent To Browser</code></pre>
+<div class="code-title">With Server Components</div>
+<pre><code class="language-text">Header.js   ❌
+Sidebar.js  ❌
+Products.js ❌
+Footer.js   ❌
+Only HTML Sent</code></pre>
+<p>
+This improves performance and reduces bundle size.
+</p>
+<h3>Real-World Example</h3>
+<div class="code-title">E-Commerce Product Page</div>
+<pre><code class="language-text">Header
+Product Details
+Description
+Reviews
+Server Components
+Add To Cart
+Quantity Selector
+Client Components</code></pre>
+<p>
+Only interactive parts need browser JavaScript.
+</p>
+<h3>Server Component vs Client Component</h3>
+<table>
+<tr>
+<th>Feature</th>
+<th>Server Component</th>
+<th>Client Component</th>
+</tr>
+<tr>
+<td>Runs On Server</td>
+<td>✅</td>
+<td>✅ (pre-render)</td>
+</tr>
+<tr>
+<td>Runs In Browser</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>useState</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>useEffect</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Event Handlers</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Database Access</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>cookies()</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>headers()</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>Bundle Size</td>
+<td>Smaller</td>
+<td>Larger</td>
+</tr>
+</table>
+<h3>The Most Important Difference</h3>
+<div class="code-title">Server Component</div>
+<pre><code class="language-text">Component Executes
+Only On Server</code></pre>
+<div class="code-title">Client Component</div>
+<pre><code class="language-text">Component Executes
+On Server And Browser</code></pre>
+<h3>Memory Trick</h3>
+<div class="code-title">Server Component</div>
+<pre><code class="language-text">Data
+Content
+SEO
+Database
+Server Logic</code></pre>
+<div class="code-title">Client Component</div>
+<pre><code class="language-text">Clicks
+Forms
+State
+Effects
+Animations</code></pre>
+<h3>Interview Tip</h3>
+<div class="feature">
+Server Components are used for rendering content and fetching data on the server, while Client Components are used for browser interactivity such as state management, effects, and event handlers.
+</div>
+<div class="feature">
+<strong>One-Line Definition:</strong><br/>
+Server Components execute only on the server and do not send component JavaScript to the browser, while Client Components execute in the browser and support interactivity using React hooks and event handlers.
+</div>
+<h2 class="section-title" id="01-06"><span class="secnum">01-06</span>How do you mark a component as a Client Component with 'use client'?</h2>
+<p>
+The <code>'use client'</code> directive is used at the top of a file to mark a component as a Client Component in the Next.js App Router.
+</p>
+<div class="feature">
+The primary purpose of <code>'use client'</code> is to enable browser-side interactivity such as React hooks, event handlers, browser APIs, and client-side state management.
+</div>
+<h3>Why Is 'use client' Needed?</h3>
+<p>
+By default, all components in the App Router are Server Components.
+</p>
+<p>
+Server Components cannot use:
+</p>
+<ul>
+<li>useState()</li>
+<li>useEffect()</li>
+<li>useRef()</li>
+<li>Event Handlers</li>
+<li>Browser APIs</li>
+<li>Client-side Libraries</li>
+</ul>
+<p>
+When we need any of these features, we must mark the component as a Client Component.
+</p>
+<h3>Basic Example</h3>
+<div class="code-title">Client Component</div>
+<pre><code class="language-jsx">'use client';
+export default function Counter() {
+  return &lt;h1&gt;Client Component&lt;/h1&gt;;
+}</code></pre>
+<p>
+The directive must be placed at the top of the file before imports and other code.
+</p>
+<h3>Using useState()</h3>
+<div class="code-title">Counter Example</div>
+<pre><code class="language-jsx">'use client';
+import { useState } from 'react';
+export default function Counter() {
+  const [count, setCount] = useState(0);
+  return (
+    &lt;button
+      onClick={() =&gt; setCount(count + 1)}
+    &gt;
+      Count: {count}
+    &lt;/button&gt;
+  );
+}</code></pre>
+<p>
+This component requires <code>'use client'</code> because it uses <code>useState()</code> and a click event.
+</p>
+<h3>Using useEffect()</h3>
+<div class="code-title">Effect Example</div>
+<pre><code class="language-jsx">'use client';
+import { useEffect } from 'react';
+export default function Page() {
+  useEffect(() =&gt; {
+    console.log('Component Mounted');
+  }, []);
+  return &lt;h1&gt;Hello World&lt;/h1&gt;;
+}</code></pre>
+<p>
+The <code>useEffect()</code> hook runs in the browser, so it requires a Client Component.
+</p>
+<h3>Using Browser APIs</h3>
+<div class="code-title">Window Example</div>
+<pre><code class="language-jsx">'use client';
+export default function Page() {
+  const width = window.innerWidth;
+  return &lt;h1&gt;Width: {width}&lt;/h1&gt;;
+}</code></pre>
+<p>
+Browser objects such as <code>window</code>, <code>document</code>, and <code>localStorage</code> are only available in Client Components.
+</p>
+<h3>What Happens Internally?</h3>
+<div class="code-title">Server Component</div>
+<pre><code class="language-text">Server
+   │
+   ▼
+Render HTML
+   │
+   ▼
+Send HTML</code></pre>
+<div class="code-title">Client Component</div>
+<pre><code class="language-text">Server
+   │
+   ▼
+Generate Initial HTML
+   │
+   ▼
+Send HTML + JavaScript
+   │
+   ▼
+Browser Downloads JS
+   │
+   ▼
+Hydration
+   │
+   ▼
+Interactive Component</code></pre>
+<h3>Server Component vs Client Component</h3>
+<table>
+<tr>
+<th>Feature</th>
+<th>Server Component</th>
+<th>Client Component</th>
+</tr>
+<tr>
+<td>Default in App Router</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>useState()</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>useEffect()</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>useRef()</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Event Handlers</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Browser APIs</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Database Access</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>Smaller JS Bundle</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+</table>
+<h3>Correct Placement</h3>
+<div class="code-title">Correct</div>
+<pre><code class="language-jsx">'use client';
+import { useState } from 'react';
+export default function Page() {
+  return &lt;h1&gt;Hello&lt;/h1&gt;;
+}</code></pre>
+<div class="code-title">Incorrect</div>
+<pre><code class="language-jsx">import { useState } from 'react';
+'use client';
+export default function Page() {
+  return &lt;h1&gt;Hello&lt;/h1&gt;;
+}</code></pre>
+<p>
+The directive must always be the first statement in the file.
+</p>
+<h3>What Gets Sent To The Browser?</h3>
+<p>
+When a component is marked with <code>'use client'</code>, Next.js sends:
+</p>
+<ul>
+<li>Rendered HTML</li>
+<li>Component JavaScript</li>
+<li>React Runtime Code</li>
+<li>Hydration Instructions</li>
+</ul>
+<p>
+This allows React to take control of the component after the page loads.
+</p>
+<h3>When Should We Use 'use client'?</h3>
+<ul>
+<li>Forms.</li>
+<li>Buttons with click handlers.</li>
+<li>Interactive UI.</li>
+<li>State management.</li>
+<li>Animations.</li>
+<li>Browser APIs.</li>
+<li>Third-party client-side libraries.</li>
+</ul>
+<h3>When Should We Avoid 'use client'?</h3>
+<ul>
+<li>Static content.</li>
+<li>Database queries.</li>
+<li>Server-side data fetching.</li>
+<li>SEO-focused pages.</li>
+<li>Components without interactivity.</li>
+</ul>
+<h3>Important Note</h3>
+<div class="feature">
+A common misconception is that Client Components render only in the browser. In reality, Next.js still generates their initial HTML on the server, then sends JavaScript to the browser for hydration and interactivity.
+</div>
+<h3>Interview Tip</h3>
+<div class="feature">
+Adding <code>'use client'</code> does not disable server rendering. It simply tells Next.js to include the component's JavaScript in the browser bundle and enable client-side React features.
+</div>
+<div class="feature">
+<strong>One-Line Definition:</strong><br/>
+The <code>'use client'</code> directive marks a component as a Client Component, allowing us to use React hooks, event handlers, browser APIs, and other interactive features in the browser.
+</div><div class="chapnav"><a class="prev" href="index.html">Guide Home</a><a class="next" href="02-routing-layouts-and-file-conventions.html">02 - Routing, Layouts & File Conventions</a></div></div></div><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-tsx.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>P4 - API Routes (Backend in Next.js) | Next.js App Router Guide</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:#0f172a;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.8;display:flex;min-height:100vh}
+a{color:inherit;text-decoration:none}
+.sidebar{width:290px;flex-shrink:0;background:#0b1220;border-right:1px solid #1e293b;padding:24px 18px;position:sticky;top:0;height:100vh;overflow-y:auto}
+.brand{color:#38bdf8;font-size:18px;font-weight:800;margin-bottom:4px}
+.brand small{display:block;color:#64748b;font-weight:400;font-size:12px;margin-top:4px}
+.chapter-nav{margin-top:22px}
+.chapter-nav a{display:block;padding:8px 10px;border-radius:8px;font-size:13px;color:#94a3b8;margin-bottom:4px;border-left:3px solid transparent}
+.chapter-nav a:hover{background:#111827;color:#e2e8f0}
+.chapter-nav a.active{background:#111827;color:#38bdf8;border-left:3px solid #38bdf8;font-weight:bold}
+.chapter-nav .chnum{display:inline-block;width:22px;color:#475569;font-family:monospace}
+.toc{margin-top:22px;border-top:1px solid #1e293b;padding-top:16px}
+.toc-title{color:#fbbf24;font-size:12px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px}
+.toc a{display:block;font-size:12.5px;color:#8ea3c2;padding:5px 8px;border-radius:6px;line-height:1.4}
+.toc a:hover{background:#111827;color:#e2e8f0}
+.main{flex:1;padding:40px 48px;max-width:980px}
+.container{max-width:900px}
+h1.page-title{color:#38bdf8;margin-bottom:6px;font-size:30px}
+.page-sub{color:#64748b;margin-bottom:28px;font-size:14px}
+h2.section-title{color:#a78bfa;margin-top:52px;margin-bottom:14px;font-size:23px;border-top:1px solid #1e293b;padding-top:38px}
+h2.section-title .secnum{color:#475569;font-family:monospace;margin-right:10px;font-size:16px}
+h3{color:#fbbf24;margin-top:25px;margin-bottom:10px;font-size:17px}
+h4{color:#38bdf8;margin-top:18px;margin-bottom:8px;font-size:15px}
+h5{color:#93c5fd;margin-top:14px;margin-bottom:6px;font-size:14px}
+p{margin-bottom:15px}
+ul,ol{margin-left:20px;margin-bottom:15px}
+li{margin-bottom:8px}
+strong{color:#f1f5f9}
+code{color:#93c5fd;font-family:'JetBrains Mono',monospace;font-size:.92em}
+.feature{background:#1e293b;border-left:5px solid #38bdf8;padding:15px;border-radius:8px;margin:20px 0}
+.warning{background:#2a1a1a;border-left:5px solid #f87171;padding:15px;border-radius:8px;margin:20px 0}
+.summary{background:#1a2a1e;border-left:5px solid #34d399;padding:15px;border-radius:8px;margin:20px 0}
+.note{background:#1e293b;border-left:5px solid #a78bfa;padding:15px;border-radius:8px;margin:20px 0}
+.code-title{background:#1e293b;color:#93c5fd;padding:10px;font-weight:bold;border-radius:6px 6px 0 0;font-size:13px;font-family:monospace}
+pre[class*="language-"]{margin:0 0 20px 0!important;border-radius:0 0 6px 6px}
+pre code{white-space:pre}
+table{width:100%;border-collapse:collapse;margin:20px 0}
+th{background:#1e293b;color:#38bdf8;text-align:left;padding:12px}
+td{padding:12px;border-top:1px solid #334155}
+hr{border:none;border-top:1px solid #1e293b;margin:30px 0}
+.chapnav{display:flex;justify-content:space-between;margin-top:60px;padding-top:24px;border-top:1px solid #1e293b}
+.chapnav a{background:#111827;padding:12px 18px;border-radius:10px;border:1px solid #1e293b;font-size:14px;color:#94a3b8}
+.chapnav a:hover{color:#38bdf8;border-color:#38bdf8}
+.chapnav .prev::before{content:"<- "}
+.chapnav .next::after{content:" ->"}
+@media(max-width:900px){body{flex-direction:column}.sidebar{position:relative;height:auto;width:100%}}
+</style>
+</head>
+<body>
+<div class="sidebar">
+<div class="brand">Next.js Pages Router<small>Complete Step-by-Step Guide</small></div>
+<div class="chapter-nav"><a class="" href="pages-P1-introduction-to-next.js-and-the-pages-router.html"><span class="chnum">P1</span>Introduction to Next.js & the Pages Router</a><a class="" href="pages-P2-file-based-routing-and-navigation.html"><span class="chnum">P2</span>File-Based Routing & Navigation</a><a class="" href="pages-P3-rendering-and-data-fetching.html"><span class="chnum">P3</span>Rendering & Data Fetching</a><a class="active" href="pages-P4-api-routes-backend-in-next.js.html"><span class="chnum">P4</span>API Routes (Backend in Next.js)</a><a class="" href="pages-P5-styling-and-assets.html"><span class="chnum">P5</span>Styling & Assets</a><a class="" href="pages-P6-seo-and-metadata-pages-router.html"><span class="chnum">P6</span>SEO & Metadata (Pages Router)</a><a class="" href="pages-P7-configuration-build-and-deployment.html"><span class="chnum">P7</span>Configuration, Build & Deployment</a></div>
+<div class="toc"><div class="toc-title">On this page</div><a href="#P4-01">What Are API Routes in Next.js and Where Do We Place Them?</a><a href="#P4-02">How Do We Handle Different HTTP Methods in a Single API Route?</a></div>
+</div><div class="main"><div class="container"><h1 class="page-title">P4 - API Routes (Backend in Next.js)</h1><div class="page-sub">Part P4 of 7 &middot; 2 topics &middot; Next.js Pages Router Guide</div><h2 class="section-title" id="P4-01"><span class="secnum">P4-01</span>What Are API Routes in Next.js and Where Do We Place Them?</h2>
+<p>
+API Routes are a way to build a backend API directly inside a Next.js Pages Router application. Any file placed inside the <code>pages/api</code> folder is automatically treated as an API endpoint instead of a page, and is never sent to the browser as part of the client bundle.
+</p>
+<div class="feature">
+<strong>Simple Meaning:</strong><br>
+Anything inside <code>pages/api</code> runs only on the server and gives us a ready-made backend without needing a separate Express or Node server.
+</div>
+<h3>Where Do API Routes Live?</h3>
+<div class="code-title">Folder Structure</div>
+<pre><code class="language-text">pages/
+├── api/
+│   ├── hello.js
+│   ├── users.js
+│   └── users/
+│       └── [id].js</code></pre>
+<h3>Basic API Route</h3>
+<div class="code-title">pages/api/hello.js</div>
+<pre><code class="language-js">export default function handler(req, res) {
+  res.status(200).json({ message: 'Hello World' });
+}</code></pre>
+<p>
+This file automatically becomes available at <code>/api/hello</code>. The exported default function receives Node-style <code>req</code> and <code>res</code> objects, the same pattern used by Express.
+</p>
+<h3>Dynamic API Routes</h3>
+<div class="code-title">pages/api/users/[id].js</div>
+<pre><code class="language-js">export default function handler(req, res) {
+  const { id } = req.query;
+  res.status(200).json({ userId: id });
+}</code></pre>
+<p>
+Dynamic segments work the same way as page routes — a file named <code>[id].js</code> captures the URL segment as <code>req.query.id</code>.
+</p>
+<h3>Why Use API Routes?</h3>
+<ul>
+<li>Build a backend without a separate server</li>
+<li>Hide API keys and secrets from the browser</li>
+<li>Connect directly to a database</li>
+<li>Handle form submissions and webhooks</li>
+<li>Proxy requests to third-party APIs</li>
+</ul>
+<div class="warning">
+API Routes only exist in the Pages Router. In the App Router, the equivalent concept is a Route Handler defined in a <code>route.ts</code> file.
+</div>
+<h2 class="section-title" id="P4-02"><span class="secnum">P4-02</span>How Do We Handle Different HTTP Methods in a Single API Route?</h2>
+<p>
+A single API Route file can handle multiple HTTP methods (GET, POST, PUT, DELETE, and so on) by checking <code>req.method</code> inside the handler function and branching accordingly.
+</p>
+<div class="feature">
+<strong>Simple Meaning:</strong><br>
+Since an API Route exports one default function, we read <code>req.method</code> ourselves and decide what to do for each type of request.
+</div>
+<h3>Handling Multiple Methods</h3>
+<div class="code-title">pages/api/users.js</div>
+<pre><code class="language-js">export default function handler(req, res) {
+  switch (req.method) {
+    case 'GET':
+      return res.status(200).json({ users: [] });
+    case 'POST':
+      const newUser = req.body;
+      return res.status(201).json(newUser);
+    case 'PUT':
+      return res.status(200).json({ updated: true });
+    case 'DELETE':
+      return res.status(200).json({ deleted: true });
+    default:
+      res.setHeader('Allow', ['GET', 'POST', 'PUT', 'DELETE']);
+      return res.status(405).end(`Method ${req.method} Not Allowed`);
+  }
+}</code></pre>
+<h3>Reading the Request Body</h3>
+<p>
+Next.js automatically parses JSON request bodies, so <code>req.body</code> is ready to use for POST and PUT requests without any extra middleware.
+</p>
+<div class="code-title">Example POST Body</div>
+<pre><code class="language-js">export default function handler(req, res) {
+  if (req.method === 'POST') {
+    const { name, email } = req.body;
+    res.status(201).json({ name, email });
+  }
+}</code></pre>
+<h3>Setting the Response Status and Headers</h3>
+<pre><code class="language-js">res.status(404).json({ error: 'Not Found' });
+res.setHeader('Content-Type', 'application/json');
+res.setHeader('Cache-Control', 's-maxage=60');</code></pre>
+<div class="warning">
+Always return a 405 status with an <code>Allow</code> header for methods we don't explicitly handle — this tells clients exactly which methods are supported.
+</div><div class="chapnav"><a class="prev" href="pages-P3-rendering-and-data-fetching.html">P3 - Rendering & Data Fetching</a><a class="next" href="pages-P5-styling-and-assets.html">P5 - Styling & Assets</a></div></div></div><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-tsx.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+</body>
+</html>

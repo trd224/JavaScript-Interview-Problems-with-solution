@@ -1,0 +1,2144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>05 - Route Handlers, Client Data & Metadata (SEO) | Next.js App Router Guide</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:#0f172a;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.8;display:flex;min-height:100vh}
+a{color:inherit;text-decoration:none}
+.sidebar{width:290px;flex-shrink:0;background:#0b1220;border-right:1px solid #1e293b;padding:24px 18px;position:sticky;top:0;height:100vh;overflow-y:auto}
+.brand{color:#38bdf8;font-size:18px;font-weight:800;margin-bottom:4px}
+.brand small{display:block;color:#64748b;font-weight:400;font-size:12px;margin-top:4px}
+.chapter-nav{margin-top:22px}
+.chapter-nav a{display:block;padding:8px 10px;border-radius:8px;font-size:13px;color:#94a3b8;margin-bottom:4px;border-left:3px solid transparent}
+.chapter-nav a:hover{background:#111827;color:#e2e8f0}
+.chapter-nav a.active{background:#111827;color:#38bdf8;border-left:3px solid #38bdf8;font-weight:bold}
+.chapter-nav .chnum{display:inline-block;width:22px;color:#475569;font-family:monospace}
+.toc{margin-top:22px;border-top:1px solid #1e293b;padding-top:16px}
+.toc-title{color:#fbbf24;font-size:12px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px}
+.toc a{display:block;font-size:12.5px;color:#8ea3c2;padding:5px 8px;border-radius:6px;line-height:1.4}
+.toc a:hover{background:#111827;color:#e2e8f0}
+.main{flex:1;padding:40px 48px;max-width:980px}
+.container{max-width:900px}
+h1.page-title{color:#38bdf8;margin-bottom:6px;font-size:30px}
+.page-sub{color:#64748b;margin-bottom:28px;font-size:14px}
+h2.section-title{color:#a78bfa;margin-top:52px;margin-bottom:14px;font-size:23px;border-top:1px solid #1e293b;padding-top:38px}
+h2.section-title .secnum{color:#475569;font-family:monospace;margin-right:10px;font-size:16px}
+h3{color:#fbbf24;margin-top:25px;margin-bottom:10px;font-size:17px}
+h4{color:#38bdf8;margin-top:18px;margin-bottom:8px;font-size:15px}
+h5{color:#93c5fd;margin-top:14px;margin-bottom:6px;font-size:14px}
+p{margin-bottom:15px}
+ul,ol{margin-left:20px;margin-bottom:15px}
+li{margin-bottom:8px}
+strong{color:#f1f5f9}
+code{color:#93c5fd;font-family:'JetBrains Mono',monospace;font-size:.92em}
+.feature{background:#1e293b;border-left:5px solid #38bdf8;padding:15px;border-radius:8px;margin:20px 0}
+.warning{background:#2a1a1a;border-left:5px solid #f87171;padding:15px;border-radius:8px;margin:20px 0}
+.summary{background:#1a2a1e;border-left:5px solid #34d399;padding:15px;border-radius:8px;margin:20px 0}
+.note{background:#1e293b;border-left:5px solid #a78bfa;padding:15px;border-radius:8px;margin:20px 0}
+.code-title{background:#1e293b;color:#93c5fd;padding:10px;font-weight:bold;border-radius:6px 6px 0 0;font-size:13px;font-family:monospace}
+pre[class*="language-"]{margin:0 0 20px 0!important;border-radius:0 0 6px 6px}
+pre code{white-space:pre}
+table{width:100%;border-collapse:collapse;margin:20px 0}
+th{background:#1e293b;color:#38bdf8;text-align:left;padding:12px}
+td{padding:12px;border-top:1px solid #334155}
+hr{border:none;border-top:1px solid #1e293b;margin:30px 0}
+.chapnav{display:flex;justify-content:space-between;margin-top:60px;padding-top:24px;border-top:1px solid #1e293b}
+.chapnav a{background:#111827;padding:12px 18px;border-radius:10px;border:1px solid #1e293b;font-size:14px;color:#94a3b8}
+.chapnav a:hover{color:#38bdf8;border-color:#38bdf8}
+.chapnav .prev::before{content:"<- "}
+.chapnav .next::after{content:" ->"}
+@media(max-width:900px){body{flex-direction:column}.sidebar{position:relative;height:auto;width:100%}}
+</style>
+</head>
+<body>
+<div class="sidebar">
+<div class="brand">Next.js App Router<small>Complete Step-by-Step Guide</small></div>
+<div class="chapter-nav"><a class="" href="01-foundations-of-the-app-router.html"><span class="chnum">01</span>Foundations of the App Router</a><a class="" href="02-routing-layouts-and-file-conventions.html"><span class="chnum">02</span>Routing, Layouts & File Conventions</a><a class="" href="03-rendering-data-fetching-and-caching.html"><span class="chnum">03</span>Rendering, Data Fetching & Caching</a><a class="" href="04-server-actions-and-mutations.html"><span class="chnum">04</span>Server Actions & Mutations</a><a class="active" href="05-route-handlers-client-data-and-metadata-seo.html"><span class="chnum">05</span>Route Handlers, Client Data & Metadata (SEO)</a><a class="" href="06-styling-assets-and-optimized-components.html"><span class="chnum">06</span>Styling, Assets & Optimized Components</a><a class="" href="07-performance-and-optimization.html"><span class="chnum">07</span>Performance & Optimization</a></div>
+<div class="toc"><div class="toc-title">On this page</div><a href="#05-01">Route Handlers (route.ts) and How They Replace API Routes</a><a href="#05-02">How do you fetch data on the client side in a Next.js app?</a><a href="#05-03">What is SWR and how does it integrate with Next.js?</a><a href="#05-04">What is the metadata export in the App Router?</a><a href="#05-05">How do you generate dynamic metadata using generateMetadata()?</a><a href="#05-06">How does metadata title.template work in nested layouts?</a><a href="#05-07">What is metadataBase and why is it important for Open Graph URLs?</a><a href="#05-08">How do you generate a sitemap.xml using the App Router file convention?</a><a href="#05-09">How do you configure robots.txt in Next.js?</a><a href="#05-10">How do you add Open Graph and Twitter card tags in the App Router?</a><a href="#05-11">What is the opengraph-image.tsx File Convention in Next.js 14?</a></div>
+</div><div class="main"><div class="container"><h1 class="page-title">05 - Route Handlers, Client Data & Metadata (SEO)</h1><div class="page-sub">Part 05 of 7 &middot; 11 topics &middot; Next.js App Router Guide</div><h2 class="section-title" id="05-01"><span class="secnum">05-01</span>Route Handlers (route.ts) and How They Replace API Routes</h2>
+<p>
+Route Handlers are the App Router's replacement for API Routes. They live in a <code>route.ts</code> (or <code>route.js</code>) file inside the <code>app</code> directory and let us define server-side endpoints using the standard Web <code>Request</code> and <code>Response</code> APIs instead of the older <code>req, res</code> style used in <code>pages/api</code>.
+</p>
+<div class="feature">
+<strong>Simple Meaning:</strong><br>
+A Route Handler is a server function tied to a URL segment, defined by exporting an HTTP-method-named function from a <code>route.ts</code> file.
+</div>
+<h3>Basic Route Handler</h3>
+<div class="code-title">app/api/users/route.ts</div>
+<pre><code class="language-ts">export async function GET() {
+  const users = await db.user.findMany();
+  return Response.json(users);
+}
+export async function POST(request: Request) {
+  const body = await request.json();
+  const user = await db.user.create({ data: body });
+  return Response.json(user, { status: 201 });
+}</code></pre>
+<p>
+Each exported function name (GET, POST, PUT, PATCH, DELETE, HEAD, OPTIONS) maps directly to that HTTP method. A request that doesn't match any exported method automatically receives a 405 response.
+</p>
+<h3>Why Route Handlers Replace API Routes</h3>
+<table>
+<tr><th>pages/api (API Routes)</th><th>app/.../route.ts (Route Handlers)</th></tr>
+<tr><td>Single default export handling all methods</td><td>Separate named export per HTTP method</td></tr>
+<tr><td>Uses Node-style <code>req, res</code> objects</td><td>Uses Web standard <code>Request</code> / <code>Response</code></td></tr>
+<tr><td>No built-in fetch-style caching</td><td>GET handlers can opt into caching like <code>fetch</code></td></tr>
+<tr><td>Lives under <code>pages/api</code></td><td>Lives anywhere inside <code>app</code>, colocated with routes</td></tr>
+</table>
+<h3>Dynamic Segments and Request Data</h3>
+<div class="code-title">app/api/users/[id]/route.ts</div>
+<pre><code class="language-ts">export async function GET(
+  request: Request,
+  { params }: { params: Promise&lt;{ id: string }&gt; }
+) {
+  const { id } = await params;
+  const user = await db.user.findUnique({ where: { id } });
+  if (!user) return new Response("Not Found", { status: 404 });
+  return Response.json(user);
+}</code></pre>
+<p>
+Query parameters are read from the request's URL using <code>new URL(request.url).searchParams</code>, and cookies/headers are read with the <code>cookies()</code> and <code>headers()</code> functions from <code>next/headers</code>.
+</p>
+<div class="warning">
+A <code>route.ts</code> file cannot coexist with a <code>page.tsx</code> file in the same route segment — a segment is either a UI page or an API endpoint, not both.
+</div>
+<h3>Caching Behavior</h3>
+<p>
+GET Route Handlers are static by default when they don't read dynamic request data (like <code>cookies()</code>, <code>headers()</code>, or search params) and can be revalidated with the same <code>{ next: { revalidate } }</code ) options used by <code>fetch</code>. As soon as a Route Handler uses a dynamic API, it automatically switches to dynamic (uncached) rendering.
+</p>
+<h2 class="section-title" id="05-02"><span class="secnum">05-02</span>How do you fetch data on the client side in a Next.js app?</h2>
+<p>
+Client-side data fetching means fetching data in the browser after the page has loaded.
+</p>
+<div class="feature">
+In Next.js, we fetch data on the client side by using a Client Component with <code>'use client'</code>, then calling an API inside <code>useEffect()</code> or using a library like SWR or React Query.
+</div>
+<h3>When Do We Use Client-Side Fetching?</h3>
+<p>
+Client-side fetching is useful when data depends on browser interaction or user-specific state.
+</p>
+<ul>
+<li>Dashboard data</li>
+<li>User profile data</li>
+<li>Search results</li>
+<li>Filters</li>
+<li>Pagination</li>
+<li>Live updates</li>
+<li>Data after button click</li>
+</ul>
+<h3>Basic Client-Side Fetching</h3>
+<p>
+In the App Router, we must use <code>'use client'</code> because <code>useEffect()</code> runs only in the browser.
+</p>
+<div class="code-title">app/users/page.js</div>
+<pre><code class="language-jsx">'use client';
+import { useEffect, useState } from 'react';
+export default function UsersPage() {
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  useEffect(() =&gt; {
+    async function fetchUsers() {
+      const res = await fetch('/api/users');
+      const data = await res.json();
+      setUsers(data);
+      setLoading(false);
+    }
+    fetchUsers();
+  }, []);
+  if (loading) {
+    return &lt;h2&gt;Loading...&lt;/h2&gt;;
+  }
+  return (
+    &lt;div&gt;
+      &lt;h1&gt;Users&lt;/h1&gt;
+      {users.map(user =&gt; (
+        &lt;p key={user.id}&gt;{user.name}&lt;/p&gt;
+      ))}
+    &lt;/div&gt;
+  );
+}</code></pre>
+<h3>What Happens Internally?</h3>
+<div class="code-title">Client-Side Fetching Flow</div>
+<pre><code class="language-text">Page Loads
+    │
+    ▼
+React Component Renders
+    │
+    ▼
+useEffect Runs In Browser
+    │
+    ▼
+API Request Sent
+    │
+    ▼
+Data Received
+    │
+    ▼
+State Updates
+    │
+    ▼
+UI Re-renders</code></pre>
+<h3>Fetching Data After Button Click</h3>
+<p>
+Sometimes we do not want to fetch data immediately. We may fetch data only after a user action.
+</p>
+<div class="code-title">Button Click Fetch</div>
+<pre><code class="language-jsx">'use client';
+import { useState } from 'react';
+export default function ProductsPage() {
+  const [products, setProducts] = useState([]);
+  const loadProducts = async () =&gt; {
+    const res = await fetch('/api/products');
+    const data = await res.json();
+    setProducts(data);
+  };
+  return (
+    &lt;div&gt;
+      &lt;button onClick={loadProducts}&gt;Load Products&lt;/button&gt;
+      {products.map(product =&gt; (
+        &lt;p key={product.id}&gt;{product.name}&lt;/p&gt;
+      ))}
+    &lt;/div&gt;
+  );
+}</code></pre>
+<h3>Using SWR</h3>
+<p>
+SWR is a popular data fetching library from Vercel.
+</p>
+<p>
+It handles caching, loading states, revalidation, and refetching automatically.
+</p>
+<div class="code-title">Install SWR</div>
+<pre><code class="language-bash">npm install swr</code></pre>
+<div class="code-title">SWR Example</div>
+<pre><code class="language-jsx">'use client';
+import useSWR from 'swr';
+const fetcher = url =&gt; fetch(url).then(res =&gt; res.json());
+export default function UsersPage() {
+  const { data, error, isLoading } = useSWR('/api/users', fetcher);
+  if (isLoading) {
+    return &lt;h2&gt;Loading...&lt;/h2&gt;;
+  }
+  if (error) {
+    return &lt;h2&gt;Failed to load users&lt;/h2&gt;;
+  }
+  return (
+    &lt;div&gt;
+      {data.map(user =&gt; (
+        &lt;p key={user.id}&gt;{user.name}&lt;/p&gt;
+      ))}
+    &lt;/div&gt;
+  );
+}</code></pre>
+<h3>Why Use SWR?</h3>
+<table>
+<tr>
+<th>Feature</th>
+<th>useEffect + fetch</th>
+<th>SWR</th>
+</tr>
+<tr>
+<td>Manual Loading State</td>
+<td>Required</td>
+<td>Built-in</td>
+</tr>
+<tr>
+<td>Error Handling</td>
+<td>Manual</td>
+<td>Built-in</td>
+</tr>
+<tr>
+<td>Caching</td>
+<td>Manual</td>
+<td>Built-in</td>
+</tr>
+<tr>
+<td>Revalidation</td>
+<td>Manual</td>
+<td>Built-in</td>
+</tr>
+<tr>
+<td>Best For</td>
+<td>Simple cases</td>
+<td>Real applications</td>
+</tr>
+</table>
+<h3>Client-Side Fetching in Pages Router</h3>
+<p>
+In the Pages Router, client-side fetching is also done using <code>useEffect()</code>.
+</p>
+<div class="code-title">pages/users.js</div>
+<pre><code class="language-jsx">import { useEffect, useState } from 'react';
+export default function UsersPage() {
+  const [users, setUsers] = useState([]);
+  useEffect(() =&gt; {
+    async function fetchUsers() {
+      const res = await fetch('/api/users');
+      const data = await res.json();
+      setUsers(data);
+    }
+    fetchUsers();
+  }, []);
+  return (
+    &lt;div&gt;
+      {users.map(user =&gt; (
+        &lt;p key={user.id}&gt;{user.name}&lt;/p&gt;
+      ))}
+    &lt;/div&gt;
+  );
+}</code></pre>
+<h3>Client-Side Fetching vs Server-Side Fetching</h3>
+<table>
+<tr>
+<th>Feature</th>
+<th>Client-Side Fetching</th>
+<th>Server-Side Fetching</th>
+</tr>
+<tr>
+<td>Where Data Fetches</td>
+<td>Browser</td>
+<td>Server</td>
+</tr>
+<tr>
+<td>SEO</td>
+<td>Weaker</td>
+<td>Better</td>
+</tr>
+<tr>
+<td>Initial HTML</td>
+<td>May not include data</td>
+<td>Includes data</td>
+</tr>
+<tr>
+<td>Best For</td>
+<td>Interactive/user-specific data</td>
+<td>SEO/fresh server-rendered data</td>
+</tr>
+<tr>
+<td>Loading State</td>
+<td>Usually needed</td>
+<td>Often not needed initially</td>
+</tr>
+</table>
+<h3>When Should We Choose Client-Side Fetching?</h3>
+<ul>
+<li>When data is not important for SEO.</li>
+<li>When data depends on user interaction.</li>
+<li>When data is private or user-specific.</li>
+<li>When we need live updates.</li>
+<li>When fetching should happen after the page loads.</li>
+</ul>
+<h3>When Should We Avoid Client-Side Fetching?</h3>
+<ul>
+<li>SEO-focused pages</li>
+<li>Blogs</li>
+<li>Marketing pages</li>
+<li>Product pages that need search engine indexing</li>
+<li>Pages where content should be visible immediately in HTML</li>
+</ul>
+<h3>Important Note</h3>
+<div class="feature">
+Client-side fetching means users may initially see a loading state because the data is fetched after JavaScript runs in the browser.
+</div>
+<h3>Interview Tip</h3>
+<div class="feature">
+A common misconception is that all data fetching in Next.js should happen on the server. In reality, client-side fetching is still useful for interactive, user-specific, and frequently changing data.
+</div>
+<div class="feature">
+<strong>One-Line Definition:</strong><br/>
+Client-side data fetching in Next.js means fetching data in the browser using a Client Component with <code>useEffect()</code>, <code>fetch()</code>, or a library like SWR, usually for interactive or user-specific data.
+</div>
+<h2 class="section-title" id="05-03"><span class="secnum">05-03</span>What is SWR and how does it integrate with Next.js?</h2>
+<p>
+SWR is a React data fetching library created by Vercel that provides caching, automatic revalidation, request deduplication, polling, and real-time data synchronization.
+</p>
+<div class="feature">
+SWR stands for <strong>Stale-While-Revalidate</strong>. It immediately shows cached data (stale data), then fetches fresh data in the background and updates the UI automatically.
+</div>
+<h3>Why Do We Need SWR?</h3>
+<p>
+Without SWR, we often write repetitive code for:
+</p>
+<ul>
+<li>Loading states</li>
+<li>Error handling</li>
+<li>Caching</li>
+<li>Refetching</li>
+<li>Revalidation</li>
+</ul>
+<div class="code-title">Without SWR</div>
+<pre><code class="language-jsx">'use client';
+import { useEffect, useState } from 'react';
+export default function Users() {
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  useEffect(() =&gt; {
+    async function loadUsers() {
+      const res = await fetch('/api/users');
+      const data = await res.json();
+      setUsers(data);
+      setLoading(false);
+    }
+    loadUsers();
+  }, []);
+  return loading
+    ? &lt;h2&gt;Loading...&lt;/h2&gt;
+    : &lt;div&gt;{users.length}&lt;/div&gt;;
+}</code></pre>
+<p>
+SWR handles most of this automatically.
+</p>
+<h3>Install SWR</h3>
+<div class="code-title">Terminal</div>
+<pre><code class="language-bash">npm install swr</code></pre>
+<h3>Basic SWR Example</h3>
+<div class="code-title">Client Component</div>
+<pre><code class="language-jsx">'use client';
+import useSWR from 'swr';
+const fetcher = (url) =&gt; fetch(url).then(res=&gt;res.json());
+export default function Users(){
+  const {data, error, isLoading} = useSWR(
+    '/api/users',
+    fetcher
+  );
+  if(isLoading){
+    return &lt;h2&gt;Loading...&lt;/h2&gt;;
+  }
+  if(error){
+    return &lt;h2&gt;Error Loading Users&lt;/h2&gt;;
+  }
+  return(
+    &lt;div&gt;
+      {data.map(user=&gt;(
+        &lt;p key={user.id}&gt;
+          {user.name}
+        &lt;/p&gt;
+      ))}
+    &lt;/div&gt;
+  );
+}</code></pre>
+<h3>What Does SWR Mean?</h3>
+<div class="code-title">Stale-While-Revalidate Flow</div>
+<pre><code class="language-text">Cached Data
+      │
+      ▼
+Show Immediately
+      │
+      ▼
+Fetch Fresh Data
+In Background
+      │
+      ▼
+Update Cache
+      │
+      ▼
+Re-render UI</code></pre>
+<h3>Example Timeline</h3>
+<div class="code-title">Timeline</div>
+<pre><code class="language-text">First Visit
+      │
+      ▼
+API Request
+      │
+      ▼
+Cache Result
+      │
+      ▼
+User Leaves Page
+      │
+      ▼
+Returns Later
+      │
+      ▼
+Show Cached Data
+Immediately
+      │
+      ▼
+Fetch Latest Data
+      │
+      ▼
+Update Screen</code></pre>
+<h3>Why Is SWR Fast?</h3>
+<p>
+Because cached data can be displayed instantly.
+</p>
+<p>
+Users do not always need to wait for a new API request.
+</p>
+<h3>Automatic Revalidation</h3>
+<p>
+SWR automatically refetches data when:
+</p>
+<ul>
+<li>User returns to the tab.</li>
+<li>Network reconnects.</li>
+<li>Component remounts.</li>
+</ul>
+<div class="code-title">Example</div>
+<pre><code class="language-jsx">const {data}=useSWR(
+  '/api/users',
+  fetcher
+);</code></pre>
+<p>
+These behaviors work automatically.
+</p>
+<h3>Polling Data</h3>
+<p>
+SWR can automatically refresh data at a specified interval.
+</p>
+<div class="code-title">Auto Refresh Every 5 Seconds</div>
+<pre><code class="language-jsx">const {data}=useSWR(
+  '/api/users',
+  fetcher,
+  {refreshInterval:5000}
+);</code></pre>
+<h3>Manual Revalidation</h3>
+<p>
+We can force SWR to refetch data.
+</p>
+<div class="code-title">Example</div>
+<pre><code class="language-jsx">import useSWR,{mutate} from 'swr';
+const refresh=()=&gt;{
+  mutate('/api/users');
+};</code></pre>
+<h3>What Happens Internally?</h3>
+<div class="code-title">SWR Flow</div>
+<pre><code class="language-text">Component Mounts
+       │
+       ▼
+Check Cache
+       │
+       ├── Exists
+       │      │
+       │      ▼
+       │   Show Data
+       │
+       ▼
+Fetch Latest Data
+       │
+       ▼
+Update Cache
+       │
+       ▼
+Update UI</code></pre>
+<h3>How Does SWR Integrate With Next.js?</h3>
+<p>
+SWR works especially well with Next.js because both are maintained by Vercel.
+</p>
+<ul>
+<li>Works in Client Components.</li>
+<li>Works with API Routes.</li>
+<li>Works with Route Handlers.</li>
+<li>Works with Server Components + Client Components.</li>
+<li>Supports Next.js caching strategies.</li>
+</ul>
+<h3>App Router Example</h3>
+<div class="code-title">app/users/page.js</div>
+<pre><code class="language-jsx">'use client';
+import useSWR from 'swr';
+const fetcher=url=&gt;
+  fetch(url).then(res=&gt;res.json());
+export default function UsersPage(){
+  const {data,isLoading}=useSWR(
+    '/api/users',
+    fetcher
+  );
+  if(isLoading){
+    return &lt;h2&gt;Loading...&lt;/h2&gt;;
+  }
+  return(
+    &lt;div&gt;
+      Total Users: {data.length}
+    &lt;/div&gt;
+  );
+}</code></pre>
+<h3>Pages Router Example</h3>
+<div class="code-title">pages/users.js</div>
+<pre><code class="language-jsx">import useSWR from 'swr';
+const fetcher=url=&gt;
+  fetch(url).then(res=&gt;res.json());
+export default function Users(){
+  const {data}=useSWR(
+    '/api/users',
+    fetcher
+  );
+  return(
+    &lt;div&gt;
+      {data?.length}
+    &lt;/div&gt;
+  );
+}</code></pre>
+<h3>SWR vs useEffect</h3>
+<table>
+<tr>
+<th>Feature</th>
+<th>useEffect + fetch</th>
+<th>SWR</th>
+</tr>
+<tr>
+<td>Loading State</td>
+<td>Manual</td>
+<td>Built-in</td>
+</tr>
+<tr>
+<td>Error Handling</td>
+<td>Manual</td>
+<td>Built-in</td>
+</tr>
+<tr>
+<td>Caching</td>
+<td>Manual</td>
+<td>Built-in</td>
+</tr>
+<tr>
+<td>Revalidation</td>
+<td>Manual</td>
+<td>Built-in</td>
+</tr>
+<tr>
+<td>Polling</td>
+<td>Manual</td>
+<td>Built-in</td>
+</tr>
+<tr>
+<td>Request Deduplication</td>
+<td>Manual</td>
+<td>Built-in</td>
+</tr>
+</table>
+<h3>When Should We Use SWR?</h3>
+<ul>
+<li>User dashboards.</li>
+<li>Profile pages.</li>
+<li>Live statistics.</li>
+<li>Search results.</li>
+<li>Admin panels.</li>
+<li>Frequently changing data.</li>
+</ul>
+<h3>When Should We Avoid SWR?</h3>
+<ul>
+<li>SEO-critical pages.</li>
+<li>Static marketing pages.</li>
+<li>Pages that should be rendered fully on the server.</li>
+</ul>
+<h3>Important Note</h3>
+<div class="feature">
+SWR runs in Client Components. If we need SEO-friendly data fetching, Server Components or server-side data fetching should usually be preferred.
+</div>
+<h3>Interview Tip</h3>
+<div class="feature">
+A common misconception is that SWR replaces server-side rendering. In reality, SWR is primarily for client-side data fetching, caching, and revalidation.
+</div>
+<div class="feature">
+<strong>One-Line Definition:</strong><br/>
+SWR is a React data fetching library from Vercel that integrates seamlessly with Next.js by providing client-side caching, automatic revalidation, polling, and stale-while-revalidate data fetching.
+</div>
+<h2 class="section-title" id="05-04"><span class="secnum">05-04</span>What is the metadata export in the App Router?</h2>
+<p>
+The <code>metadata</code> export is a special App Router feature that allows us to define page metadata such as title, description, Open Graph tags, Twitter cards, icons, and other SEO-related information without using the <code>Head</code> component.
+</p>
+<div class="feature">
+The <code>metadata</code> export automatically generates HTML head tags and is the recommended way to manage SEO metadata in the App Router.
+</div>
+<h3>Static Metadata Example</h3>
+<p>
+Use <code>metadata</code> when metadata is known in advance and does not depend on fetched data.
+</p>
+<div class="code-title">app/about/page.js</div>
+<pre><code class="language-js">export const metadata = {
+  title: 'About Us',
+  description: 'Learn more about our company.'
+};
+export default function About() {
+  return &lt;h1&gt;About Page&lt;/h1&gt;;
+}</code></pre>
+<h3>Generated HTML</h3>
+<div class="code-title">HTML Output</div>
+<pre><code class="language-html">&lt;head&gt;
+  &lt;title&gt;About Us&lt;/title&gt;
+  &lt;meta name="description" content="Learn more about our company." /&gt;
+&lt;/head&gt;</code></pre>
+<h3>Layout Metadata Example</h3>
+<p>
+Metadata can also be defined inside <code>layout.js</code>. This metadata is inherited by all child pages unless a page overrides it.
+</p>
+<div class="code-title">app/layout.js</div>
+<pre><code class="language-js">export const metadata = {
+  title: 'My Website',
+  description: 'Welcome to my website'
+};
+export default function RootLayout({ children }) {
+  return (
+    &lt;html lang="en"&gt;
+      &lt;body&gt;{children}&lt;/body&gt;
+    &lt;/html&gt;
+  );
+}</code></pre>
+<h3>Inheritance Flow</h3>
+<div class="code-title">Project Structure</div>
+<pre><code class="language-text">app
+├── layout.js
+├── page.js
+├── about
+│   └── page.js
+└── products
+    └── page.js</code></pre>
+<p>
+All pages automatically inherit metadata from <code>layout.js</code> unless they define their own metadata.
+</p>
+<div class="code-title">Metadata Flow</div>
+<pre><code class="language-text">layout.js
+    │
+    ▼
+Global Metadata
+    │
+    ▼
+Inherited By All Pages</code></pre>
+<h3>Open Graph Example</h3>
+<div class="code-title">Open Graph Metadata</div>
+<pre><code class="language-js">export const metadata = {
+  title: 'About Us',
+  description: 'Learn more about our company.',
+  openGraph: {
+    title: 'About Us',
+    description: 'Learn more about our company.',
+    type: 'website'
+  }
+};</code></pre>
+<p>
+This automatically generates Open Graph tags used by Facebook, LinkedIn, WhatsApp, and other social media platforms.
+</p>
+<h3>Dynamic Metadata Example</h3>
+<p>
+When metadata depends on API data, database data, or CMS content, we use <code>generateMetadata()</code>.
+</p>
+<div class="code-title">app/products/[id]/page.js</div>
+<pre><code class="language-js">async function getProduct(id) {
+  const res = await fetch(`https://dummyjson.com/products/${id}`);
+  return res.json();
+}
+export async function generateMetadata({ params }) {
+  const { id } = await params;
+  const product = await getProduct(id);
+  return {
+    title: product.title,
+    description: product.description
+  };
+}
+export default async function Page({ params }) {
+  const { id } = await params;
+  const product = await getProduct(id);
+  return (
+    &lt;div&gt;
+      &lt;h1&gt;{product.title}&lt;/h1&gt;
+      &lt;p&gt;{product.description}&lt;/p&gt;
+      &lt;p&gt;Price: ${product.price}&lt;/p&gt;
+    &lt;/div&gt;
+  );
+}</code></pre>
+<h3>Do We Really Fetch Data Twice?</h3>
+<p>
+At first glance, it looks like <code>getProduct()</code> is called twice:
+</p>
+<ul>
+<li>Once inside <code>generateMetadata()</code>.</li>
+<li>Once inside the page component.</li>
+</ul>
+<div class="code-title">Example</div>
+<pre><code class="language-js">export async function generateMetadata({ params }) {
+  const { id } = await params;
+  const product = await getProduct(id);
+  return {
+    title: product.title,
+    description: product.description
+  };
+}
+export default async function Page({ params }) {
+  const { id } = await params;
+  const product = await getProduct(id);
+  return (
+    &lt;div&gt;
+      &lt;h1&gt;{product.title}&lt;/h1&gt;
+    &lt;/div&gt;
+  );
+}</code></pre>
+<p>
+This appears to call <code>getProduct()</code> twice, but Next.js automatically deduplicates identical fetch requests.
+</p>
+<div class="code-title">What Happens Internally?</div>
+<pre><code class="language-text">generateMetadata()
+        │
+        ▼
+fetch(/products/1)
+        │
+        ▼
+Cache Result
+        │
+        ▼
+Page()
+        │
+        ▼
+fetch(/products/1)
+        │
+        ▼
+Return Cached Result</code></pre>
+<div class="feature">
+Although the code calls <code>getProduct()</code> twice, Next.js usually performs only one network request when both fetch calls are identical.
+</div>
+<div class="code-title">Summary</div>
+<pre><code class="language-text">Code Calls    = 2
+Network Calls = 1</code></pre>
+<h3>When Will It Fetch Twice?</h3>
+<p>
+If the requests are different, Next.js cannot deduplicate them.
+</p>
+<div class="code-title">Different Fetch Options</div>
+<pre><code class="language-js">fetch(`/products/${id}`);
+fetch(`/products/${id}`, {
+  cache: 'no-store'
+});</code></pre>
+<div class="code-title">Different URLs</div>
+<pre><code class="language-js">fetch(`/products/${id}`);
+fetch(`/products/${id}?details=true`);</code></pre>
+<div class="feature">
+Deduplication works only when the requests are identical.
+</div>
+<h3>How generateMetadata() Works</h3>
+<div class="code-title">Execution Flow</div>
+<pre><code class="language-text">Request
+   │
+   ▼
+/products/1
+   │
+   ▼
+generateMetadata()
+   │
+   ▼
+Fetch Product
+   │
+   ▼
+Create Metadata
+   │
+   ▼
+Page()
+   │
+   ▼
+Render Product HTML</code></pre>
+<h3>Generated Metadata</h3>
+<div class="code-title">Generated Head Tags</div>
+<pre><code class="language-html">&lt;head&gt;
+  &lt;title&gt;iPhone 15&lt;/title&gt;
+  &lt;meta name="description" content="Latest Apple smartphone" /&gt;
+&lt;/head&gt;</code></pre>
+<h3>Important Note</h3>
+<div class="feature">
+Although <code>getProduct()</code> appears to be called twice, once by <code>generateMetadata()</code> and once by <code>Page()</code>, Next.js automatically deduplicates identical fetch requests, so only one network request is typically made.
+</div>
+<h3>metadata vs generateMetadata()</h3>
+<table>
+<tr>
+<th>Feature</th>
+<th>metadata</th>
+<th>generateMetadata()</th>
+</tr>
+<tr>
+<td>Static Metadata</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>Dynamic Metadata</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Fetch Data</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Works In Layout</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>SEO Support</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+</table>
+<h3>When to Use metadata?</h3>
+<ul>
+<li>Home pages.</li>
+<li>About pages.</li>
+<li>Contact pages.</li>
+<li>Documentation pages.</li>
+<li>Marketing pages.</li>
+<li>Static SEO content.</li>
+</ul>
+<h3>When to Use generateMetadata()?</h3>
+<ul>
+<li>Product pages.</li>
+<li>Blog detail pages.</li>
+<li>User profile pages.</li>
+<li>CMS-driven pages.</li>
+<li>Database-driven pages.</li>
+<li>Any page whose metadata depends on fetched data.</li>
+</ul>
+<h3>Interview Tip</h3>
+<div class="feature">
+In the Pages Router we use <code>Head</code> from <code>next/head</code>. In the App Router we use <code>metadata</code> for static metadata and <code>generateMetadata()</code> for dynamic metadata.
+</div>
+<div class="feature">
+<strong>One-Line Definition:</strong><br/>
+The <code>metadata</code> export is a special App Router feature that declaratively defines SEO and HTML head metadata, while <code>generateMetadata()</code> dynamically generates metadata using fetched data.
+</div>
+<h2 class="section-title" id="05-05"><span class="secnum">05-05</span>How do you generate dynamic metadata using generateMetadata()?</h2>
+<p>
+The <code>generateMetadata()</code> function is used when metadata depends on dynamic data such as products, blog posts, user profiles, CMS content, or database records.
+</p>
+<div class="feature">
+Unlike the static <code>metadata</code> export, <code>generateMetadata()</code> can fetch data and generate metadata dynamically for each page.
+</div>
+<h3>Why Use generateMetadata()?</h3>
+<p>
+Sometimes metadata cannot be known ahead of time because it depends on the current route or fetched data.
+</p>
+<p>
+For example:
+</p>
+<ul>
+<li>Product Detail Pages</li>
+<li>Blog Detail Pages</li>
+<li>User Profile Pages</li>
+<li>CMS Content</li>
+<li>Database Records</li>
+</ul>
+<h3>Complete Example</h3>
+<div class="code-title">app/products/[id]/page.js</div>
+<pre><code class="language-js">async function getProduct(id) {
+  const res = await fetch(`https://dummyjson.com/products/${id}`);
+  return res.json();
+}
+export async function generateMetadata({ params }) {
+  const { id } = await params;
+  const product = await getProduct(id);
+  return {
+    title: product.title,
+    description: product.description
+  };
+}
+export default async function Page({ params }) {
+  const { id } = await params;
+  const product = await getProduct(id);
+  return (
+    &lt;div&gt;
+      &lt;h1&gt;{product.title}&lt;/h1&gt;
+      &lt;p&gt;{product.description}&lt;/p&gt;
+      &lt;p&gt;Price: ${product.price}&lt;/p&gt;
+    &lt;/div&gt;
+  );
+}</code></pre>
+<h3>How It Works</h3>
+<div class="code-title">Execution Flow</div>
+<pre><code class="language-text">Request
+   │
+   ▼
+/products/1
+   │
+   ▼
+generateMetadata()
+   │
+   ▼
+Fetch Product
+   │
+   ▼
+Create Metadata
+   │
+   ▼
+Page()
+   │
+   ▼
+Render HTML</code></pre>
+<h3>Generated HTML Head</h3>
+<div class="code-title">Output</div>
+<pre><code class="language-html">&lt;head&gt;
+  &lt;title&gt;iPhone 15&lt;/title&gt;
+  &lt;meta
+    name="description"
+    content="Latest Apple smartphone"
+  /&gt;
+&lt;/head&gt;</code></pre>
+<h3>Do We Really Fetch Data Twice?</h3>
+<p>
+At first glance, it appears that <code>getProduct()</code> is called twice.
+</p>
+<div class="code-title">Calls</div>
+<pre><code class="language-text">generateMetadata()
+      │
+      ▼
+getProduct()
+Page()
+      │
+      ▼
+getProduct()</code></pre>
+<p>
+However, Next.js automatically deduplicates identical fetch requests.
+</p>
+<div class="feature">
+Although the code calls <code>getProduct()</code> twice, Next.js usually performs only one network request when both fetch calls are identical.
+</div>
+<div class="code-title">Actual Behavior</div>
+<pre><code class="language-text">Code Calls    = 2
+Network Calls = 1</code></pre>
+<h3>When Will It Fetch Twice?</h3>
+<p>
+If the requests are different, deduplication cannot occur.
+</p>
+<div class="code-title">Different Fetch Options</div>
+<pre><code class="language-js">fetch(`/products/${id}`);
+fetch(`/products/${id}`, {
+  cache: 'no-store'
+});</code></pre>
+<div class="code-title">Different URLs</div>
+<pre><code class="language-js">fetch(`/products/${id}`);
+fetch(`/products/${id}?details=true`);</code></pre>
+<h3>generateMetadata() vs metadata</h3>
+<table>
+<tr>
+<th>Feature</th>
+<th>metadata</th>
+<th>generateMetadata()</th>
+</tr>
+<tr>
+<td>Static Metadata</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>Dynamic Metadata</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Can Fetch Data</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>SEO Support</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+</table>
+<h3>When Should We Use generateMetadata()?</h3>
+<ul>
+<li>Product detail pages.</li>
+<li>Blog detail pages.</li>
+<li>User profile pages.</li>
+<li>CMS-driven pages.</li>
+<li>Database-driven pages.</li>
+<li>Any route where metadata depends on fetched data.</li>
+</ul>
+<h3>Interview Tip</h3>
+<div class="feature">
+The <code>generateMetadata()</code> function runs before the page is rendered and allows us to fetch data and dynamically generate SEO metadata such as title and description.
+</div>
+<div class="feature">
+<strong>One-Line Definition:</strong><br/>
+<code>generateMetadata()</code> is an App Router function that dynamically generates page metadata by fetching data before the page is rendered.
+</div>
+<h2 class="section-title" id="05-06"><span class="secnum">05-06</span>How does metadata title.template work in nested layouts?</h2>
+<p>
+The <code>title.template</code> property allows a layout to define a title pattern that is automatically applied to all child pages and nested layouts.
+</p>
+<div class="feature">
+<title.template> acts like a wrapper around child page titles. The <code>%s</code> placeholder is replaced with the child page's title.
+</title.template></div>
+<h3>Basic Example</h3>
+<div class="code-title">app/layout.js</div>
+<pre><code class="language-js">export const metadata = {
+  title: {
+    template: '%s | My Website',
+    default: 'My Website'
+  }
+};
+export default function RootLayout({ children }) {
+  return (
+    &lt;html&gt;
+      &lt;body&gt;{children}&lt;/body&gt;
+    &lt;/html&gt;
+  );
+}</code></pre>
+<div class="code-title">app/about/page.js</div>
+<pre><code class="language-js">export const metadata = {
+  title: 'About'
+};
+export default function About() {
+  return &lt;h1&gt;About&lt;/h1&gt;;
+}</code></pre>
+<h3>Generated Title</h3>
+<div class="code-title">Result</div>
+<pre><code class="language-html">&lt;title&gt;About | My Website&lt;/title&gt;</code></pre>
+<h3>How %s Works</h3>
+<div class="code-title">Template</div>
+<pre><code class="language-text">%s | My Website</code></pre>
+<div class="code-title">Page Title</div>
+<pre><code class="language-text">About</code></pre>
+<div class="code-title">Final Title</div>
+<pre><code class="language-text">About | My Website</code></pre>
+<h3>Using default Title</h3>
+<p>
+If a page does not define its own title, Next.js uses the <code>default</code> value.
+</p>
+<div class="code-title">app/layout.js</div>
+<pre><code class="language-js">export const metadata = {
+  title: {
+    template: '%s | My Website',
+    default: 'My Website'
+  }
+};</code></pre>
+<div class="code-title">app/contact/page.js</div>
+<pre><code class="language-js">export default function Contact() {
+  return &lt;h1&gt;Contact&lt;/h1&gt;;
+}</code></pre>
+<div class="code-title">Generated Title</div>
+<pre><code class="language-html">&lt;title&gt;My Website&lt;/title&gt;</code></pre>
+<h3>Nested Layout Example</h3>
+<div class="code-title">Project Structure</div>
+<pre><code class="language-text">app
+├── layout.js
+├── page.js
+└── dashboard
+    ├── layout.js
+    ├── page.js
+    └── settings
+        └── page.js</code></pre>
+<h3>Root Layout</h3>
+<div class="code-title">app/layout.js</div>
+<pre><code class="language-js">export const metadata = {
+  title: {
+    template: '%s | My Website',
+    default: 'My Website'
+  }
+};</code></pre>
+<h3>Dashboard Layout</h3>
+<div class="code-title">app/dashboard/layout.js</div>
+<pre><code class="language-js">export const metadata = {
+  title: {
+    template: '%s | Dashboard',
+    default: 'Dashboard'
+  }
+};
+export default function DashboardLayout({
+  children
+}) {
+  return children;
+}</code></pre>
+<h3>Dashboard Page</h3>
+<div class="code-title">app/dashboard/page.js</div>
+<pre><code class="language-js">export const metadata = {
+  title: 'Home'
+};
+export default function DashboardPage() {
+  return &lt;h1&gt;Dashboard&lt;/h1&gt;;
+}</code></pre>
+<h3>Generated Title</h3>
+<div class="code-title">Result</div>
+<pre><code class="language-html">&lt;title&gt;Home | Dashboard&lt;/title&gt;</code></pre>
+<h3>Important Rule</h3>
+<div class="feature">
+The nearest layout's <code>title.template</code> wins.
+</div>
+<p>
+In the previous example:
+</p>
+<div class="code-title">Hierarchy</div>
+<pre><code class="language-text">Root Layout
+     │
+     ▼
+Dashboard Layout
+     │
+     ▼
+Dashboard Page</code></pre>
+<p>
+The Dashboard layout overrides the Root layout template.
+</p>
+<h3>Nested Layout Resolution</h3>
+<div class="code-title">Example</div>
+<pre><code class="language-text">Root Template:
+%s | My Website
+Dashboard Template:
+%s | Dashboard
+Page Title:
+Home</code></pre>
+<div class="code-title">Result</div>
+<pre><code class="language-text">Home | Dashboard</code></pre>
+<p>
+NOT:
+</p>
+<pre><code class="language-text">Home | Dashboard | My Website</code></pre>
+<h3>Multiple Nested Layouts</h3>
+<div class="code-title">Project Structure</div>
+<pre><code class="language-text">app
+└── dashboard
+    └── settings
+        ├── layout.js
+        └── page.js</code></pre>
+<div class="code-title">app/dashboard/settings/layout.js</div>
+<pre><code class="language-js">export const metadata = {
+  title: {
+    template: '%s | Settings',
+    default: 'Settings'
+  }
+};</code></pre>
+<div class="code-title">app/dashboard/settings/page.js</div>
+<pre><code class="language-js">export const metadata = {
+  title: 'Profile'
+};
+export default function Page() {
+  return &lt;h1&gt;Profile&lt;/h1&gt;;
+}</code></pre>
+<div class="code-title">Generated Title</div>
+<pre><code class="language-html">&lt;title&gt;Profile | Settings&lt;/title&gt;</code></pre>
+<h3>How Title Resolution Works</h3>
+<div class="code-title">Flow</div>
+<pre><code class="language-text">Page Title
+     │
+     ▼
+Find Nearest Layout
+     │
+     ▼
+Apply title.template
+     │
+     ▼
+Generate Final Title</code></pre>
+<h3>title.template vs title.default</h3>
+<table>
+<tr>
+<th>Property</th>
+<th>Purpose</th>
+</tr>
+<tr>
+<td>template</td>
+<td>Formats child page titles</td>
+</tr>
+<tr>
+<td>default</td>
+<td>Used when child page has no title</td>
+</tr>
+</table>
+<h3>Real-World Example</h3>
+<div class="code-title">Root Layout</div>
+<pre><code class="language-js">title: {
+  template: '%s | Amazon',
+  default: 'Amazon'
+}</code></pre>
+<div class="code-title">Product Page</div>
+<pre><code class="language-js">title: 'iPhone 15'</code></pre>
+<div class="code-title">Generated Title</div>
+<pre><code class="language-html">&lt;title&gt;iPhone 15 | Amazon&lt;/title&gt;</code></pre>
+<h3>Important Note</h3>
+<div class="feature">
+<title.template> only affects child routes. The layout's own title comes from <code>title.default</code>.
+</title.template></div>
+<h3>Interview Tip</h3>
+<div class="feature">
+In nested layouts, Next.js uses the closest parent layout's <code>title.template</code> when generating the final page title.
+</div>
+<div class="feature">
+<strong>One-Line Definition:</strong><br/>
+<code>metadata.title.template</code> defines a title format for child pages, and in nested layouts the nearest parent layout's template is applied to the page title.
+</div>
+<h2 class="section-title" id="05-07"><span class="secnum">05-07</span>What is metadataBase and why is it important for Open Graph URLs?</h2>
+<p>
+<code>metadataBase</code> is a Metadata API property that defines the base URL for all relative metadata URLs such as Open Graph images, canonical URLs, Twitter images, and alternates.
+</p>
+<div class="feature">
+Without <code>metadataBase</code>, relative URLs like <code>/og-image.jpg</code> cannot be converted into complete URLs such as <code>https://example.com/og-image.jpg</code>.
+</div>
+<h3>Why Do We Need metadataBase?</h3>
+<p>
+Social media platforms and search engines require absolute URLs.
+</p>
+<div class="code-title">Invalid Open Graph URL</div>
+<pre><code class="language-js">openGraph: {
+  images: ['/og-image.jpg']
+}</code></pre>
+<p>
+This only contains a relative path.
+</p>
+<div class="code-title">Result</div>
+<pre><code class="language-text">/og-image.jpg</code></pre>
+<p>
+Facebook, LinkedIn, WhatsApp, and Twitter cannot reliably use this path because the domain is missing.
+</p>
+<h3>Using metadataBase</h3>
+<div class="code-title">app/layout.js</div>
+<pre><code class="language-js">export const metadata = {
+  metadataBase: new URL('https://example.com'),
+  openGraph: {
+    images: ['/og-image.jpg']
+  }
+};
+export default function RootLayout({
+  children
+}) {
+  return (
+    &lt;html&gt;
+      &lt;body&gt;{children}&lt;/body&gt;
+    &lt;/html&gt;
+  );
+}</code></pre>
+<h3>Generated Open Graph URL</h3>
+<div class="code-title">Result</div>
+<pre><code class="language-text">https://example.com/og-image.jpg</code></pre>
+<h3>How It Works</h3>
+<div class="code-title">Flow</div>
+<pre><code class="language-text">metadataBase
+      │
+      ▼
+https://example.com
+      │
+      ▼
+Relative URL
+/og-image.jpg
+      │
+      ▼
+Combine
+      │
+      ▼
+https://example.com/og-image.jpg</code></pre>
+<h3>Open Graph Example</h3>
+<div class="code-title">app/layout.js</div>
+<pre><code class="language-js">export const metadata = {
+  metadataBase: new URL('https://example.com'),
+  openGraph: {
+    title: 'My Website',
+    description: 'Welcome',
+    images: ['/og-image.jpg']
+  }
+};</code></pre>
+<h3>Generated Tags</h3>
+<div class="code-title">HTML Output</div>
+<pre><code class="language-html">&lt;meta
+  property="og:image"
+  content="https://example.com/og-image.jpg"
+/&gt;</code></pre>
+<h3>Twitter Example</h3>
+<div class="code-title">app/layout.js</div>
+<pre><code class="language-js">export const metadata = {
+  metadataBase: new URL('https://example.com'),
+  twitter: {
+    card: 'summary_large_image',
+    images: ['/twitter-image.jpg']
+  }
+};</code></pre>
+<h3>Generated URL</h3>
+<div class="code-title">Result</div>
+<pre><code class="language-text">https://example.com/twitter-image.jpg</code></pre>
+<h3>Canonical URL Example</h3>
+<div class="code-title">app/layout.js</div>
+<pre><code class="language-js">export const metadata = {
+  metadataBase: new URL('https://example.com'),
+  alternates: {
+    canonical: '/'
+  }
+};</code></pre>
+<h3>Generated Canonical URL</h3>
+<div class="code-title">Output</div>
+<pre><code class="language-html">&lt;link
+  rel="canonical"
+  href="https://example.com"
+/&gt;</code></pre>
+<h3>Dynamic Product Example</h3>
+<div class="code-title">app/products/[id]/page.js</div>
+<pre><code class="language-js">export async function generateMetadata({
+  params
+}) {
+  const { id } = await params;
+  return {
+    title: `Product ${id}`,
+    openGraph: {
+      images: [`/products/${id}.jpg`]
+    }
+  };
+}</code></pre>
+<div class="code-title">app/layout.js</div>
+<pre><code class="language-js">export const metadata = {
+  metadataBase: new URL(
+    'https://example.com'
+  )
+};</code></pre>
+<h3>Generated URL</h3>
+<div class="code-title">Result</div>
+<pre><code class="language-text">https://example.com/products/1.jpg</code></pre>
+<h3>Using Environment Variables</h3>
+<div class="code-title">app/layout.js</div>
+<pre><code class="language-js">export const metadata = {
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_SITE_URL
+  )
+};</code></pre>
+<div class="code-title">.env.production</div>
+<pre><code class="language-text">NEXT_PUBLIC_SITE_URL=https://example.com</code></pre>
+<p>
+This makes the application portable between environments.
+</p>
+<h3>Without metadataBase vs With metadataBase</h3>
+<table>
+<tr>
+<th>Configuration</th>
+<th>Generated URL</th>
+</tr>
+<tr>
+<td>/og-image.jpg</td>
+<td>❌ Relative URL</td>
+</tr>
+<tr>
+<td>metadataBase + /og-image.jpg</td>
+<td>✅ Absolute URL</td>
+</tr>
+</table>
+<h3>Real-World Example</h3>
+<div class="code-title">Metadata</div>
+<pre><code class="language-js">export const metadata = {
+  metadataBase: new URL(
+    'https://amazon.com'
+  ),
+  openGraph: {
+    images: ['/iphone.jpg']
+  }
+};</code></pre>
+<div class="code-title">Generated URL</div>
+<pre><code class="language-text">https://amazon.com/iphone.jpg</code></pre>
+<h3>Important Note</h3>
+<div class="feature">
+Open Graph images, Twitter images, canonical links, and alternate URLs should generally be absolute URLs. <code>metadataBase</code> allows us to use simple relative paths while Next.js automatically generates complete URLs.
+</div>
+<h3>Interview Tip</h3>
+<div class="feature">
+<code>metadataBase</code> is commonly placed in the root layout because all child pages inherit it, allowing relative Open Graph and canonical URLs to be converted into fully qualified URLs automatically.
+</div>
+<div class="feature">
+<strong>One-Line Definition:</strong><br/>
+<code>metadataBase</code> defines the site's base URL and allows Next.js to automatically convert relative Open Graph, Twitter, and canonical URLs into absolute URLs required by search engines and social platforms.
+</div>
+<h2 class="section-title" id="05-08"><span class="secnum">05-08</span>How do you generate a sitemap.xml using the App Router file convention?</h2>
+<p>
+In the App Router, we create a special <code>sitemap.js</code> (or <code>sitemap.ts</code>) file. Next.js automatically generates a <code>sitemap.xml</code> file from the data returned by this file.
+</p>
+<div class="feature">
+The <code>sitemap.js</code> file is a built-in App Router file convention used to generate SEO-friendly sitemap.xml files.
+</div>
+<h3>What is a Sitemap?</h3>
+<p>
+A sitemap helps search engines discover and index pages on our website.
+</p>
+<p>
+Common search engines that use sitemaps:
+</p>
+<ul>
+<li>Google</li>
+<li>Bing</li>
+<li>Yahoo</li>
+<li>DuckDuckGo</li>
+</ul>
+<h3>Basic Sitemap Example</h3>
+<div class="code-title">app/sitemap.js</div>
+<pre><code class="language-js">export default function sitemap() {
+  return [
+    {
+      url: 'https://example.com',
+      lastModified: new Date()
+    },
+    {
+      url: 'https://example.com/about',
+      lastModified: new Date()
+    },
+    {
+      url: 'https://example.com/contact',
+      lastModified: new Date()
+    }
+  ];
+}</code></pre>
+<h3>Generated sitemap.xml</h3>
+<div class="code-title">Output</div>
+<pre><code class="language-xml">&lt;urlset&gt;
+  &lt;url&gt;
+    &lt;loc&gt;https://example.com&lt;/loc&gt;
+  &lt;/url&gt;
+  &lt;url&gt;
+    &lt;loc&gt;https://example.com/about&lt;/loc&gt;
+  &lt;/url&gt;
+  &lt;url&gt;
+    &lt;loc&gt;https://example.com/contact&lt;/loc&gt;
+  &lt;/url&gt;
+&lt;/urlset&gt;</code></pre>
+<h3>Dynamic Sitemap Example</h3>
+<p>
+For dynamic routes such as blog posts or products, we can fetch data and generate sitemap entries dynamically.
+</p>
+<div class="code-title">app/sitemap.js</div>
+<pre><code class="language-js">async function getProducts() {
+  const res = await fetch(
+    'https://dummyjson.com/products'
+  );
+  const data = await res.json();
+  return data.products;
+}
+export default async function sitemap() {
+  const products = await getProducts();
+  const productUrls = products.map(product =&gt; ({
+    url: `https://example.com/products/${product.id}`,
+    lastModified: new Date()
+  }));
+  return [
+    {
+      url: 'https://example.com',
+      lastModified: new Date()
+    },
+    ...productUrls
+  ];
+}</code></pre>
+<h3>How It Works</h3>
+<div class="code-title">Flow</div>
+<pre><code class="language-text">Request
+   │
+   ▼
+/sitemap.xml
+   │
+   ▼
+sitemap()
+   │
+   ▼
+Fetch Data
+   │
+   ▼
+Generate URLs
+   │
+   ▼
+Return Sitemap XML</code></pre>
+<h3>Additional Properties</h3>
+<p>
+Each sitemap entry can include additional SEO information.
+</p>
+<div class="code-title">Example</div>
+<pre><code class="language-js">export default function sitemap() {
+  return [
+    {
+      url: 'https://example.com',
+      lastModified: new Date(),
+      changeFrequency: 'daily',
+      priority: 1
+    }
+  ];
+}</code></pre>
+<h3>Generated XML</h3>
+<div class="code-title">Output</div>
+<pre><code class="language-xml">&lt;url&gt;
+  &lt;loc&gt;https://example.com&lt;/loc&gt;
+  &lt;lastmod&gt;2026-06-02&lt;/lastmod&gt;
+  &lt;changefreq&gt;daily&lt;/changefreq&gt;
+  &lt;priority&gt;1.0&lt;/priority&gt;
+&lt;/url&gt;</code></pre>
+<h3>File Location</h3>
+<div class="code-title">Project Structure</div>
+<pre><code class="language-text">app
+├── page.js
+├── layout.js
+├── sitemap.js
+├── robots.js
+└── products
+    └── [id]
+        └── page.js</code></pre>
+<h3>When is sitemap.xml Generated?</h3>
+<table>
+<tr>
+<th>Scenario</th>
+<th>Behavior</th>
+</tr>
+<tr>
+<td>Static Sitemap</td>
+<td>Generated Automatically</td>
+</tr>
+<tr>
+<td>Dynamic Sitemap</td>
+<td>Generated From Fetched Data</td>
+</tr>
+<tr>
+<td>App Router</td>
+<td>Uses sitemap.js</td>
+</tr>
+<tr>
+<td>Pages Router</td>
+<td>Manual Implementation Required</td>
+</tr>
+</table>
+<h3>Why Use sitemap.js?</h3>
+<ul>
+<li>Better SEO.</li>
+<li>Automatic XML generation.</li>
+<li>Supports dynamic routes.</li>
+<li>Built into Next.js.</li>
+<li>No custom API route required.</li>
+</ul>
+<h3>Interview Tip</h3>
+<div class="feature">
+In the App Router, creating a <code>sitemap.js</code> file automatically generates a <code>sitemap.xml</code> endpoint. The function returns an array of URLs, and Next.js converts it into valid XML.
+</div>
+<div class="feature">
+<strong>One-Line Definition:</strong><br/>
+The App Router generates <code>sitemap.xml</code> by using a special <code>sitemap.js</code> file that returns an array of sitemap entries, which Next.js automatically converts into XML.
+</div>
+<h2 class="section-title" id="05-09"><span class="secnum">05-09</span>How do you configure robots.txt in Next.js?</h2>
+<p>
+In Next.js App Router, we configure <code>robots.txt</code> by creating a special <code>robots.js</code> file inside the <code>app</code> folder.
+</p>
+<div class="feature">
+Next.js automatically converts the return value of <code>app/robots.js</code> into a valid <code>robots.txt</code> file.
+</div>
+<h3>What is robots.txt?</h3>
+<p>
+The <code>robots.txt</code> file tells search engine crawlers which pages or paths they are allowed or not allowed to crawl.
+</p>
+<div class="code-title">Example robots.txt</div>
+<pre><code class="language-text">User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /dashboard
+Sitemap: https://example.com/sitemap.xml</code></pre>
+<h3>Basic App Router Example</h3>
+<div class="code-title">app/robots.js</div>
+<pre><code class="language-js">export default function robots() {
+  return {
+    rules: {
+      userAgent: '*',
+      allow: '/',
+      disallow: ['/admin', '/dashboard']
+    },
+    sitemap: 'https://example.com/sitemap.xml'
+  };
+}</code></pre>
+<h3>Generated robots.txt</h3>
+<div class="code-title">Output</div>
+<pre><code class="language-text">User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /dashboard
+Sitemap: https://example.com/sitemap.xml</code></pre>
+<h3>Project Structure</h3>
+<div class="code-title">App Router File Convention</div>
+<pre><code class="language-text">app
+├── page.js
+├── layout.js
+├── sitemap.js
+├── robots.js
+└── admin
+    └── page.js</code></pre>
+<h3>Allow All Crawlers</h3>
+<div class="code-title">app/robots.js</div>
+<pre><code class="language-js">export default function robots() {
+  return {
+    rules: {
+      userAgent: '*',
+      allow: '/'
+    },
+    sitemap: 'https://example.com/sitemap.xml'
+  };
+}</code></pre>
+<h3>Block All Crawlers</h3>
+<div class="code-title">app/robots.js</div>
+<pre><code class="language-js">export default function robots() {
+  return {
+    rules: {
+      userAgent: '*',
+      disallow: '/'
+    }
+  };
+}</code></pre>
+<h3>Block Private Routes</h3>
+<p>
+We usually block private or user-specific routes from crawling.
+</p>
+<div class="code-title">app/robots.js</div>
+<pre><code class="language-js">export default function robots() {
+  return {
+    rules: {
+      userAgent: '*',
+      allow: '/',
+      disallow: ['/admin', '/dashboard', '/profile', '/checkout']
+    },
+    sitemap: 'https://example.com/sitemap.xml'
+  };
+}</code></pre>
+<h3>Multiple Rules Example</h3>
+<p>
+We can also define different rules for different crawlers.
+</p>
+<div class="code-title">app/robots.js</div>
+<pre><code class="language-js">export default function robots() {
+  return {
+    rules: [
+      {
+        userAgent: 'Googlebot',
+        allow: '/',
+        disallow: ['/private']
+      },
+      {
+        userAgent: '*',
+        allow: '/',
+        disallow: ['/admin']
+      }
+    ],
+    sitemap: 'https://example.com/sitemap.xml'
+  };
+}</code></pre>
+<h3>Using Environment Variable</h3>
+<p>
+In real projects, we should avoid hardcoding the domain and use an environment variable.
+</p>
+<div class="code-title">.env.local</div>
+<pre><code class="language-text">NEXT_PUBLIC_SITE_URL=https://example.com</code></pre>
+<div class="code-title">app/robots.js</div>
+<pre><code class="language-js">export default function robots() {
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL;
+  return {
+    rules: {
+      userAgent: '*',
+      allow: '/',
+      disallow: ['/admin', '/dashboard']
+    },
+    sitemap: `${baseUrl}/sitemap.xml`
+  };
+}</code></pre>
+<h3>Pages Router Alternative</h3>
+<p>
+In the Pages Router, we commonly place a static <code>robots.txt</code> file inside the <code>public</code> folder.
+</p>
+<div class="code-title">public/robots.txt</div>
+<pre><code class="language-text">User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /dashboard
+Sitemap: https://example.com/sitemap.xml</code></pre>
+<h3>robots.js vs public/robots.txt</h3>
+<table>
+<tr>
+<th>Method</th>
+<th>Use Case</th>
+</tr>
+<tr>
+<td><code>app/robots.js</code></td>
+<td>Best for App Router and dynamic configuration</td>
+</tr>
+<tr>
+<td><code>public/robots.txt</code></td>
+<td>Simple static robots.txt file</td>
+</tr>
+</table>
+<h3>Important Note</h3>
+<div class="feature">
+<code>robots.txt</code> controls crawling, not security. Do not use it to protect private data. Private pages must still be protected with authentication and authorization.
+</div>
+<h3>Interview Tip</h3>
+<div class="feature">
+In the App Router, we create <code>app/robots.js</code> and return crawler rules. Next.js automatically generates the <code>/robots.txt</code> route from it.
+</div>
+<div class="feature">
+<strong>One-Line Definition:</strong><br/>
+In Next.js, <code>robots.txt</code> is configured using <code>app/robots.js</code> in the App Router or <code>public/robots.txt</code> for a static file, and it tells search engines which routes they can or cannot crawl.
+</div>
+<h2 class="section-title" id="05-10"><span class="secnum">05-10</span>How do you add Open Graph and Twitter card tags in the App Router?</h2>
+<p>
+In the App Router, Open Graph and Twitter Card tags are added using the <code>metadata</code> export or <code>generateMetadata()</code>.
+</p>
+<div class="feature">
+Next.js automatically generates the required meta tags from the <code>openGraph</code> and <code>twitter</code> properties inside the Metadata API.
+</div>
+<h3>Why Use Open Graph and Twitter Cards?</h3>
+<p>
+These tags control how links appear when shared on social media platforms.
+</p>
+<ul>
+<li>Facebook</li>
+<li>LinkedIn</li>
+<li>WhatsApp</li>
+<li>X (Twitter)</li>
+<li>Telegram</li>
+<li>Discord</li>
+</ul>
+<h3>Basic Open Graph Example</h3>
+<div class="code-title">app/about/page.js</div>
+<pre><code class="language-js">export const metadata = {
+  title: 'About Us',
+  description: 'Learn more about our company.',
+  openGraph: {
+    title: 'About Us',
+    description: 'Learn more about our company.',
+    url: 'https://example.com/about',
+    siteName: 'My Website',
+    images: [
+      {
+        url: 'https://example.com/og-image.jpg',
+        width: 1200,
+        height: 630
+      }
+    ],
+    locale: 'en_US',
+    type: 'website'
+  }
+};
+export default function About() {
+  return &lt;h1&gt;About Page&lt;/h1&gt;;
+}</code></pre>
+<h3>Generated Open Graph Tags</h3>
+<div class="code-title">HTML Output</div>
+<pre><code class="language-html">&lt;meta property="og:title" content="About Us" /&gt;
+&lt;meta property="og:description" content="Learn more about our company." /&gt;
+&lt;meta property="og:url" content="https://example.com/about" /&gt;
+&lt;meta property="og:site_name" content="My Website" /&gt;
+&lt;meta property="og:type" content="website" /&gt;
+&lt;meta property="og:image" content="https://example.com/og-image.jpg" /&gt;</code></pre>
+<h3>Twitter Card Example</h3>
+<div class="code-title">app/about/page.js</div>
+<pre><code class="language-js">export const metadata = {
+  title: 'About Us',
+  description: 'Learn more about our company.',
+  twitter: {
+    card: 'summary_large_image',
+    title: 'About Us',
+    description: 'Learn more about our company.',
+    images: ['https://example.com/twitter-image.jpg']
+  }
+};</code></pre>
+<h3>Generated Twitter Tags</h3>
+<div class="code-title">HTML Output</div>
+<pre><code class="language-html">&lt;meta name="twitter:card" content="summary_large_image" /&gt;
+&lt;meta name="twitter:title" content="About Us" /&gt;
+&lt;meta name="twitter:description" content="Learn more about our company." /&gt;
+&lt;meta name="twitter:image" content="https://example.com/twitter-image.jpg" /&gt;</code></pre>
+<h3>Complete Example</h3>
+<div class="code-title">app/about/page.js</div>
+<pre><code class="language-js">export const metadata = {
+  title: 'About Us',
+  description: 'Learn more about our company.',
+  openGraph: {
+    title: 'About Us',
+    description: 'Learn more about our company.',
+    url: 'https://example.com/about',
+    siteName: 'My Website',
+    images: [
+      {
+        url: 'https://example.com/og-image.jpg',
+        width: 1200,
+        height: 630
+      }
+    ],
+    locale: 'en_US',
+    type: 'website'
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'About Us',
+    description: 'Learn more about our company.',
+    images: ['https://example.com/twitter-image.jpg']
+  }
+};
+export default function About() {
+  return &lt;h1&gt;About Page&lt;/h1&gt;;
+}</code></pre>
+<h3>Dynamic Open Graph Example</h3>
+<p>
+When metadata depends on fetched data, use <code>generateMetadata()</code>.
+</p>
+<div class="code-title">app/products/[id]/page.js</div>
+<pre><code class="language-js">async function getProduct(id) {
+  const res = await fetch(`https://dummyjson.com/products/${id}`);
+  return res.json();
+}
+export async function generateMetadata({ params }) {
+  const { id } = await params;
+  const product = await getProduct(id);
+  return {
+    title: product.title,
+    description: product.description,
+    openGraph: {
+      title: product.title,
+      description: product.description,
+      images: [product.thumbnail]
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: product.title,
+      description: product.description,
+      images: [product.thumbnail]
+    }
+  };
+}
+export default async function Page({ params }) {
+  const { id } = await params;
+  const product = await getProduct(id);
+  return (
+    &lt;div&gt;
+      &lt;h1&gt;{product.title}&lt;/h1&gt;
+      &lt;p&gt;{product.description}&lt;/p&gt;
+    &lt;/div&gt;
+  );
+}</code></pre>
+<h3>How It Works</h3>
+<div class="code-title">Flow</div>
+<pre><code class="language-text">Request
+   │
+   ▼
+Product Page
+   │
+   ▼
+generateMetadata()
+   │
+   ▼
+Fetch Product
+   │
+   ▼
+Generate Open Graph
+and Twitter Tags
+   │
+   ▼
+Render Page</code></pre>
+<h3>Common Twitter Card Types</h3>
+<table>
+<tr>
+<th>Card Type</th>
+<th>Description</th>
+</tr>
+<tr>
+<td>summary</td>
+<td>Small image card</td>
+</tr>
+<tr>
+<td>summary_large_image</td>
+<td>Large image preview card</td>
+</tr>
+<tr>
+<td>player</td>
+<td>Video or audio player card</td>
+</tr>
+<tr>
+<td>app</td>
+<td>Mobile app card</td>
+</tr>
+</table>
+<h3>Recommended Open Graph Image Size</h3>
+<div class="code-title">Recommended Size</div>
+<pre><code class="language-text">Width  = 1200px
+Height = 630px
+Aspect Ratio = 1.91 : 1</code></pre>
+<h3>Important Note</h3>
+<div class="feature">
+Open Graph tags are primarily used by Facebook, LinkedIn, WhatsApp, Telegram, and Discord, while Twitter Card tags are used by X (Twitter).
+</div>
+<h3>Interview Tip</h3>
+<div class="feature">
+In the App Router, Open Graph and Twitter Card tags are configured using the <code>openGraph</code> and <code>twitter</code> properties inside the Metadata API. Next.js automatically converts them into the appropriate meta tags.
+</div>
+<div class="feature">
+<strong>One-Line Definition:</strong><br/>
+Open Graph and Twitter Card tags are added in the App Router through the Metadata API using the <code>openGraph</code> and <code>twitter</code> properties, allowing social platforms to display rich link previews.
+</div>
+<h2 class="section-title" id="05-11"><span class="secnum">05-11</span>What is the opengraph-image.tsx File Convention in Next.js 14?</h2>
+<p>
+The <code>opengraph-image.tsx</code> file convention allows us to dynamically generate Open Graph images for pages in the App Router.
+</p>
+<div class="feature">
+Instead of creating image files manually, Next.js can generate Open Graph images on demand using React and the <code>ImageResponse</code> API.
+</div>
+<h3>Why Do We Need Open Graph Images?</h3>
+<p>
+When a page is shared on social media, platforms display a preview card.
+</p>
+<ul>
+<li>Facebook</li>
+<li>LinkedIn</li>
+<li>WhatsApp</li>
+<li>Telegram</li>
+<li>Discord</li>
+<li>X (Twitter)</li>
+</ul>
+<p>
+The Open Graph image is the large preview image shown in those cards.
+</p>
+<h3>Without opengraph-image.tsx</h3>
+<div class="code-title">metadata</div>
+<pre><code class="language-js">export const metadata = {
+  openGraph: {
+    images: [
+      'https://example.com/og-image.jpg'
+    ]
+  }
+};</code></pre>
+<p>
+We must manually create and manage image files.
+</p>
+<h3>With opengraph-image.tsx</h3>
+<div class="code-title">app/opengraph-image.tsx</div>
+<pre><code class="language-jsx">import { ImageResponse } from 'next/og';
+export const size = {
+  width: 1200,
+  height: 630
+};
+export const contentType = 'image/png';
+export default function Image() {
+  return new ImageResponse(
+    (
+      &lt;div
+        style={{
+          fontSize: 80,
+          background: 'black',
+          color: 'white',
+          width: '100%',
+          height: '100%',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center'
+        }}
+      &gt;
+        My Website
+      &lt;/div&gt;
+    )
+  );
+}</code></pre>
+<h3>Generated Result</h3>
+<div class="code-title">Output</div>
+<pre><code class="language-text">1200 × 630 PNG Image
+┌─────────────────────────┐
+│                         │
+│      My Website         │
+│                         │
+└─────────────────────────┘</code></pre>
+<h3>File Location</h3>
+<div class="code-title">Project Structure</div>
+<pre><code class="language-text">app
+├── layout.js
+├── page.js
+├── opengraph-image.tsx
+└── products
+    ├── [id]
+    │   ├── page.js
+    │   └── opengraph-image.tsx</code></pre>
+<p>
+Each route can have its own Open Graph image.
+</p>
+<h3>Route-Specific Open Graph Images</h3>
+<p>
+For example:
+</p>
+<div class="code-title">app/products/[id]/opengraph-image.tsx</div>
+<pre><code class="language-jsx">import { ImageResponse } from 'next/og';
+export default async function Image({
+  params
+}) {
+  const { id } = await params;
+  const product = await fetch(
+    `https://dummyjson.com/products/${id}`
+  ).then(res =&gt; res.json());
+  return new ImageResponse(
+    (
+      &lt;div
+        style={{
+          width: '100%',
+          height: '100%',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          fontSize: 70
+        }}
+      &gt;
+        {product.title}
+      &lt;/div&gt;
+    )
+  );
+}</code></pre>
+<p>
+Each product page can generate a unique social sharing image.
+</p>
+<h3>How It Works</h3>
+<div class="code-title">Flow</div>
+<pre><code class="language-text">User Shares URL
+        │
+        ▼
+Social Platform
+        │
+        ▼
+Requests Open Graph Image
+        │
+        ▼
+opengraph-image.tsx
+        │
+        ▼
+ImageResponse()
+        │
+        ▼
+Generated PNG Image</code></pre>
+<h3>Default Open Graph Image Size</h3>
+<div class="code-title">Recommended Size</div>
+<pre><code class="language-text">Width  = 1200px
+Height = 630px
+Aspect Ratio = 1.91 : 1</code></pre>
+<h3>Exported Configuration</h3>
+<div class="code-title">Optional Exports</div>
+<pre><code class="language-js">export const size = {
+  width: 1200,
+  height: 630
+};
+export const contentType = 'image/png';</code></pre>
+<h3>opengraph-image.tsx vs Static Image</h3>
+<table>
+<tr>
+<th>Feature</th>
+<th>Static Image</th>
+<th>opengraph-image.tsx</th>
+</tr>
+<tr>
+<td>Dynamic Content</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>React Support</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Route-Specific Images</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Automatic Generation</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+</table>
+<h3>Important Note</h3>
+<div class="feature">
+The <code>opengraph-image.tsx</code> file automatically becomes the Open Graph image for its route. No manual image creation is required.
+</div>
+<h3>Interview Tip</h3>
+<div class="feature">
+The <code>opengraph-image.tsx</code> convention uses the <code>ImageResponse</code> API from <code>next/og</code> to dynamically generate Open Graph images using React components.
+</div>
+<div class="feature">
+<strong>One-Line Definition:</strong><br/>
+The <code>opengraph-image.tsx</code> file convention in Next.js 14 dynamically generates Open Graph images for a route using React and the <code>ImageResponse</code> API.
+</div><div class="chapnav"><a class="prev" href="04-server-actions-and-mutations.html">04 - Server Actions & Mutations</a><a class="next" href="06-styling-assets-and-optimized-components.html">06 - Styling, Assets & Optimized Components</a></div></div></div><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-tsx.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+</body>
+</html>

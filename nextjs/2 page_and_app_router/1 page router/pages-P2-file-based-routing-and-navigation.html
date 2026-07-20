@@ -1,0 +1,2935 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>P2 - File-Based Routing & Navigation | Next.js App Router Guide</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:#0f172a;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.8;display:flex;min-height:100vh}
+a{color:inherit;text-decoration:none}
+.sidebar{width:290px;flex-shrink:0;background:#0b1220;border-right:1px solid #1e293b;padding:24px 18px;position:sticky;top:0;height:100vh;overflow-y:auto}
+.brand{color:#38bdf8;font-size:18px;font-weight:800;margin-bottom:4px}
+.brand small{display:block;color:#64748b;font-weight:400;font-size:12px;margin-top:4px}
+.chapter-nav{margin-top:22px}
+.chapter-nav a{display:block;padding:8px 10px;border-radius:8px;font-size:13px;color:#94a3b8;margin-bottom:4px;border-left:3px solid transparent}
+.chapter-nav a:hover{background:#111827;color:#e2e8f0}
+.chapter-nav a.active{background:#111827;color:#38bdf8;border-left:3px solid #38bdf8;font-weight:bold}
+.chapter-nav .chnum{display:inline-block;width:22px;color:#475569;font-family:monospace}
+.toc{margin-top:22px;border-top:1px solid #1e293b;padding-top:16px}
+.toc-title{color:#fbbf24;font-size:12px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px}
+.toc a{display:block;font-size:12.5px;color:#8ea3c2;padding:5px 8px;border-radius:6px;line-height:1.4}
+.toc a:hover{background:#111827;color:#e2e8f0}
+.main{flex:1;padding:40px 48px;max-width:980px}
+.container{max-width:900px}
+h1.page-title{color:#38bdf8;margin-bottom:6px;font-size:30px}
+.page-sub{color:#64748b;margin-bottom:28px;font-size:14px}
+h2.section-title{color:#a78bfa;margin-top:52px;margin-bottom:14px;font-size:23px;border-top:1px solid #1e293b;padding-top:38px}
+h2.section-title .secnum{color:#475569;font-family:monospace;margin-right:10px;font-size:16px}
+h3{color:#fbbf24;margin-top:25px;margin-bottom:10px;font-size:17px}
+h4{color:#38bdf8;margin-top:18px;margin-bottom:8px;font-size:15px}
+h5{color:#93c5fd;margin-top:14px;margin-bottom:6px;font-size:14px}
+p{margin-bottom:15px}
+ul,ol{margin-left:20px;margin-bottom:15px}
+li{margin-bottom:8px}
+strong{color:#f1f5f9}
+code{color:#93c5fd;font-family:'JetBrains Mono',monospace;font-size:.92em}
+.feature{background:#1e293b;border-left:5px solid #38bdf8;padding:15px;border-radius:8px;margin:20px 0}
+.warning{background:#2a1a1a;border-left:5px solid #f87171;padding:15px;border-radius:8px;margin:20px 0}
+.summary{background:#1a2a1e;border-left:5px solid #34d399;padding:15px;border-radius:8px;margin:20px 0}
+.note{background:#1e293b;border-left:5px solid #a78bfa;padding:15px;border-radius:8px;margin:20px 0}
+.code-title{background:#1e293b;color:#93c5fd;padding:10px;font-weight:bold;border-radius:6px 6px 0 0;font-size:13px;font-family:monospace}
+pre[class*="language-"]{margin:0 0 20px 0!important;border-radius:0 0 6px 6px}
+pre code{white-space:pre}
+table{width:100%;border-collapse:collapse;margin:20px 0}
+th{background:#1e293b;color:#38bdf8;text-align:left;padding:12px}
+td{padding:12px;border-top:1px solid #334155}
+hr{border:none;border-top:1px solid #1e293b;margin:30px 0}
+.chapnav{display:flex;justify-content:space-between;margin-top:60px;padding-top:24px;border-top:1px solid #1e293b}
+.chapnav a{background:#111827;padding:12px 18px;border-radius:10px;border:1px solid #1e293b;font-size:14px;color:#94a3b8}
+.chapnav a:hover{color:#38bdf8;border-color:#38bdf8}
+.chapnav .prev::before{content:"<- "}
+.chapnav .next::after{content:" ->"}
+@media(max-width:900px){body{flex-direction:column}.sidebar{position:relative;height:auto;width:100%}}
+</style>
+</head>
+<body>
+<div class="sidebar">
+<div class="brand">Next.js Pages Router<small>Complete Step-by-Step Guide</small></div>
+<div class="chapter-nav"><a class="" href="pages-P1-introduction-to-next.js-and-the-pages-router.html"><span class="chnum">P1</span>Introduction to Next.js & the Pages Router</a><a class="active" href="pages-P2-file-based-routing-and-navigation.html"><span class="chnum">P2</span>File-Based Routing & Navigation</a><a class="" href="pages-P3-rendering-and-data-fetching.html"><span class="chnum">P3</span>Rendering & Data Fetching</a><a class="" href="pages-P4-api-routes-backend-in-next.js.html"><span class="chnum">P4</span>API Routes (Backend in Next.js)</a><a class="" href="pages-P5-styling-and-assets.html"><span class="chnum">P5</span>Styling & Assets</a><a class="" href="pages-P6-seo-and-metadata-pages-router.html"><span class="chnum">P6</span>SEO & Metadata (Pages Router)</a><a class="" href="pages-P7-configuration-build-and-deployment.html"><span class="chnum">P7</span>Configuration, Build & Deployment</a></div>
+<div class="toc"><div class="toc-title">On this page</div><a href="#P2-01">What is File-Based Routing in Next.js?</a><a href="#P2-02">What is _app.js and What is it Used For?</a><a href="#P2-03">What is _document.js and When Would We Use It?</a><a href="#P2-04">How does Dynamic Routing work in Next.js?</a><a href="#P2-05">What is the Difference Between [id] and [...slug] in Next.js Routing?</a><a href="#P2-06">What is the Difference Between [[...slug]] and [...slug]?</a><a href="#P2-07">How do you Navigate Between Pages Using the Link Component?</a><a href="#P2-08">What is the useRouter Hook and What Can We Do With It?</a><a href="#P2-09">What is the Difference Between useRouter from next/navigation vs next/router?</a><a href="#P2-10">How do you Access Query Parameters in Next.js?</a><a href="#P2-11">How do you Create a Custom 404 Page in Next.js?</a><a href="#P2-12">What is Shallow Routing and When Would We Use It?</a></div>
+</div><div class="main"><div class="container"><h1 class="page-title">P2 - File-Based Routing & Navigation</h1><div class="page-sub">Part P2 of 7 &middot; 12 topics &middot; Next.js Pages Router Guide</div><h2 class="section-title" id="P2-01"><span class="secnum">P2-01</span>What is File-Based Routing in Next.js?</h2>
+<p>
+File-Based Routing is a routing system in Next.js where routes are automatically created based on the file and folder structure of your project.
+</p>
+<div class="feature">
+In Next.js, you do not manually configure routes like React Router. Instead, creating a file automatically creates a route.
+</div>
+<h3>Why is it Called File-Based Routing?</h3>
+<p>
+Because URLs are generated directly from files and folders.
+</p>
+<p>
+For example, if you create:
+</p>
+<div class="code-block">
+<div class="code-title">Pages Router Example</div>
+<pre><code class="language-text">pages/
+├── index.js
+├── about.js
+└── contact.js</code></pre>
+</div>
+<p>
+Next.js automatically creates:
+</p>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Route</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>pages/index.js</td>
+<td>/</td>
+</tr>
+<tr>
+<td>pages/about.js</td>
+<td>/about</td>
+</tr>
+<tr>
+<td>pages/contact.js</td>
+<td>/contact</td>
+</tr>
+</tbody>
+</table>
+<p>
+No route configuration is needed.
+</p>
+<h3>How Routing Works in React</h3>
+<p>
+In a plain React application, you usually need React Router.
+</p>
+<div class="code-block">
+<div class="code-title">React Router Example</div>
+<pre><code class="language-jsx">import { BrowserRouter, Routes, Route } from 'react-router-dom';
+function App() {
+  return (
+    &lt;BrowserRouter&gt;
+      &lt;Routes&gt;
+        &lt;Route path="/" element={&lt;Home /&gt;} /&gt;
+        &lt;Route path="/about" element={&lt;About /&gt;} /&gt;
+      &lt;/Routes&gt;
+    &lt;/BrowserRouter&gt;
+  );
+}</code></pre>
+</div>
+<p>
+Routes must be configured manually.
+</p>
+<h3>How Routing Works in Next.js</h3>
+<p>
+Simply create files and Next.js automatically creates routes.
+</p>
+<div class="code-block">
+<div class="code-title">Next.js Pages Router</div>
+<pre><code class="language-text">pages/
+├── index.js
+└── about.js</code></pre>
+</div>
+<p>
+Generated Routes:
+</p>
+<div class="code-block">
+<div class="code-title">Routes</div>
+<pre><code class="language-text">/
+/about</code></pre>
+</div>
+<h3>File-Based Routing in App Router</h3>
+<p>
+In modern Next.js applications, routing is handled using the <strong>app</strong> directory.
+</p>
+<div class="code-block">
+<div class="code-title">App Router Structure</div>
+<pre><code class="language-text">app/
+├── page.js
+├── about/
+│   └── page.js
+└── contact/
+    └── page.js</code></pre>
+</div>
+<p>
+Generated Routes:
+</p>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Route</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>app/page.js</td>
+<td>/</td>
+</tr>
+<tr>
+<td>app/about/page.js</td>
+<td>/about</td>
+</tr>
+<tr>
+<td>app/contact/page.js</td>
+<td>/contact</td>
+</tr>
+</tbody>
+</table>
+<h3>Nested Routes</h3>
+<p>
+Folders create nested routes automatically.
+</p>
+<div class="code-block">
+<div class="code-title">Nested Route Example</div>
+<pre><code class="language-text">app/
+├── dashboard/
+│   └── page.js</code></pre>
+</div>
+<p>
+Generated Route:
+</p>
+<div class="code-block">
+<div class="code-title">Route</div>
+<pre><code class="language-text">/dashboard</code></pre>
+</div>
+<h3>Multiple Nested Routes</h3>
+<div class="code-block">
+<div class="code-title">Folder Structure</div>
+<pre><code class="language-text">app/
+├── dashboard/
+│   ├── analytics/
+│   │   └── page.js</code></pre>
+</div>
+<p>
+Generated Route:
+</p>
+<div class="code-block">
+<div class="code-title">Route</div>
+<pre><code class="language-text">/dashboard/analytics</code></pre>
+</div>
+<h3>Dynamic Routes</h3>
+<p>
+Dynamic routes are created using square brackets.
+</p>
+<div class="code-block">
+<div class="code-title">Pages Router Dynamic Route</div>
+<pre><code class="language-text">pages/
+└── products/
+    └── [id].js</code></pre>
+</div>
+<p>
+Possible URLs:
+</p>
+<div class="code-block">
+<div class="code-title">URLs</div>
+<pre><code class="language-text">/products/1
+/products/10
+/products/100</code></pre>
+</div>
+<p>
+App Router version:
+</p>
+<div class="code-block">
+<div class="code-title">App Router Dynamic Route</div>
+<pre><code class="language-text">app/
+└── products/
+    └── [id]/
+        └── page.js</code></pre>
+</div>
+<h3>Catch-All Routes</h3>
+<div class="code-block">
+<div class="code-title">Catch-All Route</div>
+<pre><code class="language-text">app/
+└── docs/
+    └── [...slug]/
+        └── page.js</code></pre>
+</div>
+<p>
+Can match:
+</p>
+<div class="code-block">
+<div class="code-title">Example URLs</div>
+<pre><code class="language-text">/docs/react
+/docs/react/hooks
+/docs/react/hooks/useState</code></pre>
+</div>
+<h3>Advantages of File-Based Routing</h3>
+<ul>
+<li>No route configuration required.</li>
+<li>Cleaner project structure.</li>
+<li>Easier to understand.</li>
+<li>Automatic nested routing.</li>
+<li>Better developer experience.</li>
+<li>Less boilerplate code.</li>
+</ul>
+<h3>Pages Router vs App Router</h3>
+<table>
+<thead>
+<tr>
+<th>Pages Router</th>
+<th>App Router</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>pages/about.js</td>
+<td>app/about/page.js</td>
+</tr>
+<tr>
+<td>pages/products/[id].js</td>
+<td>app/products/[id]/page.js</td>
+</tr>
+<tr>
+<td>Uses pages folder</td>
+<td>Uses app folder</td>
+</tr>
+<tr>
+<td>Older system</td>
+<td>Modern system</td>
+</tr>
+</tbody>
+</table>
+<div class="summary">
+<strong>One-Line Definition:</strong><br/>
+File-Based Routing in Next.js is a routing system where URLs are automatically generated from the project's file and folder structure, eliminating the need for manual route configuration.
+</div>
+<h2 class="section-title" id="P2-02"><span class="secnum">P2-02</span>What is _app.js and What is it Used For?</h2>
+<p>
+<strong>_app.js</strong> is a special file in the <strong>Pages Router</strong> of Next.js that allows us to customize and control the root component for all pages in our application.
+</p>
+<div class="feature">
+Every page in the Pages Router is wrapped by <code>_app.js</code>. It is commonly used for global layouts, providers, global CSS, authentication, and shared application logic.
+</div>
+<h3>Where is _app.js Located?</h3>
+<div class="code-block">
+<div class="code-title">Project Structure</div>
+<pre><code class="language-text">pages/
+├── _app.js
+├── index.js
+├── about.js
+└── contact.js</code></pre>
+</div>
+<p>
+The <code>_app.js</code> file is placed directly inside the <strong>pages</strong> directory.
+</p>
+<h3>Why Do We Need _app.js?</h3>
+<p>
+Without <code>_app.js</code>, every page renders independently.
+</p>
+<div class="code-block">
+<div class="code-title">Without _app.js</div>
+<pre><code class="language-text">User
+  │
+  ▼
+about.js
+  │
+  ▼
+Rendered Page</code></pre>
+</div>
+<p>
+When <code>_app.js</code> exists, all pages are wrapped by it.
+</p>
+<div class="code-block">
+<div class="code-title">With _app.js</div>
+<pre><code class="language-text">User
+  │
+  ▼
+_app.js
+  │
+  ▼
+about.js
+  │
+  ▼
+Rendered Page</code></pre>
+</div>
+<h3>Basic _app.js Example</h3>
+<div class="code-block">
+<div class="code-title">pages/_app.js</div>
+<pre><code class="language-jsx">export default function MyApp({ Component, pageProps }) {
+  return (
+    &lt;Component {...pageProps} /&gt;
+  );
+}</code></pre>
+</div>
+<h3>What are Component and pageProps?</h3>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Component</td>
+<td>The current page being rendered</td>
+</tr>
+<tr>
+<td>pageProps</td>
+<td>The props passed to that page</td>
+</tr>
+</tbody>
+</table>
+<h3>Example Flow</h3>
+<div class="code-block">
+<div class="code-title">pages/about.js</div>
+<pre><code class="language-jsx">export default function About() {
+  return (
+    &lt;h1&gt;About Page&lt;/h1&gt;
+  );
+}</code></pre>
+</div>
+<p>
+When we visit <code>/about</code>, Next.js internally renders:
+</p>
+<div class="code-block">
+<div class="code-title">Internal Rendering</div>
+<pre><code class="language-jsx">&lt;MyApp Component={About} pageProps={{}}/&gt;</code></pre>
+</div>
+<h3>Use Case 1: Global Layout</h3>
+<p>
+We can create a common layout for all pages.
+</p>
+<div class="code-block">
+<div class="code-title">Global Layout Example</div>
+<pre><code class="language-jsx">import Header from '../components/Header';
+import Footer from '../components/Footer';
+export default function MyApp({
+  Component,
+  pageProps
+}) {
+  return (
+    &lt;&gt;
+      &lt;Header /&gt;
+      &lt;Component {...pageProps} /&gt;
+      &lt;Footer /&gt;
+    &lt;/&gt;
+  );
+}</code></pre>
+</div>
+<p>
+Now every page automatically displays the Header and Footer.
+</p>
+<h3>Use Case 2: Global CSS</h3>
+<p>
+Global CSS files are imported inside <code>_app.js</code>.
+</p>
+<div class="code-block">
+<div class="code-title">Import Global CSS</div>
+<pre><code class="language-jsx">import '../styles/globals.css';
+export default function MyApp({
+  Component,
+  pageProps
+}) {
+  return (
+    &lt;Component {...pageProps} /&gt;
+  );
+}</code></pre>
+</div>
+<h3>Use Case 3: Context Provider</h3>
+<p>
+We can provide React Context to the entire application.
+</p>
+<div class="code-block">
+<div class="code-title">Context Provider Example</div>
+<pre><code class="language-jsx">import { UserProvider } from '../context/UserContext';
+export default function MyApp({
+  Component,
+  pageProps
+}) {
+  return (
+    &lt;UserProvider&gt;
+      &lt;Component {...pageProps} /&gt;
+    &lt;/UserProvider&gt;
+  );
+}</code></pre>
+</div>
+<h3>Use Case 4: Redux Provider</h3>
+<div class="code-block">
+<div class="code-title">Redux Example</div>
+<pre><code class="language-jsx">import { Provider } from 'react-redux';
+import store from '../store';
+export default function MyApp({
+  Component,
+  pageProps
+}) {
+  return (
+    &lt;Provider store={store}&gt;
+      &lt;Component {...pageProps} /&gt;
+    &lt;/Provider&gt;
+  );
+}</code></pre>
+</div>
+<h3>Use Case 5: Authentication</h3>
+<p>
+Authentication checks can be centralized inside <code>_app.js</code>.
+</p>
+<div class="code-block">
+<div class="code-title">Authentication Example</div>
+<pre><code class="language-jsx">export default function MyApp({
+  Component,
+  pageProps
+}) {
+  const isLoggedIn = true;
+  if (!isLoggedIn) {
+    return &lt;Login /&gt;;
+  }
+  return (
+    &lt;Component {...pageProps} /&gt;
+  );
+}</code></pre>
+</div>
+<h3>Pages Router vs App Router</h3>
+<table>
+<thead>
+<tr>
+<th>Pages Router</th>
+<th>App Router</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Uses _app.js</td>
+<td>Uses layout.js</td>
+</tr>
+<tr>
+<td>Global Layouts in _app.js</td>
+<td>Global Layouts in layout.js</td>
+</tr>
+<tr>
+<td>Older Routing System</td>
+<td>Modern Routing System</td>
+</tr>
+<tr>
+<td>Still Supported</td>
+<td>Recommended for New Projects</td>
+</tr>
+</tbody>
+</table>
+<h3>Modern Equivalent: layout.js</h3>
+<p>
+In Next.js 13+, most use cases of <code>_app.js</code> are handled by <code>layout.js</code>.
+</p>
+<div class="code-block">
+<div class="code-title">app/layout.js</div>
+<pre><code class="language-jsx">export default function RootLayout({ children }) {
+  return (
+    &lt;html&gt;
+      &lt;body&gt;
+        {children}
+      &lt;/body&gt;
+    &lt;/html&gt;
+  );
+}</code></pre>
+</div>
+<div class="summary">
+<strong>One-Line Definition:</strong><br/>
+<code>_app.js</code> is a special file in the Pages Router of Next.js that allows us to customize and control the root component for all pages in our application, making it useful for global layouts, providers, CSS, authentication, and shared application logic.
+</div>
+<h2 class="section-title" id="P2-03"><span class="secnum">P2-03</span>What is _document.js and When Would We Use It?</h2>
+<p>
+<strong>_document.js</strong> is a special file in the <strong>Pages Router</strong> of Next.js that allows us to customize the HTML document structure that Next.js sends to the browser.
+</p>
+<div class="feature">
+Unlike <code>_app.js</code>, which controls React components, <code>_document.js</code> controls the root HTML structure such as <code>&lt;html&gt;</code>, <code>&lt;body&gt;</code>, and other document-level settings.
+</div>
+<h3>Where is _document.js Located?</h3>
+<div class="code-block">
+<div class="code-title">Project Structure</div>
+<pre><code class="language-text">pages/
+├── _app.js
+├── _document.js
+├── index.js
+└── about.js</code></pre>
+</div>
+<h3>Why Do We Need _document.js?</h3>
+<p>
+Normally, Next.js generates the HTML document automatically.
+</p>
+<div class="code-block">
+<div class="code-title">Generated HTML</div>
+<pre><code class="language-html">&lt;html&gt;
+  &lt;body&gt;
+    &lt;div id="__next"&gt;&lt;/div&gt;
+  &lt;/body&gt;
+&lt;/html&gt;</code></pre>
+</div>
+<p>
+Sometimes we need to customize this structure. That's when we use <code>_document.js</code>.
+</p>
+<h3>Basic Example</h3>
+<div class="code-block">
+<div class="code-title">pages/_document.js</div>
+<pre><code class="language-jsx">import { Html, Head, Main, NextScript } from 'next/document';
+export default function Document() {
+  return (
+    &lt;Html&gt;
+      &lt;Head /&gt;
+      &lt;body&gt;
+        &lt;Main /&gt;
+        &lt;NextScript /&gt;
+      &lt;/body&gt;
+    &lt;/Html&gt;
+  );
+}</code></pre>
+</div>
+<h3>Important Components</h3>
+<table>
+<thead>
+<tr>
+<th>Component</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Html</td>
+<td>Represents the root &lt;html&gt; element</td>
+</tr>
+<tr>
+<td>Head</td>
+<td>Used for document-level head content</td>
+</tr>
+<tr>
+<td>Main</td>
+<td>Renders the application content</td>
+</tr>
+<tr>
+<td>NextScript</td>
+<td>Loads Next.js JavaScript files</td>
+</tr>
+</tbody>
+</table>
+<h3>Use Case 1: Set HTML Language</h3>
+<p>
+We can define the language of our application.
+</p>
+<div class="code-block">
+<div class="code-title">Language Example</div>
+<pre><code class="language-jsx">&lt;Html lang="en"&gt;
+  ...
+&lt;/Html&gt;</code></pre>
+</div>
+<p>
+Generated HTML:
+</p>
+<div class="code-block">
+<div class="code-title">Output</div>
+<pre><code class="language-html">&lt;html lang="en"&gt;</code></pre>
+</div>
+<h3>Use Case 2: Add Custom Fonts</h3>
+<div class="code-block">
+<div class="code-title">Google Font Example</div>
+<pre><code class="language-jsx">&lt;Head&gt;
+  &lt;link
+    rel="preconnect"
+    href="https://fonts.googleapis.com"
+  /&gt;
+&lt;/Head&gt;</code></pre>
+</div>
+<h3>Use Case 3: Add External Scripts</h3>
+<div class="code-block">
+<div class="code-title">External Script Example</div>
+<pre><code class="language-jsx">&lt;Head&gt;
+  &lt;script
+    src="https://example.com/script.js"
+  /&gt;
+&lt;/Head&gt;</code></pre>
+</div>
+<h3>Use Case 4: Add Global Body Classes</h3>
+<div class="code-block">
+<div class="code-title">Body Class Example</div>
+<pre><code class="language-jsx">&lt;body className="dark-theme"&gt;
+  &lt;Main /&gt;
+  &lt;NextScript /&gt;
+&lt;/body&gt;</code></pre>
+</div>
+<h3>Rendering Flow</h3>
+<div class="code-block">
+<div class="code-title">Request Flow</div>
+<pre><code class="language-text">User Request
+      │
+      ▼
+_document.js
+      │
+      ▼
+_app.js
+      │
+      ▼
+Current Page
+      │
+      ▼
+Browser</code></pre>
+</div>
+<h3>_document.js vs _app.js</h3>
+<table>
+<thead>
+<tr>
+<th>_document.js</th>
+<th>_app.js</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Controls HTML document structure</td>
+<td>Controls React application structure</td>
+</tr>
+<tr>
+<td>Works with Html, Head, Body</td>
+<td>Works with React components</td>
+</tr>
+<tr>
+<td>Rendered only on the server</td>
+<td>Rendered on both server and client</td>
+</tr>
+<tr>
+<td>Cannot use React hooks</td>
+<td>Can use React hooks</td>
+</tr>
+<tr>
+<td>Used for document customization</td>
+<td>Used for layouts, providers, CSS</td>
+</tr>
+</tbody>
+</table>
+<h3>Can We Add Meta Tags Here?</h3>
+<p>
+Technically yes, but it is generally better to add page-specific metadata using:
+</p>
+<div class="code-block">
+<div class="code-title">Page Metadata</div>
+<pre><code class="language-jsx">import Head from 'next/head';
+export default function Home() {
+  return (
+    &lt;&gt;
+      &lt;Head&gt;
+        &lt;title&gt;Home Page&lt;/title&gt;
+      &lt;/Head&gt;
+    &lt;/&gt;
+  );
+}</code></pre>
+</div>
+<h3>Pages Router vs App Router</h3>
+<table>
+<thead>
+<tr>
+<th>Pages Router</th>
+<th>App Router</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Uses _document.js</td>
+<td>No _document.js</td>
+</tr>
+<tr>
+<td>Uses _app.js</td>
+<td>Uses layout.js</td>
+</tr>
+<tr>
+<td>Older routing system</td>
+<td>Modern routing system</td>
+</tr>
+</tbody>
+</table>
+<h3>What Replaces _document.js in App Router?</h3>
+<p>
+In Next.js 13+, the root HTML structure is usually defined inside <code>app/layout.js</code>.
+</p>
+<div class="code-block">
+<div class="code-title">app/layout.js</div>
+<pre><code class="language-jsx">export default function RootLayout({ children }) {
+  return (
+    &lt;html lang="en"&gt;
+      &lt;body&gt;
+        {children}
+      &lt;/body&gt;
+    &lt;/html&gt;
+  );
+}</code></pre>
+</div>
+<h3>When Would We Use _document.js?</h3>
+<ul>
+<li>Setting the HTML language attribute.</li>
+<li>Adding custom fonts globally.</li>
+<li>Adding external scripts.</li>
+<li>Customizing the body element.</li>
+<li>Customizing the root HTML structure.</li>
+<li>Adding document-level settings.</li>
+</ul>
+<div class="summary">
+<strong>One-Line Definition:</strong><br/>
+<code>_document.js</code> is a special file in the Next.js Pages Router that allows us to customize the HTML document structure sent to the browser, including the <code>&lt;html&gt;</code>, <code>&lt;head&gt;</code>, and <code>&lt;body&gt;</code> elements.
+</div>
+<h2 class="section-title" id="P2-04"><span class="secnum">P2-04</span>How does Dynamic Routing work in Next.js?</h2>
+<p>
+Dynamic Routing in Next.js allows us to create routes whose URL segments are determined at runtime instead of being fixed at development time.
+</p>
+<div class="feature">
+Dynamic routes are created using square brackets <code>[]</code>. The value inside the URL is captured as a route parameter.
+</div>
+<h3>Why Do We Need Dynamic Routing?</h3>
+<p>
+Suppose our application displays products.
+</p>
+<p>
+Creating a separate file for every product would be impossible:
+</p>
+<div class="code-block">
+<div class="code-title">Bad Approach</div>
+<pre><code class="language-text">products-1.js
+products-2.js
+products-3.js
+products-100.js
+products-1000.js</code></pre>
+</div>
+<p>
+Instead, we create a single dynamic route that handles all product IDs.
+</p>
+<h3>Pages Router Dynamic Route</h3>
+<div class="code-block">
+<div class="code-title">Folder Structure</div>
+<pre><code class="language-text">pages/
+└── products/
+    └── [id].js</code></pre>
+</div>
+<p>
+The <code>[id]</code> segment is dynamic.
+</p>
+<p>
+This single file can handle:
+</p>
+<div class="code-block">
+<div class="code-title">URLs</div>
+<pre><code class="language-text">/products/1
+/products/5
+/products/100
+/products/999</code></pre>
+</div>
+<h3>Accessing Route Parameters (Pages Router)</h3>
+<div class="code-block">
+<div class="code-title">pages/products/[id].js</div>
+<pre><code class="language-jsx">import { useRouter } from 'next/router';
+export default function Product() {
+  const router = useRouter();
+  return (
+    &lt;h1&gt;
+      Product ID: {router.query.id}
+    &lt;/h1&gt;
+  );
+}</code></pre>
+</div>
+<p>
+If the URL is:
+</p>
+<div class="code-block">
+<div class="code-title">URL</div>
+<pre><code class="language-text">/products/100</code></pre>
+</div>
+<p>
+Output:
+</p>
+<div class="code-block">
+<div class="code-title">Output</div>
+<pre><code class="language-text">Product ID: 100</code></pre>
+</div>
+<h3>App Router Dynamic Route</h3>
+<p>
+In modern Next.js applications, dynamic routes are created inside the <code>app</code> directory.
+</p>
+<div class="code-block">
+<div class="code-title">Folder Structure</div>
+<pre><code class="language-text">app/
+└── products/
+    └── [id]/
+        └── page.js</code></pre>
+</div>
+<h3>Accessing Route Parameters (App Router)</h3>
+<div class="code-block">
+<div class="code-title">app/products/[id]/page.js</div>
+<pre><code class="language-jsx">export default function Product({ params }) {
+  return (
+    &lt;h1&gt;
+      Product ID: {params.id}
+    &lt;/h1&gt;
+  );
+}</code></pre>
+</div>
+<p>
+For the URL:
+</p>
+<div class="code-block">
+<div class="code-title">URL</div>
+<pre><code class="language-text">/products/100</code></pre>
+</div>
+<p>
+Output:
+</p>
+<div class="code-block">
+<div class="code-title">Output</div>
+<pre><code class="language-text">Product ID: 100</code></pre>
+</div>
+<h3>Multiple Dynamic Parameters</h3>
+<p>
+We can create multiple dynamic segments.
+</p>
+<div class="code-block">
+<div class="code-title">Folder Structure</div>
+<pre><code class="language-text">app/
+└── users/
+    └── [userId]/
+        └── orders/
+            └── [orderId]/
+                └── page.js</code></pre>
+</div>
+<p>
+Supported URL:
+</p>
+<div class="code-block">
+<div class="code-title">URL</div>
+<pre><code class="language-text">/users/10/orders/500</code></pre>
+</div>
+<div class="code-block">
+<div class="code-title">Access Parameters</div>
+<pre><code class="language-jsx">export default function Order({ params }) {
+  return (
+    &lt;&gt;
+      User: {params.userId}
+      Order: {params.orderId}
+    &lt;/&gt;
+  );
+}</code></pre>
+</div>
+<h3>Catch-All Routes</h3>
+<p>
+Catch-all routes match multiple URL segments.
+</p>
+<div class="code-block">
+<div class="code-title">Folder Structure</div>
+<pre><code class="language-text">app/
+└── docs/
+    └── [...slug]/
+        └── page.js</code></pre>
+</div>
+<p>
+Can match:
+</p>
+<div class="code-block">
+<div class="code-title">URLs</div>
+<pre><code class="language-text">/docs/react
+/docs/react/hooks
+/docs/react/hooks/useState</code></pre>
+</div>
+<div class="code-block">
+<div class="code-title">Access Values</div>
+<pre><code class="language-jsx">export default function Docs({ params }) {
+  return (
+    &lt;pre&gt;
+      {JSON.stringify(params.slug)}
+    &lt;/pre&gt;
+  );
+}</code></pre>
+</div>
+<p>
+For:
+</p>
+<div class="code-block">
+<div class="code-title">URL</div>
+<pre><code class="language-text">/docs/react/hooks</code></pre>
+</div>
+<p>
+Output:
+</p>
+<div class="code-block">
+<div class="code-title">Output</div>
+<pre><code class="language-text">["react", "hooks"]</code></pre>
+</div>
+<h3>Optional Catch-All Routes</h3>
+<p>
+Optional catch-all routes can match zero or more segments.
+</p>
+<div class="code-block">
+<div class="code-title">Folder Structure</div>
+<pre><code class="language-text">app/
+└── docs/
+    └── [[...slug]]/
+        └── page.js</code></pre>
+</div>
+<p>
+Can match:
+</p>
+<div class="code-block">
+<div class="code-title">URLs</div>
+<pre><code class="language-text">/docs
+/docs/react
+/docs/react/hooks</code></pre>
+</div>
+<h3>Real-World Example</h3>
+<p>
+Suppose our e-commerce application has thousands of products.
+</p>
+<div class="code-block">
+<div class="code-title">Dynamic Product Route</div>
+<pre><code class="language-text">app/
+└── products/
+    └── [id]/
+        └── page.js</code></pre>
+</div>
+<p>
+URLs:
+</p>
+<div class="code-block">
+<div class="code-title">Examples</div>
+<pre><code class="language-text">/products/1
+/products/25
+/products/1000
+/products/5000</code></pre>
+</div>
+<p>
+A single page handles all product IDs.
+</p>
+<h3>Dynamic Routing vs Static Routing</h3>
+<table>
+<thead>
+<tr>
+<th>Static Route</th>
+<th>Dynamic Route</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>/about</td>
+<td>/products/[id]</td>
+</tr>
+<tr>
+<td>Fixed URL</td>
+<td>Variable URL</td>
+</tr>
+<tr>
+<td>One page per route</td>
+<td>One page handles many routes</td>
+</tr>
+<tr>
+<td>No route parameters</td>
+<td>Supports route parameters</td>
+</tr>
+</tbody>
+</table>
+<h3>Pages Router vs App Router</h3>
+<table>
+<thead>
+<tr>
+<th>Pages Router</th>
+<th>App Router</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>pages/products/[id].js</td>
+<td>app/products/[id]/page.js</td>
+</tr>
+<tr>
+<td>useRouter()</td>
+<td>params</td>
+</tr>
+<tr>
+<td>next/router</td>
+<td>next/navigation</td>
+</tr>
+</tbody>
+</table>
+<div class="summary">
+<strong>One-Line Definition:</strong><br/>
+Dynamic Routing in Next.js allows us to create routes with variable URL segments using square brackets (<code>[]</code>), enabling a single page to handle multiple URLs by accessing route parameters.
+</div>
+<h2 class="section-title" id="P2-05"><span class="secnum">P2-05</span>What is the Difference Between [id] and [...slug] in Next.js Routing?</h2>
+<p>
+Both <code>[id]</code> and <code>[...slug]</code> are used for dynamic routing in Next.js, but they behave differently.
+</p>
+<div class="feature">
+<code>[id]</code> captures a single URL segment, while <code>[...slug]</code> captures multiple URL segments as an array.
+</div>
+<h3>1. Single Dynamic Route: [id]</h3>
+<p>
+The <code>[id]</code> syntax matches exactly one dynamic segment.
+</p>
+<div class="code-block">
+<div class="code-title">App Router Structure</div>
+<pre><code class="language-text">app/
+└── products/
+    └── [id]/
+        └── page.js</code></pre>
+</div>
+<p>
+Supported URLs:
+</p>
+<div class="code-block">
+<div class="code-title">URLs</div>
+<pre><code class="language-text">/products/1
+/products/10
+/products/500</code></pre>
+</div>
+<p>
+Not Supported:
+</p>
+<div class="code-block">
+<div class="code-title">Invalid URLs</div>
+<pre><code class="language-text">/products
+/products/10/reviews</code></pre>
+</div>
+<div class="code-block">
+<div class="code-title">Accessing the Parameter</div>
+<pre><code class="language-jsx">export default function Product({
+  params
+}) {
+  return (
+    &lt;h1&gt;
+      {params.id}
+    &lt;/h1&gt;
+  );
+}</code></pre>
+</div>
+<p>
+URL:
+</p>
+<div class="code-block">
+<div class="code-title">Example</div>
+<pre><code class="language-text">/products/100</code></pre>
+</div>
+<p>
+Output:
+</p>
+<div class="code-block">
+<div class="code-title">params</div>
+<pre><code class="language-javascript">{
+  id: "100"
+}</code></pre>
+</div>
+<h3>2. Catch-All Route: [...slug]</h3>
+<p>
+The <code>[...slug]</code> syntax matches one or more URL segments.
+</p>
+<div class="code-block">
+<div class="code-title">App Router Structure</div>
+<pre><code class="language-text">app/
+└── docs/
+    └── [...slug]/
+        └── page.js</code></pre>
+</div>
+<p>
+Supported URLs:
+</p>
+<div class="code-block">
+<div class="code-title">URLs</div>
+<pre><code class="language-text">/docs/react
+/docs/react/hooks
+/docs/react/hooks/useState</code></pre>
+</div>
+<div class="code-block">
+<div class="code-title">Accessing Parameters</div>
+<pre><code class="language-jsx">export default function Docs({
+  params
+}) {
+  return (
+    &lt;pre&gt;
+      {JSON.stringify(params.slug)}
+    &lt;/pre&gt;
+  );
+}</code></pre>
+</div>
+<p>
+URL:
+</p>
+<div class="code-block">
+<div class="code-title">Example</div>
+<pre><code class="language-text">/docs/react/hooks</code></pre>
+</div>
+<p>
+Output:
+</p>
+<div class="code-block">
+<div class="code-title">params</div>
+<pre><code class="language-javascript">{
+  slug: ["react", "hooks"]
+}</code></pre>
+</div>
+<h3>Visual Comparison</h3>
+<div class="code-block">
+<div class="code-title">[id]</div>
+<pre><code class="language-text">/products/100
+id = "100"</code></pre>
+</div>
+<div class="code-block">
+<div class="code-title">[...slug]</div>
+<pre><code class="language-text">/docs/react/hooks/useState
+slug = [
+  "react",
+  "hooks",
+  "useState"
+]</code></pre>
+</div>
+<h3>Real-World Example</h3>
+<h4>Product Page</h4>
+<p>
+A product usually needs only one ID.
+</p>
+<div class="code-block">
+<div class="code-title">Product Route</div>
+<pre><code class="language-text">app/
+└── products/
+    └── [id]/
+        └── page.js</code></pre>
+</div>
+<p>
+URLs:
+</p>
+<div class="code-block">
+<div class="code-title">Examples</div>
+<pre><code class="language-text">/products/1
+/products/25
+/products/100</code></pre>
+</div>
+<p>
+Use <code>[id]</code>.
+</p>
+<h4>Documentation Website</h4>
+<p>
+Documentation often contains multiple nested paths.
+</p>
+<div class="code-block">
+<div class="code-title">Docs Route</div>
+<pre><code class="language-text">app/
+└── docs/
+    └── [...slug]/
+        └── page.js</code></pre>
+</div>
+<p>
+URLs:
+</p>
+<div class="code-block">
+<div class="code-title">Examples</div>
+<pre><code class="language-text">/docs/react
+/docs/react/hooks
+/docs/react/hooks/useState</code></pre>
+</div>
+<p>
+Use <code>[...slug]</code>.
+</p>
+<h3>Optional Catch-All Route</h3>
+<p>
+Next.js also supports <code>[[...slug]]</code>.
+</p>
+<div class="code-block">
+<div class="code-title">Optional Catch-All</div>
+<pre><code class="language-text">app/
+└── docs/
+    └── [[...slug]]/
+        └── page.js</code></pre>
+</div>
+<p>
+Supported URLs:
+</p>
+<div class="code-block">
+<div class="code-title">URLs</div>
+<pre><code class="language-text">/docs
+/docs/react
+/docs/react/hooks</code></pre>
+</div>
+<p>
+Unlike <code>[...slug]</code>, this route also matches <code>/docs</code>.
+</p>
+<h3>Main Differences</h3>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>[id]</th>
+<th>[...slug]</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Matches</td>
+<td>One segment</td>
+<td>One or more segments</td>
+</tr>
+<tr>
+<td>Returned Value</td>
+<td>String</td>
+<td>Array</td>
+</tr>
+<tr>
+<td>Example URL</td>
+<td>/products/100</td>
+<td>/docs/react/hooks</td>
+</tr>
+<tr>
+<td>Parameter Value</td>
+<td>"100"</td>
+<td>["react","hooks"]</td>
+</tr>
+<tr>
+<td>Use Case</td>
+<td>Product ID, User ID</td>
+<td>Documentation, Categories</td>
+</tr>
+</tbody>
+</table>
+<h3>Quick Memory Trick</h3>
+<div class="feature">
+Think of <code>[id]</code> as capturing a single value and <code>[...slug]</code> as capturing the rest of the URL path.
+</div>
+<div class="summary">
+<strong>One-Line Definition:</strong><br/>
+<code>[id]</code> captures a single dynamic URL segment and returns a string, while <code>[...slug]</code> captures multiple URL segments and returns them as an array.
+</div>
+<h2 class="section-title" id="P2-06"><span class="secnum">P2-06</span>What is the Difference Between [[...slug]] and [...slug]?</h2>
+<p>
+Both <code>[...slug]</code> and <code>[[...slug]]</code> are Catch-All Routes in Next.js, but they differ in whether the route parameter is required or optional.
+</p>
+<div class="feature">
+<code>[...slug]</code> requires at least one URL segment, while <code>[[...slug]]</code> can match zero or more URL segments.
+</div>
+<h3>1. Catch-All Route: [...slug]</h3>
+<p>
+The <code>[...slug]</code> route matches one or more URL segments.
+</p>
+<div class="code-block">
+<div class="code-title">Folder Structure</div>
+<pre><code class="language-text">app/
+└── docs/
+    └── [...slug]/
+        └── page.js</code></pre>
+</div>
+<h4>Valid URLs</h4>
+<div class="code-block">
+<div class="code-title">Matches</div>
+<pre><code class="language-text">/docs/react
+/docs/react/hooks
+/docs/react/hooks/useState</code></pre>
+</div>
+<h4>Invalid URL</h4>
+<div class="code-block">
+<div class="code-title">Does NOT Match</div>
+<pre><code class="language-text">/docs</code></pre>
+</div>
+<p>
+Because at least one segment is required after <code>/docs</code>.
+</p>
+<h3>Example</h3>
+<div class="code-block">
+<div class="code-title">URL</div>
+<pre><code class="language-text">/docs/react/hooks</code></pre>
+</div>
+<p>
+Next.js provides:
+</p>
+<div class="code-block">
+<div class="code-title">params</div>
+<pre><code class="language-javascript">{
+  slug: [
+    "react",
+    "hooks"
+  ]
+}</code></pre>
+</div>
+<h3>2. Optional Catch-All Route: [[...slug]]</h3>
+<p>
+The <code>[[...slug]]</code> route matches zero or more URL segments.
+</p>
+<div class="code-block">
+<div class="code-title">Folder Structure</div>
+<pre><code class="language-text">app/
+└── docs/
+    └── [[...slug]]/
+        └── page.js</code></pre>
+</div>
+<h4>Valid URLs</h4>
+<div class="code-block">
+<div class="code-title">Matches</div>
+<pre><code class="language-text">/docs
+/docs/react
+/docs/react/hooks
+/docs/react/hooks/useState</code></pre>
+</div>
+<p>
+Notice that <code>/docs</code> is also matched.
+</p>
+<h3>Example 1</h3>
+<div class="code-block">
+<div class="code-title">URL</div>
+<pre><code class="language-text">/docs</code></pre>
+</div>
+<p>
+Next.js provides:
+</p>
+<div class="code-block">
+<div class="code-title">params</div>
+<pre><code class="language-javascript">{
+  slug: undefined
+}</code></pre>
+</div>
+<h3>Example 2</h3>
+<div class="code-block">
+<div class="code-title">URL</div>
+<pre><code class="language-text">/docs/react/hooks</code></pre>
+</div>
+<p>
+Next.js provides:
+</p>
+<div class="code-block">
+<div class="code-title">params</div>
+<pre><code class="language-javascript">{
+  slug: [
+    "react",
+    "hooks"
+  ]
+}</code></pre>
+</div>
+<h3>Visual Comparison</h3>
+<div class="code-block">
+<div class="code-title">[...slug]</div>
+<pre><code class="language-text">/docs/react            ✅
+/docs/react/hooks      ✅
+/docs                  ❌</code></pre>
+</div>
+<div class="code-block">
+<div class="code-title">[[...slug]]</div>
+<pre><code class="language-text">/docs                  ✅
+/docs/react            ✅
+/docs/react/hooks      ✅</code></pre>
+</div>
+<h3>Route Matching Flow</h3>
+<div class="code-block">
+<div class="code-title">[...slug]</div>
+<pre><code class="language-text">Requires:
+/docs/
+      │
+      ▼
+ At Least One Segment</code></pre>
+</div>
+<div class="code-block">
+<div class="code-title">[[...slug]]</div>
+<pre><code class="language-text">Requires:
+/docs/
+      │
+      ▼
+ Zero or More Segments</code></pre>
+</div>
+<h3>Real-World Example</h3>
+<h4>Documentation Site</h4>
+<p>
+Suppose our documentation homepage is:
+</p>
+<div class="code-block">
+<div class="code-title">Homepage</div>
+<pre><code class="language-text">/docs</code></pre>
+</div>
+<p>
+And sub-pages are:
+</p>
+<div class="code-block">
+<div class="code-title">Sub Pages</div>
+<pre><code class="language-text">/docs/react
+/docs/react/hooks
+/docs/react/hooks/useState</code></pre>
+</div>
+<p>
+In this situation we should use:
+</p>
+<div class="code-block">
+<div class="code-title">Recommended Route</div>
+<pre><code class="language-text">[[...slug]]</code></pre>
+</div>
+<p>
+because it can handle both the homepage and nested pages.
+</p>
+<h3>Main Differences</h3>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>[...slug]</th>
+<th>[[...slug]]</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Matches One Segment</td>
+<td>Yes</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>Matches Multiple Segments</td>
+<td>Yes</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>Matches Zero Segments</td>
+<td>No</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>Matches /docs</td>
+<td>No</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>Parameter Required</td>
+<td>Yes</td>
+<td>No</td>
+</tr>
+<tr>
+<td>Parameter Type</td>
+<td>Array</td>
+<td>Array or undefined</td>
+</tr>
+</tbody>
+</table>
+<h3>Quick Memory Trick</h3>
+<div class="feature">
+The extra square brackets in <code>[[...slug]]</code> make the entire parameter optional.
+</div>
+<div class="summary">
+<strong>One-Line Definition:</strong><br/>
+<code>[...slug]</code> is a catch-all route that requires at least one URL segment, while <code>[[...slug]]</code> is an optional catch-all route that can match zero or more URL segments, including the parent route itself.
+</div>
+<h2 class="section-title" id="P2-07"><span class="secnum">P2-07</span>How do you Navigate Between Pages Using the Link Component?</h2>
+<p>
+The <strong>Link</strong> component in Next.js allows us to navigate between pages without performing a full page refresh.
+</p>
+<div class="feature">
+The Link component enables client-side navigation, making page transitions faster and providing a smoother user experience.
+</div>
+<h3>Why Not Use a Normal &lt;a&gt; Tag?</h3>
+<p>
+A normal anchor tag reloads the entire page.
+</p>
+<div class="code-block">
+<div class="code-title">Normal HTML Link</div>
+<pre><code class="language-html">&lt;a href="/about"&gt;
+  About
+&lt;/a&gt;</code></pre>
+</div>
+<p>
+Navigation Flow:
+</p>
+<div class="code-block">
+<div class="code-title">Page Reload</div>
+<pre><code class="language-text">Current Page
+      │
+      ▼
+Browser Request
+      │
+      ▼
+Server
+      │
+      ▼
+Full Page Reload</code></pre>
+</div>
+<p>
+This is slower because the browser reloads the entire page.
+</p>
+<h3>Using the Link Component</h3>
+<p>
+Next.js provides the <code>Link</code> component for client-side navigation.
+</p>
+<div class="code-block">
+<div class="code-title">Basic Example</div>
+<pre><code class="language-jsx">import Link from 'next/link';
+export default function Home() {
+  return (
+    &lt;Link href="/about"&gt;
+      About
+    &lt;/Link&gt;
+  );
+}</code></pre>
+</div>
+<p>
+When we click the link, Next.js updates only the necessary content without reloading the entire page.
+</p>
+<h3>Navigation Flow with Link</h3>
+<div class="code-block">
+<div class="code-title">Client-Side Navigation</div>
+<pre><code class="language-text">Current Page
+      │
+      ▼
+Link Click
+      │
+      ▼
+Next.js Router
+      │
+      ▼
+Update UI</code></pre>
+</div>
+<h3>Example Project</h3>
+<div class="code-block">
+<div class="code-title">App Router Structure</div>
+<pre><code class="language-text">app/
+├── page.js
+├── about/
+│   └── page.js
+└── contact/
+    └── page.js</code></pre>
+</div>
+<h3>Home Page</h3>
+<div class="code-block">
+<div class="code-title">app/page.js</div>
+<pre><code class="language-jsx">import Link from 'next/link';
+export default function Home() {
+  return (
+    &lt;&gt;
+      &lt;h1&gt;Home Page&lt;/h1&gt;
+      &lt;Link href="/about"&gt;
+        About
+      &lt;/Link&gt;
+    &lt;/&gt;
+  );
+}</code></pre>
+</div>
+<h3>About Page</h3>
+<div class="code-block">
+<div class="code-title">app/about/page.js</div>
+<pre><code class="language-jsx">export default function About() {
+  return (
+    &lt;h1&gt;About Page&lt;/h1&gt;
+  );
+}</code></pre>
+</div>
+<p>
+Clicking the link navigates to:
+</p>
+<div class="code-block">
+<div class="code-title">Generated URL</div>
+<pre><code class="language-text">/about</code></pre>
+</div>
+<h3>Navigation Menu Example</h3>
+<div class="code-block">
+<div class="code-title">Navigation Component</div>
+<pre><code class="language-jsx">import Link from 'next/link';
+export default function Navbar() {
+  return (
+    &lt;nav&gt;
+      &lt;Link href="/"&gt;
+        Home
+      &lt;/Link&gt;
+      &lt;Link href="/about"&gt;
+        About
+      &lt;/Link&gt;
+      &lt;Link href="/contact"&gt;
+        Contact
+      &lt;/Link&gt;
+    &lt;/nav&gt;
+  );
+}</code></pre>
+</div>
+<h3>Dynamic Route Navigation</h3>
+<p>
+We can navigate to dynamic routes by including route parameters in the URL.
+</p>
+<div class="code-block">
+<div class="code-title">Dynamic Route Link</div>
+<pre><code class="language-jsx">import Link from 'next/link';
+export default function Products() {
+  return (
+    &lt;Link href="/products/100"&gt;
+      Product 100
+    &lt;/Link&gt;
+  );
+}</code></pre>
+</div>
+<p>
+This navigates to:
+</p>
+<div class="code-block">
+<div class="code-title">URL</div>
+<pre><code class="language-text">/products/100</code></pre>
+</div>
+<h3>Passing Query Parameters</h3>
+<div class="code-block">
+<div class="code-title">Query Parameters</div>
+<pre><code class="language-jsx">import Link from 'next/link';
+export default function Home() {
+  return (
+    &lt;Link href="/products?id=100"&gt;
+      Product
+    &lt;/Link&gt;
+  );
+}</code></pre>
+</div>
+<p>
+Generated URL:
+</p>
+<div class="code-block">
+<div class="code-title">URL</div>
+<pre><code class="language-text">/products?id=100</code></pre>
+</div>
+<h3>Prefetching</h3>
+<p>
+One of the biggest advantages of the Link component is automatic prefetching.
+</p>
+<p>
+When a link becomes visible in the viewport, Next.js may preload the target page in the background.
+</p>
+<div class="code-block">
+<div class="code-title">Prefetch Flow</div>
+<pre><code class="language-text">Page Loads
+      │
+      ▼
+Link Visible
+      │
+      ▼
+Next.js Prefetches Page
+      │
+      ▼
+User Clicks Link
+      │
+      ▼
+Instant Navigation</code></pre>
+</div>
+<h3>Opening External URLs</h3>
+<p>
+For external websites, we usually use a normal anchor tag.
+</p>
+<div class="code-block">
+<div class="code-title">External Link</div>
+<pre><code class="language-html">&lt;a href="https://example.com" target="_blank" rel="noopener noreferrer"&gt;Visit Website&lt;/a&gt;</code></pre>
+</div>
+<h3>Link vs Anchor Tag</h3>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>Link</th>
+<th>&lt;a&gt;</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Internal Navigation</td>
+<td>Yes</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>Client-Side Navigation</td>
+<td>Yes</td>
+<td>No</td>
+</tr>
+<tr>
+<td>Page Reload</td>
+<td>No</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>Prefetching</td>
+<td>Yes</td>
+<td>No</td>
+</tr>
+<tr>
+<td>Recommended for Internal Pages</td>
+<td>Yes</td>
+<td>No</td>
+</tr>
+</tbody>
+</table>
+<h3>Pages Router and App Router</h3>
+<p>
+The Link component works in both routing systems.
+</p>
+<table>
+<thead>
+<tr>
+<th>Router</th>
+<th>Usage</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Pages Router</td>
+<td>import Link from 'next/link'</td>
+</tr>
+<tr>
+<td>App Router</td>
+<td>import Link from 'next/link'</td>
+</tr>
+</tbody>
+</table>
+<div class="summary">
+<strong>One-Line Definition:</strong><br/>
+The <code>Link</code> component in Next.js allows us to navigate between pages using client-side routing, providing faster navigation, automatic prefetching, and avoiding full page reloads.
+</div>
+<h2 class="section-title" id="P2-08"><span class="secnum">P2-08</span>What is the useRouter Hook and What Can We Do With It?</h2>
+<p>
+The <strong>useRouter</strong> hook allows us to access and control the Next.js router programmatically from our components.
+</p>
+<div class="feature">
+The useRouter hook allows us to navigate between pages, access route parameters, read query strings, reload pages, and move backward or forward in browser history.
+</div>
+<h3>Important Note</h3>
+<p>
+The usage depends on which routing system our application uses.
+</p>
+<table>
+<thead>
+<tr>
+<th>Router</th>
+<th>Import</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Pages Router</td>
+<td>import { useRouter } from 'next/router'</td>
+</tr>
+<tr>
+<td>App Router</td>
+<td>import { useRouter } from 'next/navigation'</td>
+</tr>
+</tbody>
+</table>
+<h3>Pages Router Example</h3>
+<div class="code-block">
+<div class="code-title">Import useRouter</div>
+<pre><code class="language-jsx">import { useRouter } from 'next/router';
+export default function Home() {
+  const router = useRouter();
+}</code></pre>
+</div>
+<h3>Use Case 1: Navigate Programmatically</h3>
+<p>
+Instead of clicking a Link component, we can navigate using JavaScript.
+</p>
+<div class="code-block">
+<div class="code-title">router.push()</div>
+<pre><code class="language-jsx">import { useRouter } from 'next/router';
+export default function Home() {
+  const router = useRouter();
+  return (
+    &lt;button onClick={() =&gt; router.push('/about')}&gt;
+      About
+    &lt;/button&gt;
+  );
+}</code></pre>
+</div>
+<p>
+Clicking the button navigates to:
+</p>
+<div class="code-block">
+<div class="code-title">URL</div>
+<pre><code class="language-text">/about</code></pre>
+</div>
+<h3>Use Case 2: Navigate to Dynamic Routes</h3>
+<div class="code-block">
+<div class="code-title">Dynamic Route Navigation</div>
+<pre><code class="language-jsx">router.push('/products/100');</code></pre>
+</div>
+<p>
+Navigates to:
+</p>
+<div class="code-block">
+<div class="code-title">URL</div>
+<pre><code class="language-text">/products/100</code></pre>
+</div>
+<h3>Use Case 3: Read Route Parameters</h3>
+<p>
+Suppose we have:
+</p>
+<div class="code-block">
+<div class="code-title">Dynamic Route</div>
+<pre><code class="language-text">pages/
+└── products/
+    └── [id].js</code></pre>
+</div>
+<div class="code-block">
+<div class="code-title">Access Route Parameter</div>
+<pre><code class="language-jsx">import { useRouter }
+from 'next/router';
+export default function Product() {
+  const router = useRouter();
+  return (
+    &lt;h1&gt;
+      {router.query.id}
+    &lt;/h1&gt;
+  );
+}</code></pre>
+</div>
+<p>
+URL:
+</p>
+<div class="code-block">
+<div class="code-title">Example</div>
+<pre><code class="language-text">/products/100</code></pre>
+</div>
+<p>
+Output:
+</p>
+<div class="code-block">
+<div class="code-title">Result</div>
+<pre><code class="language-text">100</code></pre>
+</div>
+<h3>Use Case 4: Read Query Parameters</h3>
+<div class="code-block">
+<div class="code-title">URL</div>
+<pre><code class="language-text">/products?id=100</code></pre>
+</div>
+<div class="code-block">
+<div class="code-title">Read Query String</div>
+<pre><code class="language-jsx">const router = useRouter();
+console.log(router.query.id);</code></pre>
+</div>
+<p>
+Output:
+</p>
+<div class="code-block">
+<div class="code-title">Console</div>
+<pre><code class="language-text">100</code></pre>
+</div>
+<h3>Why Do Both Return the Same Value?</h3>
+<p>
+Both examples return <code>100</code> because Next.js stores both
+dynamic route parameters and query string parameters inside
+<code>router.query</code>.
+</p>
+<table>
+<thead>
+<tr>
+<th>URL</th>
+<th>Source of id</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>/products/100</td>
+<td>Dynamic Route Parameter ([id])</td>
+<td>100</td>
+</tr>
+<tr>
+<td>/products?id=100</td>
+<td>Query String Parameter (?id=100)</td>
+<td>100</td>
+</tr>
+</tbody>
+</table>
+<p>
+Although both are accessed using <code>router.query.id</code>,
+they come from different parts of the URL.
+</p>
+<div class="code-block">
+<div class="code-title">Dynamic Route Parameter</div>
+<pre><code class="language-text">/products/100</code></pre>
+</div>
+<div class="code-block">
+<div class="code-title">Query String Parameter</div>
+<pre><code class="language-text">/products?id=100</code></pre>
+</div>
+<p>
+Next.js combines route parameters and query string parameters
+into a single <code>router.query</code> object.
+</p>
+<div class="code-block">
+<div class="code-title">Example</div>
+<pre><code class="language-text">/products/100?color=red</code></pre>
+</div>
+<div class="code-block">
+<div class="code-title">router.query</div>
+<pre><code class="language-js">{
+  id: '100',
+  color: 'red'
+}</code></pre>
+</div>
+<div class="feature">
+Dynamic route parameters come from the URL path, while query
+parameters come from the query string. Both are available through
+router.query in the Pages Router.
+</div>
+<h3>What Happens If Both Use the Same Name?</h3>
+<p>
+Consider the following URL:
+</p>
+<div class="code-block">
+<div class="code-title">URL</div>
+<pre><code class="language-text">/products/100?id=100</code></pre>
+</div>
+<p>
+In this case, the URL contains:
+</p>
+<ul>
+<li>A route parameter from <code>[id]</code>.</li>
+<li>A query string parameter from <code>?id=100</code>.</li>
+</ul>
+<p>
+Both use the same key name (<code>id</code>), so they are merged into the same
+<code>router.query</code> object.
+</p>
+<div class="code-block">
+<div class="code-title">Read Values</div>
+<pre><code class="language-jsx">const router = useRouter();
+console.log(router.query);</code></pre>
+</div>
+<div class="code-block">
+<div class="code-title">Output</div>
+<pre><code class="language-js">{
+  id: '100'
+}</code></pre>
+</div>
+<p>
+A more obvious example:
+</p>
+<div class="code-block">
+<div class="code-title">URL</div>
+<pre><code class="language-text">/products/100?id=200</code></pre>
+</div>
+<div class="code-block">
+<div class="code-title">Output</div>
+<pre><code class="language-js">{
+  id: '200'
+}</code></pre>
+</div>
+<p>
+The query string value overrides the route parameter when both use the same key.
+</p>
+<h4>Recommended Approach</h4>
+<p>
+Use different names for route parameters and query parameters.
+</p>
+<div class="code-block">
+<div class="code-title">URL</div>
+<pre><code class="language-text">/products/100?productId=200</code></pre>
+</div>
+<div class="code-block">
+<div class="code-title">router.query</div>
+<pre><code class="language-js">{
+  id: '100',
+  productId: '200'
+}</code></pre>
+</div>
+<div class="feature">
+If a route parameter and a query parameter have the same name, the query parameter value takes precedence in router.query.
+</div>
+<h3>Use Case 5: Replace Current Route</h3>
+<p>
+The <code>replace()</code> method navigates without creating a new browser history entry.
+</p>
+<div class="code-block">
+<div class="code-title">router.replace()</div>
+<pre><code class="language-jsx">router.replace('/login');</code></pre>
+</div>
+<p>
+Useful after login or logout pages.
+</p>
+<h3>Use Case 6: Go Back</h3>
+<div class="code-block">
+<div class="code-title">router.back()</div>
+<pre><code class="language-jsx">router.back();</code></pre>
+</div>
+<p>
+Equivalent to:
+</p>
+<div class="code-block">
+<div class="code-title">Browser Action</div>
+<pre><code class="language-text">Browser Back Button</code></pre>
+</div>
+<h3>Use Case 7: Reload Current Page</h3>
+<div class="code-block">
+<div class="code-title">router.reload()</div>
+<pre><code class="language-jsx">router.reload();</code></pre>
+</div>
+<p>
+Reloads the current page.
+</p>
+<h3>Common Router Properties</h3>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>router.pathname</td>
+<td>Current route path</td>
+</tr>
+<tr>
+<td>router.query</td>
+<td>Query and route parameters</td>
+</tr>
+<tr>
+<td>router.push()</td>
+<td>Navigate to another page</td>
+</tr>
+<tr>
+<td>router.replace()</td>
+<td>Replace current route</td>
+</tr>
+<tr>
+<td>router.back()</td>
+<td>Go back</td>
+</tr>
+<tr>
+<td>router.reload()</td>
+<td>Reload page</td>
+</tr>
+</tbody>
+</table>
+<h3>App Router Version</h3>
+<p>
+In the App Router, useRouter is imported from <code>next/navigation</code>.
+</p>
+<div class="code-block">
+<div class="code-title">App Router Example</div>
+<pre><code class="language-jsx">'use client';
+import { useRouter } from 'next/navigation';
+export default function Home() {
+  const router = useRouter();
+  const handleClick = () =&gt; {
+    router.push('/about');
+  };
+  return (
+    &lt;button
+      onClick={handleClick}
+    &gt;
+      About
+    &lt;/button&gt;
+  );
+}</code></pre>
+</div>
+<h3>Pages Router vs App Router</h3>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>Pages Router</th>
+<th>App Router</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Import</td>
+<td>next/router</td>
+<td>next/navigation</td>
+</tr>
+<tr>
+<td>router.query</td>
+<td>Available</td>
+<td>Not Available</td>
+</tr>
+<tr>
+<td>Dynamic Params</td>
+<td>router.query.id</td>
+<td>params.id</td>
+</tr>
+<tr>
+<td>push()</td>
+<td>Available</td>
+<td>Available</td>
+</tr>
+<tr>
+<td>replace()</td>
+<td>Available</td>
+<td>Available</td>
+</tr>
+<tr>
+<td>back()</td>
+<td>Available</td>
+<td>Available</td>
+</tr>
+</tbody>
+</table>
+<h3>When Should We Use useRouter?</h3>
+<ul>
+<li>Navigate after form submission.</li>
+<li>Redirect after login.</li>
+<li>Read dynamic route parameters.</li>
+<li>Read query string values.</li>
+<li>Move backward or forward in history.</li>
+<li>Perform programmatic navigation.</li>
+</ul>
+<div class="summary">
+<strong>One-Line Definition:</strong><br/>
+The <code>useRouter</code> hook allows us to access and control the Next.js router programmatically, enabling navigation, route parameter access, query string handling, and browser history management.
+</div>
+<h2 class="section-title" id="P2-09"><span class="secnum">P2-09</span>What is the Difference Between useRouter from next/navigation vs next/router?</h2>
+<p>
+Both hooks allow us to perform programmatic navigation in Next.js, but they belong to different routing systems.
+</p>
+<div class="feature">
+<strong>next/router</strong> is used with the Pages Router, while <strong>next/navigation</strong> is used with the App Router introduced in Next.js 13.
+</div>
+<h3>Import Difference</h3>
+<table>
+<tr>
+<th>Router</th>
+<th>Import</th>
+</tr>
+<tr>
+<td>Pages Router</td>
+<td>import { useRouter } from 'next/router';</td>
+</tr>
+<tr>
+<td>App Router</td>
+<td>import { useRouter } from 'next/navigation';</td>
+</tr>
+</table>
+<h3>Pages Router Example</h3>
+<div class="code-title">next/router</div>
+<pre><code class="language-jsx">import { useRouter } from 'next/router';
+export default function Home() {
+  const router = useRouter();
+  return (
+    &lt;button onClick={() =&gt; router.push('/about')}&gt;
+      About
+    &lt;/button&gt;
+  );
+}</code></pre>
+<h3>App Router Example</h3>
+<div class="code-title">next/navigation</div>
+<pre><code class="language-jsx">'use client';
+import { useRouter } from 'next/navigation';
+export default function Home() {
+  const router = useRouter();
+  return (
+    &lt;button onClick={() =&gt; router.push('/about')}&gt;
+      About
+    &lt;/button&gt;
+  );
+}</code></pre>
+<h3>Query Parameters</h3>
+<p>
+In the Pages Router, query parameters are available through <code>router.query</code>.
+</p>
+<div class="code-title">Pages Router</div>
+<pre><code class="language-jsx">const router = useRouter();
+console.log(router.query.id);</code></pre>
+<p>
+URL:
+</p>
+<pre><code class="language-text">/products?id=100</code></pre>
+<p>
+Output:
+</p>
+<pre><code class="language-text">100</code></pre>
+<p>
+In the App Router, <code>router.query</code> does not exist.
+</p>
+<div class="code-title">App Router</div>
+<pre><code class="language-jsx">'use client';
+import { useSearchParams } from 'next/navigation';
+export default function Product() {
+  const searchParams = useSearchParams();
+  const id = searchParams.get('id');
+  return &lt;h1&gt;{id}&lt;/h1&gt;;
+}</code></pre>
+<h3>Dynamic Route Parameters</h3>
+<div class="code-title">Pages Router</div>
+<pre><code class="language-jsx">const router = useRouter();
+console.log(router.query.id);</code></pre>
+<p>
+Route:
+</p>
+<pre><code class="language-text">pages/products/[id].js</code></pre>
+<div class="code-title">App Router</div>
+<pre><code class="language-jsx">export default function Product({ params }) {
+  return &lt;h1&gt;{params.id}&lt;/h1&gt;;
+}</code></pre>
+<p>
+Route:
+</p>
+<pre><code class="language-text">app/products/[id]/page.js</code></pre>
+<h3>Current Path</h3>
+<div class="code-title">Pages Router</div>
+<pre><code class="language-jsx">const router = useRouter();
+console.log(router.pathname);</code></pre>
+<div class="code-title">App Router</div>
+<pre><code class="language-jsx">'use client';
+import { usePathname } from 'next/navigation';
+const pathname = usePathname();</code></pre>
+<h3>Router Methods</h3>
+<table>
+<tr>
+<th>Method</th>
+<th>next/router</th>
+<th>next/navigation</th>
+</tr>
+<tr>
+<td>push()</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>replace()</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>back()</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>forward()</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>refresh()</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+</table>
+<h3>New App Router Methods</h3>
+<div class="code-title">router.refresh()</div>
+<pre><code class="language-jsx">router.refresh();</code></pre>
+<p>
+Refreshes the current route and re-fetches server data.
+</p>
+<div class="code-title">router.forward()</div>
+<pre><code class="language-jsx">router.forward();</code></pre>
+<p>
+Moves forward in browser history.
+</p>
+<h3>Main Differences</h3>
+<table>
+<tr>
+<th>Feature</th>
+<th>next/router</th>
+<th>next/navigation</th>
+</tr>
+<tr>
+<td>Router Type</td>
+<td>Pages Router</td>
+<td>App Router</td>
+</tr>
+<tr>
+<td>Import Path</td>
+<td>next/router</td>
+<td>next/navigation</td>
+</tr>
+<tr>
+<td>Requires 'use client'</td>
+<td>No</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>router.query</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>router.pathname</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>router.events</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>useSearchParams()</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>usePathname()</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>router.refresh()</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+</table>
+<h3>When Should We Use Each One?</h3>
+<ul>
+<li>Use <strong>next/router</strong> when working with the Pages Router.</li>
+<li>Use <strong>next/navigation</strong> when working with the App Router.</li>
+<li>For new Next.js applications, the App Router and <strong>next/navigation</strong> are recommended.</li>
+</ul>
+<div class="feature">
+<strong>One-Line Definition:</strong><br/>
+<code>useRouter</code> from <code>next/router</code> is designed for the Pages Router and provides features such as <code>query</code>, <code>pathname</code>, and router events, while <code>useRouter</code> from <code>next/navigation</code> is designed for the App Router and works with modern hooks such as <code>useSearchParams()</code>, <code>usePathname()</code>, and <code>router.refresh()</code>.
+</div>
+<h2 class="section-title" id="P2-10"><span class="secnum">P2-10</span>How do you Access Query Parameters in Next.js?</h2>
+<p>
+Query parameters are values passed in the URL after a question mark (<code>?</code>).
+</p>
+<div class="feature">
+Query parameters allow us to pass additional data through the URL without changing the route structure.
+</div>
+<h3>Example URL</h3>
+<div class="code-title">URL</div>
+<pre><code class="language-text">/products?id=100&amp;category=mobile</code></pre>
+<p>
+Here:
+</p>
+<table>
+<tr>
+<th>Parameter</th>
+<th>Value</th>
+</tr>
+<tr>
+<td>id</td>
+<td>100</td>
+</tr>
+<tr>
+<td>category</td>
+<td>mobile</td>
+</tr>
+</table>
+<h3>Pages Router Method</h3>
+<p>
+In the Pages Router, query parameters are accessed using <code>router.query</code>.
+</p>
+<div class="code-title">pages/products.js</div>
+<pre><code class="language-jsx">import { useRouter } from 'next/router';
+export default function Products() {
+  const router = useRouter();
+  return (
+    &lt;&gt;
+      &lt;h2&gt;ID: {router.query.id}&lt;/h2&gt;
+      &lt;h2&gt;Category: {router.query.category}&lt;/h2&gt;
+    &lt;/&gt;
+  );
+}</code></pre>
+<p>
+URL:
+</p>
+<pre><code class="language-text">/products?id=100&amp;category=mobile</code></pre>
+<p>
+Output:
+</p>
+<pre><code class="language-text">ID: 100
+Category: mobile</code></pre>
+<h3>App Router Method</h3>
+<p>
+In the App Router, <code>router.query</code> does not exist.
+</p>
+<p>
+Instead, we use <code>useSearchParams()</code>.
+</p>
+<div class="code-title">app/products/page.js</div>
+<pre><code class="language-jsx">'use client';
+import { useSearchParams } from 'next/navigation';
+export default function Products() {
+  const searchParams = useSearchParams();
+  const id = searchParams.get('id');
+  const category = searchParams.get('category');
+  return (
+    &lt;&gt;
+      &lt;h2&gt;ID: {id}&lt;/h2&gt;
+      &lt;h2&gt;Category: {category}&lt;/h2&gt;
+    &lt;/&gt;
+  );
+}</code></pre>
+<p>
+URL:
+</p>
+<pre><code class="language-text">/products?id=100&amp;category=mobile</code></pre>
+<p>
+Output:
+</p>
+<pre><code class="language-text">ID: 100
+Category: mobile</code></pre>
+<h3>Reading a Single Parameter</h3>
+<div class="code-title">App Router</div>
+<pre><code class="language-jsx">const searchParams = useSearchParams();
+const id = searchParams.get('id');
+console.log(id);</code></pre>
+<p>
+URL:
+</p>
+<pre><code class="language-text">/products?id=100</code></pre>
+<p>
+Output:
+</p>
+<pre><code class="language-text">100</code></pre>
+<h3>Reading Multiple Parameters</h3>
+<div class="code-title">App Router</div>
+<pre><code class="language-jsx">const searchParams = useSearchParams();
+const id = searchParams.get('id');
+const page = searchParams.get('page');
+const sort = searchParams.get('sort');</code></pre>
+<p>
+URL:
+</p>
+<pre><code class="language-text">/products?id=100&amp;page=2&amp;sort=price</code></pre>
+<p>
+Output:
+</p>
+<pre><code class="language-text">id   = 100
+page = 2
+sort = price</code></pre>
+<h3>Checking if a Query Parameter Exists</h3>
+<div class="code-title">App Router</div>
+<pre><code class="language-jsx">const searchParams = useSearchParams();
+const id = searchParams.get('id');
+if (id) {
+  console.log('Parameter Found');
+}</code></pre>
+<h3>Getting All Query Parameters</h3>
+<div class="code-title">App Router</div>
+<pre><code class="language-jsx">const searchParams = useSearchParams();
+console.log(searchParams.toString());</code></pre>
+<p>
+URL:
+</p>
+<pre><code class="language-text">/products?id=100&amp;page=2</code></pre>
+<p>
+Output:
+</p>
+<pre><code class="language-text">id=100&amp;page=2</code></pre>
+<h3>Pages Router vs App Router</h3>
+<table>
+<tr>
+<th>Feature</th>
+<th>Pages Router</th>
+<th>App Router</th>
+</tr>
+<tr>
+<td>Hook</td>
+<td>useRouter()</td>
+<td>useSearchParams()</td>
+</tr>
+<tr>
+<td>Access Query</td>
+<td>router.query</td>
+<td>searchParams.get()</td>
+</tr>
+<tr>
+<td>Import</td>
+<td>next/router</td>
+<td>next/navigation</td>
+</tr>
+<tr>
+<td>Requires 'use client'</td>
+<td>No</td>
+<td>Yes</td>
+</tr>
+</table>
+<h3>Query Parameters vs Dynamic Route Parameters</h3>
+<table>
+<tr>
+<th>Type</th>
+<th>Example URL</th>
+<th>Access Method</th>
+</tr>
+<tr>
+<td>Query Parameter</td>
+<td>/products?id=100</td>
+<td>searchParams.get('id')</td>
+</tr>
+<tr>
+<td>Dynamic Route Parameter</td>
+<td>/products/100</td>
+<td>params.id</td>
+</tr>
+</table>
+<div class="feature">
+<strong>Important:</strong><br/>
+Query parameters come after <code>?</code>, while dynamic route parameters are part of the URL path.
+</div>
+<h3>Real-World Example</h3>
+<p>
+Suppose our application supports filtering products.
+</p>
+<div class="code-title">URL</div>
+<pre><code class="language-text">/products?category=mobile&amp;sort=price&amp;page=2</code></pre>
+<p>
+We can access all filter values using:
+</p>
+<div class="code-title">App Router</div>
+<pre><code class="language-jsx">const searchParams = useSearchParams();
+const category = searchParams.get('category');
+const sort = searchParams.get('sort');
+const page = searchParams.get('page');</code></pre>
+<div class="feature">
+<strong>One-Line Definition:</strong><br/>
+In Next.js, query parameters are accessed using <code>router.query</code> in the Pages Router and <code>useSearchParams()</code> in the App Router.
+</div>
+<h2 class="section-title" id="P2-11"><span class="secnum">P2-11</span>How do you Create a Custom 404 Page in Next.js?</h2>
+<p>
+A custom 404 page allows us to show our own page when a user visits a route that does not exist.
+</p>
+<div class="feature">
+In the Pages Router, we create <code>pages/404.js</code>. In the App Router, we create <code>app/not-found.js</code>.
+</div>
+<h3>Pages Router: Custom 404 Page</h3>
+<p>
+In the Pages Router, create a file named <code>404.js</code> inside the <code>pages</code> directory.
+</p>
+<div class="code-title">Folder Structure</div>
+<pre><code class="language-text">pages/
+├── index.js
+├── about.js
+└── 404.js</code></pre>
+<div class="code-title">pages/404.js</div>
+<pre><code class="language-jsx">import Link from 'next/link';
+export default function Custom404() {
+  return (
+    &lt;div&gt;
+      &lt;h1&gt;404 - Page Not Found&lt;/h1&gt;
+      &lt;p&gt;The page we are looking for does not exist.&lt;/p&gt;
+      &lt;Link href="/"&gt;Go Home&lt;/Link&gt;
+    &lt;/div&gt;
+  );
+}</code></pre>
+<h3>App Router: Custom 404 Page</h3>
+<p>
+In the App Router, create a file named <code>not-found.js</code> inside the <code>app</code> directory.
+</p>
+<div class="code-title">Folder Structure</div>
+<pre><code class="language-text">app/
+├── page.js
+├── layout.js
+└── not-found.js</code></pre>
+<div class="code-title">app/not-found.js</div>
+<pre><code class="language-jsx">import Link from 'next/link';
+export default function NotFound() {
+  return (
+    &lt;div&gt;
+      &lt;h1&gt;404 - Page Not Found&lt;/h1&gt;
+      &lt;p&gt;The page we are looking for does not exist.&lt;/p&gt;
+      &lt;Link href="/"&gt;Go Home&lt;/Link&gt;
+    &lt;/div&gt;
+  );
+}</code></pre>
+<h3>Show 404 Manually in App Router</h3>
+<p>
+If data is not found, we can manually show the 404 page using <code>notFound()</code>.
+</p>
+<div class="code-title">app/products/[id]/page.js</div>
+<pre><code class="language-jsx">import { notFound } from 'next/navigation';
+export default async function Product({ params }) {
+  const product = null;
+  if (!product) {
+    notFound();
+  }
+  return &lt;h1&gt;Product Details&lt;/h1&gt;;
+}</code></pre>
+<h3>Pages Router vs App Router</h3>
+<table>
+<tr>
+<th>Router</th>
+<th>Custom 404 File</th>
+<th>Location</th>
+</tr>
+<tr>
+<td>Pages Router</td>
+<td>404.js</td>
+<td>pages/404.js</td>
+</tr>
+<tr>
+<td>App Router</td>
+<td>not-found.js</td>
+<td>app/not-found.js</td>
+</tr>
+</table>
+<h3>When Do We Use a Custom 404 Page?</h3>
+<ul>
+<li>When a route does not exist.</li>
+<li>When requested data is not found.</li>
+<li>When we want to show a branded error page.</li>
+<li>When we want to provide a link back to the home page.</li>
+</ul>
+<div class="feature">
+<strong>One-Line Definition:</strong><br/>
+A custom 404 page in Next.js allows us to display our own Not Found page when a user visits a missing route, using <code>pages/404.js</code> in the Pages Router or <code>app/not-found.js</code> in the App Router.
+</div>
+<h2 class="section-title" id="P2-12"><span class="secnum">P2-12</span>What is Shallow Routing and When Would We Use It?</h2>
+<p>
+Shallow Routing is a feature in Next.js that allows us to change the URL without re-running data fetching methods or fully reloading the current page.
+</p>
+<div class="feature">
+Shallow Routing updates the URL and router state while keeping the current page component mounted and avoiding unnecessary data fetching.
+</div>
+<h3>Why Do We Need Shallow Routing?</h3>
+<p>
+Suppose our application displays products with pagination, sorting, or filters.
+</p>
+<p>
+When a user changes a filter or page number, we may want to update the URL so it can be bookmarked, refreshed, or shared with others.
+</p>
+<p>
+Without Shallow Routing, changing the URL may trigger data fetching methods again.
+</p>
+<div class="feature">
+<strong>Note:</strong><br/>
+Shallow Routing is most useful when our application data has already been loaded and we only want to update the URL or UI state. In such cases, re-fetching the same data from the server would be unnecessary.
+</div>
+<div class="code-title">Example</div>
+<pre><code class="language-text">All Products Already Loaded
+User Changes:
+✔ View Mode
+✔ Selected Tab
+✔ Sort Order
+✔ Filter State
+Only URL Changes
+No Need To Fetch Data Again</code></pre>
+<p>
+In these situations, Shallow Routing updates the URL without re-running page data fetching methods.
+</p>
+<div class="code-title">Current URL</div>
+<pre><code class="language-text">/products?page=1</code></pre>
+<p>
+After clicking the next page:
+</p>
+<div class="code-title">Updated URL</div>
+<pre><code class="language-text">/products?page=2</code></pre>
+<p>
+We may only want the URL to change without causing a complete page refresh cycle.
+</p>
+<h3>Basic Example</h3>
+<div class="code-title">Pages Router</div>
+<pre><code class="language-jsx">import { useRouter } from 'next/router';
+export default function Products() {
+  const router = useRouter();
+  const nextPage = () =&gt; {
+    router.push('/products?page=2', undefined, { shallow: true });  //router.push(url, as, options);
+  };
+  return (
+    &lt;button onClick={nextPage}&gt;
+      Next Page
+    &lt;/button&gt;
+  );
+}</code></pre>
+<pre>
+| Parameter | Purpose                                                               |
+| --------- | --------------------------------------------------------------------- |
+| `url`     | Actual route to navigate to                                           |
+| `as`      | URL shown in the browser (mainly for older dynamic routing use cases) |
+| `options` | Extra options such as `shallow`, `scroll`, `locale`                   |
+
+</pre>
+<h3>What Happens Internally?</h3>
+<h4>Normal Routing</h4>
+<div class="code-title">Flow</div>
+<pre><code class="language-text">URL Change
+    │
+    ▼
+Next.js Navigation
+    │
+    ▼
+getServerSideProps()
+or
+getStaticProps()
+Runs Again
+    │
+    ▼
+Page Re-renders</code></pre>
+<h4>Shallow Routing</h4>
+<div class="code-title">Flow</div>
+<pre><code class="language-text">URL Change
+    │
+    ▼
+Router State Updates
+    │
+    ▼
+Current Component Stays Mounted
+    │
+    ▼
+No Data Fetching Re-execution
+    │
+    ▼
+UI Updates Using New Query Values</code></pre>
+<h3>Reading the Updated Query Parameter</h3>
+<div class="code-title">Example</div>
+<pre><code class="language-jsx">import { useRouter } from 'next/router';
+export default function Products() {
+  const router = useRouter();
+  return (
+    &lt;h2&gt;Page: {router.query.page}&lt;/h2&gt;
+  );
+}</code></pre>
+<p>
+URL:
+</p>
+<pre><code class="language-text">/products?page=2</code></pre>
+<p>
+Output:
+</p>
+<pre><code class="language-text">Page: 2</code></pre>
+<h3>Using replace() with Shallow Routing</h3>
+<div class="code-title">router.replace()</div>
+<pre><code class="language-jsx">router.replace('/products?page=3', undefined, { shallow: true });</code></pre>
+<p>
+Unlike <code>push()</code>, <code>replace()</code> does not create a new browser history entry.
+</p>
+<h3>Real-World Use Cases</h3>
+<ul>
+<li>Pagination</li>
+<li>Search Filters</li>
+<li>Sorting</li>
+<li>Dashboard State</li>
+<li>Wizard Steps</li>
+<li>Tab Navigation</li>
+</ul>
+<h3>Example: Pagination</h3>
+<div class="code-title">URL Changes</div>
+<pre><code class="language-text">/products?page=1
+/products?page=2
+/products?page=3</code></pre>
+<p>
+The URL changes while the page component remains mounted.
+</p>
+<h3>Example: Tab Navigation</h3>
+<div class="code-title">URL Changes</div>
+<pre><code class="language-text">/profile?tab=posts
+/profile?tab=photos
+/profile?tab=settings</code></pre>
+<p>
+Using Shallow Routing, we can switch tabs without re-running page data fetching methods.
+</p>
+<h3>Important Limitation</h3>
+<div class="feature">
+Shallow Routing only works when navigating within the same page.
+</div>
+<p>
+Valid:
+</p>
+<pre><code class="language-text">/products?page=1
+       ↓
+/products?page=2</code></pre>
+<p>
+Not Valid:
+</p>
+<pre><code class="language-text">/products?page=1
+       ↓
+/about</code></pre>
+<p>
+Navigating to a different page always performs normal routing.
+</p>
+<h3>Data Fetching Methods Affected</h3>
+<p>
+When using Shallow Routing, these methods are not re-executed:
+</p>
+<ul>
+<li>getServerSideProps()</li>
+<li>getStaticProps()</li>
+<li>getInitialProps()</li>
+</ul>
+<h3>Pages Router vs App Router</h3>
+<table>
+<tr>
+<th>Feature</th>
+<th>Pages Router</th>
+<th>App Router</th>
+</tr>
+<tr>
+<td>shallow option</td>
+<td>✅ Supported</td>
+<td>❌ Not Available</td>
+</tr>
+<tr>
+<td>router.push(..., { shallow: true })</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>Main Purpose</td>
+<td>Update URL without re-fetching data</td>
+<td>Uses a different routing architecture</td>
+</tr>
+</table>
+<h3>App Router Note</h3>
+<p>
+The App Router does not support the <code>shallow</code> option.
+</p>
+<p>
+Instead, App Router uses:
+</p>
+<ul>
+<li>useSearchParams()</li>
+<li>Server Components</li>
+<li>Client Components</li>
+<li>router.push()</li>
+<li>router.replace()</li>
+</ul>
+<p>
+Because of the new architecture, traditional shallow routing is generally unnecessary in most App Router scenarios.
+</p>
+<div class="feature">
+<strong>One-Line Definition:</strong><br/>
+Shallow Routing is a Pages Router feature that allows us to update the URL and query parameters without re-running data fetching methods or fully reloading the current page.
+</div>
+<h3>Good Use Case for Shallow Routing</h3>
+<p>
+Shallow Routing is useful when all required data is already available in the browser and we only want to update the URL to reflect UI state.
+</p>
+<div class="code-title">Example Data</div>
+<pre><code class="language-jsx">const products = allProducts;</code></pre>
+<p>
+Suppose our application supports different views.
+</p>
+<div class="code-title">Current URL</div>
+<pre><code class="language-text">/products?view=grid</code></pre>
+<p>
+User switches to List View:
+</p>
+<div class="code-title">Updated URL</div>
+<pre><code class="language-text">/products?view=list</code></pre>
+<p>
+In this case, no new server data is needed because all products are already loaded.
+</p>
+<div class="code-title">What We Want</div>
+<pre><code class="language-text">✔ Update URL
+✔ Update UI
+✔ Update router.query
+✘ Don't run getServerSideProps()
+✘ Don't run getStaticProps()
+✘ Don't make API calls again</code></pre>
+<p>
+This is an ideal use case for Shallow Routing because only the UI state changes while the underlying data remains the same.
+</p>
+<h3>Bad Use Case for Shallow Routing</h3>
+<p>
+Suppose each page requires new data from the server.
+</p>
+<div class="code-title">Current URL</div>
+<pre><code class="language-text">/products?page=1</code></pre>
+<p>
+User navigates to:
+</p>
+<div class="code-title">Updated URL</div>
+<pre><code class="language-text">/products?page=2</code></pre>
+<p>
+Page 2 contains completely different products:
+</p>
+<div class="code-title">Page Data</div>
+<pre><code class="language-text">Page 1:
+Product 1
+Product 2
+Product 3
+Page 2:
+Product 4
+Product 5
+Product 6</code></pre>
+<p>
+In this scenario, we must fetch new data from the server.
+</p>
+<div class="code-title">What We Need</div>
+<pre><code class="language-text">✔ Run getServerSideProps()
+✔ Fetch new data
+✔ Render new products</code></pre>
+<p>
+This is a poor use case for Shallow Routing because the page content depends on new server data.
+</p><div class="chapnav"><a class="prev" href="pages-P1-introduction-to-next.js-and-the-pages-router.html">P1 - Introduction to Next.js & the Pages Router</a><a class="next" href="pages-P3-rendering-and-data-fetching.html">P3 - Rendering & Data Fetching</a></div></div></div><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-tsx.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+</body>
+</html>

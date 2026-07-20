@@ -1,0 +1,2633 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>04 - Server Actions & Mutations | Next.js App Router Guide</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:#0f172a;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.8;display:flex;min-height:100vh}
+a{color:inherit;text-decoration:none}
+.sidebar{width:290px;flex-shrink:0;background:#0b1220;border-right:1px solid #1e293b;padding:24px 18px;position:sticky;top:0;height:100vh;overflow-y:auto}
+.brand{color:#38bdf8;font-size:18px;font-weight:800;margin-bottom:4px}
+.brand small{display:block;color:#64748b;font-weight:400;font-size:12px;margin-top:4px}
+.chapter-nav{margin-top:22px}
+.chapter-nav a{display:block;padding:8px 10px;border-radius:8px;font-size:13px;color:#94a3b8;margin-bottom:4px;border-left:3px solid transparent}
+.chapter-nav a:hover{background:#111827;color:#e2e8f0}
+.chapter-nav a.active{background:#111827;color:#38bdf8;border-left:3px solid #38bdf8;font-weight:bold}
+.chapter-nav .chnum{display:inline-block;width:22px;color:#475569;font-family:monospace}
+.toc{margin-top:22px;border-top:1px solid #1e293b;padding-top:16px}
+.toc-title{color:#fbbf24;font-size:12px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px}
+.toc a{display:block;font-size:12.5px;color:#8ea3c2;padding:5px 8px;border-radius:6px;line-height:1.4}
+.toc a:hover{background:#111827;color:#e2e8f0}
+.main{flex:1;padding:40px 48px;max-width:980px}
+.container{max-width:900px}
+h1.page-title{color:#38bdf8;margin-bottom:6px;font-size:30px}
+.page-sub{color:#64748b;margin-bottom:28px;font-size:14px}
+h2.section-title{color:#a78bfa;margin-top:52px;margin-bottom:14px;font-size:23px;border-top:1px solid #1e293b;padding-top:38px}
+h2.section-title .secnum{color:#475569;font-family:monospace;margin-right:10px;font-size:16px}
+h3{color:#fbbf24;margin-top:25px;margin-bottom:10px;font-size:17px}
+h4{color:#38bdf8;margin-top:18px;margin-bottom:8px;font-size:15px}
+h5{color:#93c5fd;margin-top:14px;margin-bottom:6px;font-size:14px}
+p{margin-bottom:15px}
+ul,ol{margin-left:20px;margin-bottom:15px}
+li{margin-bottom:8px}
+strong{color:#f1f5f9}
+code{color:#93c5fd;font-family:'JetBrains Mono',monospace;font-size:.92em}
+.feature{background:#1e293b;border-left:5px solid #38bdf8;padding:15px;border-radius:8px;margin:20px 0}
+.warning{background:#2a1a1a;border-left:5px solid #f87171;padding:15px;border-radius:8px;margin:20px 0}
+.summary{background:#1a2a1e;border-left:5px solid #34d399;padding:15px;border-radius:8px;margin:20px 0}
+.note{background:#1e293b;border-left:5px solid #a78bfa;padding:15px;border-radius:8px;margin:20px 0}
+.code-title{background:#1e293b;color:#93c5fd;padding:10px;font-weight:bold;border-radius:6px 6px 0 0;font-size:13px;font-family:monospace}
+pre[class*="language-"]{margin:0 0 20px 0!important;border-radius:0 0 6px 6px}
+pre code{white-space:pre}
+table{width:100%;border-collapse:collapse;margin:20px 0}
+th{background:#1e293b;color:#38bdf8;text-align:left;padding:12px}
+td{padding:12px;border-top:1px solid #334155}
+hr{border:none;border-top:1px solid #1e293b;margin:30px 0}
+.chapnav{display:flex;justify-content:space-between;margin-top:60px;padding-top:24px;border-top:1px solid #1e293b}
+.chapnav a{background:#111827;padding:12px 18px;border-radius:10px;border:1px solid #1e293b;font-size:14px;color:#94a3b8}
+.chapnav a:hover{color:#38bdf8;border-color:#38bdf8}
+.chapnav .prev::before{content:"<- "}
+.chapnav .next::after{content:" ->"}
+@media(max-width:900px){body{flex-direction:column}.sidebar{position:relative;height:auto;width:100%}}
+</style>
+</head>
+<body>
+<div class="sidebar">
+<div class="brand">Next.js App Router<small>Complete Step-by-Step Guide</small></div>
+<div class="chapter-nav"><a class="" href="01-foundations-of-the-app-router.html"><span class="chnum">01</span>Foundations of the App Router</a><a class="" href="02-routing-layouts-and-file-conventions.html"><span class="chnum">02</span>Routing, Layouts & File Conventions</a><a class="" href="03-rendering-data-fetching-and-caching.html"><span class="chnum">03</span>Rendering, Data Fetching & Caching</a><a class="active" href="04-server-actions-and-mutations.html"><span class="chnum">04</span>Server Actions & Mutations</a><a class="" href="05-route-handlers-client-data-and-metadata-seo.html"><span class="chnum">05</span>Route Handlers, Client Data & Metadata (SEO)</a><a class="" href="06-styling-assets-and-optimized-components.html"><span class="chnum">06</span>Styling, Assets & Optimized Components</a><a class="" href="07-performance-and-optimization.html"><span class="chnum">07</span>Performance & Optimization</a></div>
+<div class="toc"><div class="toc-title">On this page</div><a href="#04-01">What are Server Actions in Next.js and what problem do they solve?</a><a href="#04-02">What is the 'use server' directive and where can you place it?</a><a href="#04-03">Server Actions became stable in which Next.js version?</a><a href="#04-04">How do Server Actions integrate with HTML <form> elements?</a><a href="#04-05">What is useActionState (React 19) and how does it replace useFormState in Next.js 15?</a><a href="#04-06">What is useFormStatus and what does it provide during a Server Action submission?</a><a href="#04-07">How do you handle and surface validation errors from a Server Action?</a><a href="#04-08">Can Server Actions be called from Client Components? How?</a><a href="#04-09">What are the security considerations and CSRF handling for Server Actions?</a><a href="#04-10">How do you redirect inside a Server Action without triggering a client-side navigation?</a></div>
+</div><div class="main"><div class="container"><h1 class="page-title">04 - Server Actions & Mutations</h1><div class="page-sub">Part 04 of 7 &middot; 10 topics &middot; Next.js App Router Guide</div><h2 class="section-title" id="04-01"><span class="secnum">04-01</span>What are Server Actions in Next.js and what problem do they solve?</h2>
+<p>
+Server Actions are server-side functions that can be called directly from forms, Server Components, and Client Components without creating separate API routes.
+</p>
+<div class="feature">
+<strong>Simple Meaning:</strong><br/>
+Server Actions allow us to execute backend code directly from our Next.js components.
+</div>
+<hr/>
+<h3>What Problem Did Server Actions Solve?</h3>
+<p>
+Before Server Actions, every form submission usually required an API route.
+</p>
+<div class="code-title">Traditional Flow</div>
+<pre><code class="language-text">User Clicks Save
+       ↓
+Client Component
+       ↓
+fetch('/api/users')
+       ↓
+API Route
+       ↓
+Database
+       ↓
+Response
+       ↓
+Update UI</code></pre>
+<p>
+Even a simple database insert required multiple files and extra boilerplate code.
+</p>
+<hr/>
+<h3>Without Server Actions</h3>
+<div class="code-title">API Route</div>
+<pre><code class="language-ts">// app/api/users/route.ts
+export async function POST(req: Request) {
+  const data = await req.json();
+  await db.user.create({
+    data
+  });
+  return Response.json({
+    success: true
+  });
+}</code></pre>
+<div class="code-title">Client Component</div>
+<pre><code class="language-tsx">'use client';
+export default function UserForm() {
+  async function saveUser() {
+    await fetch('/api/users', {
+      method: 'POST',
+      body: JSON.stringify({
+        name: 'Rizwan'
+      })
+    });
+  }
+  return (
+    &lt;button onClick={saveUser}&gt;
+      Save User
+    &lt;/button&gt;
+  );
+}</code></pre>
+<p>
+We need:
+</p>
+<ul>
+<li>Form</li>
+<li>API Route</li>
+<li>fetch()</li>
+<li>Request Parsing</li>
+<li>Response Handling</li>
+</ul>
+<hr/>
+<h3>With Server Actions</h3>
+<div class="code-title">Server Action</div>
+<pre><code class="language-ts">// app/actions.ts
+'use server';
+export async function createUser(formData: FormData) {
+  await db.user.create({
+    data: {
+      name: formData.get('name')
+    }
+  });
+}</code></pre>
+<div class="code-title">Page</div>
+<pre><code class="language-tsx">import { createUser } from './actions';
+export default function Page() {
+  return (
+    &lt;form action={createUser}&gt;
+      &lt;input
+        name="name"
+        placeholder="Enter Name"
+      /&gt;
+      &lt;button type="submit"&gt;
+        Save User
+      &lt;/button&gt;
+    &lt;/form&gt;
+  );
+}</code></pre>
+<p>
+Flow:
+</p>
+<pre><code class="language-text">User Clicks Save
+       ↓
+Server Action
+       ↓
+Database
+       ↓
+Updated UI</code></pre>
+<p>
+No API route required.
+</p>
+<hr/>
+<h3>Understanding "use server"</h3>
+<p>
+The <code>'use server'</code> directive tells Next.js that this function must execute on the server.
+</p>
+<div class="code-title">Example</div>
+<pre><code class="language-ts">'use server';
+export async function deleteUser(id: string) {
+  await db.user.delete({
+    where: { id }
+  });
+}</code></pre>
+<p>
+The browser cannot execute this function directly. Next.js automatically sends a request to the server and runs it there.
+</p>
+<hr/>
+<h3>Real World Example</h3>
+<p>
+Suppose we have an Admin Panel where products can be added.
+</p>
+<div class="code-title">Server Action</div>
+<pre><code class="language-ts">'use server';
+export async function addProduct(formData: FormData) {
+  await db.product.create({
+    data: {
+      name: formData.get('name'),
+      price: Number(formData.get('price'))
+    }
+  });
+}</code></pre>
+<div class="code-title">Form</div>
+<pre><code class="language-tsx">&lt;form action={addProduct}&gt;
+  &lt;input name="name" /&gt;
+  &lt;input name="price" /&gt;
+  &lt;button&gt;
+    Add Product
+  &lt;/button&gt;
+&lt;/form&gt;</code></pre>
+<p>
+Flow:
+</p>
+<pre><code class="language-text">Submit Form
+      ↓
+Server Action
+      ↓
+Database Insert
+      ↓
+Success</code></pre>
+<hr/>
+<h3>Server Actions + Revalidation</h3>
+<p>
+Server Actions are commonly used with cache revalidation.
+</p>
+<div class="code-title">Example</div>
+<pre><code class="language-ts">'use server';
+import { revalidatePath } from 'next/cache';
+export async function addProduct(formData: FormData) {
+  await db.product.create({
+    data: {
+      name: formData.get('name')
+    }
+  });
+  revalidatePath('/products');
+}</code></pre>
+<p>
+Flow:
+</p>
+<pre><code class="language-text">Add Product
+      ↓
+Database Updated
+      ↓
+revalidatePath('/products')
+      ↓
+Products Cache Cleared
+      ↓
+Next Request Gets Fresh Data</code></pre>
+<hr/>
+<h3>Can Client Components Use Server Actions?</h3>
+<p>
+Yes.
+</p>
+<div class="code-title">Client Component Example</div>
+<pre><code class="language-tsx">'use client';
+import { createUser } from './actions';
+export default function Button() {
+  return (
+    &lt;button onClick={() =&gt; createUser()}&gt;
+      Create User
+    &lt;/button&gt;
+  );
+}</code></pre>
+<p>
+Although the button is in a Client Component, the action still runs on the server.
+</p>
+<hr/>
+<h3>When Should We Use Server Actions?</h3>
+<table>
+<tr>
+<th>Use Case</th>
+<th>Use Server Action?</th>
+</tr>
+<tr>
+<td>Create User</td>
+<td>✅ Yes</td>
+</tr>
+<tr>
+<td>Update Profile</td>
+<td>✅ Yes</td>
+</tr>
+<tr>
+<td>Delete Product</td>
+<td>✅ Yes</td>
+</tr>
+<tr>
+<td>Submit Contact Form</td>
+<td>✅ Yes</td>
+</tr>
+<tr>
+<td>Change Password</td>
+<td>✅ Yes</td>
+</tr>
+</table>
+<hr/>
+<h3>When Should We Use API Routes Instead?</h3>
+<p>
+Use API Routes when external systems need access.
+</p>
+<div class="code-title">Example</div>
+<pre><code class="language-text">Android App
+      ↓
+API Route
+      ↓
+Database
+Third-Party Service
+      ↓
+API Route
+      ↓
+Database</code></pre>
+<p>
+Server Actions are mainly for communication between our Next.js frontend and backend.
+</p>
+<hr/>
+<hr/>
+<h3>Common Interview Doubt</h3>
+<p>
+If Server Components already run on the server, why do Server Actions need
+<code>'use server'</code>?
+</p>
+<div class="feature">
+<strong>Short Answer:</strong><br/>
+Because a Server Component and a Server Action are two different concepts.
+</div>
+<h4>Case 1: Normal Function Inside a Server Component</h4>
+<div class="code-title">Example</div>
+<pre><code class="language-tsx">export default async function Page() {
+  async function getUsers() {
+    return db.user.findMany();
+  }
+  const users = await getUsers();
+  return (
+    &lt;div&gt;
+      {users.length}
+    &lt;/div&gt;
+  );
+}</code></pre>
+<p>
+Flow:
+</p>
+<pre><code class="language-text">Browser
+   ↓
+Page() runs on server
+   ↓
+getUsers() runs on server</code></pre>
+<p>
+Here, <code>getUsers()</code> is called by another server function
+(<code>Page()</code>), so Next.js already knows it will run on the server.
+</p>
+<p>
+No <code>'use server'</code> is required.
+</p>
+<hr/>
+<h4>Case 2: Server Action</h4>
+<div class="code-title">Server Action</div>
+<pre><code class="language-ts">'use server';
+export async function createUser( formData: FormData ) {
+  await db.user.create({
+    data: {
+      name: formData.get('name')
+    }
+  });
+}</code></pre>
+<div class="code-title">Form</div>
+<pre><code class="language-tsx">&lt;form action={createUser}&gt;
+  ...
+&lt;/form&gt;</code></pre>
+<p>
+Flow:
+</p>
+<pre><code class="language-text">Browser
+   ↓
+createUser()</code></pre>
+<p>
+Now the browser is trying to call <code>createUser()</code> directly.
+</p>
+<p>
+Next.js must create a special server endpoint so that the browser can execute
+this function on the server.
+</p>
+<p>
+That is why we add:
+</p>
+<pre><code class="language-ts">'use server';</code></pre>
+<p>
+This tells Next.js:
+</p>
+<div class="feature">
+Create a server endpoint for this function and execute it on the server whenever
+the browser calls it.
+</div>
+<hr/>
+<h3>Easy Rule</h3>
+<table>
+<tr>
+<th>Scenario</th>
+<th>Need 'use server'?</th>
+</tr>
+<tr>
+<td>Function called inside a Server Component</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td>Function used in form action</td>
+<td>✅ Yes</td>
+</tr>
+<tr>
+<td>Function called from a Client Component</td>
+<td>✅ Yes</td>
+</tr>
+<tr>
+<td>Function called directly by the browser</td>
+<td>✅ Yes</td>
+</tr>
+</table>
+<div class="feature">
+<strong>Remember:</strong><br/>
+The reason for <code>'use server'</code> is not that the function runs on the
+server. The reason is that the browser needs a way to call that function on the
+server.
+</div>
+<h3>Server Components vs Server Actions</h3>
+<table>
+<tr>
+<th>Feature</th>
+<th>Server Component</th>
+<th>Server Action</th>
+</tr>
+<tr>
+<td>Main Purpose</td>
+<td>Read Data</td>
+<td>Write Data</td>
+</tr>
+<tr>
+<td>Database Query</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Create Record</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Update Record</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Delete Record</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+</table>
+<hr/>
+<h3>Easy Memory Trick</h3>
+<div class="code-title">Remember</div>
+<pre><code class="language-text">Server Component
+       ↓
+Read Data
+Server Action
+       ↓
+Write Data</code></pre>
+<div class="feature">
+<strong>One-Line Definition:</strong><br/>
+Server Actions are server-side functions that allow us to perform create, update, and delete operations directly from Next.js components without creating separate API routes.
+</div>
+<hr/>
+<h3>Server Actions vs Separate Backend (.NET, Java, Node)</h3>
+<p>
+Server Actions provide the biggest benefit when Next.js itself owns the backend logic and talks directly to the database.
+</p>
+<div class="code-title">Ideal Server Actions Architecture</div>
+<pre><code class="language-text">Next.js Frontend
+       ↓
+Server Action
+       ↓
+Database</code></pre>
+<p>
+In this setup, we can directly create, update, or delete database records without creating API routes.
+</p>
+<div class="feature">
+<strong>Best Use Case:</strong><br/>
+Next.js Frontend + Next.js Backend + Database
+</div>
+<h4>What If We Already Have a Separate Backend?</h4>
+<p>
+Many real-world applications use a separate backend such as .NET, Java, Node.js, Spring Boot, Laravel, etc.
+</p>
+<div class="code-title">Separate Backend Architecture</div>
+<pre><code class="language-text">Next.js Frontend
+       ↓
+.NET API
+       ↓
+Database</code></pre>
+<p>
+In this case, the business logic already exists inside the backend API.
+</p>
+<p>
+Therefore, we usually call the backend directly using <code>fetch()</code>.
+</p>
+<div class="code-title">Example</div>
+<pre><code class="language-ts">const products = await fetch(
+  'https://api.company.com/products'
+);</code></pre>
+<p>
+or
+</p>
+<pre><code class="language-ts">await fetch(
+  'https://api.company.com/users',
+  {
+    method: 'POST'
+  }
+);</code></pre>
+<h4>Can Server Actions Still Be Used?</h4>
+<p>
+Yes.
+</p>
+<p>
+A Server Action can act as a middle layer between Next.js and the backend API.
+</p>
+<div class="code-title">Architecture</div>
+<pre><code class="language-text">Browser
+    ↓
+Server Action
+    ↓
+.NET API
+    ↓
+Database</code></pre>
+<div class="code-title">Example</div>
+<pre><code class="language-ts">'use server';
+export async function createUser(formData: FormData) {
+  await fetch(
+    'https://api.company.com/users',
+    {
+      method: 'POST',
+      body: JSON.stringify({
+        name: formData.get('name')
+      })
+    }
+  );
+}</code></pre>
+<p>
+Here the Server Action does not access the database directly. Instead, it forwards the request to the backend API.
+</p>
+<hr/>
+<h3>If We Can Use fetch(), Why Use a Server Action?</h3>
+<p>
+A common question is:
+</p>
+<div class="feature">
+<strong>Question:</strong><br/>
+If we already have a .NET, Java, Node.js, or Laravel backend, why not simply call it directly using <code>fetch()</code>?
+</div>
+<p>
+In many cases, that is exactly what we do.
+</p>
+<div class="code-title">Direct API Call</div>
+<pre><code class="language-tsx">'use client';
+async function saveUser() {
+  await fetch(
+    'https://api.company.com/users',
+    {
+      method: 'POST',
+      body: JSON.stringify({
+        name: 'Rizwan'
+      })
+    }
+  );
+}</code></pre>
+<p>
+Architecture:
+</p>
+<pre><code class="language-text">Browser
+   ↓
+fetch()
+   ↓
+.NET API
+   ↓
+Database</code></pre>
+<p>
+No Server Action is required.
+</p>
+<hr/>
+<h4>Then Why Would We Use a Server Action?</h4>
+<h4>1. Hide Secrets and Tokens</h4>
+<p>
+Suppose the backend API requires a secret token.
+</p>
+<div class="code-title">Server Action</div>
+<pre><code class="language-ts">'use server';
+export async function createUser(
+  formData: FormData
+) {
+  await fetch(
+    'https://api.company.com/users',
+    {
+      headers: {
+        Authorization:
+          `Bearer ${process.env.API_TOKEN}`
+      }
+    }
+  );
+}</code></pre>
+<p>
+Because the code runs on the server, the token is never exposed to the browser.
+</p>
+<hr/>
+<h4>2. Access Server-Only Features</h4>
+<p>
+Server Actions can use server-only APIs such as:
+</p>
+<ul>
+<li>cookies()</li>
+<li>headers()</li>
+<li>Environment Variables</li>
+<li>Database Access</li>
+<li>File System Access</li>
+</ul>
+<div class="code-title">Example</div>
+<pre><code class="language-ts">'use server';
+import { cookies } from 'next/headers';
+export async function createUser() {
+  const token =
+    (await cookies()).get('token');
+  await fetch(...);
+}</code></pre>
+<hr/>
+<h4>3. Hide Backend URLs</h4>
+<p>
+Without a Server Action:
+</p>
+<pre><code class="language-text">Browser
+   ↓
+https://api.company.com/users</code></pre>
+<p>
+With a Server Action:
+</p>
+<pre><code class="language-text">Browser
+   ↓
+Server Action
+   ↓
+https://api.company.com/users</code></pre>
+<p>
+The browser never directly communicates with the backend API.
+</p>
+<hr/>
+<h4>4. Simpler Form Handling</h4>
+<div class="code-title">Server Action Form</div>
+<pre><code class="language-tsx">&lt;form action={createUser}&gt;
+  ...
+&lt;/form&gt;</code></pre>
+<p>
+Instead of:
+</p>
+<div class="code-title">Traditional Form</div>
+<pre><code class="language-tsx">&lt;form onSubmit={handleSubmit}&gt;
+  ...
+&lt;/form&gt;
+async function handleSubmit(e) {
+  e.preventDefault();
+  await fetch(
+    'https://api.company.com/users',
+    {
+      method: 'POST'
+    }
+  );
+}</code></pre>
+<p>
+Server Actions reduce some of the client-side form handling code.
+</p>
+<hr/>
+<h3>What Do Most Enterprise Applications Use?</h3>
+<p>
+Most enterprise applications already have a dedicated backend.
+</p>
+<pre><code class="language-text">React / Next.js
+       ↓
+.NET API
+       ↓
+Database</code></pre>
+<p>
+In these projects, developers commonly call the backend directly using
+<code>fetch()</code>.
+</p>
+<div class="code-title">Example</div>
+<pre><code class="language-ts">await fetch(
+  'https://api.company.com/users',
+  {
+    method: 'POST'
+  }
+);</code></pre>
+<div class="feature">
+<strong>Important:</strong><br/>
+If a separate backend already exists, Server Actions are optional, not mandatory.
+Many teams simply use <code>fetch()</code> to communicate directly with the backend API.
+</div>
+<hr/>
+<h3>Easy Rule</h3>
+<table>
+<tr>
+<th>Scenario</th>
+<th>Recommended Approach</th>
+</tr>
+<tr>
+<td>Next.js owns the database</td>
+<td>✅ Server Actions</td>
+</tr>
+<tr>
+<td>Need secrets or server-only APIs</td>
+<td>✅ Server Actions</td>
+</tr>
+<tr>
+<td>Need to hide backend URLs</td>
+<td>✅ Server Actions</td>
+</tr>
+<tr>
+<td>Already have .NET / Java / Node backend</td>
+<td>✅ Direct fetch() is usually enough</td>
+</tr>
+</table>
+<div class="feature">
+<strong>Interview Answer:</strong><br/>
+When a separate backend already exists, we can often call it directly using
+<code>fetch()</code>. Server Actions are mainly useful when we need server-side
+secrets, server-only APIs, hidden endpoints, or a simpler form handling model.
+</div>
+<h4>For Projects Like Aadhaar Authentication</h4>
+<div class="code-title">Typical Architecture</div>
+<pre><code class="language-text">Angular / Next.js
+        ↓
+.NET API
+        ↓
+Database</code></pre>
+<p>
+In such projects, it is usually simpler to call the backend API directly rather than introducing Server Actions.
+</p>
+<table>
+<tr>
+<th>Architecture</th>
+<th>Recommended Approach</th>
+</tr>
+<tr>
+<td>Next.js + Database</td>
+<td>✅ Server Actions</td>
+</tr>
+<tr>
+<td>Next.js + .NET Backend</td>
+<td>✅ Direct API Calls</td>
+</tr>
+<tr>
+<td>Next.js + Java Backend</td>
+<td>✅ Direct API Calls</td>
+</tr>
+<tr>
+<td>Next.js + Node Backend</td>
+<td>✅ Direct API Calls</td>
+</tr>
+</table>
+<div class="feature">
+<strong>Easy Rule:</strong><br/>
+If Next.js owns the database, Server Actions are usually the best choice.<br/><br/>
+If a separate backend already exists, direct API calls are usually simpler and more common.
+</div>
+<h2 class="section-title" id="04-02"><span class="secnum">04-02</span>What is the 'use server' directive and where can you place it?</h2>
+<p>
+<code>'use server'</code> is a Next.js directive that marks a function or file to run only on the server.
+</p>
+<div class="feature">
+<strong>Simple Meaning:</strong><br/>
+<code>'use server'</code> tells Next.js, "This code must execute on the server and never in the browser."
+</div>
+<hr/>
+<h3>Why Do We Need 'use server'?</h3>
+<p>
+Some code should never be sent to the browser.
+</p>
+
+Examples:
+
+<ul>
+<li>Database queries</li>
+<li>Secret API keys</li>
+<li>Password hashing</li>
+<li>File system access</li>
+<li>Server-side business logic</li>
+</ul>
+<div class="code-title">Example</div>
+<pre><code class="language-ts">await db.user.create({
+  data: {
+    name: 'Rizwan'
+  }
+});</code></pre>
+<p>
+The browser cannot access the database directly, so this code must run on the server.
+</p>
+<hr/>
+<h3>Function-Level use server</h3>
+<p>
+We can place <code>'use server'</code> inside an individual function.
+</p>
+<div class="code-title">Example</div>
+<pre><code class="language-tsx">export default function Page() {
+  async function createUser(formData: FormData) {
+    'use server';
+    await db.user.create({
+      data: {
+        name: formData.get('name')
+      }
+    });
+  }
+  return (
+    &lt;form action={createUser}&gt;
+      &lt;input name="name" /&gt;
+      &lt;button&gt;Save&lt;/button&gt;
+    &lt;/form&gt;
+  );
+}</code></pre>
+<p>
+Only the <code>createUser()</code> function runs on the server.
+</p>
+<hr/>
+<h3>File-Level use server</h3>
+<p>
+We can place <code>'use server'</code> at the top of a file.
+</p>
+<div class="code-title">actions.ts</div>
+<pre><code class="language-ts">'use server';
+export async function createUser() {
+  await db.user.create({
+    data: {
+      name: 'Rizwan'
+    }
+  });
+}
+export async function deleteUser(id: string) {
+  await db.user.delete({
+    where: { id }
+  });
+}</code></pre>
+<p>
+Now every exported function in this file becomes a Server Action.
+</p>
+<hr/>
+<h3>How Next.js Treats It</h3>
+<div class="code-title">Flow</div>
+<pre><code class="language-text">Client Component
+       ↓
+Calls Server Action
+       ↓
+Next.js Internal Request
+       ↓
+Server
+       ↓
+Execute Function
+       ↓
+Return Result</code></pre>
+<p>
+The browser never executes the server code directly.
+</p>
+<hr/>
+<h3>Using use server with Forms</h3>
+<div class="code-title">Server Action</div>
+<pre><code class="language-ts">export async function createUser(
+  formData: FormData
+) {
+  'use server';
+  await db.user.create({
+    data: {
+      name: formData.get('name')
+    }
+  });
+}</code></pre>
+<div class="code-title">Form</div>
+<pre><code class="language-tsx">&lt;form action={createUser}&gt;
+  &lt;input name="name" /&gt;
+  &lt;button&gt;Save&lt;/button&gt;
+&lt;/form&gt;</code></pre>
+<p>
+When the form is submitted:
+</p>
+<pre><code class="language-text">Submit Form
+      ↓
+Server Action
+      ↓
+Database
+      ↓
+Response</code></pre>
+<hr/>
+<h3>Using use server from a Client Component</h3>
+<div class="code-title">actions.ts</div>
+<pre><code class="language-ts">'use server';
+export async function createUser() {
+  await db.user.create({
+    data: {
+      name: 'Rizwan'
+    }
+  });
+}</code></pre>
+<div class="code-title">Client Component</div>
+<pre><code class="language-tsx">'use client';
+import { createUser } from './actions';
+export default function Button() {
+  return (
+    &lt;button
+      onClick={() =&gt; createUser()}
+    &gt;
+      Create User
+    &lt;/button&gt;
+  );
+}</code></pre>
+<p>
+Although the button runs in the browser, the action executes on the server.
+</p>
+<hr/>
+<h3>Where Can We Place use server?</h3>
+<table>
+<tr>
+<th>Location</th>
+<th>Allowed?</th>
+</tr>
+<tr>
+<td>Inside a Function</td>
+<td>✅ Yes</td>
+</tr>
+<tr>
+<td>Top of actions.ts File</td>
+<td>✅ Yes</td>
+</tr>
+<tr>
+<td>Inside Client Component File</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td>Inside Event Handler</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td>Inside useEffect()</td>
+<td>❌ No</td>
+</tr>
+</table>
+<hr/>
+<h3>use server vs use client</h3>
+<table>
+<tr>
+<th>Feature</th>
+<th>use server</th>
+<th>use client</th>
+</tr>
+<tr>
+<td>Runs on Server</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>Runs in Browser</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Database Access</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>Access Secret Keys</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>useState/useEffect</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+</table>
+<hr/>
+<h3>Easy Memory Trick</h3>
+<div class="code-title">Remember</div>
+<pre><code class="language-text">use server
+      ↓
+Backend Code
+use client
+      ↓
+Browser Code</code></pre>
+<div class="feature">
+<strong>One-Line Definition:</strong><br/>
+<code>'use server'</code> is a Next.js directive that marks functions or files to execute only on the server, allowing secure access to databases, secrets, and backend logic.
+</div>
+<h2 class="section-title" id="04-03"><span class="secnum">04-03</span>Server Actions became stable in which Next.js version?</h2>
+<p>
+Server Actions became <strong>stable in Next.js 14</strong>.
+</p>
+<div class="feature">
+<strong>Interview Answer:</strong><br/>
+Server Actions were introduced as an experimental feature in Next.js 13 and became stable in Next.js 14.
+</div>
+<hr/>
+<h3>Timeline</h3>
+<table>
+<tr>
+<th>Version</th>
+<th>Status</th>
+</tr>
+<tr>
+<td>Next.js 13</td>
+<td>⚠️ Experimental</td>
+</tr>
+<tr>
+<td>Next.js 14</td>
+<td>✅ Stable</td>
+</tr>
+<tr>
+<td>Next.js 15</td>
+<td>✅ Improved and Enhanced</td>
+</tr>
+</table>
+<hr/>
+<h3>Next.js 13</h3>
+<p>
+When Server Actions were first introduced in Next.js 13, they were experimental and had to be enabled manually.
+</p>
+<div class="code-title">next.config.js</div>
+<pre><code class="language-js">/** @type {import('next').NextConfig} */
+const nextConfig = {
+  experimental: {
+    serverActions: true
+  }
+};
+module.exports = nextConfig;</code></pre>
+<p>
+Without this flag, Server Actions could not be used.
+</p>
+<hr/>
+<h3>Next.js 14</h3>
+<p>
+In Next.js 14, Server Actions became stable and no experimental flag was required.
+</p>
+<div class="code-title">Server Action</div>
+<pre><code class="language-ts">'use server';
+export async function createUser() {
+  console.log('Server Action');
+}</code></pre>
+<p>
+Everything works out of the box.
+</p>
+<hr/>
+<h3>Next.js 15</h3>
+<p>
+Next.js 15 continues to support Server Actions and improves integration with:
+</p>
+<ul>
+<li>React 19</li>
+<li>Form Actions</li>
+<li>useActionState()</li>
+<li>useFormStatus()</li>
+<li>Caching APIs</li>
+<li>Revalidation APIs</li>
+</ul>
+<hr/>
+<h3>Easy Memory Trick</h3>
+<div class="code-title">Remember</div>
+<pre><code class="language-text">Next.js 13
+      ↓
+Experimental
+Next.js 14
+      ↓
+Stable
+Next.js 15
+      ↓
+Enhanced</code></pre>
+<div class="feature">
+<strong>One-Line Definition:</strong><br/>
+Server Actions were introduced experimentally in Next.js 13 and became a stable production-ready feature in Next.js 14.
+</div>
+<h2 class="section-title" id="04-04"><span class="secnum">04-04</span>How do Server Actions integrate with HTML <form> elements?</h2>
+<p>
+Server Actions integrate directly with HTML forms using the form's <code>action</code> attribute.
+</p>
+<div class="feature">
+<strong>Simple Meaning:</strong><br/>
+Instead of submitting a form to an API endpoint, we can submit it directly to a Server Action.
+</div>
+<hr/>
+<h3>Traditional HTML Form</h3>
+<p>
+Before Server Actions, forms were submitted to a URL.
+</p>
+<div class="code-title">Traditional Form</div>
+<pre><code class="language-html">&lt;form action="/api/users" method="POST"&gt;
+  &lt;input name="name" /&gt;
+  &lt;button&gt;Save&lt;/button&gt;
+&lt;/form&gt;</code></pre>
+<p>
+Flow:
+</p>
+<pre><code class="language-text">Form Submit
+      ↓
+/api/users
+      ↓
+API Route
+      ↓
+Database
+      ↓
+Response</code></pre>
+<hr/>
+<h3>Server Actions Form</h3>
+<p>
+With Server Actions, the <code>action</code> attribute receives a function instead of a URL.
+</p>
+<div class="code-title">Server Action</div>
+<pre><code class="language-ts">'use server';
+export async function createUser(
+  formData: FormData
+) {
+  console.log(
+    formData.get('name')
+  );
+}</code></pre>
+<div class="code-title">Form</div>
+<pre><code class="language-tsx">import { createUser } from './actions';
+export default function Page() {
+  return (
+    &lt;form action={createUser}&gt;
+      &lt;input
+        name="name"
+        placeholder="Enter Name"
+      /&gt;
+      &lt;button&gt;
+        Save
+      &lt;/button&gt;
+    &lt;/form&gt;
+  );
+}</code></pre>
+<p>
+Flow:
+</p>
+<pre><code class="language-text">Submit Form
+      ↓
+Server Action
+      ↓
+Database
+      ↓
+Response</code></pre>
+<p>
+No API route is required.
+</p>
+<hr/>
+<h3>How Does formData Work?</h3>
+<p>
+When the form is submitted, Next.js automatically collects all form fields and passes them to the Server Action as a <code>FormData</code> object.
+</p>
+<div class="code-title">Form</div>
+<pre><code class="language-html">&lt;input name="name" /&gt;
+&lt;input name="email" /&gt;</code></pre>
+<div class="code-title">Server Action</div>
+<pre><code class="language-ts">'use server';
+export async function createUser(
+  formData: FormData
+) {
+  const name = formData.get('name');
+  const email = formData.get('email');
+}</code></pre>
+<p>
+Values are automatically available inside <code>formData</code>.
+</p>
+<hr/>
+<h3>Real World Example</h3>
+<div class="code-title">Server Action</div>
+<pre><code class="language-ts">'use server';
+export async function addProduct(
+  formData: FormData
+) {
+  await db.product.create({
+    data: {
+      name: formData.get('name'),
+      price: Number(
+        formData.get('price')
+      )
+    }
+  });
+}</code></pre>
+<div class="code-title">Form</div>
+<pre><code class="language-tsx">&lt;form action={addProduct}&gt;
+  &lt;input
+    name="name"
+    placeholder="Product Name"
+  /&gt;
+  &lt;input
+    name="price"
+    placeholder="Price"
+  /&gt;
+  &lt;button&gt;
+    Add Product
+  &lt;/button&gt;
+&lt;/form&gt;</code></pre>
+<p>
+Flow:
+</p>
+<pre><code class="language-text">Submit Product Form
+         ↓
+Server Action
+         ↓
+Insert Into Database
+         ↓
+Success</code></pre>
+<hr/>
+<h3>What Happens Internally?</h3>
+<p>
+Next.js automatically creates an internal request behind the scenes.
+</p>
+<div class="code-title">Internal Flow</div>
+<pre><code class="language-text">Browser
+    ↓
+Submit Form
+    ↓
+Next.js Internal Request
+    ↓
+Server Action
+    ↓
+Database
+    ↓
+Response</code></pre>
+<p>
+We do not need:
+</p>
+<ul>
+<li>fetch()</li>
+<li>API Route</li>
+<li>JSON.stringify()</li>
+<li>req.json()</li>
+</ul>
+<hr/>
+<h3>Form + Revalidation</h3>
+<p>
+Server Actions often refresh cached pages after data changes.
+</p>
+<div class="code-title">Example</div>
+<pre><code class="language-ts">'use server';
+import { revalidatePath } from 'next/cache';
+export async function addProduct(
+  formData: FormData
+) {
+  await db.product.create({
+    data: {
+      name: formData.get('name')
+    }
+  });
+  revalidatePath('/products');
+}</code></pre>
+<p>
+Flow:
+</p>
+<pre><code class="language-text">Submit Form
+      ↓
+Insert Product
+      ↓
+revalidatePath()
+      ↓
+Cache Cleared
+      ↓
+Fresh Data</code></pre>
+<hr/>
+<h3>Server Action Form vs Traditional Form</h3>
+<table>
+<tr>
+<th>Feature</th>
+<th>Traditional Form</th>
+<th>Server Action Form</th>
+</tr>
+<tr>
+<td>API Route Needed</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>fetch() Needed</td>
+<td>Often Yes</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>FormData Handling</td>
+<td>Manual</td>
+<td>Automatic</td>
+</tr>
+<tr>
+<td>Database Access</td>
+<td>Via API Route</td>
+<td>Direct</td>
+</tr>
+<tr>
+<td>Less Boilerplate</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+</table>
+<hr/>
+<h3>Easy Memory Trick</h3>
+<div class="code-title">Remember</div>
+<pre><code class="language-text">Traditional Form
+        ↓
+API Route
+Server Action Form
+        ↓
+Server Action</code></pre>
+<div class="feature">
+<strong>One-Line Definition:</strong><br/>
+Server Actions integrate with HTML forms by allowing a Server Action function to be assigned directly to the form's <code>action</code> attribute, eliminating the need for separate API routes.
+</div>
+<h2 class="section-title" id="04-05"><span class="secnum">04-05</span>What is useActionState (React 19) and how does it replace useFormState in Next.js 15?</h2>
+<p>
+<code>useActionState()</code> is a React 19 hook that allows us to manage the state returned from a Server Action.
+</p>
+<div class="feature">
+<strong>Simple Meaning:</strong><br/>
+<code>useActionState()</code> helps our form receive success messages, error messages, and validation results from a Server Action.
+</div>
+<hr/>
+<h3>Why Do We Need useActionState?</h3>
+<p>
+When a form submits to a Server Action, the Server Action may return some result.
+</p>
+<ul>
+<li>Success message</li>
+<li>Error message</li>
+<li>Validation error</li>
+<li>Updated form state</li>
+</ul>
+<p>
+<code>useActionState()</code> stores that returned result in component state.
+</p>
+<div class="code-title">Flow</div>
+<pre><code class="language-text">User Submits Form
+        ↓
+Server Action Runs
+        ↓
+Server Action Returns Message
+        ↓
+useActionState Stores Message
+        ↓
+UI Shows Message</code></pre>
+<hr/>
+<h3>Old API: useFormState</h3>
+<p>
+Earlier, Next.js used <code>useFormState()</code> from <code>react-dom</code>.
+</p>
+<div class="code-title">Old Import</div>
+<pre><code class="language-tsx">import { useFormState } from 'react-dom';</code></pre>
+<p>
+This was mainly focused on form state.
+</p>
+<hr/>
+<h3>New API: useActionState</h3>
+<p>
+In React 19 and Next.js 15, <code>useActionState()</code> is used from <code>react</code>.
+</p>
+<div class="code-title">New Import</div>
+<pre><code class="language-tsx">import { useActionState } from 'react';</code></pre>
+<div class="feature">
+<strong>Main Difference:</strong><br/>
+<code>useFormState()</code> was the older API, while <code>useActionState()</code> is the newer React 19 API.
+</div>
+<hr/>
+<h3>Basic Syntax</h3>
+<div class="code-title">Syntax</div>
+<pre><code class="language-tsx">const [state, formAction] = useActionState(actionFunction, initialState);</code></pre>
+<table>
+<tr>
+<th>Part</th>
+<th>Meaning</th>
+</tr>
+<tr>
+<td><code>state</code></td>
+<td>Latest value returned from the Server Action</td>
+</tr>
+<tr>
+<td><code>formAction</code></td>
+<td>Function passed to the form's <code>action</code> attribute</td>
+</tr>
+<tr>
+<td><code>actionFunction</code></td>
+<td>Server Action function</td>
+</tr>
+<tr>
+<td><code>initialState</code></td>
+<td>Default state before form submit</td>
+</tr>
+</table>
+<hr/>
+<h3>Complete Example</h3>
+<h4>1. Server Action</h4>
+<div class="code-title">app/actions.ts</div>
+<pre><code class="language-ts">'use server';
+export async function createUser(previousState: string, formData: FormData) {
+  const name = formData.get('name');
+  if (!name) return 'Name is required';
+  return 'User created successfully';
+}</code></pre>
+<h4>2. Client Component</h4>
+<div class="code-title">app/UserForm.tsx</div>
+<pre><code class="language-tsx">'use client';
+import { useActionState } from 'react';
+import { createUser } from './actions';
+export default function UserForm() {
+  const [message, formAction] = useActionState(createUser, '');
+  return (
+    &lt;form action={formAction}&gt;
+      &lt;input name="name" placeholder="Enter name" /&gt;
+      &lt;button&gt;Save&lt;/button&gt;
+      &lt;p&gt;{message}&lt;/p&gt;
+    &lt;/form&gt;
+  );
+}</code></pre>
+<hr/>
+<h3>How It Works</h3>
+<p>
+When the form is submitted, <code>formAction</code> calls the Server Action.
+</p>
+<div class="code-title">Important Line</div>
+<pre><code class="language-tsx">const [message, formAction] = useActionState(createUser, '');</code></pre>
+<p>
+Here:
+</p>
+<table>
+<tr>
+<th>Value</th>
+<th>Meaning</th>
+</tr>
+<tr>
+<td><code>message</code></td>
+<td>Stores the returned message from <code>createUser()</code></td>
+</tr>
+<tr>
+<td><code>formAction</code></td>
+<td>Used inside <code>&lt;form action={formAction}&gt;</code></td>
+</tr>
+</table>
+<hr/>
+<h3>Important: Action Function Receives Previous State</h3>
+<p>
+When we use <code>useActionState()</code>, React automatically passes the previous state as the first argument.
+</p>
+<div class="code-title">Server Action Signature</div>
+<pre><code class="language-ts">export async function createUser(previousState: string, formData: FormData) {
+  return 'Updated message';
+}</code></pre>
+<p>
+So the action receives:
+</p>
+<pre><code class="language-text">1st argument → previousState
+2nd argument → formData</code></pre>
+<hr/>
+<h3>Real Validation Example</h3>
+<div class="code-title">app/actions.ts</div>
+<pre><code class="language-ts">'use server';
+type State = {
+  success: boolean;
+  message: string;
+};
+export async function register(previousState: State, formData: FormData): Promise&lt;State&gt; {
+  const email = formData.get('email');
+  if (!email) return { success: false, message: 'Email is required' };
+  return { success: true, message: 'Registration successful' };
+}</code></pre>
+<div class="code-title">app/RegisterForm.tsx</div>
+<pre><code class="language-tsx">'use client';
+import { useActionState } from 'react';
+import { register } from './actions';
+const initialState = { success: false, message: '' };
+export default function RegisterForm() {
+  const [state, formAction] = useActionState(register, initialState);
+  return (
+    &lt;form action={formAction}&gt;
+      &lt;input name="email" placeholder="Enter email" /&gt;
+      &lt;button&gt;Register&lt;/button&gt;
+      &lt;p&gt;{state.message}&lt;/p&gt;
+    &lt;/form&gt;
+  );
+}</code></pre>
+<hr/>
+<h3>useFormState vs useActionState</h3>
+<table>
+<tr>
+<th>Feature</th>
+<th>useFormState</th>
+<th>useActionState</th>
+</tr>
+<tr>
+<td>Import From</td>
+<td><code>react-dom</code></td>
+<td><code>react</code></td>
+</tr>
+<tr>
+<td>Used In</td>
+<td>Older Next.js versions</td>
+<td>Next.js 15 / React 19</td>
+</tr>
+<tr>
+<td>Purpose</td>
+<td>Manage form action state</td>
+<td>Manage action result state</td>
+</tr>
+<tr>
+<td>Status</td>
+<td>Older API</td>
+<td>Recommended API</td>
+</tr>
+</table>
+<hr/>
+<h3>Easy Memory Trick</h3>
+<div class="code-title">Remember</div>
+<pre><code class="language-text">Server Action
+      ↓
+Returns Message / Error
+      ↓
+useActionState()
+      ↓
+Shows Message In UI</code></pre>
+<div class="feature">
+<strong>One-Line Definition:</strong><br/>
+<code>useActionState()</code> is a React 19 hook that stores the result returned from a Server Action, and it replaces the older <code>useFormState()</code> API used in earlier Next.js versions.
+</div>
+<h2 class="section-title" id="04-06"><span class="secnum">04-06</span>What is useFormStatus and what does it provide during a Server Action submission?</h2>
+<p>
+<code>useFormStatus()</code> is a React hook that provides information about the status of a form submission while a Server Action is running.
+</p>
+<div class="feature">
+<strong>Simple Meaning:</strong><br/>
+<code>useFormStatus()</code> tells us whether a form is currently submitting so we can show loading indicators, disable buttons, and prevent duplicate submissions.
+</div>
+<hr/>
+<h3>What Problem Does useFormStatus Solve?</h3>
+<p>
+Suppose a Server Action takes 3 seconds to complete.
+</p>
+<div class="code-title">Without useFormStatus</div>
+<pre><code class="language-text">User Clicks Submit
+         ↓
+Nothing Changes
+         ↓
+User Clicks Again
+         ↓
+Duplicate Requests</code></pre>
+<p>
+The user cannot tell whether the form is still processing.
+</p>
+<p>
+With <code>useFormStatus()</code>:
+</p>
+<pre><code class="language-text">User Clicks Submit
+         ↓
+pending = true
+         ↓
+Button Disabled
+         ↓
+Loading Text Shown
+         ↓
+Request Completes
+         ↓
+pending = false
+         ↓
+Button Enabled</code></pre>
+<hr/>
+<h3>Import</h3>
+<div class="code-title">Import Hook</div>
+<pre><code class="language-tsx">import { useFormStatus } from 'react-dom';</code></pre>
+<p>
+Unlike <code>useActionState()</code>, this hook is imported from <code>react-dom</code>.
+</p>
+<hr/>
+<h3>Basic Example</h3>
+<h4>1. Server Action</h4>
+<div class="code-title">actions.ts</div>
+<pre><code class="language-ts">'use server';
+export async function createUser(formData: FormData) {
+  await new Promise(resolve =&gt; setTimeout(resolve, 3000));
+  console.log(formData.get('name'));
+}</code></pre>
+<h4>2. Submit Button</h4>
+<div class="code-title">SubmitButton.tsx</div>
+<pre><code class="language-tsx">'use client';
+import { useFormStatus } from 'react-dom';
+export default function SubmitButton() {
+  const { pending } = useFormStatus();
+  return (
+    &lt;button disabled={pending}&gt;
+      {pending ? 'Saving...' : 'Save'}
+    &lt;/button&gt;
+  );
+}</code></pre>
+<h4>3. Form</h4>
+<div class="code-title">UserForm.tsx</div>
+<pre><code class="language-tsx">import { createUser } from './actions';
+import SubmitButton from './SubmitButton';
+export default function UserForm() {
+  return (
+    &lt;form action={createUser}&gt;
+      &lt;input name="name" /&gt;
+      &lt;SubmitButton /&gt;
+    &lt;/form&gt;
+  );
+}</code></pre>
+<hr/>
+<h3>How It Works</h3>
+<div class="code-title">Flow</div>
+<pre><code class="language-text">Submit Form
+      ↓
+pending = true
+      ↓
+Button Disabled
+      ↓
+Server Action Runs
+      ↓
+pending = false
+      ↓
+Button Enabled</code></pre>
+<hr/>
+<h3>What Does useFormStatus Return?</h3>
+<p>
+The hook returns an object describing the current form submission.
+</p>
+<div class="code-title">Example</div>
+<pre><code class="language-tsx">const status = useFormStatus();</code></pre>
+<table>
+<tr>
+<th>Property</th>
+<th>Description</th>
+</tr>
+<tr>
+<td>pending</td>
+<td>Whether the form is currently submitting</td>
+</tr>
+<tr>
+<td>data</td>
+<td>The submitted FormData</td>
+</tr>
+<tr>
+<td>method</td>
+<td>The HTTP method used by the form</td>
+</tr>
+<tr>
+<td>action</td>
+<td>The Server Action being executed</td>
+</tr>
+</table>
+<hr/>
+<h3>Using FormData During Submission</h3>
+<div class="code-title">Example</div>
+<pre><code class="language-tsx">'use client';
+import { useFormStatus } from 'react-dom';
+export default function Status() {
+  const { pending, data } = useFormStatus();
+  return (
+    &lt;&gt;
+      {pending &amp;&amp; (
+        &lt;p&gt;Saving {data?.get('name')}...&lt;/p&gt;
+      )}
+  );
+}</code></pre>
+<p>
+While the form is submitting, we can access the values currently being submitted.
+</p>
+<hr/>
+<h3>Important Rule</h3>
+<div class="feature">
+<strong>Important:</strong><br/>
+<code>useFormStatus()</code> only works inside a component rendered somewhere inside the form.
+</div>
+<h4>❌ Wrong</h4>
+<div class="code-title">Will Not Work</div>
+<pre><code class="language-tsx">'use client';
+import { useFormStatus } from 'react-dom';
+export default function Page() {
+  const { pending } = useFormStatus();
+  return (
+    &lt;form&gt;
+      &lt;button disabled={pending}&gt;
+        Save
+      &lt;/button&gt;
+    &lt;/form&gt;
+  );
+}</code></pre>
+<p>
+The hook is being called in the same component that creates the form, so it cannot subscribe to that form's status.
+</p>
+<h4>✅ Correct</h4>
+<div class="code-title">Works</div>
+<pre><code class="language-tsx">'use client';
+import { useFormStatus } from 'react-dom';
+function SubmitButton() {
+  const { pending } = useFormStatus();
+  return (
+    &lt;button disabled={pending}&gt;
+      {pending ? 'Saving...' : 'Save'}
+    &lt;/button&gt;
+  );
+}
+}
+export default function UserForm() {
+  return (
+    &lt;form action={createUser}&gt;
+      &lt;input name="name" /&gt;
+      &lt;SubmitButton /&gt;
+    &lt;/form&gt;
+  );
+}</code></pre>
+<p>
+Here, <code>SubmitButton</code> is rendered inside the form, so it can access the form status.
+</p>
+<hr/>
+<h3>useActionState vs useFormStatus</h3>
+<table>
+<tr>
+<th>Hook</th>
+<th>Purpose</th>
+</tr>
+<tr>
+<td>useActionState()</td>
+<td>Stores the value returned from the Server Action</td>
+</tr>
+<tr>
+<td>useFormStatus()</td>
+<td>Provides loading/submission status</td>
+</tr>
+</table>
+<div class="code-title">Relationship</div>
+<pre><code class="language-text">useActionState()
+         ↓
+Success / Error Message
+useFormStatus()
+         ↓
+Loading State</code></pre>
+<hr/>
+<h3>Real World Example</h3>
+<p>
+Imagine an e-commerce checkout form.
+</p>
+<div class="code-title">Flow</div>
+<pre><code class="language-text">Place Order
+      ↓
+pending = true
+      ↓
+Button Shows "Placing Order..."
+      ↓
+Order Saved
+      ↓
+pending = false
+      ↓
+Button Shows "Place Order"</code></pre>
+<hr/>
+<h3>Easy Memory Trick</h3>
+<div class="code-title">Remember</div>
+<pre><code class="language-text">useActionState()
+        ↓
+Result
+useFormStatus()
+        ↓
+Loading Status</code></pre>
+<div class="feature">
+<strong>One-Line Definition:</strong><br/>
+<code>useFormStatus()</code> is a React hook that provides information about an active form submission, including whether a Server Action is currently pending.
+</div>
+<h2 class="section-title" id="04-07"><span class="secnum">04-07</span>How do you handle and surface validation errors from a Server Action?</h2>
+<p>
+Validation errors from a Server Action are handled by returning an error object from the Server Action and showing that object in the UI using <code>useActionState()</code>.
+</p>
+<div class="feature">
+<strong>Simple Meaning:</strong><br/>
+Do not throw validation errors for normal user mistakes. Return them as state and display them in the form.
+</div>
+<hr/>
+<h3>Recommended Flow</h3>
+<div class="code-title">Flow</div>
+<pre><code class="language-text">User Submits Form
+        ↓
+Server Action Receives FormData
+        ↓
+Validate Data
+        ↓
+If Invalid → Return Error Object
+        ↓
+useActionState Receives Error
+        ↓
+Show Error In UI</code></pre>
+<hr/>
+<h3>1. Create Server Action</h3>
+<p>
+The Server Action validates the form data and returns a state object.
+</p>
+<div class="code-title">app/actions.ts</div>
+<pre><code class="language-ts">'use server';
+type State = {
+  success: boolean;
+  message: string;
+  errors?: {
+    name?: string;
+    email?: string;
+  };
+};
+export async function createUser(previousState: State, formData: FormData): Promise&lt;State&gt; {
+  const name = formData.get('name') as string;
+  const email = formData.get('email') as string;
+  const errors: State['errors'] = {};
+  if (!name) errors.name = 'Name is required';
+  if (!email) errors.email = 'Email is required';
+  if (Object.keys(errors).length &gt; 0) {
+    return { success: false, message: 'Please fix the errors below', errors };
+  }
+  await db.user.create({ data: { name, email } });
+  return { success: true, message: 'User created successfully' };
+}</code></pre>
+<hr/>
+<h3>2. Use useActionState In Form</h3>
+<p>
+The Client Component receives the returned state from the Server Action.
+</p>
+<div class="code-title">app/UserForm.tsx</div>
+<pre><code class="language-tsx">'use client';
+import { useActionState } from 'react';
+import { createUser } from './actions';
+const initialState = { success: false, message: '', errors: {} };
+export default function UserForm() {
+  const [state, formAction] = useActionState(createUser, initialState);
+  return (
+    &lt;form action={formAction}&gt;
+      &lt;input name="name" placeholder="Enter name" /&gt;
+      {state.errors?.name &amp;&amp; &lt;p&gt;{state.errors.name}&lt;/p&gt;}
+      &lt;input name="email" placeholder="Enter email" /&gt;
+      {state.errors?.email &amp;&amp; &lt;p&gt;{state.errors.email}&lt;/p&gt;}
+      &lt;button&gt;Save&lt;/button&gt;
+      {state.message &amp;&amp; &lt;p&gt;{state.message}&lt;/p&gt;}
+    &lt;/form&gt;
+  );
+}</code></pre>
+<hr/>
+<h3>Important Point</h3>
+<p>
+For expected validation errors, return values instead of throwing errors.
+</p>
+<table>
+<tr>
+<th>Situation</th>
+<th>Recommended Handling</th>
+</tr>
+<tr>
+<td>User left name empty</td>
+<td>Return validation error</td>
+</tr>
+<tr>
+<td>Email is invalid</td>
+<td>Return validation error</td>
+</tr>
+<tr>
+<td>Password is too short</td>
+<td>Return validation error</td>
+</tr>
+<tr>
+<td>Database server crashed</td>
+<td>Throw error or handle with error boundary</td>
+</tr>
+</table>
+<hr/>
+<h3>With Zod Validation</h3>
+<p>
+In real projects, we usually validate with a schema library like Zod.
+</p>
+<div class="code-title">app/actions.ts</div>
+<pre><code class="language-ts">'use server';
+import { z } from 'zod';
+const UserSchema = z.object({
+  name: z.string().min(1, 'Name is required'),
+  email: z.string().email('Invalid email address')
+});
+type State = {
+  success: boolean;
+  message: string;
+  errors?: {
+    name?: string[];
+    email?: string[];
+  };
+};
+export async function createUser(previousState: State, formData: FormData): Promise&lt;State&gt; {
+  const result = UserSchema.safeParse({
+    name: formData.get('name'),
+    email: formData.get('email')
+  });
+  if (!result.success) {
+    return { success: false, message: 'Validation failed', errors: result.error.flatten().fieldErrors };
+  }
+  await db.user.create({ data: result.data });
+  return { success: true, message: 'User created successfully', errors: {} };
+}</code></pre>
+<hr/>
+<h3>Client Form With Zod Errors</h3>
+<div class="code-title">app/UserForm.tsx</div>
+<pre><code class="language-tsx">'use client';
+import { useActionState } from 'react';
+import { createUser } from './actions';
+const initialState = { success: false, message: '', errors: {} };
+export default function UserForm() {
+  const [state, formAction] = useActionState(createUser, initialState);
+  return (
+    &lt;form action={formAction}&gt;
+      &lt;input name="name" placeholder="Enter name" /&gt;
+      {state.errors?.name &amp;&amp; &lt;p&gt;{state.errors.name[0]}&lt;/p&gt;}
+      &lt;input name="email" placeholder="Enter email" /&gt;
+      {state.errors?.email &amp;&amp; &lt;p&gt;{state.errors.email[0]}&lt;/p&gt;}
+      &lt;button&gt;Save&lt;/button&gt;
+      {state.message &amp;&amp; &lt;p&gt;{state.message}&lt;/p&gt;}
+    &lt;/form&gt;
+  );
+}</code></pre>
+<hr/>
+<h3>Why We Return Errors Instead Of Throwing</h3>
+<p>
+Validation errors are expected user mistakes, so they should be returned as normal state.
+</p>
+<div class="code-title">Good</div>
+<pre><code class="language-ts">return { success: false, message: 'Email is required' };</code></pre>
+<div class="code-title">Avoid For Validation</div>
+<pre><code class="language-ts">throw new Error('Email is required');</code></pre>
+<p>
+Throwing is better for unexpected failures like database errors, server crashes, or permission problems.
+</p>
+<hr/>
+<h3>useActionState vs useFormStatus</h3>
+<table>
+<tr>
+<th>Hook</th>
+<th>Purpose</th>
+</tr>
+<tr>
+<td>useActionState()</td>
+<td>Shows returned validation errors or success messages</td>
+</tr>
+<tr>
+<td>useFormStatus()</td>
+<td>Shows loading/pending status while submitting</td>
+</tr>
+</table>
+<hr/>
+<h3>Final Best Practice</h3>
+<div class="code-title">Best Practice Flow</div>
+<pre><code class="language-text">Server Action
+      ↓
+Validate FormData
+      ↓
+Return { success, message, errors }
+      ↓
+useActionState()
+      ↓
+Show errors beside fields</code></pre>
+<div class="feature">
+<strong>One-Line Definition:</strong><br/>
+Validation errors from a Server Action should be returned as structured state and displayed in the UI using <code>useActionState()</code>, while unexpected system errors should be thrown or handled separately.
+</div>
+<h2 class="section-title" id="04-08"><span class="secnum">04-08</span>Can Server Actions be called from Client Components? How?</h2>
+<p>
+Yes, Server Actions can be called from Client Components, but the Server Action must be defined in a separate file with <code>'use server'</code> at the top.
+</p>
+<div class="feature">
+<strong>Simple Meaning:</strong><br/>
+A Client Component can import a Server Action and call it from a form, button click, or event handler. The function still runs on the server.
+</div>
+<hr/>
+<h3>1. Create Server Action In Separate File</h3>
+<p>
+First, create a separate server-only file.
+</p>
+<div class="code-title">app/actions.ts</div>
+<pre><code class="language-ts">'use server';
+export async function createUser(name: string) {
+  await db.user.create({ data: { name } });
+  return { success: true, message: 'User created successfully' };
+}</code></pre>
+<p>
+Because this file starts with <code>'use server'</code>, the exported function becomes a Server Action.
+</p>
+<hr/>
+<h3>2. Call Server Action From Client Component</h3>
+<p>
+Now import that Server Action inside a Client Component.
+</p>
+<div class="code-title">app/UserButton.tsx</div>
+<pre><code class="language-tsx">'use client';
+import { createUser } from './actions';
+export default function UserButton() {
+  async function handleClick() {
+    const result = await createUser('Rizwan');
+    console.log(result.message);
+  }
+  return &lt;button onClick={handleClick}&gt;Create User&lt;/button&gt;;
+}</code></pre>
+<p>
+The button click happens in the browser, but <code>createUser()</code> executes on the server.
+</p>
+<hr/>
+<h3>Flow</h3>
+<div class="code-title">Internal Flow</div>
+<pre><code class="language-text">User Clicks Button
+        ↓
+Client Component Calls createUser()
+        ↓
+Next.js Sends Internal Request
+        ↓
+Server Action Runs On Server
+        ↓
+Database Updated
+        ↓
+Result Returned To Client</code></pre>
+<hr/>
+<h3>3. Calling Server Action From Client Form</h3>
+<p>
+We can also use a Server Action with a form inside a Client Component.
+</p>
+<div class="code-title">app/actions.ts</div>
+<pre><code class="language-ts">'use server';
+export async function saveUser(formData: FormData) {
+  const name = formData.get('name') as string;
+  await db.user.create({ data: { name } });
+  return { success: true, message: 'Saved successfully' };
+}</code></pre>
+<div class="code-title">app/UserForm.tsx</div>
+<pre><code class="language-tsx">'use client';
+import { saveUser } from './actions';
+export default function UserForm() {
+  return (
+    &lt;form action={saveUser}&gt;
+      &lt;input name="name" placeholder="Enter name" /&gt;
+      &lt;button&gt;Save&lt;/button&gt;
+    &lt;/form&gt;
+  );
+}</code></pre>
+<hr/>
+<h3>4. With useActionState</h3>
+<p>
+For showing success or error messages, use <code>useActionState()</code>.
+</p>
+<div class="code-title">app/actions.ts</div>
+<pre><code class="language-ts">'use server';
+type State = { success: boolean; message: string };
+export async function createUser(previousState: State, formData: FormData): Promise&lt;State&gt; {
+  const name = formData.get('name') as string;
+  if (!name) return { success: false, message: 'Name is required' };
+  await db.user.create({ data: { name } });
+  return { success: true, message: 'User created successfully' };
+}</code></pre>
+<div class="code-title">app/UserForm.tsx</div>
+<pre><code class="language-tsx">'use client';
+import { useActionState } from 'react';
+import { createUser } from './actions';
+const initialState = { success: false, message: '' };
+export default function UserForm() {
+  const [state, formAction] = useActionState(createUser, initialState);
+  return (
+    &lt;form action={formAction}&gt;
+      &lt;input name="name" placeholder="Enter name" /&gt;
+      &lt;button&gt;Save&lt;/button&gt;
+      {state.message &amp;&amp; &lt;p&gt;{state.message}&lt;/p&gt;}
+    &lt;/form&gt;
+  );
+}</code></pre>
+<hr/>
+<h3>Important Rule</h3>
+<div class="warning">
+<strong>Important:</strong><br/>
+Do not define inline Server Actions directly inside a Client Component.
+</div>
+<h4>❌ Wrong</h4>
+<div class="code-title">Client Component</div>
+<pre><code class="language-tsx">'use client';
+export default function UserForm() {
+  async function createUser(formData: FormData) {
+    'use server';
+    await db.user.create({ data: { name: formData.get('name') as string } });
+  }
+  return (
+    &lt;form action={createUser}&gt;
+      &lt;input name="name" /&gt;
+      &lt;button&gt;Save&lt;/button&gt;
+    &lt;/form&gt;
+  );
+}</code></pre>
+<p>
+This is wrong because a Client Component file cannot contain an inline Server Action. In Server Component, inline Server Action is allowed.
+</p>
+<h4>✅ Correct</h4>
+<div class="code-title">actions.ts</div>
+<pre><code class="language-ts">'use server';
+export async function createUser(formData: FormData) {
+  await db.user.create({ data: { name: formData.get('name') as string } });
+}</code></pre>
+<div class="code-title">UserForm.tsx</div>
+<pre><code class="language-tsx">'use client';
+import { createUser } from './actions';
+export default function UserForm() {
+  return (
+    &lt;form action={createUser}&gt;
+      &lt;input name="name" /&gt;
+      &lt;button&gt;Save&lt;/button&gt;
+    &lt;/form&gt;
+  );
+}</code></pre>
+<hr/>
+<h3>Server Component vs Client Component Usage</h3>
+<table>
+<tr>
+<th>Location</th>
+<th>How To Use Server Action</th>
+</tr>
+<tr>
+<td>Server Component</td>
+<td>Can define inline Server Action or import it</td>
+</tr>
+<tr>
+<td>Client Component</td>
+<td>Must import Server Action from a separate <code>'use server'</code> file</td>
+</tr>
+</table>
+<hr/>
+<h3>When Should Client Components Call Server Actions?</h3>
+<ul>
+<li>When button click should update database</li>
+<li>When form submit should create/update/delete data</li>
+<li>When we need success/error message in UI</li>
+<li>When we need client-side interactivity plus server-side mutation</li>
+</ul>
+<hr/>
+<h3>Easy Memory Trick</h3>
+<div class="code-title">Remember</div>
+<pre><code class="language-text">Client Component
+       ↓
+Import Server Action
+       ↓
+Call Action
+       ↓
+Runs On Server</code></pre>
+<div class="feature">
+<strong>One-Line Definition:</strong><br/>
+Yes, Client Components can call Server Actions by importing them from a separate file marked with <code>'use server'</code>; the call starts in the browser, but the action executes on the server.
+</div>
+<h2 class="section-title" id="04-09"><span class="secnum">04-09</span>What are the security considerations and CSRF handling for Server Actions?</h2>
+<p>
+Server Actions run on the server, so they can safely access databases, cookies, sessions, and secret values. But they still need proper validation, authentication, authorization, and CSRF protection.
+</p>
+<div class="feature">
+<strong>Simple Meaning:</strong><br/>
+Server Actions are server-side, but they are still callable from the browser, so every action must be treated like a protected backend endpoint.
+</div>
+<hr/>
+<h3>1. Server Actions Are Not Public Browser Code</h3>
+<p>
+Code inside a Server Action is not shipped to the browser.
+</p>
+<div class="code-title">Server Action</div>
+<pre><code class="language-ts">'use server';
+export async function createUser(formData: FormData) {
+  await db.user.create({ data: { name: formData.get('name') as string } });
+}</code></pre>
+<p>
+This code runs on the server, not inside the browser.
+</p>
+<div class="feature">
+<strong>Good:</strong><br/>
+Database logic, secret keys, and server-side checks can stay on the server.
+</div>
+<hr/>
+<h3>2. But Server Actions Still Need Authentication</h3>
+<p>
+Do not assume that only a valid user can call the action. Always check the current session inside the Server Action.
+</p>
+<div class="code-title">Check Session</div>
+<pre><code class="language-ts">'use server';
+import { auth } from '@/lib/auth';
+export async function updateProfile(formData: FormData) {
+  const session = await auth();
+  if (!session?.user) {
+    return { success: false, message: 'Unauthorized' };
+  }
+  await db.user.update({
+    where: { id: session.user.id },
+    data: { name: formData.get('name') as string }
+  });
+  return { success: true, message: 'Profile updated' };
+}</code></pre>
+<div class="warning">
+<strong>Important:</strong><br/>
+Never trust only the UI. Hiding a button is not security. Always check permission inside the Server Action.
+</div>
+<hr/>
+<h3>3. Authorization Is Also Required</h3>
+<p>
+Authentication means the user is logged in. Authorization means the user is allowed to perform that specific action.
+</p>
+<div class="code-title">Authorization Example</div>
+<pre><code class="language-ts">'use server';
+export async function deleteProduct(productId: string) {
+  const session = await auth();
+  if (!session?.user) {
+    return { success: false, message: 'Unauthorized' };
+  }
+  if (session.user.role !== 'admin') {
+    return { success: false, message: 'Forbidden' };
+  }
+  await db.product.delete({ where: { id: productId } });
+  return { success: true, message: 'Product deleted' };
+}</code></pre>
+<table>
+<tr>
+<th>Check</th>
+<th>Meaning</th>
+</tr>
+<tr>
+<td>Authentication</td>
+<td>Is the user logged in?</td>
+</tr>
+<tr>
+<td>Authorization</td>
+<td>Is the user allowed to do this action?</td>
+</tr>
+</table>
+<hr/>
+<h3>4. Validate All Form Data</h3>
+<p>
+Never trust <code>formData</code>. A user can modify form values from the browser DevTools.
+</p>
+<div class="code-title">Validation Example</div>
+<pre><code class="language-ts">'use server';
+export async function createUser(formData: FormData) {
+  const name = formData.get('name') as string;
+  const email = formData.get('email') as string;
+  if (!name) return { success: false, message: 'Name is required' };
+  if (!email.includes('@')) return { success: false, message: 'Invalid email' };
+  await db.user.create({ data: { name, email } });
+  return { success: true, message: 'User created' };
+}</code></pre>
+<hr/>
+<h3>5. Do Not Trust Hidden Inputs</h3>
+<p>
+Hidden inputs are useful for sending IDs, but they are not secure. Users can change them.
+</p>
+<div class="code-title">Form</div>
+<pre><code class="language-tsx">&lt;form action={deleteProduct}&gt;
+  &lt;input type="hidden" name="productId" value={product.id} /&gt;
+  &lt;button&gt;Delete&lt;/button&gt;
+&lt;/form&gt;</code></pre>
+<p>
+The Server Action must still check whether the logged-in user can delete that product.
+</p>
+<div class="code-title">Server Action</div>
+<pre><code class="language-ts">'use server';
+export async function deleteProduct(formData: FormData) {
+  const session = await auth();
+  const productId = formData.get('productId') as string;
+  if (session?.user.role !== 'admin') {
+    return { success: false, message: 'Forbidden' };
+  }
+  await db.product.delete({ where: { id: productId } });
+  return { success: true, message: 'Product deleted' };
+}</code></pre>
+<hr/>
+<h3>6. CSRF Handling in Server Actions</h3>
+<p>
+CSRF means Cross-Site Request Forgery. It happens when another website tries to submit a request using the logged-in user's cookies.
+</p>
+<div class="code-title">CSRF Attack Idea</div>
+<pre><code class="language-text">User logged in on our site
+        ↓
+User opens malicious website
+        ↓
+Malicious site tries to submit a request
+        ↓
+Browser may send cookies automatically</code></pre>
+<p>
+Next.js Server Actions include built-in CSRF protection by checking request origins. In simple terms, the request must come from the same origin as our application.
+</p>
+<div class="feature">
+<strong>Simple Meaning:</strong><br/>
+Next.js checks where the Server Action request is coming from. Cross-site action requests are blocked unless explicitly allowed.
+</div>
+<hr/>
+<h3>7. allowedOrigins for Proxies or Different Domains</h3>
+<p>
+Sometimes our app may be behind a reverse proxy, load balancer, or different domain. In that case, we can configure allowed origins.
+</p>
+<div class="code-title">next.config.js</div>
+<pre><code class="language-js">/** @type {import('next').NextConfig} */
+const nextConfig = {
+  experimental: {
+    serverActions: {
+      allowedOrigins: ['my-proxy.com', '*.my-proxy.com']
+    }
+  }
+};
+module.exports = nextConfig;</code></pre>
+<div class="warning">
+<strong>Important:</strong><br/>
+Only add trusted domains in <code>allowedOrigins</code>. Do not add random public domains.
+</div>
+<hr/>
+<h3>8. Use SameSite Cookies</h3>
+<p>
+For cookie-based authentication, use secure cookie settings.
+</p>
+<div class="code-title">Cookie Security</div>
+<pre><code class="language-ts">cookies().set('session', token, {
+  httpOnly: true,
+  secure: true,
+  sameSite: 'lax',
+  path: '/'
+});</code></pre>
+<table>
+<tr>
+<th>Cookie Option</th>
+<th>Purpose</th>
+</tr>
+<tr>
+<td>httpOnly</td>
+<td>JavaScript cannot read the cookie</td>
+</tr>
+<tr>
+<td>secure</td>
+<td>Cookie is sent only over HTTPS</td>
+</tr>
+<tr>
+<td>sameSite</td>
+<td>Helps reduce CSRF risk</td>
+</tr>
+</table>
+<hr/>
+<h3>9. Do Not Put Secrets in Client Components</h3>
+<p>
+Server Actions can access secrets, but Client Components cannot safely store secret values.
+</p>
+<div class="code-title">Good</div>
+<pre><code class="language-ts">'use server';
+export async function callPrivateApi() {
+  const apiKey = process.env.PRIVATE_API_KEY;
+  await fetch('https://api.example.com/private', {
+    headers: { Authorization: `Bearer ${apiKey}` }
+  });
+}</code></pre>
+<div class="code-title">Bad</div>
+<pre><code class="language-tsx">'use client';
+const apiKey = 'secret-key';
+export default function Page() {
+  return &lt;button&gt;Call API&lt;/button&gt;;
+}</code></pre>
+<hr/>
+<h3>10. Avoid Returning Sensitive Data</h3>
+<p>
+A Server Action can return data to the browser. So do not return passwords, tokens, secret keys, or private database fields.
+</p>
+<div class="code-title">Bad</div>
+<pre><code class="language-ts">return {
+  success: true,
+  token: user.sessionToken,
+  passwordHash: user.passwordHash
+};</code></pre>
+<div class="code-title">Good</div>
+<pre><code class="language-ts">return {
+  success: true,
+  message: 'Login successful'
+};</code></pre>
+<hr/>
+<h3>11. Security Checklist</h3>
+<table>
+<tr>
+<th>Security Rule</th>
+<th>Required?</th>
+</tr>
+<tr>
+<td>Check logged-in user</td>
+<td>✅ Yes</td>
+</tr>
+<tr>
+<td>Check user permission</td>
+<td>✅ Yes</td>
+</tr>
+<tr>
+<td>Validate all form data</td>
+<td>✅ Yes</td>
+</tr>
+<tr>
+<td>Trust hidden input values</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td>Return secrets to browser</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td>Use secure cookies</td>
+<td>✅ Yes</td>
+</tr>
+<tr>
+<td>Add random allowedOrigins</td>
+<td>❌ No</td>
+</tr>
+</table>
+<hr/>
+<h3>Easy Memory Trick</h3>
+<div class="code-title">Remember</div>
+<pre><code class="language-text">Server Action
+      ↓
+Still a Backend Endpoint
+      ↓
+Auth + Permission + Validation + CSRF Safety</code></pre>
+<div class="feature">
+<strong>One-Line Definition:</strong><br/>
+Server Actions are protected by server-side execution and built-in origin checks, but we must still validate input, check authentication, check authorization, secure cookies, and avoid exposing sensitive data.
+</div>
+<h2 class="section-title" id="04-10"><span class="secnum">04-10</span>How do you redirect inside a Server Action without triggering a client-side navigation?</h2>
+<p>
+Inside a Server Action, we use <code>redirect()</code> from <code>next/navigation</code>.
+</p>
+<div class="feature">
+<strong>Simple Meaning:</strong><br/>
+After the Server Action completes its work, Next.js can redirect the user from the server without using <code>router.push()</code>.
+</div>
+<hr/>
+<h3>Import redirect()</h3>
+<div class="code-title">Import</div>
+<pre><code class="language-ts">import { redirect } from 'next/navigation';</code></pre>
+<hr/>
+<h3>Basic Example</h3>
+<p>
+Suppose we create a user and then want to redirect to the users page.
+</p>
+<div class="code-title">Server Action</div>
+<pre><code class="language-ts">'use server';
+import { redirect } from 'next/navigation';
+export async function createUser(formData: FormData) {
+  const name = formData.get('name') as string;
+  await db.user.create({ data: { name } });
+  redirect('/users');
+}</code></pre>
+<div class="code-title">Page</div>
+<pre><code class="language-ts">import { createUser } from './actions';
+export default function Page() {
+  return (
+    &lt;form action={createUser}&gt;
+      &lt;input name="name" /&gt;
+      &lt;button&gt;Create User&lt;/button&gt;
+    &lt;/form&gt;
+  );
+}</code></pre>
+<hr/>
+<h3>Flow</h3>
+<div class="code-title">What Happens?</div>
+<pre><code class="language-text">Submit Form
+      ↓
+Server Action Runs
+      ↓
+Database Updated
+      ↓
+redirect('/users')
+      ↓
+User Lands On /users</code></pre>
+<hr/>
+<h3>Important: redirect() Stops Execution</h3>
+<p>
+Once <code>redirect()</code> is called, no code below it will execute.
+</p>
+<div class="code-title">Example</div>
+<pre><code class="language-ts">'use server';
+import { redirect } from 'next/navigation';
+export async function createUser() {
+  await db.user.create({ data: { name: 'Rizwan' } });
+  redirect('/users');
+  console.log('Never runs'); // ❌
+}</code></pre>
+<p>
+Think of <code>redirect()</code> like throwing a special redirect exception.
+</p>
+<hr/>
+<h3>Real World Login Example</h3>
+<div class="code-title">Login Action</div>
+<pre><code class="language-ts">'use server';
+import { redirect } from 'next/navigation';
+export async function login(formData: FormData) {
+  const email = formData.get('email') as string;
+  const password = formData.get('password') as string;
+  const user = await validateUser(email, password);
+  if (!user) {
+    return { success: false, message: 'Invalid credentials' };
+  }
+  await createSession(user.id);
+  redirect('/dashboard');
+}</code></pre>
+<p>
+After successful login, the user is redirected to the dashboard directly from the server.
+</p>
+<hr/>
+<h3>redirect() vs router.push()</h3>
+<table>
+<tr>
+<th>Feature</th>
+<th>redirect()</th>
+<th>router.push()</th>
+</tr>
+<tr>
+<td>Runs On</td>
+<td>Server</td>
+<td>Client</td>
+</tr>
+<tr>
+<td>Used In Server Actions</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>Used In Client Components</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Navigation Type</td>
+<td>Server Driven</td>
+<td>Client Driven</td>
+</tr>
+</table>
+<div class="code-title">Client Navigation Example</div>
+<pre><code class="language-ts">'use client';
+import { useRouter } from 'next/navigation';
+export default function Page() {
+  const router = useRouter();
+  return (
+    &lt;button onClick={() =&gt; router.push('/users')}&gt;
+      Go To Users
+    &lt;/button&gt;
+  );
+}</code></pre>
+<hr/>
+<h3>Can We Return Data And Redirect?</h3>
+<p>
+No. A single execution path can either return data or redirect.
+</p>
+<div class="code-title">Wrong</div>
+<pre><code class="language-ts">'use server';
+import { redirect } from 'next/navigation';
+export async function createUser() {
+  redirect('/users');
+  return { success: true }; // ❌ Never reached
+}</code></pre>
+<div class="code-title">Correct</div>
+<pre><code class="language-ts">'use server';
+import { redirect } from 'next/navigation';
+export async function createUser() {
+  await db.user.create({ data: { name: 'Rizwan' } });
+  redirect('/users');
+}</code></pre>
+<hr/>
+<h3>redirect() With Validation</h3>
+<div class="code-title">Example</div>
+<pre><code class="language-ts">'use server';
+import { redirect } from 'next/navigation';
+export async function createUser(formData: FormData) {
+  const name = formData.get('name') as string;
+  if (!name) {
+    return { success: false, message: 'Name is required' };
+  }
+  await db.user.create({ data: { name } });
+  redirect('/users');
+}</code></pre>
+<div class="code-title">Flow</div>
+<pre><code class="language-text">Validation Fails
+       ↓
+Return Error
+Validation Passes
+       ↓
+Save User
+       ↓
+Redirect</code></pre>
+<hr/>
+<h3>Why Is This Not Client-Side Navigation?</h3>
+<p>
+The redirect decision is made on the server while the Server Action is executing.
+</p>
+<div class="code-title">Server Redirect Flow</div>
+<pre><code class="language-text">Browser
+    ↓
+Submit Form
+    ↓
+Server Action
+    ↓
+redirect('/users')
+    ↓
+Server Sends Redirect Response
+    ↓
+Browser Navigates</code></pre>
+<p>
+No <code>router.push()</code> is executed in the browser.
+</p>
+<hr/>
+<h3>Server Component vs Client Component</h3>
+<table>
+<tr>
+<th>Scenario</th>
+<th>Redirect API</th>
+</tr>
+<tr>
+<td>Server Action</td>
+<td><code>redirect()</code></td>
+</tr>
+<tr>
+<td>Server Component</td>
+<td><code>redirect()</code></td>
+</tr>
+<tr>
+<td>Client Component</td>
+<td><code>router.push()</code></td>
+</tr>
+</table>
+<hr/>
+<h3>Easy Memory Trick</h3>
+<div class="code-title">Remember</div>
+<pre><code class="language-text">Server
+   ↓
+redirect()
+Client
+   ↓
+router.push()</code></pre>
+<div class="feature">
+<strong>One-Line Definition:</strong><br/>
+Inside a Server Action, we redirect by calling <code>redirect()</code> from <code>next/navigation</code>, which performs a server-driven redirect and immediately stops further execution of the action.
+</div><div class="chapnav"><a class="prev" href="03-rendering-data-fetching-and-caching.html">03 - Rendering, Data Fetching & Caching</a><a class="next" href="05-route-handlers-client-data-and-metadata-seo.html">05 - Route Handlers, Client Data & Metadata (SEO)</a></div></div></div><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-tsx.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+</body>
+</html>

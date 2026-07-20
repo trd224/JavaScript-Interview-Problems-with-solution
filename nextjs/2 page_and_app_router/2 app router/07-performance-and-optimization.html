@@ -1,0 +1,3404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>07 - Performance & Optimization | Next.js App Router Guide</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:#0f172a;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.8;display:flex;min-height:100vh}
+a{color:inherit;text-decoration:none}
+.sidebar{width:290px;flex-shrink:0;background:#0b1220;border-right:1px solid #1e293b;padding:24px 18px;position:sticky;top:0;height:100vh;overflow-y:auto}
+.brand{color:#38bdf8;font-size:18px;font-weight:800;margin-bottom:4px}
+.brand small{display:block;color:#64748b;font-weight:400;font-size:12px;margin-top:4px}
+.chapter-nav{margin-top:22px}
+.chapter-nav a{display:block;padding:8px 10px;border-radius:8px;font-size:13px;color:#94a3b8;margin-bottom:4px;border-left:3px solid transparent}
+.chapter-nav a:hover{background:#111827;color:#e2e8f0}
+.chapter-nav a.active{background:#111827;color:#38bdf8;border-left:3px solid #38bdf8;font-weight:bold}
+.chapter-nav .chnum{display:inline-block;width:22px;color:#475569;font-family:monospace}
+.toc{margin-top:22px;border-top:1px solid #1e293b;padding-top:16px}
+.toc-title{color:#fbbf24;font-size:12px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px}
+.toc a{display:block;font-size:12.5px;color:#8ea3c2;padding:5px 8px;border-radius:6px;line-height:1.4}
+.toc a:hover{background:#111827;color:#e2e8f0}
+.main{flex:1;padding:40px 48px;max-width:980px}
+.container{max-width:900px}
+h1.page-title{color:#38bdf8;margin-bottom:6px;font-size:30px}
+.page-sub{color:#64748b;margin-bottom:28px;font-size:14px}
+h2.section-title{color:#a78bfa;margin-top:52px;margin-bottom:14px;font-size:23px;border-top:1px solid #1e293b;padding-top:38px}
+h2.section-title .secnum{color:#475569;font-family:monospace;margin-right:10px;font-size:16px}
+h3{color:#fbbf24;margin-top:25px;margin-bottom:10px;font-size:17px}
+h4{color:#38bdf8;margin-top:18px;margin-bottom:8px;font-size:15px}
+h5{color:#93c5fd;margin-top:14px;margin-bottom:6px;font-size:14px}
+p{margin-bottom:15px}
+ul,ol{margin-left:20px;margin-bottom:15px}
+li{margin-bottom:8px}
+strong{color:#f1f5f9}
+code{color:#93c5fd;font-family:'JetBrains Mono',monospace;font-size:.92em}
+.feature{background:#1e293b;border-left:5px solid #38bdf8;padding:15px;border-radius:8px;margin:20px 0}
+.warning{background:#2a1a1a;border-left:5px solid #f87171;padding:15px;border-radius:8px;margin:20px 0}
+.summary{background:#1a2a1e;border-left:5px solid #34d399;padding:15px;border-radius:8px;margin:20px 0}
+.note{background:#1e293b;border-left:5px solid #a78bfa;padding:15px;border-radius:8px;margin:20px 0}
+.code-title{background:#1e293b;color:#93c5fd;padding:10px;font-weight:bold;border-radius:6px 6px 0 0;font-size:13px;font-family:monospace}
+pre[class*="language-"]{margin:0 0 20px 0!important;border-radius:0 0 6px 6px}
+pre code{white-space:pre}
+table{width:100%;border-collapse:collapse;margin:20px 0}
+th{background:#1e293b;color:#38bdf8;text-align:left;padding:12px}
+td{padding:12px;border-top:1px solid #334155}
+hr{border:none;border-top:1px solid #1e293b;margin:30px 0}
+.chapnav{display:flex;justify-content:space-between;margin-top:60px;padding-top:24px;border-top:1px solid #1e293b}
+.chapnav a{background:#111827;padding:12px 18px;border-radius:10px;border:1px solid #1e293b;font-size:14px;color:#94a3b8}
+.chapnav a:hover{color:#38bdf8;border-color:#38bdf8}
+.chapnav .prev::before{content:"<- "}
+.chapnav .next::after{content:" ->"}
+@media(max-width:900px){body{flex-direction:column}.sidebar{position:relative;height:auto;width:100%}}
+</style>
+</head>
+<body>
+<div class="sidebar">
+<div class="brand">Next.js App Router<small>Complete Step-by-Step Guide</small></div>
+<div class="chapter-nav"><a class="" href="01-foundations-of-the-app-router.html"><span class="chnum">01</span>Foundations of the App Router</a><a class="" href="02-routing-layouts-and-file-conventions.html"><span class="chnum">02</span>Routing, Layouts & File Conventions</a><a class="" href="03-rendering-data-fetching-and-caching.html"><span class="chnum">03</span>Rendering, Data Fetching & Caching</a><a class="" href="04-server-actions-and-mutations.html"><span class="chnum">04</span>Server Actions & Mutations</a><a class="" href="05-route-handlers-client-data-and-metadata-seo.html"><span class="chnum">05</span>Route Handlers, Client Data & Metadata (SEO)</a><a class="" href="06-styling-assets-and-optimized-components.html"><span class="chnum">06</span>Styling, Assets & Optimized Components</a><a class="active" href="07-performance-and-optimization.html"><span class="chnum">07</span>Performance & Optimization</a></div>
+<div class="toc"><div class="toc-title">On this page</div><a href="#07-01">What is next/dynamic and what options (ssr, loading) does it accept?</a><a href="#07-02">How do you lazy-load a heavy Client Component to avoid hydration cost?</a><a href="#07-03">What strategies does the next/script component offer and when do you use each?</a><a href="#07-04">How does prefetching work in the Link component and how did it change in v13?</a><a href="#07-05">What are Core Web Vitals and which Next.js features directly improve each?</a><a href="#07-06">How do you analyze and reduce bundle size in a Next.js app?</a><a href="#07-07">What is Turbopack and Why is it the Default Dev Bundler in Next.js 15?</a><a href="#07-08">How does Turbopack improve build performance compared to Webpack in Next.js 15?</a><a href="#07-09">What is the staleTimes config option introduced in Next.js 14.2 for Router Cache?</a><a href="#07-10">How do you implement granular Suspense boundaries to avoid render waterfalls?</a><a href="#07-11">How do you share state between Server and Client Components?</a><a href="#07-12">Why can't you use React Context directly in a Server Component?</a><a href="#07-13">Zustand Integration With the App Router (Per-Request Store Pattern)</a></div>
+</div><div class="main"><div class="container"><h1 class="page-title">07 - Performance & Optimization</h1><div class="page-sub">Part 07 of 7 &middot; 13 topics &middot; Next.js App Router Guide</div><h2 class="section-title" id="07-01"><span class="secnum">07-01</span>What is next/dynamic and what options (ssr, loading) does it accept?</h2>
+<p>
+<code>next/dynamic</code> is a Next.js utility that allows us to dynamically import components instead of including them in the initial JavaScript bundle.
+</p>
+<div class="feature">
+<strong>Simple Meaning:</strong><br/>
+<code>next/dynamic</code> lets us load a component only when it is needed, reducing the initial bundle size and improving page performance.
+</div>
+<hr/>
+<h3>Why Do We Need next/dynamic?</h3>
+<p>
+Normally, imported components become part of the page bundle.
+</p>
+<div class="code-title">Normal Import</div>
+<pre><code class="language-tsx">import Chart from './Chart';
+export default function Page() {
+  return &lt;Chart /&gt;;
+}</code></pre>
+<p>
+Flow:
+</p>
+<pre><code class="language-text">Page Loads
+      ↓
+Chart Downloaded
+      ↓
+Page Rendered</code></pre>
+<p>
+Even if the user never views the chart, its JavaScript is still downloaded.
+</p>
+<hr/>
+<h3>Using next/dynamic</h3>
+<div class="code-title">Dynamic Import</div>
+<pre><code class="language-tsx">import dynamic from 'next/dynamic';
+const Chart = dynamic(() =&gt; import('./Chart'));
+export default function Page() {
+  return &lt;Chart /&gt;;
+}</code></pre>
+<p>
+Flow:
+</p>
+<pre><code class="language-text">Page Loads
+      ↓
+Chart Not Downloaded Yet
+      ↓
+Chart Needed
+      ↓
+Download Chart
+      ↓
+Render Chart</code></pre>
+<hr/>
+<h3>Basic Syntax</h3>
+<div class="code-title">Syntax</div>
+<pre><code class="language-tsx">const Component = dynamic(
+  () =&gt; import('./Component'),
+  options
+);</code></pre>
+<hr/>
+<h3>Option 1: ssr</h3>
+<p>
+The <code>ssr</code> option controls whether the component should be rendered on the server.
+</p>
+<div class="code-title">Disable SSR</div>
+<pre><code class="language-tsx">import dynamic from 'next/dynamic';
+const Map = dynamic(() =&gt; import('./Map'), {
+  ssr: false
+});</code></pre>
+<p>
+Flow:
+</p>
+<pre><code class="language-text">Server Render
+      ↓
+Map Skipped
+      ↓
+Browser Loads
+      ↓
+Map Rendered</code></pre>
+<div class="feature">
+<strong>Use Case:</strong><br/>
+Browser-only libraries such as Google Maps, Leaflet, Chart.js, or components that access <code>window</code>, <code>document</code>, or <code>localStorage</code>.
+</div>
+<hr/>
+<h3>Without ssr: false</h3>
+<div class="code-title">Problem Example</div>
+<pre><code class="language-tsx">const Map = dynamic(() =&gt; import('./Map'));</code></pre>
+<p>
+If the component contains:
+</p>
+<pre><code class="language-tsx">window.location.href</code></pre>
+<p>
+The server will throw an error because <code>window</code> does not exist on the server.
+</p>
+<hr/>
+<h3>Option 2: loading</h3>
+<p>
+The <code>loading</code> option displays a fallback component while the dynamic component is being downloaded.
+</p>
+<div class="code-title">Loading Example</div>
+<pre><code class="language-tsx">import dynamic from 'next/dynamic';
+const Chart = dynamic(() =&gt; import('./Chart'), {
+  loading: () =&gt; &lt;p&gt;Loading Chart...&lt;/p&gt;
+});</code></pre>
+<p>
+Flow:
+</p>
+<pre><code class="language-text">Page Loads
+      ↓
+Loading Chart...
+      ↓
+Chart Bundle Downloaded
+      ↓
+Chart Rendered</code></pre>
+<hr/>
+<h3>Using Both Options Together</h3>
+<div class="code-title">Example</div>
+<pre><code class="language-tsx">import dynamic from 'next/dynamic';
+const Map = dynamic(() =&gt; import('./Map'), {
+  ssr: false,
+  loading: () =&gt; &lt;p&gt;Loading Map...&lt;/p&gt;
+});</code></pre>
+<p>
+Meaning:
+</p>
+<table>
+<tr>
+<th>Option</th>
+<th>Effect</th>
+</tr>
+<tr>
+<td>ssr: false</td>
+<td>Do not render on server</td>
+</tr>
+<tr>
+<td>loading</td>
+<td>Show fallback while downloading</td>
+</tr>
+</table>
+<hr/>
+<h3>Real World Example</h3>
+<p>
+Suppose our dashboard contains a heavy chart library.
+</p>
+<div class="code-title">Without Dynamic Import</div>
+<pre><code class="language-text">Dashboard Page
+      ↓
+Download Chart Library
+      ↓
+Download Table
+      ↓
+Download Filters
+      ↓
+Render</code></pre>
+<p>
+The page becomes slower.
+</p>
+<div class="code-title">With Dynamic Import</div>
+<pre><code class="language-text">Dashboard Page
+      ↓
+Render Immediately
+      ↓
+Chart Downloads Separately
+      ↓
+Chart Appears Later</code></pre>
+<p>
+The dashboard becomes faster because the chart code is split into a separate chunk.
+</p>
+<hr/>
+<h3>Common Use Cases</h3>
+<table>
+<tr>
+<th>Use Case</th>
+<th>Use next/dynamic?</th>
+</tr>
+<tr>
+<td>Google Maps</td>
+<td>✅ Yes</td>
+</tr>
+<tr>
+<td>Chart.js</td>
+<td>✅ Yes</td>
+</tr>
+<tr>
+<td>Video Player</td>
+<td>✅ Yes</td>
+</tr>
+<tr>
+<td>Rich Text Editor</td>
+<td>✅ Yes</td>
+</tr>
+<tr>
+<td>Small Header Component</td>
+<td>❌ Usually No</td>
+</tr>
+</table>
+<hr/>
+<h3>next/dynamic vs React.lazy</h3>
+<table>
+<tr>
+<th>Feature</th>
+<th>next/dynamic</th>
+<th>React.lazy</th>
+</tr>
+<tr>
+<td>Works In Next.js</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Supports SSR Control</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>loading Option</td>
+<td>✅</td>
+<td>❌ (Uses Suspense)</td>
+</tr>
+<tr>
+<td>Next.js Optimized</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+</table>
+<hr/>
+<h3>Easy Memory Trick</h3>
+<div class="code-title">Remember</div>
+<pre><code class="language-text">next/dynamic
+      ↓
+Load Later
+ssr: false
+      ↓
+Client Only
+loading
+      ↓
+Show Placeholder</code></pre>
+<div class="feature">
+<strong>One-Line Definition:</strong><br/>
+<code>next/dynamic</code> dynamically loads components to reduce initial bundle size, while <code>ssr</code> controls server rendering and <code>loading</code> provides a temporary fallback UI during download.
+</div>
+<h2 class="section-title" id="07-02"><span class="secnum">07-02</span>How do you lazy-load a heavy Client Component to avoid hydration cost?</h2>
+<p>
+We lazy-load a heavy Client Component by using <code>next/dynamic</code>, so that the heavy component's JavaScript is not included in the initial page bundle.
+</p>
+<div class="feature">
+<strong>Simple Meaning:</strong><br/>
+Load the heavy Client Component only when needed, instead of downloading and hydrating it immediately on page load.
+</div>
+<hr/>
+<h3>Problem: Heavy Client Component</h3>
+<p>
+A Client Component needs JavaScript in the browser and must be hydrated.
+</p>
+<div class="code-title">Heavy Component</div>
+<pre><code class="language-tsx">'use client';
+export default function Chart() {
+  return &lt;div&gt;Heavy Chart Component&lt;/div&gt;;
+}</code></pre>
+<p>
+If we import it normally, it becomes part of the initial JavaScript bundle.
+</p>
+<div class="code-title">Normal Import</div>
+<pre><code class="language-tsx">import Chart from './Chart';
+export default function Page() {
+  return &lt;Chart /&gt;;
+}</code></pre>
+<div class="code-title">Flow</div>
+<pre><code class="language-text">Page Loads
+      ↓
+Chart JavaScript Downloads Immediately
+      ↓
+Chart Hydrates Immediately
+      ↓
+Initial Load Becomes Heavier</code></pre>
+<hr/>
+<h3>Solution: Lazy Load With next/dynamic</h3>
+<p>
+Use <code>dynamic()</code> from <code>next/dynamic</code>.
+</p>
+<div class="code-title">Lazy Loaded Component</div>
+<pre><code class="language-tsx">import dynamic from 'next/dynamic';
+const Chart = dynamic(() =&gt; import('./Chart'), {
+  loading: () =&gt; &lt;p&gt;Loading chart...&lt;/p&gt;
+});
+export default function Page() {
+  return &lt;Chart /&gt;;
+}</code></pre>
+<div class="code-title">Flow</div>
+<pre><code class="language-text">Page Loads
+      ↓
+Main Page Hydrates
+      ↓
+Chart Bundle Loads Separately
+      ↓
+Chart Hydrates Later</code></pre>
+<hr/>
+<h3>Disable SSR For Browser-Only Heavy Component</h3>
+<p>
+If the component uses browser-only APIs like <code>window</code>, <code>document</code>, <code>localStorage</code>, maps, charts, or editors, use <code>ssr: false</code>.
+</p>
+<div class="code-title">Client Only Dynamic Import</div>
+<pre><code class="language-tsx">import dynamic from 'next/dynamic';
+const RichEditor = dynamic(() =&gt; import('./RichEditor'), {
+  ssr: false,
+  loading: () =&gt; &lt;p&gt;Loading editor...&lt;/p&gt;
+});
+export default function Page() {
+  return &lt;RichEditor /&gt;;
+}</code></pre>
+<div class="feature">
+<strong>Meaning:</strong><br/>
+<code>ssr: false</code> means this component will not render on the server. It will only load and render in the browser.
+</div>
+<hr/>
+<h3>Real World Example: Dashboard Chart</h3>
+<p>
+Suppose our dashboard has normal static content plus one heavy chart.
+</p>
+<div class="code-title">HeavyChart.tsx</div>
+<pre><code class="language-tsx">'use client';
+import Chart from 'chart.js/auto';
+export default function HeavyChart() {
+  return &lt;canvas id="sales-chart"&gt;&lt;/canvas&gt;;
+}</code></pre>
+<div class="code-title">page.tsx</div>
+<pre><code class="language-tsx">import dynamic from 'next/dynamic';
+const HeavyChart = dynamic(() =&gt; import('./HeavyChart'), {
+  ssr: false,
+  loading: () =&gt; &lt;p&gt;Loading sales chart...&lt;/p&gt;
+});
+export default function DashboardPage() {
+  return (
+    &lt;main&gt;
+      &lt;h1&gt;Dashboard&lt;/h1&gt;
+      &lt;p&gt;This content loads fast.&lt;/p&gt;
+      &lt;HeavyChart /&gt;
+    &lt;/main&gt;
+  );
+}</code></pre>
+<p>
+Now the dashboard content can load first, and the chart JavaScript loads separately.
+</p>
+<hr/>
+<h3>Lazy Load Only After User Click</h3>
+<p>
+For maximum saving, we can load the heavy component only after user interaction.
+</p>
+<div class="code-title">ReportSection.tsx</div>
+<pre><code class="language-tsx">'use client';
+import { useState } from 'react';
+import dynamic from 'next/dynamic';
+const HeavyReport = dynamic(() =&gt; import('./HeavyReport'), {
+  loading: () =&gt; &lt;p&gt;Loading report...&lt;/p&gt;
+});
+export default function ReportSection() {
+  const [showReport, setShowReport] = useState(false);
+  return (
+    &lt;div&gt;
+      &lt;button onClick={() =&gt; setShowReport(true)}&gt;Show Report&lt;/button&gt;
+      {showReport &amp;&amp; &lt;HeavyReport /&gt;}
+    &lt;/div&gt;
+  );
+}</code></pre>
+<div class="code-title">Flow</div>
+<pre><code class="language-text">Page Loads
+      ↓
+HeavyReport Not Downloaded
+      ↓
+User Clicks Show Report
+      ↓
+HeavyReport Downloads
+      ↓
+HeavyReport Hydrates</code></pre>
+<hr/>
+<h3>When Should We Lazy Load?</h3>
+<table>
+<tr>
+<th>Component</th>
+<th>Lazy Load?</th>
+</tr>
+<tr>
+<td>Chart component</td>
+<td>✅ Yes</td>
+</tr>
+<tr>
+<td>Map component</td>
+<td>✅ Yes</td>
+</tr>
+<tr>
+<td>Rich text editor</td>
+<td>✅ Yes</td>
+</tr>
+<tr>
+<td>Video player</td>
+<td>✅ Yes</td>
+</tr>
+<tr>
+<td>Payment widget</td>
+<td>✅ Yes</td>
+</tr>
+<tr>
+<td>Small button</td>
+<td>❌ Usually No</td>
+</tr>
+<tr>
+<td>Header navigation</td>
+<td>❌ Usually No</td>
+</tr>
+</table>
+<hr/>
+<h3>Important: Lazy Loading Reduces Initial JS</h3>
+<p>
+Lazy loading does not remove hydration completely. It delays hydration until the component is loaded and rendered.
+</p>
+<table>
+<tr>
+<th>Normal Import</th>
+<th>Dynamic Import</th>
+</tr>
+<tr>
+<td>Component JS loads immediately</td>
+<td>Component JS loads later</td>
+</tr>
+<tr>
+<td>Hydrates immediately</td>
+<td>Hydrates later</td>
+</tr>
+<tr>
+<td>Higher initial cost</td>
+<td>Lower initial cost</td>
+</tr>
+</table>
+<hr/>
+<h3>Best Practice</h3>
+<div class="code-title">Best Pattern</div>
+<pre><code class="language-tsx">import dynamic from 'next/dynamic';
+const HeavyClientComponent = dynamic(() =&gt; import('./HeavyClientComponent'), {
+  ssr: false,
+  loading: () =&gt; &lt;p&gt;Loading...&lt;/p&gt;
+});
+export default function Page() {
+  return &lt;HeavyClientComponent /&gt;;
+}</code></pre>
+<div class="warning">
+<strong>Important:</strong><br/>
+Use <code>ssr: false</code> only for components that do not need server rendering or depend on browser-only APIs.
+</div>
+<hr/>
+<h3>Easy Memory Trick</h3>
+<div class="code-title">Remember</div>
+<pre><code class="language-text">Heavy Client Component
+        ↓
+dynamic()
+        ↓
+Separate JS Chunk
+        ↓
+Hydrate Later
+        ↓
+Faster Initial Load</code></pre>
+<div class="feature">
+<strong>One-Line Definition:</strong><br/>
+We lazy-load a heavy Client Component with <code>next/dynamic</code> so its JavaScript loads and hydrates later instead of increasing the initial page hydration cost.
+</div>
+<h2 class="section-title" id="07-03"><span class="secnum">07-03</span>What strategies does the next/script component offer and when do you use each?</h2>
+<p>
+<code>next/script</code> allows us to control when third-party JavaScript files are loaded so they do not negatively impact page performance.
+</p>
+<div class="feature">
+<strong>Simple Meaning:</strong><br/>
+The <code>strategy</code> prop decides when a script should be downloaded and executed.
+</div>
+<hr/>
+<h3>Why Use next/script?</h3>
+<p>
+Normally, a script tag can block page rendering.
+</p>
+<div class="code-title">Traditional Script</div>
+<pre><code class="language-html">&lt;script src="https://example.com/script.js"&gt;&lt;/script&gt;</code></pre>
+<div class="code-title">Problem</div>
+<pre><code class="language-text">Browser Reads HTML
+        ↓
+Downloads Script
+        ↓
+Executes Script
+        ↓
+Continues Rendering</code></pre>
+<p>
+Large scripts can slow down page loading.
+</p>
+<p>
+<code>next/script</code> provides optimized loading strategies.
+</p>
+<hr/>
+<h3>Basic Usage</h3>
+<div class="code-title">Example</div>
+<pre><code class="language-tsx">import Script from 'next/script';
+export default function Page() {
+  return (
+    &lt;&gt;
+      &lt;Script
+        src="https://example.com/script.js"
+        strategy="afterInteractive"
+      /&gt;
+    &lt;/&gt;
+  );
+}</code></pre>
+<hr/>
+<h3>Available Strategies</h3>
+<table>
+<tr>
+<th>Strategy</th>
+<th>When It Runs</th>
+</tr>
+<tr>
+<td>beforeInteractive</td>
+<td>Before Next.js hydration</td>
+</tr>
+<tr>
+<td>afterInteractive</td>
+<td>After hydration begins</td>
+</tr>
+<tr>
+<td>lazyOnload</td>
+<td>During browser idle time</td>
+</tr>
+<tr>
+<td>worker</td>
+<td>Inside a web worker</td>
+</tr>
+</table>
+<hr/>
+<h3>1. beforeInteractive</h3>
+<p>
+Loads and executes before Next.js hydrates the page.
+</p>
+<div class="code-title">Example</div>
+<pre><code class="language-tsx">&lt;Script
+  src="https://example.com/script.js"
+  strategy="beforeInteractive"
+/&gt;</code></pre>
+<div class="code-title">Flow</div>
+<pre><code class="language-text">HTML Arrives
+      ↓
+Script Loads
+      ↓
+Script Executes
+      ↓
+Hydration Starts</code></pre>
+<div class="feature">
+<strong>Use For:</strong><br/>
+Critical scripts that must run before the application becomes interactive.
+</div>
+<p>
+Examples:
+</p>
+<ul>
+<li>Bot detection</li>
+<li>Security scripts</li>
+<li>Consent management</li>
+<li>Critical monitoring scripts</li>
+</ul>
+<div class="warning">
+<strong>Warning:</strong><br/>
+Use sparingly because it can delay page interactivity.
+</div>
+<hr/>
+<h3>2. afterInteractive (Default)</h3>
+<p>
+This is the default strategy.
+</p>
+<div class="code-title">Example</div>
+<pre><code class="language-tsx">&lt;Script
+  src="https://example.com/script.js"
+  strategy="afterInteractive"
+/&gt;</code></pre>
+<div class="code-title">Flow</div>
+<pre><code class="language-text">HTML Loads
+      ↓
+Hydration Starts
+      ↓
+Script Downloads
+      ↓
+Script Executes</code></pre>
+<div class="feature">
+<strong>Use For:</strong><br/>
+Scripts needed soon after page interaction begins.
+</div>
+<p>
+Examples:
+</p>
+<ul>
+<li>Google Analytics</li>
+<li>Tag Manager</li>
+<li>Customer chat widgets</li>
+<li>A/B testing tools</li>
+</ul>
+<hr/>
+<h3>3. lazyOnload</h3>
+<p>
+Loads only when the browser is idle.
+</p>
+<div class="code-title">Example</div>
+<pre><code class="language-tsx">&lt;Script
+  src="https://example.com/script.js"
+  strategy="lazyOnload"
+/&gt;</code></pre>
+<div class="code-title">Flow</div>
+<pre><code class="language-text">Page Loads
+      ↓
+Hydration Completes
+      ↓
+Browser Becomes Idle
+      ↓
+Script Downloads
+      ↓
+Script Executes</code></pre>
+<div class="feature">
+<strong>Use For:</strong><br/>
+Low-priority scripts that are not immediately needed.
+</div>
+<p>
+Examples:
+</p>
+<ul>
+<li>Social sharing widgets</li>
+<li>Heatmaps</li>
+<li>Feedback widgets</li>
+<li>Marketing tools</li>
+</ul>
+<hr/>
+<h3>4. worker</h3>
+<p>
+Loads the script inside a Web Worker instead of the main thread.
+</p>
+<div class="code-title">Example</div>
+<pre><code class="language-tsx">&lt;Script
+  src="https://example.com/script.js"
+  strategy="worker"
+/&gt;</code></pre>
+<div class="code-title">Flow</div>
+<pre><code class="language-text">Script Loads
+      ↓
+Runs In Worker
+      ↓
+Main Thread Remains Free</code></pre>
+<div class="feature">
+<strong>Use For:</strong><br/>
+Heavy third-party scripts that support running in a worker environment.
+</div>
+<div class="warning">
+<strong>Important:</strong><br/>
+Not all third-party scripts work inside a Web Worker.
+</div>
+<hr/>
+<h3>Real World Examples</h3>
+<table>
+<tr>
+<th>Script</th>
+<th>Recommended Strategy</th>
+</tr>
+<tr>
+<td>Cookie Consent</td>
+<td>beforeInteractive</td>
+</tr>
+<tr>
+<td>Google Analytics</td>
+<td>afterInteractive</td>
+</tr>
+<tr>
+<td>Google Tag Manager</td>
+<td>afterInteractive</td>
+</tr>
+<tr>
+<td>Hotjar</td>
+<td>lazyOnload</td>
+</tr>
+<tr>
+<td>Feedback Widget</td>
+<td>lazyOnload</td>
+</tr>
+<tr>
+<td>Heavy Analytics SDK</td>
+<td>worker (if supported)</td>
+</tr>
+</table>
+<hr/>
+<h3>Which Strategy Should We Choose?</h3>
+<div class="code-title">Decision Flow</div>
+<pre><code class="language-text">Needed Before Page Works?
+           ↓
+         Yes
+           ↓
+beforeInteractive
+Needed Soon After Load?
+           ↓
+         Yes
+           ↓
+afterInteractive
+Can Wait?
+           ↓
+         Yes
+           ↓
+lazyOnload
+Heavy CPU Work?
+           ↓
+         Yes
+           ↓
+worker</code></pre>
+<hr/>
+<h3>Complete Example</h3>
+<div class="code-title">Layout</div>
+<pre><code class="language-tsx">import Script from 'next/script';
+export default function RootLayout({ children }) {
+  return (
+    &lt;html&gt;
+      &lt;body&gt;
+        {children}
+        &lt;Script
+          src="https://www.googletagmanager.com/gtag/js"
+          strategy="afterInteractive"
+        /&gt;
+        &lt;Script
+          src="https://example.com/feedback.js"
+          strategy="lazyOnload"
+        /&gt;
+      &lt;/body&gt;
+    &lt;/html&gt;
+  );
+}</code></pre>
+<hr/>
+<h3>Easy Memory Trick</h3>
+<div class="code-title">Remember</div>
+<pre><code class="language-text">beforeInteractive
+       ↓
+Before Hydration
+afterInteractive
+       ↓
+After Hydration Starts
+lazyOnload
+       ↓
+When Browser Is Idle
+worker
+       ↓
+Run In Worker Thread</code></pre>
+<div class="feature">
+<strong>One-Line Definition:</strong><br/>
+The <code>strategy</code> prop of <code>next/script</code> controls when a script loads and executes, with <code>beforeInteractive</code>, <code>afterInteractive</code>, <code>lazyOnload</code>, and <code>worker</code> providing different performance and loading behaviors.
+</div>
+<h2 class="section-title" id="07-04"><span class="secnum">07-04</span>How does prefetching work in the Link component and how did it change in v13?</h2>
+<p>
+Prefetching allows Next.js to download a route before the user clicks the link, making navigation much faster.
+</p>
+<div class="feature">
+<strong>Simple Meaning:</strong><br/>
+When a link becomes visible on the screen, Next.js can quietly prepare the destination page in the background.
+</div>
+<hr/>
+<h3>What Is Prefetching?</h3>
+<p>
+Without prefetching:
+</p>
+<div class="code-title">Normal Navigation</div>
+<pre><code class="language-text">User Clicks Link
+        ↓
+Download Route Code
+        ↓
+Fetch Route Data
+        ↓
+Render New Page</code></pre>
+<p>
+There is a delay because everything starts after the click.
+</p>
+<p>
+With prefetching:
+</p>
+<div class="code-title">Prefetch Navigation</div>
+<pre><code class="language-text">Page Loads
+      ↓
+Link Becomes Visible
+      ↓
+Route Prefetched
+      ↓
+User Clicks Link
+      ↓
+Instant Navigation</code></pre>
+<hr/>
+<h3>Basic Link Example</h3>
+<div class="code-title">Link</div>
+<pre><code class="language-tsx">import Link from 'next/link';
+export default function Page() {
+  return (
+    &lt;Link href="/products"&gt;
+      Products
+    &lt;/Link&gt;
+  );
+}</code></pre>
+<p>
+In production mode, Next.js automatically prefetches this route when the link enters the viewport.
+</p>
+<hr/>
+<h3>How Prefetching Works</h3>
+<p>
+Next.js uses an Intersection Observer internally.
+</p>
+<div class="code-title">Flow</div>
+<pre><code class="language-text">Link Appears In Viewport
+          ↓
+Intersection Observer Detects It
+          ↓
+Next.js Starts Prefetching
+          ↓
+Route Stored In Cache
+          ↓
+User Clicks Link
+          ↓
+Fast Navigation</code></pre>
+<hr/>
+<h3>Automatic Prefetching</h3>
+<p>
+By default:
+</p>
+<div class="code-title">Automatic Prefetch</div>
+<pre><code class="language-tsx">&lt;Link href="/products"&gt;
+  Products
+&lt;/Link&gt;</code></pre>
+<table>
+<tr>
+<th>Environment</th>
+<th>Prefetch</th>
+</tr>
+<tr>
+<td>Development</td>
+<td>❌ Disabled</td>
+</tr>
+<tr>
+<td>Production</td>
+<td>✅ Enabled</td>
+</tr>
+</table>
+<p>
+This prevents unnecessary network requests during development.
+</p>
+<hr/>
+<h3>Disable Prefetching</h3>
+<p>
+Sometimes we do not want prefetching.
+</p>
+<div class="code-title">Disable</div>
+<pre><code class="language-tsx">&lt;Link href="/products" prefetch={false}&gt;
+  Products
+&lt;/Link&gt;</code></pre>
+<p>
+Now the route loads only after the user clicks.
+</p>
+<hr/>
+<h3>What Changed In Next.js 13?</h3>
+<h4>1. No More &lt;a&gt; Tag Required</h4>
+<p>
+Before v13:
+</p>
+<div class="code-title">Next.js 12</div>
+<pre><code class="language-tsx">&lt;Link href="/products"&gt;
+  &lt;a&gt;Products&lt;/a&gt;
+&lt;/Link&gt;</code></pre>
+<p>
+Starting with v13:
+</p>
+<div class="code-title">Next.js 13+</div>
+<pre><code class="language-tsx">&lt;Link href="/products"&gt;
+  Products
+&lt;/Link&gt;</code></pre>
+<p>
+The Link component automatically renders the anchor element.
+</p>
+<table>
+<tr>
+<th>Version</th>
+<th>Syntax</th>
+</tr>
+<tr>
+<td>v12</td>
+<td>&lt;Link&gt;&lt;a&gt;...&lt;/a&gt;&lt;/Link&gt;</td>
+</tr>
+<tr>
+<td>v13+</td>
+<td>&lt;Link&gt;...&lt;/Link&gt;</td>
+</tr>
+</table>
+<hr/>
+<h4>2. App Router Prefetching Became Smarter</h4>
+<p>
+In the App Router, Next.js prefetches React Server Component (RSC) payloads instead of just JavaScript bundles.
+</p>
+<div class="code-title">Pages Router</div>
+<pre><code class="language-text">Prefetch JavaScript Bundle
+          ↓
+User Click
+          ↓
+Render Page</code></pre>
+<div class="code-title">App Router</div>
+<pre><code class="language-text">Prefetch Route Segments
+          ↓
+Prefetch RSC Payload
+          ↓
+User Click
+          ↓
+Faster Render</code></pre>
+<div class="feature">
+<strong>Main v13 Improvement:</strong><br/>
+The App Router can prefetch route segments and React Server Component payloads, making navigation more efficient.
+</div>
+<hr/>
+<h3>Real World Example</h3>
+<div class="code-title">Navigation Menu</div>
+<pre><code class="language-tsx">import Link from 'next/link';
+export default function Navigation() {
+  return (
+    &lt;nav&gt;
+      &lt;Link href="/"&gt;Home&lt;/Link&gt;
+      &lt;Link href="/products"&gt;Products&lt;/Link&gt;
+      &lt;Link href="/about"&gt;About&lt;/Link&gt;
+    &lt;/nav&gt;
+  );
+}</code></pre>
+<div class="code-title">Flow</div>
+<pre><code class="language-text">Home Page Loads
+        ↓
+Links Become Visible
+        ↓
+Routes Prefetched
+        ↓
+User Clicks Products
+        ↓
+Products Page Opens Quickly</code></pre>
+<hr/>
+<h3>When Should We Disable Prefetch?</h3>
+<table>
+<tr>
+<th>Scenario</th>
+<th>Disable Prefetch?</th>
+</tr>
+<tr>
+<td>Main Navigation</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td>Frequently Visited Pages</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td>Thousands Of Links</td>
+<td>✅ Sometimes</td>
+</tr>
+<tr>
+<td>Rarely Used Admin Pages</td>
+<td>✅ Sometimes</td>
+</tr>
+<tr>
+<td>Huge Dynamic Routes</td>
+<td>✅ Sometimes</td>
+</tr>
+</table>
+<hr/>
+<h3>Link vs Traditional Anchor</h3>
+<table>
+<tr>
+<th>Feature</th>
+<th>Link</th>
+<th>&lt;a&gt;</th>
+</tr>
+<tr>
+<td>Client Navigation</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>Prefetching</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>SPA Experience</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>Full Page Reload</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+</table>
+<hr/>
+<h3>Important Interview Point</h3>
+<div class="warning">
+<strong>Important:</strong><br/>
+Prefetching works only in production builds. During development (<code>next dev</code>), automatic prefetching is disabled.
+</div>
+<hr/>
+<h3>Easy Memory Trick</h3>
+<div class="code-title">Remember</div>
+<pre><code class="language-text">Link Visible
+      ↓
+Prefetch Route
+      ↓
+User Clicks
+      ↓
+Fast Navigation
+v12
+ ↓
+&lt;Link&gt;&lt;a&gt;&lt;/a&gt;&lt;/Link&gt;
+v13+
+ ↓
+&lt;Link&gt;&lt;/Link&gt;</code></pre>
+<div class="feature">
+<strong>One-Line Definition:</strong><br/>
+The Link component automatically prefetches visible routes in production, and in Next.js 13 it became smarter by prefetching App Router data and no longer requiring a nested <code>&lt;a&gt;</code> element.
+</div>
+<h2 class="section-title" id="07-05"><span class="secnum">07-05</span>What are Core Web Vitals and which Next.js features directly improve each?</h2>
+<p>
+Core Web Vitals are Google's user experience metrics that measure loading speed, responsiveness, and visual stability.
+</p>
+<div class="feature">
+<strong>Simple Meaning:</strong><br/>
+Core Web Vitals tell us how fast, responsive, and stable our application feels to real users.
+</div>
+<hr/>
+<h3>The Three Core Web Vitals</h3>
+<table>
+<tr>
+<th>Metric</th>
+<th>Measures</th>
+<th>Good Score</th>
+</tr>
+<tr>
+<td>LCP</td>
+<td>Loading Performance</td>
+<td>≤ 2.5 seconds</td>
+</tr>
+<tr>
+<td>INP</td>
+<td>User Interaction Responsiveness</td>
+<td>≤ 200 ms</td>
+</tr>
+<tr>
+<td>CLS</td>
+<td>Visual Stability</td>
+<td>≤ 0.1</td>
+</tr>
+</table>
+<hr/>
+<h3>1. LCP (Largest Contentful Paint)</h3>
+<p>
+LCP measures how quickly the largest visible content appears on the screen.
+</p>
+<div class="code-title">Example</div>
+<pre><code class="language-text">User Opens Page
+       ↓
+Hero Image Appears
+       ↓
+LCP Recorded</code></pre>
+<p>
+Usually the LCP element is:
+</p>
+<ul>
+<li>Hero image</li>
+<li>Banner image</li>
+<li>Large heading</li>
+<li>Featured product image</li>
+</ul>
+<hr/>
+<h3>Next.js Features That Improve LCP</h3>
+<table>
+<tr>
+<th>Feature</th>
+<th>How It Helps</th>
+</tr>
+<tr>
+<td>next/image</td>
+<td>Image optimization</td>
+</tr>
+<tr>
+<td>priority</td>
+<td>Preloads LCP image</td>
+</tr>
+<tr>
+<td>SSG</td>
+<td>HTML already generated</td>
+</tr>
+<tr>
+<td>ISR</td>
+<td>Cached HTML served quickly</td>
+</tr>
+<tr>
+<td>Server Components</td>
+<td>Less JavaScript sent</td>
+</tr>
+<tr>
+<td>next/font</td>
+<td>Eliminates font delays</td>
+</tr>
+</table>
+<div class="code-title">LCP Example</div>
+<pre><code class="language-tsx">import Image from 'next/image';
+export default function Home() {
+  return (
+    &lt;Image
+      src="/hero.jpg"
+      alt="Hero"
+      width={1200}
+      height={600}
+      priority
+    /&gt;
+  );
+}</code></pre>
+<div class="feature">
+<strong>Why?</strong><br/>
+The <code>priority</code> prop preloads the hero image, helping the largest visible content appear faster.
+</div>
+<hr/>
+<h3>2. INP (Interaction to Next Paint)</h3>
+<p>
+INP measures how quickly the page responds after a user interaction.
+</p>
+<div class="code-title">Example</div>
+<pre><code class="language-text">User Clicks Button
+        ↓
+Browser Processes Event
+        ↓
+UI Updates
+        ↓
+INP Recorded</code></pre>
+<p>
+Slow JavaScript usually causes poor INP.
+</p>
+<hr/>
+<h3>Next.js Features That Improve INP</h3>
+<table>
+<tr>
+<th>Feature</th>
+<th>How It Helps</th>
+</tr>
+<tr>
+<td>Server Components</td>
+<td>Less client JS</td>
+</tr>
+<tr>
+<td>next/dynamic</td>
+<td>Lazy loads heavy code</td>
+</tr>
+<tr>
+<td>Code Splitting</td>
+<td>Smaller bundles</td>
+</tr>
+<tr>
+<td>next/script</td>
+<td>Optimized third-party scripts</td>
+</tr>
+<tr>
+<td>Suspense</td>
+<td>Avoids blocking UI</td>
+</tr>
+<tr>
+<td>Partial Prerendering (PPR)</td>
+<td>Interactive shell loads faster</td>
+</tr>
+</table>
+<div class="code-title">Dynamic Import Example</div>
+<pre><code class="language-tsx">import dynamic from 'next/dynamic';
+const Chart = dynamic(() =&gt; import('./Chart'));
+export default function Page() {
+  return &lt;Chart /&gt;;
+}</code></pre>
+<div class="feature">
+<strong>Why?</strong><br/>
+Heavy chart code is downloaded later, reducing the amount of JavaScript that blocks interaction.
+</div>
+<hr/>
+<h3>3. CLS (Cumulative Layout Shift)</h3>
+<p>
+CLS measures unexpected movement of page elements while the page is loading.
+</p>
+<div class="code-title">Bad Experience</div>
+<pre><code class="language-text">Page Loads
+      ↓
+Button Appears
+      ↓
+Image Loads
+      ↓
+Button Moves Down
+      ↓
+CLS Increases</code></pre>
+<p>
+Users may click the wrong thing because the layout shifts.
+</p>
+<hr/>
+<h3>Next.js Features That Improve CLS</h3>
+<table>
+<tr>
+<th>Feature</th>
+<th>How It Helps</th>
+</tr>
+<tr>
+<td>next/image</td>
+<td>Reserves image space</td>
+</tr>
+<tr>
+<td>width / height</td>
+<td>Prevents image shifts</td>
+</tr>
+<tr>
+<td>fill</td>
+<td>Maintains image layout</td>
+</tr>
+<tr>
+<td>next/font</td>
+<td>Prevents font swapping shifts</td>
+</tr>
+<tr>
+<td>Layouts</td>
+<td>Keeps stable UI structure</td>
+</tr>
+</table>
+<div class="code-title">Good Example</div>
+<pre><code class="language-tsx">import Image from 'next/image';
+export default function Page() {
+  return (
+    &lt;Image
+      src="/product.jpg"
+      alt="Product"
+      width={600}
+      height={400}
+    /&gt;
+  );
+}</code></pre>
+<div class="feature">
+<strong>Why?</strong><br/>
+Because dimensions are known before loading, space is reserved and no layout shift occurs.
+</div>
+<hr/>
+<h3>Core Web Vitals and Next.js Mapping</h3>
+<table>
+<tr>
+<th>Next.js Feature</th>
+<th>LCP</th>
+<th>INP</th>
+<th>CLS</th>
+</tr>
+<tr>
+<td>next/image</td>
+<td>✅</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>priority</td>
+<td>✅</td>
+<td>❌</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>next/font</td>
+<td>✅</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Server Components</td>
+<td>✅</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>next/dynamic</td>
+<td>❌</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>Code Splitting</td>
+<td>❌</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>SSG / ISR</td>
+<td>✅</td>
+<td>❌</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>next/script</td>
+<td>❌</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+</table>
+<hr/>
+<h3>Real World Example</h3>
+<div class="code-title">E-Commerce Home Page</div>
+<pre><code class="language-text">Hero Banner
+    ↓
+next/image + priority
+    ↓
+Better LCP
+Heavy Product Carousel
+    ↓
+next/dynamic
+    ↓
+Better INP
+Product Images
+    ↓
+width + height
+    ↓
+Better CLS</code></pre>
+<hr/>
+<h3>Interview Question</h3>
+<div class="code-title">Question</div>
+<pre><code class="language-text">Which Next.js feature most directly improves CLS?</code></pre>
+<div class="code-title">Answer</div>
+<pre><code class="language-text">next/image
+Because it reserves image space
+before the image loads.</code></pre>
+<hr/>
+<h3>Easy Memory Trick</h3>
+<div class="code-title">Remember</div>
+<pre><code class="language-text">LCP
+ ↓
+Loading Speed
+ ↓
+next/image
+priority
+SSG
+ISR
+INP
+ ↓
+Interaction Speed
+ ↓
+Server Components
+dynamic()
+Code Splitting
+CLS
+ ↓
+Layout Stability
+ ↓
+next/image
+next/font</code></pre>
+<div class="feature">
+<strong>One-Line Definition:</strong><br/>
+Core Web Vitals measure loading speed (LCP), interaction responsiveness (INP), and visual stability (CLS), and Next.js improves them through features such as <code>next/image</code>, <code>priority</code>, <code>next/font</code>, Server Components, dynamic imports, and static rendering.
+</div>
+<h2 class="section-title" id="07-06"><span class="secnum">07-06</span>How do you analyze and reduce bundle size in a Next.js app?</h2>
+<p>
+Bundle size means the amount of JavaScript sent to the browser. In Next.js, we analyze bundle size using bundle analyzer tools and reduce it by sending less client-side JavaScript.
+</p>
+<div class="feature">
+<strong>Simple Meaning:</strong><br/>
+Smaller bundle size means the browser downloads, parses, and hydrates less JavaScript, so our application becomes faster.
+</div>
+<hr/>
+<h3>Why Bundle Size Matters</h3>
+<div class="code-title">Large Bundle Problem</div>
+<pre><code class="language-text">User Opens Page
+      ↓
+Browser Downloads Large JS
+      ↓
+Browser Parses JS
+      ↓
+React Hydrates Page
+      ↓
+Page Becomes Interactive Slowly</code></pre>
+<p>
+Large JavaScript mainly hurts interaction performance, especially on slow devices.
+</p>
+<hr/>
+<h3>1. Analyze Bundle Size</h3>
+<p>
+Use <code>@next/bundle-analyzer</code> to see which packages are increasing the bundle.
+</p>
+<div class="code-title">Install</div>
+<pre><code class="language-bash">npm install @next/bundle-analyzer</code></pre>
+<div class="code-title">next.config.js</div>
+<pre><code class="language-js">const withBundleAnalyzer = require('@next/bundle-analyzer')({
+  enabled: process.env.ANALYZE === 'true'
+});
+const nextConfig = {};
+module.exports = withBundleAnalyzer(nextConfig);</code></pre>
+<div class="code-title">Run Analyzer</div>
+<pre><code class="language-bash">ANALYZE=true npm run build</code></pre>
+<p>
+On Windows PowerShell:
+</p>
+<div class="code-title">Windows PowerShell</div>
+<pre><code class="language-bash">$env:ANALYZE="true"; npm run build</code></pre>
+<hr/>
+<h3>2. Check Build Output</h3>
+<p>
+Next.js build output also shows route sizes.
+</p>
+<div class="code-title">Command</div>
+<pre><code class="language-bash">npm run build</code></pre>
+<div class="code-title">Example Output</div>
+<pre><code class="language-text">Route                          Size      First Load JS
+┌ ○ /                          5 kB      95 kB
+├ ○ /about                     2 kB      92 kB
+└ ○ /dashboard                 50 kB     180 kB</code></pre>
+<table>
+<tr>
+<th>Column</th>
+<th>Meaning</th>
+</tr>
+<tr>
+<td>Size</td>
+<td>JavaScript specific to that route</td>
+</tr>
+<tr>
+<td>First Load JS</td>
+<td>Total JS needed when opening that route first time</td>
+</tr>
+</table>
+<hr/>
+<h3>3. Prefer Server Components</h3>
+<p>
+In the App Router, components are Server Components by default. Server Components do not send their JavaScript to the browser.
+</p>
+<div class="code-title">Good</div>
+<pre><code class="language-js">export default async function ProductsPage() {
+  const products = await getProducts();
+  return (
+    &lt;ul&gt;
+      {products.map(product =&gt; &lt;li key={product.id}&gt;{product.name}&lt;/li&gt;)}
+    &lt;/ul&gt;
+  );
+}</code></pre>
+<div class="feature">
+<strong>Why?</strong><br/>
+Because this component runs on the server, its JavaScript is not added to the client bundle.
+</div>
+<hr/>
+<h3>4. Do Not Add 'use client' Everywhere</h3>
+<p>
+Adding <code>'use client'</code> makes that component and its imports part of the browser bundle.
+</p>
+<div class="code-title">Bad</div>
+<pre><code class="language-js">'use client';
+import HeavyChart from './HeavyChart';
+import ProductList from './ProductList';
+export default function Page() {
+  return &lt;ProductList /&gt;;
+}</code></pre>
+<p>
+Now unnecessary code may go to the browser.
+</p>
+<div class="code-title">Better</div>
+<pre><code class="language-js">import ProductList from './ProductList';
+import AddToCartButton from './AddToCartButton';
+export default function Page() {
+  return (
+    &lt;&gt;
+      &lt;ProductList /&gt;
+      &lt;AddToCartButton /&gt;
+    &lt;/&gt;
+  );
+}</code></pre>
+<p>
+Only <code>AddToCartButton</code> should be a Client Component if it needs browser interaction.
+</p>
+<hr/>
+<h3>5. Lazy Load Heavy Client Components</h3>
+<p>
+Use <code>next/dynamic</code> for heavy browser components like charts, maps, editors, and video players.
+</p>
+<div class="code-title">Dynamic Import</div>
+<pre><code class="language-js">import dynamic from 'next/dynamic';
+const Chart = dynamic(() =&gt; import('./Chart'), {
+  ssr: false,
+  loading: () =&gt; &lt;p&gt;Loading chart...&lt;/p&gt;
+});
+export default function Page() {
+  return &lt;Chart /&gt;;
+}</code></pre>
+<div class="code-title">Flow</div>
+<pre><code class="language-text">Initial Page Load
+        ↓
+Chart JS Not Included Immediately
+        ↓
+Chart Loads Separately
+        ↓
+Initial Bundle Smaller</code></pre>
+<hr/>
+<hr/>
+<h4>Main Difference Between Lazy Loading and Suspense</h4>
+<p>
+Many developers get confused between <code>lazy loading</code> and <code>Suspense</code>, but both have different responsibilities.
+</p>
+<h5>Suspense</h5>
+<p>
+<code>Suspense</code> is used to show a fallback UI while a component or data is not ready.
+</p>
+<div class="code-title">Suspense Example</div>
+<pre><code class="language-js">&lt;Suspense fallback={&lt;Loading /&gt;}&gt;
+  &lt;Chart /&gt;
+&lt;/Suspense&gt;</code></pre>
+<div class="feature">
+<strong>Meaning:</strong><br/>
+If <code>Chart</code> is not ready yet, show <code>Loading</code>.
+</div>
+<p>
+<code>Suspense</code> does not decide whether the component should be server-rendered or client-rendered. It only controls what the user sees while waiting.
+</p>
+<h5>Lazy Loading</h5>
+<p>
+Lazy loading means the component code is not downloaded immediately. It is downloaded only when the component is needed.
+</p>
+<div class="code-title">React Lazy Example</div>
+<pre><code class="language-js">import { lazy, Suspense } from 'react';
+const Chart = lazy(() =&gt; import('./Chart'));
+export default function Page() {
+  return (
+    &lt;Suspense fallback={&lt;p&gt;Loading...&lt;/p&gt;}&gt;
+      &lt;Chart /&gt;
+    &lt;/Suspense&gt;
+  );
+}</code></pre>
+<div class="feature">
+<strong>Meaning:</strong><br/>
+<code>lazy()</code> delays the download of the component, and <code>Suspense</code> shows the loading UI while waiting.
+</div>
+<h5>Next.js dynamic()</h5>
+<p>
+In Next.js, <code>dynamic()</code> is commonly used instead of <code>React.lazy()</code> because it supports lazy loading, loading UI, and optional SSR control.
+</p>
+<div class="code-title">Next.js dynamic Example</div>
+<pre><code class="language-js">import dynamic from 'next/dynamic';
+const Chart = dynamic(() =&gt; import('./Chart'), {
+  loading: () =&gt; &lt;p&gt;Loading...&lt;/p&gt;
+});
+export default function Page() {
+  return &lt;Chart /&gt;;
+}</code></pre>
+<table>
+<tr>
+<th>Feature</th>
+<th>Suspense</th>
+<th>lazy()</th>
+<th>dynamic()</th>
+</tr>
+<tr>
+<td>Shows loading UI</td>
+<td>✅ Yes</td>
+<td>❌ No</td>
+<td>✅ Yes</td>
+</tr>
+<tr>
+<td>Delays component download</td>
+<td>❌ No</td>
+<td>✅ Yes</td>
+<td>✅ Yes</td>
+</tr>
+<tr>
+<td>Controls SSR</td>
+<td>❌ No</td>
+<td>❌ No</td>
+<td>✅ Yes, using <code>ssr:false</code></td>
+</tr>
+<tr>
+<td>Next.js optimized</td>
+<td>❌ No</td>
+<td>❌ No</td>
+<td>✅ Yes</td>
+</tr>
+</table>
+<div class="code-title">Easy Memory Trick</div>
+<pre><code class="language-text">Suspense
+    ↓
+Shows loading UI
+lazy()
+    ↓
+Delays component download
+dynamic()
+    ↓
+Lazy loading
++ Loading UI
++ Optional SSR control</code></pre>
+<div class="feature">
+<strong>One-Line Interview Answer:</strong><br/>
+<code>lazy()</code> or <code>dynamic()</code> decides when the component code is downloaded, while <code>Suspense</code> decides what the user sees while waiting.
+</div>
+<h3>6. Import Only What We Need</h3>
+<p>
+Avoid importing a full library when only one function is needed.
+</p>
+<div class="code-title">Bad</div>
+<pre><code class="language-ts">import _ from 'lodash';
+const name = _.capitalize('rizwan');</code></pre>
+<div class="code-title">Better</div>
+<pre><code class="language-ts">import capitalize from 'lodash/capitalize';
+const name = capitalize('rizwan');</code></pre>
+<hr/>
+<h3>7. Remove Heavy Libraries</h3>
+<p>
+Sometimes a small native JavaScript solution can replace a heavy package.
+</p>
+<table>
+<tr>
+<th>Heavy Usage</th>
+<th>Better Option</th>
+</tr>
+<tr>
+<td>Moment.js</td>
+<td>date-fns or Intl API</td>
+</tr>
+<tr>
+<td>Lodash full import</td>
+<td>Specific function import</td>
+</tr>
+<tr>
+<td>Large chart library</td>
+<td>Lazy load chart</td>
+</tr>
+<tr>
+<td>Large editor</td>
+<td>Dynamic import editor</td>
+</tr>
+</table>
+<hr/>
+<h3>8. Use next/script For Third-Party Scripts</h3>
+<p>
+Third-party scripts can increase main thread work. Load them carefully.
+</p>
+<div class="code-title">Example</div>
+<pre><code class="language-js">import Script from 'next/script';
+export default function Page() {
+  return (
+    &lt;Script src="https://example.com/analytics.js" strategy="lazyOnload" /&gt;
+  );
+}</code></pre>
+<table>
+<tr>
+<th>Strategy</th>
+<th>Use Case</th>
+</tr>
+<tr>
+<td>afterInteractive</td>
+<td>Needed soon after page load</td>
+</tr>
+<tr>
+<td>lazyOnload</td>
+<td>Low priority scripts</td>
+</tr>
+<tr>
+<td>beforeInteractive</td>
+<td>Critical scripts only</td>
+</tr>
+</table>
+<hr/>
+<h3>9. Split Large Client Components</h3>
+<p>
+If one Client Component imports many features, split it into smaller components.
+</p>
+<div class="code-title">Bad</div>
+<pre><code class="language-js">'use client';
+import Chart from './Chart';
+import Editor from './Editor';
+import VideoPlayer from './VideoPlayer';
+export default function Dashboard() {
+  return (
+    &lt;&gt;
+      &lt;Chart /&gt;
+      &lt;Editor /&gt;
+      &lt;VideoPlayer /&gt;
+    &lt;/&gt;
+  );
+}</code></pre>
+<div class="code-title">Better</div>
+<pre><code class="language-js">import dynamic from 'next/dynamic';
+const Chart = dynamic(() =&gt; import('./Chart'));
+const Editor = dynamic(() =&gt; import('./Editor'), { ssr: false });
+const VideoPlayer = dynamic(() =&gt; import('./VideoPlayer'));
+export default function Dashboard() {
+  return (
+    &lt;&gt;
+      &lt;Chart /&gt;
+      &lt;Editor /&gt;
+      &lt;VideoPlayer /&gt;
+    &lt;/&gt;
+  );
+}</code></pre>
+<hr/>
+<h3>10. Use Package Import Optimization</h3>
+<p>
+Next.js can optimize imports from some large libraries using <code>optimizePackageImports</code>.
+</p>
+<div class="code-title">next.config.js</div>
+<pre><code class="language-js">const nextConfig = {
+  experimental: {
+    optimizePackageImports: ['lucide-react', 'date-fns']
+  }
+};
+module.exports = nextConfig;</code></pre>
+<p>
+This helps avoid pulling unnecessary code from supported packages.
+</p>
+<hr/>
+<h3>Bundle Reduction Checklist</h3>
+<table>
+<tr>
+<th>Technique</th>
+<th>Improves Bundle?</th>
+</tr>
+<tr>
+<td>Use Server Components</td>
+<td>✅ Yes</td>
+</tr>
+<tr>
+<td>Avoid unnecessary 'use client'</td>
+<td>✅ Yes</td>
+</tr>
+<tr>
+<td>Use next/dynamic</td>
+<td>✅ Yes</td>
+</tr>
+<tr>
+<td>Remove unused libraries</td>
+<td>✅ Yes</td>
+</tr>
+<tr>
+<td>Import specific functions</td>
+<td>✅ Yes</td>
+</tr>
+<tr>
+<td>Use next/script strategy</td>
+<td>✅ Yes</td>
+</tr>
+<tr>
+<td>Add more Client Components</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td>Import full lodash</td>
+<td>❌ No</td>
+</tr>
+</table>
+<hr/>
+<h3>Easy Memory Trick</h3>
+<div class="code-title">Remember</div>
+<pre><code class="language-text">Analyze
+   ↓
+@next/bundle-analyzer
+Reduce
+   ↓
+Server Components
+dynamic()
+Specific imports
+Remove heavy libraries
+Avoid unnecessary use client</code></pre>
+<div class="feature">
+<strong>One-Line Definition:</strong><br/>
+We analyze Next.js bundle size using build output and <code>@next/bundle-analyzer</code>, then reduce it by using Server Components, avoiding unnecessary <code>'use client'</code>, lazy-loading heavy components, removing large libraries, and optimizing imports.
+</div>
+<h2 class="section-title" id="07-07"><span class="secnum">07-07</span>What is Turbopack and Why is it the Default Dev Bundler in Next.js 15?</h2>
+<p>
+<strong>Turbopack</strong> is a modern JavaScript bundler created by the team behind Next.js. It is written in <strong>Rust</strong> and is designed to provide significantly faster development performance than Webpack.
+</p>
+<div class="feature">
+Turbopack is the default development bundler in Next.js 15 because it provides faster startup times, faster rebuilds, better caching, and a smoother developer experience.
+</div>
+<h3>What is a Bundler?</h3>
+<p>
+A bundler analyzes our application's files and dependencies, then combines everything into optimized bundles that can be loaded by the browser.
+</p>
+<div class="code-block">
+<div class="code-title">Bundler Process</div>
+<pre><code class="language-text">React Components
+       │
+CSS Files
+       │
+Images
+       │
+Libraries
+       │
+       ▼
+    Bundler
+       │
+       ▼
+ Optimized Bundles
+       │
+       ▼
+    Browser</code></pre>
+</div>
+<h3>Why Was Turbopack Created?</h3>
+<p>
+As applications grow larger, Webpack can become slower during development.
+</p>
+<p>
+The Next.js team created Turbopack to solve problems such as:
+</p>
+<ul>
+<li>Slow startup times</li>
+<li>Slow rebuild times</li>
+<li>Large project compilation delays</li>
+<li>Memory consumption issues</li>
+<li>Developer productivity bottlenecks</li>
+</ul>
+<h3>Webpack vs Turbopack</h3>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>Webpack</th>
+<th>Turbopack</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Language</td>
+<td>JavaScript</td>
+<td>Rust</td>
+</tr>
+<tr>
+<td>Development Speed</td>
+<td>Good</td>
+<td>Much Faster</td>
+</tr>
+<tr>
+<td>Incremental Builds</td>
+<td>Supported</td>
+<td>Highly Optimized</td>
+</tr>
+<tr>
+<td>Caching</td>
+<td>Good</td>
+<td>Advanced</td>
+</tr>
+<tr>
+<td>Large Projects</td>
+<td>Can Become Slower</td>
+<td>Optimized for Large Projects</td>
+</tr>
+<tr>
+<td>Default in Next.js 15</td>
+<td>No</td>
+<td>Yes</td>
+</tr>
+</tbody>
+</table>
+<h3>How Development Worked with Webpack</h3>
+<div class="code-block">
+<div class="code-title">Development Flow</div>
+<pre><code class="language-text">Code Change
+     │
+     ▼
+Webpack Rebuild
+     │
+     ▼
+Refresh Browser</code></pre>
+</div>
+<p>
+For large applications, rebuilding could become noticeable.
+</p>
+<h3>How Development Works with Turbopack</h3>
+<div class="code-block">
+<div class="code-title">Development Flow</div>
+<pre><code class="language-text">Code Change
+     │
+     ▼
+Rebuild Only What Changed
+     │
+     ▼
+Instant Update</code></pre>
+</div>
+<p>
+Turbopack updates only the affected modules instead of rebuilding everything.
+</p>
+<h3>Incremental Compilation</h3>
+<p>
+One of Turbopack's biggest advantages is incremental compilation.
+</p>
+<p>
+Suppose our project contains:
+</p>
+<div class="code-block">
+<div class="code-title">Project Structure</div>
+<pre><code class="language-text">app/
+├── page.js
+├── dashboard/
+│   ├── page.js
+│   └── analytics.js
+├── users/
+│   └── page.js
+└── settings/
+    └── page.js</code></pre>
+</div>
+<p>
+If we modify only:
+</p>
+<div class="code-block">
+<div class="code-title">Modified File</div>
+<pre><code class="language-text">dashboard/analytics.js</code></pre>
+</div>
+<p>
+Turbopack rebuilds only the affected dependency graph instead of reprocessing the entire application.
+</p>
+<h3>Why Rust?</h3>
+<p>
+Turbopack is written in Rust because Rust offers:
+</p>
+<ul>
+<li>High performance</li>
+<li>Memory safety</li>
+<li>Low memory usage</li>
+<li>Excellent concurrency support</li>
+</ul>
+<p>
+This allows Turbopack to perform many tasks faster than JavaScript-based tooling.
+</p>
+<h3>Running Next.js with Turbopack</h3>
+<p>
+In modern Next.js versions, Turbopack is used automatically during development.
+</p>
+<div class="code-block">
+<div class="code-title">Start Development Server</div>
+<pre><code class="language-bash">npm run dev</code></pre>
+</div>
+<p>
+Internally, Next.js uses Turbopack by default in development mode.
+</p>
+<h3>Explicit Turbopack Command</h3>
+<div class="code-block">
+<div class="code-title">Using Turbopack Explicitly</div>
+<pre><code class="language-bash">next dev --turbopack</code></pre>
+</div>
+<h3>Why is Turbopack the Default Dev Bundler in Next.js 15?</h3>
+<p>
+The Next.js team made Turbopack the default development bundler because it improves developer productivity.
+</p>
+<ul>
+<li>Faster startup times</li>
+<li>Faster hot reloading</li>
+<li>Faster rebuilds</li>
+<li>Better scaling for large projects</li>
+<li>Efficient caching</li>
+<li>Lower waiting time during development</li>
+</ul>
+<h3>Important Note</h3>
+<div class="feature">
+Turbopack is primarily focused on improving the development experience. It does not automatically reduce our production bundle size. Its main goal is to make development faster.
+</div>
+<h3>Real-World Example</h3>
+<p>
+Imagine our application contains 5,000+ files.
+</p>
+<ul>
+<li>Webpack may need more work when files change.</li>
+<li>Turbopack updates only the necessary parts.</li>
+<li>This results in a much faster feedback loop during development.</li>
+</ul>
+<h3>Summary Table</h3>
+<table>
+<thead>
+<tr>
+<th>Question</th>
+<th>Answer</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>What is Turbopack?</td>
+<td>A Rust-based bundler created by the Next.js team.</td>
+</tr>
+<tr>
+<td>Why was it created?</td>
+<td>To improve development speed.</td>
+</tr>
+<tr>
+<td>What does it improve?</td>
+<td>Startup time, rebuilds, caching, and HMR.</td>
+</tr>
+<tr>
+<td>Does it replace Webpack?</td>
+<td>For development in Next.js 15, yes.</td>
+</tr>
+<tr>
+<td>Does it reduce production bundle size?</td>
+<td>Not necessarily.</td>
+</tr>
+</tbody>
+</table>
+<div class="summary">
+<strong>One-Line Definition:</strong><br/>
+Turbopack is a Rust-based bundler created by the Next.js team that became the default development bundler in Next.js 15 because it provides much faster startup times, rebuilds, caching, and hot reloading compared to Webpack.
+</div>
+<h2 class="section-title" id="07-08"><span class="secnum">07-08</span>How does Turbopack improve build performance compared to Webpack in Next.js 15?</h2>
+<p>
+Turbopack improves performance by using a Rust-based incremental bundler that only rebuilds the parts of our application that changed, instead of repeatedly processing the whole project like traditional bundling systems.
+</p>
+<div class="feature">
+<strong>Simple Meaning:</strong><br/>
+Webpack often does more repeated work. Turbopack remembers previous work and updates only the changed parts, so development builds and refreshes become faster.
+</div>
+<hr/>
+<h3>What Is Turbopack?</h3>
+<p>
+Turbopack is Next.js's newer bundler, written in Rust and built for faster JavaScript and TypeScript compilation.
+</p>
+<div class="code-title">Main Idea</div>
+<pre><code class="language-text">Turbopack
+    ↓
+Rust-based bundler
+    ↓
+Incremental compilation
+    ↓
+Faster dev server and updates</code></pre>
+<p>
+In Next.js 15, Turbopack Dev became stable, while production Turbopack builds became beta later in Next.js 15.5.
+</p>
+<hr/>
+<h3>Webpack vs Turbopack</h3>
+<table>
+<tr>
+<th>Feature</th>
+<th>Webpack</th>
+<th>Turbopack</th>
+</tr>
+<tr>
+<td>Language</td>
+<td>JavaScript</td>
+<td>Rust</td>
+</tr>
+<tr>
+<td>Build Style</td>
+<td>Traditional bundling</td>
+<td>Incremental bundling</td>
+</tr>
+<tr>
+<td>Rebuilds</td>
+<td>Often processes more modules</td>
+<td>Processes only changed parts</td>
+</tr>
+<tr>
+<td>Dev Server Startup</td>
+<td>Slower in large apps</td>
+<td>Faster in large apps</td>
+</tr>
+<tr>
+<td>Fast Refresh</td>
+<td>Can slow down as app grows</td>
+<td>Optimized for quick updates</td>
+</tr>
+</table>
+<hr/>
+<h3>1. Incremental Compilation</h3>
+<p>
+Turbopack keeps track of the project graph and recompiles only what changed.
+</p>
+<div class="code-title">Webpack Style</div>
+<pre><code class="language-text">Change One Component
+        ↓
+Reprocess Many Related Files
+        ↓
+Slower Rebuild</code></pre>
+<div class="code-title">Turbopack Style</div>
+<pre><code class="language-text">Change One Component
+        ↓
+Find Only Affected Modules
+        ↓
+Rebuild Changed Parts
+        ↓
+Faster Update</code></pre>
+<div class="feature">
+<strong>Why It Is Faster:</strong><br/>
+Turbopack avoids repeating work that has already been done.
+</div>
+<hr/>
+<h3>2. Rust-Based Performance</h3>
+<p>
+Turbopack is written in Rust, which helps it perform heavy compilation and bundling work faster than JavaScript-based tooling in many cases.
+</p>
+<div class="code-title">Concept</div>
+<pre><code class="language-text">Webpack
+   ↓
+JavaScript-based bundling
+Turbopack
+   ↓
+Rust-based bundling</code></pre>
+<hr/>
+<h3>3. Unified Graph</h3>
+<p>
+Next.js needs separate outputs for server code, client code, and route code. Turbopack uses a unified graph to manage these environments more efficiently.
+</p>
+<div class="code-title">Concept</div>
+<pre><code class="language-text">Client Code
+Server Code
+Route Code
+    ↓
+Unified Graph
+    ↓
+Less duplicated work</code></pre>
+<hr/>
+<h3>4. Faster Fast Refresh</h3>
+<p>
+Fast Refresh is the update we see in the browser after changing a file during development.
+</p>
+<div class="code-title">With Webpack</div>
+<pre><code class="language-text">Change File
+    ↓
+Rebuild
+    ↓
+Browser Updates</code></pre>
+<div class="code-title">With Turbopack</div>
+<pre><code class="language-text">Change File
+    ↓
+Incremental Update
+    ↓
+Browser Updates Faster</code></pre>
+<p>
+This is especially useful in large applications with many components, layouts, and routes.
+</p>
+<hr/>
+<h3>How To Use Turbopack In Next.js 15</h3>
+<div class="code-title">Development</div>
+<pre><code class="language-bash">next dev --turbopack</code></pre>
+<p>
+Or in package.json:
+</p>
+<div class="code-title">package.json</div>
+<pre><code class="language-json">{
+  "scripts": {
+    "dev": "next dev --turbopack"
+  }
+}</code></pre>
+<hr/>
+<h3>Production Build In Next.js 15.5+</h3>
+<p>
+In Next.js 15.5, Turbopack production builds became beta.
+</p>
+<div class="code-title">Build With Turbopack</div>
+<pre><code class="language-bash">next build --turbopack</code></pre>
+<div class="warning">
+<strong>Important:</strong><br/>
+In Next.js 15, Turbopack is mainly known for stable development performance. Production builds with Turbopack were beta in Next.js 15.5, not the default stable build path.
+</div>
+<hr/>
+<h3>Why It Feels Faster In Development</h3>
+<table>
+<tr>
+<th>Situation</th>
+<th>Webpack</th>
+<th>Turbopack</th>
+</tr>
+<tr>
+<td>Start dev server</td>
+<td>Can take longer</td>
+<td>Starts faster</td>
+</tr>
+<tr>
+<td>Edit component</td>
+<td>More rebuild work</td>
+<td>Only changed graph updates</td>
+</tr>
+<tr>
+<td>Large app</td>
+<td>Can slow down more</td>
+<td>Scales better</td>
+</tr>
+<tr>
+<td>Repeated changes</td>
+<td>More repeated work</td>
+<td>Reuses previous work</td>
+</tr>
+</table>
+<hr/>
+<h3>Real World Example</h3>
+<p>
+Suppose our project has many routes and components.
+</p>
+<div class="code-title">Project</div>
+<pre><code class="language-text">app/
+├── dashboard/
+├── products/
+├── orders/
+├── users/
+├── reports/
+└── settings/</code></pre>
+<p>
+If we edit only this file:
+</p>
+<div class="code-title">Changed File</div>
+<pre><code class="language-text">app/products/ProductCard.tsx</code></pre>
+<p>
+Turbopack tries to update only the affected part of the dependency graph.
+</p>
+<div class="code-title">Result</div>
+<pre><code class="language-text">Only ProductCard and related modules update
+        ↓
+Browser refreshes faster
+        ↓
+Developer waits less</code></pre>
+<hr/>
+<h3>Does Turbopack Reduce Browser Bundle Size?</h3>
+<p>
+Not directly.
+</p>
+<table>
+<tr>
+<th>Goal</th>
+<th>Tool / Technique</th>
+</tr>
+<tr>
+<td>Faster builds</td>
+<td>Turbopack</td>
+</tr>
+<tr>
+<td>Smaller browser JS</td>
+<td>Server Components, dynamic imports, code splitting</td>
+</tr>
+<tr>
+<td>Better images</td>
+<td>next/image</td>
+</tr>
+<tr>
+<td>Better fonts</td>
+<td>next/font</td>
+</tr>
+</table>
+<div class="feature">
+<strong>Important:</strong><br/>
+Turbopack mainly improves developer/build performance. It does not automatically fix a large client bundle.
+</div>
+<hr/>
+<h3>Easy Memory Trick</h3>
+<div class="code-title">Remember</div>
+<pre><code class="language-text">Webpack
+   ↓
+Older bundler
+   ↓
+More repeated work
+Turbopack
+   ↓
+Rust + incremental graph
+   ↓
+Less repeated work
+   ↓
+Faster development builds</code></pre>
+<div class="feature">
+<strong>One-Line Definition:</strong><br/>
+Turbopack improves Next.js 15 build performance by using a Rust-based incremental bundling system that reuses previous work and rebuilds only changed parts, making dev startup and Fast Refresh faster than Webpack.
+</div>
+<h2 class="section-title" id="07-09"><span class="secnum">07-09</span>What is the staleTimes config option introduced in Next.js 14.2 for Router Cache?</h2>
+<p>
+<code>staleTimes</code> is an experimental Next.js configuration that allows us to control how long page segments remain reusable inside the client-side Router Cache before Next.js considers them stale and fetches fresh data. :contentReference[oaicite:0]{index=0}
+</p>
+<div class="feature">
+<strong>Simple Meaning:</strong><br/>
+staleTimes controls how long Next.js keeps previously visited or prefetched pages in the browser's Router Cache.
+</div>
+<hr/>
+<h3>Why Was staleTimes Introduced?</h3>
+<p>
+Before Next.js 14.2, Router Cache durations were mostly fixed and controlled internally by Next.js.
+</p>
+<p>
+Next.js 14.2 introduced <code>staleTimes</code> so we can decide how long cached route segments should remain reusable on the client. :contentReference[oaicite:1]{index=1}
+</p>
+<div class="code-title">Without staleTimes</div>
+<pre><code class="language-text">Visit Page
+      ↓
+Page Cached
+      ↓
+Next.js Uses Internal Cache Rules</code></pre>
+<div class="code-title">With staleTimes</div>
+<pre><code class="language-text">Visit Page
+      ↓
+Page Cached
+      ↓
+Custom Expiration Time
+      ↓
+Fresh Data When Needed</code></pre>
+<hr/>
+<h3>Basic Configuration</h3>
+<div class="code-title">next.config.js</div>
+<pre><code class="language-js">/** @type {import('next').NextConfig} */
+const nextConfig = {
+  experimental: {
+    staleTimes: {
+      dynamic: 30,
+      static: 180
+    }
+  }
+};
+module.exports = nextConfig;</code></pre>
+<p>
+Values are specified in seconds. :contentReference[oaicite:2]{index=2}
+</p>
+<hr/>
+<h3>The Two staleTimes Options</h3>
+<table>
+<tr>
+<th>Option</th>
+<th>Purpose</th>
+</tr>
+<tr>
+<td>dynamic</td>
+<td>Cache duration for dynamic route navigations</td>
+</tr>
+<tr>
+<td>static</td>
+<td>Cache duration for static or fully prefetched routes</td>
+</tr>
+</table>
+<p>
+The <code>dynamic</code> and <code>static</code> settings correspond to different Router Cache scenarios. :contentReference[oaicite:3]{index=3}
+</p>
+<hr/>
+<h3>dynamic</h3>
+<p>
+Used when a page is neither statically generated nor fully prefetched. :contentReference[oaicite:4]{index=4}
+</p>
+<div class="code-title">Example</div>
+<pre><code class="language-js">experimental: {
+  staleTimes: {
+    dynamic: 30
+  }
+}</code></pre>
+<div class="code-title">Flow</div>
+<pre><code class="language-text">Visit Dynamic Page
+        ↓
+Store In Router Cache
+        ↓
+30 Seconds Pass
+        ↓
+Cache Becomes Stale
+        ↓
+Fresh Navigation Fetches Again</code></pre>
+<p>
+In Next.js 15, the default value became <code>0 seconds</code>. :contentReference[oaicite:5]{index=5}
+</p>
+<hr/>
+<h3>static</h3>
+<p>
+Used for statically generated pages, fully prefetched routes, or routes loaded using <code>router.prefetch()</code>. :contentReference[oaicite:6]{index=6}
+</p>
+<div class="code-title">Example</div>
+<pre><code class="language-js">experimental: {
+  staleTimes: {
+    static: 300
+  }
+}</code></pre>
+<div class="code-title">Flow</div>
+<pre><code class="language-text">Prefetch Route
+       ↓
+Store In Router Cache
+       ↓
+5 Minutes Pass
+       ↓
+Cache Becomes Stale
+       ↓
+Fresh Data Retrieved</code></pre>
+<p>
+The default static value is 5 minutes. :contentReference[oaicite:7]{index=7}
+</p>
+<hr/>
+<h3>Real World Example</h3>
+<p>
+Suppose our application contains:
+</p>
+<div class="code-title">Routes</div>
+<pre><code class="language-text">/
+├── products
+├── product/[id]
+├── dashboard
+└── reports</code></pre>
+<p>
+Configuration:
+</p>
+<div class="code-title">next.config.js</div>
+<pre><code class="language-js">experimental: {
+  staleTimes: {
+    dynamic: 10,
+    static: 300
+  }
+}</code></pre>
+<table>
+<tr>
+<th>Page Type</th>
+<th>Router Cache Lifetime</th>
+</tr>
+<tr>
+<td>Dynamic Product Page</td>
+<td>10 seconds</td>
+</tr>
+<tr>
+<td>Prefetched Static Page</td>
+<td>5 minutes</td>
+</tr>
+</table>
+<hr/>
+<h3>What Cache Does staleTimes Affect?</h3>
+<p>
+A very common confusion is thinking it affects:
+</p>
+<ul>
+<li>Data Cache</li>
+<li>Full Route Cache</li>
+<li>ISR Cache</li>
+</ul>
+<p>
+It does not.
+</p>
+<div class="feature">
+<strong>Important:</strong><br/>
+staleTimes only affects the Client-side Router Cache (the cache used during navigation in the browser). It does not control ISR revalidation, fetch caching, Data Cache, or Full Route Cache behavior. :contentReference[oaicite:8]{index=8}
+</div>
+<hr/>
+<h3>staleTimes vs revalidate</h3>
+<table>
+<tr>
+<th>Feature</th>
+<th>staleTimes</th>
+<th>revalidate</th>
+</tr>
+<tr>
+<td>Affects Router Cache</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>Affects ISR</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Runs In Browser</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>Runs On Server</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Controls Navigation Cache</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+</table>
+<hr/>
+<h3>Example Timeline</h3>
+<div class="code-title">staleTimes.dynamic = 30</div>
+<pre><code class="language-text">10:00 Visit Product Page
+       ↓
+Stored In Router Cache
+10:20 Visit Again
+       ↓
+Uses Cached Version
+10:31 Visit Again
+       ↓
+Cache Is Stale
+       ↓
+Fresh Data Retrieved</code></pre>
+<hr/>
+<h3>Version History</h3>
+<table>
+<tr>
+<th>Version</th>
+<th>Change</th>
+</tr>
+<tr>
+<td>Next.js 14.2</td>
+<td>Experimental staleTimes introduced</td>
+</tr>
+<tr>
+<td>Next.js 15</td>
+<td>dynamic default changed from 30s to 0s</td>
+</tr>
+</table>
+<p>
+The feature was introduced in Next.js 14.2 as an experimental Router Cache configuration. :contentReference[oaicite:9]{index=9}
+</p>
+<hr/>
+<h3>Easy Memory Trick</h3>
+<div class="code-title">Remember</div>
+<pre><code class="language-text">ISR Cache
+    ↓
+revalidate
+Router Cache
+    ↓
+staleTimes
+Server Cache
+    ↓
+cacheLife
+cacheTag</code></pre>
+<div class="feature">
+<strong>One-Line Definition:</strong><br/>
+<code>staleTimes</code> is an experimental Next.js Router Cache configuration introduced in v14.2 that controls how long cached page segments remain reusable in the browser before they become stale and need fresh data. :contentReference[oaicite:10]{index=10}
+</div>
+<h2 class="section-title" id="07-10"><span class="secnum">07-10</span>How do you implement granular Suspense boundaries to avoid render waterfalls?</h2>
+<p>
+Granular Suspense boundaries mean splitting a page into multiple smaller <code>&lt;Suspense&gt;</code> sections, so slow parts can load independently without blocking the whole page.
+</p>
+<div class="feature">
+<strong>Simple Meaning:</strong><br/>
+Do not wrap the whole page in one Suspense boundary. Wrap each slow section separately so fast sections can render first.
+</div>
+<hr/>
+<h3>What Is A Render Waterfall?</h3>
+<p>
+A render waterfall happens when one async part waits for another async part unnecessarily.
+</p>
+<div class="code-title">Waterfall Flow</div>
+<pre><code class="language-text">Fetch User
+    ↓
+Then Fetch Orders
+    ↓
+Then Fetch Analytics
+    ↓
+Then Render Page</code></pre>
+<p>
+This makes the page slower because work happens one after another.
+</p>
+<hr/>
+<h3>Bad Pattern: One Big Suspense Boundary</h3>
+<p>
+If we wrap the whole dashboard in one Suspense boundary, the complete page waits for the slowest section.
+</p>
+<div class="code-title">Bad Example</div>
+<pre><code class="language-tsx">import { Suspense } from 'react';
+import Profile from './Profile';
+import Orders from './Orders';
+import Analytics from './Analytics';
+export default function Page() {
+  return (
+    &lt;Suspense fallback={&lt;p&gt;Loading dashboard...&lt;/p&gt;}&gt;
+      &lt;Profile /&gt;
+      &lt;Orders /&gt;
+      &lt;Analytics /&gt;
+    &lt;/Suspense&gt;
+  );
+}</code></pre>
+<div class="code-title">Problem</div>
+<pre><code class="language-text">Profile Ready Fast
+Orders Ready Medium
+Analytics Ready Slow
+        ↓
+Whole Page Waits For Analytics</code></pre>
+<hr/>
+<h3>Good Pattern: Granular Suspense Boundaries</h3>
+<p>
+Instead, wrap each independent async section in its own Suspense boundary.
+</p>
+<div class="code-title">Good Example</div>
+<pre><code class="language-tsx">import { Suspense } from 'react';
+import Profile from './Profile';
+import Orders from './Orders';
+import Analytics from './Analytics';
+export default function Page() {
+  return (
+    &lt;main&gt;
+      &lt;Suspense fallback={&lt;p&gt;Loading profile...&lt;/p&gt;}&gt;
+        &lt;Profile /&gt;
+      &lt;/Suspense&gt;
+      &lt;Suspense fallback={&lt;p&gt;Loading orders...&lt;/p&gt;}&gt;
+        &lt;Orders /&gt;
+      &lt;/Suspense&gt;
+      &lt;Suspense fallback={&lt;p&gt;Loading analytics...&lt;/p&gt;}&gt;
+        &lt;Analytics /&gt;
+      &lt;/Suspense&gt;
+    &lt;/main&gt;
+  );
+}</code></pre>
+<div class="code-title">Result</div>
+<pre><code class="language-text">Profile Ready
+    ↓
+Show Profile Immediately
+Orders Ready
+    ↓
+Show Orders
+Analytics Ready Later
+    ↓
+Show Analytics Later</code></pre>
+<hr/>
+<h3>Example Async Components</h3>
+<div class="code-title">Profile.tsx</div>
+<pre><code class="language-tsx">export default async function Profile() {
+  const profile = await getProfile();
+  return &lt;section&gt;Welcome {profile.name}&lt;/section&gt;;
+}</code></pre>
+<div class="code-title">Orders.tsx</div>
+<pre><code class="language-tsx">export default async function Orders() {
+  const orders = await getOrders();
+  return &lt;section&gt;Orders: {orders.length}&lt;/section&gt;;
+}</code></pre>
+<div class="code-title">Analytics.tsx</div>
+<pre><code class="language-tsx">export default async function Analytics() {
+  const analytics = await getAnalytics();
+  return &lt;section&gt;Revenue: {analytics.revenue}&lt;/section&gt;;
+}</code></pre>
+<p>
+Each component can fetch its own data independently.
+</p>
+<hr/>
+<h3>Parallel Data Fetching</h3>
+<p>
+If data belongs to the same component, start requests together instead of awaiting them one by one.
+</p>
+<div class="code-title">Bad: Sequential Fetching</div>
+<pre><code class="language-tsx">export default async function Dashboard() {
+  const user = await getUser();
+  const orders = await getOrders();
+  const analytics = await getAnalytics();
+  return &lt;div&gt;Dashboard&lt;/div&gt;;
+}</code></pre>
+<div class="code-title">Good: Parallel Fetching</div>
+<pre><code class="language-tsx">export default async function Dashboard() {
+  const [user, orders, analytics] = await Promise.all([getUser(), getOrders(), getAnalytics()]);
+  return &lt;div&gt;Dashboard&lt;/div&gt;;
+}</code></pre>
+<div class="feature">
+<strong>Important:</strong><br/>
+Suspense helps streaming UI, but we should also avoid sequential <code>await</code> chains when data can be fetched in parallel.
+</div>
+<hr/>
+<h3>Granular Suspense In Real Dashboard</h3>
+<div class="code-title">Dashboard Page</div>
+<pre><code class="language-tsx">import { Suspense } from 'react';
+export default function DashboardPage() {
+  return (
+    &lt;main&gt;
+      &lt;h1&gt;Dashboard&lt;/h1&gt;
+      &lt;Suspense fallback={&lt;ProfileSkeleton /&gt;}&gt;
+        &lt;ProfileCard /&gt;
+      &lt;/Suspense&gt;
+      &lt;Suspense fallback={&lt;OrdersSkeleton /&gt;}&gt;
+        &lt;RecentOrders /&gt;
+      &lt;/Suspense&gt;
+      &lt;Suspense fallback={&lt;ChartSkeleton /&gt;}&gt;
+        &lt;RevenueChart /&gt;
+      &lt;/Suspense&gt;
+    &lt;/main&gt;
+  );
+}</code></pre>
+<p>
+The heading renders immediately, and each section streams when ready.
+</p>
+<hr/>
+<h3>When To Create Separate Suspense Boundaries?</h3>
+<table>
+<tr>
+<th>Section</th>
+<th>Separate Boundary?</th>
+</tr>
+<tr>
+<td>Profile Card</td>
+<td>✅ Yes</td>
+</tr>
+<tr>
+<td>Recent Orders</td>
+<td>✅ Yes</td>
+</tr>
+<tr>
+<td>Analytics Chart</td>
+<td>✅ Yes</td>
+</tr>
+<tr>
+<td>Small Static Text</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td>Navbar</td>
+<td>❌ Usually No</td>
+</tr>
+</table>
+<hr/>
+<h3>Suspense Boundary Size Rule</h3>
+<div class="feature">
+<strong>Best Rule:</strong><br/>
+Create Suspense boundaries around independent slow sections, not around every small element and not around the entire page.
+</div>
+<table>
+<tr>
+<th>Boundary Style</th>
+<th>Result</th>
+</tr>
+<tr>
+<td>One boundary for whole page</td>
+<td>Slowest section blocks everything</td>
+</tr>
+<tr>
+<td>Boundary around every tiny element</td>
+<td>Too many loading states</td>
+</tr>
+<tr>
+<td>Boundary around meaningful sections</td>
+<td>Best user experience</td>
+</tr>
+</table>
+<hr/>
+<h3>Next.js loading.tsx vs Suspense</h3>
+<p>
+<code>loading.tsx</code> automatically creates a Suspense boundary for a route segment.
+</p>
+<div class="code-title">Route Segment Loading</div>
+<pre><code class="language-text">app/dashboard/loading.tsx
+        ↓
+Shows fallback for dashboard route segment</code></pre>
+<p>
+Manual <code>&lt;Suspense&gt;</code> is useful when we want smaller boundaries inside the page.
+</p>
+<table>
+<tr>
+<th>Feature</th>
+<th>Use Case</th>
+</tr>
+<tr>
+<td>loading.tsx</td>
+<td>Route-level loading UI</td>
+</tr>
+<tr>
+<td>Manual Suspense</td>
+<td>Section-level loading UI</td>
+</tr>
+</table>
+<hr/>
+<h3>Common Mistake</h3>
+<div class="warning">
+<strong>Bad Practice:</strong><br/>
+Do not fetch all data at the top of the page if independent sections can fetch separately.
+</div>
+<div class="code-title">Bad</div>
+<pre><code class="language-tsx">export default async function Page() {
+  const profile = await getProfile();
+  const orders = await getOrders();
+  const analytics = await getAnalytics();
+  return (
+    &lt;Dashboard profile={profile} orders={orders} analytics={analytics} /&gt;
+  );
+}</code></pre>
+<p>
+This delays the entire page.
+</p>
+<div class="code-title">Better</div>
+<pre><code class="language-tsx">export default function Page() {
+  return (
+    &lt;main&gt;
+      &lt;Suspense fallback={&lt;p&gt;Loading profile...&lt;/p&gt;}&gt;&lt;Profile /&gt;&lt;/Suspense&gt;
+      &lt;Suspense fallback={&lt;p&gt;Loading orders...&lt;/p&gt;}&gt;&lt;Orders /&gt;&lt;/Suspense&gt;
+      &lt;Suspense fallback={&lt;p&gt;Loading analytics...&lt;/p&gt;}&gt;&lt;Analytics /&gt;&lt;/Suspense&gt;
+    &lt;/main&gt;
+  );
+}</code></pre>
+<hr/>
+<h3>Easy Memory Trick</h3>
+<div class="code-title">Remember</div>
+<pre><code class="language-text">One Big Suspense
+        ↓
+Slowest Part Blocks All
+Granular Suspense
+        ↓
+Each Section Loads Independently
+Parallel Fetching
+        ↓
+Avoid Await Waterfalls</code></pre>
+<div class="feature">
+<strong>One-Line Definition:</strong><br/>
+Granular Suspense boundaries avoid render waterfalls by wrapping independent async sections separately, allowing faster parts of the page to stream and render without waiting for slower parts.
+</div>
+<h2 class="section-title" id="07-11"><span class="secnum">07-11</span>How do you share state between Server and Client Components?</h2>
+<p>
+Server Components and Client Components do not share live React state directly. Instead, we pass server data to Client Components through props, and Client Components manage interactive state in the browser.
+</p>
+<div class="feature">
+<strong>Simple Meaning:</strong><br/>
+Server Components can send initial data to Client Components, but live state like <code>useState()</code> belongs only inside Client Components.
+</div>
+<hr/>
+<h3>Important Rule</h3>
+<table>
+<tr>
+<th>Component Type</th>
+<th>Can Use useState?</th>
+<th>Main Role</th>
+</tr>
+<tr>
+<td>Server Component</td>
+<td>❌ No</td>
+<td>Fetch data and render HTML/RSC payload</td>
+</tr>
+<tr>
+<td>Client Component</td>
+<td>✅ Yes</td>
+<td>Handle interaction and browser state</td>
+</tr>
+</table>
+<hr/>
+<h3>1. Pass Server Data To Client Component Using Props</h3>
+<p>
+This is the most common way.
+</p>
+<div class="code-title">Server Component - page.tsx</div>
+<pre><code class="language-tsx">import Counter from './Counter';
+export default async function Page() {
+  const initialCount = await getCartCount();
+  return &lt;Counter initialCount={initialCount} /&gt;;
+}</code></pre>
+<div class="code-title">Client Component - Counter.tsx</div>
+<pre><code class="language-tsx">'use client';
+import { useState } from 'react';
+export default function Counter({ initialCount }: { initialCount: number }) {
+  const [count, setCount] = useState(initialCount);
+  return (
+    &lt;button onClick={() =&gt; setCount(count + 1)}&gt;
+      Cart: {count}
+    &lt;/button&gt;
+  );
+}</code></pre>
+<div class="code-title">Flow</div>
+<pre><code class="language-text">Server Component
+      ↓
+Fetch initialCount
+      ↓
+Pass initialCount as prop
+      ↓
+Client Component
+      ↓
+useState(initialCount)
+      ↓
+User interaction updates client state</code></pre>
+<hr/>
+<h3>2. Server State vs Client State</h3>
+<table>
+<tr>
+<th>State Type</th>
+<th>Where It Lives</th>
+<th>Example</th>
+</tr>
+<tr>
+<td>Server State</td>
+<td>Database / API / Server Component</td>
+<td>Products, user profile, cart count from DB</td>
+</tr>
+<tr>
+<td>Client State</td>
+<td>Browser / Client Component</td>
+<td>Modal open, selected tab, input value</td>
+</tr>
+</table>
+<div class="feature">
+<strong>Best Practice:</strong><br/>
+Fetch real data on the server, then pass it as props to the Client Component only when interaction is needed.
+</div>
+<hr/>
+<h3>3. Client Component Can Update Server State Using Server Action</h3>
+<p>
+If the user changes data, call a Server Action and then update UI.
+</p>
+<div class="code-title">actions.ts</div>
+<pre><code class="language-ts">'use server';
+export async function updateCart(productId: string) {
+  await db.cart.update({ where: { productId }, data: { quantity: 1 } });
+  return { success: true };
+}</code></pre>
+<div class="code-title">AddToCartButton.tsx</div>
+<pre><code class="language-tsx">'use client';
+import { useState } from 'react';
+import { updateCart } from './actions';
+export default function AddToCartButton({ productId }: { productId: string }) {
+  const [added, setAdded] = useState(false);
+  async function handleClick() {
+    const result = await updateCart(productId);
+    if (result.success) setAdded(true);
+  }
+  return &lt;button onClick={handleClick}&gt;{added ? 'Added' : 'Add To Cart'}&lt;/button&gt;;
+}</code></pre>
+<div class="code-title">Flow</div>
+<pre><code class="language-text">Client Button Click
+        ↓
+Server Action Runs
+        ↓
+Database Updated
+        ↓
+Client State Updates</code></pre>
+<hr/>
+<h3>4. Refresh Server Components After Mutation</h3>
+<p>
+After updating data, we can refresh the route to get fresh Server Component data.
+</p>
+<div class="code-title">Client Component</div>
+<pre><code class="language-tsx">'use client';
+import { useRouter } from 'next/navigation';
+import { updateCart } from './actions';
+export default function AddToCartButton({ productId }: { productId: string }) {
+  const router = useRouter();
+  async function handleClick() {
+    await updateCart(productId);
+    router.refresh();
+  }
+  return &lt;button onClick={handleClick}&gt;Add To Cart&lt;/button&gt;;
+}</code></pre>
+<p>
+<code>router.refresh()</code> asks Next.js to re-fetch Server Components for the current route.
+</p>
+<div class="code-title">Flow</div>
+<pre><code class="language-text">Server Action Updates DB
+        ↓
+router.refresh()
+        ↓
+Server Component Re-renders
+        ↓
+Fresh Data Sent To Client</code></pre>
+<hr/>
+<h3>5. Use URL Search Params For Shareable State</h3>
+<p>
+For filters, sorting, pagination, and tabs that should be shareable, use URL search params.
+</p>
+<div class="code-title">Client Component</div>
+<pre><code class="language-tsx">'use client';
+import { useRouter, useSearchParams } from 'next/navigation';
+export default function ProductFilter() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  function changeCategory(category: string) {
+    router.push(`/products?category=${category}`);
+  }
+  return &lt;button onClick={() =&gt; changeCategory('mobile')}&gt;Mobiles&lt;/button&gt;;
+}</code></pre>
+<div class="code-title">Server Component</div>
+<pre><code class="language-tsx">export default async function ProductsPage({ searchParams }: { searchParams: Promise&lt;{ category?: string }&gt; }) {
+  const { category } = await searchParams;
+  const products = await getProducts(category);
+  return &lt;ProductList products={products} /&gt;;
+}</code></pre>
+<div class="feature">
+<strong>Use URL State For:</strong><br/>
+Filters, sorting, pagination, search query, selected category, and shareable tabs.
+</div>
+<hr/>
+<h3>6. Use Context Only Inside Client Components</h3>
+<p>
+React Context with state works only in Client Components.
+</p>
+<div class="code-title">ThemeProvider.tsx</div>
+<pre><code class="language-tsx">'use client';
+import { createContext, useContext, useState } from 'react';
+const ThemeContext = createContext(null);
+export function ThemeProvider({ children }: { children: React.ReactNode }) {
+  const [theme, setTheme] = useState('dark');
+  return &lt;ThemeContext.Provider value={{ theme, setTheme }}&gt;{children}&lt;/ThemeContext.Provider&gt;;
+}
+export function useTheme() {
+  return useContext(ThemeContext);
+}</code></pre>
+<p>
+Server Components can be rendered inside a Client Provider as children, but they cannot read client context directly.
+</p>
+<hr/>
+<h3>What We Cannot Do</h3>
+<div class="warning">
+<strong>Important:</strong><br/>
+We cannot directly share live <code>useState()</code> between Server Components and Client Components.
+</div>
+<div class="code-title">Wrong Idea</div>
+<pre><code class="language-text">Server Component useState
+        ↓
+Client Component useState
+        ↓
+Shared live state</code></pre>
+<p>
+This does not work because Server Components run on the server, while Client Components run in the browser.
+</p>
+<hr/>
+<h3>Best Patterns</h3>
+<table>
+<tr>
+<th>Need</th>
+<th>Best Pattern</th>
+</tr>
+<tr>
+<td>Initial data from database</td>
+<td>Server Component fetches and passes props</td>
+</tr>
+<tr>
+<td>Button click / modal / tabs</td>
+<td>Client Component useState</td>
+</tr>
+<tr>
+<td>Update database</td>
+<td>Server Action</td>
+</tr>
+<tr>
+<td>Refresh server data after update</td>
+<td>router.refresh() or revalidatePath()</td>
+</tr>
+<tr>
+<td>Share filter/search state</td>
+<td>URL search params</td>
+</tr>
+<tr>
+<td>Global browser state</td>
+<td>Client Context / Zustand / Redux</td>
+</tr>
+</table>
+<hr/>
+<h3>Easy Memory Trick</h3>
+<div class="code-title">Remember</div>
+<pre><code class="language-text">Server Component
+      ↓
+Fetch data
+      ↓
+Pass props
+Client Component
+      ↓
+useState
+      ↓
+Interaction
+Server Action
+      ↓
+Update database
+router.refresh()
+      ↓
+Get fresh server data</code></pre>
+<div class="feature">
+<strong>One-Line Definition:</strong><br/>
+We share state between Server and Client Components by passing server data as props to Client Components, managing interactive state on the client, and syncing changes back to the server using Server Actions, URL params, or route refreshes.
+</div>
+<h2 class="section-title" id="07-12"><span class="secnum">07-12</span>Why can't you use React Context directly in a Server Component?</h2>
+<p>
+React Context is designed for React trees running in the browser. Server Components run on the server, do not maintain interactive state, and cannot consume Client Context values directly.
+</p>
+<div class="feature">
+<strong>Simple Meaning:</strong><br/>
+Server Components render once on the server and disappear. React Context depends on a live React tree, so it only works in Client Components.
+</div>
+<hr/>
+<h3>How React Context Normally Works</h3>
+<p>
+In a traditional React application, Context shares state between components running in the browser.
+</p>
+<div class="code-title">Client Side Flow</div>
+<pre><code class="language-text">ThemeProvider
+       ↓
+ThemeContext
+       ↓
+Component A
+Component B
+Component C</code></pre>
+<p>
+All components exist inside the browser React tree and can access the same Context value.
+</p>
+<hr/>
+<h3>Why It Fails In Server Components</h3>
+<p>
+Server Components run on the server and generate HTML/RSC payloads.
+</p>
+<div class="code-title">Server Component Flow</div>
+<pre><code class="language-text">Request Arrives
+       ↓
+Server Component Runs
+       ↓
+HTML/RSC Generated
+       ↓
+Response Sent
+       ↓
+Server Component Ends</code></pre>
+<p>
+There is no persistent React state living on the server between renders.
+</p>
+<div class="warning">
+<strong>Important:</strong><br/>
+React Context relies on a live React state tree. Server Components do not have a live browser state tree.
+</div>
+<hr/>
+<h3>Example That Does Not Work</h3>
+<div class="code-title">ThemeProvider.tsx</div>
+<pre><code class="language-tsx">'use client';
+import { createContext } from 'react';
+export const ThemeContext = createContext('dark');</code></pre>
+<div class="code-title">Server Component</div>
+<pre><code class="language-tsx">import { useContext } from 'react';
+import { ThemeContext } from './ThemeProvider';
+export default function Page() {
+  const theme = useContext(ThemeContext);
+  return &lt;div&gt;{theme}&lt;/div&gt;;
+}</code></pre>
+<div class="code-title">Result</div>
+<pre><code class="language-text">❌ Error
+Server Component cannot consume
+Client Context directly</code></pre>
+<hr/>
+<h3>The Real Reason</h3>
+<table>
+<tr>
+<th>React Context Needs</th>
+<th>Server Component Has?</th>
+</tr>
+<tr>
+<td>Live React State</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td>Browser Runtime</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td>Persistent React Tree</td>
+<td>❌ No</td>
+</tr>
+<tr>
+<td>One-Time Render Output</td>
+<td>✅ Yes</td>
+</tr>
+</table>
+<hr/>
+<h3>What Can Server Components Use Instead?</h3>
+<p>
+Server Components should use:
+</p>
+<ul>
+<li>Props</li>
+<li>Database queries</li>
+<li>API requests</li>
+<li>cookies()</li>
+<li>headers()</li>
+<li>searchParams</li>
+</ul>
+<div class="code-title">Server Component Example</div>
+<pre><code class="language-tsx">import { cookies } from 'next/headers';
+export default async function Page() {
+  const cookieStore = await cookies();
+  const theme = cookieStore.get('theme')?.value;
+  return &lt;h1&gt;Theme: {theme}&lt;/h1&gt;;
+}</code></pre>
+<p>
+Instead of Context, the Server Component gets data directly from the server.
+</p>
+<hr/>
+<h3>Correct Pattern</h3>
+<p>
+Read data in the Server Component and pass it to a Client Component as props.
+</p>
+<div class="code-title">Server Component</div>
+<pre><code class="language-tsx">import ThemeSwitcher from './ThemeSwitcher';
+export default async function Page() {
+  const theme = 'dark';
+  return &lt;ThemeSwitcher initialTheme={theme} /&gt;;
+}</code></pre>
+<div class="code-title">Client Component</div>
+<pre><code class="language-tsx">'use client';
+import { useState } from 'react';
+export default function ThemeSwitcher({ initialTheme }) {
+  const [theme, setTheme] = useState(initialTheme);
+  return (
+    &lt;button onClick={() =&gt; setTheme('light')}&gt;
+      {theme}
+    &lt;/button&gt;
+  );
+}</code></pre>
+<div class="code-title">Flow</div>
+<pre><code class="language-text">Server Component
+       ↓
+Fetch Data
+       ↓
+Pass Props
+       ↓
+Client Component
+       ↓
+useState</code></pre>
+<hr/>
+<h3>Can A Server Component Be Inside A Context Provider?</h3>
+<p>
+Yes.
+</p>
+<div class="code-title">Layout</div>
+<pre><code class="language-tsx">import ThemeProvider from './ThemeProvider';
+export default function RootLayout({ children }) {
+  return (
+    &lt;html&gt;
+      &lt;body&gt;
+        &lt;ThemeProvider&gt;
+          {children}
+        &lt;/ThemeProvider&gt;
+      &lt;/body&gt;
+    &lt;/html&gt;
+  );
+}</code></pre>
+<p>
+This is valid because the Provider is a Client Component.
+</p>
+<p>
+However, the Server Component itself still cannot call:
+</p>
+<div class="code-title">Not Allowed</div>
+<pre><code class="language-tsx">const theme = useContext(ThemeContext);</code></pre>
+<hr/>
+<h3>What About Client Components?</h3>
+<p>
+Client Components can freely use Context.
+</p>
+<div class="code-title">Client Component</div>
+<pre><code class="language-tsx">'use client';
+import { useContext } from 'react';
+import { ThemeContext } from './ThemeProvider';
+export default function Navbar() {
+  const theme = useContext(ThemeContext);
+  return &lt;div&gt;Theme: {theme}&lt;/div&gt;;
+}</code></pre>
+<p>
+Because Client Components run in the browser, they participate in the live React tree.
+</p>
+<hr/>
+<h3>Common Interview Question</h3>
+<div class="code-title">Question</div>
+<pre><code class="language-text">Can a Server Component use useContext()?</code></pre>
+<div class="code-title">Answer</div>
+<pre><code class="language-text">No.
+Server Components cannot consume
+Client Context because they do not
+run inside a live browser React tree.</code></pre>
+<hr/>
+<h3>Server Components vs Client Components</h3>
+<table>
+<tr>
+<th>Feature</th>
+<th>Server Component</th>
+<th>Client Component</th>
+</tr>
+<tr>
+<td>useState()</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>useEffect()</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>useContext()</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Database Access</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>cookies()</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>Server Actions</td>
+<td>✅</td>
+<td>Can Call Them</td>
+</tr>
+</table>
+<hr/>
+<h3>Easy Memory Trick</h3>
+<div class="code-title">Remember</div>
+<pre><code class="language-text">React Context
+      ↓
+Live React Tree
+      ↓
+Client Components
+Server Components
+      ↓
+One-Time Server Render
+      ↓
+No Live Context</code></pre>
+<div class="feature">
+<strong>One-Line Definition:</strong><br/>
+Server Components cannot use React Context directly because Context depends on a live browser React state tree, while Server Components run once on the server and do not maintain client-side state.
+</div>
+<h2 class="section-title" id="07-13"><span class="secnum">07-13</span>Zustand Integration With the App Router (Per-Request Store Pattern)</h2>
+<p>
+Zustand is a small, unopinionated client-state library. Because App Router components are Server Components by default, Zustand stores can only be created and used inside Client Components — but with a twist: on the server, a shared module-level store would leak state between different users' requests, so the App Router needs a per-request store pattern instead of Zustand's usual singleton store.
+</p>
+<div class="feature">
+<strong>Simple Meaning:</strong><br>
+Instead of one global store shared by everyone, each request/user gets its own store instance, created fresh and handed down through React Context.
+</div>
+<h3>The Problem With a Global Store</h3>
+<pre><code class="language-text">Traditional SPA:  one store, one browser tab, one user
+Next.js Server:    one Node process, many concurrent users
+                    -> a module-level store would mix user A's
+                       and user B's state together
+</code></pre>
+<h3>Step 1: Define a Store Factory</h3>
+<div class="code-title">stores/counter-store.ts</div>
+<pre><code class="language-ts">import { createStore } from 'zustand/vanilla';
+export type CounterState = { count: number };
+export type CounterActions = { increment: () => void };
+export type CounterStore = CounterState & CounterActions;
+export const createCounterStore = (init: CounterState = { count: 0 }) => {
+  return createStore<CounterStore>()((set) => ({
+    ...init,
+    increment: () => set((s) => ({ count: s.count + 1 })),
+  }));
+};</code></pre>
+<h3>Step 2: Provide It Once per Request via a Client Component</h3>
+<div class="code-title">providers/counter-provider.tsx</div>
+<pre><code class="language-tsx">'use client';
+import { createContext, useRef, useContext } from 'react';
+import { useStore } from 'zustand';
+import { createCounterStore, CounterStore } from '@/stores/counter-store';
+const CounterContext = createContext<ReturnType<typeof createCounterStore> | null>(null);
+export function CounterProvider({ children }: { children: React.ReactNode }) {
+  const storeRef = useRef<ReturnType<typeof createCounterStore>>();
+  if (!storeRef.current) storeRef.current = createCounterStore();
+  return (
+    <CounterContext.Provider value={storeRef.current}>
+      {children}
+    </CounterContext.Provider>
+  );
+}
+export function useCounterStore<T>(selector: (state: CounterStore) => T): T {
+  const store = useContext(CounterContext);
+  if (!store) throw new Error('Missing CounterProvider');
+  return useStore(store, selector);
+}</code></pre>
+<h3>Step 3: Wrap the Segment in a Server Component</h3>
+<div class="code-title">app/layout.tsx</div>
+<pre><code class="language-tsx">import { CounterProvider } from '@/providers/counter-provider';
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <html lang="en">
+      <body>
+        <CounterProvider>{children}</CounterProvider>
+      </body>
+    </html>
+  );
+}</code></pre>
+<p>
+The <code>RootLayout</code> stays a Server Component; only the provider that owns the store is a Client Component. Because <code>useRef</code> creates the store during that component's first render, every request gets a brand-new store instance instead of sharing one across users.
+</p>
+<div class="warning">
+Never create the store at module scope (<code>const store = createCounterStore()</code> outside a component) in App Router code — that single instance would be reused across every request on the server, leaking state between users.
+</div><div class="chapnav"><a class="prev" href="06-styling-assets-and-optimized-components.html">06 - Styling, Assets & Optimized Components</a><a class="next" href="index.html">Guide Home</a></div></div></div><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-tsx.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+</body>
+</html>

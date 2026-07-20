@@ -1,0 +1,2824 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>P7 - Configuration, Build & Deployment | Next.js App Router Guide</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:#0f172a;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.8;display:flex;min-height:100vh}
+a{color:inherit;text-decoration:none}
+.sidebar{width:290px;flex-shrink:0;background:#0b1220;border-right:1px solid #1e293b;padding:24px 18px;position:sticky;top:0;height:100vh;overflow-y:auto}
+.brand{color:#38bdf8;font-size:18px;font-weight:800;margin-bottom:4px}
+.brand small{display:block;color:#64748b;font-weight:400;font-size:12px;margin-top:4px}
+.chapter-nav{margin-top:22px}
+.chapter-nav a{display:block;padding:8px 10px;border-radius:8px;font-size:13px;color:#94a3b8;margin-bottom:4px;border-left:3px solid transparent}
+.chapter-nav a:hover{background:#111827;color:#e2e8f0}
+.chapter-nav a.active{background:#111827;color:#38bdf8;border-left:3px solid #38bdf8;font-weight:bold}
+.chapter-nav .chnum{display:inline-block;width:22px;color:#475569;font-family:monospace}
+.toc{margin-top:22px;border-top:1px solid #1e293b;padding-top:16px}
+.toc-title{color:#fbbf24;font-size:12px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px}
+.toc a{display:block;font-size:12.5px;color:#8ea3c2;padding:5px 8px;border-radius:6px;line-height:1.4}
+.toc a:hover{background:#111827;color:#e2e8f0}
+.main{flex:1;padding:40px 48px;max-width:980px}
+.container{max-width:900px}
+h1.page-title{color:#38bdf8;margin-bottom:6px;font-size:30px}
+.page-sub{color:#64748b;margin-bottom:28px;font-size:14px}
+h2.section-title{color:#a78bfa;margin-top:52px;margin-bottom:14px;font-size:23px;border-top:1px solid #1e293b;padding-top:38px}
+h2.section-title .secnum{color:#475569;font-family:monospace;margin-right:10px;font-size:16px}
+h3{color:#fbbf24;margin-top:25px;margin-bottom:10px;font-size:17px}
+h4{color:#38bdf8;margin-top:18px;margin-bottom:8px;font-size:15px}
+h5{color:#93c5fd;margin-top:14px;margin-bottom:6px;font-size:14px}
+p{margin-bottom:15px}
+ul,ol{margin-left:20px;margin-bottom:15px}
+li{margin-bottom:8px}
+strong{color:#f1f5f9}
+code{color:#93c5fd;font-family:'JetBrains Mono',monospace;font-size:.92em}
+.feature{background:#1e293b;border-left:5px solid #38bdf8;padding:15px;border-radius:8px;margin:20px 0}
+.warning{background:#2a1a1a;border-left:5px solid #f87171;padding:15px;border-radius:8px;margin:20px 0}
+.summary{background:#1a2a1e;border-left:5px solid #34d399;padding:15px;border-radius:8px;margin:20px 0}
+.note{background:#1e293b;border-left:5px solid #a78bfa;padding:15px;border-radius:8px;margin:20px 0}
+.code-title{background:#1e293b;color:#93c5fd;padding:10px;font-weight:bold;border-radius:6px 6px 0 0;font-size:13px;font-family:monospace}
+pre[class*="language-"]{margin:0 0 20px 0!important;border-radius:0 0 6px 6px}
+pre code{white-space:pre}
+table{width:100%;border-collapse:collapse;margin:20px 0}
+th{background:#1e293b;color:#38bdf8;text-align:left;padding:12px}
+td{padding:12px;border-top:1px solid #334155}
+hr{border:none;border-top:1px solid #1e293b;margin:30px 0}
+.chapnav{display:flex;justify-content:space-between;margin-top:60px;padding-top:24px;border-top:1px solid #1e293b}
+.chapnav a{background:#111827;padding:12px 18px;border-radius:10px;border:1px solid #1e293b;font-size:14px;color:#94a3b8}
+.chapnav a:hover{color:#38bdf8;border-color:#38bdf8}
+.chapnav .prev::before{content:"<- "}
+.chapnav .next::after{content:" ->"}
+@media(max-width:900px){body{flex-direction:column}.sidebar{position:relative;height:auto;width:100%}}
+</style>
+</head>
+<body>
+<div class="sidebar">
+<div class="brand">Next.js Pages Router<small>Complete Step-by-Step Guide</small></div>
+<div class="chapter-nav"><a class="" href="pages-P1-introduction-to-next.js-and-the-pages-router.html"><span class="chnum">P1</span>Introduction to Next.js & the Pages Router</a><a class="" href="pages-P2-file-based-routing-and-navigation.html"><span class="chnum">P2</span>File-Based Routing & Navigation</a><a class="" href="pages-P3-rendering-and-data-fetching.html"><span class="chnum">P3</span>Rendering & Data Fetching</a><a class="" href="pages-P4-api-routes-backend-in-next.js.html"><span class="chnum">P4</span>API Routes (Backend in Next.js)</a><a class="" href="pages-P5-styling-and-assets.html"><span class="chnum">P5</span>Styling & Assets</a><a class="" href="pages-P6-seo-and-metadata-pages-router.html"><span class="chnum">P6</span>SEO & Metadata (Pages Router)</a><a class="active" href="pages-P7-configuration-build-and-deployment.html"><span class="chnum">P7</span>Configuration, Build & Deployment</a></div>
+<div class="toc"><div class="toc-title">On this page</div><a href="#P7-01">What is next.config.js / next.config.ts and what can you configure in it?</a><a href="#P7-02">How do you set environment variables in Next.js?</a><a href="#P7-03">What Is the Difference Between NEXT_PUBLIC_ and Non-Prefixed Env Variables?</a><a href="#P7-04">What is Turbopack and Why is it the Default Dev Bundler in Next.js 15?</a><a href="#P7-05">What is Fast Refresh and how does it improve DX?</a><a href="#P7-06">What TypeScript Support Does Next.js Have Out of the Box?</a><a href="#P7-07">What is Automatic Code Splitting in Next.js?</a><a href="#P7-08">How do you add and configure ESLint in a Next.js project?</a><a href="#P7-09">How do you build and start a Next.js app for production?</a><a href="#P7-10">What is the Difference Between the dev, build, and start Scripts in Next.js 15?</a><a href="#P7-11">What does next build output and how do you read the route table it prints?</a><a href="#P7-12">What is the .next Folder and What Does It Contain?</a><a href="#P7-13">What is next export and when was it removed?</a><a href="#P7-14">What is Vercel and how does it relate to Next.js?</a></div>
+</div><div class="main"><div class="container"><h1 class="page-title">P7 - Configuration, Build & Deployment</h1><div class="page-sub">Part P7 of 7 &middot; 14 topics &middot; Next.js Pages Router Guide</div><h2 class="section-title" id="P7-01"><span class="secnum">P7-01</span>What is next.config.js / next.config.ts and what can you configure in it?</h2>
+<p>
+<code>next.config.js</code> or <code>next.config.ts</code> is the main configuration file for a Next.js application.
+</p>
+<div class="feature">
+It allows us to customize how Next.js builds, serves, optimizes, and runs our application.
+</div>
+<h3>Why Do We Need next.config?</h3>
+<p>
+By default, Next.js works with sensible defaults.
+</p>
+<p>
+However, sometimes we need to customize behavior such as:
+</p>
+<ul>
+<li>Remote image domains</li>
+<li>Redirects</li>
+<li>Rewrites</li>
+<li>Environment variables</li>
+<li>Webpack configuration</li>
+<li>Headers</li>
+<li>Build settings</li>
+<li>Output configuration</li>
+</ul>
+<p>
+These settings are configured in <code>next.config.js</code> or <code>next.config.ts</code>.
+</p>
+<h3>Project Structure</h3>
+<div class="code-title">Example</div>
+<pre><code class="language-text">my-app/
+├── app/
+├── public/
+├── package.json
+├── next.config.js
+└── tsconfig.json</code></pre>
+<h3>Basic Example</h3>
+<div class="code-title">next.config.js</div>
+<pre><code class="language-js">/** @type {import('next').NextConfig} */
+const nextConfig = {};
+module.exports = nextConfig;</code></pre>
+<h3>TypeScript Version</h3>
+<div class="code-title">next.config.ts</div>
+<pre><code class="language-ts">import type {
+  NextConfig
+} from 'next';
+const nextConfig: NextConfig = {};
+export default nextConfig;</code></pre>
+<p>
+Both files serve the same purpose.
+</p>
+<p>
+The TypeScript version provides type safety and IntelliSense.
+</p>
+<h3>Configure Remote Image Domains</h3>
+<div class="code-title">Example</div>
+<pre><code class="language-js">const nextConfig = {
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'images.example.com'
+      }
+    ]
+  }
+};
+module.exports = nextConfig;</code></pre>
+<p>
+This allows <code>next/image</code> to optimize images from external domains.
+</p>
+<h3>Configure Redirects</h3>
+<div class="code-title">Example</div>
+<pre><code class="language-js">const nextConfig = {
+  async redirects() {
+    return [
+      {
+        source: '/old-page',
+        destination: '/new-page',
+        permanent: true
+      }
+    ];
+  }
+};
+module.exports = nextConfig;</code></pre>
+<p>
+Visitors to <code>/old-page</code> are redirected to <code>/new-page</code>.
+</p>
+<h3>Configure Rewrites</h3>
+<div class="code-title">Example</div>
+<pre><code class="language-js">const nextConfig = {
+  async rewrites() {
+    return [
+      {
+        source: '/api/users',
+        destination: 'https://api.example.com/users'
+      }
+    ];
+  }
+};
+module.exports = nextConfig;</code></pre>
+<p>
+The browser sees:
+</p>
+<pre><code class="language-text">/api/users</code></pre>
+<p>
+But the request actually goes to:
+</p>
+<pre><code class="language-text">https://api.example.com/users</code></pre>
+<h3>Configure HTTP Headers</h3>
+<div class="code-title">Example</div>
+<pre><code class="language-js">const nextConfig = {
+  async headers() {
+    return [
+      {
+        source: '/(.*)',
+        headers: [
+          {
+            key: 'X-App',
+            value: 'NextJS'
+          }
+        ]
+      }
+    ];
+  }
+};
+module.exports = nextConfig;</code></pre>
+<h3>Environment Variables</h3>
+<div class="code-title">Example</div>
+<pre><code class="language-js">const nextConfig = {
+  env: {
+    API_URL: 'https://api.example.com'
+  }
+};
+module.exports = nextConfig;</code></pre>
+<p>
+Usage:
+</p>
+<div class="code-title">Component</div>
+<pre><code class="language-jsx">console.log(
+  process.env.API_URL
+);</code></pre>
+<h3>Custom Webpack Configuration</h3>
+<div class="code-title">Example</div>
+<pre><code class="language-js">const nextConfig = {
+  webpack(config) {
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      '@': __dirname
+    };
+    return config;
+  }
+};
+module.exports = nextConfig;</code></pre>
+<p>
+This allows:
+</p>
+<pre><code class="language-jsx">import Header from '@/components/Header';</code></pre>
+<h3>Standalone Deployment Output</h3>
+<div class="code-title">Example</div>
+<pre><code class="language-js">const nextConfig = {
+  output: 'standalone'
+};
+module.exports = nextConfig;</code></pre>
+<p>
+Useful for Docker deployments because Next.js generates a minimal production build.
+</p>
+<h3>Enable React Strict Mode</h3>
+<div class="code-title">Example</div>
+<pre><code class="language-js">const nextConfig = {
+  reactStrictMode: true
+};
+module.exports = nextConfig;</code></pre>
+<p>
+Helps detect potential React issues during development.
+</p>
+<h3>What Happens Internally?</h3>
+<div class="code-title">Flow</div>
+<pre><code class="language-text">npm run dev
+      │
+      ▼
+Read next.config.js
+      │
+      ▼
+Apply Configuration
+      │
+      ▼
+Start Next.js Server</code></pre>
+<p>
+Next.js reads the configuration during startup.
+</p>
+<h3>Important Note</h3>
+<div class="feature">
+Whenever we change next.config.js or next.config.ts, we must restart the development server because configuration files are loaded only during startup.
+</div>
+<h3>Common Configuration Options</h3>
+<table>
+<tr>
+<th>Option</th>
+<th>Purpose</th>
+</tr>
+<tr>
+<td>images</td>
+<td>Configure image optimization</td>
+</tr>
+<tr>
+<td>redirects()</td>
+<td>Create redirects</td>
+</tr>
+<tr>
+<td>rewrites()</td>
+<td>Rewrite routes</td>
+</tr>
+<tr>
+<td>headers()</td>
+<td>Add HTTP headers</td>
+</tr>
+<tr>
+<td>env</td>
+<td>Define environment variables</td>
+</tr>
+<tr>
+<td>webpack()</td>
+<td>Customize Webpack</td>
+</tr>
+<tr>
+<td>output</td>
+<td>Configure build output</td>
+</tr>
+<tr>
+<td>reactStrictMode</td>
+<td>Enable React Strict Mode</td>
+</tr>
+</table>
+<h3>Real-World Example</h3>
+<div class="code-title">next.config.js</div>
+<pre><code class="language-js">const nextConfig = {
+  reactStrictMode: true,
+  output: 'standalone',
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'cdn.example.com'
+      }
+    ]
+  }
+};
+module.exports = nextConfig;</code></pre>
+<p>
+This configuration:
+</p>
+<ul>
+<li>Enables React Strict Mode.</li>
+<li>Allows external image optimization.</li>
+<li>Creates a standalone production build.</li>
+</ul>
+<h3>next.config.js vs next.config.ts</h3>
+<table>
+<tr>
+<th>Feature</th>
+<th>next.config.js</th>
+<th>next.config.ts</th>
+</tr>
+<tr>
+<td>JavaScript</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>Type Safety</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>IntelliSense</td>
+<td>Limited</td>
+<td>Better</td>
+</tr>
+<tr>
+<td>Functionality</td>
+<td>Same</td>
+<td>Same</td>
+</tr>
+</table>
+<h3>Interview Tip</h3>
+<div class="feature">
+A common misconception is that next.config.js runs in the browser. In reality, it runs only during the build and server startup process and is never sent to the client.
+</div>
+<div class="feature">
+<strong>One-Line Definition:</strong><br/>
+<code>next.config.js</code> or <code>next.config.ts</code> is the central Next.js configuration file that allows us to customize features such as images, redirects, rewrites, headers, environment variables, build output, and Webpack behavior.
+</div>
+<h2 class="section-title" id="P7-02"><span class="secnum">P7-02</span>How do you set environment variables in Next.js?</h2>
+<p>
+Environment variables allow us to store configuration values outside of our code.
+</p>
+<div class="feature">
+They are commonly used for API URLs, database connections, secret keys, analytics IDs, and other environment-specific settings.
+</div>
+<h3>Why Use Environment Variables?</h3>
+<ul>
+<li>Keep sensitive values out of source code.</li>
+<li>Use different values for development and production.</li>
+<li>Avoid hardcoding configuration.</li>
+<li>Improve security and maintainability.</li>
+</ul>
+<h3>Environment Files</h3>
+<p>
+Next.js automatically loads environment variables from special files.
+</p>
+<div class="code-title">Project Structure</div>
+<pre><code class="language-text">my-app/
+├── .env
+├── .env.local
+├── .env.development
+├── .env.production
+├── app/
+└── package.json</code></pre>
+<h3>Basic Example</h3>
+<div class="code-title">.env.local</div>
+<pre><code class="language-text">API_URL=https://api.example.com
+DB_PASSWORD=my-secret-password</code></pre>
+<h3>Using Environment Variables on the Server</h3>
+<div class="code-title">Server Component</div>
+<pre><code class="language-jsx">export default function Page() {
+  console.log(
+    process.env.API_URL
+  );
+  return &lt;h1&gt;Home&lt;/h1&gt;;
+}</code></pre>
+<p>
+Server Components can access all environment variables.
+</p>
+<h3>Client Components</h3>
+<p>
+Client Components cannot access private environment variables.
+</p>
+<p>
+To expose a variable to the browser, it must start with:
+</p>
+<pre><code class="language-text">NEXT_PUBLIC_</code></pre>
+<div class="code-title">.env.local</div>
+<pre><code class="language-text">NEXT_PUBLIC_API_URL=https://api.example.com</code></pre>
+<div class="code-title">Client Component</div>
+<pre><code class="language-jsx">'use client';
+export default function Home() {
+  console.log(
+    process.env.NEXT_PUBLIC_API_URL
+  );
+  return &lt;h1&gt;Home&lt;/h1&gt;;
+}</code></pre>
+<h3>What Happens If NEXT_PUBLIC_ Is Missing?</h3>
+<div class="code-title">.env.local</div>
+<pre><code class="language-text">API_URL=https://api.example.com</code></pre>
+<div class="code-title">Client Component</div>
+<pre><code class="language-jsx">'use client';
+console.log(
+  process.env.API_URL
+);</code></pre>
+<p>
+Output:
+</p>
+<pre><code class="language-text">undefined</code></pre>
+<p>
+Private variables are not exposed to the browser.
+</p>
+<h3>Using Environment Variables in Route Handlers</h3>
+<div class="code-title">app/api/users/route.js</div>
+<pre><code class="language-js">export async function GET() {
+  const apiUrl =
+    process.env.API_URL;
+  return Response.json({
+    apiUrl
+  });
+}</code></pre>
+<h3>Using Environment Variables in Server Actions</h3>
+<div class="code-title">Example</div>
+<pre><code class="language-js">"use server";
+export async function saveUser() {
+  const secret =
+    process.env.DB_PASSWORD;
+}</code></pre>
+<h3>Environment-Specific Files</h3>
+<table>
+<tr>
+<th>File</th>
+<th>Purpose</th>
+</tr>
+<tr>
+<td>.env</td>
+<td>Default variables</td>
+</tr>
+<tr>
+<td>.env.local</td>
+<td>Local overrides</td>
+</tr>
+<tr>
+<td>.env.development</td>
+<td>Development only</td>
+</tr>
+<tr>
+<td>.env.production</td>
+<td>Production only</td>
+</tr>
+</table>
+<h3>Loading Order</h3>
+<div class="code-title">Priority</div>
+<pre><code class="language-text">.env.local
+      │
+      ▼
+.env.development
+or
+.env.production
+      │
+      ▼
+.env</code></pre>
+<p>
+Files higher in the list override files below them.
+</p>
+<h3>What Happens Internally?</h3>
+<div class="code-title">Flow</div>
+<pre><code class="language-text">npm run dev
+      │
+      ▼
+Read .env Files
+      │
+      ▼
+Load Variables
+      │
+      ▼
+Populate process.env
+      │
+      ▼
+Application Uses Variables</code></pre>
+<h3>Important Notes</h3>
+<div class="feature">
+Variables without the NEXT_PUBLIC_ prefix are available only on the server.
+</div>
+<div class="feature">
+Variables with the NEXT_PUBLIC_ prefix are included in the browser bundle and can be viewed by users.
+</div>
+<div class="feature">
+Whenever we change .env files, we must restart the development server because environment variables are loaded only during startup.
+</div>
+<h3>Server vs Client Access</h3>
+<table>
+<tr>
+<th>Variable</th>
+<th>Server</th>
+<th>Client</th>
+</tr>
+<tr>
+<td>API_URL</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>NEXT_PUBLIC_API_URL</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+</table>
+<h3>Real-World Example</h3>
+<div class="code-title">.env.local</div>
+<pre><code class="language-text">DATABASE_URL=mongodb://localhost:27017/mydb
+NEXT_PUBLIC_API_URL=https://api.example.com
+NEXT_PUBLIC_APP_NAME=My App</code></pre>
+<div class="code-title">Usage</div>
+<pre><code class="language-jsx">const appName =
+  process.env.NEXT_PUBLIC_APP_NAME;
+const apiUrl =
+  process.env.NEXT_PUBLIC_API_URL;</code></pre>
+<h3>Interview Tip</h3>
+<div class="feature">
+A common mistake is storing secrets in variables that begin with NEXT_PUBLIC_. Any variable with this prefix becomes part of the client-side JavaScript bundle and is visible to users.
+</div>
+<div class="feature">
+<strong>One-Line Definition:</strong><br/>
+Environment variables in Next.js are configuration values loaded from .env files and accessed through <code>process.env</code>, with only <code>NEXT_PUBLIC_</code> variables exposed to the browser.
+</div>
+<h2 class="section-title" id="P7-03"><span class="secnum">P7-03</span>What Is the Difference Between NEXT_PUBLIC_ and Non-Prefixed Env Variables?</h2>
+<p>
+Next.js exposes two kinds of environment variables: variables prefixed with <code>NEXT_PUBLIC_</code>, which are inlined into the browser JavaScript bundle at build time, and non-prefixed variables, which stay server-only and are never sent to the browser.
+</p>
+<div class="feature">
+<strong>Simple Meaning:</strong><br>
+Add <code>NEXT_PUBLIC_</code> only when a value is safe to be public, like an analytics ID; leave the prefix off for anything secret, like a database password or API key.
+</div>
+<h3>Example .env.local</h3>
+<div class="code-title">.env.local</div>
+<pre><code class="language-bash">DATABASE_URL=postgres://user:pass@host/db
+NEXT_PUBLIC_API_URL=https://api.example.com
+NEXT_PUBLIC_GA_ID=G-XXXXXXX</code></pre>
+<h3>Where Each One Can Be Used</h3>
+<table>
+<tr><th>Variable</th><th>Server code (getServerSideProps, API routes)</th><th>Browser code (components)</th></tr>
+<tr><td><code>DATABASE_URL</code></td><td>✅ Available</td><td>❌ Undefined</td></tr>
+<tr><td><code>NEXT_PUBLIC_API_URL</code></td><td>✅ Available</td><td>✅ Available</td></tr>
+</table>
+<div class="code-title">pages/index.js</div>
+<pre><code class="language-js">console.log(process.env.NEXT_PUBLIC_API_URL); // works in browser
+console.log(process.env.DATABASE_URL); // undefined in browser</code></pre>
+<div class="warning">
+Never put secrets like API keys, tokens, or database credentials behind <code>NEXT_PUBLIC_</code> — anything with that prefix is bundled into client-side JavaScript and visible to anyone who views the page source.
+</div>
+<h2 class="section-title" id="P7-04"><span class="secnum">P7-04</span>What is Turbopack and Why is it the Default Dev Bundler in Next.js 15?</h2>
+<p>
+<strong>Turbopack</strong> is a modern JavaScript bundler created by the team behind Next.js. It is written in <strong>Rust</strong> and is designed to provide significantly faster development performance than Webpack.
+</p>
+<div class="feature">
+Turbopack is the default development bundler in Next.js 15 because it provides faster startup times, faster rebuilds, better caching, and a smoother developer experience.
+</div>
+<h3>What is a Bundler?</h3>
+<p>
+A bundler analyzes our application's files and dependencies, then combines everything into optimized bundles that can be loaded by the browser.
+</p>
+<div class="code-block">
+<div class="code-title">Bundler Process</div>
+<pre><code class="language-text">React Components
+       │
+CSS Files
+       │
+Images
+       │
+Libraries
+       │
+       ▼
+    Bundler
+       │
+       ▼
+ Optimized Bundles
+       │
+       ▼
+    Browser</code></pre>
+</div>
+<h3>Why Was Turbopack Created?</h3>
+<p>
+As applications grow larger, Webpack can become slower during development.
+</p>
+<p>
+The Next.js team created Turbopack to solve problems such as:
+</p>
+<ul>
+<li>Slow startup times</li>
+<li>Slow rebuild times</li>
+<li>Large project compilation delays</li>
+<li>Memory consumption issues</li>
+<li>Developer productivity bottlenecks</li>
+</ul>
+<h3>Webpack vs Turbopack</h3>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>Webpack</th>
+<th>Turbopack</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Language</td>
+<td>JavaScript</td>
+<td>Rust</td>
+</tr>
+<tr>
+<td>Development Speed</td>
+<td>Good</td>
+<td>Much Faster</td>
+</tr>
+<tr>
+<td>Incremental Builds</td>
+<td>Supported</td>
+<td>Highly Optimized</td>
+</tr>
+<tr>
+<td>Caching</td>
+<td>Good</td>
+<td>Advanced</td>
+</tr>
+<tr>
+<td>Large Projects</td>
+<td>Can Become Slower</td>
+<td>Optimized for Large Projects</td>
+</tr>
+<tr>
+<td>Default in Next.js 15</td>
+<td>No</td>
+<td>Yes</td>
+</tr>
+</tbody>
+</table>
+<h3>How Development Worked with Webpack</h3>
+<div class="code-block">
+<div class="code-title">Development Flow</div>
+<pre><code class="language-text">Code Change
+     │
+     ▼
+Webpack Rebuild
+     │
+     ▼
+Refresh Browser</code></pre>
+</div>
+<p>
+For large applications, rebuilding could become noticeable.
+</p>
+<h3>How Development Works with Turbopack</h3>
+<div class="code-block">
+<div class="code-title">Development Flow</div>
+<pre><code class="language-text">Code Change
+     │
+     ▼
+Rebuild Only What Changed
+     │
+     ▼
+Instant Update</code></pre>
+</div>
+<p>
+Turbopack updates only the affected modules instead of rebuilding everything.
+</p>
+<h3>Incremental Compilation</h3>
+<p>
+One of Turbopack's biggest advantages is incremental compilation.
+</p>
+<p>
+Suppose our project contains:
+</p>
+<div class="code-block">
+<div class="code-title">Project Structure</div>
+<pre><code class="language-text">app/
+├── page.js
+├── dashboard/
+│   ├── page.js
+│   └── analytics.js
+├── users/
+│   └── page.js
+└── settings/
+    └── page.js</code></pre>
+</div>
+<p>
+If we modify only:
+</p>
+<div class="code-block">
+<div class="code-title">Modified File</div>
+<pre><code class="language-text">dashboard/analytics.js</code></pre>
+</div>
+<p>
+Turbopack rebuilds only the affected dependency graph instead of reprocessing the entire application.
+</p>
+<h3>Why Rust?</h3>
+<p>
+Turbopack is written in Rust because Rust offers:
+</p>
+<ul>
+<li>High performance</li>
+<li>Memory safety</li>
+<li>Low memory usage</li>
+<li>Excellent concurrency support</li>
+</ul>
+<p>
+This allows Turbopack to perform many tasks faster than JavaScript-based tooling.
+</p>
+<h3>Running Next.js with Turbopack</h3>
+<p>
+In modern Next.js versions, Turbopack is used automatically during development.
+</p>
+<div class="code-block">
+<div class="code-title">Start Development Server</div>
+<pre><code class="language-bash">npm run dev</code></pre>
+</div>
+<p>
+Internally, Next.js uses Turbopack by default in development mode.
+</p>
+<h3>Explicit Turbopack Command</h3>
+<div class="code-block">
+<div class="code-title">Using Turbopack Explicitly</div>
+<pre><code class="language-bash">next dev --turbopack</code></pre>
+</div>
+<h3>Why is Turbopack the Default Dev Bundler in Next.js 15?</h3>
+<p>
+The Next.js team made Turbopack the default development bundler because it improves developer productivity.
+</p>
+<ul>
+<li>Faster startup times</li>
+<li>Faster hot reloading</li>
+<li>Faster rebuilds</li>
+<li>Better scaling for large projects</li>
+<li>Efficient caching</li>
+<li>Lower waiting time during development</li>
+</ul>
+<h3>Important Note</h3>
+<div class="feature">
+Turbopack is primarily focused on improving the development experience. It does not automatically reduce our production bundle size. Its main goal is to make development faster.
+</div>
+<h3>Real-World Example</h3>
+<p>
+Imagine our application contains 5,000+ files.
+</p>
+<ul>
+<li>Webpack may need more work when files change.</li>
+<li>Turbopack updates only the necessary parts.</li>
+<li>This results in a much faster feedback loop during development.</li>
+</ul>
+<h3>Summary Table</h3>
+<table>
+<thead>
+<tr>
+<th>Question</th>
+<th>Answer</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>What is Turbopack?</td>
+<td>A Rust-based bundler created by the Next.js team.</td>
+</tr>
+<tr>
+<td>Why was it created?</td>
+<td>To improve development speed.</td>
+</tr>
+<tr>
+<td>What does it improve?</td>
+<td>Startup time, rebuilds, caching, and HMR.</td>
+</tr>
+<tr>
+<td>Does it replace Webpack?</td>
+<td>For development in Next.js 15, yes.</td>
+</tr>
+<tr>
+<td>Does it reduce production bundle size?</td>
+<td>Not necessarily.</td>
+</tr>
+</tbody>
+</table>
+<div class="summary">
+<strong>One-Line Definition:</strong><br/>
+Turbopack is a Rust-based bundler created by the Next.js team that became the default development bundler in Next.js 15 because it provides much faster startup times, rebuilds, caching, and hot reloading compared to Webpack.
+</div>
+<h2 class="section-title" id="P7-05"><span class="secnum">P7-05</span>What is Fast Refresh and how does it improve DX?</h2>
+<p>
+Fast Refresh is a Next.js and React development feature that instantly updates the browser when code changes without performing a full page reload.
+</p>
+<div class="feature">
+Fast Refresh improves Developer Experience (DX) by allowing us to see code changes immediately while preserving component state whenever possible.
+</div>
+<h3>What is DX?</h3>
+<p>
+DX stands for <strong>Developer Experience</strong>.
+</p>
+<p>
+It refers to how easy, fast, and enjoyable it is for developers to build and maintain applications.
+</p>
+<h3>Before Fast Refresh</h3>
+<p>
+In traditional web development, every code change required a full browser refresh.
+</p>
+<div class="code-title">Old Workflow</div>
+<pre><code class="language-text">Change Code
+     │
+     ▼
+Rebuild
+     │
+     ▼
+Reload Entire Page
+     │
+     ▼
+Lose Current State
+     │
+     ▼
+Test Again</code></pre>
+<h3>With Fast Refresh</h3>
+<div class="code-title">Modern Workflow</div>
+<pre><code class="language-text">Change Code
+     │
+     ▼
+Save File
+     │
+     ▼
+Update Browser Instantly
+     │
+     ▼
+Keep Current State
+     │
+     ▼
+Continue Working</code></pre>
+<h3>Example</h3>
+<div class="code-title">Counter Component</div>
+<pre><code class="language-js">import { useState } from 'react';
+export default function Counter() {
+  const [count, setCount] = useState(5);
+  return (
+    &lt;button onClick={() =&gt; setCount(count + 1)&gt;
+      {count}
+    &lt;/button&gt;
+  );
+}</code></pre>
+<p>
+Suppose the button currently shows:
+</p>
+<div class="code-title">Current State</div>
+<pre><code class="language-text">Count = 5</code></pre>
+<p>
+Now we modify the component:
+</p>
+<div class="code-title">Updated Component</div>
+<pre><code class="language-js">import { useState } from 'react';
+export default function Counter() {
+  const [count, setCount] = useState(5);
+  return (
+    &lt;button onClick={() =&gt; setCount(count + 1)&gt;
+      Counter: {count}
+    &lt;/button&gt;
+  );
+}</code></pre>
+<p>
+Fast Refresh updates the UI immediately:
+</p>
+<div class="code-title">Result</div>
+<pre><code class="language-text">Counter: 5</code></pre>
+<p>
+Notice that the count state remains <strong>5</strong>.
+</p>
+<h3>Without Fast Refresh</h3>
+<div class="code-title">Full Reload</div>
+<pre><code class="language-text">Count = 5
+     │
+     ▼
+Save File
+     │
+     ▼
+Reload Page
+     │
+     ▼
+Count = 0</code></pre>
+<p>
+The component state would be lost.
+</p>
+<h3>What Changes Can Fast Refresh Handle?</h3>
+<table>
+<tr>
+<th>Change</th>
+<th>Fast Refresh</th>
+</tr>
+<tr>
+<td>Component JSX</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Styles</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Hooks Logic</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>React Components</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>State Preservation</td>
+<td>✅ (Usually)</td>
+</tr>
+</table>
+<h3>When Does Fast Refresh Trigger a Full Reload?</h3>
+<p>
+Sometimes React cannot safely preserve state.
+</p>
+<div class="code-title">Example</div>
+<pre><code class="language-js">export default function Counter() {
+  return &lt;h1&gt;Counter&lt;/h1&gt;;
+}</code></pre>
+<p>
+Changed to:
+</p>
+<pre><code class="language-js">export default function User() {
+  return &lt;h1&gt;User&lt;/h1&gt;;
+}</code></pre>
+<p>
+Since the component identity changed, React may perform a full reload.
+</p>
+<h3>Fast Refresh in Next.js</h3>
+<p>
+Fast Refresh is enabled automatically in development mode.
+</p>
+<div class="code-title">Development Server</div>
+<pre><code class="language-bash">npm run dev</code></pre>
+<p>
+No additional configuration is required.
+</p>
+<h3>How It Works Internally</h3>
+<div class="code-title">Flow</div>
+<pre><code class="language-text">Edit File
+    │
+    ▼
+Save File
+    │
+    ▼
+Webpack / Turbopack Detect Change
+    │
+    ▼
+Recompile Module
+    │
+    ▼
+Send Update To Browser
+    │
+    ▼
+Update UI Instantly</code></pre>
+<h3>Fast Refresh vs Full Reload</h3>
+<table>
+<tr>
+<th>Feature</th>
+<th>Fast Refresh</th>
+<th>Full Reload</th>
+</tr>
+<tr>
+<td>Reload Entire Page</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Preserve State</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>Faster Updates</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>Better DX</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+</table>
+<h3>Benefits of Fast Refresh</h3>
+<ul>
+<li>Instant feedback.</li>
+<li>Faster development.</li>
+<li>Preserves component state.</li>
+<li>Reduces manual testing steps.</li>
+<li>Improves productivity.</li>
+<li>Provides a better developer experience.</li>
+</ul>
+<h3>Important Note</h3>
+<div class="feature">
+Fast Refresh works only in development mode. It is not used in production builds.
+</div>
+<h3>Interview Tip</h3>
+<div class="feature">
+Fast Refresh is an enhanced version of Hot Module Replacement (HMR) that updates React components instantly while preserving state whenever possible.
+</div>
+<div class="feature">
+<strong>One-Line Definition:</strong><br/>
+Fast Refresh is a React and Next.js development feature that instantly updates the browser after code changes while preserving component state, providing a faster and better developer experience (DX).
+</div>
+<h2 class="section-title" id="P7-06"><span class="secnum">P7-06</span>What TypeScript Support Does Next.js Have Out of the Box?</h2>
+<p>
+Next.js has built-in TypeScript support. We can create TypeScript files using <code>.ts</code> and <code>.tsx</code> extensions, and Next.js automatically configures and compiles them without requiring additional setup.
+</p>
+<div class="feature">
+TypeScript support is included by default in Next.js, so we do not need custom Webpack, Babel, or TypeScript configuration to get started.
+</div>
+<h3>Automatic TypeScript Setup</h3>
+<p>
+When Next.js detects a TypeScript file, it automatically creates the required TypeScript configuration files.
+</p>
+<div class="code-title">Generated Files</div>
+<pre><code class="language-text">tsconfig.json
+next-env.d.ts</code></pre>
+<h3>How to Enable TypeScript?</h3>
+<p>
+Simply create a TypeScript file.
+</p>
+<div class="code-title">Example</div>
+<pre><code class="language-text">app/page.tsx</code></pre>
+<p>
+After creating a TypeScript file and running the development server, Next.js automatically configures TypeScript.
+</p>
+<h3>Project Structure</h3>
+<div class="code-title">Example</div>
+<pre><code class="language-text">app
+├── page.tsx
+├── layout.tsx
+├── loading.tsx
+├── error.tsx
+└── not-found.tsx
+tsconfig.json
+next-env.d.ts</code></pre>
+<h3>TypeScript Component Example</h3>
+<div class="code-title">app/page.tsx</div>
+<pre><code class="language-tsx">type UserProps = {
+  name: string;
+};
+export default function User({ name }: UserProps) {
+  return &lt;h1&gt;Hello {name}&lt;/h1&gt;;
+}</code></pre>
+<h3>Type Checking Example</h3>
+<div class="code-title">Correct Usage</div>
+<pre><code class="language-tsx">&lt;User name="Rizwan" /&gt;</code></pre>
+<div class="code-title">Type Error</div>
+<pre><code class="language-tsx">&lt;User name={123} /&gt;</code></pre>
+<p>
+TypeScript reports an error because the <code>name</code> prop must be a string.
+</p>
+<h3>TypeScript in App Router</h3>
+<p>
+All App Router files support TypeScript.
+</p>
+<div class="code-title">Supported Files</div>
+<pre><code class="language-text">page.tsx
+layout.tsx
+loading.tsx
+error.tsx
+not-found.tsx
+route.ts
+middleware.ts</code></pre>
+<h3>TypeScript with Async Server Components</h3>
+<div class="code-title">app/page.tsx</div>
+<pre><code class="language-tsx">type Product = {
+  id: number;
+  title: string;
+};
+export default async function Page() {
+  const products: Product[] =
+    await fetch('https://api.example.com/products')
+      .then(res =&gt; res.json());
+  return (
+    &lt;ul&gt;
+      {products.map(product =&gt; (
+        &lt;li key={product.id}&gt;
+          {product.title}
+        &lt;/li&gt;
+      ))}
+    &lt;/ul&gt;
+  );
+}</code></pre>
+<h3>TypeScript with Metadata API</h3>
+<div class="code-title">app/page.tsx</div>
+<pre><code class="language-tsx">import type { Metadata } from 'next';
+export const metadata: Metadata = {
+  title: 'Home',
+  description: 'Welcome to our website'
+};
+export default function Page() {
+  return &lt;h1&gt;Home Page&lt;/h1&gt;;
+}</code></pre>
+<h3>TypeScript with generateMetadata()</h3>
+<div class="code-title">app/products/[id]/page.tsx</div>
+<pre><code class="language-tsx">import type { Metadata } from 'next';
+export async function generateMetadata(): Promise&lt;Metadata&gt; {
+  return {
+    title: 'Product Page',
+    description: 'Product Details'
+  };
+}</code></pre>
+<h3>TypeScript with Route Handlers</h3>
+<div class="code-title">app/api/users/route.ts</div>
+<pre><code class="language-ts">export async function GET() {
+  return Response.json({
+    message: 'Hello World'
+  });
+}</code></pre>
+<h3>Built-In TypeScript Features</h3>
+<table>
+<tr>
+<th>Feature</th>
+<th>Supported</th>
+</tr>
+<tr>
+<td>Type Checking</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Interfaces</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Types</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Generics</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Enums</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Type Inference</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>TSX Components</td>
+<td>✅</td>
+</tr>
+</table>
+<h3>Benefits of TypeScript in Next.js</h3>
+<ul>
+<li>Catch errors during development.</li>
+<li>Better IntelliSense and auto-completion.</li>
+<li>Safer refactoring.</li>
+<li>Improved code maintainability.</li>
+<li>Better developer experience.</li>
+<li>Reduced runtime bugs.</li>
+</ul>
+<h3>Does Next.js Require TypeScript?</h3>
+<p>
+No.
+</p>
+<p>
+Next.js works perfectly with JavaScript as well.
+</p>
+<div class="code-title">JavaScript Files</div>
+<pre><code class="language-text">page.js
+layout.js
+route.js</code></pre>
+<div class="code-title">TypeScript Files</div>
+<pre><code class="language-text">page.tsx
+layout.tsx
+route.ts</code></pre>
+<h3>How TypeScript Works in Next.js</h3>
+<div class="code-title">Flow</div>
+<pre><code class="language-text">Create .ts/.tsx File
+         │
+         ▼
+Next.js Detects TypeScript
+         │
+         ▼
+Create tsconfig.json
+         │
+         ▼
+Create next-env.d.ts
+         │
+         ▼
+Compile TypeScript
+         │
+         ▼
+Generate JavaScript
+         │
+         ▼
+Run Application</code></pre>
+<h3>Important Note</h3>
+<div class="feature">
+TypeScript support is built directly into Next.js. Simply creating a <code>.ts</code> or <code>.tsx</code> file is enough to start using TypeScript.
+</div>
+<h3>Interview Tip</h3>
+<div class="feature">
+Next.js automatically configures TypeScript by generating <code>tsconfig.json</code> and <code>next-env.d.ts</code>, providing type checking and editor support without additional setup.
+</div>
+<div class="feature">
+<strong>One-Line Definition:</strong><br/>
+Next.js includes built-in TypeScript support and automatically configures, compiles, and type-checks <code>.ts</code> and <code>.tsx</code> files without requiring extra setup.
+</div>
+<h2 class="section-title" id="P7-07"><span class="secnum">P7-07</span>What is Automatic Code Splitting in Next.js?</h2>
+<p>
+Automatic Code Splitting is a Next.js optimization that automatically splits JavaScript into smaller chunks so users download only the code needed for the current page.
+</p>
+<div class="feature">
+Instead of sending the entire application bundle to the browser, Next.js sends only the JavaScript required for the requested route.
+</div>
+<h3>Why Do We Need Code Splitting?</h3>
+<p>
+Imagine an application with many pages:
+</p>
+<div class="code-title">Project Structure</div>
+<pre><code class="language-text">app
+├── page.js
+├── about
+│   └── page.js
+├── products
+│   └── page.js
+├── dashboard
+│   └── page.js
+└── settings
+    └── page.js</code></pre>
+<p>
+If all page code were bundled together, every user would download JavaScript for every page, even pages they never visit.
+</p>
+<h3>Without Code Splitting</h3>
+<div class="code-title">Single Bundle</div>
+<pre><code class="language-text">Home Code
+About Code
+Products Code
+Dashboard Code
+Settings Code
+      │
+      ▼
+One Large Bundle
+      │
+      ▼
+Download Everything</code></pre>
+<p>
+Even users visiting only the Home page must download code for all pages.
+</p>
+<h3>With Automatic Code Splitting</h3>
+<div class="code-title">Route-Based Splitting</div>
+<pre><code class="language-text">Home Route
+    │
+    ▼
+Download Home Chunk
+About Route
+    │
+    ▼
+Download About Chunk
+Products Route
+    │
+    ▼
+Download Products Chunk</code></pre>
+<p>
+Users download only the JavaScript needed for the current page.
+</p>
+<h3>Example</h3>
+<div class="code-title">app/page.js</div>
+<pre><code class="language-js">export default function Home() {
+  return &lt;h1&gt;Home Page&lt;/h1&gt;;
+}</code></pre>
+<div class="code-title">app/about/page.js</div>
+<pre><code class="language-js">export default function About() {
+  return &lt;h1&gt;About Page&lt;/h1&gt;;
+}</code></pre>
+<p>
+When a user visits:
+</p>
+<pre><code class="language-text">/</code></pre>
+<p>
+Next.js sends only the Home page JavaScript.
+</p>
+<p>
+When a user visits:
+</p>
+<pre><code class="language-text">/about</code></pre>
+<p>
+Next.js sends only the About page JavaScript.
+</p>
+<h3>Build Output Concept</h3>
+<div class="code-title">Generated Chunks</div>
+<pre><code class="language-text">.next
+└── static
+    └── chunks
+        ├── home.js
+        ├── about.js
+        ├── products.js
+        └── dashboard.js</code></pre>
+<p>
+Each route gets its own JavaScript chunk.
+</p>
+<h3>How It Works</h3>
+<div class="code-title">Flow</div>
+<pre><code class="language-text">User Visits /about
+        │
+        ▼
+Next.js Detects Route
+        │
+        ▼
+Load About Chunk
+        │
+        ▼
+Do Not Load
+Home/Dashboard Chunks
+        │
+        ▼
+Faster Page Load</code></pre>
+<h3>Automatic Route Splitting</h3>
+<p>
+No configuration is required.
+</p>
+<div class="code-title">Example</div>
+<pre><code class="language-js">app/page.js
+app/about/page.js
+app/products/page.js</code></pre>
+<p>
+Next.js automatically creates separate bundles for these routes.
+</p>
+<h3>Dynamic Imports for Additional Splitting</h3>
+<p>
+We can split large components even further using dynamic imports.
+</p>
+<div class="code-title">Example</div>
+<pre><code class="language-js">import dynamic from 'next/dynamic';
+const Chart = dynamic(() =&gt;
+  import('./Chart')
+);
+export default function Dashboard() {
+  return &lt;Chart /&gt;;
+}</code></pre>
+<p>
+The Chart component is loaded only when needed.
+</p>
+<h3>Benefits of Automatic Code Splitting</h3>
+<ul>
+<li>Smaller JavaScript bundles.</li>
+<li>Faster initial page load.</li>
+<li>Better performance.</li>
+<li>Reduced bandwidth usage.</li>
+<li>Improved user experience.</li>
+<li>No manual configuration required.</li>
+</ul>
+<h3>Automatic Code Splitting vs Traditional SPA</h3>
+<table>
+<tr>
+<th>Feature</th>
+<th>Next.js</th>
+<th>Traditional SPA</th>
+</tr>
+<tr>
+<td>Route-Based Splitting</td>
+<td>✅ Automatic</td>
+<td>⚠️ Manual Setup</td>
+</tr>
+<tr>
+<td>Smaller Initial Bundle</td>
+<td>✅</td>
+<td>❌ Often Large</td>
+</tr>
+<tr>
+<td>Performance</td>
+<td>✅ Better</td>
+<td>⚠️ Depends</td>
+</tr>
+<tr>
+<td>Configuration</td>
+<td>None</td>
+<td>Usually Required</td>
+</tr>
+</table>
+<h3>Real-World Example</h3>
+<div class="code-title">E-Commerce Website</div>
+<pre><code class="language-text">Home Page
+    │
+    ▼
+Download Home Code
+Product Page
+    │
+    ▼
+Download Product Code
+Admin Dashboard
+    │
+    ▼
+Download Dashboard Code</code></pre>
+<p>
+Customers visiting the Home page do not download Dashboard code.
+</p>
+<h3>Important Note</h3>
+<div class="feature">
+Automatic code splitting happens at the route level by default. Every page gets its own JavaScript bundle automatically.
+</div>
+<h3>Interview Tip</h3>
+<div class="feature">
+One of the biggest performance benefits of Next.js is automatic route-based code splitting, where users download only the code required for the page they visit.
+</div>
+<div class="feature">
+<strong>One-Line Definition:</strong><br/>
+Automatic code splitting is a Next.js optimization that automatically creates separate JavaScript bundles for routes so users download only the code needed for the current page.
+</div>
+<h2 class="section-title" id="P7-08"><span class="secnum">P7-08</span>How do you add and configure ESLint in a Next.js project?</h2>
+<p>
+ESLint is used in a Next.js project to find code issues, enforce coding rules, and improve code quality during development.
+</p>
+<div class="feature">
+Next.js supports ESLint out of the box, and we can configure it using an ESLint configuration file such as <code>eslint.config.mjs</code>.
+</div>
+<h3>What is ESLint?</h3>
+<p>
+ESLint is a linting tool that checks JavaScript, TypeScript, React, and Next.js code for mistakes and style issues.
+</p>
+<h3>Install ESLint Packages</h3>
+<div class="code-title">Terminal</div>
+<pre><code class="language-bash">npm install -D eslint eslint-config-next</code></pre>
+<h3>Create ESLint Config File</h3>
+<div class="code-title">eslint.config.mjs</div>
+<pre><code class="language-js">import next from 'eslint-config-next';
+export default [
+  ...next
+];</code></pre>
+<h3>Alternative Config for CommonJS Projects</h3>
+<div class="code-title">.eslintrc.json</div>
+<pre><code class="language-json">{
+  "extends": "next/core-web-vitals"
+}</code></pre>
+<div class="feature">
+In newer ESLint versions, <code>eslint.config.mjs</code> is the modern flat config style. Older projects commonly use <code>.eslintrc.json</code>.
+</div>
+<h3>Add Lint Script</h3>
+<div class="code-title">package.json</div>
+<pre><code class="language-json">{
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint ."
+  }
+}</code></pre>
+<h3>Run ESLint</h3>
+<div class="code-title">Terminal</div>
+<pre><code class="language-bash">npm run lint</code></pre>
+<p>
+This checks our project files and reports linting errors or warnings.
+</p>
+<h3>Example ESLint Warning</h3>
+<div class="code-title">Bad Code</div>
+<pre><code class="language-js">export default function Page() {
+  const name = 'Rizwan';
+  return &lt;h1&gt;Hello&lt;/h1&gt;;
+}</code></pre>
+<p>
+Here, <code>name</code> is declared but not used, so ESLint can show a warning.
+</p>
+<div class="code-title">Possible Warning</div>
+<pre><code class="language-text">'name' is assigned a value but never used.</code></pre>
+<h3>Correct Code</h3>
+<div class="code-title">app/page.js</div>
+<pre><code class="language-js">export default function Page() {
+  const name = 'Rizwan';
+  return &lt;h1&gt;Hello {name}&lt;/h1&gt;;
+}</code></pre>
+<h3>Next.js ESLint Rules</h3>
+<p>
+The <code>eslint-config-next</code> package includes rules for:
+</p>
+<ul>
+<li>React best practices.</li>
+<li>Next.js best practices.</li>
+<li>Accessibility issues.</li>
+<li>Image optimization issues.</li>
+<li>Link usage issues.</li>
+<li>Core Web Vitals related rules.</li>
+</ul>
+<h3>Example: Next.js Link Rule</h3>
+<div class="code-title">Bad Code</div>
+<pre><code class="language-js">export default function Page() {
+  return &lt;a href="/about"&gt;About&lt;/a&gt;;
+}</code></pre>
+<p>
+For internal navigation in Next.js, we should use <code>Link</code>.
+</p>
+<div class="code-title">Correct Code</div>
+<pre><code class="language-js">import Link from 'next/link';
+export default function Page() {
+  return &lt;Link href="/about"&gt;About&lt;/Link&gt;;
+}</code></pre>
+<h3>Example: Image Rule</h3>
+<div class="code-title">Bad Code</div>
+<pre><code class="language-js">export default function Page() {
+  return &lt;img src="/logo.png" alt="Logo" /&gt;;
+}</code></pre>
+<p>
+Next.js recommends using the <code>Image</code> component for image optimization.
+</p>
+<div class="code-title">Correct Code</div>
+<pre><code class="language-js">import Image from 'next/image';
+export default function Page() {
+  return &lt;Image src="/logo.png" alt="Logo" width={200} height={100} /&gt;;
+}</code></pre>
+<h3>Custom ESLint Rules</h3>
+<p>
+We can also add our own rules.
+</p>
+<div class="code-title">eslint.config.mjs</div>
+<pre><code class="language-js">import next from 'eslint-config-next';
+export default [
+  ...next,
+  {
+    rules: {
+      'no-console': 'warn',
+      'no-unused-vars': 'warn'
+    }
+  }
+];</code></pre>
+<h3>Ignore Files</h3>
+<p>
+We can ignore generated folders like <code>.next</code> and <code>node_modules</code>.
+</p>
+<div class="code-title">eslint.config.mjs</div>
+<pre><code class="language-js">import next from 'eslint-config-next';
+export default [
+  {
+    ignores: ['.next/**', 'node_modules/**', 'out/**']
+  },
+  ...next
+];</code></pre>
+<h3>ESLint with TypeScript</h3>
+<p>
+For TypeScript projects, ESLint can check <code>.ts</code> and <code>.tsx</code> files also.
+</p>
+<div class="code-title">Example Files</div>
+<pre><code class="language-text">app/page.tsx
+app/layout.tsx
+components/Header.tsx</code></pre>
+<h3>Old Next.js Command</h3>
+<p>
+In older Next.js projects, we commonly used:
+</p>
+<div class="code-title">Terminal</div>
+<pre><code class="language-bash">next lint</code></pre>
+<p>
+In newer projects, using the normal ESLint command is preferred:
+</p>
+<div class="code-title">Terminal</div>
+<pre><code class="language-bash">eslint .</code></pre>
+<h3>ESLint Flow</h3>
+<div class="code-title">Flow</div>
+<pre><code class="language-text">Write Code
+    │
+    ▼
+Run npm run lint
+    │
+    ▼
+ESLint Checks Rules
+    │
+    ▼
+Show Errors / Warnings
+    │
+    ▼
+Fix Code Quality Issues</code></pre>
+<h3>ESLint vs Prettier</h3>
+<table>
+<tr>
+<th>Tool</th>
+<th>Purpose</th>
+</tr>
+<tr>
+<td>ESLint</td>
+<td>Finds code problems and enforces rules</td>
+</tr>
+<tr>
+<td>Prettier</td>
+<td>Formats code style automatically</td>
+</tr>
+</table>
+<h3>Common Commands</h3>
+<div class="code-title">Terminal</div>
+<pre><code class="language-bash">npm run lint
+npx eslint .
+npx eslint . --fix</code></pre>
+<h3>Important Note</h3>
+<div class="feature">
+ESLint helps catch problems before production. It does not replace testing, but it improves code quality and prevents common mistakes.
+</div>
+<h3>Interview Tip</h3>
+<div class="feature">
+In a Next.js project, ESLint is configured using <code>eslint-config-next</code>. We add a lint script such as <code>eslint .</code> and run it to check code quality, React rules, and Next.js best practices.
+</div>
+<div class="feature">
+<strong>One-Line Definition:</strong><br/>
+ESLint in Next.js is used to detect code issues and enforce best practices, and it can be configured with <code>eslint-config-next</code> and run using a script like <code>npm run lint</code>.
+</div>
+<h2 class="section-title" id="P7-09"><span class="secnum">P7-09</span>How do you build and start a Next.js app for production?</h2>
+<p>
+To run a Next.js app in production, we first build the application using <code>npm run build</code>, then start the optimized production server using <code>npm start</code>.
+</p>
+<div class="feature">
+The build command creates an optimized production version of our Next.js application, and the start command runs that production build.
+</div>
+<h3>Step 1: Install Dependencies</h3>
+<div class="code-title">Terminal</div>
+<pre><code class="language-bash">npm install</code></pre>
+<p>
+This installs all dependencies from <code>package.json</code>.
+</p>
+<h3>Step 2: Build the Application</h3>
+<div class="code-title">Terminal</div>
+<pre><code class="language-bash">npm run build</code></pre>
+<p>
+This creates an optimized production build inside the <code>.next</code> folder.
+</p>
+<h3>Step 3: Start the Production Server</h3>
+<div class="code-title">Terminal</div>
+<pre><code class="language-bash">npm start</code></pre>
+<p>
+This starts the Next.js production server.
+</p>
+<h3>package.json Scripts</h3>
+<div class="code-title">package.json</div>
+<pre><code class="language-json">{
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start"
+  }
+}</code></pre>
+<h3>Production Flow</h3>
+<div class="code-title">Flow</div>
+<pre><code class="language-text">Source Code
+    │
+    ▼
+npm install
+    │
+    ▼
+npm run build
+    │
+    ▼
+.next Folder Created
+    │
+    ▼
+npm start
+    │
+    ▼
+Production Server Runs</code></pre>
+<h3>What Happens During npm run build?</h3>
+<ul>
+<li>Next.js compiles our application.</li>
+<li>JavaScript and CSS are optimized.</li>
+<li>Static pages are generated.</li>
+<li>Server-rendered pages are prepared.</li>
+<li>Route information is created.</li>
+<li>Production assets are generated.</li>
+</ul>
+<h3>Default Production Port</h3>
+<p>
+By default, <code>next start</code> runs the app on port <code>3000</code>.
+</p>
+<div class="code-title">Output</div>
+<pre><code class="language-text">Local: http://localhost:3000</code></pre>
+<h3>Run on a Custom Port</h3>
+<div class="code-title">Terminal</div>
+<pre><code class="language-bash">npm start -- -p 4000</code></pre>
+<p>
+This starts the production server on port <code>4000</code>.
+</p>
+<h3>Alternative Command</h3>
+<div class="code-title">Terminal</div>
+<pre><code class="language-bash">npx next start -p 4000</code></pre>
+<h3>Using Environment Variables</h3>
+<p>
+Production environment variables should be available before building and starting the app.
+</p>
+<div class="code-title">.env.production</div>
+<pre><code class="language-text">NEXT_PUBLIC_API_URL=https://api.example.com
+DATABASE_URL=mongodb://localhost:27017/mydb</code></pre>
+<div class="feature">
+Variables used in the browser with <code>NEXT_PUBLIC_</code> are included during build time, so rebuild the app after changing them.
+</div>
+<h3>Development vs Production</h3>
+<table>
+<tr>
+<th>Command</th>
+<th>Purpose</th>
+</tr>
+<tr>
+<td><code>npm run dev</code></td>
+<td>Runs development server with hot reload</td>
+</tr>
+<tr>
+<td><code>npm run build</code></td>
+<td>Creates optimized production build</td>
+</tr>
+<tr>
+<td><code>npm start</code></td>
+<td>Runs the production build</td>
+</tr>
+</table>
+<h3>Common Production Commands</h3>
+<div class="code-title">Commands</div>
+<pre><code class="language-bash">npm install
+npm run build
+npm start</code></pre>
+<h3>Using PM2 in Production</h3>
+<p>
+On a real server, we often use a process manager like <code>PM2</code> to keep the Next.js app running.
+</p>
+<div class="code-title">Install PM2</div>
+<pre><code class="language-bash">npm install -g pm2</code></pre>
+<div class="code-title">Start Next.js with PM2</div>
+<pre><code class="language-bash">pm2 start npm --name "next-app" -- start</code></pre>
+<div class="code-title">Useful PM2 Commands</div>
+<pre><code class="language-bash">pm2 status
+pm2 logs next-app
+pm2 restart next-app
+pm2 save</code></pre>
+<h3>Important Note</h3>
+<div class="feature">
+<code>next start</code> should be used only after running <code>next build</code>. It does not build the app automatically.
+</div>
+<h3>Interview Tip</h3>
+<div class="feature">
+In production, we run <code>npm run build</code> to create an optimized build and then run <code>npm start</code> to start the production server.
+</div>
+<div class="feature">
+<strong>One-Line Definition:</strong><br/>
+A Next.js app is built for production using <code>npm run build</code> and started using <code>npm start</code>, which runs the optimized production build from the <code>.next</code> folder.
+</div>
+<h2 class="section-title" id="P7-10"><span class="secnum">P7-10</span>What is the Difference Between the dev, build, and start Scripts in Next.js 15?</h2>
+<p>
+The <code>dev</code>, <code>build</code>, and <code>start</code> scripts serve different purposes in the Next.js development and deployment lifecycle.
+</p>
+<div class="feature">
+<code>dev</code> is used during development, <code>build</code> creates the optimized production build, and <code>start</code> runs the production build.
+</div>
+<h3>Default Scripts</h3>
+<div class="code-title">package.json</div>
+<pre><code class="language-json">{
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start"
+  }
+}</code></pre>
+<h3>1. dev Script</h3>
+<div class="code-title">Command</div>
+<pre><code class="language-bash">npm run dev</code></pre>
+<p>
+Starts the development server.
+</p>
+<h4>What Happens?</h4>
+<ul>
+<li>Starts local development server.</li>
+<li>Enables Fast Refresh.</li>
+<li>Rebuilds automatically on file changes.</li>
+<li>Shows detailed error overlays.</li>
+<li>Optimized for developer experience, not performance.</li>
+</ul>
+<div class="code-title">Flow</div>
+<pre><code class="language-text">Source Code
+     │
+     ▼
+next dev
+     │
+     ▼
+Development Server
+     │
+     ▼
+Fast Refresh
+     │
+     ▼
+Live Updates</code></pre>
+<h3>2. build Script</h3>
+<div class="code-title">Command</div>
+<pre><code class="language-bash">npm run build</code></pre>
+<p>
+Creates the production build.
+</p>
+<h4>What Happens?</h4>
+<ul>
+<li>Compiles the application.</li>
+<li>Optimizes JavaScript and CSS.</li>
+<li>Generates SSG pages.</li>
+<li>Creates server bundles for SSR.</li>
+<li>Creates the <code>.next</code> folder.</li>
+<li>Analyzes routes and rendering strategies.</li>
+</ul>
+<div class="code-title">Flow</div>
+<pre><code class="language-text">Source Code
+     │
+     ▼
+next build
+     │
+     ▼
+Optimization
+     │
+     ▼
+Generate Assets
+     │
+     ▼
+.next Folder</code></pre>
+<h3>Build Output Example</h3>
+<div class="code-title">Terminal Output</div>
+<pre><code class="language-text">Route (app)                Size
+○ /                        SSG
+○ /about                   SSG
+ƒ /products/[id]           SSR
+ƒ /api/users               Route Handler</code></pre>
+<p>
+Next.js determines how each route will be rendered.
+</p>
+<h3>3. start Script</h3>
+<div class="code-title">Command</div>
+<pre><code class="language-bash">npm start</code></pre>
+<p>
+Runs the production build generated by <code>next build</code>.
+</p>
+<h4>What Happens?</h4>
+<ul>
+<li>Reads files from the <code>.next</code> folder.</li>
+<li>Starts the production server.</li>
+<li>Runs optimized SSR pages.</li>
+<li>Serves generated SSG pages.</li>
+<li>Uses production caching.</li>
+</ul>
+<div class="code-title">Flow</div>
+<pre><code class="language-text">next build
+     │
+     ▼
+.next Folder
+     │
+     ▼
+next start
+     │
+     ▼
+Production Server</code></pre>
+<h3>Important Relationship</h3>
+<div class="feature">
+<code>npm start</code> requires a completed <code>npm run build</code>. Without a build, the start command will fail.
+</div>
+<div class="code-title">Wrong</div>
+<pre><code class="language-bash">npm start</code></pre>
+<p>
+Without building first, Next.js may show:
+</p>
+<pre><code class="language-text">Could not find a production build
+in the '.next' directory.</code></pre>
+<div class="code-title">Correct</div>
+<pre><code class="language-bash">npm run build
+npm start</code></pre>
+<h3>Real-World Development Workflow</h3>
+<div class="code-title">Development</div>
+<pre><code class="language-bash">npm run dev</code></pre>
+<p>
+Develop and test locally.</p>
+<div class="code-title">Production</div>
+<pre><code class="language-bash">npm run build
+npm start</code></pre>
+<p>
+Create and run the production build.</p>
+<h3>Example Scenario</h3>
+<div class="code-title">Developer Changes app/page.js</div>
+<pre><code class="language-js">export default function Page() {
+  return &lt;h1&gt;Home Page&lt;/h1&gt;;
+}</code></pre>
+<p>
+Using:</p>
+<pre><code class="language-bash">npm run dev</code></pre>
+<p>
+The browser updates immediately using Fast Refresh.</p>
+<p>
+Using:</p>
+<pre><code class="language-bash">npm run build</code></pre>
+<p>
+Next.js generates optimized production assets.</p>
+<p>
+Using:</p>
+<pre><code class="language-bash">npm start</code></pre>
+<p>
+The production version is served to users.</p>
+<h3>dev vs build vs start</h3>
+<table>
+<tr>
+<th>Feature</th>
+<th>dev</th>
+<th>build</th>
+<th>start</th>
+</tr>
+<tr>
+<td>Command</td>
+<td>next dev</td>
+<td>next build</td>
+<td>next start</td>
+</tr>
+<tr>
+<td>Purpose</td>
+<td>Development</td>
+<td>Create Production Build</td>
+<td>Run Production Build</td>
+</tr>
+<tr>
+<td>Fast Refresh</td>
+<td>✅</td>
+<td>❌</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>Error Overlay</td>
+<td>✅</td>
+<td>❌</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>Creates .next</td>
+<td>✅</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>Uses .next</td>
+<td>⚠️ Partially</td>
+<td>Creates It</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Production Optimized</td>
+<td>❌</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+</table>
+<h3>Complete Lifecycle</h3>
+<div class="code-title">Next.js Lifecycle</div>
+<pre><code class="language-text">Development
+     │
+     ▼
+npm run dev
+     │
+     ▼
+Finished Coding
+     │
+     ▼
+npm run build
+     │
+     ▼
+.next Folder
+     │
+     ▼
+npm start
+     │
+     ▼
+Production Website</code></pre>
+<h3>Important Note</h3>
+<div class="feature">
+Users never interact with <code>next dev</code>. Real users access the application through the production server started by <code>next start</code> (or a hosting platform such as Vercel).
+</div>
+<h3>Interview Tip</h3>
+<div class="feature">
+The most common interview answer is:
+<ul>
+<li><code>next dev</code> → Development server.</li>
+<li><code>next build</code> → Creates optimized production build.</li>
+<li><code>next start</code> → Runs the production build.</li>
+</ul>
+</div>
+<div class="feature">
+<strong>One-Line Definition:</strong><br/>
+In Next.js 15, <code>dev</code> starts the development server, <code>build</code> creates the optimized production build, and <code>start</code> runs that production build from the <code>.next</code> folder.
+</div>
+<h2 class="section-title" id="P7-11"><span class="secnum">P7-11</span>What does next build output and how do you read the route table it prints?</h2>
+<p>
+When we run <code>next build</code>, Next.js compiles the application, analyzes every route, generates optimized assets, and prints a route table showing how each route will be rendered in production.
+</p>
+<div class="feature">
+The route table is one of the most important parts of the build output because it tells us whether a route is Static, Dynamic, ISR, or a Route Handler.
+</div>
+<h3>Build Command</h3>
+<div class="code-title">Terminal</div>
+<pre><code class="language-bash">npm run build</code></pre>
+<p>
+or
+</p>
+<pre><code class="language-bash">next build</code></pre>
+<h3>What Happens During Build?</h3>
+<div class="code-title">Build Process</div>
+<pre><code class="language-text">Source Code
+      │
+      ▼
+Compile Application
+      │
+      ▼
+Analyze Routes
+      │
+      ▼
+Generate Static Pages
+      │
+      ▼
+Create Server Bundles
+      │
+      ▼
+Create .next Folder
+      │
+      ▼
+Print Route Table</code></pre>
+<h3>Example Build Output</h3>
+<div class="code-title">Terminal Output</div>
+<pre><code class="language-text">Route (app)                     Size     First Load JS
+○ /                             150 B         98 kB
+○ /about                        180 B         98 kB
+● /blog/[slug]                  200 B        101 kB
+ƒ /products/[id]                250 B        103 kB
+ƒ /api/users                    0 B            0 B
++ First Load JS shared by all             98 kB</code></pre>
+<h3>Route Symbols</h3>
+<p>
+The symbol at the beginning of each route tells us how Next.js will render that route.
+</p>
+<table>
+<tr>
+<th>Symbol</th>
+<th>Meaning</th>
+</tr>
+<tr>
+<td>○</td>
+<td>Static Route (SSG)</td>
+</tr>
+<tr>
+<td>●</td>
+<td>SSG with generateStaticParams()</td>
+</tr>
+<tr>
+<td>ƒ</td>
+<td>Dynamic Route (SSR)</td>
+</tr>
+</table>
+<h3>○ Static Route</h3>
+<div class="code-title">Example</div>
+<pre><code class="language-js">export default function About() {
+  return &lt;h1&gt;About&lt;/h1&gt;;
+}</code></pre>
+<div class="code-title">Build Output</div>
+<pre><code class="language-text">○ /about</code></pre>
+<p>
+This means the page is generated during build time and served as static HTML.
+</p>
+<h3>● Static Dynamic Route</h3>
+<div class="code-title">app/blog/[slug]/page.js</div>
+<pre><code class="language-js">export async function generateStaticParams() {
+  return [
+    { slug: 'nextjs' },
+    { slug: 'react' }
+  ];
+}</code></pre>
+<div class="code-title">Build Output</div>
+<pre><code class="language-text">● /blog/[slug]</code></pre>
+<p>
+Next.js generates static pages for all values returned by <code>generateStaticParams()</code>.
+</p>
+<h3>ƒ Dynamic Route</h3>
+<div class="code-title">app/products/[id]/page.js</div>
+<pre><code class="language-js">export default async function Page({
+  params
+}) {
+  const { id } = await params;
+  const product = await fetch(
+    `https://api.example.com/products/${id}`
+  ).then(res =&gt; res.json());
+  return &lt;h1&gt;{product.title}&lt;/h1&gt;;
+}</code></pre>
+<div class="code-title">Build Output</div>
+<pre><code class="language-text">ƒ /products/[id]</code></pre>
+<p>
+This route is rendered dynamically on each request.
+</p>
+<h3>Route Handler Example</h3>
+<div class="code-title">app/api/users/route.js</div>
+<pre><code class="language-js">export async function GET() {
+  return Response.json({
+    users: []
+  });
+}</code></pre>
+<div class="code-title">Build Output</div>
+<pre><code class="language-text">ƒ /api/users</code></pre>
+<p>
+Route Handlers also appear as dynamic functions.
+</p>
+<h3>Understanding the Size Column</h3>
+<div class="code-title">Example</div>
+<pre><code class="language-text">○ /about      180 B</code></pre>
+<p>
+This represents the size of the route-specific JavaScript.
+</p>
+<h3>Understanding First Load JS</h3>
+<div class="code-title">Example</div>
+<pre><code class="language-text">○ /about      180 B      98 kB</code></pre>
+<p>
+The First Load JS value includes:
+</p>
+<ul>
+<li>Route JavaScript.</li>
+<li>Shared React runtime.</li>
+<li>Shared Next.js runtime.</li>
+<li>Shared framework code.</li>
+</ul>
+<h3>Shared Bundle</h3>
+<div class="code-title">Example</div>
+<pre><code class="language-text">+ First Load JS shared by all
+  98 kB</code></pre>
+<p>
+This bundle is downloaded by every route.
+</p>
+<h3>Real Build Output Example</h3>
+<div class="code-title">Example</div>
+<pre><code class="language-text">Route (app)                     Size     First Load JS
+○ /                             150 B         98 kB
+○ /about                        180 B         98 kB
+○ /contact                      170 B         98 kB
+ƒ /dashboard                    220 B        102 kB
+ƒ /products/[id]                250 B        103 kB
++ First Load JS shared by all             98 kB</code></pre>
+<h3>How to Read This Table</h3>
+<div class="code-title">Analysis</div>
+<pre><code class="language-text">/            → Static Page
+/about       → Static Page
+/contact     → Static Page
+/dashboard   → Dynamic SSR
+/products    → Dynamic SSR
+Shared JS    → 98 kB</code></pre>
+<h3>What Should We Look For?</h3>
+<ul>
+<li>Unexpected SSR routes.</li>
+<li>Large First Load JS sizes.</li>
+<li>Routes that should be static but became dynamic.</li>
+<li>Large shared bundles.</li>
+</ul>
+<h3>Example of Unexpected Dynamic Route</h3>
+<div class="code-title">Code</div>
+<pre><code class="language-js">import { cookies } from 'next/headers';
+export default async function Page() {
+  const cookieStore = await cookies();
+  return &lt;h1&gt;Dashboard&lt;/h1&gt;;
+}</code></pre>
+<div class="code-title">Build Output</div>
+<pre><code class="language-text">ƒ /dashboard</code></pre>
+<p>
+Using <code>cookies()</code> makes the page dynamic.
+</p>
+<h3>Route Table Summary</h3>
+<table>
+<tr>
+<th>Symbol</th>
+<th>Meaning</th>
+</tr>
+<tr>
+<td>○</td>
+<td>Static Route (SSG)</td>
+</tr>
+<tr>
+<td>●</td>
+<td>Static Dynamic Route (generateStaticParams)</td>
+</tr>
+<tr>
+<td>ƒ</td>
+<td>Dynamic Route (SSR)</td>
+</tr>
+</table>
+<h3>Important Note</h3>
+<div class="feature">
+The route table is the easiest way to verify whether Next.js is generating routes as Static (SSG) or Dynamic (SSR). Many performance issues can be discovered simply by inspecting this table after a build.
+</div>
+<h3>Interview Tip</h3>
+<div class="feature">
+After running <code>next build</code>, always inspect the route table. It shows how each route will be rendered, its bundle size, and the amount of JavaScript downloaded by users.
+</div>
+<div class="feature">
+<strong>One-Line Definition:</strong><br/>
+The <code>next build</code> route table shows each route's rendering strategy (SSG or SSR), route size, and first-load JavaScript size, helping us understand how the application will behave in production.
+</div>
+<h2 class="section-title" id="P7-12"><span class="secnum">P7-12</span>What is the .next Folder and What Does It Contain?</h2>
+<p>
+The <code>.next</code> folder is the build output directory created by Next.js. It contains compiled application code, generated pages, cached files, server bundles, and other assets required to run the application.
+</p>
+<div class="feature">
+The <code>.next</code> folder is automatically generated when we run <code>npm run dev</code> or <code>npm run build</code>.
+</div>
+<h3>When is the .next Folder Created?</h3>
+<div class="code-title">Commands</div>
+<pre><code class="language-bash">npm run dev
+npm run build</code></pre>
+<p>
+After running either command, Next.js creates the <code>.next</code> directory automatically.
+</p>
+<h3>Example Project Structure</h3>
+<div class="code-title">After Build</div>
+<pre><code class="language-text">my-app
+├── app
+├── public
+├── node_modules
+├── package.json
+├── next.config.js
+└── .next</code></pre>
+<h3>Typical .next Structure</h3>
+<div class="code-title">.next Folder</div>
+<pre><code class="language-text">.next
+├── cache
+├── server
+├── static
+├── traces
+├── build-manifest.json
+├── prerender-manifest.json
+├── routes-manifest.json
+└── BUILD_ID</code></pre>
+<h3>cache Folder</h3>
+<p>
+Stores cached compilation data to speed up future builds and development server startup.
+</p>
+<div class="code-title">Example</div>
+<pre><code class="language-text">.next
+└── cache</code></pre>
+<p>
+Deleting it is safe because Next.js can recreate it.
+</p>
+<h3>server Folder</h3>
+<p>
+Contains server-side code used for SSR, Route Handlers, Server Components, and API routes.
+</p>
+<div class="code-title">Example</div>
+<pre><code class="language-text">.next
+└── server
+    ├── app
+    ├── pages
+    └── chunks</code></pre>
+<h3>static Folder</h3>
+<p>
+Contains optimized JavaScript, CSS, and static assets sent to the browser.
+</p>
+<div class="code-title">Example</div>
+<pre><code class="language-text">.next
+└── static
+    ├── chunks
+    ├── css
+    └── media</code></pre>
+<h3>BUILD_ID File</h3>
+<p>
+Contains a unique identifier for the current build.
+</p>
+<div class="code-title">Example</div>
+<pre><code class="language-text">BUILD_ID
+3KjD8LpRr6Qh2xY</code></pre>
+<p>
+Next.js uses this value to identify a specific deployment build.
+</p>
+<h3>build-manifest.json</h3>
+<p>
+Maps routes to their generated JavaScript and CSS files.
+</p>
+<div class="code-title">Example</div>
+<pre><code class="language-json">{
+  "/": [
+    "static/chunks/home.js"
+  ]
+}</code></pre>
+<h3>prerender-manifest.json</h3>
+<p>
+Contains information about SSG and ISR pages.
+</p>
+<div class="code-title">Example</div>
+<pre><code class="language-json">{
+  "/blog": {
+    "initialRevalidateSeconds": 60
+  }
+}</code></pre>
+<h3>routes-manifest.json</h3>
+<p>
+Contains route information used by Next.js.
+</p>
+<div class="code-title">Example</div>
+<pre><code class="language-json">{
+  "dynamicRoutes": [],
+  "staticRoutes": []
+}</code></pre>
+<h3>What Happens During Build?</h3>
+<div class="code-title">Flow</div>
+<pre><code class="language-text">Source Code
+      │
+      ▼
+next build
+      │
+      ▼
+Compile React
+      │
+      ▼
+Generate HTML
+      │
+      ▼
+Generate JS Bundles
+      │
+      ▼
+Create .next Folder</code></pre>
+<h3>Can We Delete the .next Folder?</h3>
+<p>
+Yes.
+</p>
+<div class="code-title">Delete Folder</div>
+<pre><code class="language-bash">rm -rf .next</code></pre>
+<p>
+or on Windows:
+</p>
+<pre><code class="language-bash">rmdir /s /q .next</code></pre>
+<p>
+The folder will be recreated automatically the next time we run:
+</p>
+<pre><code class="language-bash">npm run dev
+or
+npm run build</code></pre>
+<h3>Should We Commit .next to Git?</h3>
+<p>
+No.
+</p>
+<div class="code-title">.gitignore</div>
+<pre><code class="language-text">.next</code></pre>
+<p>
+Since the folder is generated automatically, it should not be stored in Git.
+</p>
+<h3>.next in Development vs Production</h3>
+<table>
+<tr>
+<th>Mode</th>
+<th>Purpose</th>
+</tr>
+<tr>
+<td>Development</td>
+<td>Stores compilation cache and dev assets</td>
+</tr>
+<tr>
+<td>Production</td>
+<td>Stores optimized build output</td>
+</tr>
+</table>
+<h3>Real-World Example</h3>
+<div class="code-title">Production Deployment</div>
+<pre><code class="language-text">npm install
+      │
+      ▼
+npm run build
+      │
+      ▼
+.next Created
+      │
+      ▼
+npm start
+      │
+      ▼
+Production Server Uses .next</code></pre>
+<h3>Important Note</h3>
+<div class="feature">
+The <code>.next</code> folder is the most important build output directory in Next.js. The production server runs directly from the files generated inside this folder.
+</div>
+<h3>Interview Tip</h3>
+<div class="feature">
+The <code>.next</code> folder contains the compiled output of a Next.js application, including server bundles, static assets, generated pages, build manifests, and cache files used during development and production.
+</div>
+<div class="feature">
+<strong>One-Line Definition:</strong><br/>
+The <code>.next</code> folder is the build output directory generated by Next.js that contains everything needed to run the application, including compiled code, server bundles, static assets, and build metadata.
+</div>
+<h2 class="section-title" id="P7-13"><span class="secnum">P7-13</span>What is next export and when was it removed?</h2>
+<p>
+<code>next export</code> was a Next.js command used to generate a fully static website consisting of HTML, CSS, and JavaScript files that could be hosted on any static hosting service.
+</p>
+<div class="feature">
+The <code>next export</code> command was deprecated in Next.js 13 and removed in Next.js 14. It was replaced by the <code>output: 'export'</code> configuration.
+</div>
+<h3>What Did next export Do?</h3>
+<p>
+It converted a Next.js application into static files.
+</p>
+<div class="code-title">Old Commands</div>
+<pre><code class="language-bash">npm run build
+next export</code></pre>
+<p>
+or
+</p>
+<pre><code class="language-bash">next build
+next export</code></pre>
+<h3>Generated Output</h3>
+<div class="code-title">Output Folder</div>
+<pre><code class="language-text">out
+├── index.html
+├── about
+│   └── index.html
+├── products
+│   └── index.html
+└── _next</code></pre>
+<p>
+The generated files could be hosted on any static web server.
+</p>
+<h3>How next export Worked</h3>
+<div class="code-title">Flow</div>
+<pre><code class="language-text">Next.js App
+      │
+      ▼
+next build
+      │
+      ▼
+next export
+      │
+      ▼
+Generate Static HTML
+      │
+      ▼
+out Folder
+      │
+      ▼
+Deploy Anywhere</code></pre>
+<h3>Example</h3>
+<div class="code-title">pages/about.js</div>
+<pre><code class="language-js">export default function About() {
+  return &lt;h1&gt;About Page&lt;/h1&gt;;
+}</code></pre>
+<p>
+After export:
+</p>
+<div class="code-title">Generated File</div>
+<pre><code class="language-text">out/about/index.html</code></pre>
+<h3>Limitations of next export</h3>
+<p>
+Since everything became static files, many Next.js features could not work.
+</p>
+<table>
+<tr>
+<th>Feature</th>
+<th>Supported?</th>
+</tr>
+<tr>
+<td>SSG</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Static Assets</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>SSR</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>ISR</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>API Routes</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>Middleware</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>Server Actions</td>
+<td>❌</td>
+</tr>
+</table>
+<h3>Why Was next export Removed?</h3>
+<p>
+The App Router introduced a new static export system that made the separate <code>next export</code> command unnecessary.
+</p>
+<div class="feature">
+Instead of running a separate export command, Next.js now uses the <code>output: 'export'</code> option in <code>next.config.js</code>.
+</div>
+<h3>Modern Replacement</h3>
+<div class="code-title">next.config.js</div>
+<pre><code class="language-js">const nextConfig = {
+  output: 'export'
+};
+module.exports = nextConfig;</code></pre>
+<h3>Build Command</h3>
+<div class="code-title">Terminal</div>
+<pre><code class="language-bash">npm run build</code></pre>
+<p>
+No separate export command is needed.
+</p>
+<h3>Generated Output</h3>
+<div class="code-title">Output Folder</div>
+<pre><code class="language-text">out
+├── index.html
+├── about
+│   └── index.html
+└── _next</code></pre>
+<h3>Old vs New</h3>
+<table>
+<tr>
+<th>Before Next.js 14</th>
+<th>Next.js 14+</th>
+</tr>
+<tr>
+<td>next build</td>
+<td>npm run build</td>
+</tr>
+<tr>
+<td>next export</td>
+<td>output: 'export'</td>
+</tr>
+<tr>
+<td>Two-step process</td>
+<td>One-step process</td>
+</tr>
+</table>
+<h3>When Should We Use output: 'export'?</h3>
+<ul>
+<li>Static websites.</li>
+<li>Documentation sites.</li>
+<li>Portfolio websites.</li>
+<li>Landing pages.</li>
+<li>Sites hosted on static hosting providers.</li>
+</ul>
+<h3>When Should We Not Use It?</h3>
+<ul>
+<li>SSR applications.</li>
+<li>ISR applications.</li>
+<li>API Routes.</li>
+<li>Server Actions.</li>
+<li>Middleware.</li>
+<li>Authentication requiring server rendering.</li>
+</ul>
+<h3>Real-World Example</h3>
+<div class="code-title">Static Hosting</div>
+<pre><code class="language-text">Next.js App
+      │
+      ▼
+output: 'export'
+      │
+      ▼
+npm run build
+      │
+      ▼
+out Folder
+      │
+      ▼
+Upload To Netlify
+GitHub Pages
+Static Hosting</code></pre>
+<h3>Timeline</h3>
+<table>
+<tr>
+<th>Version</th>
+<th>Status</th>
+</tr>
+<tr>
+<td>Next.js 12</td>
+<td>✅ Supported</td>
+</tr>
+<tr>
+<td>Next.js 13</td>
+<td>⚠️ Deprecated</td>
+</tr>
+<tr>
+<td>Next.js 14</td>
+<td>❌ Removed</td>
+</tr>
+</table>
+<h3>Important Note</h3>
+<div class="feature">
+If you see old tutorials using <code>next export</code>, the modern equivalent is setting <code>output: 'export'</code> in <code>next.config.js</code> and running a normal production build.
+</div>
+<h3>Interview Tip</h3>
+<div class="feature">
+The <code>next export</code> command generated a fully static version of a Next.js application. It was removed in Next.js 14 and replaced by the <code>output: 'export'</code> configuration option.
+</div>
+<div class="feature">
+<strong>One-Line Definition:</strong><br/>
+<code>next export</code> was a command that generated static HTML files from a Next.js application, and it was removed in Next.js 14 in favor of <code>output: 'export'</code>.
+</div>
+<h2 class="section-title" id="P7-14"><span class="secnum">P7-14</span>What is Vercel and how does it relate to Next.js?</h2>
+<p>
+Vercel is a cloud hosting platform created by the company that also created Next.js. It provides the easiest and most optimized way to deploy, host, and scale Next.js applications.
+</p>
+<div class="feature">
+Vercel is the company behind Next.js, and Next.js is designed to work seamlessly with the Vercel platform.
+</div>
+<h3>What is Vercel?</h3>
+<p>
+Vercel is a cloud platform that automatically builds, deploys, and hosts web applications.
+</p>
+<p>
+It supports:
+</p>
+<ul>
+<li>Next.js</li>
+<li>React</li>
+<li>Vue</li>
+<li>Angular</li>
+<li>Svelte</li>
+<li>Static Websites</li>
+</ul>
+<h3>Relationship Between Vercel and Next.js</h3>
+<div class="code-title">Ownership</div>
+<pre><code class="language-text">Vercel Company
+      │
+      ▼
+Created Next.js
+      │
+      ▼
+Maintains Next.js
+      │
+      ▼
+Provides Hosting Platform</code></pre>
+<p>
+The same company develops both Vercel and Next.js.
+</p>
+<h3>Why Is Vercel Recommended for Next.js?</h3>
+<ul>
+<li>Zero configuration deployment.</li>
+<li>Automatic builds.</li>
+<li>Automatic scaling.</li>
+<li>Global CDN.</li>
+<li>Built-in SSR support.</li>
+<li>Built-in ISR support.</li>
+<li>Built-in Edge Functions.</li>
+<li>Automatic HTTPS.</li>
+</ul>
+<h3>Typical Deployment Flow</h3>
+<div class="code-title">Flow</div>
+<pre><code class="language-text">GitHub Repository
+        │
+        ▼
+Push Code
+        │
+        ▼
+Vercel Detects Changes
+        │
+        ▼
+Build Next.js App
+        │
+        ▼
+Deploy Automatically
+        │
+        ▼
+Live Website</code></pre>
+<h3>Deploying a Next.js App</h3>
+<div class="code-title">Commands</div>
+<pre><code class="language-bash">npm install -g vercel
+vercel</code></pre>
+<p>
+The Vercel CLI can deploy a Next.js application directly from the terminal.
+</p>
+<h3>GitHub Deployment</h3>
+<p>
+The most common deployment method is connecting a GitHub repository.
+</p>
+<div class="code-title">Flow</div>
+<pre><code class="language-text">GitHub
+   │
+   ▼
+Vercel
+   │
+   ▼
+Automatic Build
+   │
+   ▼
+Automatic Deployment</code></pre>
+<h3>How Next.js Features Work on Vercel</h3>
+<table>
+<tr>
+<th>Feature</th>
+<th>Supported</th>
+</tr>
+<tr>
+<td>SSG</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>SSR</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>ISR</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>API Routes</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Middleware</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Server Actions</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Edge Runtime</td>
+<td>✅</td>
+</tr>
+</table>
+<h3>Example</h3>
+<div class="code-title">ISR Page</div>
+<pre><code class="language-js">export default async function Page() {
+  const products = await fetch(
+    'https://api.example.com/products',
+    {
+      next: {
+        revalidate: 60
+      }
+    }
+  ).then(res =&gt; res.json());
+  return (
+    &lt;div&gt;
+      {products.length}
+    &lt;/div&gt;
+  );
+}</code></pre>
+<p>
+When deployed on Vercel, ISR caching and regeneration work automatically without additional configuration.
+</p>
+<h3>Can Next.js Run Without Vercel?</h3>
+<p>
+Yes.
+</p>
+<p>
+Next.js can be deployed on:
+</p>
+<ul>
+<li>Windows Server</li>
+<li>Linux Server</li>
+<li>Docker</li>
+<li>AWS</li>
+<li>Azure</li>
+<li>Google Cloud</li>
+<li>DigitalOcean</li>
+<li>Nginx + PM2</li>
+</ul>
+<div class="feature">
+Vercel is not required to use Next.js. It is simply the easiest and most optimized hosting platform for Next.js applications.
+</div>
+<h3>Vercel vs Traditional Server</h3>
+<table>
+<tr>
+<th>Feature</th>
+<th>Vercel</th>
+<th>Traditional Server</th>
+</tr>
+<tr>
+<td>Setup</td>
+<td>Easy</td>
+<td>Manual</td>
+</tr>
+<tr>
+<td>Scaling</td>
+<td>Automatic</td>
+<td>Manual</td>
+</tr>
+<tr>
+<td>SSL</td>
+<td>Automatic</td>
+<td>Manual</td>
+</tr>
+<tr>
+<td>Deployments</td>
+<td>Automatic</td>
+<td>Manual</td>
+</tr>
+<tr>
+<td>Global CDN</td>
+<td>Built-in</td>
+<td>Custom Setup</td>
+</tr>
+</table>
+<h3>Real-World Example</h3>
+<div class="code-title">Development Workflow</div>
+<pre><code class="language-text">Developer
+    │
+    ▼
+Git Push
+    │
+    ▼
+GitHub
+    │
+    ▼
+Vercel
+    │
+    ▼
+Build
+    │
+    ▼
+Deploy
+    │
+    ▼
+Production Website</code></pre>
+<h3>Important Note</h3>
+<div class="feature">
+Although Vercel created Next.js, Next.js is completely open source and can be deployed on any server that supports Node.js.
+</div>
+<h3>Interview Tip</h3>
+<div class="feature">
+Vercel is the company behind Next.js and provides a cloud platform specifically optimized for deploying and hosting Next.js applications with built-in support for SSR, SSG, ISR, Edge Functions, and global caching.
+</div>
+<div class="feature">
+<strong>One-Line Definition:</strong><br/>
+Vercel is the company and cloud hosting platform behind Next.js, providing the easiest and most optimized environment for deploying and running Next.js applications.
+</div><div class="chapnav"><a class="prev" href="pages-P6-seo-and-metadata-pages-router.html">P6 - SEO & Metadata (Pages Router)</a><a class="next" href="pages-index.html">Guide Home</a></div></div></div><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-tsx.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+</body>
+</html>
