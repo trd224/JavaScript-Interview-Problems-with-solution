@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Part 10 — Server Execution of Client Components & Why Navigation Skips Hydration | RSC From Zero to Interview-Ready</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:#0f172a;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.85;display:flex;min-height:100vh}
+a{color:inherit;text-decoration:none}
+::selection{background:#38bdf8;color:#0f172a}
+
+.sidebar{width:280px;flex-shrink:0;background:#0b1220;border-right:1px solid #1e293b;padding:22px 16px;position:sticky;top:0;height:100vh;overflow-y:auto}
+.brand{color:#38bdf8;font-size:16px;font-weight:800}
+.brand small{display:block;color:#64748b;font-weight:400;font-size:11.5px;margin-top:4px}
+.chapter-nav{margin-top:20px}
+.chapter-nav a{display:block;padding:7px 9px;border-radius:8px;font-size:12.5px;color:#94a3b8;margin-bottom:3px;border-left:3px solid transparent}
+.chapter-nav a:hover{background:#111827;color:#e2e8f0}
+.chapter-nav a.active{background:#111827;color:#38bdf8;border-left:3px solid #38bdf8;font-weight:bold}
+.chapter-nav .chnum{display:inline-block;width:20px;color:#475569;font-family:monospace;font-size:11px}
+.toc{margin-top:20px;border-top:1px solid #1e293b;padding-top:14px}
+.toc-title{color:#fbbf24;font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px}
+.toc a{display:block;font-size:11.8px;color:#8ea3c2;padding:4px 8px;border-radius:6px;line-height:1.4}
+.toc a:hover{background:#111827;color:#e2e8f0}
+
+.main{flex:1;padding:40px 48px;max-width:1000px}
+.container{max-width:920px}
+.hero-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(56,189,248,.1);border:1px solid rgba(56,189,248,.3);color:#38bdf8;font-size:11.5px;font-weight:bold;padding:5px 12px;border-radius:20px;margin-bottom:14px}
+.hero-badge .dot{width:6px;height:6px;border-radius:50%;background:#38bdf8}
+h1.page-title{color:#f1f5f9;font-size:27px;margin-bottom:8px;letter-spacing:-.02em}
+.page-sub{color:#94a3b8;margin-bottom:10px;font-size:14px;max-width:680px}
+.page-meta{color:#64748b;margin-bottom:28px;font-size:12.5px}
+
+h2.section-title{color:#a78bfa;margin-top:50px;margin-bottom:14px;font-size:20px;border-top:1px solid #1e293b;padding-top:36px;scroll-margin-top:20px}
+h2.section-title .secnum{color:#475569;font-family:monospace;margin-right:8px;font-size:14px}
+h3{color:#fbbf24;margin-top:22px;margin-bottom:9px;font-size:15.5px}
+h4{color:#38bdf8;margin-top:16px;margin-bottom:7px;font-size:14px}
+p{margin-bottom:13px;color:#cbd5e1}
+ul,ol{margin-left:20px;margin-bottom:13px}
+li{margin-bottom:7px;color:#cbd5e1}
+strong{color:#f1f5f9}
+code{color:#93c5fd;font-family:'JetBrains Mono',Consolas,monospace;font-size:.88em;background:#1e293b;padding:1px 6px;border-radius:4px}
+
+.feature{background:#1e293b;border-left:5px solid #38bdf8;padding:14px 17px;border-radius:8px;margin:16px 0}
+.warning{background:#2a1a1a;border-left:5px solid #f87171;padding:14px 17px;border-radius:8px;margin:16px 0}
+.summary{background:#16261c;border-left:5px solid #34d399;padding:14px 17px;border-radius:8px;margin:16px 0}
+.note{background:#241a2e;border-left:5px solid #a78bfa;padding:14px 17px;border-radius:8px;margin:16px 0}
+.analogy{background:#1a2332;border:1px dashed #38bdf8;padding:14px 17px;border-radius:8px;margin:16px 0}
+.feature b,.warning b,.summary b,.note b,.analogy b{color:#f1f5f9}
+
+.code-title{background:#1e293b;color:#93c5fd;padding:9px 13px;font-weight:bold;border-radius:8px 8px 0 0;font-size:12px;font-family:monospace;border-bottom:1px solid #0f172a}
+pre[class*="language-"]{margin:0 0 16px 0!important;border-radius:0 0 8px 8px;font-size:12.5px}
+
+.flow{background:#111827;border:1px solid #1e293b;border-radius:10px;padding:16px 18px;margin:14px 0;overflow-x:auto}
+.flow pre{margin:0!important;color:#86efac;font-family:'JetBrains Mono',Consolas,monospace;font-size:12.5px;white-space:pre;line-height:1.7}
+
+table{width:100%;border-collapse:collapse;margin:16px 0;font-size:13px}
+th{background:#1e293b;color:#38bdf8;text-align:left;padding:10px 12px;font-size:12px}
+td{padding:10px 12px;border-top:1px solid #1e293b;color:#cbd5e1;vertical-align:top}
+tr:hover td{background:#111827}
+
+.qa{background:#111827;border:1px solid #1e293b;border-radius:10px;padding:14px 16px;margin-bottom:10px}
+.qa .q{color:#38bdf8;font-weight:bold;font-size:13.5px;margin-bottom:5px}
+.qa .a{color:#cbd5e1;font-size:13px;margin-bottom:0}
+
+.chapnav{display:flex;justify-content:space-between;margin-top:56px;padding-top:22px;border-top:1px solid #1e293b}
+.chapnav a{background:#111827;padding:11px 16px;border-radius:10px;border:1px solid #1e293b;font-size:13px;color:#94a3b8}
+.chapnav a:hover{color:#38bdf8;border-color:#38bdf8}
+.chapnav .prev::before{content:"<- "}
+.chapnav .next::after{content:" ->"}
+
+.stat{background:#111827;border:1px solid #1e293b;border-radius:10px;padding:14px 18px}
+.stat b{color:#38bdf8;font-size:20px;display:block}
+.stat span{color:#64748b;font-size:12px}
+.stats{display:flex;gap:14px;margin:20px 0;flex-wrap:wrap}
+.chapters{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:20px}
+@media(max-width:800px){.chapters{grid-template-columns:1fr}}
+.chapcard{background:#111827;border:1px solid #1e293b;border-radius:12px;padding:20px;transition:.15s}
+.chapcard:hover{border-color:#38bdf8}
+.chapcard .num{color:#475569;font-family:monospace;font-size:13px}
+.chapcard h3{color:#a78bfa;margin:6px 0 10px;font-size:17px}
+.chapcard ol{margin-left:18px;color:#94a3b8;font-size:12.5px}
+.chapcard .go{display:inline-block;margin-top:10px;color:#38bdf8;font-size:12.5px;font-weight:bold}
+
+footer{margin-top:60px;padding-top:22px;border-top:1px solid #1e293b;color:#475569;font-size:12px}
+@media(max-width:820px){.main{padding:26px 20px}.sidebar{position:relative;height:auto;width:100%}body{flex-direction:column}}
+</style>
+</head>
+<body>
+<div class="sidebar">
+<div class="brand">RSC From Zero<small>to Interview-Ready</small></div>
+<div class="chapter-nav"><a class="" href="01-rsc-fundamentals.html"><span class="chnum">01</span>React Server Components (RSC) Fundamentals</a><a class="" href="02-rsc-payload-flight.html"><span class="chnum">02</span>The RSC Payload (React Flight)</a><a class="" href="03-initial-load-vs-navigation.html"><span class="chnum">03</span>Initial Load vs Client Navigation</a><a class="" href="04-link-prefetching.html"><span class="chnum">04</span>Link Prefetching</a><a class="" href="05-why-rsc-not-js-file.html"><span class="chnum">05</span>Why a Page Fetches RSC Instead of a JS File</a><a class="" href="06-use-client-deep-dive.html"><span class="chnum">06</span>'use client' Deep Dive</a><a class="" href="07-chunking-turbopack.html"><span class="chnum">07</span>JS Bundles, Turbopack & Chunking</a><a class="" href="08-complete-mental-model.html"><span class="chnum">08</span>Complete Mental Model</a><a class="" href="09-rsc-payload-purpose-recap.html"><span class="chnum">09</span>The Real Purpose of the RSC Payload</a><a class="active" href="10-server-execution-and-navigation-hydration.html"><span class="chnum">10</span>Server Execution of Client Components & Why Navigation Skips Hydration</a></div>
+<div class="toc"><div class="toc-title">On this page</div><a href="#p10-01">01. A Real Example — Reading Actual Output</a><a href="#p10-02">02. The HTML Line That Proves Server Execution</a><a href="#p10-03">03. Why useEffect Didn't Run on the Server</a><a href="#p10-04">04. Reading the Script Tags</a><a href="#p10-05">05. After Hydration — useEffect Finally Fires</a><a href="#p10-06">06. Mapping the Example to the Full Lifecycle</a><a href="#p10-07">07. What the Browser Knows Before JS Runs</a><a href="#p10-08">08. Why Execute Client Components on the Server At All?</a><a href="#p10-09">09. Option A vs Option B — SPA vs Next.js</a><a href="#p10-10">10. Why Execute the Component Twice?</a><a href="#p10-11">11. React SPA vs Next.js — Full Timelines</a><a href="#p10-12">12. The RSC Payload, Revisited</a><a href="#p10-13">13. Complete Mental Model — 10 Steps</a><a href="#p10-14">14. Client Navigation — React Is Already Running</a><a href="#p10-15">15. Why No HTML Is Needed on Navigation</a><a href="#p10-16">16. Why No Hydration Happens on Navigation</a><a href="#p10-17">17. The Painter Analogy</a><a href="#p10-18">18. The Rule to Remember</a></div>
+</div><div class="main"><div class="container"><span class="hero-badge"><span class="dot"></span>PART 10 OF 10</span><h1 class="page-title">Server Execution of Client Components & Why Navigation Skips Hydration</h1><div class="page-sub">A worked example straight from real HTML output, followed by why the server renders Client Components at all, and why a client-side navigation never needs hydration.</div><div class="page-meta">Explained in plain language, with real code examples and diagrams.</div>
+
+<h2 class="section-title" id="p10-01"><span class="secnum">01</span>A Real Example — Reading Actual Output</h2>
+<p>Take a Client Component like this:</p>
+<div class="code-title">Users.jsx (Client Component)</div>
+<pre class="language-jsx"><code class="language-jsx">'use client';
+
+export default function Users() {
+  const [users] = useState([ /* ...1 user... */ ]);
+
+  return (
+    &lt;div className="abcd"&gt;
+      {users.length}
+    &lt;/div&gt;
+  );
+}</code></pre>
+<p>Now look at the actual HTML the server sends back for this component, and what it tells us about everything happening behind the scenes.</p>
+
+<h2 class="section-title" id="p10-02"><span class="secnum">02</span>The HTML Line That Proves Server Execution</h2>
+<div class="feature"><code>&lt;div class="abcd"&gt;1&lt;/div&gt;</code> — this is the single most important line in the whole response.</div>
+<p>It means the server already executed <code>Users()</code>, calculated <code>users.length</code>, got <code>1</code>, and generated that exact <code>&lt;div&gt;</code> — all before any JavaScript reached the browser. So before the browser has downloaded a single script, it already has <strong>1</strong> painted on the screen.</p>
+
+<h2 class="section-title" id="p10-03"><span class="secnum">03</span>Why useEffect Didn't Run on the Server</h2>
+<p>If the response contained <code>10</code> instead of <code>1</code>, that would mean a data-fetching effect had already run somewhere. But the HTML only shows <code>1</code> — the initial state — which proves that this never executed on the server:</p>
+<pre class="language-jsx"><code class="language-jsx">useEffect(() => {
+  loadUsers();
+}, []);</code></pre>
+<div class="note">This is exactly what React promises: effects are a browser-only concept. The server can render output, but it never runs <code>useEffect</code>.</div>
+
+<h2 class="section-title" id="p10-04"><span class="secnum">04</span>Reading the Script Tags</h2>
+<p>Further down the response there are tags like <code>&lt;script src="/_next/static/chunks/...js"&gt;&lt;/script&gt;</code> — these are the Client Component JavaScript bundles. Notice the order they appear in: the HTML already exists on the page <em>before</em> these scripts are even mentioned. It's never "download JS, then create HTML" — it's "HTML already exists, then JS starts downloading."</p>
+<p>There's also a block like this:</p>
+<pre class="language-jsx"><code class="language-jsx">self.__next_f.push(...)</code></pre>
+<p>with entries conceptually shaped like <code>5:I[69231, ["/_next/static/chunks/..."], "default"]</code>. This is the RSC Payload. It is not rendered HTML — the HTML already exists above it. This block only tells React that a Client Component exists, which JS file its code lives in, and how to rebuild the React tree around it.</p>
+
+<h2 class="section-title" id="p10-05"><span class="secnum">05</span>After Hydration — useEffect Finally Fires</h2>
+<p>Eventually the browser downloads the JS, runs <code>Users()</code> again, gets <code>users = [1 user]</code> again, and compares its own render (<code>&lt;div&gt;1&lt;/div&gt;</code>) against the existing DOM (<code>&lt;div&gt;1&lt;/div&gt;</code>). It's a perfect match, so hydration succeeds. Only <strong>after</strong> hydration does React finally run <code>useEffect</code> — the <code>fetch(...)</code> call executes for the first time, ever, in the browser. The server never ran it. The response comes back with 10 users, <code>setUsers(users)</code> runs, and the page updates from <strong>1</strong> to <strong>10</strong>.</p>
+
+<h2 class="section-title" id="p10-06"><span class="secnum">06</span>Mapping the Example to the Full Lifecycle</h2>
+<div class="flow"><pre>SERVER
+Users()
+  ↓
+useState()
+  ↓
+users.length = 1
+  ↓
+Generate HTML  →  &lt;div class="abcd"&gt;1&lt;/div&gt;
+  ↓
+Generate RSC Payload
+  ↓
+Send response
+
+BROWSER
+Receives HTML  →  immediately paints "1"
+  ↓
+Downloads Users.js
+  ↓
+Runs Users()  →  users.length = 1
+  ↓
+Hydration (matches existing DOM)
+  ↓
+Runs useEffect()  →  fetch()
+  ↓
+Receives 10 users  →  setUsers()
+  ↓
+Re-render  →  "10"</pre></div>
+
+<h2 class="section-title" id="p10-07"><span class="secnum">07</span>What the Browser Knows Before JS Runs</h2>
+<p>Before any JavaScript executes, the browser knows only <code>&lt;div class="abcd"&gt;1&lt;/div&gt;</code>. It does <strong>not</strong> know about <code>useState</code>, <code>setUsers</code>, <code>useEffect</code>, <code>loadUsers</code>, <code>fetch</code>, the <code>users</code> variable, any event handlers, React hooks, or the React Fiber tree.</p>
+<div class="warning">Those all exist only after the browser downloads the Client Component JavaScript and executes <code>Users()</code> during hydration. The HTML shows what to display; the JavaScript teaches the browser how that UI actually works.</div>
+
+<h2 class="section-title" id="p10-08"><span class="secnum">08</span>Why Execute Client Components on the Server At All?</h2>
+<p>Take this page:</p>
+<div class="code-title">app/users/page.jsx (Server Component)</div>
+<pre class="language-jsx"><code class="language-jsx">import Users from "./Users";
+
+export default function Page() {
+  return (
+    &lt;&gt;
+      &lt;h1&gt;Users&lt;/h1&gt;
+      &lt;Users /&gt;
+    &lt;/&gt;
+  );
+}</code></pre>
+<p>When the browser requests <code>/users</code>, it has nothing yet. The server starts executing <code>&lt;Page /&gt;</code>. It immediately knows how to render <code>&lt;h1&gt;Users&lt;/h1&gt;</code> since that's a Server Component. Then it reaches <code>&lt;Users /&gt;</code> — a Client Component — and now the server has a choice.</p>
+
+<h2 class="section-title" id="p10-09"><span class="secnum">09</span>Option A vs Option B — SPA vs Next.js</h2>
+<h3>Option A — don't execute it (classic SPA)</h3>
+<p>The server sends <code>&lt;h1&gt;Users&lt;/h1&gt;</code> plus an empty <code>&lt;div id="root"&gt;&lt;/div&gt;</code>. The browser sees "Users" followed by blank space, then downloads JS, executes <code>Users()</code>, and only then creates <code>&lt;div&gt;1&lt;/div&gt;</code>. This is exactly how Create React App works.</p>
+<h3>Option B — execute it once on the server (Next.js)</h3>
+<p>The server runs <code>Users()</code> itself. Inside, <code>useState(1)</code> gives <code>count = 1</code>, and <code>Users</code> returns <code>&lt;div&gt;1&lt;/div&gt;</code>. The server now has the complete <code>&lt;h1&gt;Users&lt;/h1&gt;&lt;div&gt;1&lt;/div&gt;</code> and sends it immediately — the browser sees "Users 1" with zero JavaScript downloaded yet.</p>
+<div class="summary">This is the biggest reason the user sees the finished content immediately, instead of a blank placeholder followed by a delayed pop-in once JS finishes loading.</div>
+
+<h2 class="section-title" id="p10-10"><span class="secnum">10</span>Why Execute the Component Twice?</h2>
+<p>HTML is just text — it can't carry logic. The browser's copy of <code>&lt;div&gt;1&lt;/div&gt;</code> doesn't know about <code>useState</code>, <code>setCount</code>, <code>onClick</code>, <code>useEffect</code>, or that React even exists. So the browser downloads <code>Users.js</code> and executes <code>Users()</code> a second time, gets <code>count = 1</code> again, and produces <code>&lt;div&gt;1&lt;/div&gt;</code> again. React compares that against the existing HTML, finds a perfect match, and attaches its hooks, state, effects, and event listeners — this whole process is <strong>hydration</strong>.</p>
+<table>
+<tr><th>Execution</th><th>Goal</th><th>Result</th></tr>
+<tr><td>First (server)</td><td>Generate HTML quickly and send it to the browser</td><td><code>&lt;div&gt;1&lt;/div&gt;</code></td></tr>
+<tr><td>Second (browser)</td><td>Create the Fiber tree, restore hooks/state, attach events, hydrate</td><td>Interactive React application</td></tr>
+</table>
+
+<h2 class="section-title" id="p10-11"><span class="secnum">11</span>React SPA vs Next.js — Full Timelines</h2>
+<div class="flow"><pre>React SPA                              Next.js
+Request                                Request
+  ↓                                       ↓
+Server sends &lt;div id="root"&gt;           Server executes App()
+  ↓                                       ↓
+Browser downloads JS                   Server executes Users()
+  ↓                                       ↓
+Browser executes App()                 Server generates HTML
+  ↓                                       ↓
+Creates HTML                           Browser immediately shows page
+  ↓                                       ↓
+User finally sees page                 Browser downloads JS
+                                          ↓
+                                        Browser executes Users()
+                                          ↓
+                                        Hydration
+                                          ↓
+                                        Interactive</pre></div>
+<div class="warning">Next.js intentionally avoids the SPA timeline because it makes the user wait for JavaScript before seeing anything useful.</div>
+
+<h2 class="section-title" id="p10-12"><span class="secnum">12</span>The RSC Payload, Revisited</h2>
+<p>The HTML tells the browser what to display. But React also needs to know which parts are Server Components, which are Client Components, which JS file contains which component, and how to reconstruct the component tree — all of that travels separately as the RSC Payload.</p>
+<table>
+<tr><th>Artifact</th><th>Job</th></tr>
+<tr><td>HTML</td><td>What to display</td></tr>
+<tr><td>RSC Payload</td><td>How this page was built</td></tr>
+<tr><td>Client JS</td><td>How to make it interactive</td></tr>
+</table>
+
+<h2 class="section-title" id="p10-13"><span class="secnum">13</span>Complete Mental Model — 10 Steps</h2>
+<div class="flow"><pre>1. Browser requests page
+2. Server executes Server Components
+3. Server executes Client Components (only to generate HTML)
+4. Server sends HTML + RSC Payload
+5. Browser immediately displays HTML
+6. Browser downloads Client Component JS
+7. Browser executes Client Components again
+8. React rebuilds its Fiber tree
+9. React hydrates the existing HTML (state, hooks, events)
+10. The page becomes interactive</pre></div>
+<div class="summary">Two different goals, one component: server execution exists only to generate HTML quickly so the user isn't stuck waiting on JavaScript; browser execution exists to recreate React's internal state — Fiber tree, hooks, event handlers, effects — so the already-visible HTML becomes a live, interactive app.</div>
+
+<h2 class="section-title" id="p10-14"><span class="secnum">14</span>Client Navigation — React Is Already Running</h2>
+<p>Everything above describes the <strong>initial</strong> load, where the browser starts with nothing. A click on <code>&lt;Link href="/users"&gt;</code> from an already-hydrated page is a completely different situation, because the browser already has React, React DOM, the Next.js router, and a hydrated application running.</p>
+<div class="flow"><pre>Click &lt;Link&gt;
+  ↓
+Next.js intercepts the click
+  ↓
+Prevents a full page reload
+  ↓
+Fetches the /users RSC Payload  (NOT HTML)</pre></div>
+<p>The server executes <code>UsersPage()</code> — Server Components, then Client Components — just like before. But this time it mainly sends back an RSC Payload, not HTML, containing something like <code>Page → Users Component → props → component tree</code>.</p>
+
+<h2 class="section-title" id="p10-15"><span class="secnum">15</span>Why No HTML Is Needed on Navigation</h2>
+<p>React already exists in the browser, so it reads the RSC Payload and rebuilds the new React tree directly. If the Client Component's JS isn't already downloaded, Next.js fetches it; if it's already cached, that step is skipped entirely. Then <code>Users()</code> runs in the browser, <code>useState()</code> initializes, JSX is returned, and React updates the DOM directly — a completely normal React render, no server-generated markup required.</p>
+
+<h2 class="section-title" id="p10-16"><span class="secnum">16</span>Why No Hydration Happens on Navigation</h2>
+<p>Hydration only happens when React finds HTML it didn't create itself — the case where the server produced <code>&lt;div&gt;1&lt;/div&gt;</code> and the browser has to attach itself to markup it never wrote. After a client-side navigation, React itself is the one creating the new DOM nodes and inserting them — there's nothing foreign to attach to, so there's nothing to hydrate.</p>
+<table>
+<tr><th></th><th>Initial page load</th><th>Client navigation (&lt;Link&gt;)</th></tr>
+<tr><td>HTML from server?</td><td>✅ Yes</td><td>❌ No — React updates the DOM from the RSC Payload</td></tr>
+<tr><td>Hydration?</td><td>✅ Yes</td><td>❌ No</td></tr>
+<tr><td>Client Component executes in browser?</td><td>✅ Yes</td><td>✅ Yes</td></tr>
+</table>
+
+<h2 class="section-title" id="p10-17"><span class="secnum">17</span>The Painter Analogy</h2>
+<div class="analogy">
+<p>Think of React as a painter. On the <strong>initial load</strong>, there is no painting yet — the server paints the picture first, the browser shows that painting, and React then learns about it (hydration).</p>
+<p>On <strong>navigation</strong>, React is already painting. The server just says "draw this new page," and React paints it itself — there's no need for server-generated HTML, and nothing to hydrate.</p>
+</div>
+
+<h2 class="section-title" id="p10-18"><span class="secnum">18</span>The Rule to Remember</h2>
+<div class="qa"><div class="q">Why do we need two executions only on the initial render?</div><div class="a">The server execution generates HTML for the first paint; the browser execution hydrates that HTML. On navigation there's no server-generated HTML to hydrate — React is already running, so it just executes the Client Component and updates the DOM directly.</div></div>
+<div class="qa"><div class="q">Why not just skip server execution and download JS first?</div><div class="a">You can — that's exactly what a classic SPA does. Next.js avoids it because the user would be stuck waiting for JavaScript before seeing anything useful.</div></div>
+<div class="qa"><div class="q">Does a client-side navigation ever produce hydration?</div><div class="a">No. Hydration is specifically for attaching React to markup it didn't create. On navigation, React creates the markup itself, so there's nothing foreign to attach to.</div></div>
+
+<div class="chapnav"><a class="prev" href="09-rsc-payload-purpose-recap.html">Part 09 — The Real Purpose of the RSC Payload</a><a class="next" href="rsc-book-index.html">Book Home</a></div></div></div><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-tsx.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+</body>
+</html>

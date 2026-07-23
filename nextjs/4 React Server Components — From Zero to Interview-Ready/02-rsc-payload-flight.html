@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Part 02 — The RSC Payload (React Flight) | RSC From Zero to Interview-Ready</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:#0f172a;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.85;display:flex;min-height:100vh}
+a{color:inherit;text-decoration:none}
+::selection{background:#38bdf8;color:#0f172a}
+
+.sidebar{width:280px;flex-shrink:0;background:#0b1220;border-right:1px solid #1e293b;padding:22px 16px;position:sticky;top:0;height:100vh;overflow-y:auto}
+.brand{color:#38bdf8;font-size:16px;font-weight:800}
+.brand small{display:block;color:#64748b;font-weight:400;font-size:11.5px;margin-top:4px}
+.chapter-nav{margin-top:20px}
+.chapter-nav a{display:block;padding:7px 9px;border-radius:8px;font-size:12.5px;color:#94a3b8;margin-bottom:3px;border-left:3px solid transparent}
+.chapter-nav a:hover{background:#111827;color:#e2e8f0}
+.chapter-nav a.active{background:#111827;color:#38bdf8;border-left:3px solid #38bdf8;font-weight:bold}
+.chapter-nav .chnum{display:inline-block;width:20px;color:#475569;font-family:monospace;font-size:11px}
+.toc{margin-top:20px;border-top:1px solid #1e293b;padding-top:14px}
+.toc-title{color:#fbbf24;font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px}
+.toc a{display:block;font-size:11.8px;color:#8ea3c2;padding:4px 8px;border-radius:6px;line-height:1.4}
+.toc a:hover{background:#111827;color:#e2e8f0}
+
+.main{flex:1;padding:40px 48px;max-width:1000px}
+.container{max-width:920px}
+.hero-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(56,189,248,.1);border:1px solid rgba(56,189,248,.3);color:#38bdf8;font-size:11.5px;font-weight:bold;padding:5px 12px;border-radius:20px;margin-bottom:14px}
+.hero-badge .dot{width:6px;height:6px;border-radius:50%;background:#38bdf8}
+h1.page-title{color:#f1f5f9;font-size:27px;margin-bottom:8px;letter-spacing:-.02em}
+.page-sub{color:#94a3b8;margin-bottom:10px;font-size:14px;max-width:680px}
+.page-meta{color:#64748b;margin-bottom:28px;font-size:12.5px}
+
+h2.section-title{color:#a78bfa;margin-top:50px;margin-bottom:14px;font-size:20px;border-top:1px solid #1e293b;padding-top:36px;scroll-margin-top:20px}
+h2.section-title .secnum{color:#475569;font-family:monospace;margin-right:8px;font-size:14px}
+h3{color:#fbbf24;margin-top:22px;margin-bottom:9px;font-size:15.5px}
+h4{color:#38bdf8;margin-top:16px;margin-bottom:7px;font-size:14px}
+p{margin-bottom:13px;color:#cbd5e1}
+ul,ol{margin-left:20px;margin-bottom:13px}
+li{margin-bottom:7px;color:#cbd5e1}
+strong{color:#f1f5f9}
+code{color:#93c5fd;font-family:'JetBrains Mono',Consolas,monospace;font-size:.88em;background:#1e293b;padding:1px 6px;border-radius:4px}
+
+.feature{background:#1e293b;border-left:5px solid #38bdf8;padding:14px 17px;border-radius:8px;margin:16px 0}
+.warning{background:#2a1a1a;border-left:5px solid #f87171;padding:14px 17px;border-radius:8px;margin:16px 0}
+.summary{background:#16261c;border-left:5px solid #34d399;padding:14px 17px;border-radius:8px;margin:16px 0}
+.note{background:#241a2e;border-left:5px solid #a78bfa;padding:14px 17px;border-radius:8px;margin:16px 0}
+.analogy{background:#1a2332;border:1px dashed #38bdf8;padding:14px 17px;border-radius:8px;margin:16px 0}
+.feature b,.warning b,.summary b,.note b,.analogy b{color:#f1f5f9}
+
+.code-title{background:#1e293b;color:#93c5fd;padding:9px 13px;font-weight:bold;border-radius:8px 8px 0 0;font-size:12px;font-family:monospace;border-bottom:1px solid #0f172a}
+pre[class*="language-"]{margin:0 0 16px 0!important;border-radius:0 0 8px 8px;font-size:12.5px}
+
+.flow{background:#111827;border:1px solid #1e293b;border-radius:10px;padding:16px 18px;margin:14px 0;overflow-x:auto}
+.flow pre{margin:0!important;color:#86efac;font-family:'JetBrains Mono',Consolas,monospace;font-size:12.5px;white-space:pre;line-height:1.7}
+
+table{width:100%;border-collapse:collapse;margin:16px 0;font-size:13px}
+th{background:#1e293b;color:#38bdf8;text-align:left;padding:10px 12px;font-size:12px}
+td{padding:10px 12px;border-top:1px solid #1e293b;color:#cbd5e1;vertical-align:top}
+tr:hover td{background:#111827}
+
+.qa{background:#111827;border:1px solid #1e293b;border-radius:10px;padding:14px 16px;margin-bottom:10px}
+.qa .q{color:#38bdf8;font-weight:bold;font-size:13.5px;margin-bottom:5px}
+.qa .a{color:#cbd5e1;font-size:13px;margin-bottom:0}
+
+.chapnav{display:flex;justify-content:space-between;margin-top:56px;padding-top:22px;border-top:1px solid #1e293b}
+.chapnav a{background:#111827;padding:11px 16px;border-radius:10px;border:1px solid #1e293b;font-size:13px;color:#94a3b8}
+.chapnav a:hover{color:#38bdf8;border-color:#38bdf8}
+.chapnav .prev::before{content:"<- "}
+.chapnav .next::after{content:" ->"}
+
+.stat{background:#111827;border:1px solid #1e293b;border-radius:10px;padding:14px 18px}
+.stat b{color:#38bdf8;font-size:20px;display:block}
+.stat span{color:#64748b;font-size:12px}
+.stats{display:flex;gap:14px;margin:20px 0;flex-wrap:wrap}
+.chapters{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:20px}
+@media(max-width:800px){.chapters{grid-template-columns:1fr}}
+.chapcard{background:#111827;border:1px solid #1e293b;border-radius:12px;padding:20px;transition:.15s}
+.chapcard:hover{border-color:#38bdf8}
+.chapcard .num{color:#475569;font-family:monospace;font-size:13px}
+.chapcard h3{color:#a78bfa;margin:6px 0 10px;font-size:17px}
+.chapcard ol{margin-left:18px;color:#94a3b8;font-size:12.5px}
+.chapcard .go{display:inline-block;margin-top:10px;color:#38bdf8;font-size:12.5px;font-weight:bold}
+
+footer{margin-top:60px;padding-top:22px;border-top:1px solid #1e293b;color:#475569;font-size:12px}
+@media(max-width:820px){.main{padding:26px 20px}.sidebar{position:relative;height:auto;width:100%}body{flex-direction:column}}
+</style>
+</head>
+<body>
+<div class="sidebar">
+<div class="brand">RSC From Zero<small>to Interview-Ready</small></div>
+<div class="chapter-nav"><a class="" href="01-rsc-fundamentals.html"><span class="chnum">01</span>React Server Components (RSC) Fundamentals</a><a class="active" href="02-rsc-payload-flight.html"><span class="chnum">02</span>The RSC Payload (React Flight)</a><a class="" href="03-initial-load-vs-navigation.html"><span class="chnum">03</span>Initial Load vs Client Navigation</a><a class="" href="04-link-prefetching.html"><span class="chnum">04</span>Link Prefetching</a><a class="" href="05-why-rsc-not-js-file.html"><span class="chnum">05</span>Why a Page Fetches RSC Instead of a JS File</a><a class="" href="06-use-client-deep-dive.html"><span class="chnum">06</span>'use client' Deep Dive</a><a class="" href="07-chunking-turbopack.html"><span class="chnum">07</span>JS Bundles, Turbopack & Chunking</a><a class="" href="08-complete-mental-model.html"><span class="chnum">08</span>Complete Mental Model</a><a class="" href="09-rsc-payload-purpose-recap.html"><span class="chnum">09</span>The Real Purpose of the RSC Payload</a><a class="" href="10-server-execution-and-navigation-hydration.html"><span class="chnum">10</span>Server Execution of Client Components &amp; Why Navigation Skips Hydration</a></div>
+<div class="toc"><div class="toc-title">On this page</div><a href="#p2-01">01. What Is the RSC Payload?</a><a href="#p2-02">02. The React Flight Protocol</a><a href="#p2-03">03. Why the RSC Payload Exists</a><a href="#p2-04">04. The Internal Payload Structure</a><a href="#p2-06">06. The Payload Lives Inside the HTML</a><a href="#p2-07">07. How the Browser Parses It</a><a href="#p2-08">08. Hydration — Using the Payload to "Wake Up" the Page</a><a href="#p2-09">09. HTML vs Payload — Side by Side</a><a href="#p2-10">10. Full Diagram — Payload Creation to Hydration</a><a href="#p2-11">11. Part 2 — Interview Summary</a></div>
+</div><div class="main"><div class="container"><span class="hero-badge"><span class="dot"></span>PART 02 OF 8</span><h1 class="page-title">The RSC Payload (React Flight)</h1><div class="page-sub">The data format underneath every Server Component response — Flight, self.__next_f.push(...), and how hydration uses it.</div><div class="page-meta">Explained in plain language, with real code examples and diagrams.</div>
+<h2 class="section-title" id="p2-01"><span class="secnum">01</span>What Is the RSC Payload?</h2>
+<p>
+The RSC Payload is a special, compact format that describes your component tree — not as HTML tags, but as a structured description React can read and rebuild in the browser. It's often called <strong>Flight data</strong>.
+</p>
+<div class="feature">
+<b>Easiest definition:</b> if HTML is "the picture," the RSC Payload is "the instructions for drawing the picture again, piece by piece." React uses those instructions to know exactly which part of the page is which component, without needing to guess from raw HTML.
+</div>
+
+<h2 class="section-title" id="p2-02"><span class="secnum">02</span>The React Flight Protocol</h2>
+<p>
+"Flight" is React's internal name for the wire format used to stream Server Component output to the client. It's not JSON exactly, and not HTML — it's a custom, line-by-line, streaming format designed specifically for this job.
+</p>
+<div class="code-title">A tiny simplified look at Flight-style output</div>
+<pre><code class="language-text">0:["$","div",null,{"className":"abc","children":10}]</code></pre>
+<p>
+Read this like a small program: <code>"$"</code> means "this is a React element," <code>"div"</code> is the tag name, <code>null</code> is the key, and the object holds the props. React can turn this single line back into a real DOM node.
+</p>
+
+<h2 class="section-title" id="p2-03"><span class="secnum">03</span>Why the RSC Payload Exists</h2>
+<ul>
+<li><strong>Hydration needs it.</strong> React needs to know exactly which DOM node belongs to which component, so it can attach interactivity without throwing away and rebuilding the page.</li>
+<li><strong>Navigation reuses it.</strong> When you click a link, Next.js fetches a fresh RSC Payload instead of a whole new HTML page — much lighter and faster.</li>
+<li><strong>It can describe Client Components too.</strong> Instead of embedding a Client Component's real code, the payload just says "there's a Client Component here, its code lives in this file, here are its props" — a <em>reference</em>, not the whole component.</li>
+</ul>
+
+<h2 class="section-title" id="p2-04"><span class="secnum">04</span>The Internal Payload Structure</h2>
+<p>A real payload is a series of numbered lines, where each line can reference other lines by their ID — like a small lookup table:</p>
+<div class="code-title">Simplified real-world example</div>
+<pre><code class="language-text">1:"$Sreact.fragment"
+2:I[39756,["/_next/static/chunks/abc.js"],"default"]
+4:["$","div",null,{"className":"abc","children":10}]</code></pre>
+<table>
+<tr><th>Piece</th><th>Meaning</th></tr>
+<tr><td><code>1:</code>, <code>2:</code>, <code>4:</code></td><td>IDs — other lines can reference these by number instead of repeating the data</td></tr>
+<tr><td><code>"$"</code></td><td>Marks "this is a React element"</td></tr>
+<tr><td><code>I[...]</code></td><td>An "import reference" — points to a Client Component's JS file so the browser knows what to download</td></tr>
+<tr><td>The object at the end</td><td>Props being passed into that element/component</td></tr>
+</table>
+
+<h2 class="section-title" id="p2-05"><span class="secnum">05</span>What Is <code>self.__next_f.push(...)</code>?</h2>
+<p>
+This is how Next.js delivers the RSC Payload during a first page load. Instead of sending it as a separate network request, it embeds the payload directly inside the HTML, as a series of small inline <code>&lt;script&gt;</code> tags.
+</p>
+<div class="code-title">What you'll actually see in "View Page Source"</div>
+<pre><code class="language-html">&lt;script&gt;
+  (self.__next_f = self.__next_f || []).push([0])
+&lt;/script&gt;
+&lt;script&gt;
+  self.__next_f.push([1, "4:[\"$\",\"div\",null,{\"className\":\"abc\",\"children\":10}]\n"])
+&lt;/script&gt;</code></pre>
+<p>
+Each <code>push()</code> call adds one more chunk of the payload to an array (<code>self.__next_f</code>). Next.js can send these chunks one at a time as they become ready — which is what lets React start streaming in parts of a slow page before everything has finished loading.
+</p>
+
+<h2 class="section-title" id="p2-06"><span class="secnum">06</span>The Payload Lives Inside the HTML</h2>
+<div class="analogy">
+<b>Restaurant analogy:</b> on your very first visit, the waiter doesn't make two separate trips — one for the food, one for the recipe card. They bring both on the same tray. That's exactly what happens here: on a first page load, there's no separate network request for the RSC Payload — it rides along inside the one HTML document, tucked into these script tags.
+</div>
+<div class="warning">
+This is exactly why, if you check your Network tab after a hard reload, you won't find a request literally called "RSC payload" — look inside the <code>document</code> response itself, in the Response tab, and search for <code>__next_f</code>.
+</div>
+
+<h2 class="section-title" id="p2-07"><span class="secnum">07</span>How the Browser Parses It</h2>
+<div class="flow"><pre>Browser downloads the HTML document
+        │
+        ▼
+Browser paints the HTML immediately   (visible page!)
+        │
+        ▼
+Browser runs the inline <script> tags
+        │
+        ▼
+Each push() call feeds one chunk into React's Flight reader
+        │
+        ▼
+React reconstructs its internal component tree from those chunks</pre></div>
+
+<h2 class="section-title" id="p2-08"><span class="secnum">08</span>Hydration — Using the Payload to "Wake Up" the Page</h2>
+<p>
+Hydration is the process where React looks at the existing HTML <em>and</em> the RSC Payload side by side, matches them up, and attaches event listeners and state — without throwing away and re-creating any DOM.
+</p>
+<div class="feature">
+<b>Important:</b> only Client Components get hydrated. Server Component HTML is left completely alone forever — there's nothing in the payload telling React to attach any behavior to it, because none exists.
+</div>
+
+<h2 class="section-title" id="p2-09"><span class="secnum">09</span>HTML vs Payload — Side by Side</h2>
+<table>
+<tr><th>HTML</th><th>RSC Payload</th></tr>
+<tr><td>What the browser paints immediately</td><td>What React uses to understand the component tree</td></tr>
+<tr><td>Just tags and text — no structure info about components</td><td>Knows exactly which piece is which component, and its props</td></tr>
+<tr><td>Can't be used for hydration alone</td><td>Required for hydration</td></tr>
+<tr><td>Sent on every request (first load + navigation, in different forms)</td><td>Always sent — embedded in HTML on first load, standalone on navigation</td></tr>
+</table>
+
+<h2 class="section-title" id="p2-10"><span class="secnum">10</span>Full Diagram — Payload Creation to Hydration</h2>
+<div class="flow"><pre>Server Component runs
+        │
+        ▼
+React server renderer produces:
+   HTML  ──────────────► sent to browser, painted instantly
+   RSC Payload ─────────► embedded as __next_f.push(...) calls
+        │
+        ▼
+Browser downloads Client Component JS chunks (if any)
+        │
+        ▼
+React reads the RSC Payload + matches it to the existing HTML
+        │
+        ▼
+Hydration: event listeners attached to Client Components only
+        │
+        ▼
+Page is fully interactive</pre></div>
+
+<h2 class="section-title" id="p2-11"><span class="secnum">11</span>Part 2 — Interview Summary</h2>
+<div class="qa"><div class="q">Q: What is the RSC Payload?</div><div class="a">A serialized description of the Server Component tree (also called Flight data) that React uses to rebuild and hydrate the UI on the client.</div></div>
+<div class="qa"><div class="q">Q: Where does the RSC Payload live on a first page load?</div><div class="a">Embedded directly inside the HTML document, inside inline &lt;script&gt; tags calling self.__next_f.push(...) — not as a separate network request.</div></div>
+<div class="qa"><div class="q">Q: Why can't the browser just use the HTML alone?</div><div class="a">Plain HTML has no information about component boundaries, props, or which parts are Client Components — the payload is what lets React understand and hydrate the tree correctly.</div></div>
+<div class="qa"><div class="q">Q: Does a page with zero Client Components still get an RSC Payload?</div><div class="a">Yes — Next.js always produces one, since it's the one consistent format used across every route, whether or not there's anything to hydrate.</div></div>
+<div class="chapnav"><a class="prev" href="01-rsc-fundamentals.html">Part 01 — React Server Components (RSC) Fundamentals</a><a class="next" href="03-initial-load-vs-navigation.html">Part 03 — Initial Load vs Client Navigation</a></div></div></div><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-tsx.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+</body>
+</html>

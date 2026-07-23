@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The .next Folder — Complete Guide</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:#0f172a;color:#e2e8f0;font-family:Arial,sans-serif;line-height:1.8;display:flex;min-height:100vh}
+a{color:inherit;text-decoration:none}
+::selection{background:#38bdf8;color:#0f172a}
+
+.sidebar{width:250px;flex-shrink:0;background:#0b1220;border-right:1px solid #1e293b;padding:24px 18px;position:sticky;top:0;height:100vh;overflow-y:auto}
+.brand{color:#38bdf8;font-size:17px;font-weight:800}
+.brand small{display:block;color:#64748b;font-weight:400;font-size:12px;margin-top:4px}
+.toc{margin-top:26px}
+.toc-title{color:#fbbf24;font-size:11px;text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px}
+.toc a{display:block;font-size:13px;color:#94a3b8;padding:7px 10px;border-radius:8px;margin-bottom:2px;border-left:3px solid transparent}
+.toc a:hover{background:#111827;color:#e2e8f0}
+.toc a.l2{font-size:12px;color:#64748b;padding-left:22px}
+
+.main{flex:1;padding:44px 52px;max-width:980px}
+.container{max-width:900px}
+
+.hero-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(56,189,248,.1);border:1px solid rgba(56,189,248,.3);color:#38bdf8;font-size:12px;font-weight:bold;padding:5px 12px;border-radius:20px;margin-bottom:16px}
+.hero-badge .dot{width:6px;height:6px;border-radius:50%;background:#38bdf8}
+h1.page-title{color:#f1f5f9;font-size:32px;margin-bottom:10px;letter-spacing:-.02em}
+.page-sub{color:#94a3b8;margin-bottom:32px;font-size:15px;max-width:640px}
+
+h2{color:#a78bfa;margin-top:56px;margin-bottom:16px;font-size:22px;border-top:1px solid #1e293b;padding-top:40px;scroll-margin-top:24px}
+h2 .num{color:#475569;font-family:monospace;margin-right:10px;font-size:16px}
+h3{color:#fbbf24;margin-top:26px;margin-bottom:10px;font-size:16px;scroll-margin-top:24px}
+p{margin-bottom:15px;color:#cbd5e1}
+ul,ol{margin-left:20px;margin-bottom:15px}
+li{margin-bottom:8px;color:#cbd5e1}
+strong{color:#f1f5f9}
+code{color:#93c5fd;font-family:'JetBrains Mono',Consolas,monospace;font-size:.9em;background:#1e293b;padding:1px 6px;border-radius:4px}
+
+.feature{background:#1e293b;border-left:5px solid #38bdf8;padding:16px 18px;border-radius:8px;margin:20px 0}
+.warning{background:#2a1a1a;border-left:5px solid #f87171;padding:16px 18px;border-radius:8px;margin:20px 0}
+.summary{background:#16261c;border-left:5px solid #34d399;padding:16px 18px;border-radius:8px;margin:20px 0}
+.feature b,.warning b,.summary b{color:#f1f5f9}
+
+.code-title{background:#1e293b;color:#93c5fd;padding:10px 14px;font-weight:bold;border-radius:8px 8px 0 0;font-size:12.5px;font-family:monospace;border-bottom:1px solid #0f172a}
+pre[class*="language-"]{margin:0 0 20px 0!important;border-radius:0 0 8px 8px;font-size:13px}
+.tree-card{background:#111827;border:1px solid #1e293b;border-radius:10px;padding:20px 24px;margin:18px 0;overflow-x:auto}
+.tree{color:#86efac;white-space:pre;font-family:'JetBrains Mono',Consolas,monospace;font-size:13px;line-height:1.7}
+.tree .folder{color:#38bdf8}
+.tree .comment{color:#64748b}
+
+table{width:100%;border-collapse:collapse;margin:18px 0;font-size:14px}
+th{background:#1e293b;color:#38bdf8;text-align:left;padding:12px 14px;font-size:13px}
+td{padding:12px 14px;border-top:1px solid #1e293b;color:#cbd5e1;vertical-align:top}
+td:first-child{color:#93c5fd;font-family:monospace;white-space:nowrap;font-size:13px}
+tr:hover td{background:#111827}
+
+.badge{background:#2563eb;color:#fff;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:bold;vertical-align:middle}
+.badge.orange{background:#d97706}
+.badge.gray{background:#374151;color:#cbd5e1}
+
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:20px 0}
+@media(max-width:760px){.grid2{grid-template-columns:1fr}.main{padding:28px 20px}.sidebar{position:relative;height:auto;width:100%}body{flex-direction:column}}
+.mini-card{background:#111827;border:1px solid #1e293b;border-radius:10px;padding:16px 18px}
+.mini-card h4{color:#fbbf24;font-size:13px;margin-bottom:8px}
+.mini-card p{font-size:13px;margin-bottom:0;color:#94a3b8}
+
+.faq{background:#111827;border:1px solid #1e293b;border-radius:10px;padding:16px 18px;margin-bottom:12px}
+.faq .q{color:#38bdf8;font-weight:bold;margin-bottom:6px;font-size:14.5px}
+.faq .a{color:#cbd5e1;font-size:14px;margin-bottom:0}
+
+hr{border:none;border-top:1px solid #1e293b;margin:30px 0}
+footer{margin-top:60px;padding-top:24px;border-top:1px solid #1e293b;color:#475569;font-size:12.5px}
+</style>
+</head>
+<body>
+
+<div class="sidebar">
+<div class="brand">Next.js Internals<small>Build Output Reference</small></div>
+<div class="toc">
+<div class="toc-title">On this page</div>
+<a href="#overview">1. Overview</a>
+<a href="#when">2. When It's Created</a>
+<a href="#tree">3. Full Folder Structure</a>
+<a href="#top-level">4. Top-Level Folders</a>
+<a href="#top-level" class="l2">→ server, static, cache</a>
+<a href="#manifests">5. Manifest &amp; Metadata Files</a>
+<a href="#flow">6. How It's Used at Runtime</a>
+<a href="#dev-vs-prod">7. Dev vs Production Output</a>
+<a href="#practices">8. Best Practices</a>
+<a href="#faq">9. FAQ</a>
+</div>
+</div>
+
+<div class="main"><div class="container">
+
+<span class="hero-badge"><span class="dot"></span>NEXT.JS BUILD SYSTEM</span>
+<h1 class="page-title">The Complete Guide to the <code style="background:none;color:#f1f5f9;padding:0">.next</code> Folder</h1>
+<div class="page-sub">Everything Next.js generates when you run <code>next dev</code> or <code>next build</code> — what each file does, how the pieces fit together, and how to work with it safely.</div>
+
+<h2 id="overview"><span class="num">01</span>Overview</h2>
+<p>
+The <code>.next</code> folder is the build output directory that Next.js generates automatically. It's created the moment you run <code>next dev</code> for local development, or <code>next build</code> to produce a production build. Nothing inside it is written by hand — every file is compiled, bundled, or generated by the Next.js toolchain itself.
+</p>
+<div class="feature">
+<b>Simple meaning:</b> think of <code>.next</code> as the "compiled output" of your app — the same relationship <code>dist/</code> has to a typical JavaScript project, or <code>target/</code> has to a Java project. Your source code lives in <code>app/</code> or <code>pages/</code>; the runnable, optimized version of it lives in <code>.next</code>.
+</div>
+<p>
+It holds compiled server code (Server Components, Route Handlers, Server Actions), optimized client-side JavaScript and CSS chunks, prerendered HTML for static pages, and a set of JSON "manifest" files that tell the Next.js server how to map an incoming URL to the right compiled output.
+</p>
+<div class="summary">
+<b>Safe to delete:</b> because everything in <code>.next</code> is derived from your source code, you can always delete the folder and regenerate it with <code>next dev</code> or <code>next build</code>. Deleting it is also the standard fix for stale-cache or "weird build" issues.
+</div>
+
+<h2 id="when"><span class="num">02</span>When It's Created and Updated</h2>
+<table>
+<tr><th>Command</th><th>What happens to .next</th></tr>
+<tr><td>next dev</td><td>Created on first run; updated incrementally on every file save (Fast Refresh / Turbopack recompiles just the changed module).</td></tr>
+<tr><td>next build</td><td>Fully regenerated from scratch — compiles every route, generates all manifests, and prerenders static/ISR pages.</td></tr>
+<tr><td>next start</td><td>Doesn't modify .next — it just reads the production build already sitting there and serves it.</td></tr>
+</table>
+
+<h2 id="tree"><span class="num">03</span>Full Folder Structure</h2>
+<p>A production build (<code>next build</code>) produces a tree that looks roughly like this:</p>
+<div class="tree-card"><div class="tree">.next/
+├── <span class="folder">cache/</span>              <span class="comment"># Turbopack/webpack, fetch &amp; image cache</span>
+├── <span class="folder">server/</span>              <span class="comment"># compiled Server Components, Route Handlers, Actions</span>
+├── <span class="folder">static/</span>              <span class="comment"># hashed JS/CSS chunks served to the browser</span>
+├── <span class="folder">types/</span>               <span class="comment"># generated TypeScript route types</span>
+├── <span class="folder">diagnostics/</span>          <span class="comment"># framework/build diagnostic data</span>
+├── <span class="folder">trace</span> / <span class="folder">trace-build</span>    <span class="comment"># performance trace data (next build --profile)</span>
+├── app-build-manifest.json
+├── app-path-routes-manifest.json
+├── build-manifest.json
+├── BUILD_ID
+├── export-marker.json
+├── fallback-build-manifest.json
+├── images-manifest.json
+├── next-minimal-server.js.nft.json
+├── next-server.js.nft.json
+├── package.json
+├── prerender-manifest.json
+├── react-loadable-manifest.json
+├── required-server-files.json
+└── routes-manifest.json</div></div>
+<div class="warning">
+The exact file list varies by Next.js version, whether you're on the App Router or Pages Router, and whether Turbopack or webpack built the project — treat this as a representative snapshot, not a fixed spec.
+</div>
+
+<h2 id="top-level"><span class="num">04</span>Top-Level Folders</h2>
+<table>
+<tr><th>Folder</th><th>Contains</th></tr>
+<tr><td>server/</td><td>The compiled server-side output: your Server Components, Route Handlers, Server Actions, and the App/Pages Router route tree, all turned into runnable Node.js/Edge code. This is what <code>next start</code> actually executes.</td></tr>
+<tr><td>static/</td><td>Every hashed, browser-facing asset: JS chunks, CSS files, the React/Next.js runtime, and font files. Everything here is content-hashed so it can be cached forever by a CDN.</td></tr>
+<tr><td>cache/</td><td>Incremental build cache — SWC/Turbopack compilation cache, the fetch cache used by <code>fetch()</code> and <code>unstable_cache</code>, and the image optimization cache. This is what makes repeated <code>next dev</code>/<code>next build</code> runs fast; deleting it just costs you a slower next rebuild, nothing more.</td></tr>
+<tr><td>types/</td><td>Auto-generated <code>.d.ts</code> files that give typed <code>Link href</code> values and typed route params when <code>typedRoutes</code> is enabled.</td></tr>
+<tr><td>diagnostics/</td><td>Structured diagnostic output used by Next.js tooling and error overlays to explain build failures.</td></tr>
+<tr><td>trace / trace-build</td><td>Chrome-trace-format performance data, useful for profiling slow builds with <code>next build --profile</code>.</td></tr>
+</table>
+
+<h2 id="manifests"><span class="num">05</span>Manifest &amp; Metadata Files</h2>
+<p>
+Manifests are small JSON files the Next.js server reads at request time. They exist so the server never has to re-inspect the filesystem on every request — instead it looks up an already-computed answer.
+</p>
+<table>
+<tr><th>File</th><th>Purpose</th></tr>
+<tr><td>BUILD_ID</td><td>A unique, per-build identifier (a hash) that tags a specific production build. Used to detect when a client's cached assets belong to an outdated deployment.</td></tr>
+<tr><td>build-manifest.json</td><td>Maps every page/route to the exact list of JS files it needs, so the server can inject only the required scripts for each request.</td></tr>
+<tr><td>app-build-manifest.json</td><td>The App Router's equivalent of build-manifest.json — per-route JS chunk mapping for routes defined in <code>app/</code>.</td></tr>
+<tr><td>app-path-routes-manifest.json</td><td>Maps App Router URL paths to their underlying file-system route, including route groups and parallel/intercepting route segments.</td></tr>
+<tr><td>routes-manifest.json</td><td>The master routing table: static routes, dynamic routes, rewrites, redirects, and headers defined in <code>next.config.js</code>.</td></tr>
+<tr><td>prerender-manifest.json</td><td>Tracks every statically prerendered page — which pages are fully static, which use ISR, and their revalidate intervals.</td></tr>
+<tr><td>fallback-build-manifest.json</td><td>A build manifest used specifically for the <code>fallback: true/blocking</code> loading state of dynamic SSG pages.</td></tr>
+<tr><td>images-manifest.json</td><td>The resolved <code>next/image</code> configuration — allowed remote domains, device sizes, and formats — used by the image optimizer at request time.</td></tr>
+<tr><td>react-loadable-manifest.json</td><td>Maps dynamically-imported (<code>next/dynamic</code>) components to their JS chunks, so lazy-loaded code can be found and served correctly.</td></tr>
+<tr><td>export-marker.json</td><td>A small marker file recording whether the build used <code>next export</code>-style static export.</td></tr>
+<tr><td>required-server-files.json</td><td>Lists every file the production server needs to boot — used by minimal/standalone deployments to know exactly what to ship.</td></tr>
+<tr><td>package.json</td><td>A minimal package.json generated for standalone output mode, so a deployment can run with just <code>node server.js</code> without the full source tree.</td></tr>
+<tr><td>*.nft.json (Node File Trace)</td><td>Per-entry-point dependency traces — the exact set of files a given server file needs at runtime. Used to build minimal deployment bundles.</td></tr>
+</table>
+
+<h2 id="flow"><span class="num">06</span>How It's Used at Runtime</h2>
+<div class="code-title">Build → Serve Flow</div>
+<pre><code class="language-text">app/ or pages/ (your source code)
+        │
+        ▼
+  next dev / next build
+        │
+        ▼
+Compile with Turbopack or SWC/webpack
+        │
+   ┌────┼─────────────┐
+   ▼    ▼              ▼
+.next/server   .next/static   manifest *.json files
+   │               │                 │
+   └──────┬────────┴─────────────────┘
+          ▼
+   next start (Node server)
+          │
+          ▼
+  Incoming request → routes-manifest.json
+  resolves the route → server/ runs the
+  matching Server Component / Route Handler
+  → HTML + RSC payload sent to the browser,
+    which then fetches static/ for JS/CSS</code></pre>
+<p>
+In short: manifests answer "which route is this, and what does it need?" while <code>server/</code> and <code>static/</code> hold the actual compiled code that answers the request.
+</p>
+
+<h2 id="dev-vs-prod"><span class="num">07</span>Dev vs Production Output</h2>
+<div class="grid2">
+<div class="mini-card">
+<h4>next dev</h4>
+<p>Optimized for rebuild speed, not output size. Code is compiled on-demand per route as you navigate, source maps are verbose, and nothing is minified. The cache/ folder here is what powers Fast Refresh.</p>
+</div>
+<div class="mini-card">
+<h4>next build + next start</h4>
+<p>Optimized for runtime performance. Every route is compiled ahead of time, JS/CSS is minified and content-hashed, static/ISR pages are prerendered into HTML, and required-server-files.json enables minimal "standalone" deploys.</p>
+</div>
+</div>
+
+<h2 id="practices"><span class="num">08</span>Best Practices</h2>
+<ul>
+<li><strong>Always .gitignore it.</strong> <code>create-next-app</code> already adds <code>.next/</code> to <code>.gitignore</code> by default — generated build output has no place in version control.</li>
+<li><strong>Delete it to force a clean rebuild.</strong> <code>rm -rf .next</code> (or <code>rmdir /s /q .next</code> on Windows) followed by <code>next dev</code>/<code>next build</code> is the standard fix for stale-cache or corrupted-build symptoms.</li>
+<li><strong>Don't hand-edit anything inside it.</strong> Any change will be silently overwritten on the next build.</li>
+<li><strong>Don't ship <code>.next</code> alone as your deployment artifact.</strong> A self-hosted deploy also needs <code>node_modules</code> (or a standalone bundle), <code>public/</code>, <code>package.json</code>, and <code>next.config.js</code> — unless you're using <code>output: 'standalone'</code>, which bundles the minimal server for you.</li>
+<li><strong>Use <code>next build --profile</code></strong> when you need the <code>trace</code>/<code>trace-build</code> files to diagnose a slow build.</li>
+</ul>
+<div class="code-title">Force a Clean Rebuild</div>
+<pre><code class="language-bash"># macOS / Linux
+rm -rf .next
+npm run dev
+
+# Windows
+rmdir /s /q .next
+npm run dev</code></pre>
+
+<h2 id="faq"><span class="num">09</span>FAQ</h2>
+<div class="faq"><div class="q">Can I delete .next while the dev server is running?</div><div class="a">Stop the dev server first — Next.js writes to this folder continuously while running, so deleting it mid-session can cause errors. Stop, delete, then restart.</div></div>
+<div class="faq"><div class="q">Why is .next so large?</div><div class="a">Most of the size comes from cache/ (build caches that speed up future builds) and per-route compiled output in server/. It's expected to be much larger than your source code — none of it needs to be small since it's never committed to git.</div></div>
+<div class="faq"><div class="q">Does .next exist in the App Router and Pages Router the same way?</div><div class="a">The overall folder is shared, but some manifests differ — for example app-build-manifest.json and app-path-routes-manifest.json only exist for App Router routes, while a Pages Router project relies more heavily on build-manifest.json.</div></div>
+<div class="faq"><div class="q">What's the difference between .next and out/?</div><div class="a">out/ only appears when using static export (output: 'export') — it's a folder of plain HTML/CSS/JS with no Node server involved. .next is the standard build output used by next start and most hosting platforms, including serverless/edge deployments.</div></div>
+
+<footer>Next.js build system reference &middot; content reflects current App Router and Pages Router builds.</footer>
+
+</div></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+</body>
+</html>
