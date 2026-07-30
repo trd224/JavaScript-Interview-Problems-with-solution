@@ -180,6 +180,43 @@ export default async function Posts() {
     &lt;h1&gt;{posts.length}&lt;/h1&gt;
   );
 }</code></pre>
+or
+<pre><code class="language-jsx">export default async function Page() {
+  const products = await fetch(
+    'https://api.example.com/products',
+    {
+      next: {
+        revalidate: 60
+      }
+    }
+  ).then(res =&gt; res.json());
+
+  return (
+    &lt;div&gt;{products.length}&lt;/div&gt;
+  );
+}</code></pre>
+<table>
+  <thead>
+    <tr>
+      <th><code>fetch(..., { next: { revalidate: 60 } })</code></th>
+      <th><code>export const revalidate = 60</code></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Applies only to that specific <code>fetch()</code> request.</td>
+      <td>Applies to the entire route (page/layout).</td>
+    </tr>
+    <tr>
+      <td>Different <code>fetch()</code> calls can have different revalidation times.</td>
+      <td>All cached data in the route uses this revalidation time (unless overridden).</td>
+    </tr>
+    <tr>
+      <td>More granular control.</td>
+      <td>Simpler when the whole page should revalidate together.</td>
+    </tr>
+  </tbody>
+</table>
 <p>
 This regenerates the page when a request arrives after 60 seconds.
 </p>
@@ -196,7 +233,7 @@ This regenerates the page when a request arrives after 60 seconds.
 This replaces getStaticPaths().
 </p>
 <h3>Mapping Old APIs to New APIs</h3>
-<table>
+<!-- <table>
 <tr>
 <th>Pages Router</th>
 <th>App Router</th>
@@ -217,6 +254,60 @@ This replaces getStaticPaths().
 <td>ISR via revalidate</td>
 <td>Server Component + export const revalidate</td>
 </tr>
+</table> -->
+<table border="1" cellspacing="0" cellpadding="8">
+  <thead>
+    <tr>
+      <th>Pages Router</th>
+      <th>App Router</th>
+      <th>Example</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>getServerSideProps()</code></td>
+      <td><code>Server Component + fetch(..., { cache: 'no-store' })</code></td>
+      <td>
+        <strong>Pages:</strong>
+        <code>export async function getServerSideProps() { ... }</code><br>
+        <strong>App:</strong>
+        <code>await fetch(url, { cache: 'no-store' })</code>
+      </td>
+    </tr>
+
+    <tr>
+      <td><code>getStaticProps()</code></td>
+      <td><code>Server Component + fetch()</code> (default cache)</td>
+      <td>
+        <strong>Pages:</strong>
+        <code>export async function getStaticProps() { ... }</code><br>
+        <strong>App:</strong>
+        <code>await fetch(url)</code>
+      </td>
+    </tr>
+
+    <tr>
+      <td><code>getStaticPaths()</code></td>
+      <td><code>generateStaticParams()</code></td>
+      <td>
+        <strong>Pages:</strong>
+        <code>export async function getStaticPaths() { return { paths: [...] } }</code><br>
+        <strong>App:</strong>
+        <code>export async function generateStaticParams() { return [...] }</code>
+      </td>
+    </tr>
+
+    <tr>
+      <td>ISR via <code>revalidate</code></td>
+      <td><code>export const revalidate = 60</code></td>
+      <td>
+        <strong>Pages:</strong>
+        <code>return { props : {}, revalidate: 60 }</code><br>
+        <strong>App:</strong>
+        <code>export const revalidate = 60</code>
+      </td>
+    </tr>
+  </tbody>
 </table>
 <h3>What Happens Internally?</h3>
 <div class="code-title">Pages Router</div>

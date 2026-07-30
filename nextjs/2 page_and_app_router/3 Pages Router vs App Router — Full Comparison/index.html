@@ -1,0 +1,1776 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pages Router vs App Router — Full Comparison</title>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+
+body{
+  background:#020617;
+  color:#e2e8f0;
+  font-family:Arial,sans-serif;
+  line-height:1.75;
+}
+
+.wrap{
+  max-width:1500px;
+  margin:auto;
+  padding:30px 20px 80px;
+}
+
+/* ---------- Hero ---------- */
+.hero{
+  text-align:center;
+  padding:50px 20px 40px;
+}
+.hero h1{
+  font-size:2.2rem;
+  color:#f8fafc;
+  margin-bottom:14px;
+}
+.hero p{
+  color:#94a3b8;
+  max-width:700px;
+  margin:0 auto;
+  font-size:1.05rem;
+}
+.hero .badges{
+  margin-top:22px;
+  display:flex;
+  justify-content:center;
+  gap:16px;
+  flex-wrap:wrap;
+}
+.badge{
+  padding:8px 18px;
+  border-radius:30px;
+  font-weight:bold;
+  font-size:.9rem;
+}
+.badge.pr{background:rgba(56,189,248,.12);color:#38bdf8;border:1px solid #38bdf8}
+.badge.ar{background:rgba(192,132,252,.12);color:#c084fc;border:1px solid #c084fc}
+
+/* ---------- Sticky column header ---------- */
+.sticky-head{
+  position:sticky;
+  top:0;
+  z-index:50;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:20px;
+  background:#020617;
+  padding:12px 0;
+  border-bottom:1px solid #1e293b;
+  margin-bottom:10px;
+}
+.sticky-head div{
+  text-align:center;
+  font-weight:bold;
+  letter-spacing:.5px;
+  padding:10px;
+  border-radius:10px;
+  font-size:.95rem;
+}
+.sticky-head .pr{background:linear-gradient(90deg,#0c2438,#0f172a);color:#38bdf8;border:1px solid #1e3a52}
+.sticky-head .ar{background:linear-gradient(90deg,#1e1235,#170f2b);color:#c084fc;border:1px solid #3b2560}
+
+/* ---------- Topic block ---------- */
+.topic{
+  margin-top:46px;
+}
+.topic-title{
+  display:flex;
+  align-items:center;
+  gap:14px;
+  margin-bottom:18px;
+}
+.topic-title .num{
+  background:#1e293b;
+  color:#f8fafc;
+  min-width:34px;
+  height:34px;
+  border-radius:8px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:bold;
+}
+.topic-title h2{
+  color:#f8fafc;
+  font-size:1.4rem;
+}
+.topic-summary{
+  color:#94a3b8;
+  margin-bottom:16px;
+  padding-left:48px;
+}
+
+.compare-row{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:20px;
+  align-items:start;
+}
+
+.col{
+  background:#0f172a;
+  border-radius:12px;
+  padding:20px;
+}
+.col-left{border-top:4px solid #38bdf8}
+.col-right{border-top:4px solid #c084fc}
+
+.col h3{
+  font-size:.95rem;
+  margin-bottom:12px;
+  text-transform:uppercase;
+  letter-spacing:.5px;
+}
+.col-left h3{color:#38bdf8}
+.col-right h3{color:#c084fc}
+
+.col p{margin-bottom:12px;font-size:.95rem;color:#cbd5e1}
+.col ul{margin-left:18px;margin-bottom:12px}
+.col li{margin-bottom:6px;font-size:.92rem;color:#cbd5e1}
+
+.code-title{
+  background:#1e293b;
+  color:#93c5fd;
+  padding:8px 12px;
+  font-size:.8rem;
+  border-radius:6px 6px 0 0;
+  font-weight:bold;
+}
+.col-right .code-title{color:#d8b4fe}
+
+pre[class*="language-"]{
+  margin:0 0 14px 0!important;
+  border-radius:0 0 6px 6px;
+  font-size:.82rem!important;
+}
+
+.note{
+  background:#1e293b;
+  border-left:4px solid #facc15;
+  padding:10px 14px;
+  border-radius:6px;
+  font-size:.85rem;
+  color:#fde68a;
+  margin-top:10px;
+}
+
+/* ---------- Full width verdict / summary table ---------- */
+.full{
+  grid-column:1/-1;
+}
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:16px;
+  font-size:.9rem;
+}
+th{
+  background:#1e293b;
+  color:#f8fafc;
+  text-align:left;
+  padding:12px;
+}
+td{
+  padding:12px;
+  border-top:1px solid #1e293b;
+  color:#cbd5e1;
+}
+tr td:nth-child(2){color:#38bdf8}
+tr td:nth-child(3){color:#c084fc}
+
+.divider{
+  height:1px;
+  background:linear-gradient(90deg,transparent,#1e293b,transparent);
+  margin:50px 0;
+}
+
+@media (max-width:820px){
+  .compare-row{grid-template-columns:1fr}
+  .sticky-head{grid-template-columns:1fr;position:static}
+  .topic-summary{padding-left:0}
+}
+</style>
+</head>
+
+<body>
+
+<div class="wrap">
+
+<div class="hero">
+<h1>Pages Router vs App Router</h1>
+<p>A complete side-by-side comparison of Next.js's two routing systems — folder structure, data fetching, rendering, layouts, navigation, metadata, API handling, caching and more.</p>
+<div class="badges">
+<span class="badge pr">◀ Pages Router (pages/)</span>
+<span class="badge ar">App Router (app/) ▶</span>
+</div>
+</div>
+
+<div class="sticky-head">
+<div class="pr">PAGES ROUTER</div>
+<div class="ar">APP ROUTER</div>
+</div>
+
+<!-- 1. Overview -->
+<div class="topic">
+<div class="topic-title"><div class="num">1</div><h2>Overview</h2></div>
+<p class="topic-summary">The Pages Router is the original Next.js routing system built on the <code>pages</code> folder. The App Router, introduced in Next.js 13, is the modern system built on the <code>app</code> folder with React Server Components, nested layouts, streaming and the Metadata API.</p>
+
+<div class="compare-row">
+<div class="col col-left">
+<h3>Pages Router</h3>
+<ul>
+<li>Introduced in Next.js 1 (original router)</li>
+<li>Every component in <code>pages</code> is a Client Component by default (fully hydrated)</li>
+<li>Data fetching via <code>getStaticProps</code> / <code>getServerSideProps</code> / <code>getStaticPaths</code></li>
+<li>Shared UI via a single <code>_app.js</code> file</li>
+<li>Considered legacy, still fully supported for existing apps</li>
+</ul>
+</div>
+<div class="col col-right">
+<h3>App Router</h3>
+<ul>
+<li>Introduced in Next.js 13, stable and recommended since Next.js 13.4</li>
+<li>Every component in <code>app</code> is a Server Component by default</li>
+<li>Data fetching directly inside components using <code>async/await</code> + <code>fetch</code> caching</li>
+<li>Built-in nested layouts, loading states, error boundaries</li>
+<li>Recommended for all new Next.js applications</li>
+</ul>
+</div>
+</div>
+</div>
+
+<div class="divider"></div>
+
+<!-- 2. Folder Structure -->
+<div class="topic">
+<div class="topic-title"><div class="num">2</div><h2>Folder Structure &amp; Routing</h2></div>
+<p class="topic-summary">Both routers use file-based routing, but the file that defines a route and the way folders map to URLs is different.</p>
+
+<div class="compare-row">
+<div class="col col-left">
+<h3>Pages Router</h3>
+<div class="code-title">Folder Structure</div>
+<pre><code class="language-text">pages
+├── index.js          → /
+├── about.js           → /about
+└── products
+    └── [id].js         → /products/:id</code></pre>
+<div class="code-title">pages/about.js</div>
+<pre><code class="language-js">export default function About() {
+  return &lt;h1&gt;About Page&lt;/h1&gt;;
+}</code></pre>
+<p>One file <strong>= </strong> one route. The file itself is the page.</p>
+</div>
+<div class="col col-right">
+<h3>App Router</h3>
+<div class="code-title">Folder Structure</div>
+<pre><code class="language-text">app
+├── page.js             → /
+├── about
+│   └── page.js          → /about
+└── products
+    └── [id]
+        └── page.js        → /products/:id</code></pre>
+<div class="code-title">app/about/page.js</div>
+<pre><code class="language-js">export default function About() {
+  return &lt;h1&gt;About Page&lt;/h1&gt;;
+}</code></pre>
+<p>A <strong>folder</strong> = a route segment, and a special <code>page.js</code> file inside it makes that segment publicly accessible.</p>
+</div>
+</div>
+</div>
+
+<div class="divider"></div>
+
+<!-- 3. Dynamic Routes -->
+<div class="topic">
+<div class="topic-title"><div class="num">3</div><h2>Dynamic Routes</h2></div>
+<p class="topic-summary">Dynamic segments use the same square-bracket syntax in both routers, but params are read differently.</p>
+
+<div class="compare-row">
+<div class="col col-left">
+<h3>Pages Router</h3>
+<div class="code-title">pages/products/[id].js</div>
+<pre><code class="language-jsx">import { useRouter } from 'next/router';
+export default function Product() {
+  const router = useRouter();
+  const { id } = router.query;
+  return &lt;h1&gt;Product {id}&lt;/h1&gt;;
+}</code></pre>
+<p>Params are read at runtime on the client via <code>router.query</code>.</p>
+</div>
+<div class="col col-right">
+<h3>App Router</h3>
+<div class="code-title">app/products/[id]/page.js</div>
+<pre><code class="language-jsx">export default async function Product({ params }) {
+  const { id } = await params;
+  return &lt;h1&gt;Product {id}&lt;/h1&gt;;
+}</code></pre>
+<p>Params arrive as a <code>Promise</code> prop and are read on the server before render.</p>
+</div>
+</div>
+</div>
+
+<div class="divider"></div>
+
+<!-- 4. Data Fetching -->
+<div class="topic">
+<div class="topic-title"><div class="num">4</div><h2>Data Fetching</h2></div>
+<p class="topic-summary">The Pages Router needs special exported functions per rendering mode. The App Router fetches data directly inside async Server Components and controls the mode via the <code>fetch</code> cache option.</p>
+
+<div class="compare-row">
+<div class="col col-left">
+<h3>Pages Router — SSR</h3>
+<div class="code-title">pages/products.js</div>
+<pre><code class="language-js">export async function getServerSideProps() {
+  const res = await fetch('https://api.example.com/products');
+  const products = await res.json();
+  return { props: { products } };
+}
+export default function Products({ products }) {
+  return &lt;div&gt;{products.length}&lt;/div&gt;;
+}</code></pre>
+<h3 style="margin-top:16px">Pages Router — SSG</h3>
+<div class="code-title">pages/posts.js</div>
+<pre><code class="language-js">export async function getStaticProps() {
+  const res = await fetch('https://api.example.com/posts');
+  const posts = await res.json();
+  return { props: { posts } };
+}</code></pre>
+<h3 style="margin-top:16px">Pages Router — ISR</h3>
+<pre><code class="language-js">export async function getStaticProps() {
+  return {
+    props: { data: [] },
+    revalidate: 60
+  };
+}</code></pre>
+</div>
+<div class="col col-right">
+<h3>App Router — SSR equivalent</h3>
+<div class="code-title">app/products/page.js</div>
+<pre><code class="language-jsx">async function getProducts() {
+  const res = await fetch('https://api.example.com/products', { cache: 'no-store' });
+  return res.json();
+}
+export default async function Page() {
+  const products = await getProducts();
+  return &lt;div&gt;{products.length}&lt;/div&gt;;
+}</code></pre>
+<h3 style="margin-top:16px">App Router — SSG equivalent</h3>
+<div class="code-title">app/posts/page.js</div>
+<pre><code class="language-jsx">async function getPosts() {
+  const res = await fetch('https://api.example.com/posts');
+  return res.json();
+}
+export default async function Page() {
+  const posts = await getPosts();
+  return &lt;div&gt;{posts.length}&lt;/div&gt;;
+}</code></pre>
+<h3 style="margin-top:16px">App Router — ISR equivalent</h3>
+<pre><code class="language-jsx">export const revalidate = 60;
+async function getData() {
+  const res = await fetch('https://api.example.com/data');
+  return res.json();
+}</code></pre>
+</div>
+</div>
+<div class="note">No <code>getStaticProps</code>, <code>getServerSideProps</code> or <code>getStaticPaths</code> exist in the App Router at all — everything is driven by <code>fetch</code> cache options and the <code>revalidate</code> export.</div>
+</div>
+
+<div class="divider"></div>
+
+<!-- 5. Dynamic SSG paths -->
+<div class="topic">
+<div class="topic-title"><div class="num">5</div><h2>Static Params for Dynamic Routes</h2></div>
+<p class="topic-summary">Pre-building dynamic pages at build time.</p>
+<div class="compare-row">
+<div class="col col-left">
+<h3>Pages Router</h3>
+<div class="code-title">pages/products/[id].js</div>
+<pre><code class="language-js">export async function getStaticPaths() {
+  return {
+    paths: [
+      { params: { id: '1' } },
+      { params: { id: '2' } }
+    ],
+    fallback: false
+  };
+}
+export async function getStaticProps({ params }) {
+  return { props: { id: params.id } };
+}</code></pre>
+</div>
+<div class="col col-right">
+<h3>App Router</h3>
+<div class="code-title">app/products/[id]/page.js</div>
+<pre><code class="language-jsx">export async function generateStaticParams() {
+  return [
+    { id: '1' },
+    { id: '2' }
+  ];
+}
+export default async function Page({ params }) {
+  const { id } = await params;
+  return &lt;h1&gt;Product {id}&lt;/h1&gt;;
+}</code></pre>
+</div>
+</div>
+</div>
+
+<div class="divider"></div>
+
+<!-- 6. Rendering model / hydration -->
+<div class="topic">
+<div class="topic-title"><div class="num">6</div><h2>Rendering Model &amp; Hydration</h2></div>
+<p class="topic-summary">This is the single biggest architectural difference between the two routers.</p>
+<div class="compare-row">
+<div class="col col-left">
+<h3>Pages Router</h3>
+<p>Every component is a Client Component. The server renders HTML, then ships the <strong>full component JavaScript</strong> to the browser so React can hydrate the whole tree — even static, non-interactive parts.</p>
+<div class="code-title">Flow</div>
+<pre><code class="language-text">Server renders HTML
+        │
+        ▼
+Send HTML + full page JS bundle
+        │
+        ▼
+Browser hydrates entire tree</code></pre>
+<pre><code class="language-text">Execution
+Server  ✅
+Browser ✅ (always, for every component)</code></pre>
+</div>
+<div class="col col-right">
+<h3>App Router</h3>
+<p>Components are Server Components by default and render <strong>only on the server</strong> — no JS is shipped for them. Only components marked <code>'use client'</code> are hydrated in the browser.</p>
+<div class="code-title">app/page.js — Server Component</div>
+<pre><code class="language-js">export default async function Page() {
+  const data = await fetch('https://dummyjson.com/products').then(r => r.json());
+  return &lt;ul&gt;{data.products.map(p =&gt; &lt;li key={p.id}&gt;{p.title}&lt;/li&gt;)}&lt;/ul&gt;;
+}</code></pre>
+<div class="code-title">app/Counter.js — Client Component</div>
+<pre><code class="language-js">'use client';
+import { useState } from 'react';
+export default function Counter() {
+  const [count, setCount] = useState(0);
+  return &lt;button onClick={() =&gt; setCount(count + 1)}&gt;{count}&lt;/button&gt;;
+}</code></pre>
+</div>
+</div>
+<div class="note">Result: App Router ships much less JavaScript to the browser by default, which is why it produces smaller bundles and faster hydration than the Pages Router.</div>
+</div>
+
+<div class="divider"></div>
+
+<!-- 7. Client vs Server components capabilities -->
+<div class="topic">
+<div class="topic-title"><div class="num">7</div><h2>Server vs Client Components (App Router only)</h2></div>
+<p class="topic-summary">The Pages Router has no equivalent concept — every component behaves like a Client Component. The App Router splits capability between the two.</p>
+<div class="compare-row">
+<div class="col col-left">
+<h3>What Server Components CAN do</h3>
+<ul>
+<li>Directly <code>await fetch(...)</code></li>
+<li>Read cookies / headers on the server</li>
+<li>Query a database directly</li>
+<li>Keep API keys and secrets on the server</li>
+</ul>
+<h3 style="margin-top:16px">What they CANNOT do</h3>
+<ul>
+<li><code>useState</code> / <code>useEffect</code></li>
+<li><code>onClick</code> and other DOM event handlers</li>
+<li>Browser-only APIs like <code>window</code> or <code>localStorage</code></li>
+</ul>
+</div>
+<div class="col col-right">
+<h3>What Client Components CAN do</h3>
+<ul>
+<li><code>useState</code>, <code>useEffect</code>, <code>useRef</code></li>
+<li>Event handlers (<code>onClick</code>, <code>onChange</code>, ...)</li>
+<li>Browser APIs and animations</li>
+<li>Third-party libraries that rely on the DOM</li>
+</ul>
+<h3 style="margin-top:16px">Marking a Client Component</h3>
+<pre><code class="language-js">'use client';
+import { useState } from 'react';
+export default function Login() {
+  const [email, setEmail] = useState('');
+  return &lt;input value={email} onChange={e =&gt; setEmail(e.target.value)} /&gt;;
+}</code></pre>
+</div>
+</div>
+</div>
+
+<div class="divider"></div>
+
+<!-- 8. Layouts -->
+<div class="topic">
+<div class="topic-title"><div class="num">8</div><h2>Shared Layouts</h2></div>
+<p class="topic-summary">The Pages Router builds layouts manually. The App Router has a first-class, nested layout system.</p>
+<div class="compare-row">
+<div class="col col-left">
+<h3>Pages Router — _app.js</h3>
+<div class="code-title">pages/_app.js</div>
+<pre><code class="language-js">import Layout from '../components/Layout';
+export default function App({ Component, pageProps }) {
+  return (
+    &lt;Layout&gt;
+      &lt;Component {...pageProps} /&gt;
+    &lt;/Layout&gt;
+  );
+}</code></pre>
+<div class="code-title">components/Layout.js</div>
+<pre><code class="language-js">export default function Layout({ children }) {
+  return (
+    &lt;&gt;
+      &lt;header&gt;Header&lt;/header&gt;
+      &lt;main&gt;{children}&lt;/main&gt;
+      &lt;footer&gt;Footer&lt;/footer&gt;
+    &lt;/&gt;
+  );
+}</code></pre>
+<p>One global layout only. Per-section layouts require manual composition inside each page.</p>
+</div>
+<div class="col col-right">
+<h3>App Router — layout.js</h3>
+<div class="code-title">app/layout.js — Root Layout (required)</div>
+<pre><code class="language-js">export default function RootLayout({ children }) {
+  return (
+    &lt;html&gt;
+      &lt;body&gt;{children}&lt;/body&gt;
+    &lt;/html&gt;
+  );
+}</code></pre>
+<div class="code-title">app/dashboard/layout.js — Nested Layout</div>
+<pre><code class="language-js">export default function DashboardLayout({ children }) {
+  return (
+    &lt;section&gt;
+      &lt;nav&gt;Dashboard Nav&lt;/nav&gt;
+      {children}
+    &lt;/section&gt;
+  );
+}</code></pre>
+<p>Layouts can be nested per folder, persist across navigations without re-rendering, and don't lose state (e.g. video playback, form input).</p>
+</div>
+</div>
+</div>
+
+<div class="divider"></div>
+
+<!-- 9. Navigation -->
+<div class="topic">
+<div class="topic-title"><div class="num">9</div><h2>Navigation &amp; useRouter</h2></div>
+<p class="topic-summary">The <code>Link</code> component exists in both, but <code>useRouter</code> is imported from a different module and exposes a different API.</p>
+<div class="compare-row">
+<div class="col col-left">
+<h3>Pages Router</h3>
+<div class="code-title">Import</div>
+<pre><code class="language-jsx">import { useRouter } from 'next/router';</code></pre>
+<div class="code-title">Navigate + read query</div>
+<pre><code class="language-jsx">const router = useRouter();
+router.push('/about');
+console.log(router.query.id);</code></pre>
+<div class="code-title">Link</div>
+<pre><code class="language-jsx">import Link from 'next/link';
+&lt;Link href="/about"&gt;About&lt;/Link&gt;</code></pre>
+</div>
+<div class="col col-right">
+<h3>App Router</h3>
+<div class="code-title">Import</div>
+<pre><code class="language-jsx">import { useRouter } from 'next/navigation';</code></pre>
+<div class="code-title">Navigate + read params</div>
+<pre><code class="language-jsx">'use client';
+const router = useRouter();
+router.push('/about');
+// params come from a prop, not router.query
+import { useParams } from 'next/navigation';
+const { id } = useParams();</code></pre>
+<div class="code-title">Link</div>
+<pre><code class="language-jsx">import Link from 'next/link';
+&lt;Link href="/about"&gt;About&lt;/Link&gt;</code></pre>
+</div>
+</div>
+<div class="note"><code>useRouter</code> from <code>next/navigation</code> has no <code>.query</code> — it only has methods like <code>push</code>, <code>replace</code>, <code>back</code>, <code>refresh</code>. Route params/search params need <code>useParams()</code> / <code>useSearchParams()</code> instead, and it only works inside Client Components.</div>
+</div>
+
+<div class="divider"></div>
+
+<!-- 10. Redirects -->
+<div class="topic">
+<div class="topic-title"><div class="num">10</div><h2>Redirects</h2></div>
+<p class="topic-summary">Server-side redirects are declared differently in each router.</p>
+<div class="compare-row">
+<div class="col col-left">
+<h3>Pages Router</h3>
+<div class="code-title">getServerSideProps redirect</div>
+<pre><code class="language-js">export async function getServerSideProps() {
+  const user = null;
+  if (!user) {
+    return { redirect: { destination: '/login', permanent: false } };
+  }
+  return { props: {} };
+}</code></pre>
+</div>
+<div class="col col-right">
+<h3>App Router</h3>
+<div class="code-title">redirect() from next/navigation</div>
+<pre><code class="language-jsx">import { redirect } from 'next/navigation';
+export default async function Dashboard() {
+  const user = null;
+  if (!user) redirect('/login');
+  return &lt;h1&gt;Dashboard&lt;/h1&gt;;
+}</code></pre>
+</div>
+</div>
+<table class="full">
+<tr><th>Feature</th><th>Pages Router</th><th>App Router — redirect()</th></tr>
+<tr><td>Where it works</td><td>getServerSideProps / getStaticProps only</td><td>Server Components, Server Actions, Route Handlers</td></tr>
+<tr><td>Stops rendering</td><td>✅</td><td>✅</td></tr>
+<tr><td>Client-side equivalent</td><td>router.push()</td><td>router.push() (next/navigation)</td></tr>
+</table>
+</div>
+
+<div class="divider"></div>
+
+<!-- 11. Metadata / SEO -->
+<div class="topic">
+<div class="topic-title"><div class="num">11</div><h2>Metadata &amp; SEO</h2></div>
+<p class="topic-summary">The Pages Router uses a <code>Head</code> component rendered in JSX. The App Router uses a plain exported <code>metadata</code> object or a <code>generateMetadata()</code> function — no JSX involved.</p>
+<div class="compare-row">
+<div class="col col-left">
+<h3>Pages Router</h3>
+<div class="code-title">pages/about.js</div>
+<pre><code class="language-jsx">import Head from 'next/head';
+export default function About() {
+  return (
+    &lt;&gt;
+      &lt;Head&gt;
+        &lt;title&gt;About Us&lt;/title&gt;
+        &lt;meta name="description" content="Learn more." /&gt;
+      &lt;/Head&gt;
+      &lt;h1&gt;About&lt;/h1&gt;
+    &lt;/&gt;
+  );
+}</code></pre>
+<p>Metadata is per-page only; nothing is inherited automatically.</p>
+</div>
+<div class="col col-right">
+<h3>App Router — static</h3>
+<div class="code-title">app/about/page.js</div>
+<pre><code class="language-js">export const metadata = {
+  title: 'About Us',
+  description: 'Learn more.'
+};
+export default function About() {
+  return &lt;h1&gt;About&lt;/h1&gt;;
+}</code></pre>
+<h3 style="margin-top:16px">App Router — dynamic</h3>
+<div class="code-title">app/products/[id]/page.js</div>
+<pre><code class="language-js">export async function generateMetadata({ params }) {
+  const { id } = await params;
+  const product = await getProduct(id);
+  return { title: product.title, description: product.description };
+}</code></pre>
+<p>Metadata declared in <code>layout.js</code> is inherited by every nested page unless overridden.</p>
+</div>
+</div>
+</div>
+
+<div class="divider"></div>
+
+<!-- 12. API routes -->
+<div class="topic">
+<div class="topic-title"><div class="num">12</div><h2>API Endpoints</h2></div>
+<p class="topic-summary">Backend endpoints live in different places and use a different function signature.</p>
+<div class="compare-row">
+<div class="col col-left">
+<h3>Pages Router — API Routes</h3>
+<div class="code-title">pages/api/hello.js</div>
+<pre><code class="language-js">export default function handler(req, res) {
+  if (req.method === 'GET') {
+    return res.status(200).json({ message: 'Hello' });
+  }
+  res.status(405).end();
+}</code></pre>
+<p>One handler function receives <code>(req, res)</code> and branches on <code>req.method</code>.</p>
+</div>
+<div class="col col-right">
+<h3>App Router — Route Handlers</h3>
+<div class="code-title">app/api/hello/route.js</div>
+<pre><code class="language-js">export async function GET(request) {
+  return Response.json({ message: 'Hello' });
+}
+export async function POST(request) {
+  const body = await request.json();
+  return Response.json({ received: body });
+}</code></pre>
+<p>Each HTTP verb is its own exported function using the Web <code>Request</code>/<code>Response</code> API.</p>
+</div>
+</div>
+</div>
+
+<div class="divider"></div>
+
+<!-- 13. Loading / Error states -->
+<div class="topic">
+<div class="topic-title"><div class="num">13</div><h2>Loading &amp; Error States</h2></div>
+<p class="topic-summary">The App Router has dedicated file conventions for this; the Pages Router requires manual state management.</p>
+<div class="compare-row">
+<div class="col col-left">
+<h3>Pages Router</h3>
+<div class="code-title">Manual loading state</div>
+<pre><code class="language-jsx">import { useState, useEffect } from 'react';
+export default function Products() {
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  useEffect(() => {
+    fetch('/api/products')
+      .then(r => r.json())
+      .then(setData)
+      .catch(setError)
+      .finally(() => setLoading(false));
+  }, []);
+  if (loading) return &lt;p&gt;Loading...&lt;/p&gt;;
+  if (error) return &lt;p&gt;Something went wrong&lt;/p&gt;;
+}</code></pre>
+</div>
+<div class="col col-right">
+<h3>App Router — file conventions</h3>
+<div class="code-title">app/products/loading.js</div>
+<pre><code class="language-js">export default function Loading() {
+  return &lt;p&gt;Loading products...&lt;/p&gt;;
+}</code></pre>
+<div class="code-title">app/products/error.js</div>
+<pre><code class="language-js">'use client';
+export default function Error({ error, reset }) {
+  return (
+    &lt;div&gt;
+      &lt;p&gt;Something went wrong&lt;/p&gt;
+      &lt;button onClick={() =&gt; reset()}&gt;Try again&lt;/button&gt;
+    &lt;/div&gt;
+  );
+}</code></pre>
+<p><code>loading.js</code> wraps the segment in a React Suspense boundary automatically; <code>error.js</code> wraps it in an Error Boundary automatically.</p>
+</div>
+</div>
+</div>
+
+<div class="divider"></div>
+
+<!-- 14. CSS -->
+<div class="topic">
+<div class="topic-title"><div class="num">14</div><h2>Styling</h2></div>
+<p class="topic-summary">CSS Modules work the same way in both. Global CSS import location differs.</p>
+<div class="compare-row">
+<div class="col col-left">
+<h3>Pages Router</h3>
+<div class="code-title">pages/_app.js</div>
+<pre><code class="language-js">import '../styles/globals.css';
+export default function App({ Component, pageProps }) {
+  return &lt;Component {...pageProps} /&gt;;
+}</code></pre>
+<div class="code-title">CSS Module</div>
+<pre><code class="language-js">import styles from './Button.module.css';
+&lt;button className={styles.btn}&gt;Click&lt;/button&gt;</code></pre>
+</div>
+<div class="col col-right">
+<h3>App Router</h3>
+<div class="code-title">app/layout.js</div>
+<pre><code class="language-js">import './globals.css';
+export default function RootLayout({ children }) {
+  return &lt;html&gt;&lt;body&gt;{children}&lt;/body&gt;&lt;/html&gt;;
+}</code></pre>
+<div class="code-title">CSS Module (same syntax)</div>
+<pre><code class="language-js">import styles from './Button.module.css';
+&lt;button className={styles.btn}&gt;Click&lt;/button&gt;</code></pre>
+</div>
+</div>
+</div>
+
+<div class="divider"></div>
+
+<!-- 15. Images -->
+<div class="topic">
+<div class="topic-title"><div class="num">15</div><h2>Image Optimization</h2></div>
+<p class="topic-summary"><code>next/image</code> works in both routers with identical props — this is one of the few APIs that did not change.</p>
+<div class="compare-row">
+<div class="col col-left">
+<h3>Pages Router</h3>
+<pre><code class="language-jsx">import Image from 'next/image';
+&lt;Image src="/logo.png" width={200} height={100} alt="Logo" /&gt;</code></pre>
+</div>
+<div class="col col-right">
+<h3>App Router</h3>
+<pre><code class="language-jsx">import Image from 'next/image';
+&lt;Image src="/logo.png" width={200} height={100} alt="Logo" priority /&gt;</code></pre>
+<p>The <code>priority</code> prop is commonly needed for above-the-fold images used in Server Components (e.g. hero banners) to avoid layout shift.</p>
+</div>
+</div>
+</div>
+
+<div class="divider"></div>
+
+<!-- 16. Caching -->
+<div class="topic">
+<div class="topic-title"><div class="num">16</div><h2>Caching Behavior</h2></div>
+<p class="topic-summary">The Pages Router caches per-page based on which data function you export. The App Router caches per <code>fetch</code> call.</p>
+<div class="compare-row">
+<div class="col col-left">
+<h3>Pages Router</h3>
+<ul>
+<li><code>getStaticProps</code> → cached at build time (SSG)</li>
+<li><code>getStaticProps</code> + <code>revalidate</code> → cached, regenerated after N seconds (ISR)</li>
+<li><code>getServerSideProps</code> → never cached, runs every request (SSR)</li>
+</ul>
+</div>
+<div class="col col-right">
+<h3>App Router</h3>
+<ul>
+<li><code>fetch(url)</code> → cached by default (SSG-like, <code>force-cache</code>)</li>
+<li><code>fetch(url, { next: { revalidate: 60 } })</code> → cached, revalidated every 60s (ISR-like)</li>
+<li><code>fetch(url, { cache: 'no-store' })</code> → never cached (SSR-like)</li>
+</ul>
+<div class="note">Caching is controlled per fetch call, not per page — different fetches on the same page can use different caching strategies.</div>
+</div>
+</div>
+</div>
+
+<div class="divider"></div>
+
+<!-- 17. Summary Table -->
+<div class="topic">
+<div class="topic-title"><div class="num">17</div><h2>Full Summary</h2></div>
+<table class="full">
+<tr><th>Aspect</th><th>Pages Router</th><th>App Router</th></tr>
+<tr><td>Root folder</td><td>pages/</td><td>app/</td></tr>
+<tr><td>Route defined by</td><td>File name</td><td>Folder + page.js</td></tr>
+<tr><td>Default component type</td><td>Client Component</td><td>Server Component</td></tr>
+<tr><td>Data fetching</td><td>getStaticProps / getServerSideProps</td><td>async/await inside component</td></tr>
+<tr><td>Static params</td><td>getStaticPaths</td><td>generateStaticParams</td></tr>
+<tr><td>Layouts</td><td>_app.js (single, manual)</td><td>layout.js (nested, built-in)</td></tr>
+<tr><td>Loading UI</td><td>Manual state</td><td>loading.js (automatic Suspense)</td></tr>
+<tr><td>Error handling</td><td>Manual try/catch</td><td>error.js (automatic Error Boundary)</td></tr>
+<tr><td>Metadata / SEO</td><td>&lt;Head&gt; component</td><td>metadata export / generateMetadata()</td></tr>
+<tr><td>API endpoints</td><td>pages/api (req, res)</td><td>app/api route.js (Request/Response)</td></tr>
+<tr><td>Router hook</td><td>useRouter from next/router</td><td>useRouter from next/navigation</td></tr>
+<tr><td>Redirects</td><td>return { redirect } from data function</td><td>redirect() from next/navigation</td></tr>
+<tr><td>Caching</td><td>Per-page (via data function)</td><td>Per-fetch-call</td></tr>
+<tr><td>Streaming</td><td>Not supported</td><td>Supported (Suspense-based)</td></tr>
+<tr><td>Bundle to browser</td><td>Full page JS always shipped</td><td>Only Client Component JS shipped</td></tr>
+<tr><td>Status</td><td>Legacy, fully supported</td><td>Recommended for new apps</td></tr>
+</table>
+</div>
+
+<div class="divider"></div>
+
+<div class="hero" style="padding:30px 20px 10px">
+<h1 style="font-size:1.8rem">Part 2 — Every Remaining Topic From the Course</h1>
+<p>Everything below wasn't a direct "left vs right" difference in the source material, but is included so nothing from the course is left out. Where a real Pages-vs-App difference exists it's shown; where a feature is identical in both, or exists in only one router, that's labeled explicitly.</p>
+</div>
+
+<!-- 18 -->
+<div class="topic">
+<div class="topic-title"><div class="num">18</div><h2>Next.js Fundamentals</h2></div>
+<div class="compare-row">
+<div class="col col-left">
+<h3>React (plain)</h3>
+<ul>
+<li>A UI library only — no routing, no data fetching, no bundler built in</li>
+<li>Create React App (CRA) needs manual setup for routing, SSR, code splitting</li>
+<li>Everything renders on the client (CSR) by default</li>
+</ul>
+</div>
+<div class="col col-right">
+<h3>Next.js</h3>
+<ul>
+<li>A full React <em>framework</em>: routing, SSR/SSG/ISR, image/font optimization, API routes, and a bundler (Turbopack/Webpack) built in</li>
+<li>Project created with <code>npx create-next-app@latest</code></li>
+<li>Main features: file-based routing, hybrid rendering, built-in CSS support, automatic code splitting, TypeScript support out of the box</li>
+</ul>
+</div>
+</div>
+<div class="note">Since Next.js 13.4, <code>create-next-app</code> scaffolds the <strong>App Router</strong> by default; the Pages Router can still be selected/used manually.</div>
+</div>
+
+<div class="divider"></div>
+
+<!-- 19 -->
+<div class="topic">
+<div class="topic-title"><div class="num">19</div><h2>Custom Document / Root HTML Shell</h2></div>
+<div class="compare-row">
+<div class="col col-left">
+<h3>Pages Router — _document.js</h3>
+<div class="code-title">pages/_document.js</div>
+<pre><code class="language-jsx">import { Html, Head, Main, NextScript } from 'next/document';
+export default function Document() {
+  return (
+    &lt;Html lang="en"&gt;
+      &lt;Head /&gt;
+      &lt;body&gt;
+        &lt;Main /&gt;
+        &lt;NextScript /&gt;
+      &lt;/body&gt;
+    &lt;/Html&gt;
+  );
+}</code></pre>
+<p>Customizes the base HTML shell (once per app, not per page).</p>
+</div>
+<div class="col col-right">
+<h3>App Router — layout.js replaces it</h3>
+<div class="code-title">app/layout.js</div>
+<pre><code class="language-jsx">export default function RootLayout({ children }) {
+  return (
+    &lt;html lang="en"&gt;
+      &lt;body&gt;{children}&lt;/body&gt;
+    &lt;/html&gt;
+  );
+}</code></pre>
+<p>There is no separate <code>_document.js</code> concept — the root <code>layout.js</code> owns the <code>&lt;html&gt;</code>/<code>&lt;body&gt;</code> tags directly.</p>
+</div>
+</div>
+</div>
+
+<div class="divider"></div>
+
+<!-- 20 -->
+<div class="topic">
+<div class="topic-title"><div class="num">20</div><h2>Dynamic Segment Patterns</h2></div>
+<div class="compare-row">
+<div class="col col-left">
+<h3>Same syntax in both routers</h3>
+<div class="code-title">[id] — Single Segment</div>
+<pre><code class="language-text">pages/products/[id].js  →  /products/5</code></pre>
+<div class="code-title">[...slug] — Catch-All (required)</div>
+<pre><code class="language-text">pages/docs/[...slug].js  →  /docs/a/b/c
+router.query.slug === ['a','b','c']</code></pre>
+</div>
+<div class="col col-right">
+<h3>Same syntax in both routers</h3>
+<div class="code-title">app/products/[id]/page.js</div>
+<pre><code class="language-text">app/products/[id]/page.js  →  /products/5</code></pre>
+<div class="code-title">[[...slug]] — Optional Catch-All</div>
+<pre><code class="language-text">app/docs/[[...slug]]/page.js
+matches /docs AND /docs/a/b/c</code></pre>
+</div>
+</div>
+<div class="note"><code>[...slug]</code> requires at least one segment (no match for the bare route); <code>[[...slug]]</code> (double brackets) also matches the parent route with zero segments. This bracket syntax is identical in Pages and App Router.</div>
+</div>
+
+<div class="divider"></div>
+
+<!-- 21 -->
+<div class="topic">
+<div class="topic-title"><div class="num">21</div><h2>Navigation Extras</h2></div>
+<div class="compare-row">
+<div class="col col-left">
+<h3>Pages Router</h3>
+<div class="code-title">Query params</div>
+<pre><code class="language-jsx">const router = useRouter();
+router.query.id      // from /product?id=5
+router.query          // all query params</code></pre>
+<div class="code-title">Custom 404</div>
+<pre><code class="language-jsx">// pages/404.js
+export default function Custom404() {
+  return &lt;h1&gt;404 - Not Found&lt;/h1&gt;;
+}</code></pre>
+<div class="code-title">Shallow routing</div>
+<pre><code class="language-jsx">router.push('/product?id=5', undefined, { shallow: true });</code></pre>
+<p>Updates the URL without re-running <code>getServerSideProps</code>/<code>getStaticProps</code> — Pages Router only, no App Router equivalent.</p>
+</div>
+<div class="col col-right">
+<h3>App Router</h3>
+<div class="code-title">Query params</div>
+<pre><code class="language-jsx">'use client';
+import { useSearchParams } from 'next/navigation';
+const searchParams = useSearchParams();
+searchParams.get('id');   // from /product?id=5</code></pre>
+<div class="code-title">Custom 404</div>
+<pre><code class="language-jsx">// app/not-found.js
+export default function NotFound() {
+  return &lt;h1&gt;404 - Not Found&lt;/h1&gt;;
+}</code></pre>
+<div class="code-title">next/navigation vs next/router</div>
+<pre><code class="language-text">next/router  → Pages Router only (has .query)
+next/navigation → App Router only (no .query; use useParams/useSearchParams)</code></pre>
+</div>
+</div>
+</div>
+
+<div class="divider"></div>
+
+<!-- 22 -->
+<div class="topic">
+<div class="topic-title"><div class="num">22</div><h2>App Router-Only Advanced Routing (No Pages Router Equivalent)</h2></div>
+<p class="topic-summary">These five features do not exist in the Pages Router at all — they're built on the App Router's nested-folder + Server Component model.</p>
+
+<div class="compare-row">
+<div class="col col-left">
+<h3>Pages Router</h3>
+<p>❌ Not available. The Pages Router has a flat, single-purpose file-per-route model, so it has no concept of templates, route groups, parallel slots, or intercepting routes.</p>
+</div>
+<div class="col col-right">
+<h3>App Router</h3>
+<div class="code-title">template.js — like layout, but re-mounts on every navigation</div>
+<pre><code class="language-jsx">export default function Template({ children }) {
+  return &lt;div&gt;{children}&lt;/div&gt;;
+}</code></pre>
+<div class="code-title">Route Groups — organize without affecting the URL</div>
+<pre><code class="language-text">app/(marketing)/about/page.js  →  /about
+app/(shop)/cart/page.js         →  /cart</code></pre>
+<div class="code-title">Parallel Routes — render independent slots</div>
+<pre><code class="language-text">app/@analytics/page.js
+app/@team/page.js
+app/layout.js receives both as props</code></pre>
+<div class="code-title">Intercepting Routes — load a route inside the current UI</div>
+<pre><code class="language-text">app/feed/(..)photo/[id]/page.js
+// opens /photo/5 as a modal over /feed instead of full navigation</code></pre>
+<div class="code-title">useSelectedLayoutSegment() — first active child segment only</div>
+<pre><code class="language-jsx">'use client';
+import { useSelectedLayoutSegment } from 'next/navigation';
+import Link from 'next/link';
+export default function Sidebar() {
+  const segment = useSelectedLayoutSegment();
+  return (
+    &lt;nav&gt;
+      &lt;Link className={segment === 'reports' ? 'active' : ''} href="/dashboard/reports"&gt;Reports&lt;/Link&gt;
+    &lt;/nav&gt;
+  );
+}
+// URL /dashboard/reports  →  segment === 'reports'</code></pre>
+<div class="code-title">useSelectedLayoutSegments() — ALL active child segments as an array</div>
+<pre><code class="language-jsx">'use client';
+import { useSelectedLayoutSegments } from 'next/navigation';
+export default function Breadcrumbs() {
+  const segments = useSelectedLayoutSegments();
+  return &lt;div&gt;{segments.map(s =&gt; &lt;span key={s}&gt;{s} / &lt;/span&gt;)}&lt;/div&gt;;
+}
+// URL /dashboard/reports/monthly/sales
+// segments === ['reports', 'monthly', 'sales']</code></pre>
+<table class="full">
+<tr><th>Hook</th><th>Returns</th><th>Example URL</th><th>Result</th></tr>
+<tr><td>useSelectedLayoutSegment()</td><td>First active child segment</td><td>/dashboard/reports/monthly/sales</td><td>'reports'</td></tr>
+<tr><td>useSelectedLayoutSegments()</td><td>All active child segments</td><td>/dashboard/reports/monthly/sales</td><td>['reports','monthly','sales']</td></tr>
+</table>
+<p>Both hooks are relative to the <code>layout.tsx</code> they're called in — used inside <code>dashboard/layout.tsx</code>, they only read segments below <code>/dashboard</code>.</p>
+</div>
+</div>
+</div>
+
+<div class="divider"></div>
+
+<!-- 23 -->
+<div class="topic">
+<div class="topic-title"><div class="num">23</div><h2>forbidden() / unauthorized() (Next.js 15, App Router only)</h2></div>
+<div class="compare-row">
+<div class="col col-left">
+<h3>Pages Router</h3>
+<p>❌ No built-in equivalent — access control is handled manually, typically via <code>redirect</code> in <code>getServerSideProps</code> or custom middleware.</p>
+</div>
+<div class="col col-right">
+<h3>App Router</h3>
+<div class="code-title">unauthorized() — 401, user is not logged in</div>
+<pre><code class="language-jsx">// app/dashboard/page.tsx
+import { unauthorized } from 'next/navigation';
+export default async function DashboardPage() {
+  const session = await verifySession();
+  if (!session) unauthorized();
+  return &lt;h1&gt;Dashboard&lt;/h1&gt;;
+}</code></pre>
+<div class="code-title">forbidden() — 403, logged in but lacks permission</div>
+<pre><code class="language-jsx">// app/admin/page.tsx
+import { forbidden } from 'next/navigation';
+export default async function AdminPage() {
+  const session = await verifySession();
+  if (session.role !== 'admin') forbidden();
+  return &lt;h1&gt;Admin&lt;/h1&gt;;
+}</code></pre>
+<div class="code-title">Matching file conventions (sit next to not-found.js / error.js)</div>
+<pre><code class="language-jsx">// app/unauthorized.tsx
+export default function Unauthorized() {
+  return (&lt;div&gt;&lt;h1&gt;401&lt;/h1&gt;&lt;p&gt;Please login to continue.&lt;/p&gt;&lt;/div&gt;);
+}
+// app/forbidden.tsx
+export default function Forbidden() {
+  return (&lt;div&gt;&lt;h1&gt;403&lt;/h1&gt;&lt;p&gt;You don't have access.&lt;/p&gt;&lt;/div&gt;);
+}</code></pre>
+<p>Before Next.js 15 this was done manually — <code>if (!session) return &lt;LoginPage /&gt;</code>. Now <code>unauthorized()</code>/<code>forbidden()</code> stop rendering and automatically show <code>unauthorized.tsx</code>/<code>forbidden.tsx</code>, the same way <code>notFound()</code> + <code>not-found.js</code> already worked.</p>
+</div>
+</div>
+</div>
+
+<div class="divider"></div>
+
+<!-- 24 -->
+<div class="topic">
+<div class="topic-title"><div class="num">24</div><h2>Advanced Caching &amp; Revalidation (App Router)</h2></div>
+<p class="topic-summary">The Pages Router's only caching control is choosing which data function to export. The App Router has a much larger, granular caching toolkit — none of these APIs exist in the Pages Router.</p>
+<div class="compare-row">
+<div class="col col-left">
+<h3>Pages Router</h3>
+<p>❌ No fetch-level cache options, no tag-based invalidation, no per-function memoization API. Caching is all-or-nothing per page, controlled only by which of <code>getStaticProps</code> / <code>getServerSideProps</code> you export.</p>
+</div>
+<div class="col col-right">
+<h3>App Router</h3>
+<div class="code-title">Extended fetch — force-cache vs no-store</div>
+<pre><code class="language-js">fetch(url, { cache: 'force-cache' }); // cached indefinitely (SSG-like)
+fetch(url, { cache: 'no-store' });     // never cached (SSR-like)
+fetch(url, { next: { revalidate: 60 } }); // cached, refreshed every 60s</code></pre>
+<div class="code-title">On-demand revalidation via a Route Handler</div>
+<pre><code class="language-js">// app/api/revalidate/route.js
+import { revalidatePath, revalidateTag } from 'next/cache';
+export async function POST(req) {
+  const { path, tag } = await req.json();
+  if (path) revalidatePath(path);
+  if (tag) revalidateTag(tag);
+  return Response.json({ revalidated: true });
+}</code></pre>
+<p>Called by a webhook from any backend (.NET, Java, a CMS) when content changes, so a non-Next.js system can still invalidate the Next.js cache.</p>
+<div class="code-title">Real architecture: Next.js frontend + separate .NET/Java backend</div>
+<pre><code class="language-text">https://myshop.com        → Next.js app (Server Components, cache, revalidation)
+https://api.myshop.com    → .NET / Java backend + database</code></pre>
+<pre><code class="language-jsx">// app/products/page.tsx — Next.js fetches from the external API and tags the cache
+export default async function ProductsPage() {
+  const res = await fetch('https://api.myshop.com/products', { next: { tags: ['products'] } });
+  const products = await res.json();
+  return &lt;div&gt;{products.map(p =&gt; &lt;p key={p.id}&gt;{p.name}&lt;/p&gt;)}&lt;/div&gt;;
+}</code></pre>
+<p>The product data lives in the .NET/Java database, but the <strong>cache belongs to Next.js</strong>. When an admin changes a price directly in the external backend, Next.js has no idea — it keeps serving the old cached response until the backend calls the <code>/api/revalidate</code> webhook above with <code>tag: 'products'</code>, which is the only way to sync Next.js's cache with a change that happened outside of Next.js.</p>
+<div class="code-title">unstable_cache — cache any async function, not just fetch</div>
+<pre><code class="language-js">import { unstable_cache } from 'next/cache';
+const getUser = unstable_cache(
+  async (id) => db.user.find(id),
+  ['user'],
+  { revalidate: 3600, tags: ['user'] }
+);</code></pre>
+<div class="code-title">React.cache — per-request memoization (non-fetch)</div>
+<pre><code class="language-js">import { cache } from 'react';
+const getUser = cache(async (id) => db.user.find(id));
+// called from multiple components in one request → runs once</code></pre>
+<div class="code-title">'use cache' directive (Next.js 15)</div>
+<pre><code class="language-js">async function getPosts() {
+  'use cache';
+  const res = await fetch('https://api.example.com/posts');
+  return res.json();
+}</code></pre>
+<div class="code-title">cacheLife / cacheTag helpers</div>
+<pre><code class="language-js">import { unstable_cacheLife as cacheLife, unstable_cacheTag as cacheTag } from 'next/cache';
+async function getPosts() {
+  'use cache';
+  cacheLife('hours');
+  cacheTag('posts');
+  return fetch('https://api.example.com/posts').then(r => r.json());
+}</code></pre>
+<div class="code-title">Request deduplication — automatic</div>
+<pre><code class="language-js">// Same fetch(url) called by 3 different components in one render
+// → Next.js sends only ONE network request and shares the result</code></pre>
+<div class="code-title">after() — run code post-response</div>
+<pre><code class="language-js">import { after } from 'next/server';
+export default function Page() {
+  after(() => logAnalyticsEvent());
+  return &lt;div&gt;Page&lt;/div&gt;;
+}</code></pre>
+<div class="code-title">staleTimes — Router Cache config (next.config.js, 14.2+)</div>
+<pre><code class="language-js">module.exports = {
+  experimental: { staleTimes: { dynamic: 30, static: 180 } }
+};</code></pre>
+</div>
+</div>
+<table class="full">
+<tr><th>API</th><th>Caches</th><th>Scope</th><th>Invalidated by</th></tr>
+<tr><td>fetch cache</td><td>fetch() responses</td><td>Per URL+options</td><td>revalidate time / revalidateTag</td></tr>
+<tr><td>unstable_cache</td><td>Any async function result</td><td>Across requests</td><td>revalidate time / revalidateTag</td></tr>
+<tr><td>React.cache</td><td>Any function result</td><td>Single request only</td><td>Automatically clears after the request</td></tr>
+<tr><td>'use cache'</td><td>Function/component output</td><td>Across requests</td><td>cacheLife / cacheTag + revalidateTag</td></tr>
+</table>
+<table class="full">
+<tr><th>API</th><th>Runs Where</th><th>Purpose</th></tr>
+<tr><td>router.refresh()</td><td>Client Component</td><td>Re-fetch and re-run the current route's Server Components</td></tr>
+<tr><td>revalidatePath()</td><td>Server Action / Route Handler</td><td>Invalidate the cache for one specific route</td></tr>
+<tr><td>revalidateTag()</td><td>Server Action / Route Handler</td><td>Invalidate every cached fetch tagged with that tag, across any route</td></tr>
+</table>
+<div class="code-title">router.refresh() — re-requests the route, doesn't clear cache</div>
+<pre><code class="language-jsx">'use client';
+import { useRouter } from 'next/navigation';
+export default function AddToCartButton() {
+  const router = useRouter();
+  async function handleClick() { await updateCart(); router.refresh(); }
+  return &lt;button onClick={handleClick}&gt;Add To Cart&lt;/button&gt;;
+}</code></pre>
+<div class="note"><strong>Important:</strong> <code>router.refresh()</code> does NOT invalidate the data cache — if the fetch is still cached, the refreshed route can still receive the same cached data. Pair it with <code>revalidatePath()</code>/<code>revalidateTag()</code> in the Server Action when the data actually needs to change.</div>
+</div>
+
+<div class="divider"></div>
+
+<!-- 25 -->
+<div class="topic">
+<div class="topic-title"><div class="num">25</div><h2>Server Actions (App Router only)</h2></div>
+<p class="topic-summary">Server Actions have no Pages Router equivalent — mutations there require a separate API route called manually from the client.</p>
+<div class="compare-row">
+<div class="col col-left">
+<h3>Pages Router — the old way</h3>
+<div class="code-title">Manual API route + fetch</div>
+<pre><code class="language-js">// pages/api/create-post.js
+export default function handler(req, res) {
+  if (req.method === 'POST') {
+    // save to DB
+    res.status(200).json({ ok: true });
+  }
+}</code></pre>
+<pre><code class="language-jsx">async function onSubmit(data) {
+  await fetch('/api/create-post', { method: 'POST', body: JSON.stringify(data) });
+}</code></pre>
+</div>
+<div class="col col-right">
+<h3>App Router — Server Actions</h3>
+<div class="code-title">'use server' — mark a function as a Server Action</div>
+<pre><code class="language-js">'use server';
+export async function createPost(formData) {
+  const title = formData.get('title');
+  await db.post.create({ title });
+}</code></pre>
+<div class="code-title">Directly wired to a &lt;form&gt;, no API route needed</div>
+<pre><code class="language-jsx">import { createPost } from './actions';
+export default function NewPost() {
+  return (
+    &lt;form action={createPost}&gt;
+      &lt;input name="title" /&gt;
+      &lt;button type="submit"&gt;Create&lt;/button&gt;
+    &lt;/form&gt;
+  );
+}</code></pre>
+<div class="code-title">useActionState (React 19) — track result/pending state</div>
+<pre><code class="language-jsx">'use client';
+import { useActionState } from 'react';
+const [state, formAction] = useActionState(createPost, null);</code></pre>
+<div class="code-title">useFormStatus — pending state inside the form</div>
+<pre><code class="language-jsx">'use client';
+import { useFormStatus } from 'react-dom';
+function SubmitButton() {
+  const { pending } = useFormStatus();
+  return &lt;button disabled={pending}&gt;{pending ? 'Saving...' : 'Save'}&lt;/button&gt;;
+}</code></pre>
+<div class="code-title">Validation errors surfaced via useActionState</div>
+<pre><code class="language-js">'use server';
+export async function createPost(prevState, formData) {
+  if (!formData.get('title')) return { error: 'Title is required' };
+  return { success: true };
+}</code></pre>
+<div class="code-title">Called from a Client Component</div>
+<pre><code class="language-jsx">'use client';
+import { createPost } from './actions'; // file has 'use server' at top
+&lt;button onClick={() => createPost(new FormData())}&gt;Create&lt;/button&gt;</code></pre>
+<div class="code-title">Redirect inside a Server Action</div>
+<pre><code class="language-js">'use server';
+import { redirect } from 'next/navigation';
+export async function createPost(formData) {
+  await db.post.create({ /* ... */ });
+  redirect('/posts');
+}</code></pre>
+</div>
+</div>
+<table class="full">
+<tr><th>Point</th><th>Detail</th></tr>
+<tr><td>Became stable in</td><td>Next.js 14</td></tr>
+<tr><td>Security</td><td>Runs on the server, so DB/secrets are safe — but still needs manual auth, validation, and CSRF-style checks (Next.js adds built-in origin checking for actions)</td></tr>
+<tr><td>Where 'use server' goes</td><td>Top of a function, or top of a whole file to mark every export in it as a Server Action</td></tr>
+</table>
+</div>
+
+<div class="divider"></div>
+
+<!-- 26 -->
+<div class="topic">
+<div class="topic-title"><div class="num">26</div><h2>Performance Optimization (App Router-oriented, some shared)</h2></div>
+<div class="compare-row">
+<div class="col col-left">
+<h3>Shared with Pages Router</h3>
+<div class="code-title">next/dynamic — lazy import (both routers)</div>
+<pre><code class="language-jsx">import dynamic from 'next/dynamic';
+const HeavyChart = dynamic(() => import('./HeavyChart'), { ssr: false, loading: () => &lt;p&gt;Loading...&lt;/p&gt; });</code></pre>
+<p>Available in both routers — the <code>ssr: false</code> option disables server rendering for that component. In the App Router it's used to keep a heavy <code>'use client'</code> component out of the initial JS bundle.</p>
+<div class="code-title">Prefetching with &lt;Link&gt; — same component, refined internals</div>
+<pre><code class="language-text">Pages Router: prefetches the page's JS + data on viewport visibility.
+App Router (since v13): prefetches only the shared/static parts of the route by default; dynamic segments prefetch on hover/tap.</code></pre>
+</div>
+<div class="col col-right">
+<h3>App Router-specific</h3>
+<div class="code-title">Granular Suspense boundaries</div>
+<pre><code class="language-jsx">export default function Page() {
+  return (
+    &lt;&gt;
+      &lt;Header /&gt;
+      &lt;Suspense fallback={&lt;Skeleton /&gt;}&gt;
+        &lt;SlowComments /&gt;
+      &lt;/Suspense&gt;
+    &lt;/&gt;
+  );
+}</code></pre>
+<p>Splits a page into independent streaming chunks so one slow section doesn't block the rest — no equivalent in the Pages Router's all-or-nothing page render.</p>
+<div class="code-title">next/script strategies</div>
+<pre><code class="language-jsx">import Script from 'next/script';
+&lt;Script src="/analytics.js" strategy="afterInteractive" /&gt;
+// strategies: beforeInteractive | afterInteractive | lazyOnload | worker</code></pre>
+</div>
+</div>
+<table class="full">
+<tr><th>Topic</th><th>Detail</th></tr>
+<tr><td>priority prop on next/image</td><td>Set on above-the-fold / LCP images so they load eagerly instead of lazily — improves Largest Contentful Paint</td></tr>
+<tr><td>Core Web Vitals improved by Next.js</td><td>LCP → next/image + priority; CLS → next/font + fixed image dimensions; INP → smaller JS bundles via Server Components / code splitting</td></tr>
+<tr><td>Bundle size analysis</td><td>@next/bundle-analyzer wraps next.config.js to visualize chunk sizes; reduce via dynamic imports and shipping fewer Client Components</td></tr>
+<tr><td>Turbopack vs Webpack</td><td>Turbopack (Rust-based, default dev bundler since Next.js 15) only rebuilds changed parts incrementally, giving much faster dev refresh than Webpack's whole-graph rebuilds</td></tr>
+</table>
+</div>
+
+<div class="divider"></div>
+
+<!-- 27 -->
+<div class="topic">
+<div class="topic-title"><div class="num">27</div><h2>Sharing State Between Server &amp; Client (App Router only)</h2></div>
+<div class="compare-row">
+<div class="col col-left">
+<h3>Pages Router</h3>
+<p>Not a distinct problem — every component is already a Client Component, so React Context and normal state sharing "just work" everywhere.</p>
+</div>
+<div class="col col-right">
+<h3>App Router</h3>
+<div class="code-title">Server → Client: pass data as props</div>
+<pre><code class="language-jsx">// Server Component
+export default async function Page() {
+  const data = await getData();
+  return &lt;ClientChart data={data} /&gt;;
+}</code></pre>
+<div class="code-title">Why React Context can't be used in a Server Component</div>
+<pre><code class="language-text">Context relies on React's client-side render tree and a Provider
+that stays mounted in the browser. Server Components have no
+persistent browser instance, so they cannot subscribe to or
+provide Context values.</code></pre>
+<div class="code-title">Fix: wrap the Provider itself in a Client Component</div>
+<pre><code class="language-jsx">'use client';
+export function Providers({ children }) {
+  return &lt;ThemeContext.Provider value="dark"&gt;{children}&lt;/ThemeContext.Provider&gt;;
+}</code></pre>
+<div class="code-title">Zustand — per-request store pattern</div>
+<pre><code class="language-jsx">// store must be created INSIDE a Client Component/provider per request
+// to avoid leaking state between different users' requests on the server
+'use client';
+import { createStore } from 'zustand/vanilla';
+export const createAppStore = () => createStore((set) => ({ count: 0 }));</code></pre>
+</div>
+</div>
+</div>
+
+<div class="divider"></div>
+
+<!-- 28 -->
+<div class="topic">
+<div class="topic-title"><div class="num">28</div><h2>Styling &amp; Static Assets</h2></div>
+<div class="compare-row">
+<div class="col col-left">
+<h3>Same in both routers</h3>
+<ul>
+<li><strong>public/</strong> folder — static files served as-is from the root URL (e.g. <code>public/logo.png</code> → <code>/logo.png</code>)</li>
+<li><strong>Tailwind CSS</strong> — installed and configured identically (<code>tailwind.config.js</code> + <code>globals.css</code> import), regardless of router</li>
+<li><strong>SVG as a component</strong> — via SVGR/<code>@svgr/webpack</code>, same setup in both</li>
+</ul>
+<pre><code class="language-jsx">import Logo from './logo.svg';
+&lt;Logo width={40} height={40} /&gt;</code></pre>
+</div>
+<div class="col col-right">
+<h3>Router-specific notes</h3>
+<div class="code-title">next/font — Google or local (both routers)</div>
+<pre><code class="language-js">import { Inter } from 'next/font/google';
+const inter = Inter({ subsets: ['latin'] });
+// local:
+import localFont from 'next/font/local';
+const myFont = localFont({ src: './MyFont.woff2' });</code></pre>
+<p>Self-hosts and preloads the font at build time to eliminate layout shift — works the same in both routers.</p>
+<div class="code-title">Remote image domains (next.config.js, both routers)</div>
+<pre><code class="language-js">module.exports = {
+  images: { remotePatterns: [{ protocol: 'https', hostname: 'cdn.example.com' }] }
+};</code></pre>
+<div class="code-title">Built-in CSS-in-JS — styled-jsx</div>
+<pre><code class="language-jsx">export default function Box() {
+  return (
+    &lt;div&gt;
+      Styled
+      &lt;style jsx&gt;{`div { color: blue; }`}&lt;/style&gt;
+    &lt;/div&gt;
+  );
+}</code></pre>
+<p>Ships with Next.js and works in both routers; only client-rendered components actually execute the runtime styling, so in the App Router it effectively needs <code>'use client'</code>.</p>
+</div>
+</div>
+</div>
+
+<div class="divider"></div>
+
+<!-- 29 -->
+<div class="topic">
+<div class="topic-title"><div class="num">29</div><h2>Configuration &amp; Environment Variables</h2></div>
+<div class="compare-row">
+<div class="col col-left">
+<h3>Same in both routers</h3>
+<div class="code-title">next.config.js / next.config.ts</div>
+<pre><code class="language-js">module.exports = {
+  images: { /* ... */ },
+  env: { /* ... */ },
+  redirects: async () => []
+};</code></pre>
+<div class="code-title">Environment variables</div>
+<pre><code class="language-text">.env.local
+API_SECRET=xxxxx              → server-only
+NEXT_PUBLIC_API_URL=xxxxx     → exposed to the browser bundle</code></pre>
+<p><code>NEXT_PUBLIC_</code>-prefixed variables are inlined into client JS at build time; non-prefixed variables stay server-only and are never sent to the browser — identical behavior in both routers.</p>
+</div>
+<div class="col col-right">
+<h3>App Router-specific (Next.js 15)</h3>
+<div class="code-title">cookies(), headers(), params became async</div>
+<pre><code class="language-jsx">import { cookies, headers } from 'next/headers';
+export default async function Page({ params }) {
+  const cookieStore = await cookies();
+  const headersList = await headers();
+  const { id } = await params;
+}</code></pre>
+<p>Pages Router has no equivalent — <code>getServerSideProps(context)</code> already gives synchronous access to <code>context.req</code>/<code>context.res</code>.</p>
+<div class="code-title">connection() API (Next.js 15)</div>
+<pre><code class="language-jsx">import { connection } from 'next/server';
+export default async function Page() {
+  await connection(); // explicitly opt into dynamic rendering here
+  return &lt;div&gt;{Date.now()}&lt;/div&gt;;
+}</code></pre>
+</div>
+</div>
+</div>
+
+<div class="divider"></div>
+
+<!-- 30 -->
+<div class="topic">
+<div class="topic-title"><div class="num">30</div><h2>Client-Side Data Fetching</h2></div>
+<div class="compare-row">
+<div class="col col-left">
+<h3>Pages Router</h3>
+<pre><code class="language-jsx">import { useEffect, useState } from 'react';
+export default function Profile() {
+  const [user, setUser] = useState(null);
+  useEffect(() => {
+    fetch('/api/user').then(r => r.json()).then(setUser);
+  }, []);
+  return &lt;div&gt;{user?.name}&lt;/div&gt;;
+}</code></pre>
+</div>
+<div class="col col-right">
+<h3>App Router — same pattern, inside a Client Component</h3>
+<pre><code class="language-jsx">'use client';
+import { useEffect, useState } from 'react';
+export default function Profile() {
+  const [user, setUser] = useState(null);
+  useEffect(() => {
+    fetch('/api/user').then(r => r.json()).then(setUser);
+  }, []);
+  return &lt;div&gt;{user?.name}&lt;/div&gt;;
+}</code></pre>
+</div>
+</div>
+<div class="note"><strong>SWR</strong> (Vercel's data-fetching library) adds caching, revalidation, deduplication, and polling on top of client-side <code>fetch</code>, and is used the same way in both routers: <code>const { data } = useSWR('/api/user', fetcher)</code>. In the App Router, prefer server-side <code>fetch</code> in a Server Component when the data doesn't need to live-update in the browser.</div>
+</div>
+
+<div class="divider"></div>
+
+<!-- 31 -->
+<div class="topic">
+<div class="topic-title"><div class="num">31</div><h2>SEO Extras</h2></div>
+<div class="compare-row">
+<div class="col col-left">
+<h3>Pages Router</h3>
+<p>SEO tags are added manually per-page with the <code>&lt;Head&gt;</code> component (see Topic 11). There is no built-in sitemap/robots generator or OG-image renderer — these are typically hand-written static files in <code>public/</code> or a third-party package.</p>
+<div class="code-title">public/robots.txt (manual)</div>
+<pre><code class="language-text">User-agent: *
+Allow: /</code></pre>
+</div>
+<div class="col col-right">
+<h3>App Router — built-in file conventions</h3>
+<div class="code-title">app/sitemap.js</div>
+<pre><code class="language-js">export default function sitemap() {
+  return [
+    { url: 'https://example.com', lastModified: new Date() },
+    { url: 'https://example.com/about', lastModified: new Date() }
+  ];
+}</code></pre>
+<div class="code-title">app/robots.js</div>
+<pre><code class="language-js">export default function robots() {
+  return { rules: { userAgent: '*', allow: '/' }, sitemap: 'https://example.com/sitemap.xml' };
+}</code></pre>
+<div class="code-title">app/opengraph-image.tsx — dynamically generated OG image</div>
+<pre><code class="language-jsx">import { ImageResponse } from 'next/og';
+export default function Image() {
+  return new ImageResponse(&lt;div style={{ fontSize: 64 }}&gt;My Site&lt;/div&gt;);
+}</code></pre>
+<div class="code-title">Open Graph / Twitter via metadata export</div>
+<pre><code class="language-js">export const metadata = {
+  openGraph: { title: 'About', images: ['/og.png'] },
+  twitter: { card: 'summary_large_image' }
+};</code></pre>
+<div class="code-title">generateMetadata() — dynamic per-item metadata</div>
+<pre><code class="language-js">export async function generateMetadata({ params }) {
+  const { id } = await params;
+  const product = await getProduct(id);
+  return { title: product.title };
+}</code></pre>
+<div class="code-title">title.template — nested layout title pattern</div>
+<pre><code class="language-js">// app/layout.js
+export const metadata = { title: { template: '%s | My Store', default: 'My Store' } };
+// app/products/page.js
+export const metadata = { title: 'Products' }; // renders as "Products | My Store"</code></pre>
+<div class="code-title">metadataBase — base URL for relative OG/Twitter images</div>
+<pre><code class="language-js">export const metadata = { metadataBase: new URL('https://example.com') };</code></pre>
+</div>
+</div>
+<div class="note">Both SSR and SSG beat pure CSR for SEO in either router: search-engine crawlers receive fully-rendered HTML immediately instead of an near-empty shell that only fills in after client-side JavaScript runs.</div>
+</div>
+
+<div class="divider"></div>
+
+<!-- 32 -->
+<div class="topic">
+<div class="topic-title"><div class="num">32</div><h2>Build, Deploy &amp; Tooling</h2></div>
+<p class="topic-summary">These apply identically no matter which router the app uses.</p>
+<table class="full">
+<tr><th>Topic</th><th>Detail</th></tr>
+<tr><td>dev / build / start scripts</td><td><code>next dev</code> runs the dev server with Fast Refresh; <code>next build</code> compiles and optimizes for production; <code>next start</code> serves the built output</td></tr>
+<tr><td>Fast Refresh</td><td>Instantly reflects code edits in the browser during <code>next dev</code> without a full reload, preserving component state where possible</td></tr>
+<tr><td>Turbopack</td><td>Rust-based bundler, default for <code>next dev</code> since Next.js 15, replacing Webpack for much faster local builds</td></tr>
+<tr><td>next build output</td><td>Prints a route table showing each route's type: ● Static (SSG), λ Server (SSR), ○ or ISR-marked entries, so you can verify rendering mode per route</td></tr>
+<tr><td>.next folder</td><td>Build output directory: compiled server/client bundles, prerendered HTML, and cache — regenerated by <code>next build</code>, not committed to git</td></tr>
+<tr><td>Automatic code splitting</td><td>Each route only ships the JS it actually needs, splitting shared vendor code into separate chunks automatically</td></tr>
+<tr><td>TypeScript support</td><td>Built in — creating a <code>.ts</code>/<code>.tsx</code> file auto-generates <code>tsconfig.json</code> and types on next run, no extra config needed</td></tr>
+<tr><td>ESLint</td><td>Configured via <code>next lint</code> / an ESLint config file (<code>eslint-config-next</code>); works the same regardless of router</td></tr>
+<tr><td>next export</td><td>Legacy command that produced a fully static HTML/CSS/JS export; removed as a separate command in Next.js 14 — replaced by setting <code>output: 'export'</code> in next.config.js</td></tr>
+<tr><td>Partial Prerendering (PPR)</td><td>Stable in Next.js 15, App Router only — combines a static shell (prerendered) with dynamic holes streamed in via Suspense on the same page; no Pages Router equivalent</td></tr>
+<tr><td>Vercel</td><td>The hosting platform built by the Next.js team; deploying there gives zero-config ISR, edge caching, and image optimization, but Next.js apps (either router) can be self-hosted anywhere that runs Node.js</td></tr>
+</table>
+</div>
+
+<div class="divider"></div>
+
+<div class="hero" style="padding:30px 20px 10px">
+<h1 style="font-size:1.8rem">Part 3 — Additional Next.js Concepts (General Knowledge, Beyond the Course Files)</h1>
+<p>These aren't from the uploaded files — they're commonly-asked Next.js/App Router topics added for completeness, in the same format.</p>
+</div>
+
+<!-- 33 -->
+<div class="topic">
+<div class="topic-title"><div class="num">33</div><h2>Middleware</h2></div>
+<div class="compare-row">
+<div class="col col-left">
+<h3>Pages Router</h3>
+<p>Middleware runs the same way regardless of router — it's not tied to Pages or App Router internals, since it executes before either one on the Edge, based on a root-level <code>middleware.ts</code> file.</p>
+</div>
+<div class="col col-right">
+<h3>App Router</h3>
+<div class="code-title">middleware.ts (project root)</div>
+<pre><code class="language-ts">import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+export function middleware(request: NextRequest) {
+  const token = request.cookies.get('token');
+  if (!token) return NextResponse.redirect(new URL('/login', request.url));
+  return NextResponse.next();
+}
+export const config = { matcher: ['/dashboard/:path*'] };
+</code></pre>
+<p>Runs on the Edge Runtime before a request reaches any route — used for auth checks, redirects, A/B testing, and header rewriting, in either router.</p>
+</div>
+</div>
+</div>
+
+<div class="divider"></div>
+
+<!-- 34 -->
+<div class="topic">
+<div class="topic-title"><div class="num">34</div><h2>Runtime: Edge vs Node.js</h2></div>
+<div class="compare-row">
+<div class="col col-left">
+<h3>Pages Router</h3>
+<pre><code class="language-js">export const config = { runtime: 'edge' }; // in an API route or page</code></pre>
+<p>Set per API route/page via an exported <code>config</code> object.</p>
+</div>
+<div class="col col-right">
+<h3>App Router</h3>
+<pre><code class="language-js">export const runtime = 'edge'; // or 'nodejs' (default)
+export const preferredRegion = 'iad1';</code></pre>
+<p>Set via a segment-config export in <code>page.js</code>/<code>layout.js</code>/<code>route.js</code>. Edge Runtime is lighter/faster to cold-start but can't use full Node.js APIs (e.g. some native modules); Node.js runtime supports the full Node API surface.</p>
+</div>
+</div>
+</div>
+
+<div class="divider"></div>
+
+<!-- 35 -->
+<div class="topic">
+<div class="topic-title"><div class="num">35</div><h2>Route Segment Config (App Router)</h2></div>
+<div class="compare-row">
+<div class="col col-left">
+<h3>Pages Router</h3>
+<p>❌ No equivalent — rendering mode is controlled entirely by which data function (<code>getStaticProps</code>/<code>getServerSideProps</code>) you export.</p>
+</div>
+<div class="col col-right">
+<h3>App Router</h3>
+<pre><code class="language-js">// app/products/page.js
+export const dynamic = 'force-dynamic'; // 'auto' | 'force-dynamic' | 'error' | 'force-static'
+export const revalidate = 60;            // seconds, or false to never revalidate
+export const fetchCache = 'default-cache';
+export const dynamicParams = true;       // 404 unlisted params if false
+export const runtime = 'nodejs';
+export const preferredRegion = 'auto';</code></pre>
+<p>A single block of exported constants controls the entire segment's rendering + caching strategy.</p>
+</div>
+</div>
+</div>
+
+<div class="divider"></div>
+
+<!-- 36 -->
+<div class="topic">
+<div class="topic-title"><div class="num">36</div><h2>notFound() &amp; Draft Mode</h2></div>
+<div class="compare-row">
+<div class="col col-left">
+<h3>Pages Router</h3>
+<div class="code-title">Custom 404 from getStaticProps</div>
+<pre><code class="language-js">export async function getStaticProps() {
+  const product = await getProduct();
+  if (!product) return { notFound: true };
+  return { props: { product } };
+}</code></pre>
+<div class="code-title">Preview Mode (CMS draft content)</div>
+<pre><code class="language-js">// pages/api/preview.js
+export default function handler(req, res) {
+  res.setPreviewData({});
+  res.redirect('/posts/1');
+}</code></pre>
+</div>
+<div class="col col-right">
+<h3>App Router</h3>
+<div class="code-title">notFound() function</div>
+<pre><code class="language-jsx">import { notFound } from 'next/navigation';
+export default async function Page({ params }) {
+  const { id } = await params;
+  const product = await getProduct(id);
+  if (!product) notFound(); // renders app/not-found.js
+  return &lt;h1&gt;{product.title}&lt;/h1&gt;;
+}</code></pre>
+<div class="code-title">Draft Mode (Preview Mode's successor)</div>
+<pre><code class="language-js">// app/api/draft/route.js
+import { draftMode } from 'next/headers';
+export async function GET() {
+  (await draftMode()).enable();
+  return Response.redirect('/posts/1');
+}</code></pre>
+</div>
+</div>
+</div>
+
+<div class="divider"></div>
+
+<!-- 37 -->
+<div class="topic">
+<div class="topic-title"><div class="num">37</div><h2>i18n (Internationalization) Routing</h2></div>
+<div class="compare-row">
+<div class="col col-left">
+<h3>Pages Router — built in</h3>
+<pre><code class="language-js">// next.config.js
+module.exports = {
+  i18n: { locales: ['en', 'fr', 'de'], defaultLocale: 'en' }
+};</code></pre>
+<p>Next.js automatically generates locale-prefixed routes (<code>/fr/about</code>) and exposes <code>router.locale</code> — fully built in.</p>
+</div>
+<div class="col col-right">
+<h3>App Router — manual, via middleware + folders</h3>
+<pre><code class="language-text">app/[lang]/page.js       →  /en, /fr, /de
+middleware.ts detects the Accept-Language header and rewrites/redirects to the right [lang] segment</code></pre>
+<p>The built-in <code>i18n</code> config key from <code>next.config.js</code> does not apply to the App Router — routing has to be built manually (or with a library like <code>next-intl</code>).</p>
+</div>
+</div>
+</div>
+
+<div class="divider"></div>
+
+<!-- 38 -->
+<div class="topic">
+<div class="topic-title"><div class="num">38</div><h2>Deployment Output Modes &amp; Monorepos</h2></div>
+<table class="full">
+<tr><th>Topic</th><th>Detail</th></tr>
+<tr><td>output: 'standalone'</td><td>next.config.js option that produces a minimal, self-contained server folder (only the files needed to run) — ideal for Docker images; applies to both routers</td></tr>
+<tr><td>transpilePackages</td><td>next.config.js option to transpile untranspiled packages from a monorepo (e.g. a shared internal UI package) so Next.js can bundle them correctly</td></tr>
+<tr><td>instrumentation.ts</td><td>Root-level file with a <code>register()</code> export that runs once when the server starts — used for APM/tracing setup (e.g. OpenTelemetry); App Router only</td></tr>
+<tr><td>server-only / client-only packages</td><td>Importing the <code>server-only</code> package into a module throws a build error if that module is ever imported into a Client Component — a safety net to stop server secrets leaking to the browser</td></tr>
+<tr><td>Custom server</td><td>Both routers can be wrapped in a custom Node.js server (Express, etc.) via <code>next({ dev })</code>, though Next.js recommends avoiding it since it opts out of some platform optimizations</td></tr>
+</table>
+</div>
+
+<div class="divider"></div>
+
+<!-- 39 -->
+<div class="topic">
+<div class="topic-title"><div class="num">39</div><h2>Viewport &amp; Icons Metadata</h2></div>
+<div class="compare-row">
+<div class="col col-left">
+<h3>Pages Router</h3>
+<pre><code class="language-jsx">&lt;Head&gt;
+  &lt;meta name="viewport" content="width=device-width, initial-scale=1" /&gt;
+  &lt;meta name="theme-color" content="#000000" /&gt;
+  &lt;link rel="icon" href="/favicon.ico" /&gt;
+&lt;/Head&gt;</code></pre>
+</div>
+<div class="col col-right">
+<h3>App Router</h3>
+<pre><code class="language-js">// app/layout.js
+export const viewport = { width: 'device-width', initialScale: 1, themeColor: '#000000' };
+export const metadata = { icons: { icon: '/favicon.ico', apple: '/apple-touch-icon.png' } };</code></pre>
+<p><code>viewport</code> was split out from <code>metadata</code> as its own export in newer Next.js versions since it doesn't behave like static SEO metadata.</p>
+</div>
+</div>
+</div>
+
+<div class="divider"></div>
+
+<!-- 40 -->
+<div class="topic">
+<div class="topic-title"><div class="num">40</div><h2>next/image: fill, sizes &amp; custom loaders</h2></div>
+<div class="compare-row">
+<div class="col col-left">
+<h3>Same API in both routers</h3>
+<pre><code class="language-jsx">&lt;div style={{ position: 'relative', height: 300 }}&gt;
+  &lt;Image src="/banner.jpg" alt="Banner" fill sizes="100vw" style={{ objectFit: 'cover' }} /&gt;
+&lt;/div&gt;</code></pre>
+<p><code>fill</code> makes the image fill its relatively-positioned parent instead of using fixed width/height — useful for responsive banners.</p>
+</div>
+<div class="col col-right">
+<h3>Same API in both routers</h3>
+<pre><code class="language-js">// next.config.js — custom image loader (e.g. Cloudinary/Imgix instead of Next's built-in optimizer)
+module.exports = {
+  images: { loader: 'custom', loaderFile: './my-loader.js' }
+};</code></pre>
+<p><code>next/legacy/image</code> exists as a compatibility import for the pre-v13 <code>Image</code> API when migrating older Pages Router codebases.</p>
+</div>
+</div>
+</div>
+
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js"></script>
+
+</body>
+</html>
