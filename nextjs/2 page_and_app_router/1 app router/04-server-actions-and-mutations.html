@@ -621,8 +621,7 @@ Server Actions can use server-only APIs such as:
 <pre><code class="language-ts">'use server';
 import { cookies } from 'next/headers';
 export async function createUser() {
-  const token =
-    (await cookies()).get('token');
+  const token = (await cookies()).get('token');
   await fetch(...);
 }</code></pre>
 <hr/>
@@ -654,9 +653,7 @@ The browser never directly communicates with the backend API.
 Instead of:
 </p>
 <div class="code-title">Traditional Form</div>
-<pre><code class="language-tsx">&lt;form onSubmit={handleSubmit}&gt;
-  ...
-&lt;/form&gt;
+<pre><code class="language-tsx">
 async function handleSubmit(e) {
   e.preventDefault();
   await fetch(
@@ -665,7 +662,10 @@ async function handleSubmit(e) {
       method: 'POST'
     }
   );
-}</code></pre>
+}
+&lt;form onSubmit={handleSubmit}&gt;
+  ...
+&lt;/form&gt;</code></pre>
 <p>
 Server Actions reduce some of the client-side form handling code.
 </p>
@@ -861,7 +861,8 @@ The browser never executes the server code directly.
 <hr/>
 <h3>Using use server with Forms</h3>
 <div class="code-title">Server Action</div>
-<pre><code class="language-ts">export async function createUser(
+<pre><code class="language-ts">//'use server'; // or inside function both are valid
+  export async function createUser(
   formData: FormData
 ) {
   'use server';
@@ -987,6 +988,106 @@ Browser Code</code></pre>
 <strong>One-Line Definition:</strong><br/>
 <code>'use server'</code> is a Next.js directive that marks functions or files to execute only on the server, allowing secure access to databases, secrets, and backend logic.
 </div>
+<h3>Common Interview Confusion</h3>
+
+<div class="feature">
+<strong>Important:</strong><br/>
+A user interaction does <strong>not</strong> automatically make a component a Client Component.
+</div>
+
+<h3>Server Component Example</h3>
+
+<div class="code-title">Server Component</div>
+
+<pre><code class="language-tsx">import { createUser } from './actions';
+
+export default function Page() {
+  return (
+    &lt;form action={createUser}&gt;
+      &lt;input name="name" /&gt;
+      &lt;button&gt;Save&lt;/button&gt;
+    &lt;/form&gt;
+  );
+}</code></pre>
+
+<p>
+This is still a <strong>Server Component</strong> because there are no React event handlers
+(<code>onClick</code>, <code>onSubmit</code>, <code>onChange</code>) running in the browser.
+</p>
+
+<h3>What Happens When the User Clicks "Save"?</h3>
+
+<pre><code class="language-text">User clicks "Save"
+        ↓
+Browser submits the form
+(native HTML behavior)
+        ↓
+Request sent to Next.js
+        ↓
+Server Action executes
+(createUser)
+        ↓
+Response returned
+</code></pre>
+
+<div class="feature">
+<strong>Remember:</strong><br/>
+The user clicks the button, but React does <strong>not</strong> handle the click.
+The browser performs the form submission, and Next.js executes the Server Action on the server.
+</div>
+
+<hr/>
+
+<h3>Server Component vs Client Component</h3>
+
+<table>
+<tr>
+<th>Code</th>
+<th>Who Handles It?</th>
+<th>Component Type</th>
+</tr>
+
+<tr>
+<td><code>&lt;form action={createUser}&gt;</code></td>
+<td>Browser → Next.js Server</td>
+<td>✅ Server Component</td>
+</tr>
+
+<tr>
+<td><code>onClick</code></td>
+<td>React in Browser</td>
+<td>✅ Client Component</td>
+</tr>
+
+<tr>
+<td><code>onSubmit</code></td>
+<td>React in Browser</td>
+<td>✅ Client Component</td>
+</tr>
+
+<tr>
+<td><code>onChange</code></td>
+<td>React in Browser</td>
+<td>✅ Client Component</td>
+</tr>
+</table>
+
+<div class="feature">
+<strong>Easy Memory Trick:</strong><br/>
+
+<pre><code class="language-text">User Interaction
+        │
+        ├── Browser handles it
+        │       ↓
+        │   Server Component
+        │
+        └── React handles it
+                ↓
+          Client Component
+</code></pre>
+
+</div>
+
 <h2 class="section-title" id="04-03"><span class="secnum">04-03</span>Server Actions became stable in which Next.js version?</h2>
 <p>
 Server Actions became <strong>stable in Next.js 14</strong>.
