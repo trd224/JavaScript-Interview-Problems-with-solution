@@ -225,7 +225,118 @@ Chart Appears Later</code></pre>
 <p>
 The dashboard becomes faster because the chart code is split into a separate chunk.
 </p>
+
 <hr/>
+
+<h3>Option 3: Using Suspense Instead of <code>loading</code></h3>
+
+<p>
+Sometimes, instead of using the <code>loading</code> option, we can use React's
+<code>Suspense</code> to display a fallback UI while the dynamic component is loading.
+</p>
+
+<h4>Can We Use Suspense Instead of <code>loading</code>?</h4>
+
+<p>
+Yes, but we must tell <code>next/dynamic</code> to use Suspense by setting
+<code>suspense: true</code>.
+</p>
+
+<div class="code-title">Using Suspense</div>
+<pre><code class="language-tsx">import dynamic from 'next/dynamic';
+import { Suspense } from 'react';
+
+const Chart = dynamic(() =&gt; import('./Chart'), {
+  suspense: true,
+});
+
+export default function Page() {
+  return (
+    &lt;Suspense fallback={&lt;p&gt;Loading Chart...&lt;/p&gt;}&gt;
+      &lt;Chart /&gt;
+    &lt;/Suspense&gt;
+  );
+}</code></pre>
+
+<div class="feature">
+<strong>Meaning:</strong><br/>
+The <code>fallback</code> prop of <code>Suspense</code> replaces the
+<code>loading</code> option and displays temporary UI while the dynamically imported
+component is loading.
+</div>
+
+<hr/>
+
+<h4>Do Not Use Both Together</h4>
+
+<div class="code-title">Incorrect Example</div>
+<pre><code class="language-tsx">const Chart = dynamic(() =&gt; import('./Chart'), {
+  suspense: true,
+  loading: () =&gt; &lt;p&gt;Loading...&lt;/p&gt;, // ❌ Invalid
+});</code></pre>
+
+<div class="warning">
+<strong>Important:</strong><br/>
+When <code>suspense: true</code> is enabled, the loading UI must come from the nearest
+<code>&lt;Suspense&gt;</code> boundary. Do not use both
+<code>suspense: true</code> and the <code>loading</code> option together.
+</div>
+
+<hr/>
+
+<h4>loading vs Suspense</h4>
+
+<table>
+<tr>
+<th>Feature</th>
+<th><code>loading</code> Option</th>
+<th><code>Suspense</code></th>
+</tr>
+<tr>
+<td>Shows loading UI</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Requires <code>&lt;Suspense&gt;</code></td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>React standard</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Can wrap multiple components</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Works with suspended data</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Recommended for App Router</td>
+<td>Good</td>
+<td>✅ Yes</td>
+</tr>
+</table>
+
+<hr/>
+
+<div class="summary">
+<strong>Best Practice:</strong><br/>
+For modern <code>Next.js App Router</code>, prefer using
+<code>Suspense</code> because it is React's standard mechanism for handling loading
+states and can manage both lazy-loaded components and suspended data.
+Use the <code>loading</code> option for simple dynamic imports when you do not want to
+wrap the component inside a <code>&lt;Suspense&gt;</code> boundary.
+</div>
+<hr/>
+
+
 <h3>Common Use Cases</h3>
 <table>
 <tr>
@@ -261,21 +372,31 @@ The dashboard becomes faster because the chart code is split into a separate chu
 <th>next/dynamic</th>
 <th>React.lazy</th>
 </tr>
+
 <tr>
 <td>Works In Next.js</td>
 <td>✅</td>
 <td>✅</td>
 </tr>
+
 <tr>
 <td>Supports SSR Control</td>
 <td>✅</td>
 <td>❌</td>
 </tr>
+
 <tr>
-<td>loading Option</td>
-<td>✅</td>
-<td>❌ (Uses Suspense)</td>
+<td>Loading UI</td>
+<td>✅ <code>loading</code> option or <code>Suspense</code></td>
+<td>❌ Requires <code>Suspense</code></td>
 </tr>
+
+<tr>
+<td>Requires Suspense</td>
+<td>❌ Optional</td>
+<td>✅ Required</td>
+</tr>
+
 <tr>
 <td>Next.js Optimized</td>
 <td>✅</td>

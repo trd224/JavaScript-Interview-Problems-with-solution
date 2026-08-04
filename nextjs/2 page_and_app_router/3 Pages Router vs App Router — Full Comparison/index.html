@@ -587,13 +587,35 @@ console.log(router.query.id);</code></pre>
 <h3>App Router</h3>
 <div class="code-title">Import</div>
 <pre><code class="language-jsx">import { useRouter } from 'next/navigation';</code></pre>
-<div class="code-title">Navigate + read params</div>
+<div class="code-title">Read params (Server Component)</div>
+<pre><code class="language-jsx">export default async function UserPage({ params }) {
+  const { id } = await params;
+
+  return <h1>User ID: {id}</h1>;
+}</code></pre>
+<div class="code-title">Navigate + read params (Client Component)</div>
 <pre><code class="language-jsx">'use client';
-const router = useRouter();
-router.push('/about');
-// params come from a prop, not router.query
-import { useParams } from 'next/navigation';
-const { id } = useParams();</code></pre>
+
+import { useRouter, useParams } from 'next/navigation';
+
+export default function UserPage() {
+  const router = useRouter();
+  const { id } = useParams();
+
+  function goToAbout() {
+    router.push('/about');
+  }
+
+  return (
+    &lt;&gt;
+      &lt;p&gt;User ID: {id}&lt;/p&gt;
+
+      &lt;button onClick={goToAbout}&gt;
+        Go to About
+      &lt;/button&gt;
+    &lt;/&gt;
+  );
+}</code></pre>
 <div class="code-title">Link</div>
 <pre><code class="language-jsx">import Link from 'next/link';
 &lt;Link href="/about"&gt;About&lt;/Link&gt;</code></pre>
